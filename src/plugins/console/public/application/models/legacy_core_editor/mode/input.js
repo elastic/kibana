@@ -18,8 +18,7 @@
  */
 
 import ace from 'brace';
-
-import { workerModule } from '../../../../../../es_ui_shared/public';
+import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;

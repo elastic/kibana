@@ -17,13 +17,9 @@
  * under the License.
  */
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './console_lang';
-
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+// Satisfy TS's requirements that the module be declared per './index.ts'.
+declare module '!!raw-loader!./worker.js' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

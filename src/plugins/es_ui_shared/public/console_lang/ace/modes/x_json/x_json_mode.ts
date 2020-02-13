@@ -1,14 +1,25 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
-// Copied and modified from src/legacy/core_plugins/console/public/src/sense_editor/mode/input.js
 
 import ace from 'brace';
 
-import { XJsonHighlightRules } from '../../../../../../src/plugins/es_ui_shared/public';
+import { XJsonHighlightRules } from '../';
 import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
@@ -19,7 +30,7 @@ const { CstyleBehaviour } = ace.acequire('ace/mode/behaviour/cstyle');
 const { FoldMode: CStyleFoldMode } = ace.acequire('ace/mode/folding/cstyle');
 const { WorkerClient } = ace.acequire('ace/worker/worker_client');
 
-function XJsonMode(this: any) {
+export function XJsonMode(this: any) {
   const ruleset: any = new XJsonHighlightRules();
   ruleset.normalizeRules();
   this.$tokenizer = new AceTokenizer(ruleset.getRules());

@@ -24,4 +24,4 @@ export {
   addXJsonToRules,
 } from './lexer_rules';
 
-export { workerModule } from './worker';
+export { XJsonMode, installXJsonMode } from './x_json';

@@ -17,14 +17,9 @@
  * under the License.
  */
 
-export declare const workerModule: { id: string; src: string };
+import src from '!!raw-loader!./worker.js';
 
-export declare const ElasticsearchSqlHighlightRules: FunctionConstructor;
-export declare const ScriptHighlightRules: FunctionConstructor;
-export declare const XJsonHighlightRules: FunctionConstructor;
-
-/**
- * @param otherRules Another Ace ruleset
- * @param embedUnder The state name under which the rules will be embedded. Defaults to "json".
- */
-export declare const addXJsonToRules: (otherRules: any, embedUnder?: string) => void;
+export const workerModule = {
+  id: 'ace/mode/json_worker',
+  src,
+};

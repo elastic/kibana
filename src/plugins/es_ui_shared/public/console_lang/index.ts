@@ -22,5 +22,6 @@ export {
   ScriptHighlightRules,
   XJsonHighlightRules,
   addXJsonToRules,
-  workerModule,
-} from './ace/mode';
+  XJsonMode,
+  installXJsonMode,
+} from './ace/modes';

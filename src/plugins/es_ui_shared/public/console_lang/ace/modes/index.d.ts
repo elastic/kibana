@@ -16,14 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Editor } from 'brace';
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './console_lang';
+export declare const ElasticsearchSqlHighlightRules: FunctionConstructor;
+export declare const ScriptHighlightRules: FunctionConstructor;
+export declare const XJsonHighlightRules: FunctionConstructor;
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export declare const XJsonMode: FunctionConstructor;
+
+/**
+ * @param editor The Ace editor instance against which to install XJsonMode.
+ */
+export declare const installXJsonMode: (editor: Editor) => void;
+
+/**
+ * @param otherRules Another Ace ruleset
+ * @param embedUnder The state name under which the rules will be embedded. Defaults to "json".
+ */
+export declare const addXJsonToRules: (otherRules: any, embedUnder?: string) => void;
