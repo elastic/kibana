@@ -232,8 +232,10 @@ def withGcsArtifactUpload(workerName, closure) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-  junit(testResults: '../kibana-oss/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-  junit(testResults: '../kibana-xpack/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  dir('../') {
+    junit(testResults: 'kibana-oss/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+    junit(testResults: 'kibana-xpack/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  }
 }
 
 def sendMail() {
@@ -318,6 +320,7 @@ def runErrorReporter() {
 }
 def processOssQueue(queue, finishedSuites, workerNumber) {
   def testMetadataPath = "target/test_metadata_oss_${workerNumber}.json"
+  def iteration = 0
 
   withEnv([
     "CI_GROUP=${workerNumber}",
@@ -339,10 +342,13 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
           testSuite.success = null
           def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
 
+          iteration++
+
           try {
             // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${workerNumber}")
             bash(
               """
+                export JOB=${env.JOB}-${iteration}
                 source test/scripts/jenkins_test_setup_oss.sh
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
@@ -377,6 +383,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
 
 def processXpackQueue(queue, finishedSuites, workerNumber) {
   def testMetadataPath = "target/test_metadata_xpack_${workerNumber}.json"
+  def iteration = 0
 
   withEnv([
     "CI_GROUP=${workerNumber}",
@@ -398,10 +405,13 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
           testSuite.success = null
           def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
 
+          iteration++
+
           try {
             // runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${workerNumber}")
             bash(
               """
+                export JOB=${env.JOB}-${iteration}
                 source test/scripts/jenkins_test_setup_xpack.sh
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
@@ -471,14 +481,6 @@ def prepareXpackTestQueue(queue) {
   def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
   queue.xpackFirefox = items.xpackFirefox.reverse()
-}
-
-def getFunctionalWorkersMap(queue, finishedSuites, count = 24) {
-  def map = []
-  for (def i = 1; i <= count; i++) {
-    map["kibana-functional-${i}"] = getFunctionalQueueWorker(queue, finishedSuites, 1)
-  }
-  return map
 }
 
 return this
