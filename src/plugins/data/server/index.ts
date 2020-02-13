@@ -20,6 +20,34 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+import {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+} from '../common';
+
+/*
+ * Filter helper namespace:
+ */
+
+export const esFilters = {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -117,24 +145,23 @@ export {
   KBN_FIELD_TYPES,
 } from '../common';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataServerPlugin(initializerContext);
-}
+/**
+ * Search
+ */
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './search';
 
 /**
  * Types to be shared externally
  * @public
  */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
-  // es query
-  esFilters,
   // kbn field types
   castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
   // query
+  Filter,
   Query,
   // timefilter
   RefreshInterval,
@@ -148,7 +175,9 @@ export {
  * @public
  */
 
-export * from './search';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataServerPlugin(initializerContext);
+}
 
 export {
   DataServerPlugin as Plugin,
