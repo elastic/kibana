@@ -28,15 +28,6 @@ export const schema: FormSchema = {
       },
     ],
   },
-  case_type: {
-    type: FIELD_TYPES.SUPER_SELECT,
-    label: i18n.CASE_TYPE,
-    validations: [
-      {
-        validator: emptyField(i18n.CASE_TYPE_REQUIRED),
-      },
-    ],
-  },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.TAGS,

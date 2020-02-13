@@ -21,7 +21,6 @@ import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { DescriptionMarkdown } from '../description_md_editor';
-import { caseTypeOptions } from './form_options';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -73,18 +72,6 @@ export const Create = React.memo(() => {
           initialDescription={data.description}
           isLoading={isLoading}
           onChange={description => setFormData({ ...data, description })}
-        />
-        <CommonUseField
-          path="case_type"
-          componentProps={{
-            idAria: 'caseType',
-            'data-test-subj': 'caseType',
-            euiFieldProps: {
-              fullWidth: false,
-              options: caseTypeOptions,
-            },
-            isDisabled: isLoading,
-          }}
         />
         <TagContainer>
           <CommonUseField

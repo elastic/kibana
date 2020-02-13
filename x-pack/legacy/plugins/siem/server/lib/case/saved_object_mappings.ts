@@ -45,9 +45,6 @@ export const caseSavedObjectMappings: {
       tags: {
         type: 'keyword',
       },
-      case_type: {
-        type: 'keyword',
-      },
       updated_at: {
         type: 'date',
       },
