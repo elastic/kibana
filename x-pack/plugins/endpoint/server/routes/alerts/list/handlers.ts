@@ -8,17 +8,18 @@ import { SearchResponse } from 'elasticsearch';
 import { AlertData } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { getRequestData, buildAlertListESQuery, mapToAlertResultList } from './lib';
-import { AlertListRequestParams } from './types';
+import { AlertListRequestQuery } from './types';
 
 export const alertListHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
-): RequestHandler<unknown, AlertListRequestParams, unknown> {
-  const alertListHandler: RequestHandler<unknown, AlertListRequestParams, unknown> = async (
+): RequestHandler<unknown, AlertListRequestQuery, unknown> {
+  const alertListHandler: RequestHandler<unknown, AlertListRequestQuery, unknown> = async (
     ctx,
-    req: KibanaRequest<unknown, AlertListRequestParams, unknown>,
+    req: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
     res
   ) => {
     try {
+      // console.log(req);
       const reqData = await getRequestData(req, endpointAppContext);
 
       const reqWrapper = await buildAlertListESQuery(reqData);

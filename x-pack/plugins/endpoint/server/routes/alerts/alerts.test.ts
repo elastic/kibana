@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { decode, encode } from 'rison-node';
+// import { decode, encode } from 'rison-node';
+import { encode } from 'rison-node';
 import {
   IClusterClient,
   IRouter,
@@ -82,15 +83,13 @@ describe('test alerts route', () => {
   });
 
   it('should not support POST requests for querying', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      method: 'post',
-      body: {},
-    });
-
-    const response: SearchResponse<AlertData> = (data as unknown) as SearchResponse<AlertData>;
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-
-    expect(routerMock.post.mock.calls).toEqual([]);
+    try {
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+        path.startsWith('/api/endpoint/alerts')
+      )!;
+    } catch (err) {
+      expect(err).toBeInstanceOf(TypeError);
+    }
   });
 
   it('should return alert results according to pagination params -- GET', async () => {

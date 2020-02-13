@@ -14,15 +14,23 @@ import { EndpointConfigType } from './config';
  *
  * Must match exactly the values that the API receives.
  */
-export interface AlertListRequestParams {
+export interface AlertListRequestQuery {
   page_index?: number;
   page_size?: number;
-  filters?: string;
   query?: string;
+  filters?: string;
+  date_range: string;
   sort?: string;
   order?: string;
-  after?: string;
-  before?: string;
+  after?: [any, any];
+  before?: [any, any];
+}
+
+/**
+ * Data about the request.
+ **/
+interface AlertListRequestQueryMeta {
+  pageUrl: string;
 }
 
 /**
@@ -31,65 +39,25 @@ export interface AlertListRequestParams {
  * Internal use: contains the validated request parameters for use
  * by the application. Keys are camel-cased and do not necessarily
  * match the names of the request parameters that were passed in.
+ *
+ * Some additional metadata, such as `pageUrl` might be contained in
+ * here as well.
  */
-export class AlertListRequestData {
-  [key: string]: any;
-  pageSize!: number;
+export interface AlertListRequestQueryInternal {
+  pageSize: number;
   pageIndex?: number;
   fromIndex?: number;
   query?: string;
-  sort!: string;
-  order!: string;
+  filters?: esFilters.Filter[];
+  dateRange?: TimeRange;
+  sort: string;
+  order: string;
   searchAfter?: [any, any];
   searchBefore?: [any, any];
   next?: string;
   prev?: string;
 
-  // Rison-encoded
-  private _filters?: esFilters.Filter[];
-  private _dateRange?: TimeRange;
-
-  public get filters(): esFilters.Filter[] {
-    return this._filters;
-  }
-
-  public set filters(_filters: any) {
-    if (typeof _filters === 'string') {
-      try {
-        this._filters = (decode(_filters) as unknown) as esFilters.Filter[];
-      } catch (err) {
-        // TODO: log
-        this._filters = [] as esFilters.Filter[];
-      }
-    } else if (Array.isArray(_filters)) {
-      this._filters = _filters as esFilters.Filter[];
-    } else {
-      // TODO: log
-      this._filters = [] as esFilters.Filter[];
-    }
-  }
-
-  public set dateRange(_dateRange: string) {
-    try {
-      this._dateRange = (decode(_dateRange) as unknown) as TimeRange;
-    } catch (err) {
-      // TODO: log
-      this._dateRange = null;
-    }
-  }
-
-  public get dateRange(): TimeRange {
-    return this._dateRange;
-  }
-
-  public getEncoded(fieldName: string): string | null {
-    try {
-      return (encode(this[fieldName]) as unknown) as string;
-    } catch (err) {
-      // TODO: log
-      return null;
-    }
-  }
+  meta: AlertListRequestQueryMeta;
 }
 
 /**
@@ -104,7 +72,7 @@ export interface AlertListSortParam {
 /**
  * Request body for alerts.
  */
-export interface AlertListRequestBody {
+export interface AlertListESRequestBody {
   track_total_hits: number;
   query: JsonObject;
   sort: [AlertListSortParam, AlertListSortParam];
@@ -118,7 +86,7 @@ export interface AlertListRequest {
   index: string;
   size: number;
   from?: number;
-  body: AlertListRequestBody;
+  body: AlertListESRequestBody;
 }
 
 type AlertHits = AlertSource[];
