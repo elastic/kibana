@@ -16,6 +16,7 @@ export interface ApplicationStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [capabilities](./kibana-plugin-public.applicationstart.capabilities.md) | <code>RecursiveReadonly&lt;Capabilities&gt;</code> | Gets the read-only capabilities. |
+|  [currentAppId$](./kibana-plugin-public.applicationstart.currentappid_.md) | <code>Observable&lt;string &#124; undefined&gt;</code> | An observable that emits the current application id and each subsequent id update. |
 
 ## Methods
 

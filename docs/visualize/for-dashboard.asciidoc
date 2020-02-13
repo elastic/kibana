@@ -1,117 +1,51 @@
 [[for-dashboard]]
-== Markdown and controls
+== Dashboard tools
 
-[float]
-[[markdown-widget]]
-=== Markdown widget
-
-The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. Kibana renders the text you enter
-in this field and displays the results on the dashboard. You can click the *Help* link to go to the
-https://help.github.com/articles/github-flavored-markdown/[help page] for GitHub flavored Markdown. From the widget
-you can:
-
-* Click *Apply* to display the rendered text in the Preview panel
-* Click *Discard* to revert to a previously saved version
-
+Visualize comes with controls and Markdown tools that you can add to dashboards for an interactive experience.
 
 [float]
 [[controls]]
-=== Controls widget
+=== Controls
 experimental[]
 
-The Controls widget enables you to add interactive inputs
-to a dashboard.  You can create two types of inputs:
+The controls tool enables you to add interactive inputs
+on a dashboard.
 
-* Dropdown menu
-* Radio slider
+You can add two types of interactive inputs:
 
-[role="screenshot"]
-image::images/controls/controls_in_dashboard.png[]
+* *Options list* - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
 
-[float]
-[[add-input-controls]]
-=== Add input controls
-
-To start a *Controls* visualization, open the Visualization application
-and click the *+* button. Scroll to the *Others* section and
-select *Controls*.
-
-In the visualization builder, choose the type of control to add to
-your visualization.
-
-[float]
-==== Dropdown menu
-
-A dropdown menu allows users to filter content by selecting
-one or more options from a list. The dropdown menu is dynamically populated
-with the results of a terms aggregation.
+* *Range slider* - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
 
 [role="screenshot"]
-image::images/controls/dropdown_control_editor.png[]
-
-*Control Label*:: The label for the dropdown menu. By default, the
-label is the field name.
-
-*Index Pattern*:: The <<index-patterns,index pattern>> that contains
-the data set to visualize.
-
-*Field*:: The field used to populate the list of options
-and filter on when users interact with the input.
-The list of available fields is derived from the specified
-index pattern.
-
-*Parent control*:: The control for chaining dropdown menus so that the
-selection in the first menu
-filters the terms in the second menu. Only available when
-creating multiple dropdown menus.
-
-*Multiselect*:: When enabled, the dropdown menu allows users to select multiple options.
-
-*Size*:: The number of options to include in the list.
+image::images/dashboard-controls.png[]
 
 [float]
-==== Range slider
+[[markdown-widget]]
+=== Markdown
 
-A range sliders allow users to filter content within a range of numbers.
-The range slider minimum and maximum values are dynamically populated with
-the results of a min and max aggregation.
+The Markdown tool is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard.
 
-[role="screenshot"]
-image::images/controls/range_slider_editor.png[]
+Markdown is helpful when you want to include important information, instructions, and images on your dashboard.
 
-*Control Label*:: The label for the range slider. By default, the
-label is the field name.
+For information about GitHub-flavored Markdown text, click *Help*.
 
-*Index Pattern*:: The <<index-patterns,index pattern>> that contains
-the data set to visualize.
-
-*Field*:: The field used to populate the range slider
-and filter on when users interact with the input.
-The list of available fields is derived from the
-specified index pattern.
-
-*Step Size*:: The increment/decrement size of the slider.
-
-*Decimal Places*:: The number of decimal places.
-
-[float]
-[[global-options]]
-=== Global options
-
-Open the *Options* tab to configure settings that apply to all input
-controls in a Controls visualization.
+For example, when you enter:
 
 [role="screenshot"]
-image::images/controls/controls_options.png[]
+image::images/markdown_example_1.png[]
 
-*Update Kibana filters on each change*:: When enabled, all input interactions
-immediately create filters that cause the dashboard to refresh. When disabled,
-Kibana filters are only created
-when the user clicks *Apply changes* image:images/apply-changes-button.png[].
+The following instructions are displayed:
 
-*Use time filter*:: When enabled, the aggregations used to generate
-the dropdown options list and range minimum and maximum are bound
-to <<set-time-filter,Kibana's global time range>>.
+[role="screenshot"]
+image::images/markdown_example_2.png[]
 
-*Pin filters to global state*:: When enabled, all filters created by
-interacting with the inputs are automatically pinned.
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]

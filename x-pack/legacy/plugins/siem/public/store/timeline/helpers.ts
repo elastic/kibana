@@ -6,7 +6,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -135,7 +135,7 @@ interface AddNewTimelineParams {
     start: number;
     end: number;
   };
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   id: string;
   itemsPerPage?: number;
   kqlQuery?: {
@@ -1296,7 +1296,7 @@ export const updateSavedQuery = ({
 
 interface UpdateFiltersParams {
   id: string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   timelineById: TimelineById;
 }
 
