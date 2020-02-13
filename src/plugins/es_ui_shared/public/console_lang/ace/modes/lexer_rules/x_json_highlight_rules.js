@@ -19,6 +19,7 @@
 
 import * as _ from 'lodash';
 import ace from 'brace';
+import 'brace/mode/json';
 
 import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
 const { ScriptHighlightRules } = require('./script_highlight_rules');
