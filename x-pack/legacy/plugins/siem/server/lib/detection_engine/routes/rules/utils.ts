@@ -5,6 +5,7 @@
  */
 
 import { pickBy } from 'lodash/fp';
+import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -214,4 +215,12 @@ export const transformOrImportError = (
       existingImportSuccessError,
     });
   }
+};
+
+export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
+  const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
+  if (hasDuplicates) {
+    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
+  }
+  return [];
 };
