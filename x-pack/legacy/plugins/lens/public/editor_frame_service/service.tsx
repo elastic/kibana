@@ -47,11 +47,7 @@ export interface EditorFrameStartPlugins {
 async function collectAsyncDefinitions<T extends { id: string }>(
   definitions: Array<T | Promise<T>>
 ) {
-  const resolvedDefinitions = await Promise.all(
-    definitions.map(definition =>
-      definition instanceof Promise ? definition : Promise.resolve(definition)
-    )
-  );
+  const resolvedDefinitions = await Promise.all(definitions);
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach(definition => {
     definitionMap[definition.id] = definition;
