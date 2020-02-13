@@ -53,9 +53,9 @@ function legacyLinkToNavLink(spec: LegacyNavLinkSpec): LegacyNavLink {
     icon: spec.icon,
     euiIconType: spec.euiIconType,
     linkToLastSubUrl: spec.linkToLastSubUrl ?? true,
-    hidden: 'hidden' in spec ? spec.hidden : false,
-    disabled: 'disabled' in spec ? spec.disabled : false,
-    tooltip: spec.tooltip || '',
+    hidden: spec.hidden ?? false,
+    disabled: spec.disabled ?? false,
+    tooltip: spec.tooltip ?? '',
   };
 }
 
