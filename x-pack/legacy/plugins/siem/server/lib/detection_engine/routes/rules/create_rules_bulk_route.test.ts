@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { ServerInjectOptions } from 'hapi';
+import { omit } from 'lodash/fp';
+
 import {
   getFindResult,
   getResult,
@@ -14,9 +15,11 @@ import {
   getReadBulkRequest,
   getEmptyIndex,
 } from '../__mocks__/request_responses';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
-import { omit } from 'lodash/fp';
+import { BulkError } from '../utils';
+import { OutputRuleAlertRest } from '../../types';
 
 describe('create_rules_bulk', () => {
   let server = createMockServer();
@@ -129,5 +132,35 @@ describe('create_rules_bulk', () => {
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
+  });
+
+  test('returns 409 if duplicate rule_ids found in request payload', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
+  });
+
+  test('returns one error object in response when duplicate rule_ids found in request payload', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.length).toBe(1);
   });
 });
