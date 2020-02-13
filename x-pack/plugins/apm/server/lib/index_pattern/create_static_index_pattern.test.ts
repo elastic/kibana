@@ -8,6 +8,7 @@ import { createStaticIndexPattern } from './create_static_index_pattern';
 import { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../services/get_services/has_historical_agent_data';
 import { APMRequestHandlerContext } from '../../routes/typings';
+import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
 function getMockContext(config: Record<string, unknown>) {
   return ({
@@ -21,6 +22,11 @@ function getMockContext(config: Record<string, unknown>) {
     }
   } as unknown) as APMRequestHandlerContext;
 }
+function getMockSavedObjectsClient() {
+  return ({
+    create: jest.fn()
+  } as unknown) as InternalSavedObjectsClient;
+}
 
 describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
@@ -28,8 +34,9 @@ describe('createStaticIndexPattern', () => {
     const context = getMockContext({
       'xpack.apm.autocreateApmIndexPattern': false
     });
-    await createStaticIndexPattern(setup, context);
-    expect(context.core.savedObjects.client.create).not.toHaveBeenCalled();
+    const savedObjectsClient = getMockSavedObjectsClient();
+    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   it(`should not create index pattern if no APM data is found`, async () => {
@@ -43,8 +50,10 @@ describe('createStaticIndexPattern', () => {
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(false);
 
-    await createStaticIndexPattern(setup, context);
-    expect(context.core.savedObjects.client.create).not.toHaveBeenCalled();
+    const savedObjectsClient = getMockSavedObjectsClient();
+
+    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   it(`should create index pattern`, async () => {
@@ -57,8 +66,11 @@ describe('createStaticIndexPattern', () => {
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
-    await createStaticIndexPattern(setup, context);
 
-    expect(context.core.savedObjects.client.create).toHaveBeenCalled();
+    const savedObjectsClient = getMockSavedObjectsClient();
+
+    await createStaticIndexPattern(setup, context, savedObjectsClient);
+
+    expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 });

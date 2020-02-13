@@ -7,13 +7,15 @@ import * as t from 'io-ts';
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 
-export const staticIndexPatternRoute = createRoute(() => ({
+export const staticIndexPatternRoute = createRoute(core => ({
   method: 'POST',
   path: '/api/apm/index_pattern/static',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    await createStaticIndexPattern(setup, context);
+    const savedObjectsClient = await getInternalSavedObjectsClient(core);
+    await createStaticIndexPattern(setup, context, savedObjectsClient);
 
     // send empty response regardless of outcome
     return undefined;

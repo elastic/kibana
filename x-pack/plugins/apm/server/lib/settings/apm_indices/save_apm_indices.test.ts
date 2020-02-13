@@ -5,13 +5,13 @@
  */
 
 import { saveApmIndices } from './save_apm_indices';
-import { InternalSavedObjectsClient } from '../../helpers/get_internal_saved_objects_client';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
     const savedObjectsClient = ({
       create: jest.fn()
-    } as unknown) as InternalSavedObjectsClient;
+    } as unknown) as SavedObjectsClientContract;
 
     const apmIndices = {
       settingA: 'aa',

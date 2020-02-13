@@ -10,10 +10,12 @@ import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server/save
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRequestHandlerContext } from '../../routes/typings';
+import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
 
 export async function createStaticIndexPattern(
   setup: Setup,
-  context: APMRequestHandlerContext
+  context: APMRequestHandlerContext,
+  savedObjectsClient: InternalSavedObjectsClient
 ): Promise<void> {
   const { config } = context;
 
@@ -31,7 +33,6 @@ export async function createStaticIndexPattern(
 
   try {
     const apmIndexPatternTitle = config['apm_oss.indexPattern'];
-    const savedObjectsClient = context.core.savedObjects.client;
     await savedObjectsClient.create(
       'index-pattern',
       {

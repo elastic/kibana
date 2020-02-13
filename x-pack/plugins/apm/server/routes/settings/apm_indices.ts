@@ -11,7 +11,6 @@ import {
   getApmIndexSettings
 } from '../../lib/settings/apm_indices/get_apm_indices';
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
-import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
 // get list of apm indices and values
 export const apmIndexSettingsRoute = createRoute(() => ({
@@ -38,6 +37,9 @@ export const apmIndicesRoute = createRoute(() => ({
 export const saveApmIndicesRoute = createRoute(core => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   params: {
     body: t.partial({
       'apm_oss.sourcemapIndices': t.string,
@@ -50,7 +52,7 @@ export const saveApmIndicesRoute = createRoute(core => ({
   },
   handler: async ({ context, request }) => {
     const { body } = context.params;
-    const savedObjectsClient = await getInternalSavedObjectsClient(core);
+    const savedObjectsClient = context.core.savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
   }
 }));
