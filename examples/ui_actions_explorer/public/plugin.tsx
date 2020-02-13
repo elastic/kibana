@@ -19,7 +19,6 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { ISearchAppMountContext } from '../../../src/plugins/data/public';
 import {
   PHONE_TRIGGER,
   USER_TRIGGER,
@@ -37,12 +36,6 @@ import {
   showcasePluggability,
   SHOWCASE_PLUGGABILITY_ACTION,
 } from './actions/actions';
-
-declare module 'kibana/public' {
-  interface AppMountContext {
-    search?: ISearchAppMountContext;
-  }
-}
 
 interface StartDeps {
   uiActions: UiActionsStart;
