@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './app';
+export const ALL_HOSTS_TABLE = '[data-test-subj="table-allHosts-loading-false"]';
+
+export const HOSTS_NAMES = '[data-test-subj="draggable-content-host.name"]';
