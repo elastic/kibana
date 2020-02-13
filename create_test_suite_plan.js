@@ -57,7 +57,7 @@ Object.keys(allSuites).forEach(group => {
     const next = suites.shift();
     const byConfig = suitesByConfig[next.config];
     let totalDuration = 0;
-    while (totalDuration < 60 * 5 && byConfig.length > 0) {
+    while (totalDuration < 60 * 8 && byConfig.length > 0) {
       const suite =
         totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 8
           ? byConfig.shift()
