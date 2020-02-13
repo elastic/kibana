@@ -95,6 +95,12 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
             </h5>
           </EuiTitle>
           {traceSamples && (
+            <EuiPagination
+              pageCount={traceSamples.length}
+              activePage={sampleActivePage}
+              onPageClick={goToSample}
+              compressed
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem>
