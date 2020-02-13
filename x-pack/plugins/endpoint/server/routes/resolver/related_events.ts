@@ -37,9 +37,9 @@ export function handleRelatedEvents(
       query: { limit, after, legacyEndpointID },
     } = req;
     try {
-      const client = context.core.elasticsearch.dataClient;
-      const pagination = await getPaginationParams(client, limit, after);
+      const pagination = getPaginationParams(limit, after);
 
+      const client = context.core.elasticsearch.dataClient;
       // Retrieve the related non-process events for a given process
       const relatedEventsQuery = new RelatedEventsQuery(legacyEndpointID, pagination);
       const relatedEvents = await relatedEventsQuery.search(client, id);
