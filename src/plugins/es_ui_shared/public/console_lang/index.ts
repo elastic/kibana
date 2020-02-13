@@ -23,6 +23,4 @@ export {
   XJsonHighlightRules,
   addXJsonToRules,
   workerModule,
-} from './console_lang';
-
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+} from './ace/mode';

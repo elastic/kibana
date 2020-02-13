@@ -22,7 +22,6 @@ export {
   ScriptHighlightRules,
   XJsonHighlightRules,
   addXJsonToRules,
-  workerModule,
-} from './console_lang';
+} from './lexer_rules';
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { workerModule } from './worker';

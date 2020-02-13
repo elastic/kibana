@@ -17,12 +17,9 @@
  * under the License.
  */
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  workerModule,
-} from './console_lang';
+export declare const workerModule: { id: string; src: string };
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export declare const ElasticsearchSqlHighlightRules: Function;
+export declare const ScriptHighlightRules: Function;
+export declare const XJsonHighlightRules: Function;
+export declare const addXJsonToRules: Function;

@@ -146,6 +146,12 @@ const jsonRules = function(root) {
   return rules;
 };
 
+export function XJsonHighlightRules() {
+  this.$rules = {
+    ...jsonRules('x-json'),
+  };
+}
+
 export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, 'script-', [
