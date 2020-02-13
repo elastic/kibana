@@ -314,6 +314,9 @@ describe('BulkUploader', () => {
     });
 
     it('uses a direct connection to the monitoring cluster, when configured', done => {
+      const dateInIndex = '2020.02.10';
+      const oldNow = moment.now;
+      moment.now = () => 1581310800000;
       const prodClusterUuid = '1sdfd5';
       const prodCluster = {
         callWithInternalUser: sinon
@@ -386,13 +389,13 @@ describe('BulkUploader', () => {
       setTimeout(() => {
         uploader.stop();
         const firstCallArgs = monitoringCluster.callWithInternalUser.firstCall.args;
-
         expect(firstCallArgs[0]).to.be('bulk');
         expect(firstCallArgs[1].body[0].index._index).to.be(
-          `.monitoring-kibana-${MONITORING_SYSTEM_API_VERSION}-${moment().format('YYYY.MM.DD')}`
+          `.monitoring-kibana-${MONITORING_SYSTEM_API_VERSION}-${dateInIndex}`
         );
         expect(firstCallArgs[1].body[1].type).to.be('kibana_stats');
         expect(firstCallArgs[1].body[1].cluster_uuid).to.be(prodClusterUuid);
+        moment.now = oldNow;
         done();
       }, CHECK_DELAY);
     });

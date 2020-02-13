@@ -45,10 +45,16 @@ export async function sendBulkPayload(
   cluster,
   interval,
   payload,
+  log,
   hasDirectConnectionToMonitoringCluster = false,
   productionClusterUuid = null
 ) {
   if (hasDirectConnectionToMonitoringCluster) {
+    if (productionClusterUuid === null) {
+      log.warn(
+        `Unable to determine production cluster uuid to use for shipping monitoring data. Kibana monitoring data will appear in a standalone cluster in the Stack Monitoring UI.`
+      );
+    }
     const formattedPayload = formatForNormalBulkEndpoint(payload, productionClusterUuid);
     return await cluster.callWithInternalUser('bulk', {
       body: formattedPayload,

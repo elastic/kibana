@@ -66,6 +66,7 @@ export class BulkUploader {
 
     const directConfig = parseElasticsearchConfig(config, 'monitoring.elasticsearch');
     if (hasMonitoringCluster(directConfig)) {
+      this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
       this._cluster = elasticsearchPlugin.createCluster('monitoring-direct', directConfig);
       elasticsearchPlugin
@@ -201,6 +202,7 @@ export class BulkUploader {
       this._cluster,
       this._interval,
       payload,
+      this._log,
       this._hasDirectConnectionToMonitoringCluster,
       this._productionClusterUuid
     );
