@@ -43,7 +43,6 @@ export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
-    QueryString: any;
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
   };

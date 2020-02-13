@@ -34,7 +34,7 @@ import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
@@ -65,10 +65,9 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const kibana = useKibana();
-    const hostDetailsPageFilters: esFilters.Filter[] = useMemo(
-      () => getHostDetailsPageFilters(detailName),
-      [detailName]
-    );
+    const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
+      detailName,
+    ]);
     const getFilters = () => [...hostDetailsPageFilters, ...filters];
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
