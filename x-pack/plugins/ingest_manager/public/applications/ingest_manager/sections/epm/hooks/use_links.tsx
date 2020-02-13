@@ -3,16 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { generatePath } from 'react-router-dom';
-// import { useCore } from '.';
-// import { PLUGIN } from '../../common/constants';
-import { getFilePath, getInfoPath } from '../tmp_routes';
-import { patterns } from '../routes';
-// import { DetailViewPanelName } from '..';
-
-// create './types' later and move there?
-type DetailViewPanelName = 'overview' | 'data-sources';
+import { useCore } from '../../../hooks/use_core';
+import { PLUGIN_ID } from '../../../constants';
+import { epmRouteService } from '../../../../../../common/services/routes';
+import { DetailViewPanelName } from '../types';
+import { BASE_PATH, EPM_PATH, EPM_DETAIL_VIEW_PATH } from '../../../constants';
 
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
@@ -27,45 +23,15 @@ const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;
 
 export function useLinks() {
-  // XXX no http on fake core contest
-  // const { http } = useCore();
+  const { http } = useCore();
   function appRoot(path: string) {
     // include '#' because we're using HashRouter
-    // return http.basePath.prepend(patterns.APP_ROOT + '#' + path);
-    return 'really/wrong/app/root';
+    return http.basePath.prepend(BASE_PATH + '#' + path);
   }
 
-  // return {
-  //   toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN.ID}/assets/${path}`),
-  //   toImage: (path: string) => http.basePath.prepend(getFilePath(path)),
-  //   toRelativeImage: ({
-  //     path,
-  //     packageName,
-  //     version,
-  //   }: {
-  //     path: string;
-  //     packageName: string;
-  //     version: string;
-  //   }) => {
-  //     const imagePath = removeRelativePath(path);
-  //     const pkgkey = `${packageName}-${version}`;
-  //     const filePath = `${getInfoPath(pkgkey)}/${imagePath}`;
-  //     return http.basePath.prepend(filePath);
-  //   },
-  //   toListView: () => appRoot(patterns.LIST_VIEW),
-  //   toDetailView: ({ name, version, panel, withAppRoot = true }: DetailParams) => {
-  //     // panel is optional, but `generatePath` won't accept `path: undefined`
-  //     // so use this to pass `{ pkgkey }` or `{ pkgkey, panel }`
-  //     const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
-  //     const path = generatePath(patterns.DETAIL_VIEW, params);
-  //     return withAppRoot ? appRoot(path) : path;
-  //   },
-  // };
-
-  // XXX this is totally broken, only goal is to get the code running
   return {
-    toAssets: (path: string) => `/really/WRONG.PLUGIN.ID}/assets/${path}`,
-    toImage: (path: string) => getFilePath(path),
+    toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/epm/assets/${path}`),
+    toImage: (path: string) => http.basePath.prepend(epmRouteService.getFilePath(path)),
     toRelativeImage: ({
       path,
       packageName,
@@ -77,15 +43,15 @@ export function useLinks() {
     }) => {
       const imagePath = removeRelativePath(path);
       const pkgkey = `${packageName}-${version}`;
-      const filePath = `${getInfoPath(pkgkey)}/${imagePath}`;
-      return filePath;
+      const filePath = `${epmRouteService.getInfoPath(pkgkey)}/${imagePath}`;
+      return http.basePath.prepend(filePath);
     },
-    toListView: () => appRoot(patterns.LIST_VIEW),
+    toListView: () => appRoot(EPM_PATH),
     toDetailView: ({ name, version, panel, withAppRoot = true }: DetailParams) => {
       // panel is optional, but `generatePath` won't accept `path: undefined`
       // so use this to pass `{ pkgkey }` or `{ pkgkey, panel }`
       const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
-      const path = generatePath('/no/DETAIL_VIEW/', params);
+      const path = generatePath(EPM_DETAIL_VIEW_PATH, params);
       return withAppRoot ? appRoot(path) : path;
     },
   };

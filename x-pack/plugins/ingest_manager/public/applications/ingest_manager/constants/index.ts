@@ -12,6 +12,7 @@ export {
 } from '../../../../common';
 export const BASE_PATH = `/app/${PLUGIN_ID}`;
 export const EPM_PATH = '/epm';
+export const EPM_DETAIL_VIEW_PATH = `${EPM_PATH}/detail/:pkgkey/:panel?`;
 export const AGENT_CONFIG_PATH = '/configs';
 export const AGENT_CONFIG_DETAILS_PATH = '/configs/';
 export const FLEET_PATH = '/fleet';
