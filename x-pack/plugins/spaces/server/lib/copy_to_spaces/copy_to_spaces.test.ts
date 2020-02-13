@@ -149,7 +149,6 @@ describe('copySavedObjectsToSpaces', () => {
               },
             ],
             "savedObjectsClient": null,
-            "types": undefined,
           },
         ],
       ]

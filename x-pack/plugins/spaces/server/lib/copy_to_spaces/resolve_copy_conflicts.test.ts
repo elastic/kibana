@@ -169,7 +169,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               },
             ],
             "savedObjectsClient": null,
-            "types": undefined,
           },
         ],
       ]
