@@ -5,12 +5,13 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -40,7 +41,6 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
   loadData,
   currentFilter,
   onFilterChange,
-  search,
   onSearchChange,
   availableGroupByOptions,
   currentGroupBy,
@@ -48,10 +48,12 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
   intl,
 }) => {
   const [searchTermError, setSearchTermError] = useState<null | string>(null);
+  const filterInvalid = Boolean(searchTermError);
   return (
     <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
+          isInvalid={filterInvalid}
           aria-label="Filter"
           placeholder={intl.formatMessage({
             id: 'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
@@ -60,20 +62,34 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
           onChange={e => {
             const string = e.target.value;
             const errorMessage = validateRegExpString(string);
-            if (!errorMessage) {
+            if (errorMessage) {
+              // Emit an empty search term to listeners if search term is invalid.
+              onSearchChange('');
+              setSearchTermError(errorMessage);
+            } else {
+              onSearchChange(e.target.value);
               if (searchTermError) {
                 setSearchTermError(null);
               }
-              onSearchChange(e.target.value);
-            } else {
-              setSearchTermError(errorMessage);
             }
           }}
         />
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="danger">
-          {searchTermError}
-        </EuiText>
+        {filterInvalid && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              color="danger"
+              title={i18n.translate(
+                'xpack.upgradeAssistant.checkupTab.controls.filterErrorMessageLabel',
+                {
+                  defaultMessage: 'Filter Invalid: {searchTermError}',
+                  values: { searchTermError },
+                }
+              )}
+              iconType="faceSad"
+            />
+          </>
+        )}
       </EuiFlexItem>
 
       {/* These two components provide their own EuiFlexItem wrappers */}
