@@ -6,12 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
-import { init as initBreadcrumbs } from './app/services/breadcrumb';
-import { init as initDocumentation } from './app/services/documentation';
-import { init as initHttp } from './app/services/http';
-import { init as initUiMetric } from './app/services/ui_metric';
-import { init as initNotification } from './app/services/notification';
-import { init as initRedirect } from './app/services/redirect';
+import { init as initBreadcrumbs } from './application/services/breadcrumb';
+import { init as initDocumentation } from './application/services/documentation';
+import { init as initHttp } from './application/services/http';
+import { init as initUiMetric } from './application/services/ui_metric';
+import { init as initNotification } from './application/services/notification';
+import { init as initRedirect } from './application/services/redirect';
 import { Dependencies } from './types';
 
 export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, any> {
@@ -41,7 +41,7 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
         initNotification(toasts, fatalErrors);
         initHttp(http);
 
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./application');
         return renderApp(element, i18nContext);
       },
     });
