@@ -51,10 +51,10 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction | ExpandRangeAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
-  startDate: string | null;
-  endDate: string | null;
-  startTimestamp: number | null;
-  endTimestamp: number | null;
+  startDate: string;
+  endDate: string;
+  startTimestamp: number;
+  endTimestamp: number;
   liveStreamingInterval: number;
   filterQuery: string | null;
   timeKey: TimeKey | null;

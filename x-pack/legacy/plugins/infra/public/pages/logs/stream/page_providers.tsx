@@ -43,6 +43,11 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
+  // Don't render anything if the date range is incorrect.
+  if (!startTimestamp || !endTimestamp) {
+    return null;
+  }
+
   const entriesProps = {
     startDate,
     endDate,
