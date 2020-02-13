@@ -6,7 +6,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
@@ -55,7 +55,7 @@ export const dispatchSetInitialStateFromUrl = (
     }
 
     if (urlKey === CONSTANTS.filters) {
-      const filters = decodeRisonUrlState<esFilters.Filter[]>(newUrlStateString);
+      const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
       filterManager.setFilters(filters || []);
     }
 

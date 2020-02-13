@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -35,7 +35,7 @@ interface OwnProps {
 interface StateReduxProps {
   dataProviders: DataProvider[];
   eventType: EventType;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
@@ -66,7 +66,7 @@ interface DispatchProps {
     filterQueryDraft: KueryFilterQuery;
   }) => void;
   setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) => void;
-  setFilters: ({ id, filters }: { id: string; filters: esFilters.Filter[] }) => void;
+  setFilters: ({ id, filters }: { id: string; filters: Filter[] }) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -126,7 +126,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     const setFiltersInTimeline = useCallback(
-      (newFilters: esFilters.Filter[]) =>
+      (newFilters: Filter[]) =>
         setFilters({
           id: timelineId,
           filters: newFilters,
@@ -260,7 +260,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     ),
   setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) =>
     dispatch(timelineActions.setSavedQueryId({ id, savedQueryId })),
-  setFilters: ({ id, filters }: { id: string; filters: esFilters.Filter[] }) =>
+  setFilters: ({ id, filters }: { id: string; filters: Filter[] }) =>
     dispatch(timelineActions.setFilters({ id, filters })),
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });

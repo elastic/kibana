@@ -6,12 +6,12 @@
 
 import { addFilterStateIfNotThere } from './';
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { esFilters, Filter } from '../../../../../../../../../../src/plugins/data/public';
 
 describe('description_step', () => {
   describe('addFilterStateIfNotThere', () => {
     test('it does not change the state if it is global', () => {
-      const filters: esFilters.Filter[] = [
+      const filters: Filter[] = [
         {
           $state: {
             store: esFilters.FilterStateStore.GLOBAL_STATE,
@@ -54,7 +54,7 @@ describe('description_step', () => {
         },
       ];
       const output = addFilterStateIfNotThere(filters);
-      const expected: esFilters.Filter[] = [
+      const expected: Filter[] = [
         {
           $state: {
             store: esFilters.FilterStateStore.GLOBAL_STATE,
@@ -100,7 +100,7 @@ describe('description_step', () => {
     });
 
     test('it adds the state if it does not exist as local', () => {
-      const filters: esFilters.Filter[] = [
+      const filters: Filter[] = [
         {
           meta: {
             alias: null,
@@ -137,7 +137,7 @@ describe('description_step', () => {
         },
       ];
       const output = addFilterStateIfNotThere(filters);
-      const expected: esFilters.Filter[] = [
+      const expected: Filter[] = [
         {
           $state: {
             store: esFilters.FilterStateStore.APP_STATE,
