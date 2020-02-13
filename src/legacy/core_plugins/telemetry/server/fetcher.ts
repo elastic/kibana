@@ -40,7 +40,7 @@ export class FetcherTask {
 
   constructor(server: any) {
     this.server = server;
-    this.currentVersion = '';
+    this.currentVersion = this.server.config().get('pkg.version');
   }
 
   private getInternalRepository = () => {
