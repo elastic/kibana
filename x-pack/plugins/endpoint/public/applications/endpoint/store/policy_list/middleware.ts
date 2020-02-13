@@ -14,19 +14,32 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
       (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage') ||
       action.type === 'userPaginatedPolicyListTable'
     ) {
-      // load data from API
+      const state = getState();
+      let pageSize: number;
+      let pageIndex: number;
+
+      if (action.type === 'userPaginatedPolicyListTable') {
+        pageSize = action.payload.pageSize;
+        pageIndex = action.payload.pageIndex;
+      } else {
+        pageSize = state.pageSize;
+        pageIndex = state.pageIndex;
+      }
+
+      // Need load data from API and remove fake data below
       // Refactor tracked via: https://github.com/elastic/endpoint-app-team/issues/150
-      setTimeout(() => {
-        dispatch({
-          type: 'serverReturnedPolicyListData',
-          payload: {
-            policyItems: [],
-            pageIndex: 0,
-            pageSize: 10,
-            total: 0,
-          },
-        });
-      }, 10);
+      const { getFakeDatasourceApiResponse } = await import('./fake_data');
+      const { items: policyItems, total } = await getFakeDatasourceApiResponse(pageIndex, pageSize);
+
+      dispatch({
+        type: 'serverReturnedPolicyListData',
+        payload: {
+          policyItems,
+          pageIndex,
+          pageSize,
+          total,
+        },
+      });
     }
   };
 };
