@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chromeMock from 'ui/chrome';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
@@ -15,8 +13,6 @@ import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
-// chrome, notify, storage are used by ./plugin
-jest.mock('ui/chrome');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
 
@@ -142,10 +138,8 @@ describe('IndexPattern Data Source', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
-      chrome: chromeMock,
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
-      savedObjectsClient: {} as SavedObjectsClientContract,
       data: pluginsMock.createStart().data,
     });
 
