@@ -35,7 +35,7 @@ describe('UPDATE case', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(typeof response.payload.updated_at).toBe('number');
+    expect(typeof response.payload.updated_at).toBe('string');
     expect(response.payload.state).toEqual('closed');
   });
   it(`Returns an error if updateCase throws`, async () => {
