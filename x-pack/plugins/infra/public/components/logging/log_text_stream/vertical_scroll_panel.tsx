@@ -5,8 +5,7 @@
  */
 
 import { bisector } from 'd3-array';
-import { sortBy } from 'lodash';
-import { throttle } from 'lodash';
+import { sortBy, throttle } from 'lodash';
 import * as React from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
