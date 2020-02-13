@@ -37,28 +37,13 @@ const localStorage = new Storage(window.localStorage);
 import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
-    if (nextId !== prevState.prevId) {
-      return {
-        displayName: '',
-        immutableSourceProps: [],
-        hasLoadedSourcePropsForLayer: false,
-        prevId: nextId,
-      };
-    }
-    return null;
-  }
-
-  state = {};
+  state = {
+    displayName: '',
+    immutableSourceProps: [],
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-  }
-
-  componentDidUpdate() {
     this.loadDisplayName();
     this.loadImmutableSourceProperties();
   }
@@ -73,24 +58,19 @@ export class LayerPanel extends React.Component {
     }
 
     const displayName = await this.props.selectedLayer.getDisplayName();
-    if (!this._isMounted || displayName === this.state.displayName) {
-      return;
+    if (this._isMounted) {
+      this.setState({ displayName });
     }
-
-    this.setState({ displayName });
   };
 
   loadImmutableSourceProperties = async () => {
-    if (this.state.hasLoadedSourcePropsForLayer || !this.props.selectedLayer) {
+    if (!this.props.selectedLayer) {
       return;
     }
 
     const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
     if (this._isMounted) {
-      this.setState({
-        immutableSourceProps,
-        hasLoadedSourcePropsForLayer: true,
-      });
+      this.setState({ immutableSourceProps });
     }
   };
 
