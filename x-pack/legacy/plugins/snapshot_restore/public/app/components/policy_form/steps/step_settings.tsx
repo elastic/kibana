@@ -64,21 +64,42 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     )
   );
 
+  // if the length is the same, we can assume the user only defined indices (not index patterns)
+  // and we show the `list` view.
+
+  const selectedIndices = indices.filter(index => {
+    return (
+      typeof config.indices === 'string' ||
+      (Array.isArray(config.indices) && config.indices.includes(index))
+    );
+  });
+
+  const showListView = useState<boolean>(
+    typeof config.indices === 'string' ||
+    (Array.isArray(config.indices) && selectedIndices.length === config.indices.length)
+  );
+
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select
   // them instead, so we'll default to showing them the index pattern input.
+
   const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
     typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) && config.indices.length > 100)
+      (Array.isArray(config.indices) && config.indices.length > 100) ||
+      !showListView[0]
       ? 'custom'
       : 'list'
   );
 
   // State for custom patterns
   const [indexPatterns, setIndexPatterns] = useState<string[]>(
-    typeof config.indices === 'string' ? config.indices.split(',') : []
+    typeof config.indices === 'string'
+      ? config.indices.split(',')
+      : Array.isArray(config.indices)
+        ? config.indices
+        : []
   );
-
+  
   const renderIndicesField = () => {
     const indicesSwitch = (
       <EuiSwitch
