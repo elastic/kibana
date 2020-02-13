@@ -17,7 +17,7 @@
  * under the License.
  */
 import { CoreSetup } from 'kibana/public';
-import { fieldFormats, FieldFormatsStart } from '../../plugins/data/public';
+import { DataPublicPluginStart, fieldFormats } from '../../plugins/data/public';
 import { deserializeFieldFormat } from '../../plugins/data/public/field_formats/utils/deserialize';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
@@ -27,7 +27,7 @@ export const getFieldFormatsRegistry = (core: CoreSetup) => {
   fieldFormatsRegistry.init(getConfig, {});
 
   fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
-    fieldFormatsRegistry as FieldFormatsStart
+    fieldFormatsRegistry as DataPublicPluginStart['fieldFormats']
   );
 
   return fieldFormatsRegistry;
