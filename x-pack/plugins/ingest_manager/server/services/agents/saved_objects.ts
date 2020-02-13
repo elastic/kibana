@@ -21,5 +21,6 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
     local_metadata: JSON.parse(so.attributes.local_metadata),
     user_provided_metadata: JSON.parse(so.attributes.user_provided_metadata),
     access_api_key: undefined,
+    status: undefined,
   };
 }

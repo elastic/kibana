@@ -5,7 +5,7 @@
  */
 import url from 'url';
 import { IRouter, BasePath, HttpServerInfo, KibanaRequest } from 'kibana/server';
-import { PLUGIN_ID, INSTALL_SCRIPT_API_ROUTES } from '../../constants';
+import { INSTALL_SCRIPT_API_ROUTES } from '../../constants';
 import { getScript } from '../../services/install_script';
 import { InstallScriptRequestSchema } from '../../types';
 
@@ -29,7 +29,7 @@ export const registerRoutes = ({
     {
       path: INSTALL_SCRIPT_API_ROUTES,
       validate: InstallScriptRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [], authRequired: false },
     },
     async function getInstallScriptHandler(
       context,

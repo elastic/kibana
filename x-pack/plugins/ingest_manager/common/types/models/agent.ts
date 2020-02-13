@@ -99,6 +99,7 @@ const AgentSchema = schema.object({
   user_provided_metadata: schema.recordOf(schema.string(), schema.string()),
   local_metadata: schema.recordOf(schema.string(), schema.string()),
   access_api_key: schema.maybe(schema.string()),
+  status: schema.maybe(schema.string()),
 });
 
 const AgentSOAttributesSchema = schema.object({

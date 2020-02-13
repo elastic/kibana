@@ -17,6 +17,10 @@ import {
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusForPolicySchema,
+  GetAgentsResponse,
+  PostAgentUnenrollResponse,
+  GetOneAgentResponse,
+  GetOneAgentEventsResponse,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services/app_context';
@@ -29,7 +33,7 @@ export const getAgentHandler: RequestHandler<TypeOf<
   try {
     const agent = await AgentService.getAgent(soClient, request.params.agentId);
 
-    const body = {
+    const body: GetOneAgentResponse = {
       item: {
         ...agent,
         status: AgentService.getAgentStatus(agent),
@@ -65,14 +69,16 @@ export const getAgentEventsHandler: RequestHandler<
       kuery,
     });
 
+    const body: GetOneAgentEventsResponse = {
+      list: items,
+      total,
+      success: true,
+      page,
+      perPage,
+    };
+
     return response.ok({
-      body: {
-        list: items,
-        total,
-        success: true,
-        page,
-        perPage,
-      },
+      body,
     });
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
@@ -301,7 +307,7 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
     });
 
-    const body = {
+    const body: GetAgentsResponse = {
       list: agents.map(agent => ({
         ...agent,
         status: AgentService.getAgentStatus(agent),
@@ -371,7 +377,7 @@ export const postAgentsUnenrollHandler: RequestHandler<
       }
     );
 
-    const body = {
+    const body: PostAgentUnenrollResponse = {
       results,
       success: results.every(result => result.success),
     };

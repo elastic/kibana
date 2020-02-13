@@ -108,7 +108,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
       validate: PostAgentUnenrollRequestSchema,
-      options: { tags: [] },
+      options: { tags: [`access:${PLUGIN_ID}`] },
     },
     postAgentsUnenrollHandler
   );
