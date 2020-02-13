@@ -18,10 +18,18 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
-import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
-import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
+import { ExpressionExecutor } from './types';
+import {
+  ExpressionRendererRegistry,
+  FunctionsRegistry,
+  serializeProvider,
+  TypesRegistry,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+} from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import {
   setCoreStart,
   setInspector,
@@ -29,37 +37,11 @@ import {
   setRenderersRegistry,
   setNotifications,
 } from './services';
-import { clog as clogFunction } from './functions/clog';
-import { font as fontFunction } from './functions/font';
-import { kibana as kibanaFunction } from './functions/kibana';
-import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
-import { variable } from './functions/var';
-import { variableSet } from './functions/var_set';
-import {
-  boolean as booleanType,
-  datatable as datatableType,
-  error as errorType,
-  filter as filterType,
-  image as imageType,
-  nullType,
-  number as numberType,
-  pointseries,
-  range as rangeType,
-  render as renderType,
-  shape as shapeType,
-  string as stringType,
-  style as styleType,
-  kibanaContext as kibanaContextType,
-  kibanaDatatable as kibanaDatatableType,
-} from '../common/expression_types';
-import { interpreterProvider } from './interpreter_provider';
-import { createHandlers } from './create_handlers';
-import { ExpressionRendererImplementation } from './expression_renderer';
+import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
-import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
-import { serializeProvider } from '../common';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
@@ -71,82 +53,77 @@ export interface ExpressionsStartDeps {
   inspector: InspectorStart;
 }
 
-export interface ExpressionsSetup {
-  registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
-  registerRenderer: (renderer: any) => void;
-  registerType: (type: () => AnyExpressionType) => void;
+export interface ExpressionsSetup extends ExpressionsServiceSetup {
+  /**
+   * @todo Get rid of these `__LEGACY` APIs.
+   *
+   * `__LEGACY` APIs are used by Canvas. It should be possible to stop
+   * using all of them (except `loadLegacyServerFunctionWrappers`) and use
+   * Kibana Platform plugin contracts instead.
+   */
   __LEGACY: {
-    functions: FunctionsRegistry;
-    renderers: RenderFunctionsRegistry;
+    /**
+     * Use `registerType` and `getTypes` instead.
+     */
     types: TypesRegistry;
+
+    /**
+     * Use `registerFunction` and `getFunctions` instead.
+     */
+    functions: FunctionsRegistry;
+
+    /**
+     * Use `registerRenderer` and `getRenderers`, and `getRenderer` instead.
+     */
+    renderers: ExpressionRendererRegistry;
+
+    /**
+     * Use `run` function instead.
+     */
     getExecutor: () => ExpressionExecutor;
+
+    /**
+     * This function is used by Canvas to load server-side function and create
+     * browser-side "wrapper" for each one. This function can be removed once
+     * we enable expressions on server-side: https://github.com/elastic/kibana/issues/46906
+     */
     loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
 }
 
-export interface ExpressionsStart {
+export interface ExpressionsStart extends ExpressionsServiceStart {
   execute: typeof execute;
   ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderer: typeof ExpressionRendererImplementation;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
+  ReactExpressionRenderer: typeof ReactExpressionRenderer;
   render: typeof render;
 }
 
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly functions = new FunctionsRegistry();
-  private readonly renderers = new RenderFunctionsRegistry();
-  private readonly types = new TypesRegistry();
+  private readonly expressions: ExpressionsService = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { functions, renderers, types } = this;
+    const { expressions } = this;
+    const { executor, renderers } = expressions;
+
+    executor.extendContext({
+      environment: 'client',
+    });
+    executor.registerFunction(kibanaContextFunction());
 
     setRenderersRegistry(renderers);
 
-    const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
-      functions.register(fn);
-    };
+    const expressionsSetup = expressions.setup();
 
-    registerFunction(clogFunction);
-    registerFunction(fontFunction);
-    registerFunction(kibanaFunction);
-    registerFunction(kibanaContextFunction);
-    registerFunction(variable);
-    registerFunction(variableSet);
-
-    types.register(booleanType);
-    types.register(datatableType);
-    types.register(errorType);
-    types.register(filterType);
-    types.register(imageType);
-    types.register(nullType);
-    types.register(numberType);
-    types.register(pointseries);
-    types.register(rangeType);
-    types.register(renderType);
-    types.register(shapeType);
-    types.register(stringType);
-    types.register(styleType);
-    types.register(kibanaContextType);
-    types.register(kibanaDatatableType);
-
-    // TODO: Refactor this function.
-    const getExecutor = () => {
-      const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
-        const interpret = interpreterProvider({
-          types: types.toJS(),
-          handlers: { ...handlers, ...createHandlers() },
-          functions,
-        });
-        return interpret(ast, context);
-      };
-      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
-      return executor;
+    // This is legacy. Should go away when we get rid of __LEGACY.
+    const getExecutor = (): ExpressionExecutor => {
+      return { interpreter: { interpretAst: expressionsSetup.run } };
     };
 
     setInterpreter(getExecutor().interpreter);
@@ -157,22 +134,22 @@ export class ExpressionsPublicPlugin
         cached = (async () => {
           const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
           const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fns` });
-          const { serialize } = serializeProvider(types.toJS());
+          const { serialize } = serializeProvider(executor.getTypes());
 
           // For every sever-side function, register a client-side
           // function that matches its definition, but which simply
           // calls the server-side function endpoint.
           Object.keys(serverFunctionList).forEach(functionName => {
-            if (functions.get(functionName)) {
+            if (expressionsSetup.getFunction(functionName)) {
               return;
             }
             const fn = () => ({
               ...serverFunctionList[functionName],
-              fn: (context: any, args: any) => {
-                return batchedFunction({ functionName, args, context: serialize(context) });
+              fn: (input: any, args: any) => {
+                return batchedFunction({ functionName, args, context: serialize(input) });
               },
             });
-            registerFunction(fn);
+            expressionsSetup.registerFunction(fn);
           });
         })();
       }
@@ -180,17 +157,11 @@ export class ExpressionsPublicPlugin
     };
 
     const setup: ExpressionsSetup = {
-      registerFunction,
-      registerRenderer: (renderer: any) => {
-        renderers.register(renderer);
-      },
-      registerType: type => {
-        types.register(type);
-      },
+      ...expressionsSetup,
       __LEGACY: {
-        functions,
+        types: executor.types,
+        functions: executor.functions,
         renderers,
-        types,
         getExecutor,
         loadLegacyServerFunctionWrappers,
       },
@@ -199,18 +170,22 @@ export class ExpressionsPublicPlugin
     return setup;
   }
 
-  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
+  public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
     setInspector(inspector);
     setNotifications(core.notifications);
 
+    const { expressions } = this;
+    const expressionsStart = expressions.start();
+
     return {
+      ...expressionsStart,
       execute,
       ExpressionDataHandler,
       ExpressionLoader,
-      ExpressionRenderer: ExpressionRendererImplementation,
       ExpressionRenderHandler,
       loader,
+      ReactExpressionRenderer,
       render,
     };
   }

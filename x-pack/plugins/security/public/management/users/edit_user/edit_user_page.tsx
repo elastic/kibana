@@ -204,6 +204,7 @@ export class EditUserPage extends Component<Props, State> {
           {...this.validator.validatePassword(this.state.user)}
         >
           <EuiFieldText
+            autoComplete="new-password"
             data-test-subj="passwordInput"
             name="password"
             type="password"
@@ -218,6 +219,7 @@ export class EditUserPage extends Component<Props, State> {
           {...this.validator.validateConfirmPassword(this.state.user)}
         >
           <EuiFieldText
+            autoComplete="new-password"
             data-test-subj="passwordConfirmationInput"
             onChange={this.onConfirmPasswordChange}
             name="confirm_password"
