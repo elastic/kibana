@@ -44,6 +44,7 @@ export class ExpressionDataHandler {
   private promise: Promise<ExpressionValue>;
 
   public isPending: boolean = true;
+
   constructor(expression: string | ExpressionAstExpression, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;

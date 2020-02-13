@@ -40,7 +40,7 @@ import {
 import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler, execute } from './execute';
+import { ExpressionDataHandler } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
@@ -92,7 +92,6 @@ export interface ExpressionsSetup extends ExpressionsServiceSetup {
 }
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  execute: typeof execute;
   ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
@@ -180,7 +179,6 @@ export class ExpressionsPublicPlugin
 
     return {
       ...expressionsStart,
-      execute,
       ExpressionDataHandler,
       ExpressionLoader,
       ExpressionRenderHandler,

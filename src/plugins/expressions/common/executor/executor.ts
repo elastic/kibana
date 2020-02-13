@@ -186,17 +186,21 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return (await execution.result) as Output;
   }
 
-  public createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+  public createExecution<
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
+    Input = unknown,
+    Output = unknown
+  >(
     ast: string | ExpressionAstExpression,
     context: ExtraContext = {} as ExtraContext
-  ): Execution<Context & ExtraContext> {
+  ): Execution<Context & ExtraContext, Input, Output> {
     let expression: string | undefined;
     if (typeof ast === 'string') {
       expression = ast;
       ast = parseExpression(expression);
     }
 
-    const execution = new Execution<Context & ExtraContext>({
+    const execution = new Execution<Context & ExtraContext, Input, Output>({
       ast,
       expression,
       executor: this,

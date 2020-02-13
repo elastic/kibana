@@ -131,9 +131,10 @@ describe('Execution', () => {
   describe('.expression', () => {
     test('uses expression passed in to constructor', () => {
       const expression = 'add val="1"';
+      const executor = createUnitTestExecutor();
       const execution = new Execution({
         ast: parseExpression('add val="WRONG"'),
-        executor: {} as any,
+        executor,
         expression,
       });
       expect(execution.expression).toBe(expression);
@@ -141,9 +142,10 @@ describe('Execution', () => {
 
     test('generates expression from AST if not passed to constructor', () => {
       const expression = 'add val="1"';
+      const executor = createUnitTestExecutor();
       const execution = new Execution({
         ast: parseExpression(expression),
-        executor: {} as any,
+        executor,
       });
       expect(execution.expression).toBe(expression);
     });
