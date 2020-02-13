@@ -5,7 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { AlertsClientFactory, ConstructorOpts } from './alerts_client_factory';
+import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../src/core/server';
@@ -21,7 +21,7 @@ const securityPluginSetup = {
     getCurrentUser: jest.fn(),
   },
 };
-const alertsClientFactoryParams: jest.Mocked<ConstructorOpts> = {
+const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   logger: loggingServiceMock.create().get(),
   taskManager: taskManagerMock.start(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
@@ -52,7 +52,8 @@ beforeEach(() => {
 });
 
 test('creates an alerts client with proper constructor arguments', async () => {
-  const factory = new AlertsClientFactory(alertsClientFactoryParams);
+  const factory = new AlertsClientFactory();
+  factory.initialize(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
@@ -70,7 +71,8 @@ test('creates an alerts client with proper constructor arguments', async () => {
 });
 
 test('getUserName() returns null when security is disabled', async () => {
-  const factory = new AlertsClientFactory(alertsClientFactoryParams);
+  const factory = new AlertsClientFactory();
+  factory.initialize(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
@@ -79,7 +81,8 @@ test('getUserName() returns null when security is disabled', async () => {
 });
 
 test('getUserName() returns a name when security is enabled', async () => {
-  const factory = new AlertsClientFactory({
+  const factory = new AlertsClientFactory();
+  factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup: securityPluginSetup as any,
   });
@@ -92,7 +95,8 @@ test('getUserName() returns a name when security is enabled', async () => {
 });
 
 test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {
-  const factory = new AlertsClientFactory(alertsClientFactoryParams);
+  const factory = new AlertsClientFactory();
+  factory.initialize(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
@@ -101,7 +105,8 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled
 });
 
 test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
-  const factory = new AlertsClientFactory(alertsClientFactoryParams);
+  const factory = new AlertsClientFactory();
+  factory.initialize(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
@@ -111,7 +116,8 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled 
 });
 
 test('createAPIKey() returns an API key when security is enabled', async () => {
-  const factory = new AlertsClientFactory({
+  const factory = new AlertsClientFactory();
+  factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup: securityPluginSetup as any,
   });
@@ -127,7 +133,8 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
 });
 
 test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
-  const factory = new AlertsClientFactory({
+  const factory = new AlertsClientFactory();
+  factory.initialize({
     ...alertsClientFactoryParams,
     securityPluginSetup: securityPluginSetup as any,
   });

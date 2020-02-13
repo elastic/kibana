@@ -13,7 +13,7 @@ describe('Alerting Plugin', () => {
   describe('setup()', () => {
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
       const context = coreMock.createPluginInitializerContext();
-      const plugin = new Plugin(context);
+      const plugin = new AlertingPlugin(context);
 
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
