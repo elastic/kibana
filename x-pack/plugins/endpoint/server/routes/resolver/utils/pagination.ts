@@ -23,7 +23,7 @@ interface PaginationCursor {
 
 function urlEncodeCursor(data: PaginationCursor) {
   const value = JSON.stringify(data);
-  return new Buffer(value, 'utf8')
+  return Buffer.from(value, 'utf8')
     .toString('base64')
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
@@ -31,7 +31,9 @@ function urlEncodeCursor(data: PaginationCursor) {
 }
 
 function urlDecodeCursor(value: string): PaginationCursor {
-  const data = new Buffer(value.replace(/\-/g, '+').replace(/\_/g, '-'), 'base64').toString('utf8');
+  const data = Buffer.from(value.replace(/\-/g, '+').replace(/\_/g, '-'), 'base64').toString(
+    'utf8'
+  );
   const { timestamp, eventID } = JSON.parse(data);
   // take some extra care to only grab the things we want
   return { timestamp, eventID };
