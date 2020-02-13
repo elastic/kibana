@@ -29,12 +29,9 @@ export function confirmModalPromise(
   overlays: OverlayStart
 ): Promise<true> {
   return new Promise((resolve, reject) => {
-    const cancelButtonText = i18n.translate(
-      'common.ui.savedObjects.confirmModal.cancelButtonLabel',
-      {
-        defaultMessage: 'Cancel',
-      }
-    );
+    const cancelButtonText = i18n.translate('savedObjects.confirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    });
 
     const modal = overlays.openModal(
       toMountPoint(

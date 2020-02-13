@@ -22,18 +22,15 @@ import { i18n } from '@kbn/i18n';
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
-export const OVERWRITE_REJECTED = i18n.translate(
-  'common.ui.savedObjects.overwriteRejectedDescription',
-  {
-    defaultMessage: 'Overwrite confirmation was rejected',
-  }
-);
+export const OVERWRITE_REJECTED = i18n.translate('savedObjects.overwriteRejectedDescription', {
+  defaultMessage: 'Overwrite confirmation was rejected',
+});
 /**
  * An error message to be used when the user rejects a confirm save with duplicate title.
  * @type {string}
  */
 export const SAVE_DUPLICATE_REJECTED = i18n.translate(
-  'common.ui.savedObjects.saveDuplicateRejectedDescription',
+  'savedObjects.saveDuplicateRejectedDescription',
   {
     defaultMessage: 'Save with duplicate title confirmation was rejected',
   }

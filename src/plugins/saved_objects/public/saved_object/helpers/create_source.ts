@@ -52,23 +52,20 @@ export async function createSource(
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
-        'common.ui.savedObjects.confirmModal.overwriteConfirmationMessage',
+        'savedObjects.confirmModal.overwriteConfirmationMessage',
         {
           defaultMessage: 'Are you sure you want to overwrite {title}?',
           values: { title: savedObject.title },
         }
       );
 
-      const title = i18n.translate('common.ui.savedObjects.confirmModal.overwriteTitle', {
+      const title = i18n.translate('savedObjects.confirmModal.overwriteTitle', {
         defaultMessage: 'Overwrite {name}?',
         values: { name: savedObject.getDisplayName() },
       });
-      const confirmButtonText = i18n.translate(
-        'common.ui.savedObjects.confirmModal.overwriteButtonLabel',
-        {
-          defaultMessage: 'Overwrite',
-        }
-      );
+      const confirmButtonText = i18n.translate('savedObjects.confirmModal.overwriteButtonLabel', {
+        defaultMessage: 'Overwrite',
+      });
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>

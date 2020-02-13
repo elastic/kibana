@@ -27,20 +27,17 @@ export function displayDuplicateTitleConfirmModal(
   overlays: OverlayStart
 ): Promise<true> {
   const confirmMessage = i18n.translate(
-    'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
+    'savedObjects.confirmModal.saveDuplicateConfirmationMessage',
     {
       defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
       values: { title: savedObject.title, name: savedObject.getDisplayName() },
     }
   );
 
-  const confirmButtonText = i18n.translate(
-    'common.ui.savedObjects.confirmModal.saveDuplicateButtonLabel',
-    {
-      defaultMessage: 'Save {name}',
-      values: { name: savedObject.getDisplayName() },
-    }
-  );
+  const confirmButtonText = i18n.translate('savedObjects.confirmModal.saveDuplicateButtonLabel', {
+    defaultMessage: 'Save {name}',
+    values: { name: savedObject.getDisplayName() },
+  });
   try {
     return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
   } catch (_) {
