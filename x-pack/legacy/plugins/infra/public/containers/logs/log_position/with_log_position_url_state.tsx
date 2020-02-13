@@ -9,18 +9,19 @@ import React, { useContext, useMemo } from 'react';
 import { pickTimeKey } from '../../../../common/time';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
 import { LogPositionState, LogPositionStateParams } from './log_position_state';
-import { isValidDatemath } from '../../../utils/datemath';
+import { isValidDatemath, datemathToEpochMillis } from '../../../utils/datemath';
 
 /**
  * Url State
  */
-
 interface LogPositionUrlState {
   position: LogPositionStateParams['visibleMidpoint'] | undefined;
   streamLive: boolean;
   start?: string;
   end?: string;
 }
+
+const ONE_HOUR = 86400000;
 
 export const WithLogPositionUrlState = () => {
   const {
@@ -69,12 +70,31 @@ export const WithLogPositionUrlState = () => {
       }}
       onInitialize={(initialUrlState: LogPositionUrlState | undefined) => {
         if (initialUrlState) {
-          if (initialUrlState.start || initialUrlState.end) {
-            updateDateRange({ startDate: initialUrlState.start, endDate: initialUrlState.end });
-          }
+          const initialPosition = initialUrlState.position;
+          let initialStartDate = initialUrlState.start || 'now-1d';
+          let initialEndDate = initialUrlState.end || 'now';
 
-          if (initialUrlState.position) {
-            jumpToTargetPosition(initialUrlState.position);
+          if (initialPosition) {
+            const initialStartTimestamp = initialStartDate
+              ? datemathToEpochMillis(initialStartDate)
+              : undefined;
+            const initialEndTimestamp = initialEndDate
+              ? datemathToEpochMillis(initialEndDate)
+              : undefined;
+
+            // Adjust the start-end range if the target position falls outside
+            if (initialStartTimestamp && initialStartTimestamp > initialPosition.time) {
+              initialStartDate = new Date(initialPosition.time - ONE_HOUR).toISOString();
+            }
+            if (initialEndTimestamp && initialEndTimestamp < initialPosition.time) {
+              initialEndDate = new Date(initialPosition.time + ONE_HOUR).toISOString();
+            }
+
+            if (initialStartDate || initialEndDate) {
+              updateDateRange({ startDate: initialStartDate, endDate: initialEndDate });
+            }
+
+            jumpToTargetPosition(initialPosition);
           }
 
           if (initialUrlState.streamLive) {
