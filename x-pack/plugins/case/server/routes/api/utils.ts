@@ -27,9 +27,9 @@ export const formatNewCase = (
   newCase: NewCaseType,
   { full_name, username }: { full_name?: string; username: string }
 ): CaseAttributes => ({
-  created_at: new Date().valueOf(),
+  created_at: new Date().toISOString(),
   created_by: { full_name, username },
-  updated_at: new Date().valueOf(),
+  updated_at: new Date().toISOString(),
   ...newCase,
 });
 
@@ -44,9 +44,9 @@ export const formatNewComment = ({
   username,
 }: NewCommentArgs): CommentAttributes => ({
   ...newComment,
-  created_at: new Date().valueOf(),
+  created_at: new Date().toISOString(),
   created_by: { full_name, username },
-  updated_at: new Date().valueOf(),
+  updated_at: new Date().toISOString(),
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
