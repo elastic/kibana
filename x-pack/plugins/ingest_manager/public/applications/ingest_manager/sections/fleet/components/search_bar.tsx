@@ -5,11 +5,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 // @ts-ignore
 import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
 import { useDebounce } from '../../../hooks';
+import { useStartDeps } from '../../../hooks/use_deps';
+import { INDEX_NAME } from '../../../constants';
 
 const DEBOUNCE_SEARCH_MS = 150;
+const HIDDEN_FIELDS = ['agents.actions'];
 
 interface Suggestion {
   label: string;
@@ -79,26 +83,72 @@ function transformSuggestionType(type: string): { iconType: string; color: strin
 }
 
 function useSuggestions(fieldPrefix: string, search: string) {
-  // const { elasticsearch } = useLibs();
+  const { data } = useStartDeps();
+
   const debouncedSearch = useDebounce(search, DEBOUNCE_SEARCH_MS);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   const fetchSuggestions = async () => {
-    // try {
-    //   const esSuggestions = (
-    //     await elasticsearch.getSuggestions(debouncedSearch, debouncedSearch.length, fieldPrefix)
-    //   ).map((suggestion: any) => ({
-    //     label: suggestion.text,
-    //     description: suggestion.description || '',
-    //     type: transformSuggestionType(suggestion.type),
-    //     start: suggestion.start,
-    //     end: suggestion.end,
-    //     value: suggestion.text,
-    //   }));
-    //   setSuggestions(esSuggestions);
-    // } catch (err) {
-    //   setSuggestions([]);
-    // }
+    try {
+      const res = (await data.indexPatterns.getFieldsForWildcard({
+        pattern: INDEX_NAME,
+      })) as IFieldType[];
+
+      if (!data || !data.autocomplete) {
+        throw new Error('Missing data plugin');
+      }
+      const query = debouncedSearch || '';
+      // @ts-ignore
+      const esSuggestions = (
+        await data.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [
+            {
+              title: INDEX_NAME,
+              fields: res,
+            },
+          ],
+          boolFilter: [],
+          query,
+          selectionStart: query.length,
+          selectionEnd: query.length,
+        })
+      )
+        .filter(suggestion => {
+          if (suggestion.type === 'conjunction') {
+            return true;
+          }
+          if (suggestion.type === 'value') {
+            return true;
+          }
+          if (suggestion.type === 'operator') {
+            return true;
+          }
+
+          if (fieldPrefix && suggestion.text.startsWith(fieldPrefix)) {
+            for (const hiddenField of HIDDEN_FIELDS) {
+              if (suggestion.text.startsWith(hiddenField)) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          return false;
+        })
+        .map((suggestion: any) => ({
+          label: suggestion.text,
+          description: suggestion.description || '',
+          type: transformSuggestionType(suggestion.type),
+          start: suggestion.start,
+          end: suggestion.end,
+          value: suggestion.text,
+        }));
+
+      setSuggestions(esSuggestions);
+    } catch (err) {
+      setSuggestions([]);
+    }
   };
 
   useEffect(() => {
@@ -110,59 +160,3 @@ function useSuggestions(fieldPrefix: string, search: string) {
     suggestions,
   };
 }
-
-// export class RestElasticsearchAdapter {
-//   private cachedIndexPattern: any = null;
-//   constructor(private readonly api: RestAPIAdapter, private readonly indexPatternName: string) {}
-
-//   public isKueryValid(kuery: string): boolean {
-//     try {
-//       esKuery.fromKueryExpression(kuery);
-//     } catch (err) {
-//       return false;
-//     }
-
-//     return true;
-//   }
-//   public async convertKueryToEsQuery(kuery: string): Promise<string> {
-//     if (!this.isKueryValid(kuery)) {
-//       return '';
-//     }
-//     const ast = esKuery.fromKueryExpression(kuery);
-//     const indexPattern = await this.getIndexPattern();
-//     return JSON.stringify(esKuery.toElasticsearchQuery(ast, indexPattern));
-//   }
-//   public async getSuggestions(
-//     kuery: string,
-//     selectionStart: any
-//   ): Promise<autocomplete.QuerySuggestion[]> {
-//     const indexPattern = await this.getIndexPattern();
-//     return (
-//       (await npStart.plugins.data.autocomplete.getQuerySuggestions({
-//         language: 'kuery',
-//         indexPatterns: [indexPattern],
-//         boolFilter: [],
-//         query: kuery || '',
-//         selectionStart,
-//         selectionEnd: selectionStart,
-//       })) || ([] as autocomplete.QuerySuggestion[])
-//     );
-//   }
-
-//   private async getIndexPattern() {
-//     if (this.cachedIndexPattern) {
-//       return this.cachedIndexPattern;
-//     }
-//     const res = await this.api.get<any>(`/api/index_patterns/_fields_for_wildcard`, {
-//       query: { pattern: this.indexPatternName },
-//     });
-//     if (isEmpty(res.fields)) {
-//       return;
-//     }
-//     this.cachedIndexPattern = {
-//       fields: res.fields,
-//       title: `${this.indexPatternName}`,
-//     };
-//     return this.cachedIndexPattern;
-//   }
-// }
