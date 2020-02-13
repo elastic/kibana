@@ -75,8 +75,7 @@ export const createCreateRulesRoute = (
           return headers.response().code(404);
         }
 
-        const finalIndex =
-          outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
           return headers

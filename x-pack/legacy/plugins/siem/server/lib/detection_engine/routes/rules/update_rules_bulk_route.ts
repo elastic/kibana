@@ -74,8 +74,7 @@ export const createUpdateRulesBulkRoute = (
             references,
             version,
           } = payloadRule;
-          const finalIndex =
-            outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+          const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({

@@ -70,8 +70,7 @@ export const createUpdateRulesRoute = (
           return headers.response().code(404);
         }
 
-        const finalIndex =
-          outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
         const rule = await updateRules({
           alertsClient,
           actionsClient,

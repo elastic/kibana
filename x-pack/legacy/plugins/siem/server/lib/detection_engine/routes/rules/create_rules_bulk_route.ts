@@ -81,8 +81,7 @@ export const createCreateRulesBulkRoute = (
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
-              const finalIndex =
-                outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+              const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
