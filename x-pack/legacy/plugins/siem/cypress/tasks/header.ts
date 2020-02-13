@@ -4,6 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_TIMEOUT } from '../tasks/login';
+import { REFRESH_BUTTON, KQL_INPUT } from '../screens/header';
+
 export const navigateFromHeaderTo = (page: string) => {
   cy.get(page).click({ force: true });
+};
+
+export const clearSearchBar = () => {
+  cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT })
+    .clear()
+    .type('{enter}');
+};
+
+export const refreshPage = () => {
+  cy.get(REFRESH_BUTTON)
+    .click({ force: true })
+    .invoke('text', { timeout: DEFAULT_TIMEOUT })
+    .should('not.equal', 'Updating');
 };

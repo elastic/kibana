@@ -10,17 +10,17 @@ import { SignalsHistogramPanel } from '../../detection_engine/components/signals
 import { signalsHistogramOptions } from '../../detection_engine/components/signals_histogram_panel/config';
 import { useSignalIndex } from '../../../containers/detection_engine/signals/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
-import { esFilters, IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import * as i18n from '../translations';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'signal.rule.threat.tactic.name';
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   indexPattern: IIndexPattern;
   query?: Query;

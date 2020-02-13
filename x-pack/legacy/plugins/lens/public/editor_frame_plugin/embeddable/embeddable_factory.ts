@@ -10,7 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
@@ -26,11 +26,11 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
 
   private chrome: Chrome;
   private indexPatternService: IndexPatternsContract;
-  private expressionRenderer: ExpressionRenderer;
+  private expressionRenderer: ReactExpressionRendererType;
 
   constructor(
     chrome: Chrome,
-    expressionRenderer: ExpressionRenderer,
+    expressionRenderer: ReactExpressionRendererType,
     indexPatternService: IndexPatternsContract
   ) {
     super({

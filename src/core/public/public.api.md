@@ -6,6 +6,7 @@
 
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
@@ -97,6 +98,7 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
+    currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
     }): string;
@@ -1170,7 +1172,7 @@ export interface SavedObjectsUpdateOptions {
 
 // @public
 export class SimpleSavedObject<T extends SavedObjectAttributes> {
-    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)

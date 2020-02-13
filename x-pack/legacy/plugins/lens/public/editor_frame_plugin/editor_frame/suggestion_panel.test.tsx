@@ -15,7 +15,7 @@ import {
   createMockFramePublicAPI,
 } from '../mocks';
 import { act } from 'react-dom/test-utils';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
@@ -29,7 +29,7 @@ describe('suggestion_panel', () => {
   let mockVisualization: Visualization;
   let mockDatasource: DatasourceMock;
 
-  let expressionRendererMock: ExpressionRenderer;
+  let expressionRendererMock: ReactExpressionRendererType;
   let dispatchMock: jest.Mock;
 
   const suggestion1State = { suggestion1: true };
