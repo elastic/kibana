@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Field } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { AggConfig } from '../../agg_config';
 
-type AggTypeFieldFilter = (field: Field, aggConfig: AggConfig) => boolean;
+type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: AggConfig) => boolean;
 
 /**
  * A registry to store {@link AggTypeFieldFilter} which are used to filter down
@@ -45,7 +45,7 @@ class AggTypeFieldFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(fields: Field[], aggConfig: AggConfig) {
+  public filter(fields: IndexPatternField[], aggConfig: AggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter => filter(field, aggConfig));

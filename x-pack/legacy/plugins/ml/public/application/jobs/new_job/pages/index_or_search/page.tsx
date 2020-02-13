@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 export interface PageProps {
   nextStepPath: string;
@@ -24,6 +24,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
+  const { uiSettings, savedObjects } = useMlKibana().services;
 
   const onObjectSelection = (id: string, type: string) => {
     window.location.href = `${nextStepPath}?${
@@ -77,8 +78,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
-            uiSettings={npStart.core.uiSettings}
-            savedObjects={npStart.core.savedObjects}
+            uiSettings={uiSettings}
+            savedObjects={savedObjects}
           />
         </EuiPageContent>
       </EuiPageBody>

@@ -47,9 +47,9 @@ describe('toggle column in timeline', () => {
       'exist'
     );
 
-    cy.get(
-      `[data-test-subj="timeline"] [data-test-subj="toggle-field-${timestampField}"]`
-    ).uncheck({ force: true });
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${timestampField}"]`, {
+      timeout: DEFAULT_TIMEOUT,
+    }).uncheck({ force: true });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${timestampField}"]`).should(
       'not.exist'

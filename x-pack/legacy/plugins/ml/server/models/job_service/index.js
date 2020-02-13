@@ -14,14 +14,14 @@ import {
   topCategoriesProvider,
 } from './new_job';
 
-export function jobServiceProvider(callWithRequest, request) {
+export function jobServiceProvider(callAsCurrentUser) {
   return {
-    ...datafeedsProvider(callWithRequest),
-    ...jobsProvider(callWithRequest),
-    ...groupsProvider(callWithRequest),
-    ...newJobCapsProvider(callWithRequest, request),
-    ...newJobChartsProvider(callWithRequest, request),
-    ...categorizationExamplesProvider(callWithRequest, request),
-    ...topCategoriesProvider(callWithRequest, request),
+    ...datafeedsProvider(callAsCurrentUser),
+    ...jobsProvider(callAsCurrentUser),
+    ...groupsProvider(callAsCurrentUser),
+    ...newJobCapsProvider(callAsCurrentUser),
+    ...newJobChartsProvider(callAsCurrentUser),
+    ...categorizationExamplesProvider(callAsCurrentUser),
+    ...topCategoriesProvider(callAsCurrentUser),
   };
 }

@@ -32,7 +32,7 @@ const indexPatternCache = createIndexPatternCache();
 
 type IndexPatternCachedFieldType = 'id' | 'title';
 
-export class IndexPatterns {
+export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
@@ -150,4 +150,4 @@ export class IndexPatterns {
   };
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
+export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

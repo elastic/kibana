@@ -29,6 +29,7 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
+import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
@@ -53,7 +54,6 @@ export interface HomeKibanaServices {
   };
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
-  telemetryOptInProvider: any;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
@@ -64,10 +64,10 @@ export interface HomeKibanaServices {
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
-  shouldShowTelemetryOptIn: boolean;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environment: Environment;
+  telemetry?: TelemetryPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;
