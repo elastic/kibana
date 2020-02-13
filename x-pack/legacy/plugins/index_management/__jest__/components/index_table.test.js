@@ -313,35 +313,35 @@ describe('index table', () => {
   });
   // Commenting the following 2 tests as it works in the browser (status changes to "closed" or "open") but the
   // snapshot say the contrary. Need to be investigated.
-  // test('close index button works from context menu', done => {
-  //   const modifiedIndices = indices.map(index => {
-  //     return {
-  //       ...index,
-  //       status: index.name === 'testy0' ? 'close' : index.status,
-  //     };
-  //   });
+  test('close index button works from context menu', done => {
+    const modifiedIndices = indices.map(index => {
+      return {
+        ...index,
+        status: index.name === 'testy0' ? 'close' : index.status,
+      };
+    });
 
-  //   server.respondWith(`${API_BASE_PATH}/indices/reload`, [
-  //     200,
-  //     { 'Content-Type': 'application/json' },
-  //     JSON.stringify(modifiedIndices),
-  //   ]);
-  //   testAction(4, done);
-  // });
-  // test('open index button works from context menu', done => {
-  //   const modifiedIndices = indices.map(index => {
-  //     return {
-  //       ...index,
-  //       status: index.name === 'testy1' ? 'open' : index.status,
-  //     };
-  //   });
-  //   server.respondWith(`${API_BASE_PATH}/indices/reload`, [
-  //     200,
-  //     { 'Content-Type': 'application/json' },
-  //     JSON.stringify(modifiedIndices),
-  //   ]);
-  //   testAction(3, done, 1);
-  // });
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(modifiedIndices),
+    ]);
+    testAction(4, done);
+  });
+  test('open index button works from context menu', done => {
+    const modifiedIndices = indices.map(index => {
+      return {
+        ...index,
+        status: index.name === 'testy1' ? 'open' : index.status,
+      };
+    });
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(modifiedIndices),
+    ]);
+    testAction(3, done, 1);
+  });
   test('show settings button works from context menu', () => {
     testEditor(0);
   });
