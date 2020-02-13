@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiKeyPadMenuItem,
-  EuiLink,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
@@ -27,6 +26,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -595,12 +595,13 @@ export const AlertForm = ({
 
   const alertTypeDetails = (
     <Fragment>
+      <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: {alertType}"
+                defaultMessage="{alertType}"
                 id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
                 values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
               />
@@ -609,17 +610,20 @@ export const AlertForm = ({
         </EuiFlexItem>
         {canChangeTrigger ? (
           <EuiFlexItem grow={false}>
-            <EuiLink
+            <EuiButtonIcon
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertForm.changeAlertTypeAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
               }}
-            >
-              <FormattedMessage
-                defaultMessage="Change"
-                id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
-              />
-            </EuiLink>
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
@@ -636,7 +640,7 @@ export const AlertForm = ({
       {selectedGroupActions}
       {isAddActionPanelOpen ? (
         <Fragment>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h5 id="alertActionTypeTitle">
               <FormattedMessage
                 defaultMessage="Actions: Select an action type"
@@ -839,6 +843,7 @@ export const AlertForm = ({
         <Fragment>{alertTypeDetails}</Fragment>
       ) : (
         <Fragment>
+          <EuiHorizontalRule />
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
