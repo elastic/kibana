@@ -14,7 +14,7 @@ import {
 
 const SUPPORTED_TYPES = [KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE];
 export function formatForNormalBulkEndpoint(payload, productionClusterUuid) {
-  const dateSuffix = moment().format('YYYY.MM.DD');
+  const dateSuffix = moment.utc().format('YYYY.MM.DD');
   return chunk(payload, 2).reduce((accum, chunk) => {
     const type = get(chunk[0], 'index._type');
     if (!type || !SUPPORTED_TYPES.includes(type)) {
