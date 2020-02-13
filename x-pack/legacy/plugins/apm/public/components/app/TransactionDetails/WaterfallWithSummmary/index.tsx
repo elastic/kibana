@@ -86,7 +86,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'baseLine' }}>
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
