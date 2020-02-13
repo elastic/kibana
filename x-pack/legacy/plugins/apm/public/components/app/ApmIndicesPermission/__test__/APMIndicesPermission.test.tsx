@@ -73,31 +73,6 @@ describe('APMIndicesPermission', () => {
     expectTextsNotInDocument(component, ['apm-7.5.1-span-000001']);
   });
 
-  it('does not show escape hatch button when indices do not have read privileges', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
-      status: hooks.FETCH_STATUS.SUCCESS,
-      data: {
-        'apm-7.5.1-error-000001': { read: false },
-        'apm-7.5.1-metric-000001': { read: false },
-        'apm-7.5.1-transaction-000001': { read: false },
-        'apm-7.5.1-span-000001': { read: false }
-      }
-    });
-    const component = render(
-      <MockApmPluginContextWrapper>
-        <APMIndicesPermission />
-      </MockApmPluginContextWrapper>
-    );
-    expectTextsInDocument(component, [
-      'Missing permissions to access APM',
-      'apm-7.5.1-error-000001',
-      'apm-7.5.1-metric-000001',
-      'apm-7.5.1-transaction-000001',
-      'apm-7.5.1-span-000001'
-    ]);
-    expectTextsNotInDocument(component, ['Dismiss']);
-  });
-
   it('shows children component when indices have read privileges', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,

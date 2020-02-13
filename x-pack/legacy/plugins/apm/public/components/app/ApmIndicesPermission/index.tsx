@@ -40,8 +40,7 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return null;
   }
 
-  const indicesPrivilegesKeys = Object.keys(indicesPrivileges);
-  const indicesWithoutPermission = indicesPrivilegesKeys.filter(
+  const indicesWithoutPermission = Object.keys(indicesPrivileges).filter(
     index => !indicesPrivileges[index].read
   );
 
@@ -51,12 +50,6 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return (
       <PermissionWarning
         indicesWithoutPermission={indicesWithoutPermission}
-        // Show escape hatch button if the index pattern was used to check the privileges
-        // or if at least one index has read privilege
-        showEscapeHatch={
-          indicesPrivilegesKeys.some(index => index === 'apm-*') ||
-          indicesPrivilegesKeys.length !== indicesWithoutPermission.length
-        }
         onEscapeHatchClick={() => setIsPermissionWarningDismissed(true)}
       />
     );
@@ -81,13 +74,11 @@ const EscapeHatch = styled.div`
 
 interface Props {
   indicesWithoutPermission: string[];
-  showEscapeHatch: boolean;
   onEscapeHatchClick: () => void;
 }
 
 const PermissionWarning = ({
   indicesWithoutPermission,
-  showEscapeHatch,
   onEscapeHatchClick
 }: Props) => {
   return (
@@ -159,20 +150,17 @@ const PermissionWarning = ({
                       </EuiButton>
                     )}
                   </ElasticDocsLink>
-
-                  {showEscapeHatch && (
-                    <EscapeHatch>
-                      <EuiLink
-                        color="subdued"
-                        onClick={onEscapeHatchClick}
-                        style={{ fontSize }}
-                      >
-                        {i18n.translate('xpack.apm.permission.dismissWarning', {
-                          defaultMessage: 'Dismiss'
-                        })}
-                      </EuiLink>
-                    </EscapeHatch>
-                  )}
+                  <EscapeHatch>
+                    <EuiLink
+                      color="subdued"
+                      onClick={onEscapeHatchClick}
+                      style={{ fontSize }}
+                    >
+                      {i18n.translate('xpack.apm.permission.dismissWarning', {
+                        defaultMessage: 'Dismiss'
+                      })}
+                    </EuiLink>
+                  </EscapeHatch>
                 </>
               }
             />
