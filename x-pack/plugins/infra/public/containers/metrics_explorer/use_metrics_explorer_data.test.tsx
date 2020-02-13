@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
 import { renderHook } from '@testing-library/react-hooks';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import {
   options,
@@ -17,8 +19,18 @@ import {
   createSeries,
 } from '../../utils/fixtures/metrics_explorer';
 
-const renderUseMetricsExplorerDataHook = () =>
-  renderHook(
+const mockedFetch = jest.fn();
+
+const renderUseMetricsExplorerDataHook = () => {
+  const wrapper: React.FC = ({ children }) => {
+    const services = {
+      http: {
+        fetch: mockedFetch,
+      },
+    };
+    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+  };
+  return renderHook(
     props =>
       useMetricsExplorerData(
         props.options,
@@ -37,24 +49,10 @@ const renderUseMetricsExplorerDataHook = () =>
         afterKey: null as string | null,
         signal: 1,
       },
+      wrapper,
     }
   );
-
-const mockedFetch = jest.fn();
-
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
-  return {
-    useKibana: () => {
-      return {
-        services: {
-          http: {
-            fetch: mockedFetch,
-          },
-        },
-      };
-    },
-  };
-});
+};
 
 jest.mock('../../utils/kuery', () => {
   return {
