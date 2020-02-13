@@ -17,11 +17,11 @@ import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_c
 import { HttpService } from '../../../../../../src/core/public/http';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { init as initBreadcrumb } from '../../../public/app/services/breadcrumb';
-import { init as initHttp } from '../../../public/app/services/http';
-import { init as initNotification } from '../../../public/app/services/notification';
-import { init as initUiMetric } from '../../../public/app/services/ui_metric';
-import { init as initDocumentation } from '../../../public/app/services/documentation';
+import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
+import { init as initHttp } from '../../../public/application/services/http';
+import { init as initNotification } from '../../../public/application/services/notification';
+import { init as initUiMetric } from '../../../public/application/services/ui_metric';
+import { init as initDocumentation } from '../../../public/application/services/documentation';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {

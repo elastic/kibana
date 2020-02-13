@@ -7,9 +7,9 @@
 import { registerTestBed } from '../../../../../test_utils';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { RemoteClusterAdd } from '../../../public/app/sections/remote_cluster_add';
-import { createRemoteClustersStore } from '../../../public/app/store';
-import { registerRouter } from '../../../public/app/services/routing';
+import { RemoteClusterAdd } from '../../../public/application/sections/remote_cluster_add';
+import { createRemoteClustersStore } from '../../../public/application/store';
+import { registerRouter } from '../../../public/application/services/routing';
 
 const testBedConfig = {
   store: createRemoteClustersStore,

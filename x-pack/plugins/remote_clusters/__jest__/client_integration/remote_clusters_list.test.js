@@ -12,7 +12,7 @@ import {
   findTestSubject,
 } from './helpers';
 
-import { getRouter } from '../../public/app/services';
+import { getRouter } from '../../public/application/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 jest.mock('ui/new_platform');
