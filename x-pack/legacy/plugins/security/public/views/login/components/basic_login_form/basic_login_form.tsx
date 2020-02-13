@@ -75,6 +75,7 @@ class BasicLoginFormUI extends Component<Props, State> {
               }
             >
               <EuiFieldText
+                autoComplete="off"
                 id="password"
                 name="password"
                 data-test-subj="loginPassword"
