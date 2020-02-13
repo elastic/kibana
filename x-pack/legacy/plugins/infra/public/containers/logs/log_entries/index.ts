@@ -27,6 +27,7 @@ enum Action {
   ReceiveEntriesAfter,
   ErrorOnNewEntries,
   ErrorOnMoreEntries,
+  ExpandRange,
 }
 
 type ReceiveActions =
@@ -38,10 +39,14 @@ interface ReceiveEntriesAction {
   type: ReceiveActions;
   payload: LogEntriesResponse['data'];
 }
-interface FetchOrErrorAction {
-  type: Exclude<Action, ReceiveActions>;
+interface ExpandRangeAction {
+  type: Action.ExpandRange;
+  payload: { before: boolean; after: boolean };
 }
-type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
+interface FetchOrErrorAction {
+  type: Exclude<Action, ReceiveActions | Action.ExpandRange>;
+}
+type ActionObj = ReceiveEntriesAction | FetchOrErrorAction | ExpandRangeAction;
 
 type Dispatch = (action: ActionObj) => void;
 
@@ -106,9 +111,12 @@ const shouldFetchNewEntries = ({
   bottomCursor,
   startDate,
   endDate,
+  startTimestamp,
+  endTimestamp,
 }: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams | undefined }) => {
   const shouldLoadWithNewDates = prevParams
-    ? startDate !== prevParams.startDate || endDate !== prevParams.endDate
+    ? (startDate !== prevParams.startDate && startTimestamp > prevParams.startTimestamp) ||
+      (endDate !== prevParams.endDate && endTimestamp < prevParams.endTimestamp)
     : true;
   const shouldLoadWithNewFilter = prevParams ? filterQuery !== prevParams.filterQuery : true;
   const shouldLoadAroundNewPosition =
@@ -281,9 +289,38 @@ const useFetchEntriesEffect = (
     })();
   };
 
+  const expandRangeEffect = () => {
+    const shouldExpand = {
+      before: false,
+      after: false,
+    };
+
+    if (
+      !props.startTimestamp ||
+      !props.endTimestamp ||
+      !prevParams ||
+      !prevParams.startTimestamp ||
+      !prevParams.endTimestamp
+    ) {
+      return;
+    }
+
+    if (props.startTimestamp < prevParams.startTimestamp) {
+      shouldExpand.before = true;
+    }
+    if (props.endTimestamp > prevParams.endTimestamp) {
+      shouldExpand.after = true;
+    }
+
+    dispatch({ type: Action.ExpandRange, payload: shouldExpand });
+  };
+
+  const expandRangeEffectDependencies = [props.startDate, props.endDate];
+
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
   useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
+  useEffect(expandRangeEffect, expandRangeEffectDependencies);
 
   return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
 };
@@ -345,13 +382,32 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return { ...prevState, ...update };
     }
     case Action.FetchingNewEntries:
-      return { ...prevState, isReloading: true, entries: [], topCursor: null, bottomCursor: null };
+      return {
+        ...prevState,
+        isReloading: true,
+        entries: [],
+        topCursor: null,
+        bottomCursor: null,
+        hasMoreBeforeStart: true,
+        hasMoreAfterEnd: true,
+      };
     case Action.FetchingMoreEntries:
       return { ...prevState, isLoadingMore: true };
     case Action.ErrorOnNewEntries:
       return { ...prevState, isReloading: false };
     case Action.ErrorOnMoreEntries:
       return { ...prevState, isLoadingMore: false };
+
+    case Action.ExpandRange: {
+      const hasMoreBeforeStart = action.payload.before ? true : prevState.hasMoreBeforeStart;
+      const hasMoreAfterEnd = action.payload.after ? true : prevState.hasMoreAfterEnd;
+
+      return {
+        ...prevState,
+        hasMoreBeforeStart,
+        hasMoreAfterEnd,
+      };
+    }
     default:
       throw new Error();
   }

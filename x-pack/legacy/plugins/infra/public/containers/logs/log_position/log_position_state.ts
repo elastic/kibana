@@ -7,7 +7,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { TimeKey } from '../../../../common/time';
-import { datemathToEpochMillis } from '../../../utils/datemath';
+import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -125,7 +125,25 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         return;
       }
 
-      jumpToTargetPosition(null);
+      const nextStartDate = newDateRange.startDate || dateRange.startDate;
+      const nextEndDate = newDateRange.endDate || dateRange.endDate;
+
+      if (!isValidDatemath(nextStartDate) || !isValidDatemath(nextEndDate)) {
+        return;
+      }
+
+      // Dates are valid, so the function cannot return `null`
+      const nextStartTimestamp = datemathToEpochMillis(nextStartDate)!;
+      const nextEndTimestamp = datemathToEpochMillis(nextEndDate)!;
+
+      // Reset the target position if it doesn't fall within the new range.
+      if (
+        targetPosition &&
+        (nextStartTimestamp > targetPosition.time || nextEndTimestamp < targetPosition.time)
+      ) {
+        jumpToTargetPosition(null);
+      }
+
       setDateRange(previousDateRange => {
         return {
           startDate: newDateRange.startDate || previousDateRange.startDate,
@@ -133,7 +151,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         };
       });
     },
-    [dateRange]
+    [dateRange, targetPosition]
   );
 
   const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDate), [
