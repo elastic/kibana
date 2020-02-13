@@ -40,37 +40,42 @@ describe('query for signal', () => {
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
-        expect(params!.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-        return Promise.resolve(true);
-      });
-      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+      const { statusCode } = await server.inject(getSignalsQueryRequest());
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({ body: typicalSignalsQuery() })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using single agg', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
-        expect(params!.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-        return Promise.resolve(true);
-      });
       const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({ body: typicalSignalsQueryAggs() })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using aggs and query together', async () => {
-      const allTogether = getSignalsQueryRequest();
-      allTogether.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
-        expect(params!.body).toMatchObject({
-          ...typicalSignalsQueryAggs(),
-          ...typicalSignalsQuery(),
-        });
-        return Promise.resolve(true);
-      });
-      const { statusCode } = await server.inject(allTogether);
+      const request = getSignalsQueryRequest();
+      request.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
+      const { statusCode } = await server.inject(request);
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({
+          body: {
+            ...typicalSignalsQuery(),
+            ...typicalSignalsQueryAggs(),
+          },
+        })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
