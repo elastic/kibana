@@ -8,9 +8,8 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
 
-import { useDateFormat, useTimeZone } from '../../hooks';
+import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
-import { useUiSetting$ } from '../../lib/kibana';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 

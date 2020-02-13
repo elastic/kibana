@@ -26,7 +26,8 @@ import { getFilters } from './get_filters';
 
 import {
   esQuery,
-  esFilters,
+  EsQueryConfig,
+  Filter,
   IIndexPattern,
   Query,
   // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
@@ -45,7 +46,7 @@ const getEsQueryConfig = async (config: any) => {
     allowLeadingWildcards,
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
-  } as esQuery.EsQueryConfig;
+  } as EsQueryConfig;
 };
 
 const getUiSettings = async (config: any) => {
@@ -145,7 +146,7 @@ export async function generateCsvSearch(
       query: esQuery.buildEsQuery(
         indexPatternSavedObject as IIndexPattern,
         (searchSourceQuery as unknown) as Query,
-        (combinedFilter as unknown) as esFilters.Filter,
+        (combinedFilter as unknown) as Filter,
         esQueryConfig
       ),
       script_fields: scriptFieldsConfig,

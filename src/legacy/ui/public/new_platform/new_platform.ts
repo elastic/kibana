@@ -18,7 +18,7 @@
  */
 import { IScope } from 'angular';
 
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
@@ -32,9 +32,14 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from '../../../../plugins/advanced_settings/public';
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
@@ -48,13 +53,15 @@ export interface PluginsSetup {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   navigation: NavigationPublicPluginSetup;
-  dev_tools: DevToolsSetup;
-  kibana_legacy: KibanaLegacySetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
+  advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface PluginsStart {
@@ -65,12 +72,14 @@ export interface PluginsStart {
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
   inspector: InspectorStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  dev_tools: DevToolsStart;
-  kibana_legacy: KibanaLegacyStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
+  advancedSettings: AdvancedSettingsStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export const npSetup = {

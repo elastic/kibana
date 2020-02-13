@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../embeddable_plugin';
-import { IAction, IncompatibleActionError } from '../ui_actions_plugin';
+import { Action, IncompatibleActionError } from '../ui_actions_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
@@ -40,7 +40,7 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction implements IAction<ActionContext> {
+export class ExpandPanelAction implements Action<ActionContext> {
   public readonly type = EXPAND_PANEL_ACTION;
   public readonly id = EXPAND_PANEL_ACTION;
   public order = 7;

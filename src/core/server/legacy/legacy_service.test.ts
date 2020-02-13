@@ -83,12 +83,12 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
-      savedObjects: savedObjectsServiceMock.createSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
+          internal: new Map([['plugin-id', { publicTargetDir: 'path/to/target/public' }]]),
           browserConfigs: new Map(),
         },
       },
@@ -101,7 +101,7 @@ beforeEach(() => {
   startDeps = {
     core: {
       capabilities: capabilitiesServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },

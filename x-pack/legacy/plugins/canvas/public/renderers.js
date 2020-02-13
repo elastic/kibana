@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderersRegistry } from 'plugins/interpreter/registries';
+import { npSetup } from 'ui/new_platform';
 import { renderFunctions } from '../canvas_plugin_src/renderers';
 
-renderFunctions.forEach(r => {
-  renderersRegistry.register(r);
-});
+renderFunctions.forEach(npSetup.plugins.expressions.registerRenderer);
 
 export default renderFunctions;
