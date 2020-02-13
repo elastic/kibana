@@ -81,7 +81,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('managementHome', {
-          timeout: 10000,
+          timeout: 30000,
         });
       });
     });
