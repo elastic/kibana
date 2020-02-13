@@ -80,8 +80,13 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
     let filters = args.filters ? JSON.parse(args.filters) : [];
 
     if (args.savedSearchId) {
-      if (typeof getSavedObject !== 'function')
-        throw new Error('"getSavedObject" function not available in execution context.');
+      if (typeof getSavedObject !== 'function') {
+        throw new Error(
+          '"getSavedObject" function not available in execution context. ' +
+            'When you execute expression you need to extra execution context ' +
+            'as the third argument and provide "getSavedObject" implementation.'
+        );
+      }
       const obj = await getSavedObject('search', args.savedSearchId);
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
       const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
