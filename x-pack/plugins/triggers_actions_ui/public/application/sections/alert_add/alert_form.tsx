@@ -291,7 +291,9 @@ export const AlertForm = ({
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
-          if (
+          if (item.defaultActionGroup) {
+            setDefaultActionGroup(item.defaultActionGroup);
+          } else if (
             !alertTypeModel?.defaultActionGroup &&
             alertTypesIndex &&
             alertTypesIndex[item.id] &&
