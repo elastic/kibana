@@ -21,12 +21,12 @@ const breadcrumbs = [
 
 export const accessDeniedRoute: MlRoute = {
   path: '/access-denied',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, undefined, config, {});
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, {});
 
   return (
     <PageLoader context={context}>

@@ -232,7 +232,7 @@ export class DetailPanel extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={550}
       >
         <EuiFlyoutHeader>
           <EuiTitle

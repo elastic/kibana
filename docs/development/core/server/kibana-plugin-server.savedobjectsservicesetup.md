@@ -20,9 +20,19 @@ When plugins access the Saved Objects client, a new client is created using the 
 
 ## Example
 
+
+```ts
 import { SavedObjectsClient, CoreSetup } from 'src/core/server';
 
-export class Plugin() { setup: (core: CoreSetup) =<!-- -->&gt; { core.savedObjects.setClientFactory((<!-- -->{ request: KibanaRequest }<!-- -->) =<!-- -->&gt; { return new SavedObjectsClient(core.savedObjects.scopedRepository(request)); }<!-- -->) } }
+export class Plugin() {
+  setup: (core: CoreSetup) => {
+    core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
+      return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
+    })
+  }
+}
+
+```
 
 ## Properties
 

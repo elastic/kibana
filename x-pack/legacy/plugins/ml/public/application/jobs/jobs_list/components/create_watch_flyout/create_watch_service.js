@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { template } from 'lodash';
 import { http } from '../../../../services/http_service';
 
@@ -12,6 +11,7 @@ import emailBody from './email.html';
 import emailInfluencersBody from './email_influencers.html';
 import { watch } from './watch.js';
 import { i18n } from '@kbn/i18n';
+import { getBasePath, getAppUrl } from '../../../../util/dependency_cache';
 
 const compiledEmailBody = template(emailBody);
 const compiledEmailInfluencersBody = template(emailInfluencersBody);
@@ -38,8 +38,9 @@ function randomNumber(min, max) {
 }
 
 function saveWatch(watchModel) {
-  const basePath = chrome.addBasePath('/api/watcher');
-  const url = `${basePath}/watch/${watchModel.id}`;
+  const basePath = getBasePath();
+  const path = basePath.prepend('/api/watcher');
+  const url = `${path}/watch/${watchModel.id}`;
 
   return http({
     url,
@@ -95,7 +96,7 @@ class CreateWatchService {
 
           // create the html by adding the variables to the compiled email body.
           emailSection.send_email.email.body.html = compiledEmailBody({
-            serverAddress: chrome.getAppUrl(),
+            serverAddress: getAppUrl(),
             influencersSection:
               this.config.includeInfluencers === true
                 ? compiledEmailInfluencersBody({
@@ -156,11 +157,12 @@ class CreateWatchService {
           },
         };
 
+        const basePath = getBasePath();
         if (id !== '') {
           saveWatch(watchModel)
             .then(() => {
               this.status.watch = this.STATUS.SAVED;
-              this.config.watcherEditURL = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
+              this.config.watcherEditURL = `${basePath.get()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
               resolve({
                 id,
                 url: this.config.watcherEditURL,
@@ -180,8 +182,9 @@ class CreateWatchService {
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
-    const basePath = chrome.addBasePath('/api/watcher');
-    const url = `${basePath}/watch/${id}`;
+    const basePath = getBasePath();
+    const path = basePath.prepend('/api/watcher');
+    const url = `${path}/watch/${id}`;
     return http({
       url,
       method: 'GET',

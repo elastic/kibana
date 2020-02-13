@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'querystring';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
@@ -44,7 +45,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      const { redirect } = parse(search.replace(/^\?/, ''));
+      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
+
       history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
     }
   };

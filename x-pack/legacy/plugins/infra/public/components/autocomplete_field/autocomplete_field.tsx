@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
@@ -25,7 +25,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
   autoFocus?: boolean;
   'aria-label'?: string;
