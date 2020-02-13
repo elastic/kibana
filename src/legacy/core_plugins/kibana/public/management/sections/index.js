@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import './settings';
 import './objects';
 import './index_patterns';

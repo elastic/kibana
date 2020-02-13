@@ -124,6 +124,14 @@
         ],
       },
       {
+        groupSlug: 'browserslist-useragent',
+        groupName: 'browserslist-useragent related packages',
+        packageNames: [
+          'browserslist-useragent',
+          '@types/browserslist-useragent',
+        ],
+      },
+      {
         groupSlug: 'chance',
         groupName: 'chance related packages',
         packageNames: [
@@ -927,6 +935,14 @@
         packageNames: [
           'vinyl-fs',
           '@types/vinyl-fs',
+        ],
+      },
+      {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
         ],
       },
       {
