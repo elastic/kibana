@@ -6,7 +6,7 @@
 
 import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/types';
 
-export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'infra.metric-alert.threshold';
+export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 
 export enum Comparator {
   GT = '>',
