@@ -34,13 +34,16 @@ export const anomalyDetectionUpdateJobSchema = {
       schema.maybe(
         schema.object({
           detector_index: schema.number(),
-          custom_rules: schema.arrayOf(
-            schema.maybe(
-              schema.object({
-                actions: schema.arrayOf(schema.string()),
-                conditions: schema.arrayOf(schema.any()),
-                scope: schema.maybe(schema.any()),
-              })
+          description: schema.maybe(schema.string()),
+          custom_rules: schema.maybe(
+            schema.arrayOf(
+              schema.maybe(
+                schema.object({
+                  actions: schema.arrayOf(schema.string()),
+                  conditions: schema.arrayOf(schema.any()),
+                  scope: schema.maybe(schema.any()),
+                })
+              )
             )
           ),
         })
