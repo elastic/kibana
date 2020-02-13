@@ -658,6 +658,7 @@ function discoverController(
 
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
         if (newInterval !== oldInterval) {
+          syncAppState({ interval: newInterval });
           $fetchObservable.next();
         }
       });
