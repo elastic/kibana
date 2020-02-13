@@ -27,15 +27,20 @@ const historicalByTag = {};
 for (const group of Object.keys(historical)) {
   historicalByTag[group] = {};
   for (const suite of Object.values(historical[group])) {
-    historicalByTag[group][suite.tag] = suite.duration;
+    historicalByTag[group][suite.config] = historicalByTag[group][suite.config] || {};
+    historicalByTag[group][suite.config][suite.tag] = suite.duration;
   }
 }
 
 Object.keys(allSuites).forEach(group => {
   const suites = allSuites[group];
   for (const suite of suites) {
-    if (historicalByTag[group] && suite.tag in historicalByTag[group]) {
-      suite.duration = historicalByTag[group][suite.tag];
+    if (
+      historicalByTag[group] &&
+      historicalByTag[group][suite.config] &&
+      suite.tag in historicalByTag[group][suite.config]
+    ) {
+      suite.duration = historicalByTag[group][suite.config][suite.tag];
     }
   }
 

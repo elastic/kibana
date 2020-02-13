@@ -6,7 +6,7 @@ def withWorkers(machineName, preWorkerClosure = {}, inParallel = {}, workerClosu
           doSetup()
 
           parallel([
-            one: {
+            main: {
               preWorkerClosure()
 
               def nextWorker = 1
@@ -30,7 +30,7 @@ def withWorkers(machineName, preWorkerClosure = {}, inParallel = {}, workerClosu
 
               parallel(workers)
             },
-            two: inParallel
+            xpackBuild: inParallel
           ])
         }
       })
@@ -334,7 +334,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
         continue
       }
       try {
-        retryable("kibana-ciGroup${workerNumber}") {
+        // retryable("kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
           def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
@@ -346,7 +346,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
                 source test/scripts/jenkins_test_setup_oss.sh
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
-                  --debug --bail \
+                  --debug \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
               """, "OSS tests: ${testSuite.config}"
@@ -358,7 +358,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
           } finally {
             testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           }
-        }
+        // }
       }
       catch(ex) {
         catchError {
@@ -393,7 +393,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
         continue
       }
       try {
-        retryable("xpack-kibana-ciGroup${workerNumber}") {
+        // retryable("xpack-kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
           def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
@@ -405,10 +405,10 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
                 source test/scripts/jenkins_test_setup_xpack.sh
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
-                  --debug --bail \
+                  --debug \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
-              """, "X-Pack tests: ${testSuite.config}"
+              """, "X-Pack tests: ${testSuite.config}" // TODO add --bail back?
             )
             testSuite.success = true
           } catch (ex) {
@@ -417,7 +417,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
           } finally {
             testSuite.endTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           }
-        }
+        // }
       }
       catch(ex) {
         catchError {
@@ -471,6 +471,14 @@ def prepareXpackTestQueue(queue) {
   def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
   queue.xpackFirefox = items.xpackFirefox.reverse()
+}
+
+def getFunctionalWorkersMap(queue, finishedSuites, count = 24) {
+  def map = []
+  for (def i = 1; i <= count; i++) {
+    map["kibana-functional-${i}"] = getFunctionalQueueWorker(queue, finishedSuites, 1)
+  }
+  return map
 }
 
 return this
