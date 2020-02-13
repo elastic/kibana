@@ -9,15 +9,15 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const defaultLabel = i18n.translate('xpack.painless_playground.contextDefaultLabel', {
+const defaultLabel = i18n.translate('xpack.painlessLab.contextDefaultLabel', {
   defaultMessage: 'Basic',
 });
 
-const filterLabel = i18n.translate('xpack.painless_playground.contextFilterLabel', {
+const filterLabel = i18n.translate('xpack.painlessLab.contextFilterLabel', {
   defaultMessage: 'Filter',
 });
 
-const scoreLabel = i18n.translate('xpack.painless_playground.contextScoreLabel', {
+const scoreLabel = i18n.translate('xpack.painlessLab.contextScoreLabel', {
   defaultMessage: 'Score',
 });
 

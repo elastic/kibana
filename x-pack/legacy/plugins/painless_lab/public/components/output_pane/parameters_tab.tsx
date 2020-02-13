@@ -33,13 +33,13 @@ export function ParametersTab({ context, contextSetup, setContext, setContextSet
       <EuiFormRow
         label={
           <EuiToolTip
-            content={i18n.translate('xpack.painless_playground.parametersFieldTooltipText', {
+            content={i18n.translate('xpack.painlessLab.parametersFieldTooltipText', {
               defaultMessage: 'These variables are assigned to the "params" object in your script',
             })}
           >
             <span>
               <FormattedMessage
-                id="xpack.painless_playground.parametersFieldLabel"
+                id="xpack.painlessLab.parametersFieldLabel"
                 defaultMessage="Parameters"
               />{' '}
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -53,13 +53,13 @@ export function ParametersTab({ context, contextSetup, setContext, setContextSet
               href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-using.html#prefer-params"
               target="_blank"
             >
-              {i18n.translate('xpack.painless_playground.parametersFieldDocLinkText', {
+              {i18n.translate('xpack.painlessLab.parametersFieldDocLinkText', {
                 defaultMessage: 'Parameters docs',
               })}
             </EuiLink>
           </EuiText>
         }
-        helpText={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
+        helpText={i18n.translate('xpack.painlessLab.helpIconAriaLabel', {
           defaultMessage: 'Use JSON format',
         })}
       >

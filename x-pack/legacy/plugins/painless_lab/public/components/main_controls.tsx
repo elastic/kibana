@@ -40,7 +40,7 @@ export function MainControls({
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >
-      {i18n.translate('xpack.painless_playground.walkthroughButtonLabel', {
+      {i18n.translate('xpack.painlessLab.walkthroughButtonLabel', {
         defaultMessage: 'Walkthrough',
       })}
     </EuiContextMenuItem>,
@@ -52,7 +52,7 @@ export function MainControls({
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >
-      {i18n.translate('xpack.painless_playground.apiReferenceButtonLabel', {
+      {i18n.translate('xpack.painlessLab.apiReferenceButtonLabel', {
         defaultMessage: 'API reference',
       })}
     </EuiContextMenuItem>,
@@ -64,7 +64,7 @@ export function MainControls({
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >
-      {i18n.translate('xpack.painless_playground.languageSpecButtonLabel', {
+      {i18n.translate('xpack.painlessLab.languageSpecButtonLabel', {
         defaultMessage: 'Language spec',
       })}
     </EuiContextMenuItem>,
@@ -77,7 +77,7 @@ export function MainControls({
         setIsHelpOpen(false);
       }}
     >
-      {i18n.translate('xpack.painless_playground.resetButtonLabel', {
+      {i18n.translate('xpack.painlessLab.resetButtonLabel', {
         defaultMessage: 'Reset script',
       })}
     </EuiContextMenuItem>,
@@ -85,7 +85,7 @@ export function MainControls({
 
   return (
     <>
-      <div className="painlessPlaygroundBottomBarPlaceholder" />
+      <div className="painlessLabBottomBarPlaceholder" />
 
       <EuiBottomBar paddingSize="none">
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
@@ -93,7 +93,7 @@ export function MainControls({
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
                 <EuiPopover
-                  id="painlessPlaygroundHelpContextMenu"
+                  id="painlessLabHelpContextMenu"
                   button={
                     <EuiButtonEmpty
                       size="s"
@@ -102,7 +102,7 @@ export function MainControls({
                       color="ghost"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
-                      {i18n.translate('xpack.painless_playground.helpButtonLabel', {
+                      {i18n.translate('xpack.painlessLab.helpButtonLabel', {
                         defaultMessage: 'Help',
                       })}
                     </EuiButtonEmpty>
@@ -126,10 +126,10 @@ export function MainControls({
               data-test-subj="btnViewRequest"
             >
               {isRequestFlyoutOpen
-                ? i18n.translate('xpack.painless_playground.hideRequestButtonLabel', {
+                ? i18n.translate('xpack.painlessLab.hideRequestButtonLabel', {
                     defaultMessage: 'Hide API request',
                   })
-                : i18n.translate('xpack.painless_playground.showRequestButtonLabel', {
+                : i18n.translate('xpack.painlessLab.showRequestButtonLabel', {
                     defaultMessage: 'Show API request',
                   })}
             </EuiButtonEmpty>

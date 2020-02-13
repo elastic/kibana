@@ -44,7 +44,7 @@ export function OutputPane({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.painless_playground.outputTabLabel', {
+        {i18n.translate('xpack.painlessLab.outputTabLabel', {
           defaultMessage: 'Output',
         })}
       </EuiFlexItem>
@@ -52,9 +52,9 @@ export function OutputPane({
   );
 
   return (
-    <EuiPanel className="painlessPlaygroundRightPane">
+    <EuiPanel className="painlessLabRightPane">
       <EuiTabbedContent
-        className="painlessPlaygroundRightPane__tabs"
+        className="painlessLabRightPane__tabs"
         size="s"
         tabs={[
           {
@@ -64,7 +64,7 @@ export function OutputPane({
           },
           {
             id: 'parameters',
-            name: i18n.translate('xpack.painless_playground.parametersTabLabel', {
+            name: i18n.translate('xpack.painlessLab.parametersTabLabel', {
               defaultMessage: 'Parameters',
             }),
             content: (
@@ -78,7 +78,7 @@ export function OutputPane({
           },
           {
             id: 'context',
-            name: i18n.translate('xpack.painless_playground.contextTabLabel', {
+            name: i18n.translate('xpack.painlessLab.contextTabLabel', {
               defaultMessage: 'Context',
             }),
             content: (

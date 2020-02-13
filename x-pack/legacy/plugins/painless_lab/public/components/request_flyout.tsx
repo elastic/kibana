@@ -36,7 +36,7 @@ export function RequestFlyout({
             <div>
               <EuiTitle size="m">
                 <h2>
-                  {i18n.translate('xpack.painless_playground.flyoutTitle', {
+                  {i18n.translate('xpack.painlessLab.flyoutTitle', {
                     defaultMessage: 'API request',
                   })}
                 </h2>
@@ -52,7 +52,7 @@ export function RequestFlyout({
               target="_blank"
               iconType="help"
             >
-              {i18n.translate('xpack.painless_playground.flyoutDocLink', {
+              {i18n.translate('xpack.painlessLab.flyoutDocLink', {
                 defaultMessage: 'API documentation',
               })}
             </EuiButtonEmpty>
@@ -86,7 +86,7 @@ export function RequestFlyout({
           ]}
         />
 
-        <div className="painlessPlaygroundBottomBarPlaceholder" />
+        <div className="painlessLabBottomBarPlaceholder" />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

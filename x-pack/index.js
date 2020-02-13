@@ -12,7 +12,7 @@ import { security } from './legacy/plugins/security';
 import { ml } from './legacy/plugins/ml';
 import { tilemap } from './legacy/plugins/tilemap';
 import { grokdebugger } from './legacy/plugins/grokdebugger';
-import { painlessPlayground } from './legacy/plugins/painless_playground';
+import { painlessLab } from './legacy/plugins/painless_lab';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
 import { beats } from './legacy/plugins/beats_management';
@@ -51,7 +51,7 @@ module.exports = function(kibana) {
     ml(kibana),
     tilemap(kibana),
     grokdebugger(kibana),
-    painlessPlayground(kibana),
+    painlessLab(kibana),
     dashboardMode(kibana),
     logstash(kibana),
     beats(kibana),

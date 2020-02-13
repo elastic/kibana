@@ -5,11 +5,11 @@
  * 1. This is a very brittle way of preventing the editor and other content from disappearing
  *    behind the bottom bar.
  */
-.painlessPlaygroundBottomBarPlaceholder {
+.painlessLabBottomBarPlaceholder {
   height: $euiSize * 2; /* [1] */
 }
 
-.painlessPlaygroundRightPane {
+.painlessLabRightPane {
   border-right: none;
   border-top: none;
   border-bottom: none;
@@ -18,7 +18,7 @@
   height: 100%;
 }
 
-.painlessPlaygroundRightPane__tabs {
+.painlessLabRightPane__tabs {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -28,6 +28,6 @@
   }
 }
 
-.painlessPlayground__betaLabelContainer {
+.painlessLab__betaLabelContainer {
   line-height: 0;
 }
