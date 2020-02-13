@@ -13,7 +13,8 @@ import {
 } from '../../../../../../src/core/server';
 import { ActionsClient } from '../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../legacy/plugins/alerting/server';
-import { CoreStart, StartPlugins, SetupPlugins } from '../plugin';
+import { SpacesServiceSetup } from '../../../../../plugins/spaces/server';
+import { CoreStart, StartPlugins } from '../plugin';
 
 export interface Clients {
   actionsClient?: ActionsClient;
@@ -30,12 +31,9 @@ export class ClientsService {
   private actions?: StartPlugins['actions'];
   private clusterClient?: IClusterClient;
   private savedObjects?: CoreStart['savedObjects'];
-  private spacesService?: SetupPlugins['spaces']['spacesService'];
+  private spacesService?: SpacesServiceSetup;
 
-  public setup(
-    clusterClient: IClusterClient,
-    spacesService: SetupPlugins['spaces']['spacesService']
-  ) {
+  public setup(clusterClient: IClusterClient, spacesService?: SpacesServiceSetup) {
     this.clusterClient = clusterClient;
     this.spacesService = spacesService;
   }

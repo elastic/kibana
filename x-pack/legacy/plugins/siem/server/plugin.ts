@@ -37,7 +37,7 @@ export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   security: SecuritySetup;
-  spaces: SpacesSetup;
+  spaces?: SpacesSetup;
 }
 
 export interface StartPlugins {
