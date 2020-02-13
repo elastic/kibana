@@ -7,7 +7,7 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppConstants } from '../../../../common/types';
 import { paginate, paginatedResults, PaginationParams } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export abstract class ResolverQuery {
   constructor(
