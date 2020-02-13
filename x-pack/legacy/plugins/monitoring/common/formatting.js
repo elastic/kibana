@@ -6,12 +6,6 @@
 
 import moment from 'moment-timezone';
 
-/**
- * Kind of a bad practice to depend on anything in the "/public" directory,
- * but this way we avoid passing/prop-drilling injector all over our components
- */
-import chrome from '../public/np_imports/ui/chrome';
-
 export const LARGE_FLOAT = '0,0.[00]';
 export const SMALL_FLOAT = '0.[00]';
 export const LARGE_BYTES = '0,0.0 b';
@@ -23,10 +17,7 @@ export const LARGE_ABBREVIATED = '0,0.[0]a';
  * @param date Either a numeric Unix timestamp or a {@code Date} object
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date) {
-  const injector = chrome.dangerouslyGetActiveInjector();
-  let timezone = injector.get('config').get('dateFormat:tz');
-
+export function formatDateTimeLocal(date, timezone) {
   if (timezone === 'Browser') {
     timezone = moment.tz.guess() || 'utc';
   }
