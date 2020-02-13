@@ -119,6 +119,16 @@ export const AlertIndex = memo(() => {
     };
   }, [json, pageSize, total]);
 
+  const pagination = useMemo(() => {
+    return {
+      pageIndex,
+      pageSize,
+      pageSizeOptions: [10, 50, 100],
+      onChangeItemsPerPage,
+      onChangePage,
+    };
+  }, [onChangeItemsPerPage, onChangePage, pageIndex, pageSize]);
+
   return (
     <EuiPage data-test-subj="alertListPage">
       <EuiPageBody>
@@ -126,24 +136,13 @@ export const AlertIndex = memo(() => {
           <EuiDataGrid
             aria-label="Alert List"
             rowCount={total}
-            // Required. Sets up three columns, the last of which has a custom schema we later define down below.
-            // The second column B won't allow clicking in to see the content in a popup.
-            // The first column defines an starting width of 150px and prevents the user from resizing it
             columns={columns}
-            // This allows you to initially hide columns. Users can still turn them on.
             columnVisibility={{
               visibleColumns,
               setVisibleColumns,
             }}
-            // Often used in combination with useEffect() to dynamically change the render.
             renderCellValue={renderCellValue}
-            pagination={{
-              pageIndex,
-              pageSize,
-              pageSizeOptions: [10, 50, 100],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
+            pagination={pagination}
             data-test-subj="alertListGrid"
           />
         </EuiPageContent>

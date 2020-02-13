@@ -11,6 +11,7 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
   const table = getService('table');
 
   return {
+<<<<<<< HEAD
     /**
 <<<<<<< HEAD
      * Finds the Table with the given `selector` (test subject) and returns
@@ -47,6 +48,8 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
 
 =======
 >>>>>>> adds functional tests
+=======
+>>>>>>> switches router/url logic
     async welcomeEndpointTitle() {
       return await testSubjects.getVisibleText('welcomeTitle');
     },

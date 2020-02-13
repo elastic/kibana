@@ -5,8 +5,9 @@
  */
 
 import { Store, createStore, applyMiddleware } from 'redux';
+import { History } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState, EndpointAppHistory } from '../../types';
+import { AlertListState } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
@@ -20,11 +21,11 @@ import {
 describe('alert list pagination', () => {
   let store: Store<AlertListState, AppAction>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let history: EndpointAppHistory;
+  let history: History<never>;
   beforeEach(() => {
     coreStart = coreMock.createStart();
     history = createBrowserHistory();
-    const { middleware } = alertMiddlewareFactory(coreStart, history);
+    const { middleware } = alertMiddlewareFactory(coreStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
   });
   describe('when the user navigates to the alert list page', () => {
@@ -32,7 +33,7 @@ describe('alert list pagination', () => {
       beforeEach(() => {
         const urlPageSizeSelector = urlFromNewPageSizeParam(store.getState());
         history.push(urlPageSizeSelector(1));
-        store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
+        store.dispatch({ type: 'userChangedUrl', payload: history.location });
       });
       it('should modify the url correctly', () => {
         const actualPaginationQuery = paginationDataFromUrl(store.getState());
@@ -47,7 +48,7 @@ describe('alert list pagination', () => {
         beforeEach(() => {
           const urlPageIndexSelector = urlFromNewPageIndexParam(store.getState());
           history.push(urlPageIndexSelector(1));
-          store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
+          store.dispatch({ type: 'userChangedUrl', payload: history.location });
         });
         it('should modify the url in the correct order', () => {
           const actualPaginationQuery = paginationDataFromUrl(store.getState());
@@ -65,7 +66,7 @@ describe('alert list pagination', () => {
       beforeEach(() => {
         const urlPageIndexSelector = urlFromNewPageIndexParam(store.getState());
         history.push(urlPageIndexSelector(1));
-        store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
+        store.dispatch({ type: 'userChangedUrl', payload: history.location });
       });
       it('should modify the url correctly', () => {
         const actualPaginationQuery = paginationDataFromUrl(store.getState());
@@ -80,7 +81,7 @@ describe('alert list pagination', () => {
         beforeEach(() => {
           const urlPageSizeSelector = urlFromNewPageSizeParam(store.getState());
           history.push(urlPageSizeSelector(1));
-          store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
+          store.dispatch({ type: 'userChangedUrl', payload: history.location });
         });
         it('should modify the url correctly and reset index to `0`', () => {
           const actualPaginationQuery = paginationDataFromUrl(store.getState());

@@ -5,23 +5,24 @@
  */
 
 import { Store, createStore, applyMiddleware } from 'redux';
+import { History } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState, EndpointAppHistory } from '../../types';
+import { AlertListState } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
-import { createBrowserHistory } from 'history';
 import { AlertResultList } from '../../../../../common/types';
 import { isOnAlertPage } from './selectors';
+import { createBrowserHistory } from 'history';
 
 describe('alert list tests', () => {
   let store: Store<AlertListState, AppAction>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let history: EndpointAppHistory;
+  let history: History<never>;
   beforeEach(() => {
     coreStart = coreMock.createStart();
     history = createBrowserHistory();
-    const { middleware } = alertMiddlewareFactory(coreStart, history);
+    const { middleware } = alertMiddlewareFactory(coreStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
   });
   describe('when the user navigates to the alert list page', () => {
@@ -60,7 +61,15 @@ describe('alert list tests', () => {
         };
         return response;
       });
-      store.dispatch({ type: 'userChangedUrl', payload: '/alerts' });
+
+      // Simulates user navigating to the /alerts page
+      store.dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          ...history.location,
+          pathname: '/alerts',
+        },
+      });
     });
 
     it("should recognize it's on the alert list page", () => {

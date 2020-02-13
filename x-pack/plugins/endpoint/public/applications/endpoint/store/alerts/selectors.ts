@@ -5,11 +5,16 @@
  */
 
 import qs from 'querystring';
-import URL from 'url-parse';
 import { AlertListState } from '../../types';
 
+/**
+ * Returns the Alert Data array from state
+ */
 export const alertListData = (state: AlertListState) => state.alerts;
 
+/**
+ * Returns the alert list pagination data from state
+ */
 export const alertListPagination = (state: AlertListState) => {
   return {
     pageIndex: state.request_page_index,
@@ -19,16 +24,28 @@ export const alertListPagination = (state: AlertListState) => {
   };
 };
 
-export const isOnAlertPage = (state: AlertListState) => {
-  return URL(state.url).pathname.endsWith('/alerts');
+/**
+ * Returns a boolean based on whether or not the user is on the alerts page
+ */
+export const isOnAlertPage = (state: AlertListState): boolean => {
+  return state.location ? state.location.pathname.endsWith('/alerts') : false;
 };
 
-export const paginationDataFromUrl = (state: AlertListState) => {
-  return URL(state.url, true).query;
+/**
+ * Returns the query object received from parsing the URL query params
+ */
+export const paginationDataFromUrl = (state: AlertListState): qs.ParsedUrlQuery => {
+  // Removes the `?` from the beginning of query string if it exists
+  return state.location ? qs.parse(state.location.search.slice(1)) : {};
 };
 
-export const urlFromNewPageSizeParam = (state: AlertListState) => {
-  return (newPageSize: number) => {
+/**
+ * Returns a function that takes in a new page size and returns a new query param string
+ */
+export const urlFromNewPageSizeParam: (
+  state: AlertListState
+) => (newPageSize: number) => string = state => {
+  return newPageSize => {
     const urlPaginationData = paginationDataFromUrl(state);
     urlPaginationData.page_size = newPageSize.toString();
 
@@ -40,8 +57,13 @@ export const urlFromNewPageSizeParam = (state: AlertListState) => {
   };
 };
 
-export const urlFromNewPageIndexParam = (state: AlertListState) => {
-  return (newPageIndex: number) => {
+/**
+ * Returns a function that takes in a new page index and returns a new query param string
+ */
+export const urlFromNewPageIndexParam: (
+  state: AlertListState
+) => (newPageIndex: number) => string = state => {
+  return newPageIndex => {
     const urlPaginationData = paginationDataFromUrl(state);
     urlPaginationData.page_index = newPageIndex.toString();
     return '?' + qs.stringify(urlPaginationData);
