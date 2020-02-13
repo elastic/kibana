@@ -20,6 +20,7 @@ import { managementMiddlewareFactory } from './managing';
 import { policyListMiddlewareFactory } from './policy_list';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
+import { EndpointPluginStartDependencies } from '../../../plugin';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
@@ -53,11 +54,12 @@ export const appStoreFactory: (
    * Allow middleware to communicate with Kibana core.
    */
   coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies,
   /**
    * Create the store without any middleware. This is useful for testing the store w/o side effects.
    */
   disableMiddleware?: boolean
-) => Store = (coreStart, disableMiddleware = false) => {
+) => Store = (coreStart, depsStart, disableMiddleware = false) => {
   const store = createStore(
     appReducer,
     disableMiddleware
@@ -74,7 +76,7 @@ export const appStoreFactory: (
             ),
             substateMiddlewareFactory(
               globalState => globalState.alertList,
-              alertMiddlewareFactory(coreStart)
+              alertMiddlewareFactory(coreStart, depsStart)
             )
           )
         )

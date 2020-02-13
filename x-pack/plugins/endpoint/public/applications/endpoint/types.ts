@@ -5,6 +5,7 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { Query, TimeRange, IIndexPattern, esFilters } from 'src/plugins/data/public';
 import {
   EndpointMetadata,
   AlertData,
@@ -12,12 +13,14 @@ import {
   Immutable,
   ImmutableArray,
 } from '../../../common/types';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
@@ -101,6 +104,19 @@ export interface EndpointAppLocation {
   key?: string;
 }
 
+interface AlertsSearchBarState {
+  patterns: IIndexPattern[];
+  query: Query;
+  dateRange: TimeRange;
+  filters: esFilters.Filter[];
+}
+
+export interface UserUpdatedAlertsSearchBarFilterPayload {
+  query?: Query;
+  filters?: esFilters.Filter[];
+  dateRange?: TimeRange;
+}
+
 export type AlertListData = AlertResultList;
 
 export interface AlertListState {
@@ -121,6 +137,9 @@ export interface AlertListState {
 
   /** Specific Alert data to be shown in the details view */
   readonly alertDetails?: Immutable<AlertData>;
+
+  /** Search bar filters, query, dateRange, and index */
+  readonly searchBar: AlertsSearchBarState;
 }
 
 /**

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IIndexPattern } from 'src/plugins/data/public';
 import { Immutable, AlertData } from '../../../../../common/types';
-import { AlertListData } from '../../types';
+import { AlertListData, UserUpdatedAlertsSearchBarFilterPayload } from '../../types';
 
 interface ServerReturnedAlertsData {
   readonly type: 'serverReturnedAlertsData';
@@ -17,4 +18,24 @@ interface ServerReturnedAlertDetailsData {
   readonly payload: Immutable<AlertData>;
 }
 
-export type AlertAction = ServerReturnedAlertsData | ServerReturnedAlertDetailsData;
+interface ServerReturnedSearchBarIndexPatterns {
+  type: 'serverReturnedSearchBarIndexPatterns';
+  payload: IIndexPattern[];
+}
+
+interface UserUpdatedAlertsSearchBarFilter {
+  type: 'userUpdatedAlertsSearchBarFilter';
+  payload: UserUpdatedAlertsSearchBarFilterPayload;
+}
+
+interface UserSubmittedAlertsSearchBarFilter {
+  type: 'userSubmittedAlertsSearchBarFilter';
+  payload: UserUpdatedAlertsSearchBarFilterPayload;
+}
+
+export type AlertAction =
+  | ServerReturnedAlertsData
+  | ServerReturnedAlertDetailsData
+  | ServerReturnedSearchBarIndexPatterns
+  | UserUpdatedAlertsSearchBarFilter
+  | UserSubmittedAlertsSearchBarFilter;

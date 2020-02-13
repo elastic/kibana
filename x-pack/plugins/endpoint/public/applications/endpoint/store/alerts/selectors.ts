@@ -106,3 +106,8 @@ export const selectedAlertIsLegacyEndpointEvent: (
   }
   return 'endgame' in event;
 });
+
+export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
+export const searchBarQuery = (state: AlertListState) => state.searchBar.query;
+export const searchBarFilters = (state: AlertListState) => state.searchBar.filters;
+export const searchBarDateRange = (state: AlertListState) => state.searchBar.dateRange;
