@@ -16,34 +16,43 @@ export interface PaginationParams {
   eventID?: string;
 }
 
-export async function getPaginationParams(
-  client: IScopedClusterClient,
-  limit: number,
-  after?: string
-): Promise<PaginationParams> {
-  if (!after) {
-    return { size: limit };
-  }
-  const cursor = (await client.callAsCurrentUser('search', {
-    body: {
-      query: {
-        ids: {
-          values: [after],
-        },
-      },
-    },
-  })) as SearchResponse<ResolverEvent>;
+interface PaginationCursor {
+  timestamp: Date;
+  eventID: string;
+}
 
-  if (cursor.hits.hits.length === 0) {
-    return { size: limit };
-  }
-  const event = cursor.hits.hits[0]._source;
+function urlEncodeCursor(data: PaginationCursor) {
+  const value = JSON.stringify(data);
+  return new Buffer(value, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
 
-  return {
-    size: limit,
-    timestamp: event['@timestamp'],
-    eventID: extractEventID(event),
-  };
+function urlDecodeCursor(value: string): PaginationCursor {
+  const data = new Buffer(value.replace(/\-/g, '+').replace(/\_/g, '-'), 'base64').toString('utf8');
+  const { timestamp, eventID } = JSON.parse(data);
+  // take some extra care to only grab the things we want
+  return { timestamp, eventID };
+}
+
+export function getPaginationParams(limit: number, after?: string): Promise<PaginationParams> {
+  if (after) {
+    try {
+      const cursor = urlDecodeCursor(after);
+      if (cursor.timestamp && cursor.eventID) {
+        return {
+          size: limit,
+          timestamp: cursor.timestamp,
+          eventID: cursor.eventID,
+        };
+      }
+    } catch (err) {
+      /* tslint:disable:no-empty */
+    } // ignore invalid cursor values
+  }
+  return { size: limit };
 }
 
 export function paginate(pagination: PaginationParams, field: string, query: JsonObject) {
@@ -64,12 +73,17 @@ export function paginatedResults(
   if (response.hits.hits.length === 0) {
     return { total, results: [], next: null };
   }
-  let next: string | null = null;
+  let next: ResolverEvent;
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);
-    next = hit._id;
+    next = hit._source;
   }
 
-  return { total, results, next };
+  const cursor = {
+    timestamp: next['@timestamp'],
+    eventID: extractEventID(next),
+  };
+
+  return { total, results, next: urlEncodeCursor(cursor) };
 }

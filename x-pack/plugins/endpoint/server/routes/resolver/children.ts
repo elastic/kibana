@@ -40,9 +40,9 @@ export function handleChildren(
       query: { limit, after, legacyEndpointID },
     } = req;
     try {
-      const client = context.core.elasticsearch.dataClient;
-      const pagination = await getPaginationParams(client, limit, after);
+      const pagination = getPaginationParams(limit, after);
 
+      const client = context.core.elasticsearch.dataClient;
       const childrenQuery = new ChildrenQuery(legacyEndpointID, pagination);
       const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
 

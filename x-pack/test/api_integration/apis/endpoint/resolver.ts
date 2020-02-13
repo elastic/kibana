@@ -23,6 +23,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     describe('related events endpoint', () => {
       const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
       const entityID = '94042';
+      const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MyJ9';
 
       it('should return details for the root node', async () => {
         const { body } = await supertest
@@ -30,7 +31,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.events.length).to.eql(1);
-        expect(body.pagination.next).to.eql('t7QkNnABvfrOPnsMY1cl');
+        expect(body.pagination.next).to.eql(cursor);
         expect(body.pagination.total).to.eql(1);
         // default limit
         expect(body.pagination.limit).to.eql(100);
@@ -40,7 +41,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
           .get(
-            `/api/endpoint/resolver/${entityID}/related?legacyEndpointID=${endpointID}&after=t7QkNnABvfrOPnsMY1cl`
+            `/api/endpoint/resolver/${entityID}/related?legacyEndpointID=${endpointID}&after=${cursor}`
           )
           .set(commonHeaders)
           .expect(200);
@@ -150,6 +151,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     describe('children endpoint', () => {
       const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
       const entityID = '94041';
+      const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MiJ9';
 
       it('returns child process lifecycle events', async () => {
         const { body } = await supertest
@@ -157,7 +159,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
-        expect(body.pagination.next).to.eql('trQkNnABvfrOPnsMY1cl');
+        expect(body.pagination.next).to.eql(cursor);
         // default limit
         expect(body.pagination.limit).to.eql(10);
 
@@ -170,7 +172,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
           .get(
-            `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&after=trQkNnABvfrOPnsMY1cl`
+            `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&after=${cursor}`
           )
           .set(commonHeaders)
           .expect(200);
