@@ -26,7 +26,8 @@ export function extractEntityID(event: ResolverEvent) {
 
 export function extractParentEntityID(event: ResolverEvent) {
   if (isLegacyData(event)) {
-    return String(event.endgame.unique_ppid);
+    const ppid = event.endgame.unique_ppid;
+    return ppid && String(ppid); // if unique_ppid is undefined return undefined
   }
   return event.endpoint.process.parent?.entity_id;
 }
