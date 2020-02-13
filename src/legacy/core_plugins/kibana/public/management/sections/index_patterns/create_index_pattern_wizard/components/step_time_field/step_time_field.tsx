@@ -38,7 +38,7 @@ import { IndexPatternCreationConfig } from '../../../../../../../../management/p
 
 interface StepTimeFieldProps {
   indexPattern: string;
-  indexPatternsService: any;
+  indexPatternsService: any; // todo
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;

@@ -107,6 +107,7 @@ export class IndexPatternCreationConfig {
   }
 
   public checkIndicesForErrors(indices: any) {
+    // todo
     return undefined;
   }
 

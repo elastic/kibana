@@ -42,7 +42,7 @@ import { IndexPatternCreationConfig } from '../../../../../../../../management/p
 import { MatchedIndex } from '../../types';
 
 interface StepIndexPatternProps {
-  allIndices: any[];
+  allIndices: any[]; // todo
   isIncludingSystemIndices: boolean;
   esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
   savedObjectsClient: SavedObjectsClient;
@@ -76,7 +76,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     showingIndexPatternQueryErrors: false,
     indexPatternName: '',
   };
-  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS]; // no reason to copy this locally
+  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS]; // todo consider refactoring out
   lastQuery: string | undefined;
 
   constructor(props: StepIndexPatternProps) {
