@@ -34,7 +34,13 @@ export const createReadTagsRoute: Hapi.ServerRoute = {
       });
       return tags;
     } catch (err) {
-      return transformError(err);
+      const error = transformError(err);
+      return headers
+        .response({
+          message: error.message,
+          status_code: error.statusCode,
+        })
+        .code(error.statusCode);
     }
   },
 };
