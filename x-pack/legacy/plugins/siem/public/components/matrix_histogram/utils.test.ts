@@ -36,8 +36,8 @@ describe('utils', () => {
         expect(configs.settings.showLegend).toEqual(true);
       });
 
-      test('it should put legend at the bottom', () => {
-        expect(configs.settings.legendPosition).toEqual(Position.Bottom);
+      test('it should put legend on the right', () => {
+        expect(configs.settings.legendPosition).toEqual(Position.Right);
       });
 
       test('it should format Y tick to local string', () => {
