@@ -16,17 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-export { getTelemetrySavedObject, TelemetrySavedObject } from './get_telemetry_saved_object';
-export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
+interface GetTelemetryFailureDetailsConfig {
+  telemetrySavedObject: TelemetrySavedObject;
+}
 
-export interface TelemetrySavedObjectAttributes {
-  enabled?: boolean | null;
-  lastVersionChecked?: string;
-  sendUsageFrom?: 'browser' | 'server';
-  lastReported?: number;
-  telemetryAllowChangingOptInStatus?: boolean;
-  userHasSeenNotice?: boolean;
-  reportFailureCount?: number;
-  reportFailureVersion?: string;
+export interface TelemetryFailureDetails {
+  failureCount: number;
+  failureVersion?: string;
+}
+
+export function getTelemetryFailureDetails({
+  telemetrySavedObject,
+}: GetTelemetryFailureDetailsConfig): TelemetryFailureDetails {
+  if (!telemetrySavedObject) {
+    return {
+      failureVersion: undefined,
+      failureCount: 0,
+    };
+  }
+  const { reportFailureCount, reportFailureVersion } = telemetrySavedObject;
+
+  return {
+    failureCount: typeof reportFailureCount === 'number' ? reportFailureCount : 0,
+    failureVersion: typeof reportFailureVersion === 'string' ? reportFailureVersion : undefined,
+  };
 }
