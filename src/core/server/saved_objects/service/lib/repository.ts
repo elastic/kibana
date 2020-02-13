@@ -277,7 +277,7 @@ export class SavedObjectsRepository {
         attributes,
         migrationVersion,
         updated_at: time,
-        references,
+        ...(Array.isArray(references) && { references }),
       });
 
       const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -869,11 +869,8 @@ export class SavedObjectsRepository {
     const doc = {
       [type]: attributes,
       updated_at: time,
-      references,
+      ...(Array.isArray(references) && { references }),
     };
-    if (!Array.isArray(doc.references)) {
-      delete doc.references;
-    }
 
     const updateResponse = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
@@ -983,12 +980,8 @@ export class SavedObjectsRepository {
       const documentToSave = {
         [type]: attributes,
         updated_at: time,
-        references,
+        ...(Array.isArray(references) && { references }),
       };
-
-      if (!Array.isArray(documentToSave.references)) {
-        delete documentToSave.references;
-      }
 
       if (!this._registry.isNamespaces(type)) {
         return {

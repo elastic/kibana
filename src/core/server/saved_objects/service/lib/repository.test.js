@@ -1215,7 +1215,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`accepts custom references`, async () => {
+      it(`accepts custom references array`, async () => {
         const test = async references => {
           await createSuccess(type, attributes, { id, references });
           expectClusterCallArgs({
@@ -1223,11 +1223,19 @@ describe('SavedObjectsRepository', () => {
           });
           callAdminCluster.mockReset();
         };
-        // arrays
         await test(references);
         await test(['string']);
         await test([]);
-        // not arrays
+      });
+
+      it(`doesn't accept custom references if not an array`, async () => {
+        const test = async references => {
+          await createSuccess(type, attributes, { id, references });
+          expectClusterCallArgs({
+            body: expect.not.objectContaining({ references: expect.anything() }),
+          });
+          callAdminCluster.mockReset();
+        };
         await test('string');
         await test(123);
         await test(true);
