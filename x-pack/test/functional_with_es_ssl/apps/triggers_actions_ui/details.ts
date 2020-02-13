@@ -394,13 +394,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      const PAGE_SIZE = 10;
       it('renders the first page', async () => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
         const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
 
-        const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        expect(items.length).to.eql(PAGE_SIZE);
+
+        const [firstItem] = items;
         expect(firstItem.instance).to.eql(Object.keys(alertInstances)[0]);
       });
 
@@ -411,8 +415,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
-
-        const PAGE_SIZE = 10;
 
         await retry.try(async () => {
           const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();

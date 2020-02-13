@@ -18,6 +18,7 @@ import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -135,7 +136,10 @@ export function AlertInstances({
   unmuteAlertInstance,
   requestRefresh,
 }: AlertInstancesProps) {
-  const [pagination, setPagination] = useState<Pagination>({ index: 0, size: 10 });
+  const [pagination, setPagination] = useState<Pagination>({
+    index: 0,
+    size: DEFAULT_SEARCH_PAGE_SIZE,
+  });
 
   const mergedAlertInstances = [
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
