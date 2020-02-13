@@ -24,7 +24,7 @@ import {
   createLegacyServerInterpreterApi,
   createLegacyServerEndpoints,
 } from './legacy';
-import { ExpressionsService } from '../common';
+import { ExpressionsService, kibanaContextFunction } from '../common';
 
 // eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
@@ -66,6 +66,7 @@ export class ExpressionsServerPlugin
     executor.extendContext({
       environment: 'server',
     });
+    executor.registerFunction(kibanaContextFunction);
 
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);

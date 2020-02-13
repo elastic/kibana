@@ -27,6 +27,8 @@ import {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
+  kibanaContextFunction,
+  ExecutionContext,
 } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
@@ -37,7 +39,6 @@ import {
   setRenderersRegistry,
   setNotifications,
 } from './services';
-import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
@@ -112,17 +113,16 @@ export class ExpressionsPublicPlugin
     const { expressions } = this;
     const { executor, renderers } = expressions;
 
+    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
+      const [start] = await core.getStartServices();
+      return start.savedObjects.client.get(type, id);
+    };
+
     executor.extendContext({
       environment: 'client',
+      getSavedObject,
     });
-    executor.registerFunction(
-      kibanaContextFunction({
-        getSavedObject: async (...args) => {
-          const [start] = await core.getStartServices();
-          return start.savedObjects.client.get(...args);
-        },
-      })
-    );
+    executor.registerFunction(kibanaContextFunction);
 
     setRenderersRegistry(renderers);
 

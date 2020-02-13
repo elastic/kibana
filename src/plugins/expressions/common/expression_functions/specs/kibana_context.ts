@@ -18,9 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../common';
-import { KibanaContext } from '../../common/expression_types';
-import { SavedObjectsClient } from '../../../../core/public';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { KibanaContext } from '../../expression_types';
 
 interface Arguments {
   q?: string | null;
@@ -36,13 +35,7 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Promise<KibanaContext>
 >;
 
-export interface ExpressionFunctionKibanaContextParams {
-  getSavedObject: SavedObjectsClient['get'];
-}
-
-export const kibanaContext = ({
-  getSavedObject,
-}: ExpressionFunctionKibanaContextParams): ExpressionFunctionKibanaContext => ({
+export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   name: 'kibana_context',
   type: 'kibana_context',
   inputTypes: ['kibana_context', 'null'],
@@ -80,12 +73,15 @@ export const kibanaContext = ({
       }),
     },
   },
-  async fn(input, args) {
+
+  async fn(input, args, { getSavedObject }) {
     const queryArg = args.q ? JSON.parse(args.q) : [];
     let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
     let filters = args.filters ? JSON.parse(args.filters) : [];
 
     if (args.savedSearchId) {
+      if (typeof getSavedObject !== 'function')
+        throw new Error('"getSavedObject" function not available in execution context.');
       const obj = await getSavedObject('search', args.savedSearchId);
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
       const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
@@ -114,4 +110,4 @@ export const kibanaContext = ({
       timeRange,
     };
   },
-});
+};

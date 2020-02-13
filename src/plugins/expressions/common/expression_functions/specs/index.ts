@@ -35,5 +35,6 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
 export * from './clog';
 export * from './font';
 export * from './kibana';
+export * from './kibana_context';
 export * from './var_set';
 export * from './var';
