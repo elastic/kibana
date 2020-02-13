@@ -190,9 +190,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     context: ExtraContext = {} as ExtraContext
   ): Execution<Context & ExtraContext> {
-    if (typeof ast === 'string') ast = parseExpression(ast);
+    let expression: string | undefined;
+    if (typeof ast === 'string') {
+      expression = ast;
+      ast = parseExpression(expression);
+    }
+
     const execution = new Execution<Context & ExtraContext>({
       ast,
+      expression,
       executor: this,
       context: {
         ...this.context,

@@ -24,17 +24,19 @@ import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError } from '../expression_types/specs/error';
-import { ExpressionAstExpression, ExpressionAstFunction, parse } from '../ast';
+import { ExpressionAstExpression, ExpressionAstFunction, parse, formatExpression } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
+import { ExecutionContract } from './execution_contract';
 
 export interface ExecutionParams<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>
 > {
   executor: Executor<any>;
   ast: ExpressionAstExpression;
+  expression?: string;
   context?: ExtraContext;
 }
 
@@ -85,6 +87,19 @@ export class Execution<
    */
   private readonly firstResultFuture = new Defer<Output>();
 
+  /**
+   * Contract is a public representation of `Execution` instances. Contract we
+   * can return to other plugins for their consumption.
+   */
+  public readonly contract: ExecutionContract<
+    ExtraContext,
+    Input,
+    Output,
+    InspectorAdapters
+  > = new ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>(this);
+
+  public readonly expression: string;
+
   public get result(): Promise<unknown> {
     return this.firstResultFuture.promise;
   }
@@ -94,7 +109,10 @@ export class Execution<
   }
 
   constructor(public readonly params: ExecutionParams<ExtraContext>) {
-    const { executor, ast } = params;
+    const { executor, ast, expression } = params;
+
+    this.expression = expression || formatExpression(ast);
+
     this.state = createExecutionContainer<Output>({
       ...executor.state.get(),
       state: 'not-started',
