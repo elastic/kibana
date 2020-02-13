@@ -91,7 +91,7 @@ server.http.Kibana
 Outputs the application supplied message associated with the logging event.
 
 #### meta
-Outputs the entries of `meta` object data, if one is present in the event.
+Outputs the entries of `meta` object data in **json** format, if one is present in the event.
 Example of `%meta` output:
 ```bash
 // Meta{from: 'v7', to: 'v8'}
@@ -245,9 +245,9 @@ The log will be less verbose with `warn` level for the `server` context:
 ```
 
 ### Logging config migration
-Kibana during `v7` version provides compatibility with the Legacy logging.
+Compatibility with the legacy logging system is assured until the end of the `v7` version.
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
-root appenders, make sure that if contains `default` to provide backward compatibility.
+root appenders, make sure that it contains `default` appender to provide backward compatibility.
 **Note**: If you define an appender for a context, the log messages aren't handled by the
 `root` context anymore and not forwarded to the legacy logging service.
  
