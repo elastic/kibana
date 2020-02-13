@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
 import { MlCustomUrls } from './custom_urls';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../legacy/plugins/ml/common/constants/new_job';
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
@@ -123,6 +124,53 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertJobIdInputExists() {
       await testSubjects.existOrFail('mlJobWizardInputJobId');
+    },
+
+    async assertCategorizationDetectorTypeSelectionExists() {
+      await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorCountCard');
+      await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorRareCard');
+    },
+
+    async selectCategorizationDetectorType(identifier: string) {
+      const id = `~mlJobWizardCategorizationDetector${identifier}Card`;
+      await testSubjects.existOrFail(id);
+      await testSubjects.clickWhenNotDisabled(id);
+    },
+
+    async assertCategorizationDetectorTypeSelected(identifier: string) {
+      await testSubjects.existOrFail(`mlJobWizardCategorizationDetector${identifier}Card selected`);
+    },
+
+    async assertCategorizationFieldInputExists() {
+      await testSubjects.existOrFail('mlCategorizationFieldNameSelect > comboBoxInput');
+    },
+
+    async selectCategorizationField(identifier: string, isIdentifierKeptInField: boolean) {
+      await comboBox.set('mlCategorizationFieldNameSelect > comboBoxInput', identifier);
+
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCategorizationFieldNameSelect > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql([identifier]);
+    },
+
+    async assertCategorizationFieldSelection(expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCategorizationFieldNameSelect > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+    },
+
+    async assertCategorizationExamplesCallout(status: CATEGORY_EXAMPLES_VALIDATION_STATUS) {
+      await testSubjects.existOrFail(`mlJobWizardCategorizationExamplesCallout ${status}`);
+    },
+
+    async assertCategorizationExamplesTable(exampleCount: number) {
+      const table = await testSubjects.find('mlJobWizardCategorizationExamplesTable');
+      const body = await table.findAllByTagName('tbody');
+      expect(body.length).to.eql(1);
+      const rows = await body[0].findAllByTagName('tr');
+      expect(rows.length).to.eql(exampleCount);
     },
 
     async assertJobIdValue(expectedValue: string) {
