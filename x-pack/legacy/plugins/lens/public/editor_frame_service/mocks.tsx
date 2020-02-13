@@ -10,12 +10,10 @@ import {
   ExpressionsSetup,
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
-import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
+import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -108,9 +106,6 @@ export function createMockSetupDependencies() {
     data: {},
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    chrome: {
-      getSavedObjectsClient: () => {},
-    },
   } as unknown) as MockedSetupDependencies;
 }
 

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './plugin';
+export { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';

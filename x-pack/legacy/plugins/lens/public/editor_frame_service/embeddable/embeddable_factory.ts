@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import { Chrome } from 'ui/chrome';
-
-import { capabilities } from 'ui/capabilities';
+import {
+  Capabilities,
+  HttpSetup,
+  RecursiveReadonly,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
@@ -24,14 +26,12 @@ import { getEditPath } from '../../../../../../plugins/lens/common';
 export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
-  private chrome: Chrome;
-  private indexPatternService: IndexPatternsContract;
-  private expressionRenderer: ReactExpressionRendererType;
-
   constructor(
-    chrome: Chrome,
-    expressionRenderer: ReactExpressionRendererType,
-    indexPatternService: IndexPatternsContract
+    private coreHttp: HttpSetup,
+    private capabilities: RecursiveReadonly<Capabilities>,
+    private savedObjectsClient: SavedObjectsClientContract,
+    private expressionRenderer: ReactExpressionRendererType,
+    private indexPatternService: IndexPatternsContract
   ) {
     super({
       savedObjectMetaData: {
@@ -42,13 +42,10 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         getIconForSavedObject: () => 'lensApp',
       },
     });
-    this.chrome = chrome;
-    this.expressionRenderer = expressionRenderer;
-    this.indexPatternService = indexPatternService;
   }
 
   public isEditable() {
-    return capabilities.get().visualize.save as boolean;
+    return this.capabilities.visualize.save as boolean;
   }
 
   canCreateNew() {
@@ -66,7 +63,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
   ) {
-    const store = new SavedObjectIndexStore(this.chrome.getSavedObjectsClient());
+    const store = new SavedObjectIndexStore(this.savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
 
     const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
@@ -91,7 +88,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       this.expressionRenderer,
       {
         savedVis,
-        editUrl: this.chrome.addBasePath(getEditPath(savedObjectId)),
+        editUrl: this.coreHttp.basePath.prepend(getEditPath(savedObjectId)),
         editable: this.isEditable(),
         indexPatterns,
       },

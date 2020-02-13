@@ -8,8 +8,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import chrome, { Chrome } from 'ui/chrome';
-import { npSetup, npStart } from 'ui/new_platform';
 import {
   ExpressionsSetup,
   ExpressionsStart,
@@ -44,24 +42,35 @@ export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
   embeddable: IEmbeddableStart;
   expressions: ExpressionsStart;
-  chrome: Chrome;
 }
 
-export class EditorFramePlugin {
+async function collectAsyncDefinitions<T extends { id: string }>(
+  definitions: Array<T | Promise<T>>
+) {
+  const resolvedDefinitions = await Promise.all(definitions);
+  const definitionMap: Record<string, T> = {};
+  resolvedDefinitions.forEach(definition => {
+    definitionMap[definition.id] = definition;
+  });
+
+  return definitionMap;
+}
+
+export class EditorFrameService {
   constructor() {}
 
-  private readonly datasources: Record<string, Datasource> = {};
-  private readonly visualizations: Record<string, Visualization> = {};
+  private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
+  private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
 
   public setup(core: CoreSetup, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
 
     return {
       registerDatasource: datasource => {
-        this.datasources[datasource.id] = datasource as Datasource<unknown, unknown>;
+        this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
       registerVisualization: visualization => {
-        this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
+        this.visualizations.push(visualization as Visualization<unknown, unknown>);
       },
     };
   }
@@ -70,27 +79,34 @@ export class EditorFramePlugin {
     plugins.embeddable.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
-        plugins.chrome,
+        core.http,
+        core.application.capabilities,
+        core.savedObjects.client,
         plugins.expressions.ReactExpressionRenderer,
         plugins.data.indexPatterns
       )
     );
 
-    const createInstance = (): EditorFrameInstance => {
+    const createInstance = async (): Promise<EditorFrameInstance> => {
       let domElement: Element;
+      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+        collectAsyncDefinitions(this.datasources),
+        collectAsyncDefinitions(this.visualizations),
+      ]);
+
       return {
         mount: (element, { doc, onError, dateRange, query, filters, savedQuery, onChange }) => {
           domElement = element;
-          const firstDatasourceId = Object.keys(this.datasources)[0];
-          const firstVisualizationId = Object.keys(this.visualizations)[0];
+          const firstDatasourceId = Object.keys(resolvedDatasources)[0];
+          const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
 
           render(
             <I18nProvider>
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 onError={onError}
-                datasourceMap={this.datasources}
-                visualizationMap={this.visualizations}
+                datasourceMap={resolvedDatasources}
+                visualizationMap={resolvedVisualizations}
                 initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
@@ -120,27 +136,4 @@ export class EditorFramePlugin {
       createInstance,
     };
   }
-
-  public stop() {
-    return {};
-  }
 }
-
-const editorFrame = new EditorFramePlugin();
-
-export const editorFrameSetup = () =>
-  editorFrame.setup(npSetup.core, {
-    data: npSetup.plugins.data,
-    embeddable: npSetup.plugins.embeddable,
-    expressions: npSetup.plugins.expressions,
-  });
-
-export const editorFrameStart = () =>
-  editorFrame.start(npStart.core, {
-    data: npStart.plugins.data,
-    embeddable: npStart.plugins.embeddable,
-    expressions: npStart.plugins.expressions,
-    chrome,
-  });
-
-export const editorFrameStop = () => editorFrame.stop();

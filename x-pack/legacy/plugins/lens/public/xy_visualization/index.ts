@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup } from 'ui/new_platform';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { CoreSetup, IUiSettingsClient } from 'src/core/public';
-import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
-import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../legacy_imports';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
+import { EditorFrameSetup } from '../types';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  chrome: Chrome;
-  // TODO this is a simulated NP plugin.
-  // Once field formatters are actually migrated, the actual shim can be used
-  fieldFormat: {
-    formatFactory: FormatFactory;
-  };
+  formatFactory: FormatFactory;
+  editorFrame: EditorFrameSetup;
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -33,16 +29,12 @@ function getTimeZone(uiSettings: IUiSettingsClient) {
   return configuredTimeZone;
 }
 
-class XyVisualizationPlugin {
+export class XyVisualization {
   constructor() {}
 
   setup(
-    _core: CoreSetup | null,
-    {
-      expressions,
-      fieldFormat: { formatFactory },
-      chrome: { getUiSettingsClient },
-    }: XyVisualizationPluginSetupPlugins
+    core: CoreSetup,
+    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => legendConfig);
     expressions.registerFunction(() => xConfig);
@@ -52,24 +44,13 @@ class XyVisualizationPlugin {
     expressions.registerRenderer(
       getXyChartRenderer({
         formatFactory,
-        timeZone: getTimeZone(getUiSettingsClient()),
+        chartTheme: core.uiSettings.get<boolean>('theme:darkMode')
+          ? EUI_CHARTS_THEME_DARK.theme
+          : EUI_CHARTS_THEME_LIGHT.theme,
+        timeZone: getTimeZone(core.uiSettings),
       })
     );
 
-    return xyVisualization;
+    editorFrame.registerVisualization(xyVisualization);
   }
-
-  stop() {}
 }
-
-const plugin = new XyVisualizationPlugin();
-
-export const xyVisualizationSetup = () =>
-  plugin.setup(null, {
-    expressions: npSetup.plugins.expressions,
-    fieldFormat: {
-      formatFactory: getFormat,
-    },
-    chrome,
-  });
-export const xyVisualizationStop = () => plugin.stop();

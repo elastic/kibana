@@ -14,7 +14,7 @@ import { State } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
-import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
 
 jest.mock('../id_generator');
 

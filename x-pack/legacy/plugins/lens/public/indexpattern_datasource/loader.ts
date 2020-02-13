@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsClientContract, SavedObjectAttributes, HttpSetup } from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { StateSetter } from '../types';
