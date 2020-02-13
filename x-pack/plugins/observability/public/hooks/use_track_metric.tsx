@@ -5,10 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import {
-  UiStatsMetricType,
-  METRIC_TYPE,
-} from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 /**
