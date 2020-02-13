@@ -54,7 +54,8 @@ Object.keys(allSuites).forEach(group => {
   const nextGroup = () => {
     const group = [];
 
-    const next = suites.shift();
+    // const next = suites.shift();
+    const next = suites[0];
     const byConfig = suitesByConfig[next.config];
     let totalDuration = 0;
     while (totalDuration < 60 * 8 && byConfig.length > 0) {
@@ -64,7 +65,11 @@ Object.keys(allSuites).forEach(group => {
           : byConfig.pop();
 
       totalDuration += suite.duration;
-      suites.splice(suites.indexOf(suite), 1);
+      const index = suites.indexOf(suite);
+      if (index >= 0) {
+        suites.splice(index, 1);
+      }
+
       group.push(suite);
     }
 

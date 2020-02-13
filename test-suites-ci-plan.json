@@ -185,6 +185,52 @@
         "functional.apps.visualize._linked_saved_searches"
       ],
       "estimatedDuration": 550
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.dashboard.dashboard_clone",
+        "functional.apps.getting_started._shakespeare",
+        "functional.apps.visualize._tsvb_table",
+        "functional.apps.visualize.input_control_vis.input_control_options"
+      ],
+      "estimatedDuration": 557
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.discover._discover",
+        "functional.apps.visualize._visualize_listing",
+        "functional.apps.dashboard.create_and_add_embeddables",
+        "functional.apps.management._index_pattern_results_sort"
+      ],
+      "estimatedDuration": 566
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._tag_cloud",
+        "functional.apps.visualize._metric_chart",
+        "functional.apps.discover._discover_histogram",
+        "functional.apps.home._sample_data"
+      ],
+      "estimatedDuration": 630
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._data_table_nontimeindex",
+        "functional.apps.management._index_pattern_popularity",
+        "functional.apps.discover._saved_queries"
+      ],
+      "estimatedDuration": 538
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._inspector"
+      ],
+      "estimatedDuration": 180
     }
   ],
   "xpack": [
@@ -1006,6 +1052,104 @@
         "api_integration.apis.siem.hosts"
       ],
       "estimatedDuration": 480
+    },
+    {
+      "config": "test/api_integration/config.js",
+      "tags": [
+        "api_integration.apis.siem.kpi_network",
+        "api_integration.apis.siem.kpi_hosts",
+        "api_integration.apis.siem.network_dns",
+        "api_integration.apis.siem.network_top_n_flow",
+        "api_integration.apis.siem.overview_host",
+        "api_integration.apis.siem.saved_objects.notes",
+        "api_integration.apis.siem.saved_objects.pinned_events",
+        "api_integration.apis.spaces.get_active_space",
+        "api_integration.apis.siem.sources",
+        "api_integration.apis.siem.overview_network",
+        "api_integration.apis.siem.timeline",
+        "api_integration.apis.siem.timeline_details",
+        "api_integration.apis.siem.uncommon_processes",
+        "api_integration.apis.siem.users",
+        "api_integration.apis.siem.tls",
+        "api_integration.apis.siem.feature_controls"
+      ],
+      "estimatedDuration": 480
+    },
+    {
+      "config": "test/api_integration/config.js",
+      "tags": [
+        "api_integration.apis.short_urls.feature_controls",
+        "api_integration.apis.lens.existing_fields",
+        "api_integration.apis.lens.field_stats",
+        "api_integration.apis.lens.telemetry",
+        "api_integration.apis.endpoint.resolver",
+        "api_integration.apis.endpoint.endpoints",
+        "api_integration.apis.endpoint.alerts",
+        "api_integration.apis.ml.bucket_span_estimator",
+        "api_integration.apis.ml.calculate_model_memory_limit",
+        "api_integration.apis.monitoring.beats.overview",
+        "api_integration.apis.monitoring.logstash.overview",
+        "api_integration.apis.monitoring.logstash.nodes",
+        "api_integration.apis.monitoring.elasticsearch.indices",
+        "api_integration.apis.monitoring.logstash.multicluster_pipelines",
+        "api_integration.apis.monitoring.logstash.pipelines",
+        "api_integration.apis.xpack_main.settings.settings"
+      ],
+      "estimatedDuration": 480
+    },
+    {
+      "config": "test/licensing_plugin/config.public.ts",
+      "tags": [
+        "licensing_plugin.public.updates"
+      ],
+      "estimatedDuration": 30
+    },
+    {
+      "config": "test/oidc_api_integration/implicit_flow.config.ts",
+      "tags": [
+        "oidc_api_integration.apis.implicit_flow.oidc_auth"
+      ],
+      "estimatedDuration": 30
+    },
+    {
+      "config": "test/api_integration/config.js",
+      "tags": [
+        "api_integration.apis.monitoring.elasticsearch.ccr",
+        "api_integration.apis.telemetry.opt_in",
+        "api_integration.apis.monitoring.elasticsearch.nodes",
+        "api_integration.apis.monitoring.elasticsearch.overview",
+        "api_integration.apis.telemetry.telemetry",
+        "api_integration.apis.infra.log_analysis",
+        "api_integration.apis.kibana.kql_telemetry.kql_telemetry",
+        "api_integration.apis.features.features.features",
+        "api_integration.apis.logstash.pipeline.load",
+        "api_integration.apis.monitoring.elasticsearch.node_detail",
+        "api_integration.apis.telemetry.telemetry_local",
+        "api_integration.apis.management.index_lifecycle_management.indices",
+        "api_integration.apis.security.change_password",
+        "api_integration.apis.monitoring.setup.collection.security",
+        "api_integration.apis.security.roles",
+        "api_integration.apis.monitoring.beats.list",
+        "api_integration.apis.security.builtin_es_privileges",
+        "api_integration.apis.monitoring.beats.detail",
+        "api_integration.apis.security.basic_login",
+        "api_integration.apis.monitoring.elasticsearch.node_detail_advanced",
+        "api_integration.apis.monitoring.elasticsearch.index_detail"
+      ],
+      "estimatedDuration": 120
+    },
+    {
+      "config": "test/api_integration/config_security_basic.js",
+      "tags": [
+        "api_integration.apis.security.change_password",
+        "api_integration.apis.security.roles",
+        "api_integration.apis.security.builtin_es_privileges",
+        "api_integration.apis.security.basic_login",
+        "api_integration.apis.security.privileges",
+        "api_integration.apis.security.index_fields",
+        "api_integration.apis.security.session"
+      ],
+      "estimatedDuration": 5
     }
   ],
   "ossFirefox": [
@@ -1049,6 +1193,13 @@
         "functional.apps.home._sample_data"
       ],
       "estimatedDuration": 540
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.discover._doc_navigation"
+      ],
+      "estimatedDuration": 180
     }
   ],
   "xpackFirefox": [
@@ -1109,6 +1260,22 @@
         "functional.apps.infra.metrics_source_configuration"
       ],
       "estimatedDuration": 540
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.infra.home_page",
+        "functional.apps.infra.log_entry_categories_tab",
+        "functional.apps.watcher.watcher_test"
+      ],
+      "estimatedDuration": 540
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.infra.log_entry_rate_tab"
+      ],
+      "estimatedDuration": 180
     }
   ]
 }
