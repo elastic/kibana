@@ -9,10 +9,14 @@ import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../common/graphql/types';
-import { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
+import {
+  MetricsExplorerResponse,
+  metricsExplorerResponseRT,
+} from '../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { decodeOrThrow } from '../../../common/runtime_types';
 
 function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
   return isEqual(current, next);
@@ -45,32 +49,34 @@ export function useMetricsExplorerData(
         if (!fetch) {
           throw new Error('HTTP service is unavailable');
         }
-        const response = await fetch('/api/infra/metrics_explorer', {
-          method: 'POST',
-          body: JSON.stringify({
-            metrics:
-              options.aggregation === 'count'
-                ? [{ aggregation: 'count' }]
-                : options.metrics.map(metric => ({
-                    aggregation: metric.aggregation,
-                    field: metric.field,
-                  })),
-            groupBy: options.groupBy,
-            afterKey,
-            limit: options.limit,
-            indexPattern: source.metricAlias,
-            filterQuery:
-              (options.filterQuery &&
-                convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
-              void 0,
-            timerange: {
-              ...timerange,
-              field: source.fields.timestamp,
-              from: from.valueOf(),
-              to: to.valueOf(),
-            },
-          }),
-        });
+        const response = decodeOrThrow(metricsExplorerResponseRT)(
+          await fetch('/api/infra/metrics_explorer', {
+            method: 'POST',
+            body: JSON.stringify({
+              metrics:
+                options.aggregation === 'count'
+                  ? [{ aggregation: 'count' }]
+                  : options.metrics.map(metric => ({
+                      aggregation: metric.aggregation,
+                      field: metric.field,
+                    })),
+              groupBy: options.groupBy,
+              afterKey,
+              limit: options.limit,
+              indexPattern: source.metricAlias,
+              filterQuery:
+                (options.filterQuery &&
+                  convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
+                void 0,
+              timerange: {
+                ...timerange,
+                field: source.fields.timestamp,
+                from: from.valueOf(),
+                to: to.valueOf(),
+              },
+            }),
+          })
+        );
 
         if (response) {
           if (
