@@ -28,6 +28,11 @@ import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
+import { XJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/public';
+import { collapseLiteralStrings } from '../../../../../../../../../src/plugins/es_ui_shared/static/lib';
+
+const xJsonMode = new XJsonMode();
+
 export const JsonWatchEditForm = () => {
   const {
     links: { putWatchApiUrl },
@@ -35,6 +40,7 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
+  const [xjsonEditorValue, setXJsonEditorValue] = useState(watch.watchString);
 
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
@@ -160,9 +166,9 @@ export const JsonWatchEditForm = () => {
           errors={jsonErrors}
         >
           <EuiCodeEditor
-            mode="json"
+            mode={xJsonMode}
             width="100%"
-            theme="github"
+            theme="textmate"
             data-test-subj="jsonEditor"
             aria-label={i18n.translate(
               'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
@@ -170,12 +176,14 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Code editor',
               }
             )}
-            value={watch.watchString}
-            onChange={(json: string) => {
+            value={xjsonEditorValue}
+            onChange={(xjson: string) => {
               if (validationError) {
                 setValidationError(null);
               }
-              setWatchProperty('watchString', json);
+              setXJsonEditorValue(xjson);
+              // Keep the watch in sync with the editor content
+              setWatchProperty('watchString', collapseLiteralStrings(xjson));
             }}
           />
         </ErrableFormRow>

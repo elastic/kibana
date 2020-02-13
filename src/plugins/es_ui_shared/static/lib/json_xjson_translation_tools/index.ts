@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function collapseLiteralStrings(data: any) {
+export function collapseLiteralStrings(data: string) {
   const splitData = data.split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
     splitData[idx] = JSON.stringify(splitData[idx]);

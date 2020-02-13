@@ -20,7 +20,8 @@
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
 import { collapseLiteralStrings } from '../../../../../es_ui_shared/static/lib';
-import * as utils from '../../../lib/utils/utils';
+import * as utils from '../../../lib/utils';
+
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 
