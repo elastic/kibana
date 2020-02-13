@@ -474,12 +474,13 @@ describe('Field', () => {
           });
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          const expectedEditableValue = getEditableValue(setting.type, setting.defVal);
           expect(handleChange).toBeCalledWith(setting.name, {
-            value: getEditableValue(setting.type, setting.defVal),
+            value: expectedEditableValue,
           });
-          updated.setProps({ unsavedChanges: { value: setting.defVal } });
+          updated.setProps({ unsavedChanges: { value: expectedEditableValue } });
           const currentValue = getFieldSettingValue(updated, setting.name, type);
-          expect(currentValue).toEqual(setting.defVal);
+          expect(currentValue).toEqual(expectedEditableValue);
         });
       });
     }
