@@ -27,6 +27,7 @@ import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
+import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
 
 const NO_FILTERS: esFilters.Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
@@ -85,7 +86,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [kibana, indexPattern, query, filters]
   );
 
-  const eventsByDatasetHistogramConfigs = useMemo(
+  const eventsByDatasetHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:

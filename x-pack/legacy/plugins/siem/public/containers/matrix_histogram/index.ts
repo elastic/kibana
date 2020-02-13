@@ -80,8 +80,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setData(null);
               setTotalCount(-1);
               setInspect(null);
-              errorToToaster({ title: errorMessage, error, dispatchToaster });
               setLoading(false);
+              errorToToaster({ title: errorMessage, error, dispatchToaster });
             }
           }
         );

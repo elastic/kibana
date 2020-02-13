@@ -13,6 +13,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { MatrixHistogramContainer } from '../matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
+import { MatrixHisrogramConfigs } from '../matrix_histogram/types';
 const ID = 'alertsOverTimeQuery';
 
 export const AlertsView = ({
@@ -32,7 +33,7 @@ export const AlertsView = ({
       )}`,
     []
   );
-  const alertsHistogramConfigs = useMemo(
+  const alertsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       subtitle: getSubtitle,

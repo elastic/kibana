@@ -29,6 +29,7 @@ import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../components/alerts_viewer/histogram_configs';
+import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -78,7 +79,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  const alertsByCategoryHistogramConfigs = useMemo(
+  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:

@@ -44,7 +44,7 @@ export const getBarchartConfigs = ({
     tickSize: 8,
   },
   settings: {
-    legendPosition: legendPosition ?? Position.Bottom,
+    legendPosition: legendPosition ?? Position.Right,
     onBrushEnd,
     showLegend: showLegend ?? true,
     theme: {

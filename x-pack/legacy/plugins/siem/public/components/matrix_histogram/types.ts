@@ -29,6 +29,7 @@ export interface MatrixHisrogramConfigs {
   errorMessage: string;
   hideHistogramIfEmpty?: boolean;
   histogramType: HistogramType;
+  legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
