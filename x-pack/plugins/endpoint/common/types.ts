@@ -101,6 +101,7 @@ export interface EndpointMetadata {
   agent: {
     version: string;
     id: string;
+    name: string;
   };
   host: {
     id: string;
@@ -111,6 +112,7 @@ export interface EndpointMetadata {
       name: string;
       full: string;
       version: string;
+      variant: string;
     };
   };
 }
