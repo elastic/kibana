@@ -3,251 +3,91 @@
     {
       "config": "test/functional/config.js",
       "tags": [
-        "functional.apps.management._index_pattern_create_delete",
+        "functional.apps.visualize._data_table",
+        "functional.apps.status_page",
+        "functional.apps.visualize._shared_item",
+        "functional.apps.visualize._chart_types",
+        "functional.apps.home._add_data",
+        "functional.apps.home._newsfeed",
+        "functional.apps.home._home",
         "functional.apps.console._console",
-        "functional.apps.context._discover_navigation",
-        "functional.apps.context._filters"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
+        "functional.apps.visualize._markdown_vis",
+        "functional.apps.visualize._vega_chart",
+        "functional.apps.management._create_index_pattern_wizard",
+        "functional.apps.discover._date_nanos_mixed",
+        "functional.apps.management._mgmt_import_saved_objects",
+        "functional.apps.discover._large_string",
         "functional.apps.context._size",
         "functional.apps.context._date_nanos",
-        "functional.apps.context._date_nanos_custom_timestamp",
-        "functional.apps.dashboard.empty_dashboard"
+        "functional.apps.discover._date_nanos",
+        "functional.apps.discover._doc_navigation",
+        "functional.apps.dashboard.embed_mode"
       ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.embeddable_rendering",
-        "functional.apps.dashboard.create_and_add_embeddables",
-        "functional.apps.dashboard.time_zones",
-        "functional.apps.dashboard.dashboard_options"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.data_shared_attributes",
-        "functional.apps.dashboard.embed_mode",
-        "functional.apps.dashboard.dashboard_query_bar",
-        "functional.apps.dashboard.full_screen_mode"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.dashboard_filter_bar",
-        "functional.apps.dashboard.dashboard_filtering",
-        "functional.apps.dashboard.panel_expand_toggle",
-        "functional.apps.dashboard.dashboard_grid"
-      ],
-      "estimatedDuration": 720
+      "estimatedDuration": 731
     },
     {
       "config": "test/functional/config.js",
       "tags": [
         "functional.apps.dashboard.view_edit",
-        "functional.apps.dashboard.dashboard_snapshots",
-        "functional.apps.dashboard.dashboard_time_picker",
-        "functional.apps.dashboard.bwc_shared_urls"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.panel_controls",
-        "functional.apps.dashboard.dashboard_state",
-        "functional.apps.dashboard.dashboard_save",
-        "functional.apps.dashboard.dashboard_time"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.dashboard_listing",
-        "functional.apps.dashboard.dashboard_clone",
-        "functional.apps.discover._saved_queries",
-        "functional.apps.discover._discover"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.discover._discover_histogram",
-        "functional.apps.discover._filter_editor",
         "functional.apps.discover._errors",
+        "functional.apps.context._discover_navigation",
+        "functional.apps.visualize._vertical_bar_chart",
+        "functional.apps.visualize.input_control_vis.chained_controls",
+        "functional.apps.dashboard.panel_expand_toggle",
+        "functional.apps.dashboard.dashboard_grid",
+        "functional.apps.dashboard.dashboard_options",
+        "functional.apps.management._scripted_fields_filter",
+        "functional.apps.discover._source_filters",
+        "functional.apps.timelion._expression_typeahead",
+        "functional.apps.visualize._histogram_request_start",
+        "functional.apps.management._test_huge_fields"
+      ],
+      "estimatedDuration": 734
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._pie_chart",
+        "functional.apps.management._scripted_fields",
+        "functional.apps.context._filters"
+      ],
+      "estimatedDuration": 738
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.dashboard.dashboard_filtering",
+        "functional.apps.dashboard.dashboard_state",
+        "functional.apps.visualize._lab_mode",
+        "functional.apps.discover._sidebar",
+        "functional.apps.dashboard.bwc_shared_urls",
+        "functional.apps.dashboard.full_screen_mode"
+      ],
+      "estimatedDuration": 745
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._tile_map",
+        "functional.apps.visualize._tsvb_chart",
+        "functional.apps.visualize._point_series_options",
+        "functional.apps.dashboard.dashboard_query_bar",
+        "functional.apps.discover._inspector",
         "functional.apps.discover._field_data"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 762
     },
     {
       "config": "test/functional/config.js",
       "tags": [
-        "functional.apps.discover._shared_links",
-        "functional.apps.discover._sidebar",
-        "functional.apps.discover._source_filters",
-        "functional.apps.discover._large_string"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.discover._inspector",
-        "functional.apps.discover._doc_navigation",
-        "functional.apps.discover._date_nanos",
-        "functional.apps.discover._date_nanos_mixed"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.home._navigation",
-        "functional.apps.home._home",
-        "functional.apps.home._newsfeed",
-        "functional.apps.home._add_data"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.home._sample_data",
-        "functional.apps.management._create_index_pattern_wizard",
-        "functional.apps.getting_started._shakespeare",
-        "functional.apps.management._index_pattern_results_sort"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.management._index_pattern_popularity",
-        "functional.apps.management._kibana_settings",
-        "functional.apps.management._scripted_fields",
-        "functional.apps.management._scripted_fields_preview"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.management._mgmt_import_saved_objects",
-        "functional.apps.management._index_pattern_filter",
-        "functional.apps.management._scripted_fields_filter",
-        "functional.apps.management._import_objects"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.management._test_huge_fields",
-        "functional.apps.management._handle_alias",
-        "functional.apps.management._handle_version_conflict",
-        "functional.apps.status_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.timelion._expression_typeahead",
-        "functional.apps.visualize._embedding_chart",
-        "functional.apps.visualize._chart_types",
-        "functional.apps.visualize._area_chart"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._data_table",
-        "functional.apps.visualize._data_table_nontimeindex",
-        "functional.apps.visualize._data_table_notimeindex_filters",
-        "functional.apps.visualize._inspector"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
+        "functional.apps.visualize._area_chart",
+        "functional.apps.dashboard.dashboard_listing",
+        "functional.apps.visualize._tsvb_time_series",
+        "functional.apps.visualize._region_map",
         "functional.apps.visualize._experimental_vis",
-        "functional.apps.visualize._gauge_chart",
-        "functional.apps.visualize._heatmap_chart",
-        "functional.apps.visualize.input_control_vis.input_control_options"
+        "functional.apps.dashboard.empty_dashboard"
       ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize.input_control_vis.dynamic_options",
-        "functional.apps.visualize.input_control_vis.chained_controls",
-        "functional.apps.visualize.input_control_vis.input_control_range",
-        "functional.apps.visualize._histogram_request_start"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._metric_chart",
-        "functional.apps.visualize._line_chart",
-        "functional.apps.visualize._pie_chart",
-        "functional.apps.visualize._region_map"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._point_series_options",
-        "functional.apps.visualize._markdown_vis",
-        "functional.apps.visualize._shared_item",
-        "functional.apps.visualize._lab_mode"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._linked_saved_searches",
-        "functional.apps.visualize._visualize_listing",
-        "functional.apps.visualize._tag_cloud",
-        "functional.apps.visualize._tile_map"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._vertical_bar_chart",
-        "functional.apps.visualize._vertical_bar_chart_nontimeindex",
-        "functional.apps.visualize._tsvb_chart",
-        "functional.apps.visualize._tsvb_time_series"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize._tsvb_markdown",
-        "functional.apps.visualize._tsvb_table",
-        "functional.apps.visualize._vega_chart"
-      ],
-      "estimatedDuration": 540
+      "estimatedDuration": 731
     },
     {
       "config": "test/ui_capabilities/newsfeed_err/config.ts",
@@ -255,387 +95,323 @@
         "ui_capabilities.newsfeed_err.test"
       ],
       "estimatedDuration": 180
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.management._import_objects",
+        "functional.apps.dashboard.dashboard_filter_bar",
+        "functional.apps.management._kibana_settings",
+        "functional.apps.management._handle_alias"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.dashboard.embeddable_rendering",
+        "functional.apps.visualize._vertical_bar_chart_nontimeindex",
+        "functional.apps.management._handle_version_conflict",
+        "functional.apps.dashboard.dashboard_time_picker"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._line_chart",
+        "functional.apps.dashboard.panel_controls",
+        "functional.apps.context._date_nanos_custom_timestamp",
+        "functional.apps.dashboard.dashboard_save"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.dashboard.dashboard_time",
+        "functional.apps.home._navigation",
+        "functional.apps.dashboard.dashboard_clone",
+        "functional.apps.getting_started._shakespeare"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.discover._discover",
+        "functional.apps.visualize._visualize_listing",
+        "functional.apps.visualize._tag_cloud",
+        "functional.apps.visualize._metric_chart"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._data_table_nontimeindex",
+        "functional.apps.management._index_pattern_popularity",
+        "functional.apps.visualize._inspector",
+        "functional.apps.discover._saved_queries",
+        "functional.apps.management._index_pattern_filter"
+      ],
+      "estimatedDuration": 774
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.home._sample_data",
+        "functional.apps.discover._discover_histogram",
+        "functional.apps.management._index_pattern_results_sort",
+        "functional.apps.dashboard.create_and_add_embeddables",
+        "functional.apps.visualize.input_control_vis.input_control_options",
+        "functional.apps.visualize._tsvb_table",
+        "functional.apps.visualize.input_control_vis.dynamic_options"
+      ],
+      "estimatedDuration": 729
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.visualize._linked_saved_searches",
+        "functional.apps.discover._shared_links",
+        "functional.apps.management._scripted_fields_preview",
+        "functional.apps.dashboard.dashboard_snapshots",
+        "functional.apps.visualize._gauge_chart",
+        "functional.apps.visualize._tsvb_markdown",
+        "functional.apps.dashboard.data_shared_attributes",
+        "functional.apps.dashboard.time_zones",
+        "functional.apps.visualize.input_control_vis.input_control_range",
+        "functional.apps.visualize._heatmap_chart"
+      ],
+      "estimatedDuration": 773
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.discover._filter_editor",
+        "functional.apps.visualize._embedding_chart",
+        "functional.apps.visualize._data_table_notimeindex_filters",
+        "functional.apps.management._index_pattern_create_delete"
+      ],
+      "estimatedDuration": 265
     }
   ],
   "xpack": [
     {
       "config": "test/functional/config.js",
       "tags": [
-        "functional.apps.advanced_settings.feature_controls.advanced_settings_security",
-        "functional.apps.canvas.smoke_test",
-        "functional.apps.canvas.expression",
-        "functional.apps.canvas.custom_elements"
+        "functional.apps.maps.es_geo_grid_source"
       ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/licensing_plugin/config.legacy.ts",
-      "tags": [
-        "licensing_plugin.legacy.updates"
-      ],
-      "estimatedDuration": 180
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.canvas.feature_controls.canvas_security",
-        "functional.apps.canvas.feature_controls.canvas_spaces",
-        "functional.apps.graph.feature_controls.graph_security",
-        "functional.apps.graph.feature_controls.graph_spaces"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.graph.graph",
-        "functional.apps.monitoring.feature_controls.monitoring_security",
-        "functional.apps.monitoring.feature_controls.monitoring_spaces",
-        "functional.apps.monitoring.cluster.list"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.monitoring.cluster.overview",
-        "functional.apps.monitoring.cluster.alerts",
-        "functional.apps.monitoring.elasticsearch.overview",
-        "functional.apps.monitoring.elasticsearch.nodes"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.monitoring.elasticsearch.node_detail",
-        "functional.apps.monitoring.elasticsearch.indices",
-        "functional.apps.monitoring.elasticsearch.index_detail",
-        "functional.apps.monitoring.elasticsearch.shards"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.monitoring.kibana.overview",
-        "functional.apps.monitoring.kibana.instances",
-        "functional.apps.monitoring.kibana.instance",
-        "functional.apps.monitoring.logstash.pipelines"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.monitoring.beats.cluster",
-        "functional.apps.monitoring.beats.overview",
-        "functional.apps.monitoring.beats.listing",
-        "functional.apps.monitoring.beats.beat_detail"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.monitoring.time_filter",
-        "functional.apps.monitoring.enable_monitoring",
-        "functional.apps.watcher.watcher_test",
-        "functional.apps.dashboard.feature_controls.dashboard_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dashboard.feature_controls.dashboard_spaces",
-        "functional.apps.dashboard_mode.dashboard_view_mode",
-        "functional.apps.dashboard_mode.dashboard_empty_screen",
-        "functional.apps.discover.feature_controls.discover_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.discover.feature_controls.discover_spaces",
-        "functional.apps.security.security",
-        "functional.apps.security.doc_level_security_roles",
-        "functional.apps.security.management"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.security.users",
-        "functional.apps.security.secure_roles_perm",
-        "functional.apps.security.field_level_security",
-        "functional.apps.security.rbac_phase1"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.security.user_email",
-        "functional.apps.security.role_mappings",
-        "functional.apps.spaces.copy_saved_objects",
-        "functional.apps.spaces.feature_controls.spaces_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.spaces.spaces_selection",
-        "functional.apps.spaces.enter_space",
-        "functional.apps.lens.smokescreen",
-        "functional.apps.lens.lens_reporting"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.logstash.pipeline_list",
-        "functional.apps.logstash.pipeline_create",
-        "functional.apps.grok_debugger.grok_debugger",
-        "functional.apps.infra.home_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.infra.feature_controls.infrastructure_security",
-        "functional.apps.infra.feature_controls.infrastructure_spaces",
-        "functional.apps.infra.feature_controls.logs_security",
-        "functional.apps.infra.feature_controls.logs_spaces"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.infra.log_entry_categories_tab",
-        "functional.apps.infra.log_entry_rate_tab",
-        "functional.apps.infra.logs_source_configuration",
-        "functional.apps.infra.metrics_source_configuration"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.infra.link_to",
-        "functional.apps.machine_learning.feature_controls.ml_security",
-        "functional.apps.machine_learning.feature_controls.ml_spaces",
-        "functional.apps.machine_learning.pages"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.machine_learning.anomaly_detection.single_metric_job",
-        "functional.apps.machine_learning.anomaly_detection.multi_metric_job",
-        "functional.apps.machine_learning.anomaly_detection.population_job",
-        "functional.apps.machine_learning.anomaly_detection.saved_search_job"
-      ],
-      "estimatedDuration": 720
+      "estimatedDuration": 736
     },
     {
       "config": "test/functional/config.js",
       "tags": [
         "functional.apps.machine_learning.anomaly_detection.advanced_job",
-        "functional.apps.machine_learning.anomaly_detection.single_metric_viewer",
-        "functional.apps.machine_learning.anomaly_detection.anomaly_explorer",
-        "functional.apps.machine_learning.data_visualizer.index_data_visualizer"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.machine_learning.data_frame_analytics.outlier_detection_creation",
-        "functional.apps.machine_learning.data_frame_analytics.regression_creation",
-        "functional.apps.machine_learning.data_frame_analytics.classification_creation",
+        "functional.apps.cross_cluster_replication.home_page",
+        "functional.apps.endpoint.landing_page",
+        "functional.apps.index_lifecycle_management.home_page",
+        "functional.apps.infra.link_to",
+        "functional.apps.license_management.home_page",
+        "functional.apps.uptime.locations",
+        "functional.apps.uptime.monitor",
+        "functional.apps.remote_clusters.home_page",
+        "functional.apps.maps.full_screen_mode",
+        "functional.apps.infra.log_entry_categories_tab",
+        "functional.apps.maps.embeddable.tooltip_filter_actions",
+        "functional.apps.index_management.home_page",
+        "functional.apps.machine_learning.pages",
+        "functional.apps.infra.log_entry_rate_tab",
+        "functional.apps.security.role_mappings",
         "functional.apps.rollup_job.rollup_jobs"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 725
     },
     {
       "config": "test/functional/config.js",
       "tags": [
-        "functional.apps.rollup_job.hybrid_index_pattern",
+        "functional.apps.machine_learning.anomaly_detection.saved_search_job",
+        "functional.apps.machine_learning.anomaly_detection.single_metric_viewer",
+        "functional.apps.machine_learning.data_frame_analytics.outlier_detection_creation",
         "functional.apps.rollup_job.tsvb",
-        "functional.apps.maps.documents_source.docvalue_fields",
-        "functional.apps.maps.documents_source.search_hits"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.maps.documents_source.top_hits",
-        "functional.apps.maps.saved_object_management",
-        "functional.apps.maps.sample_data",
-        "functional.apps.maps.feature_controls.maps_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.maps.feature_controls.maps_spaces",
-        "functional.apps.maps.full_screen_mode",
-        "functional.apps.maps.es_geo_grid_source",
-        "functional.apps.maps.joins"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
         "functional.apps.maps.add_layer_panel",
-        "functional.apps.maps.import_geojson.add_layer_import_panel",
-        "functional.apps.maps.import_geojson.file_indexing_panel",
-        "functional.apps.maps.layer_errors"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.maps.embeddable.dashboard",
-        "functional.apps.maps.embeddable.embeddable_state",
-        "functional.apps.maps.embeddable.tooltip_filter_actions",
-        "functional.apps.status_page.status_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.timelion.feature_controls.timelion_security",
-        "functional.apps.timelion.feature_controls.timelion_spaces",
-        "functional.apps.upgrade_assistant.upgrade_assistant",
-        "functional.apps.visualize.feature_controls.visualize_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.visualize.feature_controls.visualize_spaces",
-        "functional.apps.visualize.hybrid_visualization",
-        "functional.apps.uptime.locations",
-        "functional.apps.uptime.feature_controls.uptime_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.uptime.feature_controls.uptime_spaces",
-        "functional.apps.uptime.overview",
-        "functional.apps.uptime.monitor",
-        "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.dev_tools.feature_controls.dev_tools_security",
-        "functional.apps.dev_tools.feature_controls.dev_tools_spaces",
-        "functional.apps.dev_tools.searchprofiler_editor",
-        "functional.apps.apm.feature_controls.apm_security"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.apm.feature_controls.apm_spaces",
-        "functional.apps.index_patterns.feature_controls.index_patterns_security",
-        "functional.apps.index_patterns.feature_controls.index_patterns_spaces",
-        "functional.apps.index_management.home_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.index_lifecycle_management.home_page",
-        "functional.apps.snapshot_restore.home_page",
-        "functional.apps.cross_cluster_replication.home_page",
-        "functional.apps.remote_clusters.home_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.js",
-      "tags": [
-        "functional.apps.transform.creation_index_pattern",
-        "functional.apps.transform.creation_saved_search",
         "functional.apps.endpoint.feature_controls.endpoint_spaces",
-        "functional.apps.endpoint.landing_page"
+        "functional.apps.visualize.hybrid_visualization",
+        "functional.apps.monitoring.kibana.overview"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 743
+    },
+    {
+      "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
+      "tags": [
+        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
+        "spaces_api_integration.security_and_spaces.apis.get",
+        "spaces_api_integration.security_and_spaces.apis.update",
+        "spaces_api_integration.security_and_spaces.apis.delete"
+      ],
+      "estimatedDuration": 747
+    },
+    {
+      "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
+      "tags": [
+        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
+        "spaces_api_integration.security_and_spaces.apis.update",
+        "spaces_api_integration.security_and_spaces.apis.get",
+        "spaces_api_integration.security_and_spaces.apis.delete"
+      ],
+      "estimatedDuration": 725
+    },
+    {
+      "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
+      "tags": [
+        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
+        "spaces_api_integration.security_and_spaces.apis.get_all",
+        "spaces_api_integration.security_and_spaces.apis.create"
+      ],
+      "estimatedDuration": 667
+    },
+    {
+      "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
+      "tags": [
+        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
+        "spaces_api_integration.security_and_spaces.apis.get_all",
+        "spaces_api_integration.security_and_spaces.apis.create"
+      ],
+      "estimatedDuration": 677
     },
     {
       "config": "test/functional/config.js",
       "tags": [
-        "functional.apps.license_management.home_page",
-        "functional.apps.advanced_settings.feature_controls.advanced_settings_spaces"
+        "functional.apps.dashboard_mode.dashboard_view_mode",
+        "functional.apps.dashboard.feature_controls.dashboard_security",
+        "functional.apps.machine_learning.anomaly_detection.anomaly_explorer"
       ],
-      "estimatedDuration": 360
-    },
-    {
-      "config": "test/reporting/configs/chromium_api.js",
-      "tags": [
-        "reporting.api.usage"
-      ],
-      "estimatedDuration": 180
+      "estimatedDuration": 756
     },
     {
       "config": "test/reporting/configs/chromium_functional.js",
       "tags": [
         "reporting.functional.reporting"
       ],
-      "estimatedDuration": 180
+      "estimatedDuration": 368
     },
     {
-      "config": "test/reporting/configs/generate_api.js",
+      "config": "test/functional/config.js",
       "tags": [
-        "reporting.api.generate.csv_saved_search",
-        "reporting.api.generate.csv_job_params"
+        "functional.apps.discover.feature_controls.discover_security",
+        "functional.apps.monitoring.elasticsearch.overview",
+        "functional.apps.monitoring.beats.overview",
+        "functional.apps.lens.lens_reporting",
+        "functional.apps.monitoring.enable_monitoring",
+        "functional.apps.machine_learning.data_frame_analytics.regression_creation"
       ],
-      "estimatedDuration": 360
+      "estimatedDuration": 754
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.monitoring.kibana.instances",
+        "functional.apps.security.field_level_security",
+        "functional.apps.transform.creation_index_pattern",
+        "functional.apps.maps.embeddable.embeddable_state",
+        "functional.apps.monitoring.beats.cluster",
+        "functional.apps.monitoring.beats.listing"
+      ],
+      "estimatedDuration": 731
+    },
+    {
+      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
+      "tags": [
+        "alerting_api_integration.security_and_spaces.tests.alerting.alerts",
+        "alerting_api_integration.security_and_spaces.tests.alerting.update",
+        "alerting_api_integration.security_and_spaces.tests.actions.find",
+        "alerting_api_integration.security_and_spaces.tests.alerting.find",
+        "alerting_api_integration.security_and_spaces.tests.alerting.delete",
+        "alerting_api_integration.security_and_spaces.tests.alerting.disable",
+        "alerting_api_integration.security_and_spaces.tests.alerting.get_alert_state",
+        "alerting_api_integration.security_and_spaces.tests.alerting.update_api_key",
+        "alerting_api_integration.security_and_spaces.tests.alerting.get",
+        "alerting_api_integration.security_and_spaces.tests.actions.execute",
+        "alerting_api_integration.security_and_spaces.tests.alerting.enable",
+        "alerting_api_integration.security_and_spaces.tests.actions.list_action_types",
+        "alerting_api_integration.security_and_spaces.tests.alerting.list_alert_types",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.email",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.server_log",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.slack"
+      ],
+      "estimatedDuration": 721
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.machine_learning.anomaly_detection.population_job",
+        "functional.apps.maps.import_geojson.file_indexing_panel",
+        "functional.apps.logstash.pipeline_list",
+        "functional.apps.uptime.feature_controls.uptime_spaces"
+      ],
+      "estimatedDuration": 771
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.maps.documents_source.search_hits",
+        "functional.apps.machine_learning.anomaly_detection.single_metric_job",
+        "functional.apps.maps.joins",
+        "functional.apps.transform.creation_saved_search",
+        "functional.apps.snapshot_restore.home_page"
+      ],
+      "estimatedDuration": 766
     },
     {
       "config": "test/functional_with_es_ssl/config.ts",
       "tags": [
+        "functional_with_es_ssl.apps.triggers_actions_ui.alerts",
         "functional_with_es_ssl.apps.triggers_actions_ui.home_page",
         "functional_with_es_ssl.apps.triggers_actions_ui.connectors",
-        "functional_with_es_ssl.apps.triggers_actions_ui.alerts",
         "functional_with_es_ssl.apps.triggers_actions_ui.details"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 292
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.spaces.spaces_selection",
+        "functional.apps.graph.graph",
+        "functional.apps.machine_learning.anomaly_detection.multi_metric_job",
+        "functional.apps.security.users",
+        "functional.apps.upgrade_assistant.upgrade_assistant"
+      ],
+      "estimatedDuration": 723
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.spaces.feature_controls.spaces_security",
+        "functional.apps.maps.saved_object_management",
+        "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security",
+        "functional.apps.index_patterns.feature_controls.index_patterns_spaces",
+        "functional.apps.machine_learning.feature_controls.ml_spaces",
+        "functional.apps.monitoring.beats.beat_detail"
+      ],
+      "estimatedDuration": 769
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.infra.feature_controls.infrastructure_spaces",
+        "functional.apps.dev_tools.searchprofiler_editor",
+        "functional.apps.monitoring.elasticsearch.shards",
+        "functional.apps.monitoring.elasticsearch.indices",
+        "functional.apps.uptime.overview",
+        "functional.apps.status_page.status_page"
+      ],
+      "estimatedDuration": 743
     },
     {
       "config": "test/functional/config_security_basic.js",
       "tags": [
         "functional.apps.security.basic_license.role_mappings"
-      ],
-      "estimatedDuration": 180
-    },
-    {
-      "config": "test/licensing_plugin/config.public.ts",
-      "tags": [
-        "licensing_plugin.public.updates"
       ],
       "estimatedDuration": 180
     },
@@ -649,27 +425,18 @@
       "estimatedDuration": 540
     },
     {
-      "config": "test/upgrade_assistant_integration/config.js",
+      "config": "test/licensing_plugin/config.legacy.ts",
       "tags": [
-        "upgrade_assistant_integration.upgrade_assistant.reindexing"
+        "licensing_plugin.legacy.updates"
       ],
       "estimatedDuration": 180
     },
     {
-      "config": "test/ui_capabilities/spaces_only/config.ts",
-      "tags": [
-        "ui_capabilities.spaces_only.tests.nav_links",
-        "ui_capabilities.spaces_only.tests.foo",
-        "ui_capabilities.spaces_only.tests.catalogue"
-      ],
-      "estimatedDuration": 540
-    },
-    {
       "config": "test/ui_capabilities/security_only/config.ts",
       "tags": [
-        "ui_capabilities.security_only.tests.nav_links",
         "ui_capabilities.security_only.tests.foo",
-        "ui_capabilities.security_only.tests.catalogue"
+        "ui_capabilities.security_only.tests.catalogue",
+        "ui_capabilities.security_only.tests.nav_links"
       ],
       "estimatedDuration": 540
     },
@@ -683,6 +450,35 @@
       "estimatedDuration": 540
     },
     {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.infra.feature_controls.infrastructure_security",
+        "functional.apps.monitoring.kibana.instance",
+        "functional.apps.monitoring.logstash.pipelines",
+        "functional.apps.maps.feature_controls.maps_spaces"
+      ],
+      "estimatedDuration": 720
+    },
+    {
+      "config": "test/ui_capabilities/spaces_only/config.ts",
+      "tags": [
+        "ui_capabilities.spaces_only.tests.nav_links",
+        "ui_capabilities.spaces_only.tests.foo",
+        "ui_capabilities.spaces_only.tests.catalogue"
+      ],
+      "estimatedDuration": 540
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.maps.feature_controls.maps_security",
+        "functional.apps.spaces.copy_saved_objects",
+        "functional.apps.maps.sample_data",
+        "functional.apps.watcher.watcher_test"
+      ],
+      "estimatedDuration": 720
+    },
+    {
       "config": "test/plugin_functional/config.ts",
       "tags": [
         "plugin_functional.resolver"
@@ -690,131 +486,407 @@
       "estimatedDuration": 180
     },
     {
-      "config": "test/alerting_api_integration/spaces_only/config.ts",
+      "config": "test/functional/config.js",
       "tags": [
-        "alerting_api_integration.spaces_only.tests.actions.type_not_enabled",
-        "alerting_api_integration.spaces_only.tests.actions.create",
-        "alerting_api_integration.spaces_only.tests.actions.delete",
-        "alerting_api_integration.spaces_only.tests.actions.find",
-        "alerting_api_integration.spaces_only.tests.actions.get",
-        "alerting_api_integration.spaces_only.tests.actions.list_action_types",
-        "alerting_api_integration.spaces_only.tests.actions.update",
-        "alerting_api_integration.spaces_only.tests.actions.execute",
-        "alerting_api_integration.spaces_only.tests.actions.builtin_action_types.es_index",
-        "alerting_api_integration.spaces_only.tests.alerting.create",
-        "alerting_api_integration.spaces_only.tests.alerting.delete",
-        "alerting_api_integration.spaces_only.tests.alerting.disable",
-        "alerting_api_integration.spaces_only.tests.alerting.enable",
-        "alerting_api_integration.spaces_only.tests.alerting.find",
-        "alerting_api_integration.spaces_only.tests.alerting.get",
-        "alerting_api_integration.spaces_only.tests.alerting.get_alert_state",
-        "alerting_api_integration.spaces_only.tests.alerting.list_alert_types",
-        "alerting_api_integration.spaces_only.tests.alerting.mute_all",
-        "alerting_api_integration.spaces_only.tests.alerting.mute_instance",
-        "alerting_api_integration.spaces_only.tests.alerting.unmute_all",
-        "alerting_api_integration.spaces_only.tests.alerting.unmute_instance",
-        "alerting_api_integration.spaces_only.tests.alerting.update",
-        "alerting_api_integration.spaces_only.tests.alerting.update_api_key",
-        "alerting_api_integration.spaces_only.tests.alerting.alerts_space1"
+        "functional.apps.canvas.feature_controls.canvas_security",
+        "functional.apps.graph.feature_controls.graph_security",
+        "functional.apps.canvas.feature_controls.canvas_spaces",
+        "functional.apps.security.rbac_phase1",
+        "functional.apps.monitoring.elasticsearch.index_detail"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 740
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.monitoring.cluster.overview",
+        "functional.apps.visualize.feature_controls.visualize_security",
+        "functional.apps.advanced_settings.feature_controls.advanced_settings_security",
+        "functional.apps.discover.feature_controls.discover_spaces",
+        "functional.apps.grok_debugger.grok_debugger",
+        "functional.apps.monitoring.time_filter"
+      ],
+      "estimatedDuration": 781
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.security.security",
+        "functional.apps.monitoring.feature_controls.monitoring_security",
+        "functional.apps.maps.embeddable.dashboard",
+        "functional.apps.logstash.pipeline_create",
+        "functional.apps.apm.feature_controls.apm_spaces",
+        "functional.apps.dashboard.feature_controls.dashboard_spaces"
+      ],
+      "estimatedDuration": 758
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.infra.logs_source_configuration",
+        "functional.apps.monitoring.cluster.alerts",
+        "functional.apps.dev_tools.feature_controls.dev_tools_spaces",
+        "functional.apps.monitoring.feature_controls.monitoring_spaces",
+        "functional.apps.graph.feature_controls.graph_spaces",
+        "functional.apps.machine_learning.feature_controls.ml_security"
+      ],
+      "estimatedDuration": 777
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.machine_learning.data_frame_analytics.classification_creation",
+        "functional.apps.advanced_settings.feature_controls.advanced_settings_spaces",
+        "functional.apps.uptime.feature_controls.uptime_security",
+        "functional.apps.security.doc_level_security_roles",
+        "functional.apps.timelion.feature_controls.timelion_security",
+        "functional.apps.visualize.feature_controls.visualize_spaces"
+      ],
+      "estimatedDuration": 751
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.dev_tools.feature_controls.dev_tools_security",
+        "functional.apps.dashboard_mode.dashboard_empty_screen",
+        "functional.apps.infra.feature_controls.logs_spaces",
+        "functional.apps.monitoring.elasticsearch.nodes",
+        "functional.apps.security.management",
+        "functional.apps.maps.import_geojson.add_layer_import_panel",
+        "functional.apps.infra.home_page"
+      ],
+      "estimatedDuration": 801
+    },
+    {
+      "config": "test/reporting/configs/generate_api.js",
+      "tags": [
+        "reporting.api.generate.csv_saved_search",
+        "reporting.api.generate.csv_job_params"
+      ],
+      "estimatedDuration": 142
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.infra.metrics_source_configuration",
+        "functional.apps.security.secure_roles_perm",
+        "functional.apps.index_patterns.feature_controls.index_patterns_security",
+        "functional.apps.lens.smokescreen",
+        "functional.apps.canvas.custom_elements",
+        "functional.apps.maps.documents_source.docvalue_fields",
+        "functional.apps.infra.feature_controls.logs_security"
+      ],
+      "estimatedDuration": 796
+    },
+    {
+      "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+      "tags": [
+        "saved_object_api_integration.security_and_spaces.apis.create",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_get",
+        "saved_object_api_integration.security_and_spaces.apis.delete",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_update",
+        "saved_object_api_integration.security_and_spaces.apis.import",
+        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
+        "saved_object_api_integration.security_and_spaces.apis.find",
+        "saved_object_api_integration.security_and_spaces.apis.update",
+        "saved_object_api_integration.security_and_spaces.apis.export"
+      ],
+      "estimatedDuration": 744
+    },
+    {
+      "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+      "tags": [
+        "saved_object_api_integration.security_and_spaces.apis.create",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_get",
+        "saved_object_api_integration.security_and_spaces.apis.delete",
+        "saved_object_api_integration.security_and_spaces.apis.bulk_update",
+        "saved_object_api_integration.security_and_spaces.apis.import",
+        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
+        "saved_object_api_integration.security_and_spaces.apis.find",
+        "saved_object_api_integration.security_and_spaces.apis.update",
+        "saved_object_api_integration.security_and_spaces.apis.export"
+      ],
+      "estimatedDuration": 738
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.maps.documents_source.top_hits",
+        "functional.apps.spaces.enter_space",
+        "functional.apps.rollup_job.hybrid_index_pattern",
+        "functional.apps.monitoring.elasticsearch.node_detail",
+        "functional.apps.machine_learning.data_visualizer.index_data_visualizer",
+        "functional.apps.maps.layer_errors",
+        "functional.apps.canvas.smoke_test"
+      ],
+      "estimatedDuration": 736
+    },
+    {
+      "config": "test/functional/config.js",
+      "tags": [
+        "functional.apps.timelion.feature_controls.timelion_spaces",
+        "functional.apps.monitoring.cluster.list",
+        "functional.apps.apm.feature_controls.apm_security",
+        "functional.apps.security.user_email",
+        "functional.apps.canvas.expression"
+      ],
+      "estimatedDuration": 472
+    },
+    {
+      "config": "test/reporting/configs/chromium_api.js",
+      "tags": [
+        "reporting.api.usage"
+      ],
+      "estimatedDuration": 86
+    },
+    {
+      "config": "test/upgrade_assistant_integration/config.js",
+      "tags": [
+        "upgrade_assistant_integration.upgrade_assistant.reindexing"
+      ],
+      "estimatedDuration": 79
+    },
+    {
+      "config": "test/plugin_api_integration/config.js",
+      "tags": [
+        "plugin_api_integration.task_manager.task_manager_integration",
+        "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
+      ],
+      "estimatedDuration": 107
+    },
+    {
+      "config": "test/saved_object_api_integration/security_only/config_basic.ts",
+      "tags": [
+        "saved_object_api_integration.security_only.apis.bulk_create",
+        "saved_object_api_integration.security_only.apis.bulk_get",
+        "saved_object_api_integration.security_only.apis.resolve_import_errors",
+        "saved_object_api_integration.security_only.apis.bulk_update",
+        "saved_object_api_integration.security_only.apis.delete",
+        "saved_object_api_integration.security_only.apis.import",
+        "saved_object_api_integration.security_only.apis.create",
+        "saved_object_api_integration.security_only.apis.find",
+        "saved_object_api_integration.security_only.apis.update",
+        "saved_object_api_integration.security_only.apis.get",
+        "saved_object_api_integration.security_only.apis.export"
+      ],
+      "estimatedDuration": 418
+    },
+    {
+      "config": "test/saved_object_api_integration/security_only/config_trial.ts",
+      "tags": [
+        "saved_object_api_integration.security_only.apis.bulk_create",
+        "saved_object_api_integration.security_only.apis.bulk_get",
+        "saved_object_api_integration.security_only.apis.delete",
+        "saved_object_api_integration.security_only.apis.find",
+        "saved_object_api_integration.security_only.apis.bulk_update",
+        "saved_object_api_integration.security_only.apis.import",
+        "saved_object_api_integration.security_only.apis.resolve_import_errors",
+        "saved_object_api_integration.security_only.apis.create",
+        "saved_object_api_integration.security_only.apis.get",
+        "saved_object_api_integration.security_only.apis.update",
+        "saved_object_api_integration.security_only.apis.export"
+      ],
+      "estimatedDuration": 412
+    },
+    {
+      "config": "test/spaces_api_integration/spaces_only/config.ts",
+      "tags": [
+        "spaces_api_integration.spaces_only.apis.copy_to_space",
+        "spaces_api_integration.spaces_only.apis.resolve_copy_to_space_conflicts",
+        "spaces_api_integration.spaces_only.apis.get",
+        "spaces_api_integration.spaces_only.apis.delete",
+        "spaces_api_integration.spaces_only.apis.update",
+        "spaces_api_integration.spaces_only.apis.create",
+        "spaces_api_integration.spaces_only.apis.get_all"
+      ],
+      "estimatedDuration": 122
+    },
+    {
+      "config": "test/pki_api_integration/config.ts",
+      "tags": [
+        "pki_api_integration.apis.security.pki_auth"
+      ],
+      "estimatedDuration": 58
+    },
+    {
+      "config": "test/kerberos_api_integration/anonymous_access.config.ts",
+      "tags": [
+        "kerberos_api_integration.apis.security.kerberos_login"
+      ],
+      "estimatedDuration": 55
+    },
+    {
+      "config": "test/kerberos_api_integration/config.ts",
+      "tags": [
+        "kerberos_api_integration.apis.security.kerberos_login"
+      ],
+      "estimatedDuration": 55
+    },
+    {
+      "config": "test/saml_api_integration/config.ts",
+      "tags": [
+        "saml_api_integration.apis.security.saml_login"
+      ],
+      "estimatedDuration": 51
+    },
+    {
+      "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+      "tags": [
+        "saved_object_api_integration.security_and_spaces.apis.get"
+      ],
+      "estimatedDuration": 48
+    },
+    {
+      "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+      "tags": [
+        "saved_object_api_integration.security_and_spaces.apis.get"
+      ],
+      "estimatedDuration": 47
+    },
+    {
+      "config": "test/saved_object_api_integration/spaces_only/config.ts",
+      "tags": [
+        "saved_object_api_integration.spaces_only.apis.bulk_create",
+        "saved_object_api_integration.spaces_only.apis.bulk_update",
+        "saved_object_api_integration.spaces_only.apis.delete",
+        "saved_object_api_integration.spaces_only.apis.update",
+        "saved_object_api_integration.spaces_only.apis.import",
+        "saved_object_api_integration.spaces_only.apis.resolve_import_errors",
+        "saved_object_api_integration.spaces_only.apis.create",
+        "saved_object_api_integration.spaces_only.apis.get",
+        "saved_object_api_integration.spaces_only.apis.find",
+        "saved_object_api_integration.spaces_only.apis.bulk_get",
+        "saved_object_api_integration.spaces_only.apis.export"
+      ],
+      "estimatedDuration": 117
     },
     {
       "config": "test/api_integration/config.js",
       "tags": [
-        "api_integration.apis.spaces.get_active_space",
-        "api_integration.apis.spaces.space_attributes",
-        "api_integration.apis.monitoring.apm.overview",
-        "api_integration.apis.monitoring.apm.instances",
-        "api_integration.apis.monitoring.apm.instance",
-        "api_integration.apis.monitoring.beats.overview",
-        "api_integration.apis.monitoring.beats.list",
-        "api_integration.apis.monitoring.beats.detail",
-        "api_integration.apis.monitoring.cluster.list",
-        "api_integration.apis.monitoring.cluster.overview",
-        "api_integration.apis.monitoring.elasticsearch.overview",
-        "api_integration.apis.monitoring.elasticsearch.nodes",
-        "api_integration.apis.monitoring.elasticsearch.node_detail",
-        "api_integration.apis.monitoring.elasticsearch.node_detail_advanced",
-        "api_integration.apis.monitoring.elasticsearch.indices",
-        "api_integration.apis.monitoring.elasticsearch.index_detail",
-        "api_integration.apis.monitoring.elasticsearch.ccr",
-        "api_integration.apis.monitoring.elasticsearch.ccr_shard",
-        "api_integration.apis.monitoring.elasticsearch_settings.check_cluster",
-        "api_integration.apis.monitoring.elasticsearch_settings.check_nodes",
-        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_enabled",
-        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_interval",
-        "api_integration.apis.monitoring.kibana.overview",
-        "api_integration.apis.monitoring.kibana.listing"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/api_integration/config.js",
-      "tags": [
-        "api_integration.apis.monitoring.kibana.instance",
-        "api_integration.apis.monitoring.logstash.overview",
-        "api_integration.apis.monitoring.logstash.nodes",
-        "api_integration.apis.monitoring.logstash.node_detail",
-        "api_integration.apis.monitoring.logstash.multicluster_pipelines",
-        "api_integration.apis.monitoring.logstash.pipelines",
-        "api_integration.apis.monitoring.common.mappings_exist",
-        "api_integration.apis.monitoring.standalone_cluster.clusters",
-        "api_integration.apis.monitoring.standalone_cluster.cluster",
-        "api_integration.apis.monitoring.logs.node_detail",
-        "api_integration.apis.monitoring.logs.index_detail",
-        "api_integration.apis.monitoring.logs.cluster",
-        "api_integration.apis.monitoring.logs.multiple_clusters",
-        "api_integration.apis.monitoring.setup.collection.kibana_mb",
-        "api_integration.apis.monitoring.setup.collection.kibana_exclusive_mb",
-        "api_integration.apis.monitoring.setup.collection.es_and_kibana_mb",
-        "api_integration.apis.monitoring.setup.collection.es_and_kibana_exclusive_mb",
-        "api_integration.apis.monitoring.setup.collection.detect_beats",
-        "api_integration.apis.monitoring.setup.collection.detect_beats_management",
-        "api_integration.apis.monitoring.setup.collection.detect_logstash",
-        "api_integration.apis.monitoring.setup.collection.detect_logstash_management",
-        "api_integration.apis.monitoring.setup.collection.detect_apm",
-        "api_integration.apis.monitoring.setup.collection.security",
-        "api_integration.apis.monitoring.setup.collection.ccs"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/api_integration/config.js",
-      "tags": [
-        "api_integration.apis.xpack_main.settings.settings",
-        "api_integration.apis.features.features.features",
-        "api_integration.apis.telemetry.telemetry",
-        "api_integration.apis.telemetry.telemetry_local",
-        "api_integration.apis.telemetry.opt_in",
-        "api_integration.apis.telemetry.telemetry_optin_notice_seen",
+        "api_integration.apis.infra.sources",
         "api_integration.apis.logstash.pipelines.list",
+        "api_integration.apis.siem.saved_objects.timeline",
+        "api_integration.apis.uptime.graphql.doc_count",
+        "api_integration.apis.monitoring.logstash.pipelines",
         "api_integration.apis.logstash.pipelines.delete",
-        "api_integration.apis.logstash.pipeline.load",
+        "api_integration.apis.monitoring.cluster.list",
         "api_integration.apis.logstash.pipeline.save",
         "api_integration.apis.logstash.pipeline.delete",
         "api_integration.apis.logstash.cluster.load",
         "api_integration.apis.kibana.stats.stats",
-        "api_integration.apis.kibana.kql_telemetry.kql_telemetry",
+        "api_integration.apis.monitoring.cluster.overview",
         "api_integration.apis.infra.metadata",
-        "api_integration.apis.infra.log_analysis",
         "api_integration.apis.infra.log_entries",
         "api_integration.apis.infra.log_entry_highlights",
         "api_integration.apis.infra.log_summary",
         "api_integration.apis.infra.logs_without_millis",
         "api_integration.apis.infra.metrics",
-        "api_integration.apis.infra.sources",
         "api_integration.apis.infra.waffle",
-        "api_integration.apis.security.session"
+        "api_integration.apis.monitoring.logs.node_detail",
+        "api_integration.apis.infra.metrics_explorer",
+        "api_integration.apis.infra.feature_controls",
+        "api_integration.apis.infra.ip_to_hostname",
+        "api_integration.apis.monitoring.logs.cluster",
+        "api_integration.apis.monitoring.kibana.instance",
+        "api_integration.apis.monitoring.setup.collection.detect_logstash",
+        "api_integration.apis.security.index_fields",
+        "api_integration.apis.monitoring.common.mappings_exist",
+        "api_integration.apis.monitoring.standalone_cluster.clusters",
+        "api_integration.apis.monitoring.standalone_cluster.cluster",
+        "api_integration.apis.security.session",
+        "api_integration.apis.monitoring.logs.index_detail",
+        "api_integration.apis.spaces.saved_objects",
+        "api_integration.apis.telemetry.telemetry_optin_notice_seen",
+        "api_integration.apis.monitoring.setup.collection.detect_logstash_management",
+        "api_integration.apis.monitoring.apm.overview",
+        "api_integration.apis.monitoring.apm.instances",
+        "api_integration.apis.monitoring.apm.instance",
+        "api_integration.apis.monitoring.logs.multiple_clusters",
+        "api_integration.apis.monitoring.setup.collection.detect_apm",
+        "api_integration.apis.monitoring.setup.collection.kibana_exclusive_mb",
+        "api_integration.apis.monitoring.setup.collection.ccs",
+        "api_integration.apis.monitoring.setup.collection.es_and_kibana_exclusive_mb",
+        "api_integration.apis.monitoring.setup.collection.detect_beats",
+        "api_integration.apis.monitoring.setup.collection.detect_beats_management",
+        "api_integration.apis.monitoring.elasticsearch_settings.check_cluster",
+        "api_integration.apis.monitoring.elasticsearch_settings.check_nodes",
+        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_enabled",
+        "api_integration.apis.es.has_privileges",
+        "api_integration.apis.monitoring.elasticsearch_settings.set_collection_interval",
+        "api_integration.apis.es.post_privileges",
+        "api_integration.apis.monitoring.kibana.overview",
+        "api_integration.apis.monitoring.kibana.listing",
+        "api_integration.apis.security.privileges",
+        "api_integration.apis.monitoring.setup.collection.kibana_mb",
+        "api_integration.apis.monitoring.logstash.node_detail",
+        "api_integration.apis.monitoring.elasticsearch.index_detail",
+        "api_integration.apis.monitoring.elasticsearch.node_detail_advanced"
       ],
       "estimatedDuration": 720
     },
     {
+      "config": "test/alerting_api_integration/spaces_only/config.ts",
+      "tags": [
+        "alerting_api_integration.spaces_only.tests.alerting.alerts_space1",
+        "alerting_api_integration.spaces_only.tests.alerting.alerts_default_space",
+        "alerting_api_integration.spaces_only.tests.actions.type_not_enabled",
+        "alerting_api_integration.spaces_only.tests.alerting.get_alert_state",
+        "alerting_api_integration.spaces_only.tests.actions.execute",
+        "alerting_api_integration.spaces_only.tests.alerting.get",
+        "alerting_api_integration.spaces_only.tests.alerting.find",
+        "alerting_api_integration.spaces_only.tests.alerting.update_api_key",
+        "alerting_api_integration.spaces_only.tests.actions.delete",
+        "alerting_api_integration.spaces_only.tests.alerting.disable",
+        "alerting_api_integration.spaces_only.tests.alerting.update",
+        "alerting_api_integration.spaces_only.tests.alerting.delete",
+        "alerting_api_integration.spaces_only.tests.alerting.create",
+        "alerting_api_integration.spaces_only.tests.alerting.enable",
+        "alerting_api_integration.spaces_only.tests.alerting.unmute_all",
+        "alerting_api_integration.spaces_only.tests.alerting.unmute_instance",
+        "alerting_api_integration.spaces_only.tests.actions.update",
+        "alerting_api_integration.spaces_only.tests.actions.get",
+        "alerting_api_integration.spaces_only.tests.actions.find",
+        "alerting_api_integration.spaces_only.tests.alerting.mute_instance",
+        "alerting_api_integration.spaces_only.tests.actions.create",
+        "alerting_api_integration.spaces_only.tests.actions.builtin_action_types.es_index",
+        "alerting_api_integration.spaces_only.tests.alerting.mute_all",
+        "alerting_api_integration.spaces_only.tests.actions.list_action_types",
+        "alerting_api_integration.spaces_only.tests.alerting.list_alert_types"
+      ],
+      "estimatedDuration": 230
+    },
+    {
+      "config": "test/oidc_api_integration/config.ts",
+      "tags": [
+        "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
+      ],
+      "estimatedDuration": 34
+    },
+    {
+      "config": "test/oidc_api_integration/implicit_flow.config.ts",
+      "tags": [
+        "oidc_api_integration.apis.implicit_flow.oidc_auth"
+      ],
+      "estimatedDuration": 30
+    },
+    {
+      "config": "test/api_integration/config_security_basic.js",
+      "tags": [
+        "api_integration.apis.security.change_password",
+        "api_integration.apis.security.index_fields",
+        "api_integration.apis.security.roles",
+        "api_integration.apis.security.privileges",
+        "api_integration.apis.security.session",
+        "api_integration.apis.security.basic_login",
+        "api_integration.apis.security.builtin_es_privileges"
+      ],
+      "estimatedDuration": 210
+    },
+    {
       "config": "test/api_integration/config.js",
       "tags": [
-        "api_integration.apis.infra.metrics_explorer",
-        "api_integration.apis.infra.feature_controls",
-        "api_integration.apis.infra.ip_to_hostname",
         "api_integration.apis.beats.create_enrollment_tokens",
         "api_integration.apis.beats.enroll_beat",
         "api_integration.apis.beats.list_beats",
@@ -835,20 +907,18 @@
         "api_integration.apis.management.index_management.mapping",
         "api_integration.apis.management.index_management.settings",
         "api_integration.apis.management.index_management.stats",
-        "api_integration.apis.management.index_management.templates"
+        "api_integration.apis.management.index_management.templates",
+        "api_integration.apis.management.index_lifecycle_management.policies",
+        "api_integration.apis.management.index_lifecycle_management.templates",
+        "api_integration.apis.management.index_lifecycle_management.nodes"
       ],
       "estimatedDuration": 720
     },
     {
       "config": "test/api_integration/config.js",
       "tags": [
-        "api_integration.apis.management.index_lifecycle_management.policies",
-        "api_integration.apis.management.index_lifecycle_management.templates",
-        "api_integration.apis.management.index_lifecycle_management.indices",
-        "api_integration.apis.management.index_lifecycle_management.nodes",
         "api_integration.apis.uptime.feature_controls",
         "api_integration.apis.uptime.get_all_pings",
-        "api_integration.apis.uptime.graphql.doc_count",
         "api_integration.apis.uptime.graphql.monitor_charts",
         "api_integration.apis.uptime.graphql.monitor_states",
         "api_integration.apis.uptime.graphql.ping_list",
@@ -865,19 +935,28 @@
         "api_integration.apis.siem.kpi_network",
         "api_integration.apis.siem.kpi_hosts",
         "api_integration.apis.siem.network_dns",
-        "api_integration.apis.siem.network_top_n_flow"
+        "api_integration.apis.siem.network_top_n_flow",
+        "api_integration.apis.siem.overview_host",
+        "api_integration.apis.siem.saved_objects.notes",
+        "api_integration.apis.siem.saved_objects.pinned_events",
+        "api_integration.apis.siem.sources",
+        "api_integration.apis.siem.overview_network"
       ],
       "estimatedDuration": 720
     },
     {
+      "config": "test/token_api_integration/config.js",
+      "tags": [
+        "token_api_integration.auth.session",
+        "token_api_integration.auth.header",
+        "token_api_integration.auth.logout",
+        "token_api_integration.auth.login"
+      ],
+      "estimatedDuration": 120
+    },
+    {
       "config": "test/api_integration/config.js",
       "tags": [
-        "api_integration.apis.siem.overview_host",
-        "api_integration.apis.siem.saved_objects.notes",
-        "api_integration.apis.siem.saved_objects.pinned_events",
-        "api_integration.apis.siem.saved_objects.timeline",
-        "api_integration.apis.siem.sources",
-        "api_integration.apis.siem.overview_network",
         "api_integration.apis.siem.timeline",
         "api_integration.apis.siem.timeline_details",
         "api_integration.apis.siem.uncommon_processes",
@@ -893,389 +972,178 @@
         "api_integration.apis.endpoint.alerts",
         "api_integration.apis.ml.bucket_span_estimator",
         "api_integration.apis.ml.calculate_model_memory_limit",
-        "api_integration.apis.spaces.saved_objects",
-        "api_integration.apis.security.privileges",
-        "api_integration.apis.security.roles"
+        "api_integration.apis.monitoring.elasticsearch.indices",
+        "api_integration.apis.spaces.get_active_space",
+        "api_integration.apis.monitoring.elasticsearch.ccr",
+        "api_integration.apis.monitoring.elasticsearch.ccr_shard",
+        "api_integration.apis.infra.log_item",
+        "api_integration.apis.monitoring.beats.overview",
+        "api_integration.apis.xpack_main.settings.settings",
+        "api_integration.apis.monitoring.logstash.overview",
+        "api_integration.apis.monitoring.logstash.nodes"
       ],
       "estimatedDuration": 720
     },
     {
-      "config": "test/alerting_api_integration/spaces_only/config.ts",
+      "config": "test/licensing_plugin/config.public.ts",
       "tags": [
-        "alerting_api_integration.spaces_only.tests.alerting.alerts_default_space"
+        "licensing_plugin.public.updates"
       ],
       "estimatedDuration": 30
-    },
-    {
-      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
-      "tags": [
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.email",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.es_index",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.pagerduty",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.server_log",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.servicenow",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.slack",
-        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.webhook",
-        "alerting_api_integration.security_and_spaces.tests.actions.create",
-        "alerting_api_integration.security_and_spaces.tests.actions.delete",
-        "alerting_api_integration.security_and_spaces.tests.actions.execute",
-        "alerting_api_integration.security_and_spaces.tests.actions.find",
-        "alerting_api_integration.security_and_spaces.tests.actions.get",
-        "alerting_api_integration.security_and_spaces.tests.actions.list_action_types",
-        "alerting_api_integration.security_and_spaces.tests.actions.update",
-        "alerting_api_integration.security_and_spaces.tests.alerting.create",
-        "alerting_api_integration.security_and_spaces.tests.alerting.delete",
-        "alerting_api_integration.security_and_spaces.tests.alerting.disable",
-        "alerting_api_integration.security_and_spaces.tests.alerting.enable",
-        "alerting_api_integration.security_and_spaces.tests.alerting.find",
-        "alerting_api_integration.security_and_spaces.tests.alerting.get",
-        "alerting_api_integration.security_and_spaces.tests.alerting.get_alert_state",
-        "alerting_api_integration.security_and_spaces.tests.alerting.list_alert_types",
-        "alerting_api_integration.security_and_spaces.tests.alerting.mute_all",
-        "alerting_api_integration.security_and_spaces.tests.alerting.mute_instance"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
-      "tags": [
-        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_all",
-        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_instance",
-        "alerting_api_integration.security_and_spaces.tests.alerting.update",
-        "alerting_api_integration.security_and_spaces.tests.alerting.update_api_key",
-        "alerting_api_integration.security_and_spaces.tests.alerting.alerts"
-      ],
-      "estimatedDuration": 150
-    },
-    {
-      "config": "test/plugin_api_integration/config.js",
-      "tags": [
-        "plugin_api_integration.task_manager.task_manager_integration",
-        "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
-      ],
-      "estimatedDuration": 60
-    },
-    {
-      "config": "test/kerberos_api_integration/config.ts",
-      "tags": [
-        "kerberos_api_integration.apis.security.kerberos_login"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/kerberos_api_integration/anonymous_access.config.ts",
-      "tags": [
-        "kerberos_api_integration.apis.security.kerberos_login"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/saml_api_integration/config.ts",
-      "tags": [
-        "saml_api_integration.apis.security.saml_login"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/token_api_integration/config.js",
-      "tags": [
-        "token_api_integration.auth.login",
-        "token_api_integration.auth.logout",
-        "token_api_integration.auth.header",
-        "token_api_integration.auth.session"
-      ],
-      "estimatedDuration": 120
-    },
-    {
-      "config": "test/oidc_api_integration/config.ts",
-      "tags": [
-        "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/oidc_api_integration/implicit_flow.config.ts",
-      "tags": [
-        "oidc_api_integration.apis.implicit_flow.oidc_auth"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/pki_api_integration/config.ts",
-      "tags": [
-        "pki_api_integration.apis.security.pki_auth"
-      ],
-      "estimatedDuration": 30
-    },
-    {
-      "config": "test/spaces_api_integration/spaces_only/config.ts",
-      "tags": [
-        "spaces_api_integration.spaces_only.apis.copy_to_space",
-        "spaces_api_integration.spaces_only.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.spaces_only.apis.create",
-        "spaces_api_integration.spaces_only.apis.delete",
-        "spaces_api_integration.spaces_only.apis.get_all",
-        "spaces_api_integration.spaces_only.apis.get",
-        "spaces_api_integration.spaces_only.apis.update"
-      ],
-      "estimatedDuration": 210
-    },
-    {
-      "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
-        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.security_and_spaces.apis.create",
-        "spaces_api_integration.security_and_spaces.apis.delete",
-        "spaces_api_integration.security_and_spaces.apis.get_all",
-        "spaces_api_integration.security_and_spaces.apis.get",
-        "spaces_api_integration.security_and_spaces.apis.update"
-      ],
-      "estimatedDuration": 210
-    },
-    {
-      "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
-      "tags": [
-        "spaces_api_integration.security_and_spaces.apis.copy_to_space",
-        "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
-        "spaces_api_integration.security_and_spaces.apis.create",
-        "spaces_api_integration.security_and_spaces.apis.delete",
-        "spaces_api_integration.security_and_spaces.apis.get_all",
-        "spaces_api_integration.security_and_spaces.apis.get",
-        "spaces_api_integration.security_and_spaces.apis.update"
-      ],
-      "estimatedDuration": 210
-    },
-    {
-      "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_get",
-        "saved_object_api_integration.security_and_spaces.apis.create",
-        "saved_object_api_integration.security_and_spaces.apis.delete",
-        "saved_object_api_integration.security_and_spaces.apis.export",
-        "saved_object_api_integration.security_and_spaces.apis.find",
-        "saved_object_api_integration.security_and_spaces.apis.get",
-        "saved_object_api_integration.security_and_spaces.apis.import",
-        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
-        "saved_object_api_integration.security_and_spaces.apis.update",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_update"
-      ],
-      "estimatedDuration": 330
-    },
-    {
-      "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
-      "tags": [
-        "saved_object_api_integration.security_and_spaces.apis.bulk_create",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_get",
-        "saved_object_api_integration.security_and_spaces.apis.create",
-        "saved_object_api_integration.security_and_spaces.apis.delete",
-        "saved_object_api_integration.security_and_spaces.apis.export",
-        "saved_object_api_integration.security_and_spaces.apis.find",
-        "saved_object_api_integration.security_and_spaces.apis.get",
-        "saved_object_api_integration.security_and_spaces.apis.import",
-        "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
-        "saved_object_api_integration.security_and_spaces.apis.update",
-        "saved_object_api_integration.security_and_spaces.apis.bulk_update"
-      ],
-      "estimatedDuration": 330
-    },
-    {
-      "config": "test/saved_object_api_integration/security_only/config_trial.ts",
-      "tags": [
-        "saved_object_api_integration.security_only.apis.bulk_create",
-        "saved_object_api_integration.security_only.apis.bulk_get",
-        "saved_object_api_integration.security_only.apis.create",
-        "saved_object_api_integration.security_only.apis.delete",
-        "saved_object_api_integration.security_only.apis.export",
-        "saved_object_api_integration.security_only.apis.find",
-        "saved_object_api_integration.security_only.apis.get",
-        "saved_object_api_integration.security_only.apis.import",
-        "saved_object_api_integration.security_only.apis.resolve_import_errors",
-        "saved_object_api_integration.security_only.apis.update",
-        "saved_object_api_integration.security_only.apis.bulk_update"
-      ],
-      "estimatedDuration": 330
-    },
-    {
-      "config": "test/saved_object_api_integration/security_only/config_basic.ts",
-      "tags": [
-        "saved_object_api_integration.security_only.apis.bulk_create",
-        "saved_object_api_integration.security_only.apis.bulk_get",
-        "saved_object_api_integration.security_only.apis.create",
-        "saved_object_api_integration.security_only.apis.delete",
-        "saved_object_api_integration.security_only.apis.export",
-        "saved_object_api_integration.security_only.apis.find",
-        "saved_object_api_integration.security_only.apis.get",
-        "saved_object_api_integration.security_only.apis.import",
-        "saved_object_api_integration.security_only.apis.resolve_import_errors",
-        "saved_object_api_integration.security_only.apis.update",
-        "saved_object_api_integration.security_only.apis.bulk_update"
-      ],
-      "estimatedDuration": 330
-    },
-    {
-      "config": "test/saved_object_api_integration/spaces_only/config.ts",
-      "tags": [
-        "saved_object_api_integration.spaces_only.apis.bulk_create",
-        "saved_object_api_integration.spaces_only.apis.bulk_get",
-        "saved_object_api_integration.spaces_only.apis.create",
-        "saved_object_api_integration.spaces_only.apis.delete",
-        "saved_object_api_integration.spaces_only.apis.export",
-        "saved_object_api_integration.spaces_only.apis.find",
-        "saved_object_api_integration.spaces_only.apis.get",
-        "saved_object_api_integration.spaces_only.apis.import",
-        "saved_object_api_integration.spaces_only.apis.resolve_import_errors",
-        "saved_object_api_integration.spaces_only.apis.update",
-        "saved_object_api_integration.spaces_only.apis.bulk_update"
-      ],
-      "estimatedDuration": 330
     },
     {
       "config": "test/api_integration/config.js",
       "tags": [
-        "api_integration.apis.security.index_fields",
+        "api_integration.apis.telemetry.opt_in",
+        "api_integration.apis.monitoring.logstash.multicluster_pipelines",
+        "api_integration.apis.monitoring.elasticsearch.nodes",
+        "api_integration.apis.monitoring.elasticsearch.overview",
+        "api_integration.apis.kibana.kql_telemetry.kql_telemetry",
+        "api_integration.apis.telemetry.telemetry",
+        "api_integration.apis.infra.log_analysis",
+        "api_integration.apis.management.index_lifecycle_management.indices",
+        "api_integration.apis.logstash.pipeline.load",
+        "api_integration.apis.telemetry.telemetry_local",
         "api_integration.apis.security.change_password",
+        "api_integration.apis.features.features.features",
+        "api_integration.apis.monitoring.elasticsearch.node_detail",
+        "api_integration.apis.monitoring.beats.detail",
+        "api_integration.apis.monitoring.setup.collection.es_and_kibana_mb",
         "api_integration.apis.security.builtin_es_privileges",
-        "api_integration.apis.security.basic_login",
-        "api_integration.apis.es.post_privileges",
-        "api_integration.apis.es.has_privileges",
-        "api_integration.apis.infra.log_item"
-      ],
-      "estimatedDuration": 210
-    },
-    {
-      "config": "test/api_integration/config_security_basic.js",
-      "tags": [
-        "api_integration.apis.security.session",
-        "api_integration.apis.security.privileges",
         "api_integration.apis.security.roles",
-        "api_integration.apis.security.index_fields",
-        "api_integration.apis.security.change_password",
-        "api_integration.apis.security.builtin_es_privileges",
+        "api_integration.apis.monitoring.setup.collection.security",
+        "api_integration.apis.spaces.space_attributes",
+        "api_integration.apis.monitoring.beats.list",
         "api_integration.apis.security.basic_login"
       ],
-      "estimatedDuration": 210
+      "estimatedDuration": 120
+    },
+    {
+      "config": "test/alerting_api_integration/security_and_spaces/config.ts",
+      "tags": [
+        "alerting_api_integration.security_and_spaces.tests.actions.get",
+        "alerting_api_integration.security_and_spaces.tests.actions.delete",
+        "alerting_api_integration.security_and_spaces.tests.actions.update",
+        "alerting_api_integration.security_and_spaces.tests.alerting.mute_instance",
+        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_instance",
+        "alerting_api_integration.security_and_spaces.tests.alerting.create",
+        "alerting_api_integration.security_and_spaces.tests.alerting.unmute_all",
+        "alerting_api_integration.security_and_spaces.tests.alerting.mute_all",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.webhook",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.es_index",
+        "alerting_api_integration.security_and_spaces.tests.actions.create",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.pagerduty",
+        "alerting_api_integration.security_and_spaces.tests.actions.builtin_action_types.servicenow"
+      ],
+      "estimatedDuration": 142
     }
   ],
   "ossFirefox": [
     {
       "config": "test/functional/config.firefox.js",
       "tags": [
-        "functional.apps.home._home",
+        "functional.apps.dashboard.dashboard_filtering",
+        "functional.apps.visualize._tsvb_chart",
         "functional.apps.console._console",
+        "functional.apps.home._home",
+        "functional.apps.visualize.input_control_vis.chained_controls",
         "functional.apps.context._discover_navigation",
+        "functional.apps.visualize._experimental_vis"
+      ],
+      "estimatedDuration": 731
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.dashboard.panel_controls",
+        "functional.apps.getting_started._shakespeare",
+        "functional.apps.management._create_index_pattern_wizard",
+        "functional.apps.visualize._heatmap_chart",
+        "functional.apps.visualize._gauge_chart",
         "functional.apps.dashboard.time_zones"
       ],
-      "estimatedDuration": 720
+      "estimatedDuration": 811
     },
     {
       "config": "test/functional/config.firefox.js",
       "tags": [
-        "functional.apps.dashboard.dashboard_filtering",
-        "functional.apps.dashboard.panel_controls",
         "functional.apps.dashboard.dashboard_save",
-        "functional.apps.discover._field_data"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
+        "functional.apps.discover._field_data",
         "functional.apps.discover._doc_navigation",
-        "functional.apps.getting_started._shakespeare",
-        "functional.apps.home._sample_data",
-        "functional.apps.management._create_index_pattern_wizard"
+        "functional.apps.home._sample_data"
       ],
       "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.firefox.js",
       "tags": [
-        "functional.apps.visualize._inspector",
-        "functional.apps.visualize._experimental_vis",
-        "functional.apps.visualize._gauge_chart",
-        "functional.apps.visualize._heatmap_chart"
+        "functional.apps.visualize._inspector"
       ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
-        "functional.apps.visualize.input_control_vis.chained_controls",
-        "functional.apps.visualize._tsvb_chart"
-      ],
-      "estimatedDuration": 360
+      "estimatedDuration": 125
     }
   ],
   "xpackFirefox": [
     {
       "config": "test/functional/config.firefox.js",
       "tags": [
-        "functional.apps.infra.logs_source_configuration",
-        "functional.apps.canvas.smoke_test",
-        "functional.apps.security.security",
-        "functional.apps.security.users"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
-        "functional.apps.security.user_email",
-        "functional.apps.spaces.spaces_selection",
-        "functional.apps.spaces.enter_space",
-        "functional.apps.logstash.pipeline_list"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
+        "functional.apps.logstash.pipeline_list",
         "functional.apps.logstash.pipeline_create",
-        "functional.apps.grok_debugger.grok_debugger",
-        "functional.apps.infra.home_page",
-        "functional.apps.infra.log_entry_categories_tab"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
-        "functional.apps.infra.log_entry_rate_tab",
-        "functional.apps.watcher.watcher_test",
-        "functional.apps.infra.metrics_source_configuration",
-        "functional.apps.infra.link_to"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
-        "functional.apps.machine_learning.pages",
-        "functional.apps.status_page.status_page",
-        "functional.apps.upgrade_assistant.upgrade_assistant",
-        "functional.apps.index_management.home_page"
-      ],
-      "estimatedDuration": 720
-    },
-    {
-      "config": "test/functional/config.firefox.js",
-      "tags": [
-        "functional.apps.index_lifecycle_management.home_page",
-        "functional.apps.snapshot_restore.home_page",
         "functional.apps.cross_cluster_replication.home_page",
+        "functional.apps.index_lifecycle_management.home_page",
         "functional.apps.remote_clusters.home_page"
       ],
+      "estimatedDuration": 730
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.spaces.spaces_selection",
+        "functional.apps.security.user_email",
+        "functional.apps.security.security",
+        "functional.apps.transform.creation_index_pattern"
+      ],
+      "estimatedDuration": 751
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.infra.logs_source_configuration",
+        "functional.apps.machine_learning.pages",
+        "functional.apps.status_page.status_page",
+        "functional.apps.transform.creation_saved_search",
+        "functional.apps.index_management.home_page",
+        "functional.apps.upgrade_assistant.upgrade_assistant"
+      ],
+      "estimatedDuration": 742
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.infra.link_to",
+        "functional.apps.infra.home_page",
+        "functional.apps.infra.log_entry_categories_tab",
+        "functional.apps.infra.log_entry_rate_tab"
+      ],
       "estimatedDuration": 720
     },
     {
       "config": "test/functional/config.firefox.js",
       "tags": [
-        "functional.apps.transform.creation_index_pattern",
-        "functional.apps.transform.creation_saved_search"
+        "functional.apps.watcher.watcher_test",
+        "functional.apps.infra.metrics_source_configuration",
+        "functional.apps.grok_debugger.grok_debugger",
+        "functional.apps.spaces.enter_space",
+        "functional.apps.snapshot_restore.home_page"
       ],
-      "estimatedDuration": 360
+      "estimatedDuration": 780
+    },
+    {
+      "config": "test/functional/config.firefox.js",
+      "tags": [
+        "functional.apps.canvas.smoke_test",
+        "functional.apps.security.users"
+      ],
+      "estimatedDuration": 201
     }
   ]
 }
