@@ -184,9 +184,21 @@ export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
 });
 
-export const importRulesRequest = (payload?: importRulesPayloadSchema): ServerInjectOptions => ({
+export const importRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
   method: 'POST',
   url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  headers: {
+    'Content-Type': 'multipart/form-data; boundary=frank_is_awesome',
+  },
+  payload,
+});
+
+export const importRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
+  headers: {
+    'Content-Type': 'multipart/form-data; boundary=frank_is_awesome',
+  },
   payload,
 });
 
