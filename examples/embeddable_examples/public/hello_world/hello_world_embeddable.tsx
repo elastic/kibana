@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Chart, getSpecId, ScaleType, SpecTypes, BarSeries, ChartTypes } from '@elastic/charts';
+import ReactDOM from 'react-dom';
+import React from 'react';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../src/plugins/embeddable/public';
 
 export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
@@ -37,13 +40,39 @@ export class HelloWorldEmbeddable extends Embeddable {
     );
   }
 
+  SPEC_ID = 'bars';
+  GROUP_ID = 'group_1';
+
   /**
    * Render yourself at the dom node using whatever framework you like, angular, react, or just plain
    * vanilla js.
    * @param node
    */
   public render(node: HTMLElement) {
-    node.innerHTML = '<div data-test-subj="helloWorldEmbeddable">HELLO WORLD!</div>';
+    const data = [
+      { x: 0, y: 2 },
+      { x: 1, y: 7 },
+      { x: 2, y: 3 },
+      { x: 3, y: 6 },
+    ];
+    ReactDOM.render(
+      <div style={{ width: 100 + '%', height: 200 + 'px' }}>
+        <Chart>
+          <BarSeries
+            id={getSpecId('bars')}
+            name={'Simple bar series'}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={data}
+          />
+        </Chart>
+      </div>,
+      node
+    );
+
+    // node.innerHTML = '<div data-test-subj="helloWorldEmbeddable">HELLO WORLD!</div>';
   }
 
   /**
