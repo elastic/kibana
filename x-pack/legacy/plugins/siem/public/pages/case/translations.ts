@@ -106,6 +106,10 @@ export const TAGS_HELP = i18n.translate('xpack.siem.case.createCase.fieldTagsHel
     'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
 });
 
+export const NO_TAGS = i18n.translate('xpack.siem.case.caseView.noTags', {
+  defaultMessage: 'No tags are currently assigned to this case.',
+});
+
 export const TITLE_REQUIRED = i18n.translate('xpack.siem.case.createCase.titleFieldRequiredError', {
   defaultMessage: 'A title is required.',
 });

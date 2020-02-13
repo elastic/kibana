@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import * as i18n from '../../translations';
-import { Form, useForm } from '../shared_imports';
+import { Form, useForm } from '../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 
@@ -57,6 +57,11 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
       iconAction.onClick(false);
     }
   }, [form]);
+
+  const onActionClick = useCallback(
+    (cb: (b: boolean) => void, onClickBool: boolean) => cb(onClickBool),
+    [iconAction]
+  );
   return (
     <EuiText>
       <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -68,16 +73,14 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
             <EuiButtonIcon
               aria-label={iconAction['aria-label']}
               iconType={iconAction.iconType}
-              onClick={() => iconAction.onClick(true)}
+              onClick={() => onActionClick(iconAction.onClick, true)}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <MyFlexGroup gutterSize="xs">
-        {tags.length === 0 && !isEditTags && (
-          <p>{`No tags are currently assigned to this case.`}</p>
-        )}
+        {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
         {tags.length > 0 &&
           !isEditTags &&
           tags.map((tag, key) => (
@@ -108,7 +111,7 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction }: TagListProp
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => iconAction.onClick(false)}>
+              <EuiButtonEmpty onClick={() => onActionClick(iconAction.onClick, false)}>
                 {i18n.CANCEL}
               </EuiButtonEmpty>
             </EuiFlexItem>

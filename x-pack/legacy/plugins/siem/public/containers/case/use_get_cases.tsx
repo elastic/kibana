@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
 
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
@@ -22,6 +22,7 @@ import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { getCases } from './api';
+import { useDidMountEffect } from '../../utils/use_did_mount';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -81,15 +82,6 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
   }
 };
 
-function useDidUpdateEffect(fn: () => void, inputs: unknown[]) {
-  const didUpdateRef = useRef(false);
-
-  useEffect(() => {
-    if (didUpdateRef.current) fn();
-    else didUpdateRef.current = true;
-  }, inputs);
-}
-
 const initialData: AllCases = {
   page: 0,
   per_page: 0,
@@ -120,11 +112,11 @@ export const useGetCases = (): [
   const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
-  useDidUpdateEffect(() => {
+  useDidMountEffect(() => {
     dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
   }, [queryParams]);
 
-  useDidUpdateEffect(() => {
+  useDidMountEffect(() => {
     dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
   }, [filterQuery]);
 

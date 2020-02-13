@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
-import { Field, Form, getUseField, useForm } from '../shared_imports';
+import { Field, Form, getUseField, useForm } from '../../../shared_imports';
 import { NewCase } from '../../../../containers/case/types';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';

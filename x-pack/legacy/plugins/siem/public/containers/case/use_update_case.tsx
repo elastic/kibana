@@ -93,7 +93,7 @@ export const useUpdateCase = (
   };
 
   useEffect(() => {
-    const fetchData = async (updateKey: keyof Case) => {
+    const updateData = async (updateKey: keyof Case) => {
       dispatch({ type: FETCH_INIT });
       try {
         const response = await updateCaseProperty(caseId, { [updateKey]: state.data[updateKey] });
@@ -104,7 +104,7 @@ export const useUpdateCase = (
       }
     };
     if (state.updateKey) {
-      fetchData(state.updateKey);
+      updateData(state.updateKey);
     }
   }, [state.updateKey]);
 

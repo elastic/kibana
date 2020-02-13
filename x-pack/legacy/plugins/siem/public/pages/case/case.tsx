@@ -14,18 +14,16 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 import { getCreateCaseUrl } from '../../components/link_to';
 
+const badgeOptions = {
+  beta: true,
+  text: i18n.PAGE_BADGE_LABEL,
+  tooltip: i18n.PAGE_BADGE_TOOLTIP,
+};
+
 export const CasesPage = React.memo(() => (
   <>
     <WrapperPage>
-      <HeaderPage
-        badgeOptions={{
-          beta: true,
-          text: i18n.PAGE_BADGE_LABEL,
-          tooltip: i18n.PAGE_BADGE_TOOLTIP,
-        }}
-        subtitle={i18n.PAGE_SUBTITLE}
-        title={i18n.PAGE_TITLE}
-      >
+      <HeaderPage badgeOptions={badgeOptions} subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
           <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
             {i18n.CREATE_TITLE}

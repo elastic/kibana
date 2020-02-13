@@ -11,7 +11,7 @@ export const mockCases = [
     attributes: {
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
-        full_name: null,
+        full_name: 'elastic',
         username: 'elastic',
       },
       description: 'This is a brand new case of a bad meanie defacing data',
@@ -31,7 +31,7 @@ export const mockCases = [
     attributes: {
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
-        full_name: null,
+        full_name: 'elastic',
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie destroying data!',
@@ -51,7 +51,7 @@ export const mockCases = [
     attributes: {
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
-        full_name: null,
+        full_name: 'elastic',
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -42,7 +42,7 @@ export const AllCases = React.memo(() => {
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
-      let newQueryParams = {};
+      let newQueryParams = queryParams;
       if (sort) {
         let newSort;
         switch (sort.field) {
@@ -80,7 +80,18 @@ export const AllCases = React.memo(() => {
     (newFilterOptions: Partial<FilterOptions>) => {
       setFilters({ ...filterOptions, ...newFilterOptions });
     },
-    [setFilters]
+    [filterOptions, setFilters]
+  );
+
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(), []);
+  const memoizedPagination = useMemo(
+    () => ({
+      pageIndex: queryParams.page - 1,
+      pageSize: queryParams.perPage,
+      totalItemCount: data.total,
+      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+    }),
+    [data, queryParams]
   );
 
   const sorting: EuiTableSortingType<Case> = {
@@ -108,7 +119,7 @@ export const AllCases = React.memo(() => {
             </UtilityBarSection>
           </UtilityBar>
           <EuiBasicTable
-            columns={getCasesColumns()}
+            columns={memoizedGetCasesColumns}
             itemId="id"
             items={data.cases}
             noItemsMessage={
@@ -124,12 +135,7 @@ export const AllCases = React.memo(() => {
               />
             }
             onChange={tableOnChangeCallback}
-            pagination={{
-              pageIndex: queryParams.page - 1,
-              pageSize: queryParams.perPage,
-              totalItemCount: data.total,
-              pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-            }}
+            pagination={memoizedPagination}
             sorting={sorting}
           />
         </>

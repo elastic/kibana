@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -17,6 +17,7 @@ import {
 import styled from 'styled-components';
 import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../components/ml_popover/jobs_table/filters/toggle_selected_group';
+import { useDidMountEffect } from '../../../../../utils/use_did_mount';
 
 interface TagsFilterPopoverProps {
   tags: string[];
@@ -41,11 +42,9 @@ export const TagsFilterPopoverComponent = ({
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const didMountRef = useRef(false);
 
-  useEffect(() => {
-    if (didMountRef.current) onSelectedTagsChanged(selectedTags);
-    else didMountRef.current = true;
+  useDidMountEffect(() => {
+    onSelectedTagsChanged(selectedTags);
   }, [selectedTags.sort().join()]);
 
   return (

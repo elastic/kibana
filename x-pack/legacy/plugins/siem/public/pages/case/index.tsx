@@ -18,22 +18,18 @@ const casesPagePath = `/:pageName(${SiemPageName.case})`;
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
 const createCasePagePath = `${casesPagePath}/create`;
 
-const CaseContainerComponent: React.FC<Props> = () => {
-  return (
-    <Switch>
-      <Route strict exact path={casesPagePath} render={() => <CasesPage />} />
-      <Route strict exact path={createCasePagePath} render={() => <CreateCasePage />} />
-      <Route
-        strict
-        path={caseDetailsPagePath}
-        render={({
-          match: {
-            params: { detailName },
-          },
-        }) => <CaseDetailsPage caseId={detailName} />}
-      />
-    </Switch>
-  );
-};
+const CaseContainerComponent: React.FC<Props> = () => (
+  <Switch>
+    <Route strict exact path={casesPagePath}>
+      <CasesPage />
+    </Route>
+    <Route strict exact path={createCasePagePath}>
+      <CreateCasePage />
+    </Route>
+    <Route strict path={caseDetailsPagePath}>
+      <CaseDetailsPage />
+    </Route>
+  </Switch>
+);
 
 export const Case = React.memo(CaseContainerComponent);

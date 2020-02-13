@@ -49,12 +49,6 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
-  // ${({ theme }) => css`
-  //   @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
-  //     margin: 0 auto;
-  //     width: 85%;
-  //   }
-  // `}
 `;
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
@@ -118,6 +112,11 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
     [dispatchUpdateCaseProperty, title]
   );
 
+  const onSetIsCaseOpen = useCallback(() => setIsCaseOpen(!isCaseOpen), [
+    isCaseOpen,
+    setIsCaseOpen,
+  ]);
+
   useEffect(() => {
     const caseState = isCaseOpen ? 'open' : 'closed';
     if (data.state !== caseState) {
@@ -127,6 +126,8 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
       });
     }
   }, [isCaseOpen]);
+
+  // TO DO refactor each of these const's into their own components
   const propertyActions = [
     {
       iconType: 'documentEdit',
@@ -252,7 +253,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
                   <EuiButtonToggle
                     label={isCaseOpen ? 'Close case' : 'Reopen case'}
                     iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
-                    onChange={() => setIsCaseOpen(!isCaseOpen)}
+                    onChange={onSetIsCaseOpen}
                     isSelected={isCaseOpen}
                   />
                 </EuiFlexItem>

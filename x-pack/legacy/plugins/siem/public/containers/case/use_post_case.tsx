@@ -78,7 +78,7 @@ export const usePostCase = (): [NewCaseState, Dispatch<SetStateAction<NewCase>>]
   }, [formData]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const postCase = async () => {
       dispatch({ type: FETCH_INIT });
       try {
         const dataWithoutIsNew = state.data;
@@ -91,7 +91,7 @@ export const usePostCase = (): [NewCaseState, Dispatch<SetStateAction<NewCase>>]
       }
     };
     if (state.data.isNew) {
-      fetchData();
+      postCase();
     }
   }, [state.data.isNew]);
   return [state, setFormData];

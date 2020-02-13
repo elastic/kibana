@@ -5,19 +5,22 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import { CaseView } from './components/case_view';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-interface Props {
-  caseId: string;
-}
-
-export const CaseDetailsPage = React.memo(({ caseId }: Props) => (
-  <>
-    <CaseView caseId={caseId} />
-    <SpyRoute />
-  </>
-));
+export const CaseDetailsPage = React.memo(() => {
+  const { detailName: caseId } = useParams();
+  if (!caseId) {
+    return null;
+  }
+  return (
+    <>
+      <CaseView caseId={caseId} />
+      <SpyRoute />
+    </>
+  );
+});
 
 CaseDetailsPage.displayName = 'CaseDetailsPage';
