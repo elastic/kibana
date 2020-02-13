@@ -25,7 +25,7 @@ import {
   LegacyAppSpec,
 } from '../types';
 
-function convertToNavLink(spec: LegacyNavLinkSpec | LegacyAppSpec): LegacyNavLink {
+function legacyAppToNavLink(spec: LegacyAppSpec): LegacyNavLink {
   if (!spec.id) {
     throw new Error('Every app must specify an id');
   }
@@ -34,15 +34,28 @@ function convertToNavLink(spec: LegacyNavLinkSpec | LegacyAppSpec): LegacyNavLin
     category: spec.category,
     title: spec.title ?? spec.id,
     order: typeof spec.order === 'number' ? spec.order : 0,
-    url: spec.url ?? `/app/${spec.id}`,
-    subUrlBase: spec.subUrlBase ?? spec.url,
+    icon: spec.icon,
+    euiIconType: spec.euiIconType,
+    url: spec.url || `/app/${spec.id}`,
+    linkToLastSubUrl: spec.linkToLastSubUrl,
+  };
+}
+
+function legacyLinkToNavLink(spec: LegacyNavLinkSpec): LegacyNavLink {
+  return {
+    id: spec.id,
+    category: spec.category,
+    title: spec.title,
+    order: typeof spec.order === 'number' ? spec.order : 0,
+    url: spec.url,
+    subUrlBase: spec.subUrlBase || spec.url,
     disableSubUrlTracking: spec.disableSubUrlTracking,
     icon: spec.icon,
     euiIconType: spec.euiIconType,
-    linkToLastSubUrl: spec.linkToLastSubUrl ?? false,
-    hidden: spec.hidden ?? false,
-    disabled: spec.disabled ?? false,
-    tooltip: spec.tooltip ?? '',
+    linkToLastSubUrl: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+    hidden: 'hidden' in spec ? spec.hidden : false,
+    disabled: 'disabled' in spec ? spec.disabled : false,
+    tooltip: spec.tooltip || '',
   };
 }
 
@@ -63,5 +76,7 @@ export function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPlugi
     }
   });
 
-  return [...navLinkSpecs, ...appSpecs].map(convertToNavLink).sort((a, b) => a.order - b.order);
+  return [...navLinkSpecs.map(legacyLinkToNavLink), ...appSpecs.map(legacyAppToNavLink)].sort(
+    (a, b) => a.order - b.order
+  );
 }

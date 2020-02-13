@@ -131,13 +131,17 @@ export type VarsReplacer = (
  * @internal
  * @deprecated
  */
-export type LegacyNavLinkSpec = Partial<ChromeNavLink>;
+export type LegacyNavLinkSpec = Partial<LegacyNavLink> & {
+  id: string;
+  title: string;
+  url: string;
+};
 
 /**
  * @internal
  * @deprecated
  */
-export type LegacyAppSpec = Partial<ChromeNavLink> & {
+export type LegacyAppSpec = Partial<LegacyNavLink> & {
   pluginId?: string;
   listed?: boolean;
 };

@@ -136,13 +136,10 @@ describe('getNavLinks', () => {
               },
               order: 42,
               url: '/some-custom-url',
-              subUrlBase: '/some-custom-url/sub',
-              disableSubUrlTracking: true,
               icon: 'fa-snowflake',
               euiIconType: 'euiIcon',
               linkToLastSubUrl: true,
               hidden: false,
-              tooltip: 'My tooltip',
             },
           ],
         }),
@@ -157,14 +154,9 @@ describe('getNavLinks', () => {
         },
         order: 42,
         url: '/some-custom-url',
-        subUrlBase: '/some-custom-url/sub',
-        disableSubUrlTracking: true,
         icon: 'fa-snowflake',
         euiIconType: 'euiIcon',
         linkToLastSubUrl: true,
-        hidden: false,
-        disabled: false,
-        tooltip: 'My tooltip',
       });
     });
   });
@@ -181,6 +173,8 @@ describe('getNavLinks', () => {
             },
             {
               id: 'link-b',
+              title: 'AppB',
+              url: '/some-other-url',
               disableSubUrlTracking: true,
             },
           ],
@@ -201,14 +195,14 @@ describe('getNavLinks', () => {
       expect(navlinks[1]).toEqual(
         expect.objectContaining({
           id: 'link-b',
-          title: 'link-b',
-          url: '/app/link-b',
+          title: 'AppB',
+          url: '/some-other-url',
           disableSubUrlTracking: true,
         })
       );
     });
 
-    it('uses all known properties of the navlink', () => {
+    it('only uses known properties to create the navlink', () => {
       const navlinks = getNavLinks(
         createLegacyExports({
           navLinkSpecs: [
@@ -274,6 +268,8 @@ describe('getNavLinks', () => {
           },
           {
             id: 'link-b',
+            title: 'AppB',
+            url: '/url-b',
             disableSubUrlTracking: true,
           },
         ],
