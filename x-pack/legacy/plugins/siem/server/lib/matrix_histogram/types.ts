@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MatrixHistogramOverTimeData } from '../../graphql/types';
+import {
+  MatrixHistogramOverTimeData,
+  HistogramType,
+  MatrixOverTimeHistogramData,
+} from '../../graphql/types';
 import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import { SearchHit } from '../types';
+import { EventHit } from '../events/types';
+import { AuthenticationHit } from '../authentications/types';
 
-export interface AlertsBucket {
+export interface HistogramBucket {
   key: number;
   doc_count: number;
 }
 
-export interface AlertsGroupData {
+interface AlertsGroupData {
   key: string;
   doc_count: number;
   alerts: {
-    buckets: AlertsBucket[];
+    buckets: HistogramBucket[];
   };
 }
 
@@ -81,6 +87,41 @@ export interface DnsHistogramGroupData {
   histogram: DnsHistogramBucket;
 }
 
+export interface MatrixHistogramSchema<T> {
+  buildDsl: (options: MatrixHistogramRequestOptions) => {};
+  aggName: string;
+  parseKey: string;
+  parser?: <T>(
+    data: MatrixHistogramParseData<T>,
+    keyBucket: string
+  ) => MatrixOverTimeHistogramData[];
+}
+
+export type MatrixHistogramParseData<T> = T extends HistogramType.alerts
+  ? AlertsGroupData[]
+  : T extends HistogramType.anomalies
+  ? AnomaliesActionGroupData[]
+  : T extends HistogramType.dns
+  ? DnsHistogramGroupData[]
+  : T extends HistogramType.authentications
+  ? AuthenticationsActionGroupData[]
+  : T extends HistogramType.events
+  ? EventsActionGroupData[]
+  : never;
+
+export type MatrixHistogramHit<T> = T extends HistogramType.alerts
+  ? EventHit
+  : T extends HistogramType.anomalies
+  ? AnomalyHit
+  : T extends HistogramType.dns
+  ? EventHit
+  : T extends HistogramType.authentications
+  ? AuthenticationHit
+  : T extends HistogramType.events
+  ? EventHit
+  : never;
+
+export type MatrixHistogramDataConfig = Record<HistogramType, MatrixHistogramSchema<HistogramType>>;
 interface AuthenticationsOverTimeHistogramData {
   key_as_string: string;
   key: number;

@@ -4,110 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 
-import {
-  MatrixHistogramOverTimeData,
-  MatrixOverTimeHistogramData,
-  HistogramType,
-} from '../../graphql/types';
+import { MatrixHistogramOverTimeData, HistogramType } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
-import {
-  MatrixHistogramAdapter,
-  AlertsGroupData,
-  AlertsBucket,
-  AnomaliesActionGroupData,
-  AnomalyHit,
-  EventsActionGroupData,
-  DnsHistogramBucket,
-  DnsHistogramGroupData,
-  DnsHistogramSubBucket,
-  AuthenticationsActionGroupData,
-} from './types';
+import { MatrixHistogramAdapter, MatrixHistogramDataConfig, MatrixHistogramHit } from './types';
 import { TermAggregation } from '../types';
-import { EventHit } from '../events/types';
-import { buildAlertsHistogramQuery } from './query_alerts.dsl';
 import { buildAnomaliesOverTimeQuery } from './query.anomalies_over_time.dsl';
 import { buildDnsHistogramQuery } from './query_dns_histogram.dsl';
 import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
+import { getDnsParsedData, getGenericData } from './utils';
 import { buildAuthenticationsOverTimeQuery } from './query.authentications_over_time.dsl';
-import { AuthenticationHit } from '../authentications/types';
+import { buildAlertsHistogramQuery } from './query_alerts.dsl';
 
-interface MatrixHistogramSchema<T> {
-  buildDsl: (options: MatrixHistogramRequestOptions) => {};
-  aggName: string;
-  parseKey: string;
-  parser?: <T>(
-    data: MatrixHistogramParseData<T>,
-    keyBucket: string
-  ) => MatrixOverTimeHistogramData[];
-}
-
-type MatrixHistogramParseData<T> = T extends HistogramType.alerts
-  ? AlertsGroupData[]
-  : T extends HistogramType.anomalies
-  ? AnomaliesActionGroupData[]
-  : T extends HistogramType.dns
-  ? DnsHistogramGroupData[]
-  : T extends HistogramType.authentications
-  ? AuthenticationsActionGroupData[]
-  : T extends HistogramType.events
-  ? EventsActionGroupData[]
-  : never;
-
-type MatrixHistogramHit<T> = T extends HistogramType.alerts
-  ? EventHit
-  : T extends HistogramType.anomalies
-  ? AnomalyHit
-  : T extends HistogramType.dns
-  ? EventHit
-  : T extends HistogramType.authentications
-  ? AuthenticationHit
-  : T extends HistogramType.events
-  ? EventHit
-  : never;
-
-type MatrixHistogramConfig = Record<HistogramType, MatrixHistogramSchema<HistogramType>>;
-
-const getDnsParsedData = (
-  data: MatrixHistogramParseData<HistogramType.dns>,
-  keyBucket: string
-): MatrixOverTimeHistogramData[] => {
-  let result: MatrixOverTimeHistogramData[] = [];
-  data.forEach((bucketData: DnsHistogramBucket) => {
-    const time = get('key', bucketData);
-    const histData = getOr([], keyBucket, bucketData).map(
-      ({ key, doc_count }: DnsHistogramSubBucket) => ({
-        x: time,
-        y: doc_count,
-        g: key,
-      })
-    );
-    result = [...result, ...histData];
-  });
-  return result;
-};
-
-const getGenericData = <T>(
-  data: MatrixHistogramParseData<T>,
-  keyBucket: string
-): MatrixOverTimeHistogramData[] => {
-  let result: MatrixOverTimeHistogramData[] = [];
-  data.forEach((bucketData: unknown) => {
-    const group = get('key', bucketData);
-    const histData = getOr([], keyBucket, bucketData).map(({ key, doc_count }: AlertsBucket) => ({
-      x: key,
-      y: doc_count,
-      g: group,
-    }));
-    result = [...result, ...histData];
-  });
-
-  return result;
-};
-
-const matrixHistogramConfig: MatrixHistogramConfig = {
+const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [HistogramType.alerts]: {
     buildDsl: buildAlertsHistogramQuery,
     aggName: 'aggregations.alertsGroup.buckets',
