@@ -41,7 +41,7 @@ import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { TruncateText } from '../../components/truncate_text';
 
-interface TTableChangeCallbackArguments {
+interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
@@ -105,7 +105,7 @@ export const PolicyList = React.memo(() => {
   }, [pageIndex, pageSize, totalItemCount]);
 
   const handleTableChange = useCallback(
-    ({ page: { index, size } }: TTableChangeCallbackArguments) => {
+    ({ page: { index, size } }: TableChangeCallbackArguments) => {
       dispatch({
         type: 'userPaginatedPolicyListTable',
         payload: {
