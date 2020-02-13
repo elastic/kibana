@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useInput, sendRequest } from '../../../../../hooks';
 import { usePolicies } from './hooks';
+import { enrollmentAPIKeyRouteService } from '../../../../../services';
 
 export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange }) => {
   const { data: policies } = usePolicies();
@@ -73,7 +74,7 @@ function useCreateApiKey(onSuccess: () => void) {
     setSubmitted(true);
     await sendRequest({
       method: 'post',
-      path: '/api/ingest_manager/fleet/enrollment-api-keys',
+      path: enrollmentAPIKeyRouteService.getCreatePath(),
       body: JSON.stringify({
         name: inputs.nameInput.value,
         policy_id: inputs.policyIdInput.value,

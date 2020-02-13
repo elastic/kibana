@@ -8,4 +8,5 @@ export {
   agentConfigRouteService,
   fleetSetupRouteService,
   agentRouteService,
+  enrollmentAPIKeyRouteService,
 } from '../../../../common';

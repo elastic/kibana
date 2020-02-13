@@ -12,6 +12,7 @@ import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
 import { EnrollmentAPIKey } from '../../../../../types';
+import { enrollmentAPIKeyRouteService } from '../../../../../services';
 export { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 
 export const EnrollmentApiKeysTable: React.FC<{
@@ -63,7 +64,7 @@ export const EnrollmentApiKeysTable: React.FC<{
           onConfirm={async () => {
             await sendRequest({
               method: 'delete',
-              path: `/api/ingest_manager/fleet/enrollment-api-keys/${confirmDeleteApiKeyId}`,
+              path: enrollmentAPIKeyRouteService.getDeletePath(confirmDeleteApiKeyId),
             });
             setConfirmDeleteApiKeyId(null);
             refresh();

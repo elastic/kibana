@@ -10,11 +10,12 @@ import {
   GetOneEnrollmentAPIKeyResponse,
   GetAgentConfigsResponse,
 } from '../../../../../types';
+import { enrollmentAPIKeyRouteService, agentConfigRouteService } from '../../../../../services';
 
 export function useEnrollmentApiKeys(pagination: Pagination) {
   const request = useRequest<GetEnrollmentAPIKeysResponse>({
     method: 'get',
-    path: '/api/ingest_manager/fleet/enrollment-api-keys',
+    path: enrollmentAPIKeyRouteService.getListPath(),
   });
 
   return {
@@ -27,7 +28,7 @@ export function useEnrollmentApiKeys(pagination: Pagination) {
 export function usePolicies() {
   const request = useRequest<GetAgentConfigsResponse>({
     method: 'get',
-    path: '/api/ingest_manager/agent_configs',
+    path: agentConfigRouteService.getListPath(),
   });
 
   return {
@@ -39,7 +40,7 @@ export function usePolicies() {
 export function useEnrollmentApiKey(apiKeyId: string | null) {
   const request = useRequest<GetOneEnrollmentAPIKeyResponse>({
     method: 'get',
-    path: `/api/ingest_manager/fleet/enrollment-api-keys/${apiKeyId}`,
+    path: enrollmentAPIKeyRouteService.getInfoPath(apiKeyId as string),
   });
 
   return {

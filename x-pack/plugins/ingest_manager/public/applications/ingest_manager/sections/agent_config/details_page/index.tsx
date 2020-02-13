@@ -280,7 +280,7 @@ export const AgentConfigDetailsPage: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {/* TODO: Make this link to filtered agents list and change to real agent count */}
-                    <ConnectedLink color="primary" path={`/agents`}>
+                    <ConnectedLink color="primary" path={`/fleet/agents`}>
                       <FormattedMessage
                         id="xpack.ingestManager.policyDetails.viewAgentsLinkText"
                         defaultMessage="View agents"

@@ -19,7 +19,6 @@ import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
 import { DefaultLayout } from './layouts';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
 import { CoreContext, DepsContext, ConfigContext, setHttpClient } from './hooks';
-import { StartDepsContext } from './hooks/use_deps';
 
 const IngestManagerRoutes = ({ ...rest }) => (
   <EuiErrorBoundary>
@@ -65,14 +64,12 @@ const IngestManagerApp = ({
   return (
     <coreStart.i18n.Context>
       <CoreContext.Provider value={coreStart}>
-        <DepsContext.Provider value={setupDeps}>
-          <StartDepsContext.Provider value={startDeps}>
-            <ConfigContext.Provider value={config}>
-              <EuiThemeProvider darkMode={isDarkMode}>
-                <IngestManagerRoutes />
-              </EuiThemeProvider>
-            </ConfigContext.Provider>
-          </StartDepsContext.Provider>
+        <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
+          <ConfigContext.Provider value={config}>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <IngestManagerRoutes />
+            </EuiThemeProvider>
+          </ConfigContext.Provider>
         </DepsContext.Provider>
       </CoreContext.Provider>
     </coreStart.i18n.Context>
