@@ -6,14 +6,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
@@ -50,65 +43,68 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
   const [searchTermError, setSearchTermError] = useState<null | string>(null);
   const filterInvalid = Boolean(searchTermError);
   return (
-    <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
+    <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem grow={true}>
-        <EuiFieldSearch
-          isInvalid={filterInvalid}
-          aria-label="Filter"
-          placeholder={intl.formatMessage({
-            id: 'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
-            defaultMessage: 'Filter',
-          })}
-          onChange={e => {
-            const string = e.target.value;
-            const errorMessage = validateRegExpString(string);
-            if (errorMessage) {
-              // Emit an empty search term to listeners if search term is invalid.
-              onSearchChange('');
-              setSearchTermError(errorMessage);
-            } else {
-              onSearchChange(e.target.value);
-              if (searchTermError) {
-                setSearchTermError(null);
-              }
-            }
-          }}
-        />
-        {filterInvalid && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              color="danger"
-              title={i18n.translate(
-                'xpack.upgradeAssistant.checkupTab.controls.filterErrorMessageLabel',
-                {
-                  defaultMessage: 'Filter Invalid: {searchTermError}',
-                  values: { searchTermError },
+        <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
+          <EuiFlexItem grow={true}>
+            <EuiFieldSearch
+              isInvalid={filterInvalid}
+              aria-label="Filter"
+              placeholder={intl.formatMessage({
+                id: 'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
+                defaultMessage: 'Filter',
+              })}
+              onChange={e => {
+                const string = e.target.value;
+                const errorMessage = validateRegExpString(string);
+                if (errorMessage) {
+                  // Emit an empty search term to listeners if search term is invalid.
+                  onSearchChange('');
+                  setSearchTermError(errorMessage);
+                } else {
+                  onSearchChange(e.target.value);
+                  if (searchTermError) {
+                    setSearchTermError(null);
+                  }
                 }
-              )}
-              iconType="faceSad"
+              }}
             />
-          </>
-        )}
+          </EuiFlexItem>
+
+          {/* These two components provide their own EuiFlexItem wrappers */}
+          <FilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
+          <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={loadData}
+              iconType="refresh"
+              isLoading={loadingState === LoadingState.Loading}
+            >
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.controls.refreshButtonLabel"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-
-      {/* These two components provide their own EuiFlexItem wrappers */}
-      <FilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
-      <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
-
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          onClick={loadData}
-          iconType="refresh"
-          isLoading={loadingState === LoadingState.Loading}
-        >
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.controls.refreshButtonLabel"
-            defaultMessage="Refresh"
+      {filterInvalid && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate(
+              'xpack.upgradeAssistant.checkupTab.controls.filterErrorMessageLabel',
+              {
+                defaultMessage: 'Filter Invalid: {searchTermError}',
+                values: { searchTermError },
+              }
+            )}
+            iconType="faceSad"
           />
-        </EuiButton>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
