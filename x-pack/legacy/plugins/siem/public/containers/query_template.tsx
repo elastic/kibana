@@ -19,7 +19,7 @@ export interface QueryTemplateProps {
   startDate?: number;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
+export type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
   FetchMoreOptions<TData, TVariables>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
