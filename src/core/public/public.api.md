@@ -101,6 +101,7 @@ export interface ApplicationStart {
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
