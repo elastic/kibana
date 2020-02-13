@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
@@ -13,11 +14,19 @@ import {
   // @ts-ignore
 } from '../../common/constants';
 
-function getUniqueLayerCounts(layerCountsList: any[], mapsCount: number) {
+interface Stats {
+  [key: string]: {
+    min: number;
+    max: number;
+    avg: number;
+  };
+}
+
+function getUniqueLayerCounts(layerCountsList: object[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
 
-  return uniqueLayerTypes.reduce((accu: any, type) => {
-    const typeCounts = layerCountsList.reduce((tCountsAccu, tCounts) => {
+  return uniqueLayerTypes.reduce((accu: Stats, type: string) => {
+    const typeCounts = layerCountsList.reduce((tCountsAccu: number[], tCounts: any) => {
       if (tCounts[type]) {
         tCountsAccu.push(tCounts[type]);
       }
@@ -114,17 +123,20 @@ export function buildMapsTelemetry({
     },
   };
 }
-async function getMapSavedObjects(savedObjectsClient: any) {
+async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
   return _.get(mapsSavedObjects, 'saved_objects', []);
 }
 
-async function getIndexPatternSavedObjects(savedObjectsClient: any) {
+async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
-export async function getMapsTelemetry(savedObjectsClient: any, config: Function) {
+export async function getMapsTelemetry(
+  savedObjectsClient: SavedObjectsClientContract,
+  config: Function
+) {
   const mapSavedObjects: Array<Record<string, any>> = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects: Array<Record<string, any>> = await getIndexPatternSavedObjects(
     savedObjectsClient

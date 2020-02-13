@@ -21,10 +21,10 @@ import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
-import { esFilters } from '../../../..';
+import { Filter, FILTERS } from '../../../../../common';
 
 interface Props {
-  filter: esFilters.Filter;
+  filter: Filter;
   valueLabel?: string;
 }
 
@@ -51,43 +51,43 @@ export function FilterLabel({ filter, valueLabel }: Props) {
   }
 
   switch (filter.meta.type) {
-    case esFilters.FILTERS.EXISTS:
+    case FILTERS.EXISTS:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key} {existsOperator.message}
         </Fragment>
       );
-    case esFilters.FILTERS.GEO_BOUNDING_BOX:
+    case FILTERS.GEO_BOUNDING_BOX:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key}: {valueLabel}
         </Fragment>
       );
-    case esFilters.FILTERS.GEO_POLYGON:
+    case FILTERS.GEO_POLYGON:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key}: {valueLabel}
         </Fragment>
       );
-    case esFilters.FILTERS.PHRASES:
+    case FILTERS.PHRASES:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key} {isOneOfOperator.message} {valueLabel}
         </Fragment>
       );
-    case esFilters.FILTERS.QUERY_STRING:
+    case FILTERS.QUERY_STRING:
       return (
         <Fragment>
           {prefix}
           {valueLabel}
         </Fragment>
       );
-    case esFilters.FILTERS.PHRASE:
-    case esFilters.FILTERS.RANGE:
+    case FILTERS.PHRASE:
+    case FILTERS.RANGE:
       return (
         <Fragment>
           {prefix}

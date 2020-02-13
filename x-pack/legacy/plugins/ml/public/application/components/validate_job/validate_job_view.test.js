@@ -9,6 +9,13 @@ import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
 
+jest.mock('../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+  }),
+}));
+
 const job = {
   job_id: 'test-id',
 };

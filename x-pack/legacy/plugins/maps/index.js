@@ -53,7 +53,7 @@ export function maps(kibana) {
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
       inspectorViews: ['plugins/maps/inspector/views/register_views'],
-      home: ['plugins/maps/register_feature'],
+      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
@@ -96,6 +96,11 @@ export function maps(kibana) {
         return;
       }
 
+      // Init saved objects client deps
+      const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+      const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+      const internalRepository = getSavedObjectsRepository(callCluster);
+
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
       const pluginsSetup = {
@@ -116,13 +121,7 @@ export function maps(kibana) {
           elasticsearch: server.plugins.elasticsearch,
         },
         savedObjects: {
-          savedObjectsClient: (() => {
-            const callCluster = server.plugins.elasticsearch.getCluster('admin')
-              .callWithInternalUser;
-            const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-            const internalRepository = getSavedObjectsRepository(callCluster);
-            return new SavedObjectsClient(internalRepository);
-          })(),
+          savedObjectsClient: new SavedObjectsClient(internalRepository),
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
         injectUiAppVars: server.injectUiAppVars,
