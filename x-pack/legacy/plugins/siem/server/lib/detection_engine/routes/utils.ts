@@ -178,7 +178,7 @@ export const getIndex = (
   request: RequestFacade | Omit<RequestFacade, 'query'>,
   server: ServerFacade
 ): string => {
-  const spaceId = server.plugins.spaces.getSpaceId(request);
+  const spaceId = server.plugins.spaces?.getSpaceId?.(request) ?? 'default';
   const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
   return `${signalsIndex}-${spaceId}`;
 };
