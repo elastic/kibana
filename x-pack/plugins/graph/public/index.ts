@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
 import { PluginInitializerContext } from 'kibana/public';
 import { GraphPlugin } from './plugin';
-import { configSchema, ConfigSchema } from '../config';
+import { ConfigSchema } from '../config';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
+export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
   new GraphPlugin(initializerContext);
 
 export { GraphSetup } from './plugin';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  schema: configSchema,
-};
