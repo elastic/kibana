@@ -62,7 +62,7 @@ export interface VisualizePluginSetupDependencies {
   home: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
-  npData: DataPublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -79,10 +79,10 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibanaLegacy, usageCollection, npData }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, usageCollection, data }: VisualizePluginSetupDependencies
   ) {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      npData.query
+      data.query
     );
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
@@ -105,7 +105,6 @@ export class VisualizePlugin implements Plugin {
     kibanaLegacy.registerLegacyApp({
       id: 'visualize',
       title: 'Visualize',
-      // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:visualize',
       mount: async ({ core: contextCore }, params) => {
@@ -119,7 +118,7 @@ export class VisualizePlugin implements Plugin {
           embeddables,
           navigation,
           visualizations,
-          data,
+          data: dataStart,
           share,
         } = this.startDependencies;
 
@@ -127,15 +126,15 @@ export class VisualizePlugin implements Plugin {
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
-          data,
+          data: dataStart,
           embeddables,
           getBasePath: core.http.basePath.get,
-          indexPatterns: data.indexPatterns,
+          indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
           savedVisualizations: visualizations.getSavedVisualizationsLoader(),
-          savedQueryService: data.query.savedQueries,
+          savedQueryService: dataStart.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,

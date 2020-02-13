@@ -25,10 +25,7 @@ import { plugin } from './index';
 
 (() => {
   const instance = plugin({} as PluginInitializerContext);
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    npData: npSetup.plugins.data,
-  });
+  instance.setup(npSetup.core, npSetup.plugins);
   instance.start(npStart.core, {
     ...npStart.plugins,
     embeddables,

@@ -137,7 +137,6 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
-      // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:discover',
       order: -1004,
