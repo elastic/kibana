@@ -17,12 +17,12 @@ import {
 import styled from 'styled-components';
 import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../components/ml_popover/jobs_table/filters/toggle_selected_group';
-import { useDidMountEffect } from '../../../../../utils/use_did_mount';
 
 interface TagsFilterPopoverProps {
+  selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
-  isLoading: boolean;
+  isLoading: boolean; // TO DO reimplement?
 }
 
 const ScrollableDiv = styled.div`
@@ -38,14 +38,10 @@ const ScrollableDiv = styled.div`
  */
 export const TagsFilterPopoverComponent = ({
   tags,
+  selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  useDidMountEffect(() => {
-    onSelectedTagsChanged(selectedTags);
-  }, [selectedTags.sort().join()]);
 
   return (
     <EuiPopover
@@ -71,7 +67,7 @@ export const TagsFilterPopoverComponent = ({
           <EuiFilterSelectItem
             checked={selectedTags.includes(tag) ? 'on' : undefined}
             key={`${index}-${tag}`}
-            onClick={() => toggleSelectedGroup(tag, selectedTags, setSelectedTags)}
+            onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
           >
             {`${tag}`}
           </EuiFilterSelectItem>

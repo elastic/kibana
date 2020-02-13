@@ -5,13 +5,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-
+import { isEqual } from 'lodash/fp';
 import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { FilterOptions } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
-import { useDidMountEffect } from '../../../../utils/use_did_mount';
 import { TagsFilterPopover } from '../../../../pages/detection_engine/rules/all/rules_table_filters/tags_filter_popover';
 
 interface Initial {
@@ -38,12 +37,25 @@ const CasesTableFiltersComponent = ({
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [{ isLoading, data }] = useGetTags();
 
-  // Propagate filter changes to parent
-  useDidMountEffect(() => {
-    onFilterChanged({ search, tags: selectedTags });
-  }, [search, selectedTags]);
-
-  const handleOnSearch = useCallback(searchString => setSearch(searchString.trim()), [setSearch]);
+  const handleSelectedTags = useCallback(
+    newTags => {
+      if (!isEqual(newTags, selectedTags)) {
+        setSelectedTags(newTags);
+        onFilterChanged({ search, tags: newTags });
+      }
+    },
+    [search, selectedTags]
+  );
+  const handleOnSearch = useCallback(
+    newSearch => {
+      const trimSearch = newSearch.trim();
+      if (!isEqual(trimSearch, search)) {
+        setSearch(trimSearch);
+        onFilterChanged({ tags: selectedTags, search: trimSearch });
+      }
+    },
+    [search, selectedTags]
+  );
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
@@ -60,9 +72,10 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover
-            tags={data}
-            onSelectedTagsChanged={setSelectedTags}
             isLoading={isLoading}
+            onSelectedTagsChanged={handleSelectedTags}
+            selectedTags={selectedTags}
+            tags={data}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

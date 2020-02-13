@@ -52,22 +52,12 @@ export const readRawTags = async ({
     page: 1,
     perPage,
   });
-  const firstSet = convertTagsToSet(firstTags.saved_objects);
-  const totalPages = Math.ceil(firstTags.total / firstTags.per_page);
-  if (totalPages <= 1) {
-    return Array.from(firstSet);
-  } else {
-    const returnTags = await Array(totalPages - 1)
-      .fill({})
-      .map((_, page) => {
-        // page index starts at 2 as we already got the first page and we have more pages to go
-        return client.find({ type: CASE_SAVED_OBJECT, fields: ['tags'], perPage, page: page + 2 });
-      })
-      .reduce<Promise<Set<string>>>(async (accum, nextTagPage) => {
-        const tagArray = convertToTags((await nextTagPage).saved_objects);
-        return new Set([...(await accum), ...tagArray]);
-      }, Promise.resolve(firstSet));
+  const tags = await client.find({
+    type: CASE_SAVED_OBJECT,
+    fields: ['tags'],
+    page: 1,
+    perPage: firstTags.total,
+  });
 
-    return Array.from(returnTags);
-  }
+  return Array.from(convertTagsToSet(tags.saved_objects));
 };

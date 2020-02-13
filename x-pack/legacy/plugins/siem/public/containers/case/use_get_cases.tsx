@@ -5,7 +5,7 @@
  */
 
 import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-
+import { isEqual } from 'lodash/fp';
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
   DEFAULT_TABLE_LIMIT,
@@ -22,7 +22,6 @@ import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { getCases } from './api';
-import { useDidMountEffect } from '../../utils/use_did_mount';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -112,13 +111,17 @@ export const useGetCases = (): [
   const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
-  useDidMountEffect(() => {
-    dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
-  }, [queryParams]);
+  useEffect(() => {
+    if (!isEqual(queryParams, state.queryParams)) {
+      dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
+    }
+  }, [queryParams, state.queryParams]);
 
-  useDidMountEffect(() => {
-    dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
-  }, [filterQuery]);
+  useEffect(() => {
+    if (!isEqual(filterQuery, state.filterOptions)) {
+      dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
+    }
+  }, [filterQuery, state.filterOptions]);
 
   useEffect(() => {
     let didCancel = false;
