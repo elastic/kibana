@@ -9,21 +9,17 @@ import { CoreStart } from 'kibana/public';
 import { appSagaFactory } from './saga';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
-import { EndpointPluginStartDependencies } from '../../../plugin';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
   : compose;
 
-export const appStoreFactory = (
-  coreStart: CoreStart,
-  depsStart: EndpointPluginStartDependencies
-): [Store, () => void] => {
+export const appStoreFactory = (coreStart: CoreStart): [Store, () => void] => {
   const sagaReduxMiddleware = appSagaFactory(coreStart);
   const store = createStore(
     appReducer,
     composeWithReduxDevTools(
-      applyMiddleware(alertMiddlewareFactory(coreStart, depsStart), appSagaFactory(coreStart))
+      applyMiddleware(alertMiddlewareFactory(coreStart), appSagaFactory(coreStart))
     )
   );
 

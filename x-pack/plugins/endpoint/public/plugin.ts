@@ -6,7 +6,6 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
 
@@ -14,11 +13,9 @@ export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
 export interface EndpointPluginSetupDependencies {
   embeddable: IEmbeddableSetup;
-  data: DataPublicPluginStart;
 }
-export interface EndpointPluginStartDependencies {
-  data: DataPublicPluginStart;
-}
+
+export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export class EndpointPlugin
   implements
@@ -28,19 +25,16 @@ export class EndpointPlugin
       EndpointPluginSetupDependencies,
       EndpointPluginStartDependencies
     > {
-  public setup(
-    core: CoreSetup<EndpointPluginStartDependencies>,
-    plugins: EndpointPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     core.application.register({
       id: 'endpoint',
       title: i18n.translate('xpack.endpoint.pluginTitle', {
         defaultMessage: 'Endpoint',
       }),
       async mount(params: AppMountParameters) {
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
-        return renderApp(coreStart, depsStart, params);
+        return renderApp(coreStart, params);
       },
     });
 

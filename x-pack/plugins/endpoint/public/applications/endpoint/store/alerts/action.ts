@@ -4,31 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
-import { AlertListData, UserUpdatedAlertsSearchBarFilterPayload } from '../../types';
+import { AlertListData } from '../../types';
 
 interface ServerReturnedAlertsData {
   type: 'serverReturnedAlertsData';
   payload: AlertListData;
 }
 
-interface ServerReturnedSearchBarIndexPatterns {
-  type: 'serverReturnedSearchBarIndexPatterns';
-  payload: IIndexPattern[];
-}
-
-interface UserUpdatedAlertsSearchBarFilter {
-  type: 'userUpdatedAlertsSearchBarFilter';
-  payload: UserUpdatedAlertsSearchBarFilterPayload;
-}
-
-interface UserSubmittedAlertsSearchBarFilter {
-  type: 'userSubmittedAlertsSearchBarFilter';
-  payload: UserUpdatedAlertsSearchBarFilterPayload;
-}
-
-export type AlertAction =
-  | ServerReturnedAlertsData
-  | ServerReturnedSearchBarIndexPatterns
-  | UserUpdatedAlertsSearchBarFilter
-  | UserSubmittedAlertsSearchBarFilter;
+export type AlertAction = ServerReturnedAlertsData;
