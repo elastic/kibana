@@ -6,7 +6,11 @@
 import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { init as initHttpRequests } from './http_requests';
+
+import {
+  notificationServiceMock,
+  docLinksServiceMock,
+} from '../../../../../../../src/core/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
@@ -16,10 +20,7 @@ import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
 import { setExtensionsService } from '../../../public/application/store/selectors';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { notificationServiceMock } from '../../../../../../../src/core/public/notifications/notifications_service.mock';
-import { docLinksServiceMock } from '../../../../../../../src/core/public/doc_links/doc_links_service.mock';
+import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -38,7 +39,7 @@ export const setupEnvironment = () => {
   httpService.setup(mockHttpClient);
   breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
-  notificationService.setup(notificationServiceMock.createStartContract());
+  notificationService.setup(notificationServiceMock.createSetupContract());
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 
