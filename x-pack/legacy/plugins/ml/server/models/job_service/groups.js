@@ -7,7 +7,7 @@
 import { CalendarManager } from '../calendar';
 
 export function groupsProvider(callWithRequest) {
-  const calMngr = new CalendarManager(true, callWithRequest);
+  const calMngr = new CalendarManager(callWithRequest);
 
   async function getAllGroups() {
     const groups = {};
