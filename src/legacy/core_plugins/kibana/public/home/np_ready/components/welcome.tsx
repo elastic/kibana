@@ -38,13 +38,14 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../../kibana_services';
+import { TelemetryPluginStart } from '../../../../../../../plugins/telemetry/public';
+import { PRIVACY_STATEMENT_URL } from '../../../../../../../plugins/telemetry/common/constants';
 
 import { SampleDataCard } from './sample_data';
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
-  onOptInSeen: () => any;
-  currentOptInStatus: boolean;
+  telemetry?: TelemetryPluginStart;
 }
 
 /**
@@ -75,8 +76,11 @@ export class Welcome extends React.Component<Props> {
   };
 
   componentDidMount() {
+    const { telemetry } = this.props;
     this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    this.props.onOptInSeen();
+    if (telemetry) {
+      telemetry.telemetryNotifications.setOptedInNoticeSeen();
+    }
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
@@ -85,7 +89,13 @@ export class Welcome extends React.Component<Props> {
   }
 
   private renderTelemetryEnabledOrDisabledText = () => {
-    if (this.props.currentOptInStatus) {
+    const { telemetry } = this.props;
+    if (!telemetry) {
+      return null;
+    }
+
+    const isOptedIn = telemetry.telemetryService.getIsOptedIn();
+    if (isOptedIn) {
       return (
         <Fragment>
           <FormattedMessage
@@ -119,7 +129,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   render() {
-    const { urlBasePath } = this.props;
+    const { urlBasePath, telemetry } = this.props;
     return (
       <EuiPortal>
         <div className="homWelcome">
@@ -154,24 +164,24 @@ export class Welcome extends React.Component<Props> {
                   onDecline={this.onSampleDataDecline}
                 />
                 <EuiSpacer size="s" />
-                <EuiTextColor className="euiText--small" color="subdued">
-                  <FormattedMessage
-                    id="kbn.home.dataManagementDisclaimerPrivacy"
-                    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-                  />
-                  <EuiLink
-                    href="https://www.elastic.co/legal/privacy-statement"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <FormattedMessage
-                      id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                      defaultMessage="Privacy Statement."
-                    />
-                  </EuiLink>
-                  {this.renderTelemetryEnabledOrDisabledText()}
-                </EuiTextColor>
-                <EuiSpacer size="xs" />
+                {!!telemetry && (
+                  <Fragment>
+                    <EuiTextColor className="euiText--small" color="subdued">
+                      <FormattedMessage
+                        id="kbn.home.dataManagementDisclaimerPrivacy"
+                        defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                      />
+                      <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+                        <FormattedMessage
+                          id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                          defaultMessage="Privacy Statement."
+                        />
+                      </EuiLink>
+                      {this.renderTelemetryEnabledOrDisabledText()}
+                    </EuiTextColor>
+                    <EuiSpacer size="xs" />
+                  </Fragment>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

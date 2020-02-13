@@ -31,6 +31,7 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
       "IS_PIPELINE_JOB=1",
       "JOB=${name}",
+      "KBN_NP_PLUGINS_BUILT=true",
     ]) {
       closure()
     }

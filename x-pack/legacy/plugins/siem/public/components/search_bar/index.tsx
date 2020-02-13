@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { FilterManager, IIndexPattern, TimeRange, Query, esFilters } from 'src/plugins/data/public';
+import { FilterManager, IIndexPattern, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
@@ -54,7 +54,7 @@ interface SiemSearchBarDispatch {
     id: InputsModelId;
     savedQuery: SavedQuery | undefined;
   }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) => void;
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) => void;
 }
 
 interface SiemSearchBarProps {
@@ -313,7 +313,7 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;
   savedQuery?: SavedQuery;
@@ -399,7 +399,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) =>
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 

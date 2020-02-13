@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
 import {
-  esFilters,
+  Filter,
   IIndexPattern,
   Query,
   FilterManager,
@@ -33,7 +33,7 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   saved_id: string | null;
 }
