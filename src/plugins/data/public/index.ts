@@ -306,7 +306,6 @@ export {
   TimeHistoryContract,
 } from './query';
 export * from './ui';
-export { FieldFormatsStart } from './field_formats';
 export {
   // kbn field types
   castEsToKbnFieldTypeName,

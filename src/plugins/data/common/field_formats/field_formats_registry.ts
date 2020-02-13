@@ -39,6 +39,7 @@ export class FieldFormatsRegistry {
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
+  // overriden on the public contract
   public deserialize: (mapping: SerializedFieldFormat) => IFieldFormat = () => {
     return new (FieldFormat.from(identity))();
   };

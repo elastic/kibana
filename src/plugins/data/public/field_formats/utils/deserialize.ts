@@ -30,7 +30,7 @@ import {
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 import { FieldFormatId, FieldFormatsContentType, IFieldFormat } from '../..';
 import { FieldFormat } from '../../../common';
-import { FieldFormatsStart } from '../../../public/field_formats';
+import { DataPublicPluginStart } from '../../../public';
 import { getUiSettings } from '../../../public/services';
 import { FormatFactory } from '../../../common/field_formats/utils';
 
@@ -51,7 +51,7 @@ const getConfig = (key: string, defaultOverride?: any): any =>
 const DefaultFieldFormat = FieldFormat.from(identity);
 
 const getFieldFormat = (
-  fieldFormatsService: FieldFormatsStart,
+  fieldFormatsService: DataPublicPluginStart['fieldFormats'],
   id?: FieldFormatId,
   params: object = {}
 ): IFieldFormat => {
@@ -67,7 +67,7 @@ const getFieldFormat = (
 };
 
 export const deserializeFieldFormat: FormatFactory = function(
-  this: FieldFormatsStart,
+  this: DataPublicPluginStart['fieldFormats'],
   mapping?: SerializedFieldFormat
 ) {
   if (!mapping) {
