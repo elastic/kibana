@@ -12,7 +12,7 @@ import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID
 } from '../../../../common/apm_saved_object_constants';
-import { APMConfig } from '../../../../../../../plugins/apm/server';
+import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'create' | 'get'>;

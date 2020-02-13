@@ -12,7 +12,7 @@ import { hasHistoricalAgentData } from './get_services/has_historical_agent_data
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../public/utils/testHelpers';
+} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;

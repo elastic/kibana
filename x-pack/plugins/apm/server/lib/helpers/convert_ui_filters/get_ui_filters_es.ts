@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../../../plugins/apm/typings/elasticsearch';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import {
@@ -14,7 +14,7 @@ import {
 import {
   esKuery,
   IIndexPattern
-} from '../../../../../../../../src/plugins/data/server';
+} from '../../../../../../../src/plugins/data/server';
 
 export function getUiFiltersES(
   indexPattern: IIndexPattern | undefined,

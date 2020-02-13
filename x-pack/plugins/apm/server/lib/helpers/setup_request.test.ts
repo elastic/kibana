@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { setupRequest } from './setup_request';
-import { APMConfig } from '../../../../../../plugins/apm/server';
+import { APMConfig } from '../..';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({

@@ -5,8 +5,8 @@
  */
 
 import { IClusterClient } from 'src/core/server';
-import { APMConfig } from '../../../../../../../plugins/apm/server';
-import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({

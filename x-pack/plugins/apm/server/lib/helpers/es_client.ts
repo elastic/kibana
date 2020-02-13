@@ -16,9 +16,9 @@ import { KibanaRequest } from 'src/core/server';
 import {
   ESSearchRequest,
   ESSearchResponse
-} from '../../../../../../plugins/apm/typings/elasticsearch';
+} from '../../../typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { pickKeys } from '../../../public/utils/pickKeys';
+import { pickKeys } from '../../../../../legacy/plugins/apm/public/utils/pickKeys';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 

@@ -8,12 +8,14 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   ERROR_GROUP_ID
 } from '../elasticsearch_fieldnames';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getErrorGroupsProjection({

@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
-import { APMConfig } from '../../../../../../plugins/apm/server';
+import { APMConfig } from '../..';
 import {
   ServerAPI,
   RouteFactoryFn,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectAttributes } from '../../../../../../../src/core/server';
 import { createApmTelementry, storeApmServicesTelemetry } from '../index';
 import {
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,

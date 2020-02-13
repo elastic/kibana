@@ -5,7 +5,7 @@
  */
 
 import { transactionGroupsFetcher } from './fetcher';
-import { APMConfig } from '../../../../../../plugins/apm/server';
+import { APMConfig } from '../..';
 
 function getSetup() {
   return {

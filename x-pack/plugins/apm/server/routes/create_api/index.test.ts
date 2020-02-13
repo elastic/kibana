@@ -8,8 +8,8 @@ import { createApi } from './index';
 import { CoreSetup, Logger } from 'src/core/server';
 import { Params } from '../typings';
 import { BehaviorSubject } from 'rxjs';
-import { APMConfig } from '../../../../../../plugins/apm/server';
-import { LegacySetup } from '../../../../../../plugins/apm/server/plugin';
+import { APMConfig } from '../..';
+import { LegacySetup } from '../../plugin';
 
 const getCoreMock = () => {
   const get = jest.fn();

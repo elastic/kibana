@@ -7,9 +7,10 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { AvgDurationByBrowserAPIResponse } from '../../server/lib/transactions/avg_duration_by_browser';
-import { TimeSeries } from '../../typings/timeseries';
-import { getVizColorForIndex } from '../../common/viz_colors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AvgDurationByBrowserAPIResponse } from '../../../../../plugins/apm/server/lib/transactions/avg_duration_by_browser';
+import { TimeSeries } from '../../../../../plugins/apm/typings/timeseries';
+import { getVizColorForIndex } from '../../../../../plugins/apm/common/viz_colors';
 
 function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
   if (!data) {

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
 import LRU from 'lru-cache';
+import { APICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
   IIndexPattern
-} from '../../../../../../../src/plugins/data/server';
+} from '../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';

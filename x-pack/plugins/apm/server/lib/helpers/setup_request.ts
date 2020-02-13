@@ -5,14 +5,14 @@
  */
 
 import moment from 'moment';
-import { KibanaRequest } from 'src/core/server';
-import { IIndexPattern } from 'src/plugins/data/common';
-import { APMConfig } from '../../../../../../plugins/apm/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common';
+import { APMConfig } from '../..';
 import {
   getApmIndices,
   ApmIndicesConfig
 } from '../settings/apm_indices/get_apm_indices';
-import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
+import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { APMRequestHandlerContext } from '../../routes/typings';

@@ -6,7 +6,7 @@
 
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
-import { APMConfig } from '../../../../../../../../plugins/apm/server';
+import { APMConfig } from '../../../../../server';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;

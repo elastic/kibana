@@ -6,7 +6,7 @@
 
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { getBuckets } from '../get_buckets';
-import { APMConfig } from '../../../../../../../../plugins/apm/server';
+import { APMConfig } from '../../../..';
 
 describe('timeseriesFetcher', () => {
   let clientSpy: jest.Mock;

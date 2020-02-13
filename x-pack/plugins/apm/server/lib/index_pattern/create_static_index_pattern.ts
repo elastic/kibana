@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import apmIndexPattern from '../../../../../../plugins/apm/server/tutorial/index_pattern.json';
+import apmIndexPattern from '../../tutorial/index_pattern.json';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server/saved_objects';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRequestHandlerContext } from '../../routes/typings';

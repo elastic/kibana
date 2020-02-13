@@ -7,7 +7,7 @@
 import '../../infra/types/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
-import {} from '../../reporting/public/components/report_listing';
+import '../../reporting/public/components/report_listing';
 // .svg
 import '../../canvas/types/webpack';
 

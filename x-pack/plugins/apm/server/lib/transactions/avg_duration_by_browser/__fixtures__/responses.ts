@@ -7,7 +7,7 @@
 import {
   ESSearchResponse,
   ESSearchRequest
-} from '../../../../../../../../plugins/apm/typings/elasticsearch';
+} from '../../../../../typings/elasticsearch';
 
 export const response = ({
   hits: {

@@ -11,7 +11,7 @@ import { getTransaction } from './get_transaction';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../public/utils/testHelpers';
+} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;

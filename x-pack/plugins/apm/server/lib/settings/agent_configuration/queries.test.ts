@@ -12,7 +12,7 @@ import { searchConfigurations } from './search';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../public/utils/testHelpers';
+} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
 
 describe('agent configuration queries', () => {
   let mock: SearchParamsMock;

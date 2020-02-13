@@ -8,7 +8,7 @@ import { getTransactionBreakdown } from '.';
 import * as constants from './constants';
 import noDataResponse from './mock-responses/noData.json';
 import dataResponse from './mock-responses/data.json';
-import { APMConfig } from '../../../../../../../plugins/apm/server';
+import { APMConfig } from '../../..';
 
 const mockIndices = {
   'apm_oss.sourcemapIndices': 'myIndex',

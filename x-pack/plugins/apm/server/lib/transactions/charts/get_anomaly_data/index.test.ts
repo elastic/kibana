@@ -8,7 +8,7 @@ import { getAnomalySeries } from '.';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { mlBucketSpanResponse } from './mock-responses/mlBucketSpanResponse';
 import { PromiseReturnType } from '../../../../../typings/common';
-import { APMConfig } from '../../../../../../../../plugins/apm/server';
+import { APMConfig } from '../../../..';
 
 describe('getAnomalySeries', () => {
   let avgAnomalies: PromiseReturnType<typeof getAnomalySeries>;
