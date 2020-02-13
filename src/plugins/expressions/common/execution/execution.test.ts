@@ -21,6 +21,7 @@ import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../../public';
+import { ExecutionContract } from './execution_contract';
 
 const createExecution = (
   expression: string = 'foo bar=123',
@@ -124,6 +125,39 @@ describe('Execution', () => {
     expect(result).toEqual({
       type: 'num',
       value: 2,
+    });
+  });
+
+  describe('.expression', () => {
+    test('uses expression passed in to constructor', () => {
+      const expression = 'add val="1"';
+      const execution = new Execution({
+        ast: parseExpression('add val="WRONG"'),
+        executor: {} as any,
+        expression,
+      });
+      expect(execution.expression).toBe(expression);
+    });
+
+    test('generates expression from AST if not passed to constructor', () => {
+      const expression = 'add val="1"';
+      const execution = new Execution({
+        ast: parseExpression(expression),
+        executor: {} as any,
+      });
+      expect(execution.expression).toBe(expression);
+    });
+  });
+
+  describe('.contract', () => {
+    test('is instance of ExecutionContract', () => {
+      const execution = createExecution('add val=1');
+      expect(execution.contract).toBeInstanceOf(ExecutionContract);
+    });
+
+    test('execution returns the same expression string', () => {
+      const execution = createExecution('add val=1');
+      expect(execution.expression).toBe(execution.contract.getExpression());
     });
   });
 
