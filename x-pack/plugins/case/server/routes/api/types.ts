@@ -63,7 +63,6 @@ export interface AllComments {
 }
 
 export interface UpdatedCaseType {
-  case_type?: UpdatedCaseTyped['case_type'];
   description?: UpdatedCaseTyped['description'];
   state?: UpdatedCaseTyped['state'];
   tags?: UpdatedCaseTyped['tags'];

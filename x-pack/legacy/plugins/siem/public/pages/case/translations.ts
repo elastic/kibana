@@ -18,17 +18,6 @@ export const CASE_TITLE = i18n.translate('xpack.siem.case.caseView.caseTitle', {
   defaultMessage: 'Case Title',
 });
 
-export const CASE_TYPE = i18n.translate('xpack.siem.case.caseView.caseType', {
-  defaultMessage: 'Case type',
-});
-
-export const CASE_TYPE_REQUIRED = i18n.translate(
-  'xpack.siem.case.createCase.caseTypeFieldRequiredError',
-  {
-    defaultMessage: 'A case type is required.',
-  }
-);
-
 export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.createdAt', {
   defaultMessage: 'Created at',
 });

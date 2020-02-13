@@ -51,7 +51,6 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
 };
 const initialData: Case = {
   case_id: '',
-  case_type: '',
   created_at: '',
   created_by: {
     username: '',

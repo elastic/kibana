@@ -28,7 +28,6 @@ export const UpdatedCommentSchema = schema.object({
 });
 
 export const NewCaseSchema = schema.object({
-  case_type: schema.string(),
   description: schema.string(),
   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -36,7 +35,6 @@ export const NewCaseSchema = schema.object({
 });
 
 export const UpdatedCaseSchema = schema.object({
-  case_type: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
   tags: schema.maybe(schema.arrayOf(schema.string())),

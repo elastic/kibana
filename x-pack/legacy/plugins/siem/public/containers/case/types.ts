@@ -13,12 +13,10 @@ export interface NewCase extends FormData {
   description: string;
   tags: string[];
   title: string;
-  case_type: string;
 }
 
 export interface Case {
   case_id: string;
-  case_type: string;
   created_at: string;
   created_by: ElasticUser;
   description: string;

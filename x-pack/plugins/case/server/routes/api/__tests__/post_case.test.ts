@@ -28,7 +28,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['defacement'],
-        case_type: 'security',
       },
     });
 
@@ -48,7 +47,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['error'],
-        case_type: 'security',
       },
     });
 
@@ -69,7 +67,6 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         state: 'open',
         tags: ['defacement'],
-        case_type: 'security',
       },
     });
 

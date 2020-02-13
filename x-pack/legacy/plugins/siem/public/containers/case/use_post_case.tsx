@@ -57,7 +57,6 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
   }
 };
 const initialData: NewCase = {
-  case_type: 'security',
   description: '',
   isNew: false,
   tags: [],
