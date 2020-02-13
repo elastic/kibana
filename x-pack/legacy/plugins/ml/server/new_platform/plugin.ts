@@ -106,6 +106,7 @@ export interface RouteInitialization {
   xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  securityPlugin: any;
   cloud?: CloudSetup;
 }
 export interface UsageInitialization {
@@ -212,6 +213,7 @@ export class Plugin {
       elasticsearchService: core.elasticsearch,
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
+      securityPlugin: plugins.security,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {

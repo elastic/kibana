@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
 import { execute, ExpressionDataHandler } from './execute';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression, parseExpression } from '../common';
 
 jest.mock('./services', () => ({
   getInterpreter: () => {
     return {
-      interpretAst: async (expression: ExpressionAST) => {
+      interpretAst: async (expression: ExpressionAstExpression) => {
         return {};
       },
     };
@@ -55,7 +54,7 @@ describe('ExpressionDataHandler', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString) as ExpressionAST;
+      const expressionAST = parseExpression(expressionString) as ExpressionAstExpression;
       const expressionDataHandler = new ExpressionDataHandler(expressionAST, {});
       expect(expressionDataHandler.getExpression()).toEqual(expressionString);
       expect(expressionDataHandler.getAst()).toEqual(expressionAST);
@@ -70,7 +69,7 @@ describe('ExpressionDataHandler', () => {
 
     it('allows passing in search context', () => {
       const expressionDataHandler = new ExpressionDataHandler(expressionString, {
-        searchContext: { type: 'kibana_context', filters: [] },
+        searchContext: { filters: [] },
       });
       expect(expressionDataHandler.getExpression()).toEqual(expressionString);
     });

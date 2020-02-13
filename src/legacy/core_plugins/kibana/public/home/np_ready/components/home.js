@@ -51,7 +51,6 @@ export class Home extends Component {
       getServices().homeConfig.disableWelcomeScreen ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const currentOptInStatus = this.props.getOptInStatus();
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -60,7 +59,6 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
-      currentOptInStatus,
     };
   }
 
@@ -224,8 +222,7 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        onOptInSeen={this.props.onOptInSeen}
-        currentOptInStatus={this.state.currentOptInStatus}
+        telemetry={this.props.telemetry}
       />
     );
   }
@@ -264,6 +261,8 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
-  onOptInSeen: PropTypes.func.isRequired,
-  getOptInStatus: PropTypes.func.isRequired,
+  telemetry: PropTypes.shape({
+    telemetryService: PropTypes.any,
+    telemetryNotifications: PropTypes.any,
+  }),
 };
