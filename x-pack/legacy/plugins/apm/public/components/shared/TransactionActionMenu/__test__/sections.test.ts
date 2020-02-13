@@ -12,13 +12,15 @@ describe('Transaction action menu', () => {
   const basePath = ({
     prepend: jest.fn()
   } as unknown) as AppMountContextBasePath;
-  const timestamp = { us: 1580983200000 };
+  const date = '2020-02-06T11:00:00.000Z';
+  const timestamp = { us: new Date(date).getTime() };
 
   it('shows required sections only', () => {
     const transaction = ({
       timestamp,
       trace: { id: '123' },
-      transaction: { id: '123' }
+      transaction: { id: '123' },
+      '@timestamp': date
     } as unknown) as Transaction;
     expect(
       getSections({
@@ -38,7 +40,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580983200&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -66,7 +68,8 @@ describe('Transaction action menu', () => {
       kubernetes: { pod: { uid: '123' } },
       timestamp,
       trace: { id: '123' },
-      transaction: { id: '123' }
+      transaction: { id: '123' },
+      '@timestamp': date
     } as unknown) as Transaction;
     expect(
       getSections({
@@ -86,13 +89,14 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href: '#/link-to/pod-logs/123?time=1580983200',
+              href: '#/link-to/pod-logs/123?time=1580986800',
               condition: true
             },
             {
               key: 'podMetrics',
               label: 'Pod metrics',
-              href: '#/link-to/pod-detail/123?from=&to=',
+              href:
+                '#/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
               condition: true
             }
           ]
@@ -106,7 +110,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580983200&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -134,7 +138,8 @@ describe('Transaction action menu', () => {
       host: { hostname: 'foo' },
       timestamp,
       trace: { id: '123' },
-      transaction: { id: '123' }
+      transaction: { id: '123' },
+      '@timestamp': date
     } as unknown) as Transaction;
     expect(
       getSections({
@@ -153,13 +158,14 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href: '#/link-to/host-logs/foo?time=1580983200',
+              href: '#/link-to/host-logs/foo?time=1580986800',
               condition: true
             },
             {
               key: 'hostMetrics',
               label: 'Host metrics',
-              href: '#/link-to/host-detail/foo?from=&to=',
+              href:
+                '#/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
               condition: true
             }
           ]
@@ -173,7 +179,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580983200&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
