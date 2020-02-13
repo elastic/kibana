@@ -281,7 +281,7 @@ describe('url state', () => {
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
     const timelineName = 'SIEM';
-    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`, { delay: 30 });
+    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`);
     cy.url({ timeout: DEFAULT_TIMEOUT }).should('match', /\w*-\w*-\w*-\w*-\w*/);
     cy.url().then(url => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
