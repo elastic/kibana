@@ -31,8 +31,6 @@ export const UI_EXPORT_DEFAULTS = {
     __kibanaCore__$: resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
     querystring: 'querystring-browser',
-    moment$: resolve(ROOT, 'webpackShims/moment'),
-    'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone'),
   },
 
   styleSheetPaths: ['light', 'dark'].map(theme => ({
