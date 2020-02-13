@@ -57,9 +57,21 @@ const makeSuccessMessage = options => {
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {boolean} options.bail          Whether to exit test run at the first failure
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
- * @param {asyncFunction} testRunner         Optional function to execute a different test runner once elasticsearch and kibana are setup
  */
-export async function runTests(options, testRunner) {
+export async function runTests(options) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+    const log = options.createLogger();
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+  }
+
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {
@@ -87,11 +99,7 @@ export async function runTests(options, testRunner) {
       try {
         es = await runElasticsearch({ config, options: opts });
         await runKibanaServer({ procs, config, options: opts });
-        if (testRunner) {
-          await testRunner({ configPath, config, es, procs, options: opts });
-        } else {
-          await runFtr({ configPath, options: opts });
-        }
+        await runFtr({ configPath, options: opts });
       } finally {
         try {
           await procs.stop('kibana');
@@ -114,7 +122,7 @@ export async function runTests(options, testRunner) {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const log = options.log || options.createLogger();
+  const log = options.createLogger();
   const opts = {
     ...options,
     log,
