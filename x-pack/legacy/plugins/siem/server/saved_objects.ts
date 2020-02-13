@@ -31,6 +31,7 @@ export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
+  // TODO: Remove once while Saved Object Mappings API is programmed for the NP See: https://github.com/elastic/kibana/issues/50309
   ...caseSavedObjectMappings,
   ...caseCommentSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
