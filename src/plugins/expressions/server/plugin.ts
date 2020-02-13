@@ -26,12 +26,10 @@ import {
 } from './legacy';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
-// eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
   bfetch: BfetchServerSetup;
 }
 
-// eslint-disable-next-line
 export interface ExpressionsServerStartDependencies {
   bfetch: BfetchServerStart;
 }
