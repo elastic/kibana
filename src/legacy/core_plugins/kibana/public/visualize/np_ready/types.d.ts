@@ -31,7 +31,6 @@ export interface VisualizeAppState {
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
-  save(): void;
 }
 
 export interface VisualizeAppStateTransitions {
@@ -47,7 +46,7 @@ export interface VisualizeAppStateTransitions {
 }
 
 export interface EditorRenderProps {
-  appState: VisualizeAppState;
+  appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
   embeddables: IEmbeddableStart;

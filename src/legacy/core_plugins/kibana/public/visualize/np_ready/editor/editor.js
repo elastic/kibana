@@ -346,8 +346,8 @@ function VisualizeAppController(
     const initialState = stateContainer.getState();
 
     $scope.appState = {
-      ...initialState,
       // mock implementation of the legacy appState.save()
+      // this could be even replaced by passing only "updateAppState" callback
       save() {
         stateContainer.transitions.updateVisState(vis.getState());
       },
@@ -359,7 +359,6 @@ function VisualizeAppController(
       stateContainer
     );
     $scope.uiState = persistedState;
-    $scope.appStatus = $appStatus;
     $scope.savedVis = savedVis;
     $scope.query = initialState.query;
     $scope.searchSource = searchSource;
@@ -389,7 +388,7 @@ function VisualizeAppController(
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
-    const stateContainerSubscription = stateContainer.state$.subscribe(state => {
+    const stateContainerSubscription = stateContainer.subscribe(state => {
       const newQuery = migrateLegacyQuery(state.query);
       if (!_.isEqual(state.query, newQuery)) {
         stateContainer.transitions.set('query', newQuery);
