@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { getOr, noop } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
 import { NetworkDnsQuery, HISTOGRAM_ID } from '../../../containers/network_dns';
@@ -14,7 +14,10 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import {
+  MatrixHistogramOption,
+  MatrixHisrogramConfigs,
+} from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { HistogramType } from '../../../graphql/types';
@@ -28,13 +31,15 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 
-export const histogramConfigs = {
-  defaultStackByOption: dnsStackByOptions[0],
+const DEFAULT_STACK_BY = 'dns.question.registered_domain';
+
+export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
+  defaultStackByOption:
+    dnsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
   histogramType: HistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
-  title: noop,
 };
 
 export const DnsQueryTabBody = ({
@@ -59,7 +64,7 @@ export const DnsQueryTabBody = ({
     []
   );
 
-  const dnsHistogramConfigs = useMemo(
+  const dnsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       title: getTitle,

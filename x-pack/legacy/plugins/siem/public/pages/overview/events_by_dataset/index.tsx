@@ -64,7 +64,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);

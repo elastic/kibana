@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as i18n from './translations';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import {
+  MatrixHistogramOption,
+  MatrixHisrogramConfigs,
+} from '../../../components/matrix_histogram/types';
 import { HistogramType } from '../../../graphql/types';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
@@ -14,8 +17,11 @@ export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 
-export const histogramConfigs = {
-  defaultStackByOption: anomaliesStackByOptions[0],
+const DEFAULT_STACK_BY = i18n.ANOMALIES_STACK_BY_JOB_ID;
+
+export const histogramConfigs: MatrixHisrogramConfigs = {
+  defaultStackByOption:
+    anomaliesStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? anomaliesStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_ANOMALIES_DATA,
   hideHistogramIfEmpty: true,
   histogramType: HistogramType.anomalies,

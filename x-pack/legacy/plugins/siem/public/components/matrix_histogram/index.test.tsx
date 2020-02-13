@@ -83,7 +83,7 @@ describe('Matrix Histogram Component', () => {
   describe('on initial load', () => {
     test('it renders MatrixLoader', () => {
       expect(wrapper.html()).toMatchSnapshot();
-      expect(wrapper.find('MatrixLoader')).toHaveLength(1);
+      expect(wrapper.find('MatrixLoader').exists()).toBe(true);
     });
   });
 
@@ -107,17 +107,17 @@ describe('Matrix Histogram Component', () => {
     });
     test('it renders no MatrixLoader', () => {
       expect(wrapper.html()).toMatchSnapshot();
-      expect(wrapper.find(`MatrixLoader`)).toHaveLength(0);
+      expect(wrapper.find(`MatrixLoader`).exists()).toBe(false);
     });
 
     test('it shows BarChart if data available', () => {
-      expect(wrapper.find(`.barchart`)).toHaveLength(1);
+      expect(wrapper.find(`.barchart`).exists()).toBe(true);
     });
   });
 
   describe('select dropdown', () => {
     test('should be hidden if only one option is provided', () => {
-      expect(wrapper.find('EuiSelect')).toHaveLength(0);
+      expect(wrapper.find('EuiSelect').exists()).toBe(false);
     });
   });
 });

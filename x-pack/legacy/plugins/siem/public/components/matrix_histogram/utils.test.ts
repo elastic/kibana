@@ -12,46 +12,12 @@ import {
   getCustomChartData,
 } from './utils';
 import { UpdateDateRange } from '../charts/common';
-import { Position, ScaleType, TickFormatter } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { BarchartConfigs } from './types';
 
 describe('utils', () => {
   describe('getBarchartConfigs', () => {
-    interface BarchartConfigs {
-      series: {
-        xScaleType: ScaleType;
-        yScaleType: ScaleType;
-        stackAccessors: string[];
-      };
-      axis: {
-        xTickFormatter: TickFormatter;
-        yTickFormatter: TickFormatter;
-        tickSize: number;
-      };
-      settings: {
-        legendPosition: Position;
-        onBrushEnd: UpdateDateRange;
-        showLegend: boolean;
-        theme: {
-          scales: {
-            barsPadding: number;
-          };
-          chartMargins: {
-            left: number;
-            right: number;
-            top: number;
-            bottom: number;
-          };
-          chartPaddings: {
-            left: number;
-            right: number;
-            top: number;
-            bottom: number;
-          };
-        };
-      };
-      customHeight: number;
-    }
     describe('it should get correct default values', () => {
       let configs: BarchartConfigs;
       beforeAll(() => {

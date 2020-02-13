@@ -14,6 +14,7 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  MatrixHisrogramConfigs,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
@@ -28,6 +29,7 @@ const authStackByOptions: MatrixHistogramOption[] = [
     value: 'event.type',
   },
 ];
+const DEFAULT_STACK_BY = 'event.type';
 
 enum AuthMatrixDataGroup {
   authSuccess = 'authentication_success',
@@ -47,8 +49,9 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
   },
 };
 
-const histogramConfigs = {
-  defaultStackByOption: authStackByOptions[0],
+const histogramConfigs: MatrixHisrogramConfigs = {
+  defaultStackByOption:
+    authStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
   histogramType: HistogramType.authentications,
   mapping: authMatrixDataMappingFields,

@@ -7,7 +7,7 @@ import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramMappingTypes } from './types';
+import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
 import { histogramDateTimeFormatter } from '../utils';
 
@@ -32,7 +32,7 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
-}: GetBarchartConfigsProps) => ({
+}: GetBarchartConfigsProps): BarchartConfigs => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
@@ -88,7 +88,7 @@ export const getCustomChartData = (
   if (mapping)
     return map((item: ChartSeriesData) => {
       const mapItem = get(item.key, mapping);
-      return { ...item, color: mapItem ? mapItem.color : undefined };
+      return { ...item, color: mapItem?.color };
     }, formattedChartData);
   else return formattedChartData;
 };

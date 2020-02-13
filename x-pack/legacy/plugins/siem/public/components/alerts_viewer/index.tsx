@@ -45,7 +45,7 @@ export const AlertsView = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
 
   return (
     <>

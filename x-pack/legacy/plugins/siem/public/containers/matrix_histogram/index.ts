@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getOr } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -34,21 +33,20 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [totalCount, setTotalCount] = useState(-1);
   const apolloClient = useApolloClient();
 
-  const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
-    filterQuery: createFilter(filterQuery),
-    sourceId: 'default',
-    timerange: {
-      interval: '12h',
-      from: startDate!,
-      to: endDate!,
-    },
-    defaultIndex,
-    inspect: isInspected,
-    stackByField,
-    histogramType,
-  };
-
   useEffect(() => {
+    const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
+      filterQuery: createFilter(filterQuery),
+      sourceId: 'default',
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+      defaultIndex,
+      inspect: isInspected,
+      stackByField,
+      histogramType,
+    };
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const abortSignal = abortCtrl.signal;
@@ -70,10 +68,10 @@ export const useQuery = <Hit, Aggs, TCache = object>({
         .then(
           result => {
             if (isSubscribed) {
-              const source = getOr({}, 'data.source.MatrixHistogram', result);
-              setData(getOr([], 'matrixHistogramData', source));
-              setTotalCount(getOr(-1, 'totalCount', source));
-              setInspect(getOr(null, 'inspect', source));
+              const source = result?.data?.source?.MatrixHistogram ?? {};
+              setData(source?.matrixHistogramData ?? []);
+              setTotalCount(source?.totalCount ?? -1);
+              setInspect(source?.inspect ?? null);
               setLoading(false);
             }
           },
@@ -94,7 +92,17 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [defaultIndex, filterQuery, isInspected, stackByField, startDate, endDate, data]);
+  }, [
+    defaultIndex,
+    errorMessage,
+    filterQuery,
+    histogramType,
+    isInspected,
+    stackByField,
+    startDate,
+    endDate,
+    data,
+  ]);
 
   return { data, loading, inspect, totalCount, refetch: refetch.current };
 };
