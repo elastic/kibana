@@ -23,7 +23,7 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
-} from '../../../..//observability/public';
+} from '../../../../observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;
