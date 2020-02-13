@@ -37,7 +37,7 @@ function legacyAppToNavLink(spec: LegacyAppSpec): LegacyNavLink {
     icon: spec.icon,
     euiIconType: spec.euiIconType,
     url: spec.url || `/app/${spec.id}`,
-    linkToLastSubUrl: spec.linkToLastSubUrl,
+    linkToLastSubUrl: spec.linkToLastSubUrl ?? true,
   };
 }
 
@@ -52,7 +52,7 @@ function legacyLinkToNavLink(spec: LegacyNavLinkSpec): LegacyNavLink {
     disableSubUrlTracking: spec.disableSubUrlTracking,
     icon: spec.icon,
     euiIconType: spec.euiIconType,
-    linkToLastSubUrl: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+    linkToLastSubUrl: spec.linkToLastSubUrl ?? true,
     hidden: 'hidden' in spec ? spec.hidden : false,
     disabled: 'disabled' in spec ? spec.disabled : false,
     tooltip: spec.tooltip || '',
