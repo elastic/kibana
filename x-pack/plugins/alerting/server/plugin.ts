@@ -99,6 +99,12 @@ export class AlertingPlugin {
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
+    if (this.isESOUsingEphemeralEncryptionKey) {
+      this.logger.warn(
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+      );
+    }
+
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
       type: 'alert',

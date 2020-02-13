@@ -86,7 +86,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       async executor() {},
     });
   });
@@ -1884,7 +1884,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       async executor() {},
     });
   });
@@ -2414,7 +2414,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -2646,7 +2646,7 @@ describe('update()', () => {
       alertTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor() {},
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
