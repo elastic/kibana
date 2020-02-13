@@ -37,7 +37,7 @@ const HorizontalRule = memo(function HorizontalRule() {
 export const Panel = memo(function Event({ className }: { className?: string }) {
   interface ProcessTableView {
     name: string;
-    timestamp: Date;
+    timestamp?: Date;
     event: ProcessEvent;
   }
 
@@ -48,9 +48,10 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () =>
       [...processNodePositions.keys()].map(processEvent => {
         const { data_buffer } = processEvent;
+        const date = new Date(data_buffer.timestamp_utc);
         return {
           name: data_buffer.process_name,
-          timestamp: new Date(data_buffer.timestamp_utc),
+          timestamp: isFinite(date.getTime()) ? date : undefined,
           event: processEvent,
         };
       }),
@@ -107,10 +108,14 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampTitle', {
           defaultMessage: 'Timestamp',
         }),
-        dataType: 'date' as const,
+        dataType: 'date',
         sortable: true,
-        render(eventTimestamp: Date) {
-          return formatter.format(eventTimestamp);
+        render(eventTimestamp?: Date) {
+          return eventTimestamp
+            ? formatter.format(eventTimestamp)
+            : i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {
+                defaultMessage: 'timestamp invalid',
+              });
         },
       },
       {
