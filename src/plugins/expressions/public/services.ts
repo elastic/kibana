@@ -23,7 +23,7 @@ import { ExpressionInterpreter } from './types';
 import { Start as IInspector } from '../../inspector/public';
 import { ExpressionsSetup } from './plugin';
 
-export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
+export const { getCoreStart, setCoreStart } = createKibanaUtilsCore();
 
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
 

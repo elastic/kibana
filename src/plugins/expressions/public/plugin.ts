@@ -115,7 +115,14 @@ export class ExpressionsPublicPlugin
     executor.extendContext({
       environment: 'client',
     });
-    executor.registerFunction(kibanaContextFunction());
+    executor.registerFunction(
+      kibanaContextFunction({
+        getSavedObject: async (...args) => {
+          const [start] = await core.getStartServices();
+          return start.savedObjects.client.get(...args);
+        },
+      })
+    );
 
     setRenderersRegistry(renderers);
 
