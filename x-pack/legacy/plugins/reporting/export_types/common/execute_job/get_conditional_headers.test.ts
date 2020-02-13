@@ -152,7 +152,7 @@ describe('conditions', () => {
 
 test('uses basePath from job when creating saved object service', async () => {
   const mockGetSavedObjectsClient = jest.fn();
-  mockReportingPlugin.getSavedObjectsClient = jest.fn();
+  mockReportingPlugin.getSavedObjectsClient = mockGetSavedObjectsClient;
 
   const permittedHeaders = {
     foo: 'bar',

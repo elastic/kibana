@@ -7,23 +7,28 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
 import { ReportingCore } from '../../server';
-import { ESCallCluster, ServerFacade } from '../../types';
+import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
 
-export function registerReportingUsageCollector(
-  reporting: ReportingCore,
+/*
+ * @param {Object} server
+ * @return {Object} kibana usage stats type collection object
+ */
+export function getReportingUsageCollector(
   server: ServerFacade,
-  usageCollection: UsageCollectionSetup
+  usageCollection: UsageCollectionSetup,
+  exportTypesRegistry: ExportTypesRegistry,
+  isReady: () => Promise<boolean>
 ) {
-  const collector = usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(server, callCluster, reporting.getExportTypesRegistry()),
-    isReady: reporting.pluginHasStarted,
+      getReportingUsage(server, callCluster, exportTypesRegistry),
+    isReady,
 
     /*
      * Format the response data into a model for internal upload
@@ -43,6 +48,21 @@ export function registerReportingUsageCollector(
       };
     },
   });
+}
 
+export function registerReportingUsageCollector(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  usageCollection: UsageCollectionSetup
+) {
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+
+  const collector = getReportingUsageCollector(
+    server,
+    usageCollection,
+    exportTypesRegistry,
+    collectionIsReady
+  );
   usageCollection.registerCollector(collector);
 }

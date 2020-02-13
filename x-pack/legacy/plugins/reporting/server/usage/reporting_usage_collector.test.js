@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import sinon from 'sinon';
+import { createMockReportingCore } from '../../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import {
-  getReportingUsageCollector,
   registerReportingUsageCollector,
+  getReportingUsageCollector,
 } from './reporting_usage_collector';
 
 const exportTypesRegistry = getExportTypesRegistry();
@@ -415,6 +415,12 @@ describe('data modeling', () => {
 });
 
 describe('Ready for collection observable', () => {
+  let mockReporting;
+
+  beforeEach(async () => {
+    mockReporting = await createMockReportingCore();
+  });
+
   test('converts observable to promise', async () => {
     const serverWithBasicLicenseMock = getServerMock();
     const makeCollectorSpy = sinon.spy();
@@ -422,13 +428,7 @@ describe('Ready for collection observable', () => {
       makeUsageCollector: makeCollectorSpy,
       registerCollector: sinon.stub(),
     };
-    const start$ = Rx.of({ start: true });
-    registerReportingUsageCollector(
-      serverWithBasicLicenseMock,
-      usageCollection,
-      start$,
-      exportTypesRegistry
-    );
+    registerReportingUsageCollector(mockReporting, serverWithBasicLicenseMock, usageCollection);
 
     const [args] = makeCollectorSpy.firstCall.args;
     expect(args).toMatchInlineSnapshot(`
