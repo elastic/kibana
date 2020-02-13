@@ -8,6 +8,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { extractEventID } from './normalize';
+import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
 
 export interface PaginationParams {
   size: number;
@@ -45,23 +46,25 @@ export async function getPaginationParams(
   };
 }
 
-export function paginate(pagination: PaginationParams, field: string, query: any) {
+export function paginate(pagination: PaginationParams, field: string, query: JsonObject) {
   const { size, timestamp, eventID } = pagination;
   query.sort = [{ '@timestamp': 'asc' }, { [field]: 'asc' }];
   query.aggs = { total: { value_count: { field } } };
   query.size = size;
   if (timestamp && eventID) {
-    query.search_after = [timestamp, eventID];
+    query.search_after = ([timestamp, eventID] as unknown) as JsonObject[];
   }
   return query;
 }
 
-export function paginatedResults(response: SearchResponse<ResolverEvent>) {
+export function paginatedResults(
+  response: SearchResponse<ResolverEvent>
+): { total: number; results: ResolverEvent[]; next: string | null } {
   const total = response.aggregations?.total?.value || 0;
   if (response.hits.hits.length === 0) {
     return { total, results: [], next: null };
   }
-  let next: string;
+  let next: string | null = null;
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);

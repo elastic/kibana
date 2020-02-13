@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
+import { ResolverEvent } from '../../../common/types';
 
 interface LifecycleQueryParams {
   ancestors: number;

@@ -7,6 +7,7 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppConstants } from '../../../../common/types';
 import { paginate, paginatedResults, PaginationParams } from '../utils/pagination';
+import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
 
 export abstract class ResolverQuery {
   constructor(
@@ -14,7 +15,7 @@ export abstract class ResolverQuery {
     private readonly pagination?: PaginationParams
   ) {}
 
-  protected paginateBy(field: string, query: any) {
+  protected paginateBy(field: string, query: JsonObject) {
     if (!this.pagination) {
       return query;
     }
@@ -32,6 +33,10 @@ export abstract class ResolverQuery {
     return paginatedResults(await client.callAsCurrentUser('search', this.build(...ids)));
   }
 
-  protected abstract legacyQuery(endpointID: string, uniquePIDs: string[], index: string): any;
-  protected abstract query(entityIDs: string[], index: string): any;
+  protected abstract legacyQuery(
+    endpointID: string,
+    uniquePIDs: string[],
+    index: string
+  ): JsonObject;
+  protected abstract query(entityIDs: string[], index: string): JsonObject;
 }

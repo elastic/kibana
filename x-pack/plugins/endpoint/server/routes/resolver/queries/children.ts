@@ -25,6 +25,7 @@ export class ChildrenQuery extends ResolverQuery {
                 // Corner case, we could only have a process_running or process_terminated
                 // so to solve this we'll probably want to either search for all of them and only return one if that's
                 // possible in elastic search or in memory pull out a single event to return
+                // https://github.com/elastic/endpoint-app-team/issues/168
                 term: { 'event.type': 'process_start' },
               },
             ],
@@ -57,6 +58,10 @@ export class ChildrenQuery extends ResolverQuery {
                 term: { 'event.category': 'process' },
               },
               {
+                // Corner case, we could only have a process_running or process_terminated
+                // so to solve this we'll probably want to either search for all of them and only return one if that's
+                // possible in elastic search or in memory pull out a single event to return
+                // https://github.com/elastic/endpoint-app-team/issues/168
                 term: { 'event.type': 'start' },
               },
             ],

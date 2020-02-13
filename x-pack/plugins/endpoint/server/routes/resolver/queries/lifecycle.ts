@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ResolverQuery } from './base';
+import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
 
 // consider limiting the response size to a reasonable value in case we have a bunch of lifecycle events
 export class LifecycleQuery extends ResolverQuery {
-  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
+  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     return {
       body: {
         query: {
@@ -31,7 +32,7 @@ export class LifecycleQuery extends ResolverQuery {
     };
   }
 
-  protected query(entityIDs: string[], index: string) {
+  protected query(entityIDs: string[], index: string): JsonObject {
     return {
       body: {
         query: {

@@ -153,16 +153,6 @@ export interface EndpointEvent {
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
-export interface EventsForProcessResponse {
-  lifecycle: ResolverEvent[];
-  events: ResolverEvent[];
-  pagination: {
-    next: string;
-    total: number;
-    limit: number;
-  };
-}
-
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */

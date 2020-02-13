@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ResolverQuery } from './base';
+import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
 
 export class RelatedEventsQuery extends ResolverQuery {
-  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
+  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     return {
       body: this.paginateBy('endgame.serial_event_id', {
         query: {
@@ -33,7 +34,7 @@ export class RelatedEventsQuery extends ResolverQuery {
     };
   }
 
-  protected query(entityIDs: string[], index: string) {
+  protected query(entityIDs: string[], index: string): JsonObject {
     return {
       body: this.paginateBy('event.id', {
         query: {
