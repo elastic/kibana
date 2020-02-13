@@ -11,7 +11,10 @@ import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 const alertType: AlertType = {
   id: 'test',
   name: 'Test',
-  actionGroups: ['default', 'other-group'],
+  actionGroups: [
+    { id: 'default', name: 'Default' },
+    { id: 'other-group', name: 'Other Group' },
+  ],
   executor: jest.fn(),
 };
 
