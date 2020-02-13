@@ -51,6 +51,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       },
     },
     async handler(request: ImportRulesRequest, headers) {
+      let importRuleResponse: ImportRuleResponse[] = [];
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
       const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
         KibanaRequest.from((request as unknown) as Hapi.Request)
@@ -84,6 +85,15 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
               } else {
                 const { rule_id: ruleId } = parsedRule;
                 if (ruleId != null) {
+                  if (acc.has(ruleId) && !request.query.overwrite) {
+                    importRuleResponse.push(
+                      createBulkErrorObject({
+                        ruleId,
+                        statusCode: 400,
+                        message: `More than one rule with rule-id: "${ruleId}" found`,
+                      })
+                    );
+                  }
                   acc.set(ruleId, parsedRule);
                 } else {
                   acc.set(uuid.v4(), parsedRule);
@@ -97,7 +107,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       );
 
       const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
-      let importRuleResponse: ImportRuleResponse[] = [];
 
       while (chunkParseObjects.length) {
         const batchParseObjects = chunkParseObjects.shift() ?? [];

@@ -282,10 +282,18 @@ describe('import_rules_route', () => {
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
         const { statusCode, payload } = await server.inject(importRulesRequest(requestPayload));
         const parsed: ImportSuccessError = JSON.parse(payload);
-        // TO-DO: Should report with conflict, currently being overwritten using map .set() with no reported conflict
+
         expect(parsed).toEqual({
-          errors: [],
-          success: true,
+          errors: [
+            {
+              error: {
+                message: 'More than one rule with rule-id: "rule-1" found',
+                status_code: 400,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
           success_count: 1,
         });
         expect(statusCode).toEqual(200);
