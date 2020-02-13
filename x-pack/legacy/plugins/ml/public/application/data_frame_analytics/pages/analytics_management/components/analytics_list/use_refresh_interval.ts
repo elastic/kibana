@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { timefilter } from 'ui/timefilter';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -18,6 +18,9 @@ import { useRefreshAnalyticsList } from '../../../../common';
 export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
+
   const { refresh } = useRefreshAnalyticsList();
   useEffect(() => {
     let analyticsRefreshInterval: null | number = null;

@@ -12,7 +12,7 @@ import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../../../../plugins/lens/common';
-import { Query, esFilters } from '../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -31,7 +31,7 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -177,7 +177,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 // The only way a visualization has to restrict the query building
@@ -308,7 +308,7 @@ export interface FramePublicAPI {
 
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;

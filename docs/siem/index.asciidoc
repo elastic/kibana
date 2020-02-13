@@ -33,7 +33,8 @@ https://www.elastic.co/products/beats/packetbeat[{packetbeat}]
 send security events and other data to Elasticsearch.
 
 The default index patterns for SIEM events are `auditbeat-*`, `winlogbeat-*`,
-`filebeat-*`, `endgame-*`, and `packetbeat-*``. You can change the default index patterns in
+`filebeat-*`, `packetbeat-*`, `endgame-*`, and `apm-*-transaction*`. You can 
+change the default index patterns in
 *Kibana > Management > Advanced Settings > siem:defaultIndex*.
 
 [float]

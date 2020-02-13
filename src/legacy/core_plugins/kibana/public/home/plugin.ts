@@ -20,6 +20,7 @@
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
@@ -30,14 +31,10 @@ import {
   FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
-export interface LegacyAngularInjectedDependencies {
-  telemetryOptInProvider: any;
-  shouldShowTelemetryOptIn: boolean;
-}
-
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   home: HomePublicPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -55,7 +52,6 @@ export interface HomePluginSetupDependencies {
       devMode: boolean;
       uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
     };
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
   usageCollection: UsageCollectionSetup;
   kibanaLegacy: KibanaLegacySetup;
@@ -67,6 +63,7 @@ export class HomePlugin implements Plugin {
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
   private directories: readonly FeatureCatalogueEntry[] | null = null;
+  private telemetry?: TelemetryPluginStart;
 
   setup(
     core: CoreSetup,
@@ -74,7 +71,7 @@ export class HomePlugin implements Plugin {
       home,
       kibanaLegacy,
       usageCollection,
-      __LEGACY: { getAngularDependencies, ...legacyServices },
+      __LEGACY: { ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
     kibanaLegacy.registerLegacyApp({
@@ -82,7 +79,6 @@ export class HomePlugin implements Plugin {
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
-        const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
           trackUiMetric,
@@ -92,6 +88,7 @@ export class HomePlugin implements Plugin {
           getInjected: core.injectedMetadata.getInjectedVar,
           docLinks: contextCore.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
+          telemetry: this.telemetry,
           chrome: contextCore.chrome,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
@@ -101,7 +98,6 @@ export class HomePlugin implements Plugin {
           config: kibanaLegacy.config,
           homeConfig: home.config,
           directories: this.directories!,
-          ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -109,10 +105,11 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+  start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
     this.directories = home.featureCatalogue.get();
     this.dataStart = data;
+    this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;
   }
 
