@@ -5,13 +5,12 @@
  */
 
 import { each } from 'lodash';
-import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
-import chrome from 'ui/chrome';
 
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications, getBasePath } from '../../../util/dependency_cache';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
@@ -58,6 +57,7 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
     })
     .catch(error => {
       mlMessageBarService.notify.error(error);
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
           defaultMessage: 'Jobs failed to start',
@@ -78,6 +78,7 @@ export function stopDatafeeds(jobs, finish = () => {}) {
     })
     .catch(error => {
       mlMessageBarService.notify.error(error);
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
           defaultMessage: 'Jobs failed to stop',
@@ -139,6 +140,7 @@ function showResults(resp, action) {
     });
   }
 
+  const toastNotifications = getToastNotifications();
   toastNotifications.addSuccess(
     i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
       defaultMessage:
@@ -213,6 +215,7 @@ export async function cloneJob(jobId) {
     window.location.href = '#/jobs/new_job';
   } catch (error) {
     mlMessageBarService.notify.error(error);
+    const toastNotifications = getToastNotifications();
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
         defaultMessage: 'Could not clone {jobId}. Job could not be found',
@@ -232,6 +235,7 @@ export function closeJobs(jobs, finish = () => {}) {
     })
     .catch(error => {
       mlMessageBarService.notify.error(error);
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
@@ -252,6 +256,7 @@ export function deleteJobs(jobs, finish = () => {}) {
     })
     .catch(error => {
       mlMessageBarService.notify.error(error);
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {
           defaultMessage: 'Jobs failed to delete',
@@ -367,8 +372,9 @@ export function getJobIdUrl(jobId) {
   };
   const encoded = rison.encode(settings);
   const url = `?mlManagement=${encoded}`;
+  const basePath = getBasePath();
 
-  return `${chrome.getBasePath()}/app/ml#/jobs${url}`;
+  return `${basePath.get()}/app/ml#/jobs${url}`;
 }
 
 function getUrlVars(url) {
