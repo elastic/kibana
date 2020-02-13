@@ -56,13 +56,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'kibana-functional-22': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 22),
                 'kibana-functional-23': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 23),
                 'kibana-functional-24': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 24),
-                'kibana-functional-25': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 25),
-                'kibana-functional-26': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 26),
-                'kibana-functional-27': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 27),
-                'kibana-functional-28': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 28),
-                'kibana-functional-29': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 29),
-                'kibana-functional-30': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 30),
-
                 // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
               ]),
             ])

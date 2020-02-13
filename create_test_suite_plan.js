@@ -59,7 +59,7 @@ Object.keys(allSuites).forEach(group => {
     let totalDuration = 0;
     while (totalDuration < 60 * 5 && byConfig.length > 0) {
       const suite =
-        totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 5
+        totalDuration === 0 || byConfig[0].duration + totalDuration <= 60 * 8
           ? byConfig.shift()
           : byConfig.pop();
 
