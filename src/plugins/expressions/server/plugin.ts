@@ -74,7 +74,7 @@ export class ExpressionsServerPlugin
       __LEGACY: legacyApi,
     };
 
-    return setup;
+    return Object.freeze(setup);
   }
 
   public start(
@@ -83,7 +83,7 @@ export class ExpressionsServerPlugin
   ): ExpressionsServerStart {
     const start = this.expressions.start();
 
-    return start;
+    return Object.freeze(start);
   }
 
   public stop() {

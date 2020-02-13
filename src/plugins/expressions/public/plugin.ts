@@ -167,7 +167,7 @@ export class ExpressionsPublicPlugin
       },
     };
 
-    return setup;
+    return Object.freeze(setup);
   }
 
   public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
@@ -187,7 +187,7 @@ export class ExpressionsPublicPlugin
       render,
     };
 
-    return start;
+    return Object.freeze(start);
   }
 
   public stop() {
