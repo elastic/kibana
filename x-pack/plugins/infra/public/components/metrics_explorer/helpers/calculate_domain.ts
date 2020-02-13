@@ -9,12 +9,12 @@ import { MetricsExplorerOptionsMetric } from '../../../containers/metrics_explor
 
 const getMin = (values: Array<number | null>) => {
   const minValue = min(values);
-  return minValue === Infinity || minValue === -Infinity ? undefined : minValue;
+  return isNumber(minValue) && Number.isFinite(minValue) ? minValue : undefined;
 };
 
 const getMax = (values: Array<number | null>) => {
   const maxValue = max(values);
-  return maxValue === Infinity || maxValue === -Infinity ? undefined : maxValue;
+  return isNumber(maxValue) && Number.isFinite(maxValue) ? maxValue : undefined;
 };
 
 export const calculateDomain = (
