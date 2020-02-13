@@ -111,11 +111,15 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         dataType: 'date',
         sortable: true,
         render(eventTimestamp?: Date) {
-          return eventTimestamp
-            ? formatter.format(eventTimestamp)
-            : i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {
-                defaultMessage: 'timestamp invalid',
-              });
+          return eventTimestamp ? (
+            formatter.format(eventTimestamp)
+          ) : (
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {
+                defaultMessage: 'invalid',
+              })}
+            </EuiBadge>
+          );
         },
       },
       {
