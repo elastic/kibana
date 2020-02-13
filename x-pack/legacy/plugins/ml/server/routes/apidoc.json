@@ -69,6 +69,13 @@
     "GetAllJobAndGroupIds",
     "GetLookBackProgress",
     "ValidateCategoryExamples",
-    "TopCategories"
+    "TopCategories",
+    "Filters",
+    "GetFilters",
+    "GetFilterById",
+    "CreateFilter",
+    "UpdateFilter",
+    "DeleteFilter",
+    "GetFiltersStats"
   ]
 }

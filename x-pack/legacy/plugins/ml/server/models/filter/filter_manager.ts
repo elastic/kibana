@@ -5,22 +5,75 @@
  */
 
 import Boom from 'boom';
+import { IScopedClusterClient } from 'src/core/server';
+
+import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
+
+export interface Filter {
+  filter_id: string;
+  description?: string;
+  items: string[];
+}
+
+export interface FormFilter {
+  filterId: string;
+  description?: string;
+  addItems?: string[];
+  removeItems?: string[];
+}
+
+export interface FilterRequest {
+  filter_id: string;
+  description?: string;
+  add_items?: string[];
+  remove_items?: string[];
+}
+
+interface FilterUsage {
+  jobs: string[];
+  detectors: string[];
+}
+
+interface FilterStats {
+  filter_id: string;
+  description?: string;
+  item_count: number;
+  used_by: FilterUsage;
+}
+
+interface FiltersInUse {
+  [id: string]: FilterUsage;
+}
+
+interface PartialDetector {
+  detector_description: string;
+  custom_rules: DetectorRule[];
+}
+
+interface PartialJob {
+  job_id: string;
+  analysis_config: {
+    detectors: PartialDetector[];
+  };
+}
 
 export class FilterManager {
-  constructor(callWithRequest) {
-    this.callWithRequest = callWithRequest;
+  private _client: IScopedClusterClient['callAsCurrentUser'];
+
+  constructor(client: any) {
+    this._client = client;
   }
 
-  async getFilter(filterId) {
+  async getFilter(filterId: string) {
     try {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
-        this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters', { filterId }),
+        this._client('ml.jobs'),
+        this._client('ml.filters', { filterId }),
       ]);
 
       if (results[FILTERS] && results[FILTERS].filters.length) {
-        let filtersInUse = {};
+        let filtersInUse: FiltersInUse = {};
         if (results[JOBS] && results[JOBS].jobs) {
           filtersInUse = this.buildFiltersInUse(results[JOBS].jobs);
         }
@@ -38,7 +91,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const filtersResp = await this.callWithRequest('ml.filters');
+      const filtersResp = await this._client('ml.filters');
       return filtersResp.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -48,13 +101,10 @@ export class FilterManager {
   async getAllFilterStats() {
     try {
       const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([
-        this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters'),
-      ]);
+      const results = await Promise.all([this._client('ml.jobs'), this._client('ml.filters')]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
-      let filtersInUse = {};
+      let filtersInUse: FiltersInUse = {};
       if (results[JOBS] && results[JOBS].jobs) {
         filtersInUse = this.buildFiltersInUse(results[JOBS].jobs);
       }
@@ -64,10 +114,10 @@ export class FilterManager {
       //  description
       //  item_count
       //  jobs using the filter
-      const filterStats = [];
+      const filterStats: FilterStats[] = [];
       if (results[FILTERS] && results[FILTERS].filters) {
-        results[FILTERS].filters.forEach(filter => {
-          const stats = {
+        results[FILTERS].filters.forEach((filter: Filter) => {
+          const stats: FilterStats = {
             filter_id: filter.filter_id,
             description: filter.description,
             item_count: filter.items.length,
@@ -83,32 +133,32 @@ export class FilterManager {
     }
   }
 
-  async newFilter(filter) {
+  async newFilter(filter: FormFilter) {
     const filterId = filter.filterId;
     delete filter.filterId;
     try {
       // Returns the newly created filter.
-      return await this.callWithRequest('ml.addFilter', { filterId, body: filter });
+      return await this._client('ml.addFilter', { filterId, body: filter });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
-  async updateFilter(filterId, description, addItems, removeItems) {
+  async updateFilter(filterId: string, filter: FormFilter) {
     try {
-      const body = {};
-      if (description !== undefined) {
-        body.description = description;
+      const body: FilterRequest = { filter_id: filterId };
+      if (filter.description !== undefined) {
+        body.description = filter.description;
       }
-      if (addItems !== undefined) {
-        body.add_items = addItems;
+      if (filter.addItems !== undefined) {
+        body.add_items = filter.addItems;
       }
-      if (removeItems !== undefined) {
-        body.remove_items = removeItems;
+      if (filter.removeItems !== undefined) {
+        body.remove_items = filter.removeItems;
       }
 
       // Returns the newly updated filter.
-      return await this.callWithRequest('ml.updateFilter', {
+      return await this._client('ml.updateFilter', {
         filterId,
         body,
       });
@@ -117,13 +167,13 @@ export class FilterManager {
     }
   }
 
-  async deleteFilter(filterId) {
-    return this.callWithRequest('ml.deleteFilter', { filterId });
+  async deleteFilter(filterId: string) {
+    return this._client('ml.deleteFilter', { filterId });
   }
 
-  buildFiltersInUse(jobsList) {
+  buildFiltersInUse(jobsList: PartialJob[]) {
     // Build a map of filter_ids against jobs and detectors using that filter.
-    const filtersInUse = {};
+    const filtersInUse: FiltersInUse = {};
     jobsList.forEach(job => {
       const detectors = job.analysis_config.detectors;
       detectors.forEach(detector => {
@@ -131,9 +181,10 @@ export class FilterManager {
           const rules = detector.custom_rules;
           rules.forEach(rule => {
             if (rule.scope) {
-              const scopeFields = Object.keys(rule.scope);
+              const ruleScope: DetectorRuleScope = rule.scope;
+              const scopeFields = Object.keys(ruleScope);
               scopeFields.forEach(scopeField => {
-                const filter = rule.scope[scopeField];
+                const filter = ruleScope[scopeField];
                 const filterId = filter.filter_id;
                 if (filtersInUse[filterId] === undefined) {
                   filtersInUse[filterId] = { jobs: [], detectors: [] };
