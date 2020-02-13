@@ -22,6 +22,7 @@ import Url from 'url';
 import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 
+import 'jquery';
 import 'tether';
 import 'bootstrap';
 
