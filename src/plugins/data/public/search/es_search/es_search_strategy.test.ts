@@ -37,7 +37,13 @@ describe('ES search strategy', () => {
 
     const esSearch = esSearchStrategyProvider({
       core: mockCoreStart,
-      getSearchStrategy: jest.fn(),
+      getSearchStrategy: jest.fn().mockImplementation(() => {
+        return () => {
+          return {
+            search: mockSearch,
+          };
+        };
+      }),
     });
     esSearch.search(request, options);
 
