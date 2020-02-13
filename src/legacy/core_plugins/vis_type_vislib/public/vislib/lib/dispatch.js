@@ -18,10 +18,8 @@
  */
 
 import d3 from 'd3';
-import { get } from 'lodash';
+import { get, pull, restParam, size, reduce } from 'lodash';
 import $ from 'jquery';
-
-import { SimpleEmitter } from '../../legacy_imports';
 
 /**
  * Handles event responses
@@ -30,12 +28,110 @@ import { SimpleEmitter } from '../../legacy_imports';
  * @constructor
  * @param handler {Object} Reference to Handler Class Object
  */
-export class Dispatch extends SimpleEmitter {
+export class Dispatch {
   constructor(handler, uiSettings) {
-    super();
     this.handler = handler;
     this.uiSettings = uiSettings;
     this._listeners = {};
+  }
+
+  /**
+   * Add an event handler
+   *
+   * @param  {string} name
+   * @param  {function} handler
+   * @return {Dispatch} - this, for chaining
+   */
+  on(name, handler) {
+    let handlers = this._listeners[name];
+    if (!handlers) {
+      this._listeners[name] = [];
+      handlers = this._listeners[name];
+    }
+
+    handlers.push(handler);
+
+    return this;
+  }
+
+  /**
+   * Remove an event handler
+   *
+   * @param  {string} name
+   * @param  {function} [handler] - optional handler to remove, if no handler is
+   *                              passed then all are removed
+   * @return {Dispatch} - this, for chaining
+   */
+  off(name, handler) {
+    if (!this._listeners[name]) {
+      return this;
+    }
+
+    // remove a specific handler
+    if (handler) {
+      pull(this._listeners[name], handler);
+    }
+    // or remove all listeners
+    else {
+      this._listeners[name] = null;
+    }
+
+    return this;
+  }
+
+  /**
+   * Remove all event listeners bound to this emitter.
+   *
+   * @return {Dispatch} - this, for chaining
+   */
+  removeAllListeners() {
+    this._listeners = {};
+    return this;
+  }
+
+  /**
+   * Emit an event and all arguments to all listeners for an event name
+   *
+   * @param  {string} name
+   * @param  {*} [arg...] - any number of arguments that will be applied to each handler
+   * @return {Dispatch} - this, for chaining
+   */
+  emit = restParam(function(name, args) {
+    if (!this._listeners[name]) {
+      return this;
+    }
+    const listeners = this.listeners(name);
+    let i = -1;
+
+    while (++i < listeners.length) {
+      listeners[i].apply(this, args);
+    }
+
+    return this;
+  });
+
+  /**
+   * Get a list of the handler functions for a specific event
+   *
+   * @param  {string} name
+   * @return {array[function]}
+   */
+  listeners(name) {
+    return this._listeners[name] ? this._listeners[name].slice(0) : [];
+  }
+
+  /**
+   * Get the count of handlers for a specific event
+   *
+   * @param  {string} [name] - optional event name to filter by
+   * @return {number}
+   */
+  listenerCount(name) {
+    if (name) {
+      return size(this._listeners[name]);
+    }
+
+    return reduce(this._listeners, (count, handlers) => count + size(handlers), 0);
   }
 
   _pieClickResponse(data) {

@@ -37,7 +37,7 @@ import {
   Query,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
 } from '../../../../../../src/plugins/data/public';
@@ -57,7 +57,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   hideDetails?: boolean;
 }
 

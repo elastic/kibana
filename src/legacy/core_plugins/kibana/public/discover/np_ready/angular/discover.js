@@ -73,7 +73,7 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
-  generateFilters,
+  esFilters,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
@@ -935,7 +935,7 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function(field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    const newFilters = generateFilters(
+    const newFilters = esFilters.generateFilters(
       filterManager,
       field,
       values,

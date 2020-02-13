@@ -27,7 +27,7 @@ import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
 import { migrateLegacyQuery } from '../legacy_imports';
 import {
-  esFilters,
+  Filter,
   Query,
   TimefilterContract as Timefilter,
 } from '../../../../../../plugins/data/public';
@@ -62,7 +62,7 @@ export class DashboardStateManager {
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
-    filterBars: esFilters.Filter[];
+    filterBars: Filter[];
     query: Query;
   };
   private stateDefaults: DashboardAppStateDefaults;
@@ -251,7 +251,7 @@ export class DashboardStateManager {
     this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
   }
 
-  public setFilters(filters: esFilters.Filter[]) {
+  public setFilters(filters: Filter[]) {
     this.stateContainer.transitions.set('filters', filters);
   }
 
@@ -367,7 +367,7 @@ export class DashboardStateManager {
     return this.savedDashboard.timeRestore;
   }
 
-  public getLastSavedFilterBars(): esFilters.Filter[] {
+  public getLastSavedFilterBars(): Filter[] {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
@@ -546,7 +546,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: esFilters.Filter[]) {
+  public applyFilters(query: Query, filters: Filter[]) {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.stateContainer.transitions.set('query', query);
