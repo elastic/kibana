@@ -101,7 +101,6 @@ src/dev/code_coverage/cc_app/public/initial_data.js
                   yarn
                   yarn build:prod
                   popd
-
                 """,
                 "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
               )
