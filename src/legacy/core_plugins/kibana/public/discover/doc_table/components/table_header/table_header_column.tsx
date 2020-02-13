@@ -24,6 +24,8 @@ import { EuiToolTip } from '@elastic/eui';
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 import { SortOrder } from './helpers';
 
+import CaptureHeader from '../../../../../../../../netmon/components/capture_header';
+
 interface Props {
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
   colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
@@ -34,6 +36,8 @@ interface Props {
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
+  onSelectAll?: () => void;
+  onSelectCurrentPage?: () => void;
   sortOrder: SortOrder[];
 }
 
@@ -53,6 +57,8 @@ export function TableHeaderColumn({
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
+  onSelectAll,
+  onSelectCurrentPage,
   sortOrder,
 }: Props) {
   const [, sortDirection = ''] = sortOrder.find(sortPair => name === sortPair[0]) || [];
@@ -174,6 +180,9 @@ export function TableHeaderColumn({
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
+        {name === 'Captured' && (
+          <CaptureHeader onSelectAll={onSelectAll} onSelectCurrentPage={onSelectCurrentPage} />
+        )}
         {buttons
           .filter(button => button.active)
           .map((button, idx) => (
