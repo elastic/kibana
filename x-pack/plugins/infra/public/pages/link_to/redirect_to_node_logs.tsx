@@ -77,13 +77,10 @@ export const getNodeLogsUrl = ({
   nodeId,
   nodeType,
   time,
-  prefixPathWithBasePath,
 }: {
   nodeId: string;
   nodeType: InventoryItemType;
   time?: number;
-  prefixPathWithBasePath: (app: string, path?: string) => string | undefined;
 }) => {
-  const path = [`link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');
-  return prefixPathWithBasePath('logs', path);
+  return [`link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');
 };

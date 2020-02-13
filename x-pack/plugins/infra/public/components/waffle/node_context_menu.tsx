@@ -8,7 +8,7 @@ import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -24,6 +24,7 @@ import {
   SectionLinks,
   SectionLink,
 } from '../../../../observability/public';
+import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -45,18 +46,8 @@ export const NodeContextMenu: React.FC<Props> = ({
   nodeType,
   popoverPosition,
 }) => {
+  const urlPrefixer = usePrefixPathWithBasepath();
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const getUrlForApp = useKibana().services.application?.getUrlForApp;
-  const prependBasePath = useKibana().services.http?.basePath.prepend;
-  const prefixPathWithBasePath = useCallback(
-    (app: string, path?: string) => {
-      if (!getUrlForApp || !prependBasePath) {
-        return;
-      }
-      return prependBasePath(getUrlForApp(app, { path }));
-    },
-    [getUrlForApp, prependBasePath]
-  );
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   // Due to the changing nature of the fields between APM and this UI,
@@ -95,12 +86,14 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} logs',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: getNodeLogsUrl({
-      nodeType,
-      nodeId: node.id,
-      time: currentTime,
-      prefixPathWithBasePath,
-    }),
+    href: urlPrefixer(
+      'logs',
+      getNodeLogsUrl({
+        nodeType,
+        nodeId: node.id,
+        time: currentTime,
+      })
+    ),
     'data-test-subj': 'viewLogsContextMenuItem',
     isDisabled: !showLogsLink,
   };
@@ -110,13 +103,15 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} metrics',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: getNodeDetailUrl({
-      nodeType,
-      nodeId: node.id,
-      from: nodeDetailFrom,
-      to: currentTime,
-      prefixPathWithBasePath,
-    }),
+    href: urlPrefixer(
+      'metrics',
+      getNodeDetailUrl({
+        nodeType,
+        nodeId: node.id,
+        from: nodeDetailFrom,
+        to: currentTime,
+      })
+    ),
     isDisabled: !showDetail,
   };
 
@@ -125,7 +120,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} APM traces',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: prefixPathWithBasePath('apm', `#traces?_g=()&kuery=${apmField}:"${node.id}"`),
+    href: urlPrefixer('apm', `#traces?_g=()&kuery=${apmField}:"${node.id}"`),
     'data-test-subj': 'viewApmTracesContextMenuItem',
     isDisabled: !showAPMTraceLink,
   };
@@ -135,7 +130,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} in Uptime',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: createUptimeLink(options, nodeType, node, prefixPathWithBasePath),
+    href: urlPrefixer('uptime', createUptimeLink(options, nodeType, node)),
     isDisabled: !showUptimeLink,
   };
 

@@ -24,7 +24,7 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 
 interface Props {
   options: MetricsExplorerOptions;
@@ -61,15 +61,13 @@ export const createNodeDetailLink = (
   nodeType: InventoryItemType,
   nodeId: string,
   from: string,
-  to: string,
-  prefixPathWithBasePath: (app: string, path?: string | undefined) => string | undefined
+  to: string
 ) => {
   return getNodeDetailUrl({
     nodeType,
     nodeId,
     from: dateMathExpressionToEpoch(from),
     to: dateMathExpressionToEpoch(to, true),
-    prefixPathWithBasePath,
   });
 };
 
@@ -82,17 +80,7 @@ export const MetricsExplorerChartContextMenu = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const getUrlForApp = useKibana().services.application?.getUrlForApp;
-  const prependBasePath = useKibana().services.http?.basePath.prepend;
-  const prefixPathWithBasePath = useCallback(
-    (app: string, path?: string) => {
-      if (!getUrlForApp || !prependBasePath) {
-        return;
-      }
-      return prependBasePath(getUrlForApp(app, { path }));
-    },
-    [getUrlForApp, prependBasePath]
-  );
+  const urlPrefixer = usePrefixPathWithBasepath();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {
@@ -129,12 +117,9 @@ export const MetricsExplorerChartContextMenu = ({
             values: { name: nodeType },
           }),
           icon: 'metricsApp',
-          href: createNodeDetailLink(
-            nodeType,
-            series.id,
-            timeRange.from,
-            timeRange.to,
-            prefixPathWithBasePath
+          href: urlPrefixer(
+            'metrics',
+            createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to)
           ),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },
