@@ -31,7 +31,6 @@ export function pct(value: number): string {
 export const borderRadius = '4px';
 
 // Fonts
-export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';
 export const fontFamilyCode =
   '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace';
 
