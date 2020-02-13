@@ -10,7 +10,7 @@ import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
 
 export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
-  router.post(
+  router.patch(
     {
       path: '/api/cases/comment/{id}',
       validate: {
@@ -25,9 +25,12 @@ export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
         const updatedComment = await caseService.updateComment({
           client: context.core.savedObjects.client,
           commentId: request.params.id,
-          updatedAttributes: request.body,
+          updatedAttributes: {
+            ...request.body,
+            updated_at: new Date().toISOString(),
+          },
         });
-        return response.ok({ body: updatedComment });
+        return response.ok({ body: updatedComment.attributes });
       } catch (error) {
         return response.customError(wrapError(error));
       }

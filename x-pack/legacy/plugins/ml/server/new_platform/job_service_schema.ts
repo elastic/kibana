@@ -8,11 +8,13 @@ import { schema } from '@kbn/config-schema';
 
 const analyzerSchema = {
   tokenizer: schema.string(),
-  filter: schema.arrayOf(
-    schema.object({
-      type: schema.string(),
-      stopwords: schema.arrayOf(schema.maybe(schema.string())),
-    })
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        stopwords: schema.arrayOf(schema.maybe(schema.string())),
+      })
+    )
   ),
 };
 
