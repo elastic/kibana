@@ -14,7 +14,7 @@ import { CoreStart } from 'kibana/public';
 import { selectIsLoading } from './selectors';
 
 describe('policy list store concerns', () => {
-  const sleep = () => new Promise(resolve => setTimeout(resolve, 100));
+  const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let store: Store<PolicyListState>;
   let getState: typeof store['getState'];

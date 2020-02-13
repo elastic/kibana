@@ -30,7 +30,7 @@ const getRandomNumber = () => {
 };
 
 export const getFakeDatasourceApiResponse = async (page: number, pageSize: number) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   // Emulates the API response - see PR:
   // https://github.com/elastic/kibana/pull/56567/files#diff-431549a8739efe0c56763f164c32caeeR25
