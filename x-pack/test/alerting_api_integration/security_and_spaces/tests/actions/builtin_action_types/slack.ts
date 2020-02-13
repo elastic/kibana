@@ -108,6 +108,28 @@ export default function slackTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack action',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: 'fee-fi-fo-fum',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
+          });
+        });
+    });
+
     it('should create our slack simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
         .post('/api/action')
