@@ -5,7 +5,7 @@
  */
 
 import { createStore, applyMiddleware, Store } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import { ResolverAction, ResolverState } from '../types';
 import { resolverReducer } from './reducer';
 

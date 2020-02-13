@@ -6,10 +6,10 @@
   "license": "Elastic-License",
   "scripts": {},
   "dependencies": {
-    "react-redux": "^7.1.0",
-    "redux-devtools-extension": "^2.13.8"
+    "react-redux": "^7.1.0"
   },
   "devDependencies": {
-    "@types/react-redux": "^7.1.0"
+    "@types/react-redux": "^7.1.0",
+    "redux-devtools-extension": "^2.13.8"
   }
 }
