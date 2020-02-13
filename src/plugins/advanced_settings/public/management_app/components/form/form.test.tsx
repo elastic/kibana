@@ -34,6 +34,18 @@ jest.mock('../field', () => ({
   },
 }));
 
+const localStorage: Record<string, any> = {
+  'core.chrome.isLocked': true,
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    getItem: (key: string) => {
+      return localStorage[key] || null;
+    },
+  },
+});
+
 const defaults = {
   requiresPageReload: false,
   readOnly: false,
