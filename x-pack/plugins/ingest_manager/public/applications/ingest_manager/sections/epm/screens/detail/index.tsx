@@ -9,12 +9,12 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { DetailViewPanelName } from '../../types';
 import { PackageInfo } from '../../../../types';
-import { getPackageInfoByKey } from '../../data';
-// import { useSetPackageInstallStatus } from '../../hooks';
+import { useSetPackageInstallStatus } from '../../hooks';
 // import { useCore } from '../../hooks/use_core';
-// import { InstallStatus } from '../../types';
+import { InstallStatus } from '../../types';
 import { Content } from './content';
 import { Header } from './header';
+import { getPackageInfoByKey } from '../../data';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -24,22 +24,21 @@ export interface DetailParams {
 }
 
 export function Detail() {
-  // XXX fix forced cast if possible
+  // TODO: fix forced cast if possible
   const { pkgkey, panel } = useParams() as DetailParams;
+
   const [info, setInfo] = useState<PackageInfo | null>(null);
-  // const setPackageInstallStatus = useSetPackageInstallStatus();
+  const setPackageInstallStatus = useSetPackageInstallStatus();
   useEffect(() => {
     getPackageInfoByKey(pkgkey).then(response => {
-      // const { title, name } = response;
-      const { title } = response;
-      // const status: InstallStatus = response.status as any;
+      const { title, name } = response;
+      const status: InstallStatus = response.status as any;
       // track install status state
-      // setPackageInstallStatus({ name, status });
+      setPackageInstallStatus({ name, status });
       setInfo({ ...response, title });
     });
-  }, [pkgkey]);
+  }, [pkgkey, setPackageInstallStatus]);
 
-  // don't have designs for loading/empty states
   if (!info) return null;
 
   return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;

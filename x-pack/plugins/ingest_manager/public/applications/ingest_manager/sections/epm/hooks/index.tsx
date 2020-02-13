@@ -7,10 +7,10 @@
 // export { useBreadcrumbs } from './use_breadcrumbs';
 export { useCore } from './use_core';
 export { useLinks } from './use_links';
-// export {
-//   PackageInstallProvider,
-//   useDeletePackage,
-//   useGetPackageInstallStatus,
-//   useInstallPackage,
-//   useSetPackageInstallStatus,
-// } from './use_package_install';
+export {
+  PackageInstallProvider,
+  useDeletePackage,
+  useGetPackageInstallStatus,
+  useInstallPackage,
+  useSetPackageInstallStatus,
+} from './use_package_install';

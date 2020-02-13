@@ -41,7 +41,7 @@ export function PackageCard({
     <Card
       betaBadgeLabel={showInstalledBadge && status === 'installed' ? 'Installed' : ''}
       layout="horizontal"
-      title={title}
+      title={title || ''}
       description={description}
       icon={optionalIcon}
       href={url}

@@ -6,8 +6,8 @@
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { PackageInfo } from '../../../../types';
-// import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
-// import { InstallStatus } from '../../types';
+import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
+import { InstallStatus } from '../../types';
 import { ConfirmPackageDelete } from './confirm_package_delete';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
@@ -17,30 +17,14 @@ interface InstallationButtonProps {
 
 export function InstallationButton(props: InstallationButtonProps) {
   const { assets, name, title, version } = props.package;
-  // const installPackage = useInstallPackage();
-  // const deletePackage = useDeletePackage();
-  // const getPackageInstallStatus = useGetPackageInstallStatus();
-  // const installationStatus = getPackageInstallStatus(name);
+  const installPackage = useInstallPackage();
+  const deletePackage = useDeletePackage();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+  const installationStatus = getPackageInstallStatus(name);
 
-  // const isInstalling = installationStatus === InstallStatus.installing;
-  // const isRemoving = installationStatus === InstallStatus.uninstalling;
-  // const isInstalled = installationStatus === InstallStatus.installed;
-  // XXX restore when hooks are available
-  // eslint-disable react-hooks/exhaustive-deps
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const installPackage = (a: any) => {
-    // eslint-disable-next-line no-console
-    console.log('install package called with arguments', a);
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const deletePackage = (a: any) => {
-    // eslint-disable-next-line no-console
-    console.log('delete package called with arguments', a);
-  };
-
-  const isInstalling = false;
-  const isRemoving = false;
-  const isInstalled = true;
+  const isInstalling = installationStatus === InstallStatus.installing;
+  const isRemoving = installationStatus === InstallStatus.uninstalling;
+  const isInstalled = installationStatus === InstallStatus.installed;
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const toggleModal = useCallback(() => {
     setModalVisible(!isModalVisible);

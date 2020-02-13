@@ -30,8 +30,6 @@ export {
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -50,6 +48,9 @@ export {
   RequirementVersion,
   ScreenshotItem,
   ServiceName,
+  GetCategoriesResponse,
+  GetPackagesResponse,
+  GetInfoResponse,
 } from '../../../../common';
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
