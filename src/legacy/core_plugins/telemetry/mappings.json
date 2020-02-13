@@ -19,7 +19,7 @@
         "type": "boolean"
       },
       "reportFailureCount": {
-        "type": "number"
+        "type": "integer"
       },
       "reportFailureVersion": {
         "ignore_above": 256,
