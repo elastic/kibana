@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -62,12 +62,34 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
+          if (transformed == null) {
+            return headers
+              .response({
+                message: 'Internal error transforming rules',
+                status_code: 500,
+              })
+              .code(500);
+          } else {
+            return transformed;
+          }
         } else {
-          return getIdError({ id, ruleId });
+          const error = getIdError({ id, ruleId });
+          return headers
+            .response({
+              message: error.message,
+              status_code: error.statusCode,
+            })
+            .code(error.statusCode);
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

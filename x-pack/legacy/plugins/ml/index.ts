@@ -45,7 +45,6 @@ export const ml = (kibana: any) => {
         category: DEFAULT_APP_CATEGORIES.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
-      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
@@ -87,7 +86,7 @@ export const ml = (kibana: any) => {
       const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
         elasticsearch: server.plugins.elasticsearch, // legacy
-        security: server.plugins.security,
+        security: server.newPlatform.setup.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
         home,

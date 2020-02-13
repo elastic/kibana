@@ -139,7 +139,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
   const response = await KibanaServices.get().http.fetch<Rule[]>(
     `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(ids.map(id => ({ id, enabled }))),
       asResponse: true,
     }
@@ -160,7 +160,7 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
   const response = await KibanaServices.get().http.fetch<Rule[]>(
     `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     {
-      method: 'PUT',
+      method: 'DELETE',
       body: JSON.stringify(ids.map(id => ({ id }))),
       asResponse: true,
     }

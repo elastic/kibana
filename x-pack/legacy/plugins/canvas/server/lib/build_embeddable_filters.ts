@@ -13,10 +13,14 @@ import { buildBoolArray } from './build_bool_array';
 // by the browser. This file should probably be refactored so that the pieces required
 // on the client live in a `public` directory instead. See kibana/issues/52343
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TimeRange, esFilters } from '../../../../../../src/plugins/data/common';
+import {
+  TimeRange,
+  esFilters,
+  Filter as DataFilter,
+} from '../../../../../../src/plugins/data/server';
 
 export interface EmbeddableFilterInput {
-  filters: esFilters.Filter[];
+  filters: DataFilter[];
   timeRange?: TimeRange;
 }
 
@@ -35,7 +39,7 @@ function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
     : undefined;
 }
 
-export function getQueryFilters(filters: Filter[]): esFilters.Filter[] {
+export function getQueryFilters(filters: Filter[]): DataFilter[] {
   return buildBoolArray(filters).map(esFilters.buildQueryFilter);
 }
 

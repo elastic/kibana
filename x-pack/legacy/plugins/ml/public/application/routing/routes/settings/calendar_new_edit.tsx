@@ -54,28 +54,24 @@ const editBreadcrumbs = [
 
 export const newCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/new_calendar',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} deps={deps} mode={MODE.NEW} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: newBreadcrumbs,
 };
 
 export const editCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/edit_calendar/:calendarId',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} deps={deps} mode={MODE.EDIT} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: editBreadcrumbs,
 };
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, config, mode }) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
 
-  const { context } = useResolver(undefined, undefined, config, {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     checkMlNodesAvailable,
