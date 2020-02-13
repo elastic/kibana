@@ -255,6 +255,20 @@ const testDataList = [
       ],
     },
   },
+  {
+    title: "endpoint error, index doesn't exist",
+    requestBody: {
+      ...defaultRequestBody,
+      indexPatternTitle: 'does_not_exist',
+      field: 'field1',
+    },
+    expected: {
+      responseCode: 404,
+      overallValidStatus: undefined,
+      sampleSize: undefined,
+      validationChecks: undefined,
+    },
+  },
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -280,9 +294,11 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(testData.expected.responseCode);
 
         expect(body.overallValidStatus).to.eql(testData.expected.overallValidStatus);
-        expect(body.examples.length).to.eql(testData.expected.exampleLength);
         expect(body.sampleSize).to.eql(testData.expected.sampleSize);
         expect(body.validationChecks).to.eql(testData.expected.validationChecks);
+        if (body.statusCode === 200) {
+          expect(body.examples.length).to.eql(testData.expected.exampleLength);
+        }
       });
     }
   });
