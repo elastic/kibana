@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { extractEventID } from './normalize';
