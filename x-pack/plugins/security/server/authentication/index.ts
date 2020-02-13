@@ -36,7 +36,7 @@ interface SetupAuthenticationParams {
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  getLegacyAPI(): Pick<LegacyAPI, 'serverConfig' | 'isSystemAPIRequest'>;
+  getLegacyAPI(): Pick<LegacyAPI, 'serverConfig'>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -96,7 +96,6 @@ export async function setupAuthentication({
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
-    isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     getServerBaseURL,
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
