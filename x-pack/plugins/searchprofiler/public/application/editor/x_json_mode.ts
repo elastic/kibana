@@ -8,7 +8,7 @@
 
 import ace from 'brace';
 
-import * as xJsonRules from './x_json_highlight_rules';
+import { XJsonHighlightRules } from '../../../../../../src/plugins/es_ui_shared/public';
 import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
@@ -20,7 +20,9 @@ const { FoldMode: CStyleFoldMode } = ace.acequire('ace/mode/folding/cstyle');
 const { WorkerClient } = ace.acequire('ace/worker/worker_client');
 
 function XJsonMode(this: any) {
-  this.$tokenizer = new AceTokenizer(xJsonRules.getRules());
+  const ruleset: any = new XJsonHighlightRules();
+  ruleset.normalizeRules();
+  this.$tokenizer = new AceTokenizer(ruleset.getRules());
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();

@@ -19,7 +19,12 @@
 
 export declare const workerModule: { id: string; src: string };
 
-export declare const ElasticsearchSqlHighlightRules: Function;
-export declare const ScriptHighlightRules: Function;
-export declare const XJsonHighlightRules: Function;
-export declare const addXJsonToRules: Function;
+export declare const ElasticsearchSqlHighlightRules: FunctionConstructor;
+export declare const ScriptHighlightRules: FunctionConstructor;
+export declare const XJsonHighlightRules: FunctionConstructor;
+
+/**
+ * @param otherRules Another Ace ruleset
+ * @param embedUnder The state name under which the rules will be embedded. Defaults to "json".
+ */
+export declare const addXJsonToRules: (otherRules: any, embedUnder?: string) => void;

@@ -17,10 +17,14 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import * as _ from 'lodash';
+import ace from 'brace';
 
 import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
 const { ScriptHighlightRules } = require('./script_highlight_rules');
+
+const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
+const oop = ace.acequire('ace/lib/oop');
 
 const jsonRules = function(root) {
   root = root ? root : 'json';
@@ -148,9 +152,27 @@ const jsonRules = function(root) {
 
 export function XJsonHighlightRules() {
   this.$rules = {
-    ...jsonRules('x-json'),
+    ...jsonRules('start'),
   };
+
+  this.embedRules(ScriptHighlightRules, 'script-', [
+    {
+      token: 'punctuation.end_triple_quote',
+      regex: '"""',
+      next: 'pop',
+    },
+  ]);
+
+  this.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [
+    {
+      token: 'punctuation.end_triple_quote',
+      regex: '"""',
+      next: 'pop',
+    },
+  ]);
 }
+
+oop.inherits(XJsonHighlightRules, JsonHighlightRules);
 
 export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
