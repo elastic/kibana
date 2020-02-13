@@ -34,6 +34,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
 
+      await PageObjects.common.waitForKbnLoadingMessageToClose();
       await PageObjects.common.closeWelcomeScreenIfNeeded();
 
       // wait for either space selector, kibanaChrome or loginErrorMessage

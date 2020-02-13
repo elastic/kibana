@@ -150,6 +150,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         }
       });
 
+      await this.waitForKbnLoadingMessageToClose();
       await this.closeWelcomeScreenIfNeeded();
     }
 
@@ -505,10 +506,19 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
+    async waitForKbnLoadingMessageToClose() {
+      log.debug('Waiting for Kibana loading message to close');
+      await retry.tryForTime(30 * 1000, async () => {
+        if (await testSubjects.exists('kbnLoadingMessage')) {
+          throw new Error('loading message still open');
+        }
+      });
+    }
+
     async closeWelcomeScreenIfNeeded() {
       if (await testSubjects.exists('skipWelcomeScreen')) {
         await testSubjects.click('skipWelcomeScreen');
-        await testSubjects.missingOrFail('skipWelcomeScreen', { timeout: 5000 });
+        await testSubjects.missingOrFail('skipWelcomeScreen');
       }
     }
   }
