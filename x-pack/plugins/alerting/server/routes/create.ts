@@ -20,7 +20,7 @@ import { Alert } from '../types';
 export const bodySchema = schema.object({
   name: schema.string(),
   alertTypeId: schema.string(),
-  enabled: schema.boolean(),
+  enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   throttle: schema.nullable(schema.string()), // getDurationSchema().default(null),
