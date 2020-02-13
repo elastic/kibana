@@ -118,7 +118,6 @@ export async function registerMetricThresholdAlertType(server: Server) {
       const alertInstance = services.alertInstanceFactory(
         `${searchField.name}:${searchField.value}`
       );
-      const { alertState } = alertInstance.getState();
       const currentValue = await getMetric(services, params as MetricThresholdAlertTypeParams);
       if (typeof currentValue === 'undefined')
         throw new Error('Could not get current value of metric');
@@ -126,28 +125,15 @@ export async function registerMetricThresholdAlertType(server: Server) {
       const comparisonFunction = comparatorMap[comparator];
 
       const isValueInAlertState = comparisonFunction(currentValue, threshold);
-      const isAlertInFiredState = alertState === AlertStates.ALERT;
-      // If the value has crossed the threshold, check to see if this just happened, or if
-      // it was beyond the threshold the previous time this alert executed
-      const shouldFire = isValueInAlertState && !isAlertInFiredState;
-      // Vice versa for if the value has NOT crossed the threshold
-      const shouldRecover = !isValueInAlertState && isAlertInFiredState;
 
-      let nextAlertState = Boolean(isAlertInFiredState) ? AlertStates.ALERT : AlertStates.OK;
-
-      // Only schedule actions when the value tranverses the threshold; don't renotify
-      // over and over again if the value remains in an alert state
-      if (shouldFire) {
+      if (isValueInAlertState) {
         alertInstance.scheduleActions(FIRED_ACTIONS, {
           value: currentValue,
         });
       }
-      if (shouldFire || shouldRecover) {
-        nextAlertState = shouldFire ? AlertStates.ALERT : AlertStates.OK;
-      }
 
       alertInstance.replaceState({
-        alertState: nextAlertState,
+        alertState: isValueInAlertState ? AlertStates.ALERT : AlertStates.OK,
       });
     },
   });
