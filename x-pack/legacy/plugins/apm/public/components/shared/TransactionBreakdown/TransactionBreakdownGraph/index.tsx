@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import numeral from '@elastic/numeral';
-import { useThrottleFn } from 'react-use';
+import { throttle } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { Maybe } from '../../../../../typings/common';
@@ -33,20 +33,10 @@ const formatTooltipValue = (coordinate: Coordinate) => {
 const TransactionBreakdownGraph: React.FC<Props> = props => {
   const { timeseries } = props;
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const [lastHoverTime, setLastHoverTime] = useState<number | null>(null);
-
-  const handleHover = useCallback(() => {
-    setLastHoverTime(Date.now());
-  }, [setLastHoverTime]);
-
-  useThrottleFn(
-    hoverTime => {
-      if (hoverTime) {
-        trackApmEvent({ metric: 'hover_breakdown_chart' });
-      }
-    },
-    60000,
-    [lastHoverTime]
+  const handleHover = useMemo(
+    () =>
+      throttle(() => trackApmEvent({ metric: 'hover_breakdown_chart' }), 60000),
+    [trackApmEvent]
   );
 
   return (

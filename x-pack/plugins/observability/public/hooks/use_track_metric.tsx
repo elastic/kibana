@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
@@ -32,11 +32,14 @@ export { METRIC_TYPE };
 
 export function useUiTracker({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
   const reportUiStats = useKibana<any>().services?.usageCollection?.reportUiStats;
-  return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
-    if (reportUiStats) {
-      reportUiStats(app, metricType, metric);
-    }
-  };
+  const trackEvent = useMemo(() => {
+    return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
+      if (reportUiStats) {
+        reportUiStats(app, metricType, metric);
+      }
+    };
+  }, [defaultApp, reportUiStats]);
+  return trackEvent;
 }
 
 export function useTrackMetric(
