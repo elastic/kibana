@@ -8,7 +8,7 @@ import { LifecycleQuery } from './lifecycle';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', () => {
-    expect(new LifecycleQuery('endgame-5-awesome-id').build()).toStrictEqual({
+    expect(new LifecycleQuery('awesome-id').build('5')).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -32,7 +32,7 @@ describe('lifecycle query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    expect(new LifecycleQuery('baz').build()).toStrictEqual({
+    expect(new LifecycleQuery().build('baz')).toStrictEqual({
       body: {
         query: {
           bool: {

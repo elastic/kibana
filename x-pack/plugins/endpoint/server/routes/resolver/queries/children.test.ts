@@ -10,7 +10,7 @@ describe('children events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date();
     expect(
-      new ChildrenQuery('endgame-5-awesome-id', { size: 1, timestamp, eventID: 'foo' }).build()
+      new ChildrenQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -49,7 +49,9 @@ describe('children events query', () => {
   it('generates the correct non-legacy queries', () => {
     const timestamp = new Date();
 
-    expect(new ChildrenQuery('baz', { size: 1, timestamp, eventID: 'bar' }).build()).toStrictEqual({
+    expect(
+      new ChildrenQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
+    ).toStrictEqual({
       body: {
         query: {
           bool: {
