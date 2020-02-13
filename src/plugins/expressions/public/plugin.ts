@@ -176,10 +176,8 @@ export class ExpressionsPublicPlugin
     setNotifications(core.notifications);
 
     const { expressions } = this;
-    const expressionsStart = expressions.start();
-
-    return {
-      ...expressionsStart,
+    const start = {
+      ...expressions.start(),
       execute,
       ExpressionDataHandler,
       ExpressionLoader,
@@ -188,7 +186,11 @@ export class ExpressionsPublicPlugin
       ReactExpressionRenderer,
       render,
     };
+
+    return start;
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }

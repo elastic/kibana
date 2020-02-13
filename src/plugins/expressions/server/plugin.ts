@@ -24,7 +24,7 @@ import {
   createLegacyServerInterpreterApi,
   createLegacyServerEndpoints,
 } from './legacy';
-import { ExpressionsService } from '../common';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 // eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
@@ -36,12 +36,11 @@ export interface ExpressionsServerStartDependencies {
   bfetch: BfetchServerStart;
 }
 
-export interface ExpressionsServerSetup {
+export interface ExpressionsServerSetup extends ExpressionsServiceSetup {
   __LEGACY: LegacyInterpreterServerApi;
 }
 
-// eslint-disable-next-line
-export interface ExpressionsServerStart {}
+export type ExpressionsServerStart = ExpressionsServiceStart;
 
 export class ExpressionsServerPlugin
   implements
@@ -70,17 +69,24 @@ export class ExpressionsServerPlugin
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);
 
-    return {
+    const setup = {
+      ...this.expressions.setup(),
       __LEGACY: legacyApi,
     };
+
+    return setup;
   }
 
   public start(
     core: CoreStart,
     plugins: ExpressionsServerStartDependencies
   ): ExpressionsServerStart {
-    return {};
+    const start = this.expressions.start();
+
+    return start;
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }
