@@ -37,18 +37,22 @@ export interface AlertResultList {
    * The alerts restricted by page size.
    */
   alerts: AlertData[];
+
   /**
-   * The total number of items on the page.
+   * The total number of alerts on the page.
    */
   total: number;
+
   /**
    * The size of the requested page.
    */
   request_page_size: number;
+
   /**
    * The index of the requested page, starting at 0.
    */
   request_page_index: number;
+
   /**
    * The offset of the requested page, starting at 0.
    */

@@ -8,7 +8,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { extractEventID } from './normalize';
-import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface PaginationParams {
   size: number;

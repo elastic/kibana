@@ -14,7 +14,7 @@ import {
 } from '../services/endpoint/alert_query_builders';
 
 import { AlertData, AlertResultList } from '../../common/types';
-import { AlertRequestParams, EndpointAppContext, Total } from '../types';
+import { AlertRequestParams, EndpointAppContext } from '../types';
 
 const ALERTS_ROUTE = '/api/endpoint/alerts';
 
@@ -69,6 +69,11 @@ function mapToAlertResultList(
   queryParams: Record<string, any>,
   searchResponse: SearchResponse<AlertData>
 ): AlertResultList {
+  interface Total {
+    value: number;
+    relation: string;
+  }
+
   let totalNumberOfAlerts: number = 0;
   let totalIsLowerBound: boolean = false;
 

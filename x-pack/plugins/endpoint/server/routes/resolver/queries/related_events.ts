@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ResolverQuery } from './base';
-import { JsonObject } from '../../../../../../../src/plugins/data/common/es_query/kuery';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export class RelatedEventsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
