@@ -40,7 +40,7 @@ const getColumn = (agg: IAggConfig, i: number): AggColumn => {
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
  */
-export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean) {
+export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean): AggColumn[] {
   // pick the columns
   if (minimalColumns) {
     return aggs.map((agg, i) => getColumn(agg, i));

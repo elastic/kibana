@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import './_get_columns';
-import './_buckets';
-import './_response_writer';
-import './_integration';
-describe('Tabify Agg Response', function() {});
+import { TimeRange } from '../../../../../plugins/data/public';
+
+export interface TabbedResponseWriterOptions {
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  timeRange?: { [key: string]: TimeRange };
+}

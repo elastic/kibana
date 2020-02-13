@@ -17,29 +17,28 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { TabifyBuckets } from '../_buckets';
+import { TabifyBuckets } from './_buckets';
 
-describe('Buckets wrapper', function() {
-  function test(aggResp, count, keys) {
-    it('reads the length', function() {
+describe('Buckets wrapper', () => {
+  function check(aggResp, count, keys) {
+    test('reads the length', () => {
       const buckets = new TabifyBuckets(aggResp);
-      expect(buckets).to.have.length(count);
+      expect(buckets).toHaveLength(count);
     });
 
-    it('iterates properly, passing in the key', function() {
+    test('iterates properly, passing in the key', () => {
       const buckets = new TabifyBuckets(aggResp);
       const keysSent = [];
       buckets.forEach(function(bucket, key) {
         keysSent.push(key);
       });
 
-      expect(keysSent).to.have.length(count);
-      expect(keysSent).to.eql(keys);
+      expect(keysSent).toHaveLength(count);
+      expect(keysSent).toEqual(keys);
     });
   }
 
-  describe('with object style buckets', function() {
+  describe('with object style buckets', () => {
     const aggResp = {
       buckets: {
         '0-100': {},
@@ -51,9 +50,9 @@ describe('Buckets wrapper', function() {
     const count = 3;
     const keys = ['0-100', '100-200', '200-300'];
 
-    test(aggResp, count, keys);
+    check(aggResp, count, keys);
 
-    it('should accept filters agg queries with strings', () => {
+    test('should accept filters agg queries with strings', () => {
       const aggResp = {
         buckets: {
           'response:200': {},
@@ -75,13 +74,15 @@ describe('Buckets wrapper', function() {
       };
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
-      expect(buckets).to.have.length(2);
+
+      expect(buckets).toHaveLength(2);
+
       buckets._keys.forEach(key => {
-        expect(key).to.be.a('string');
+        expect(typeof key).toBe('string');
       });
     });
 
-    it('should accept filters agg queries with query_string queries', () => {
+    test('should accept filters agg queries with query_string queries', () => {
       const aggResp = {
         buckets: {
           'response:200': {},
@@ -103,13 +104,15 @@ describe('Buckets wrapper', function() {
       };
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
-      expect(buckets).to.have.length(2);
+
+      expect(buckets).toHaveLength(2);
+
       buckets._keys.forEach(key => {
-        expect(key).to.be.a('string');
+        expect(typeof key).toBe('string');
       });
     });
 
-    it('should accept filters agg queries with query dsl queries', () => {
+    test('should accept filters agg queries with query dsl queries', () => {
       const aggResp = {
         buckets: {
           '{match_all: {}}': {},
@@ -126,14 +129,16 @@ describe('Buckets wrapper', function() {
       };
 
       const buckets = new TabifyBuckets(aggResp, aggParams);
-      expect(buckets).to.have.length(1);
+
+      expect(buckets).toHaveLength(1);
+
       buckets._keys.forEach(key => {
-        expect(key).to.be.a('string');
+        expect(typeof key).toBe('string');
       });
     });
   });
 
-  describe('with array style buckets', function() {
+  describe('with array style buckets', () => {
     const aggResp = {
       buckets: [
         { key: '0-100', value: {} },
@@ -145,21 +150,22 @@ describe('Buckets wrapper', function() {
     const count = 3;
     const keys = ['0-100', '100-200', '200-300'];
 
-    test(aggResp, count, keys);
+    check(aggResp, count, keys);
   });
 
-  describe('with single bucket aggregations (filter)', function() {
-    it('creates single bucket from agg content', function() {
+  describe('with single bucket aggregations (filter)', () => {
+    test('creates single bucket from agg content', () => {
       const aggResp = {
         single_bucket: {},
         doc_count: 5,
       };
       const buckets = new TabifyBuckets(aggResp);
-      expect(buckets).to.have.length(1);
+
+      expect(buckets).toHaveLength(1);
     });
   });
 
-  describe('drop_partial option', function() {
+  describe('drop_partial option', () => {
     const aggResp = {
       buckets: [
         { key: 0, value: {} },
@@ -169,7 +175,7 @@ describe('Buckets wrapper', function() {
       ],
     };
 
-    it('drops partial buckets when enabled', function() {
+    test('drops partial buckets when enabled', () => {
       const aggParams = {
         drop_partials: true,
         field: {
@@ -182,10 +188,11 @@ describe('Buckets wrapper', function() {
         name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
-      expect(buckets).to.have.length(1);
+
+      expect(buckets).toHaveLength(1);
     });
 
-    it('keeps partial buckets when disabled', function() {
+    test('keeps partial buckets when disabled', () => {
       const aggParams = {
         drop_partials: false,
         field: {
@@ -198,10 +205,11 @@ describe('Buckets wrapper', function() {
         name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
-      expect(buckets).to.have.length(4);
+
+      expect(buckets).toHaveLength(4);
     });
 
-    it('keeps aligned buckets when enabled', function() {
+    test('keeps aligned buckets when enabled', () => {
       const aggParams = {
         drop_partials: true,
         field: {
@@ -214,10 +222,11 @@ describe('Buckets wrapper', function() {
         name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
-      expect(buckets).to.have.length(3);
+
+      expect(buckets).toHaveLength(3);
     });
 
-    it('does not drop buckets for non-timerange fields', function() {
+    test('does not drop buckets for non-timerange fields', () => {
       const aggParams = {
         drop_partials: true,
         field: {
@@ -230,7 +239,8 @@ describe('Buckets wrapper', function() {
         name: 'date',
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
-      expect(buckets).to.have.length(4);
+
+      expect(buckets).toHaveLength(4);
     });
   });
 });

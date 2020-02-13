@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { TabbedAggResponseWriter } from './_response_writer';
+import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './_buckets';
 
 /**
@@ -32,13 +32,26 @@ import { TabifyBuckets } from './_buckets';
  * @param {Object} respOpts.timeRange - time range object, if provided
  */
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
-  const write = new TabbedAggResponseWriter(aggs, respOpts);
-
   const topLevelBucket = _.assign({}, esResponse.aggregations, {
     doc_count: esResponse.hits.total,
   });
+  const write = new TabbedAggResponseWriter(aggs, respOpts);
 
-  collectBucket(write, topLevelBucket, '', 1);
+  let timeRange;
+
+  // Extract the time range object if provided
+  if (respOpts.timeRange) {
+    const timeRangeKey = Object.keys(respOpts.timeRange)[0];
+
+    if (timeRangeKey) {
+      timeRange = {
+        name: timeRangeKey,
+        ...respOpts.timeRange[timeRangeKey],
+      };
+    }
+  }
+
+  collectBucket(aggs, write, topLevelBucket, '', 1, timeRange);
 
   return write.response();
 }
@@ -48,29 +61,34 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
  * the response came in object form), and will recurse down the aggregation
  * tree and will pass the read values to the ResponseWriter.
  *
+ * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {object} bucket - a bucket from the aggResponse
  * @param {undefined|string} key - the key where the bucket was found
+ * @param {Object} timeRange - time range object, if provided
  * @returns {undefined}
  */
-function collectBucket(write, bucket, key, aggScale) {
-  const column = write.aggStack.shift();
+function collectBucket(aggs, write, bucket, key, aggScale, timeRange) {
+  const column = write.columns.shift();
   const agg = column.aggConfig;
-  const aggInfo = agg.write(write.aggs);
+  const aggInfo = agg.write(aggs);
   aggScale *= aggInfo.metricScale || 1;
 
   switch (agg.type.type) {
     case 'buckets':
-      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
+      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, timeRange);
       if (buckets.length) {
         buckets.forEach(function(subBucket, key) {
           // if the bucket doesn't have value don't add it to the row
           // we don't want rows like: { column1: undefined, column2: 10 }
           const bucketValue = agg.getKey(subBucket, key);
           const hasBucketValue = typeof bucketValue !== 'undefined';
+
           if (hasBucketValue) {
             write.bucketBuffer.push({ id: column.id, value: bucketValue });
           }
-          collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
+
+          collectBucket(aggs, write, subBucket, agg.getKey(subBucket, key), aggScale, timeRange);
+
           if (hasBucketValue) {
             write.bucketBuffer.pop();
           }
@@ -79,9 +97,9 @@ function collectBucket(write, bucket, key, aggScale) {
         // we don't have any buckets, but we do have metrics at this
         // level, then pass all the empty buckets and jump back in for
         // the metrics.
-        write.aggStack.unshift(column);
-        passEmptyBuckets(write, bucket, key, aggScale);
-        write.aggStack.shift();
+        write.columns.unshift(column);
+        passEmptyBuckets(aggs, write, bucket, key, aggScale, timeRange);
+        write.columns.shift();
       } else {
         // we don't have any buckets, and we don't have isHierarchical
         // data, so no metrics, just try to write the row
@@ -97,12 +115,12 @@ function collectBucket(write, bucket, key, aggScale) {
       }
       write.metricBuffer.push({ id: column.id, value: value });
 
-      if (!write.aggStack.length) {
+      if (!write.columns.length) {
         // row complete
         write.row();
       } else {
         // process the next agg at this same level
-        collectBucket(write, bucket, key, aggScale);
+        collectBucket(aggs, write, bucket, key, aggScale, timeRange);
       }
 
       write.metricBuffer.pop();
@@ -110,25 +128,25 @@ function collectBucket(write, bucket, key, aggScale) {
       break;
   }
 
-  write.aggStack.unshift(column);
+  write.columns.unshift(column);
 }
 
 // write empty values for each bucket agg, then write
 // the metrics from the initial bucket using collectBucket()
-function passEmptyBuckets(write, bucket, key, aggScale) {
-  const column = write.aggStack.shift();
+function passEmptyBuckets(aggs, write, bucket, key, aggScale, timeRange) {
+  const column = write.columns.shift();
   const agg = column.aggConfig;
 
   switch (agg.type.type) {
     case 'metrics':
       // pass control back to collectBucket()
-      write.aggStack.unshift(column);
-      collectBucket(write, bucket, key, aggScale);
+      write.columns.unshift(column);
+      collectBucket(aggs, write, bucket, key, aggScale, timeRange);
       return;
 
     case 'buckets':
-      passEmptyBuckets(write, bucket, key, aggScale);
+      passEmptyBuckets(aggs, write, bucket, key, aggScale, timeRange);
   }
 
-  write.aggStack.unshift(column);
+  write.columns.unshift(column);
 }

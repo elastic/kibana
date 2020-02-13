@@ -74,7 +74,7 @@ export class AggConfigs {
 
     configStates.forEach((params: any) => this.createAggConfig(params));
 
-    if (this.schemas) {
+    if (schemas) {
       this.initializeDefaultsFromSchemas(schemas);
     }
   }
