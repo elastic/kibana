@@ -36,8 +36,31 @@ export const AGENT_CONFIG_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
 };
 
+// Agent API routes
+export const AGENT_API_ROUTES = {
+  LIST_PATTERN: `${FLEET_API_ROOT}/agents`,
+  INFO_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}`,
+  UPDATE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}`,
+  DELETE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}`,
+  EVENTS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/events`,
+  CHECKIN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/checkin`,
+  ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
+  ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
+  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
+  STATUS_FOR_POLICY_PATTERN: `${FLEET_API_ROOT}/policy/{policyId}/agent-status`,
+};
+
+export const ENROLLMENT_API_KEY_ROUTES = {
+  CREATE_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys`,
+  LIST_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys`,
+  INFO_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys/{keyId}`,
+  DELETE_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys/{keyId}`,
+};
+
 // Fleet setup API routes
 export const FLEET_SETUP_API_ROUTES = {
   INFO_PATTERN: `${FLEET_API_ROOT}/setup`,
   CREATE_PATTERN: `${FLEET_API_ROOT}/setup`,
 };
+
+export const INSTALL_SCRIPT_API_ROUTES = `${FLEET_API_ROOT}/install/{osType}`;

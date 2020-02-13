@@ -50,7 +50,7 @@ export default function(providerContext: FtrProviderContext) {
 
     it('should return a 401 if this a not a valid acks access', async () => {
       await supertest
-        .post(`/api/fleet/agents/agent1/acks`)
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
         .send({
@@ -61,7 +61,7 @@ export default function(providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid acks access', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/fleet/agents/agent1/acks`)
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',

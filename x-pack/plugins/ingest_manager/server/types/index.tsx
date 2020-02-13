@@ -5,6 +5,13 @@
  */
 export {
   // Object types
+  Agent,
+  AgentSOAttributes,
+  AgentStatus,
+  AgentType,
+  AgentEvent,
+  AgentEventSOAttributes,
+  AgentAction,
   Datasource,
   NewDatasource,
   AgentConfig,
@@ -13,6 +20,13 @@ export {
   Output,
   NewOutput,
   OutputType,
+  EnrollmentAPIKeySOAttributes,
+  EnrollmentAPIKey,
+  // Agent constants
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_POLLING_THRESHOLD_MS,
   // Common schemas
   ListWithKuery,
   ListWithKuerySchema,
@@ -21,6 +35,21 @@ export {
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
+  // Agent schemas
+  GetAgentsRequestSchema,
+  GetAgentsResponse,
+  GetOneAgentRequestSchema,
+  GetOneAgentResponse,
+  GetOneAgentEventsRequestSchema,
+  GetOneAgentEventsResponse,
+  UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
+  PostAgentCheckinRequestSchema,
+  PostAgentUnenrollRequestSchema,
+  PostAgentUnenrollResponse,
+  PostAgentEnrollRequestSchema,
+  PostAgentAcksRequestSchema,
+  GetAgentStatusForPolicySchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,
@@ -36,11 +65,23 @@ export {
   GetFleetSetupRequestSchema,
   CreateFleetSetupRequestSchema,
   CreateFleetSetupResponse,
+  // EPM schema
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
+  // Enrollment API keys schemas
+  GetEnrollmentAPIKeysRequestSchema,
+  GetEnrollmentAPIKeysResponse,
+  PostEnrollmentAPIKeyRequestSchema,
+  PostEnrollmentAPIKeyResponse,
+  DeleteEnrollmentAPIKeyRequestSchema,
+  DeleteEnrollmentAPIKeyResponse,
+  GetOneEnrollmentAPIKeyRequestSchema,
+  GetOneEnrollmentAPIKeyResponse,
+  // Install Script schema
+  InstallScriptRequestSchema,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (

@@ -9,8 +9,6 @@ import { resolve } from 'path';
 // import { i18n } from '@kbn/i18n';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
-import { initServerWithKibana } from './server/kibana.index';
-import { mappings } from './server/mappings';
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
@@ -52,7 +50,6 @@ export function fleet(kibana: any) {
           // indexPattern: INDEX_NAMES.FLEET,
         },
       },
-      mappings,
     },
     config: () => config,
     configPrefix: CONFIG_PREFIX,
@@ -88,7 +85,6 @@ export function fleet(kibana: any) {
           },
         },
       });
-      initServerWithKibana(server);
     },
   });
 }

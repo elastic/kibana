@@ -33,6 +33,7 @@ const DatasourceBaseSchema = {
   ),
   streams: schema.arrayOf(
     schema.object({
+      id: schema.string(),
       config: schema.recordOf(schema.string(), schema.any()),
       input: schema.object({
         type: schema.oneOf([

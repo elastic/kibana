@@ -26,7 +26,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('GET /fleet/enrollment-api-keys', async () => {
       it('should list existing api keys', async () => {
         const { body: apiResponse } = await supertest
-          .get(`/api/fleet/enrollment-api-keys`)
+          .get(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .expect(200);
 
         expect(apiResponse.total).to.be(2);
@@ -37,7 +37,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('GET /fleet/enrollment-api-keys/{id}', async () => {
       it('should allow to retrieve existing api keys', async () => {
         const { body: apiResponse } = await supertest
-          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .get(`/api/ingest_manager/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
           .expect(200);
 
         expect(apiResponse.item).to.have.keys('id', 'api_key_id', 'name');
@@ -47,7 +47,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('GET /fleet/enrollment-api-keys/{id}', async () => {
       it('should allow to retrieve existing api keys', async () => {
         const { body: apiResponse } = await supertest
-          .delete(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .delete(`/api/ingest_manager/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
@@ -58,7 +58,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('POST /fleet/enrollment-api-keys', () => {
       it('should not accept bad parameters', async () => {
         await supertest
-          .post(`/api/fleet/enrollment-api-keys`)
+          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             raoul: 'raoul',
@@ -68,7 +68,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should allow to create an enrollment api key with a policy', async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/fleet/enrollment-api-keys`)
+          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy1',

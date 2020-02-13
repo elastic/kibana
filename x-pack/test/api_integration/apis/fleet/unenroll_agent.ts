@@ -22,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should not allow both ids and kuery in the payload', async () => {
       await supertest
-        .post(`/api/fleet/agents/unenroll`)
+        .post(`/api/ingest_manager/fleet/agents/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           ids: ['agent:1'],
@@ -33,7 +33,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should not allow no ids or kuery in the payload', async () => {
       await supertest
-        .post(`/api/fleet/agents/unenroll`)
+        .post(`/api/ingest_manager/fleet/agents/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({})
         .expect(400);
@@ -41,7 +41,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('allow to unenroll using a list of ids', async () => {
       const { body } = await supertest
-        .post(`/api/fleet/agents/unenroll`)
+        .post(`/api/ingest_manager/fleet/agents/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           ids: ['agent1'],
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('allow to unenroll using a kibana query', async () => {
       const { body } = await supertest
-        .post(`/api/fleet/agents/unenroll`)
+        .post(`/api/ingest_manager/fleet/agents/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           kuery: 'agents.shared_id:agent2_filebeat OR agents.shared_id:agent3_metricbeat',

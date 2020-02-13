@@ -10,7 +10,9 @@ import {
   Plugin,
   PluginInitializerContext,
   ICustomClusterClient,
+  SavedObjectsLegacyService,
 } from 'kibana/server';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -22,6 +24,9 @@ import {
   registerDatasourceRoutes,
   registerAgentConfigRoutes,
   registerFleetSetupRoutes,
+  registerAgentRoutes,
+  registerEnrollmentApiKeyRoutes,
+  registerInstallScriptRoutes,
 } from './routes';
 import { IngestManagerConfigType } from './';
 
@@ -35,6 +40,15 @@ export interface IngestManagerAppContext {
   clusterClient: ICustomClusterClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
+  internalSavedObjectsClient: SavedObjectsClient;
+}
+
+/**
+ * Describes a set of APIs that is available in the legacy platform only and required by this plugin
+ * to function properly.
+ */
+export interface LegacyAPI {
+  savedObjects: SavedObjectsLegacyService;
 }
 
 export class IngestManagerPlugin implements Plugin {
@@ -64,7 +78,7 @@ export class IngestManagerPlugin implements Plugin {
           all: {
             api: [PLUGIN_ID],
             savedObject: {
-              all: [],
+              all: ['agents', 'events', 'enrollment_api_keys'],
               read: [],
             },
             ui: ['show'],
@@ -73,7 +87,7 @@ export class IngestManagerPlugin implements Plugin {
             api: [PLUGIN_ID],
             savedObject: {
               all: [],
-              read: [],
+              read: ['agents', 'events', 'enrollment_api_keys'],
             },
             ui: ['show'],
           },
@@ -83,7 +97,6 @@ export class IngestManagerPlugin implements Plugin {
 
     // Create router
     const router = core.http.createRouter();
-
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
@@ -92,6 +105,13 @@ export class IngestManagerPlugin implements Plugin {
     // TODO: Use this.config$ + if security is enabled to register conditional routing
     registerEPMRoutes(router);
     registerFleetSetupRoutes(router);
+    registerAgentRoutes(router);
+    registerEnrollmentApiKeyRoutes(router);
+    registerInstallScriptRoutes({
+      router,
+      serverInfo: core.http.getServerInfo(),
+      basePath: core.http.basePath,
+    });
   }
 
   public async start(
@@ -100,7 +120,12 @@ export class IngestManagerPlugin implements Plugin {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
+    const internalSavedObjectsClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository()
+    );
+
     appContextService.start({
+      internalSavedObjectsClient,
       clusterClient: this.clusterClient,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,

@@ -64,11 +64,8 @@ class OutputService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output | null> {
+  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
     const outputSO = await soClient.get<Output>(SAVED_OBJECT_TYPE, id);
-    if (!outputSO) {
-      return null;
-    }
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);

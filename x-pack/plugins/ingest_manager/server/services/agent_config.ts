@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
+import { flatten } from 'lodash';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_CONFIG_ID,
@@ -14,28 +15,22 @@ import {
   NewAgentConfig,
   AgentConfig,
   AgentConfigStatus,
-  AgentConfigUpdateHandler,
   ListWithKuery,
   DeleteAgentConfigsResponse,
 } from '../types';
 import { datasourceService } from './datasource';
+import { outputService } from './output';
+import { agentConfigUpdateEventHandler } from './agent_config_update';
 
 const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
 
 class AgentConfigService {
-  private eventsHandler: AgentConfigUpdateHandler[] = [];
-
-  public registerAgentConfigUpdateHandler(handler: AgentConfigUpdateHandler) {
-    this.eventsHandler.push(handler);
-  }
-
-  public triggerAgentConfigUpdatedEvent: AgentConfigUpdateHandler = async (
-    action,
-    agentConfigId
+  private triggerAgentConfigUpdatedEvent = async (
+    soClient: SavedObjectsClientContract,
+    action: string,
+    agentConfigId: string
   ) => {
-    for (const handler of this.eventsHandler) {
-      await handler(action, agentConfigId);
-    }
+    return agentConfigUpdateEventHandler(soClient, action, agentConfigId);
   };
 
   private async _update(
@@ -50,7 +45,7 @@ class AgentConfigService {
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerAgentConfigUpdatedEvent('updated', id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
 
     return (await this.get(soClient, id)) as AgentConfig;
   }
@@ -92,7 +87,7 @@ class AgentConfigService {
       options
     );
 
-    await this.triggerAgentConfigUpdatedEvent('created', newSo.id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
 
     return {
       id: newSo.id,
@@ -238,7 +233,7 @@ class AgentConfigService {
     for (const id of ids) {
       try {
         await soClient.delete(SAVED_OBJECT_TYPE, id);
-        await this.triggerAgentConfigUpdatedEvent('deleted', id);
+        await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
         result.push({
           id,
           success: true,
@@ -252,6 +247,64 @@ class AgentConfigService {
     }
 
     return result;
+  }
+
+  private storedDatasourceToAgentStreams(datasources: AgentConfig['datasources'] = []): any[] {
+    return flatten(
+      // @ts-ignore
+      datasources.map((ds: any) => {
+        return ds.streams.map((stream: any) => ({
+          ...stream.input,
+          id: stream.id,
+          type: stream.input.type as any,
+          output: { use_output: stream.output_id },
+          ...(stream.config || {}),
+        }));
+      })
+    );
+  }
+
+  public async getFullPolicy(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<any | null> {
+    let policy;
+
+    try {
+      policy = await this.get(soClient, id);
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+    }
+
+    if (!policy) {
+      return null;
+    }
+
+    const agentPolicy = {
+      id: policy.id,
+      outputs: {
+        // TEMPORARY as we only support a default output
+        ...[await outputService.get(soClient, 'default')].reduce(
+          (outputs, { config, ...output }) => {
+            outputs[output.id] = {
+              ...output,
+              type: output.type as any,
+              ...config,
+            };
+            return outputs;
+          },
+          {} as any
+        ),
+      },
+      streams:
+        policy.datasources && policy.datasources.length
+          ? this.storedDatasourceToAgentStreams(policy.datasources)
+          : [],
+    };
+
+    return agentPolicy;
   }
 }
 
