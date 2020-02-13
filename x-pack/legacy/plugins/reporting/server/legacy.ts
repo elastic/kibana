@@ -8,7 +8,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../types';
 import { plugin } from './index';
-import { LegacySetup, ReportingStartDeps } from './plugin';
+import { LegacySetup, ReportingStartDeps } from './types';
 
 const buildLegacyDependencies = (
   server: Legacy.Server,

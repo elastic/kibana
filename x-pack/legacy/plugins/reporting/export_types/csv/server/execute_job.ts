@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { i18n } from '@kbn/i18n';
+import Hapi from 'hapi';
 import {
   ElasticsearchServiceSetup,
-  KibanaRequest,
   IUiSettingsClient,
+  KibanaRequest,
 } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
+import { getFieldFormats } from '../../../server/services';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
-import { getFieldFormats } from '../../../server/services';
-import { ReportingPlugin } from '../../../server/plugin';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
 >> = async function executeJobFactoryFn(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger

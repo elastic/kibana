@@ -16,7 +16,7 @@ import {
   ResponseFacade,
   ServerFacade,
 } from '../../types';
-import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 
@@ -30,7 +30,7 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   parentLogger: Logger

@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingPlugin } from '../../../../server/plugin';
+import { ReportingCore } from '../../../../server';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import {
@@ -22,7 +22,7 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger

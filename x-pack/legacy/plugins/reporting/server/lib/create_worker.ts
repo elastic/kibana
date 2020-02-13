@@ -5,26 +5,26 @@
  */
 
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { PLUGIN_ID } from '../../common/constants';
 import { CancellationToken } from '../../common/cancellation_token';
+import { PLUGIN_ID } from '../../common/constants';
 import {
   ESQueueInstance,
-  QueueConfig,
-  ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
-  JobDocPayload,
+  ExportTypeDefinition,
   ImmediateExecuteFn,
+  JobDocPayload,
   JobSource,
+  Logger,
+  QueueConfig,
   RequestFacade,
   ServerFacade,
-  Logger,
 } from '../../types';
-import { ReportingPlugin } from '../plugin';
+import { ReportingCore } from '../core';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
 export function createWorkerFactory<JobParamsType>(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger

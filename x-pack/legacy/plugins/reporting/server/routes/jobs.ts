@@ -17,7 +17,7 @@ import {
   ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
@@ -32,7 +32,7 @@ function isResponse(response: Boom<null> | ResponseObject): response is Response
 }
 
 export function registerJobInfoRoutes(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger

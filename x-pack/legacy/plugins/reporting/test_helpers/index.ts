@@ -5,4 +5,4 @@
  */
 
 export { createMockServer } from './create_mock_server';
-export { createMockReportingPlugin } from './create_mock_reportingplugin';
+export { createMockReportingCore } from './create_mock_reportingplugin';

@@ -20,7 +20,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { ReportingPlugin } from '../../../../server/plugin';
+import { ReportingCore } from '../../../../server';
 import { Logger, RequestFacade, ServerFacade } from '../../../../types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
@@ -61,7 +61,7 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 
 export async function generateCsvSearch(
   req: RequestFacade,
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,

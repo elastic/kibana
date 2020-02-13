@@ -16,7 +16,7 @@ jest.mock('../log_configuration');
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
-import { ReportingPlugin, ReportingSetupDeps, ReportingStartDeps } from '../server/plugin';
+import { ReportingCore, ReportingPlugin, ReportingSetupDeps, ReportingStartDeps } from '../server';
 
 export const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => ({
   elasticsearch: setupMock.elasticsearch,
@@ -31,7 +31,7 @@ export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   __LEGACY: {} as any,
 });
 
-export const createMockReportingPlugin = async (config = {}) => {
+const createMockReportingPlugin = async (config = {}): Promise<ReportingPlugin> => {
   const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(config));
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
@@ -44,4 +44,9 @@ export const createMockReportingPlugin = async (config = {}) => {
   await plugin.start(startMock, createMockStartDeps(startMock));
 
   return plugin;
+};
+
+export const createMockReportingCore = async (config = {}): Promise<ReportingCore> => {
+  const plugin = await createMockReportingPlugin(config);
+  return plugin.getReportingCore();
 };

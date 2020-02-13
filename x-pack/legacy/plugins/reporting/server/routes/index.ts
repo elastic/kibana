@@ -5,12 +5,12 @@
  */
 
 import { Logger, ServerFacade } from '../../types';
-import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 
 export function registerRoutes(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger

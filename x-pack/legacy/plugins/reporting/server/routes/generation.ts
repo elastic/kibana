@@ -9,7 +9,7 @@ import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
@@ -18,7 +18,7 @@ import { makeRequestFacade } from './lib/make_request_facade';
 const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger

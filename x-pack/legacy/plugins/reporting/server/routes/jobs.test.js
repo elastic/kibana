@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { memoize } from 'lodash';
-import { createMockReportingPlugin } from '../../test_helpers';
+import { createMockReportingCore } from '../../test_helpers';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
@@ -43,7 +43,7 @@ beforeEach(async () => {
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
   });
-  mockReportingPlugin = await createMockReportingPlugin();
+  mockReportingPlugin = await createMockReportingCore();
   mockReportingPlugin.getExportTypesRegistry = () => exportTypesRegistry;
 });
 

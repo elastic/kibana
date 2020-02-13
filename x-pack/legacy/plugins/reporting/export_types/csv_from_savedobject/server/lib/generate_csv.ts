@@ -6,13 +6,13 @@
 
 import { badRequest } from 'boom';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { ReportingPlugin } from '../../../../server/plugin';
+import { ReportingCore } from '../../../../server';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
 import { SearchPanel, VisPanel, JobParamsPanelCsv, FakeRequest } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
 export function createGenerateCsv(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger

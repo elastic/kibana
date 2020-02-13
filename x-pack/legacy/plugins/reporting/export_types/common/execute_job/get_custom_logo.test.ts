@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingPlugin } from '../../../server/plugin';
-import { createMockReportingPlugin, createMockServer } from '../../../test_helpers';
+import { ReportingCore } from '../../../server';
+import { createMockReportingCore, createMockServer } from '../../../test_helpers';
 import { ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
-let mockReportingPlugin: ReportingPlugin;
+let mockReportingPlugin: ReportingCore;
 let mockServer: ServerFacade;
 beforeEach(async () => {
-  mockReportingPlugin = await createMockReportingPlugin();
+  mockReportingPlugin = await createMockReportingCore();
   mockServer = createMockServer('');
 });
 

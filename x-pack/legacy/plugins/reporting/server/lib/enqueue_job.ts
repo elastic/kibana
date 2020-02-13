@@ -20,7 +20,7 @@ import {
   QueueConfig,
   ConditionalHeaders,
 } from '../../types';
-import { ReportingPlugin } from '../plugin';
+import { ReportingCore } from '../core';
 
 interface ConfirmedJob {
   id: string;
@@ -30,7 +30,7 @@ interface ConfirmedJob {
 }
 
 export function enqueueJobFactory(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger

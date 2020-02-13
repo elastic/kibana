@@ -5,10 +5,10 @@
  */
 
 import { notFound, notImplemented } from 'boom';
-import { get } from 'lodash';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { ReportingPlugin } from '../../../../server/plugin';
+import { get } from 'lodash';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { ReportingCore } from '../../../../server';
 import { cryptoFactory } from '../../../../server/lib';
 import {
   CreateJobFactory,
@@ -38,7 +38,7 @@ interface VisData {
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
 >> = function createJobFactoryFn(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger

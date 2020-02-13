@@ -6,14 +6,14 @@
 
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ESQueueInstance, ServerFacade, QueueConfig, Logger } from '../../types';
-import { ReportingPlugin } from '../plugin';
+import { ReportingCore } from '../core';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger

@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockReportingPlugin, createMockServer } from '../../../test_helpers';
+import { createMockReportingCore, createMockServer } from '../../../test_helpers';
+import { ReportingCore } from '../../../server';
 import { JobDocPayload } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
-let mockReportingPlugin: any;
+let mockReportingPlugin: ReportingCore;
 let mockServer: any;
 beforeEach(async () => {
-  mockReportingPlugin = createMockReportingPlugin();
+  mockReportingPlugin = await createMockReportingCore();
   mockServer = createMockServer('');
 });
 
@@ -150,11 +151,7 @@ describe('conditions', () => {
 });
 
 test('uses basePath from job when creating saved object service', async () => {
-  const logo = 'custom-logo';
-  const mockUiSettingsClient = { get: () => Promise.resolve(logo) };
-  mockReportingPlugin.getUiSettingsServiceFactory = jest
-    .fn()
-    .mockResolvedValueOnce(mockUiSettingsClient);
+  const mockGetSavedObjectsClient = jest.fn();
   mockReportingPlugin.getSavedObjectsClient = jest.fn();
 
   const permittedHeaders = {
@@ -174,17 +171,13 @@ test('uses basePath from job when creating saved object service', async () => {
     server: mockServer,
   });
 
-  const getBasePath = mockReportingPlugin.getSavedObjectsClient.mock.calls[0][0].getBasePath;
+  const getBasePath = mockGetSavedObjectsClient.mock.calls[0][0].getBasePath;
   expect(getBasePath()).toBe(jobBasePath);
 });
 
 test(`uses basePath from server if job doesn't have a basePath when creating saved object service`, async () => {
-  const logo = 'custom-logo';
-  const mockUiSettingsClient = { get: () => Promise.resolve(logo) };
-  mockReportingPlugin.getUiSettingsServiceFactory = jest
-    .fn()
-    .mockResolvedValueOnce(mockUiSettingsClient);
-  mockReportingPlugin.getSavedObjectsClient = jest.fn();
+  const mockGetSavedObjectsClient = jest.fn();
+  mockReportingPlugin.getSavedObjectsClient = mockGetSavedObjectsClient;
 
   const permittedHeaders = {
     foo: 'bar',
@@ -203,9 +196,9 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
     server: mockServer,
   });
 
-  const getBasePath = mockReportingPlugin.getSavedObjectsClient.mock.calls[0][0].getBasePath;
+  const getBasePath = mockGetSavedObjectsClient.mock.calls[0][0].getBasePath;
   expect(getBasePath()).toBe(`/sbp`);
-  expect(mockReportingPlugin.getSavedObjectsClient.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(mockGetSavedObjectsClient.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "getBasePath": [Function],

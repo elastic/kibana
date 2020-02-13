@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
-import { createMockReportingPlugin } from '../../../../test_helpers';
+import { createMockReportingCore } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -23,7 +23,7 @@ let mockServer;
 let mockReporting;
 
 beforeEach(async () => {
-  mockReporting = await createMockReportingPlugin();
+  mockReporting = await createMockReportingCore();
 
   config = {
     'xpack.reporting.encryptionKey': 'testencryptionkey',

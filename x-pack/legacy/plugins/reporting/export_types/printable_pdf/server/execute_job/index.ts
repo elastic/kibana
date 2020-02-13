@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingPlugin } from '../../../../server/plugin';
+import { ReportingCore } from '../../../../server';
 import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
@@ -23,7 +23,7 @@ import {
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger

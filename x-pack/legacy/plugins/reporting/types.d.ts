@@ -13,13 +13,8 @@ import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 import { LevelLogger } from './server/lib/level_logger';
-import {
-  LegacySetup,
-  ReportingPlugin,
-  ReportingStartDeps,
-  ReportingSetup,
-  ReportingStart,
-} from './server/plugin';
+import { ReportingCore } from './server/core';
+import { LegacySetup, ReportingStartDeps, ReportingSetup, ReportingStart } from './server/types';
 
 export type Job = EventEmitter & {
   id: string;
@@ -69,6 +64,7 @@ interface GenerateExportTypePayload {
 
 /*
  * Legacy System
+ * TODO: move to server/types
  */
 
 export type ServerFacade = LegacySetup;
@@ -286,13 +282,13 @@ export interface ESQueueInstance {
 }
 
 export type CreateJobFactory<CreateJobFnType> = (
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { createMockReportingPlugin } from '../../test_helpers';
+import * as sinon from 'sinon';
+import { ReportingCore } from '../../server';
+import { createMockReportingCore } from '../../test_helpers';
 import { ServerFacade } from '../../types';
-import { ReportingPlugin } from '../../server/plugin';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
@@ -43,10 +43,10 @@ const getMockExportTypesRegistry = (
 describe('Create Worker', () => {
   let queue: Esqueue;
   let client: ClientMock;
-  let mockReporting: ReportingPlugin;
+  let mockReporting: ReportingCore;
 
   beforeEach(async () => {
-    mockReporting = await createMockReportingPlugin();
+    mockReporting = await createMockReportingCore();
     client = new ClientMock();
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();

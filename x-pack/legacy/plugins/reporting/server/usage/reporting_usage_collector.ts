@@ -4,33 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { first, mapTo } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingStart } from '../../server/plugin';
-import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
+import { ReportingCore } from '../../server';
+import { ESCallCluster, ServerFacade } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
 
-/*
- * @param {Object} server
- * @return {Object} kibana usage stats type collection object
- */
-export function getReportingUsageCollector(
+export function registerReportingUsageCollector(
+  reporting: ReportingCore,
   server: ServerFacade,
-  usageCollection: UsageCollectionSetup,
-  exportTypesRegistry: ExportTypesRegistry,
-  isReady: () => Promise<boolean>
+  usageCollection: UsageCollectionSetup
 ) {
-  return usageCollection.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(server, callCluster, exportTypesRegistry),
-    isReady,
+      getReportingUsage(server, callCluster, reporting.getExportTypesRegistry()),
+    isReady: reporting.pluginHasStarted,
 
     /*
      * Format the response data into a model for internal upload
@@ -50,20 +43,6 @@ export function getReportingUsageCollector(
       };
     },
   });
-}
 
-export function registerReportingUsageCollector(
-  server: ServerFacade,
-  usageCollection: UsageCollectionSetup,
-  pluginStart$: Rx.Observable<ReportingStart>,
-  exportTypesRegistry: ExportTypesRegistry
-) {
-  const collectionIsReady = () => pluginStart$.pipe(first(), mapTo(true)).toPromise();
-  const collector = getReportingUsageCollector(
-    server,
-    usageCollection,
-    exportTypesRegistry,
-    collectionIsReady
-  );
   usageCollection.registerCollector(collector);
 }

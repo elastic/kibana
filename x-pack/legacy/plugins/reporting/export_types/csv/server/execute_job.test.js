@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { fieldFormats } from '../../../../../../../src/plugins/data/server';
-import { createMockReportingPlugin } from '../../../test_helpers';
+import { createMockReportingCore } from '../../../test_helpers';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
 import { setFieldFormats } from '../../../server/services';
@@ -57,7 +57,7 @@ describe('CSV Execute Job', function() {
   });
 
   beforeEach(async function() {
-    mockReportingPlugin = await createMockReportingPlugin();
+    mockReportingPlugin = await createMockReportingCore();
     mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
     cancellationToken = new CancellationToken();
 

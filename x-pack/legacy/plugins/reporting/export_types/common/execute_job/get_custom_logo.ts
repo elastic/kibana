@@ -5,7 +5,7 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ReportingPlugin } from '../../../server/plugin';
+import { ReportingCore } from '../../../server';
 import { ConditionalHeaders, ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
@@ -15,7 +15,7 @@ export const getCustomLogo = async ({
   job,
   conditionalHeaders,
 }: {
-  reporting: ReportingPlugin;
+  reporting: ReportingCore;
   server: ServerFacade;
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;

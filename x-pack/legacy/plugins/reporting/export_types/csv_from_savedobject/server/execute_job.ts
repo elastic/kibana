@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { ReportingPlugin } from '../../../server/plugin';
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
 import {
   ExecuteJobFactory,
@@ -24,7 +24,7 @@ import { createGenerateCsv } from './lib';
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
 >> = async function executeJobFactoryFn(
-  reporting: ReportingPlugin,
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
