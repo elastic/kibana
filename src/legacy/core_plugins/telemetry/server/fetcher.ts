@@ -130,6 +130,14 @@ export class FetcherTask {
 
   private sendTelemetry = async (url: string, cluster: any): Promise<void> => {
     this.server.log(['debug', 'telemetry', 'fetcher'], `Sending usage stats.`);
+    /**
+     * send OPTIONS before sending usage data.
+     * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
+     */
+    await fetch(url, {
+      method: 'options',
+    });
+
     await fetch(url, {
       method: 'post',
       body: cluster,
