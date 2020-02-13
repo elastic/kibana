@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 
 interface IntegrationLinkProps {
   ariaLabel: string;
