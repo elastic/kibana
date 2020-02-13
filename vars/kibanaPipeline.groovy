@@ -87,6 +87,7 @@ def getPostBuildWorker(name, closure) {
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
       "IS_PIPELINE_JOB=1",
+      "KBN_NP_PLUGINS_BUILT=true",
     ]) {
       closure()
     }

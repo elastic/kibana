@@ -22,14 +22,17 @@ import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getConfigPath } from '../../../core/server/path';
 // @ts-ignore
 import mappings from './mappings.json';
-import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
-import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask, PluginsSetup } from './server';
+import {
+  telemetryPlugin,
+  replaceTelemetryInjectedVars,
+  FetcherTask,
+  PluginsSetup,
+  handleOldSettings,
+} from './server';
 
 const ENDPOINT_VERSION = 'v2';
 
@@ -76,16 +79,6 @@ const telemetry = (kibana: any) => {
     },
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
-      uiSettingDefaults: {
-        [CONFIG_TELEMETRY]: {
-          name: i18n.translate('telemetry.telemetryConfigTitle', {
-            defaultMessage: 'Telemetry opt-in',
-          }),
-          description: getConfigTelemetryDesc(),
-          value: false,
-          readonly: true,
-        },
-      },
       savedObjectSchemas: {
         telemetry: {
           isNamespaceAgnostic: true,
@@ -98,11 +91,11 @@ const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
-          telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
+          telemetryEnabled: config.get('telemetry.enabled'),
+          telemetryUrl: config.get('telemetry.url'),
           telemetryBanner:
             config.get('telemetry.allowChangingOptInStatus') !== false &&
-            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+            config.get('telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
           telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
@@ -110,14 +103,13 @@ const telemetry = (kibana: any) => {
           telemetryNotifyUserAboutOptInDefault: false,
         };
       },
-      hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
     postInit(server: Server) {
       const fetcherTask = new FetcherTask(server);
       fetcherTask.start();
     },
-    init(server: Server) {
+    async init(server: Server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       const initializerContext = {
         env: {
@@ -144,6 +136,12 @@ const telemetry = (kibana: any) => {
         http: { server },
         log: server.log,
       } as any) as CoreSetup;
+
+      try {
+        await handleOldSettings(server);
+      } catch (err) {
+        server.log(['warning', 'telemetry'], 'Unable to update legacy telemetry configs.');
+      }
 
       const pluginsSetup: PluginsSetup = {
         usageCollection,
