@@ -12,11 +12,9 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
 
-export function estimateBucketSpanFactory(callAsCurrentUser, elasticsearchPlugin, xpackMainPlugin) {
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
+export function estimateBucketSpanFactory(callAsCurrentUser, callAsInternalUser, xpackMainPlugin) {
   const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
   const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
 
@@ -337,7 +335,7 @@ export function estimateBucketSpanFactory(callAsCurrentUser, elasticsearchPlugin
       function getBucketSpanEstimation() {
         // fetch the `search.max_buckets` cluster setting so we're able to
         // adjust aggregations to not exceed that limit.
-        callWithInternalUser('cluster.getSettings', {
+        callAsInternalUser('cluster.getSettings', {
           flatSettings: true,
           includeDefaults: true,
           filterPath: '*.*max_buckets',

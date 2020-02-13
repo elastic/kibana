@@ -27,13 +27,11 @@ import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status'
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
-// @ts-ignore: could not find declaration file for module
 import { jobRoutes } from '../routes/anomaly_detectors';
 // @ts-ignore: could not find declaration file for module
 import { dataFeedRoutes } from '../routes/datafeeds';
 // @ts-ignore: could not find declaration file for module
 import { indicesRoutes } from '../routes/indices';
-// @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
 // @ts-ignore: could not find declaration file for module
@@ -49,9 +47,7 @@ import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
 import { filtersRoutes } from '../routes/filters';
-// @ts-ignore: could not find declaration file for module
 import { resultsServiceRoutes } from '../routes/results_service';
-// @ts-ignore: could not find declaration file for module
 import { jobServiceRoutes } from '../routes/job_service';
 // @ts-ignore: could not find declaration file for module
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';

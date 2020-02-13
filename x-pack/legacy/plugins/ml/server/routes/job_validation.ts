@@ -10,13 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-// import {
-//   anomaliesTableDataSchema,
-//   categoryDefinitionSchema,
-//   categoryExamplesSchema,
-//   maxAnomalyScoreSchema,
-//   partitionFieldValuesSchema,
-// } from '../new_platform/results_service_schema';
+import { estimateBucketSpanSchema } from '../new_platform/job_validation_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
@@ -24,12 +18,7 @@ import { validateJob, validateCardinality } from '../models/job_validation';
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes({
-  config,
-  elasticsearchPlugin,
-  xpackMainPlugin,
-  router,
-}: RouteInitialization) {
+export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteInitialization) {
   function calculateModelMemoryLimit(context: RequestHandlerContext, payload: any) {
     const {
       indexPattern,
@@ -65,7 +54,7 @@ export function jobValidationRoutes({
     {
       path: '/api/ml/validate/estimate_bucket_span',
       validate: {
-        body: schema.any(),
+        body: schema.object(estimateBucketSpanSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -74,7 +63,7 @@ export function jobValidationRoutes({
 
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
-          elasticsearchPlugin,
+          context.core.elasticsearch.adminClient.callAsInternalUser,
           xpackMainPlugin
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
@@ -181,7 +170,7 @@ export function jobValidationRoutes({
           context.ml!.mlClient.callAsCurrentUser,
           request.body,
           version,
-          elasticsearchPlugin,
+          context.core.elasticsearch.adminClient.callAsInternalUser,
           xpackMainPlugin
         );
 

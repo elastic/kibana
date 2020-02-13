@@ -5,9 +5,10 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
+import { BucketSpanEstimatorData } from '../../../public/application/services/ml_api_service';
 
 export function estimateBucketSpanFactory(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  elasticsearchPlugin: any,
+  callAsInternalUser: IScopedClusterClient['callAsInternalUser'],
   xpackMainPlugin: any
-): (config: any) => Promise<any>;
+): (config: BucketSpanEstimatorData) => Promise<any>;

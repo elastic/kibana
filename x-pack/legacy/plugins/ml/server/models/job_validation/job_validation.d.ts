@@ -10,6 +10,6 @@ export function validateJob(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
   payload: any,
   kbnVersion: string,
-  elasticsearchPlugin: any,
+  callAsInternalUser: IScopedClusterClient['callAsInternalUser'],
   xpackMainPlugin: any
 ): string[];
