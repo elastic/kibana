@@ -61,6 +61,12 @@ export function getState(
     ...defaultAppState,
     ...appStateFromUrl,
   };
+
+  // make sure url ('_a') matches initial state
+  if (!_.isEqual(initialAppState, appStateFromUrl)) {
+    stateStorage.set('_a', initialAppState, { replace: true });
+  }
+
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 
   const { start, stop } = syncStates([
