@@ -11,10 +11,10 @@ import {
   transformBulkError,
   BulkError,
   createSuccessObject,
+  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
-  getIndex,
 } from './utils';
 import { createMockConfig } from './__mocks__';
 
