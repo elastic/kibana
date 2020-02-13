@@ -96,7 +96,7 @@ export const WatchEdit = ({
   };
 }) => {
   // hooks
-  const { MANAGEMENT_BREADCRUMB, chrome } = useAppContext();
+  const { setBreadcrumbs } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 
   const setWatchProperty = (property: string, value: any) => {
@@ -128,12 +128,8 @@ export const WatchEdit = ({
   }, [id, type]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      MANAGEMENT_BREADCRUMB,
-      listBreadcrumb,
-      id ? editBreadcrumb : createBreadcrumb,
-    ]);
-  }, [id, chrome, MANAGEMENT_BREADCRUMB]);
+    setBreadcrumbs([listBreadcrumb, id ? editBreadcrumb : createBreadcrumb]);
+  }, [id, setBreadcrumbs]);
 
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {

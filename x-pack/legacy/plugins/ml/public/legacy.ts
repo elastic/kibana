@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { PluginInitializerContext } from '../../../../../src/core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {
-  npData: npStart.plugins.data,
+  data: npStart.plugins.data,
+  __LEGACY: {
+    XSRF: chrome.getXsrfToken(),
+    // @ts-ignore getAppUrl is missing from chrome's definition
+    APP_URL: chrome.getAppUrl(),
+  },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

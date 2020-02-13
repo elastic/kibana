@@ -7,7 +7,6 @@
 import React, { useEffect, FC } from 'react';
 import { useObservable } from 'react-use';
 import { i18n } from '@kbn/i18n';
-import { timefilter } from 'ui/timefilter';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useUrlState } from '../../util/url_state';
@@ -16,6 +15,7 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useMlKibana } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -30,12 +30,14 @@ const breadcrumbs = [
 
 export const jobListRoute: MlRoute = {
   path: '/jobs',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context } = useResolver(undefined, undefined, config, basicResolvers(deps));
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
 
