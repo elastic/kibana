@@ -190,6 +190,7 @@ export default function({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
+        await queryBar.setQuery('');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(
