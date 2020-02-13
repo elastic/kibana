@@ -43,7 +43,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp, true),
+    render: timestamp => formatDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -73,7 +73,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp, true),
+    render: timestamp => formatDateTimeLocal(timestamp),
   },
   {
     field: 'level',
