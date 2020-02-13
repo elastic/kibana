@@ -30,7 +30,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<MatrixOverTimeHistogramData[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState<number>(-1);
   const apolloClient = useApolloClient();
 
   useEffect(() => {

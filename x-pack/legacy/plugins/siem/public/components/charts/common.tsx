@@ -17,7 +17,6 @@ import {
   Position,
 } from '@elastic/charts';
 import styled from 'styled-components';
-import { isNumber } from 'lodash/fp';
 import { useUiSetting } from '../../lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
@@ -124,8 +123,5 @@ export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): st
 export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefined): boolean =>
   Array.isArray(data) &&
   data.every(series => {
-    return (
-      Array.isArray(series.value) &&
-      (series.value as ChartData[]).every(({ y }) => isNumber(y) && y === 0)
-    );
+    return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);
   });
