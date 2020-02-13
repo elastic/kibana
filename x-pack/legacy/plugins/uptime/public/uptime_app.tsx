@@ -23,6 +23,7 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import { PageHeader } from './components/connected/pages/page_header_container';
 
 export interface UptimeAppColors {
   danger: string;
@@ -98,12 +99,8 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <PageRouter
-                            // @ts-ignore we need to update the type of this prop
-                            autocomplete={plugins.data.autocomplete}
-                            basePath={basePath}
-                            setBreadcrumbs={setBreadcrumbs}
-                          />
+                          <PageHeader setBreadcrumbs={setBreadcrumbs} />
+                          <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>
                     </UptimeThemeContextProvider>

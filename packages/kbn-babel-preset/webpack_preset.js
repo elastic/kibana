@@ -25,7 +25,9 @@ module.exports = () => {
         {
           useBuiltIns: 'entry',
           modules: false,
-          corejs: 3,
+          // Please read the explanation for this
+          // in node_preset.js
+          corejs: '3.2.1',
         },
       ],
       require('./common_preset'),

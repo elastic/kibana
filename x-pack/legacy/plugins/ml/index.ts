@@ -86,7 +86,7 @@ export const ml = (kibana: any) => {
       const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
         elasticsearch: server.plugins.elasticsearch, // legacy
-        security: server.plugins.security,
+        security: server.newPlatform.setup.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
         home,

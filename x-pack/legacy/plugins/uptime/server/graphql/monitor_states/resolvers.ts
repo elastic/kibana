@@ -47,10 +47,10 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           ? JSON.parse(decodeURIComponent(pagination))
           : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
         const [
-          totalSummaryCount,
+          indexStatus,
           { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          libs.requests.getDocCount({ callES: APICaller }),
+          libs.requests.getIndexStatus({ callES: APICaller }),
           libs.requests.getMonitorStates({
             callES: APICaller,
             dateRangeStart,
@@ -63,6 +63,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
             statusFilter: statusFilter || undefined,
           }),
         ]);
+
+        const totalSummaryCount = indexStatus?.docCount ?? { count: undefined };
+
         return {
           summaries,
           nextPagePagination,
@@ -71,7 +74,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         };
       },
       async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
-        return await libs.requests.getStatesIndexStatus({ callES: APICaller });
+        return await libs.requests.getIndexStatus({ callES: APICaller });
       },
     },
   };
