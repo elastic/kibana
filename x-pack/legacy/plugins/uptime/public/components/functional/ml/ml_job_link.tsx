@@ -6,10 +6,11 @@
 
 import React from 'react';
 import { MLLink } from './ml_link';
+import { ML_JOB_ID } from '../../../../common/constants';
 
 export const MLJobLink: React.FC = ({ children }) => {
   const query = {
-    ml: { jobIds: ['uptime-duration-chart'] },
+    ml: { jobIds: [ML_JOB_ID] },
     refreshInterval: { pause: true, value: 0 },
     time: { from: 'now-24h', to: 'now' },
   };

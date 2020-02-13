@@ -26,7 +26,7 @@ import * as labels from '../translations';
 
 interface Props {
   isCreatingJob: boolean;
-  onClickCreate: ({ transactionType }: { transactionType: string }) => void;
+  onClickCreate: () => void;
   onClose: () => void;
   hasMLJob: boolean;
 }

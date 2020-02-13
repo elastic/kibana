@@ -5,27 +5,33 @@
  */
 
 import { fetchGet, fetchPost } from './utils';
-import { ML_JOB_ID } from '../../../common/constants';
+import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
 
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
-
-  return fetchGet(url);
+  try {
+    return await fetchGet(url);
+  } catch (error) {
+    if (error.response.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
 
 export const createMLJob = async () => {
-  const data = {
-    prefix: '',
-    indexPatternName: 'heartbeat-8*',
-    useDedicatedIndex: false,
-    startDatafeed: true,
-    start: 1581503000688,
-    end: 1581504751315,
-  };
-
   const url = `/api/ml/modules/setup/${ML_JOB_ID}`;
 
   const dateRange = await getIndexDateRange();
+
+  const data = {
+    prefix: '',
+    indexPatternName: INDEX_NAMES.HEARTBEAT,
+    useDedicatedIndex: false,
+    startDatafeed: true,
+    start: dateRange?.[0],
+    end: dateRange?.[1],
+  };
 
   return fetchPost(url, data);
 };
