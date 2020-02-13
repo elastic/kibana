@@ -24,7 +24,7 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         },
       },
     },
-    async handler(request: RulesRequest) {
+    async handler(request: RulesRequest, headers) {
       try {
         const callWithRequest = callWithRequestFactory(request, server);
         const index = getIndex(request, server);
@@ -35,7 +35,13 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
