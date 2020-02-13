@@ -39,7 +39,7 @@ export const AgentMetadataFlyout: React.FC<Props> = ({ agent, flyout }) => {
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
             <FormattedMessage
-              id="xpack.fleet.agentDetails.metadataSectionTitle"
+              id="xpack.ingestManager.agentDetails.metadataSectionTitle"
               defaultMessage="Metadata"
             />
           </h2>
@@ -49,7 +49,7 @@ export const AgentMetadataFlyout: React.FC<Props> = ({ agent, flyout }) => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.fleet.agentDetails.localMetadataSectionSubtitle"
+              id="xpack.ingestManager.agentDetails.localMetadataSectionSubtitle"
               defaultMessage="Local metadata"
             />
           </h3>
@@ -60,7 +60,7 @@ export const AgentMetadataFlyout: React.FC<Props> = ({ agent, flyout }) => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.fleet.agentDetails.userProvidedMetadataSectionSubtitle"
+              id="xpack.ingestManager.agentDetails.userProvidedMetadataSectionSubtitle"
               defaultMessage="User provided metadata"
             />
           </h3>

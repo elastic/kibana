@@ -18,7 +18,7 @@ export const ConfirmDeleteModal: React.FC<{
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.fleet.deleteApiKeys.confirmModal.title"
+            id="xpack.ingestManager.deleteApiKeys.confirmModal.title"
             defaultMessage="Delete api key: {apiKeyId}"
             values={{
               apiKeyId,
@@ -29,13 +29,13 @@ export const ConfirmDeleteModal: React.FC<{
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.fleet.deleteApiKeys.confirmModal.cancelButtonLabel"
+            id="xpack.ingestManager.deleteApiKeys.confirmModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.fleet.deleteApiKeys.confirmModal.confirmButtonLabel"
+            id="xpack.ingestManager.deleteApiKeys.confirmModal.confirmButtonLabel"
             defaultMessage="Delete"
           />
         }

@@ -20,6 +20,7 @@ import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { Agent, GetOneAgentEventsResponse, AgentEvent } from '../../../../types';
 import { usePagination, useRequest } from '../../../../hooks';
 import { SearchBar } from '../../components/search_bar';
+import { agentRouteService } from '../../../../services';
 
 function useSearch() {
   const [state, setState] = useState<{ search: string }>({
@@ -42,7 +43,7 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
   const { search, setSearch } = useSearch();
 
   const eventsRequest = useRequest<GetOneAgentEventsResponse>({
-    path: `/api/ingest_manager/fleet/agents/${agent.id}/events`,
+    path: agentRouteService.getEventsPath(agent.id),
     method: 'get',
     query: {
       page: pagination.currentPage,
@@ -67,7 +68,7 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
   const columns = [
     {
       field: 'timestamp',
-      name: i18n.translate('xpack.fleet.agentEventsList.timestampColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentEventsList.timestampColumnTitle', {
         defaultMessage: 'Timestamp',
       }),
       render: (timestamp: string) => (
@@ -77,27 +78,27 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.fleet.agentEventsList.typeColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentEventsList.typeColumnTitle', {
         defaultMessage: 'Type',
       }),
       width: '90px',
     },
     {
       field: 'subtype',
-      name: i18n.translate('xpack.fleet.agentEventsList.subtypeColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentEventsList.subtypeColumnTitle', {
         defaultMessage: 'Subtype',
       }),
       width: '90px',
     },
     {
       field: 'message',
-      name: i18n.translate('xpack.fleet.agentEventsList.messageColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentEventsList.messageColumnTitle', {
         defaultMessage: 'Message',
       }),
     },
     {
       field: 'payload',
-      name: i18n.translate('xpack.fleet.agentEventsList.paylodColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentEventsList.paylodColumnTitle', {
         defaultMessage: 'Payload',
       }),
       truncateText: true,
@@ -127,7 +128,10 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
     <>
       <EuiTitle size="s">
         <h3>
-          <FormattedMessage id="xpack.fleet.agentEventsList.title" defaultMessage="Activity Log" />
+          <FormattedMessage
+            id="xpack.ingestManager.agentEventsList.title"
+            defaultMessage="Activity Log"
+          />
         </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
@@ -138,7 +142,7 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
         <EuiFlexItem grow={null}>
           <EuiButton color="secondary" iconType="refresh" onClick={onClickRefresh}>
             <FormattedMessage
-              id="xpack.fleet.agentEventsList.refreshButton"
+              id="xpack.ingestManager.agentEventsList.refreshButton"
               defaultMessage="Refresh"
             />
           </EuiButton>

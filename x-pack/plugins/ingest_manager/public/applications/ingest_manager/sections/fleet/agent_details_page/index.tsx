@@ -13,6 +13,7 @@ import { AgentRefreshContext } from './hooks';
 import { Loading } from '../../../components';
 import { useRequest } from '../../../hooks';
 import { GetOneAgentResponse } from '../../../types';
+import { agentRouteService } from '../../../services';
 
 export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
@@ -25,7 +26,7 @@ export const AgentDetailsPage: React.FC = () => {
     params: { agentId },
   } = useRouteMatch();
   const agentRequest = useRequest<GetOneAgentResponse>({
-    path: `/api/ingest_manager/fleet/agents/${agentId}`,
+    path: agentRouteService.getInfoPath(agentId),
     method: 'get',
     pollIntervalMs: 5000,
   });
@@ -38,7 +39,7 @@ export const AgentDetailsPage: React.FC = () => {
     return (
       <Layout>
         <EuiCallOut
-          title={i18n.translate('xpack.fleet.agentDetails.unexceptedErrorTitle', {
+          title={i18n.translate('xpack.ingestManager.agentDetails.unexceptedErrorTitle', {
             defaultMessage: 'An error happened while loading the agent',
           })}
           color="danger"
@@ -56,7 +57,7 @@ export const AgentDetailsPage: React.FC = () => {
     return (
       <Layout>
         <FormattedMessage
-          id="xpack.fleet.agentDetails.agentNotFoundErrorTitle"
+          id="xpack.ingestManager.agentDetails.agentNotFoundErrorTitle"
           defaultMessage="Agent Not found"
         />
       </Layout>

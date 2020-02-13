@@ -26,7 +26,7 @@ export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange 
     <EuiFlexGroup style={{ maxWidth: 600 }}>
       <EuiFlexItem>
         <EuiFormRow
-          label={i18n.translate('xpack.fleet.apiKeysForm.nameLabel', {
+          label={i18n.translate('xpack.ingestManager.apiKeysForm.nameLabel', {
             defaultMessage: 'Key Name',
           })}
         >
@@ -35,7 +35,7 @@ export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange 
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
-          label={i18n.translate('xpack.fleet.apiKeysForm.policyLabel', {
+          label={i18n.translate('xpack.ingestManager.apiKeysForm.policyLabel', {
             defaultMessage: 'Policy',
           })}
         >
@@ -51,7 +51,10 @@ export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange 
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiButton disabled={submitted} onClick={() => onSubmit()}>
-            <FormattedMessage id="xpack.fleet.apiKeysForm.saveButton" defaultMessage="Save" />
+            <FormattedMessage
+              id="xpack.ingestManager.apiKeysForm.saveButton"
+              defaultMessage="Save"
+            />
           </EuiButton>
         </EuiFormRow>
       </EuiFlexItem>

@@ -28,6 +28,7 @@ import { useRequest } from '../../../../hooks';
 import { Loading } from '../../../../components';
 import { ConnectedLink } from '../../components';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
+import { agentConfigRouteService } from '../../../../services';
 
 const Item: React.FC<{ label: string }> = ({ label, children }) => {
   return (
@@ -57,39 +58,39 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
   const refreshAgent = useAgentRefresh();
 
   // Fetch policy information
-  const { isLoading: isPolicyLoading, data: policyData } = useRequest({
-    path: `/api/ingest_manager/agent_configs/${agent.policy_id}`,
+  const { isLoading: isPolicyLoading, data: agentConfigData } = useRequest({
+    path: agentConfigRouteService.getInfoPath(agent.policy_id as string),
     method: 'get',
   });
 
   const items = [
     {
-      title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
+      title: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
         defaultMessage: 'Status',
       }),
       description: <AgentHealth agent={agent} />,
     },
     {
-      title: i18n.translate('xpack.fleet.agentDetails.idLabel', {
+      title: i18n.translate('xpack.ingestManager.agentDetails.idLabel', {
         defaultMessage: 'ID',
       }),
       description: agent.id,
     },
     {
-      title: i18n.translate('xpack.fleet.agentDetails.typeLabel', {
+      title: i18n.translate('xpack.ingestManager.agentDetails.typeLabel', {
         defaultMessage: 'Type',
       }),
       description: agent.type,
     },
     {
-      title: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
-        defaultMessage: 'Policy',
+      title: i18n.translate('xpack.ingestManager.agentDetails.agentConfigLabel', {
+        defaultMessage: 'AgentConfig',
       }),
       description: isPolicyLoading ? (
         <Loading />
-      ) : policyData && policyData.item ? (
+      ) : agentConfigData && agentConfigData.item ? (
         <ConnectedLink color="primary" path={`/policies/${agent.policy_id}`}>
-          {policyData.item.name}
+          {agentConfigData.item.name}
         </ConnectedLink>
       ) : (
         <Fragment>
@@ -98,7 +99,7 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
             color="primary"
             content={
               <FormattedMessage
-                id="xpack.fleet.agentDetails.unavailablePolicyTooltipText"
+                id="xpack.ingestManager.agentDetails.unavailablePolicyTooltipText"
                 defaultMessage="This policy is no longer available"
               />
             }
@@ -116,7 +117,7 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="xpack.fleet.agentDetails.agentDetailsTitle"
+                id="xpack.ingestManager.agentDetails.agentDetailsTitle"
                 defaultMessage="Agent detail"
               />
             </h1>
@@ -132,7 +133,7 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.fleet.agentDetails.unenrollButtonText"
+                  id="xpack.ingestManager.agentDetails.unenrollButtonText"
                   defaultMessage="Unenroll"
                 />
               </EuiButton>

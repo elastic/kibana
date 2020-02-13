@@ -3,9 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export {
-  agentConfigRouteService,
-  fleetSetupRouteService,
-  agentRouteService,
-} from '../../../../common';
+export { useGetAgentStatus, AgentStatusRefreshContext } from './use_agent_status';
+export { PolicyRefreshContext } from './use_policy';

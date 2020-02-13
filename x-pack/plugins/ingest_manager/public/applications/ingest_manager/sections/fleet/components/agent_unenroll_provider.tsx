@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useCore, sendRequest } from '../../../hooks';
 import { PostAgentUnenrollResponse } from '../../../types';
+import { agentRouteService } from '../../../services';
 
 interface Props {
   children: (unenrollAgents: UnenrollAgents) => React.ReactElement;
@@ -61,7 +62,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
     try {
       const unenrollByKuery = typeof agents === 'string';
       const { data, error } = await sendRequest<PostAgentUnenrollResponse>({
-        path: '/api/ingest_manager/fleet/agents/unenroll',
+        path: agentRouteService.getUnenrollPath(),
         method: 'post',
         body: JSON.stringify({
           kuery: unenrollByKuery ? agents : undefined,
@@ -81,11 +82,11 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
       if (successfulResults.length) {
         const hasMultipleSuccesses = successfulResults.length > 1;
         const successMessage = hasMultipleSuccesses
-          ? i18n.translate('xpack.fleet.unenrollAgents.successMultipleNotificationTitle', {
+          ? i18n.translate('xpack.ingestManager.unenrollAgents.successMultipleNotificationTitle', {
               defaultMessage: 'Unenrolled {count} agents',
               values: { count: successfulResults.length },
             })
-          : i18n.translate('xpack.fleet.unenrollAgents.successSingleNotificationTitle', {
+          : i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
               defaultMessage: "Unenrolled agent '{id}'",
               values: { id: successfulResults[0].id },
             });
@@ -95,11 +96,11 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
       if (failedResults.length) {
         const hasMultipleFailures = failedResults.length > 1;
         const failureMessage = hasMultipleFailures
-          ? i18n.translate('xpack.fleet.unenrollAgents.failureMultipleNotificationTitle', {
+          ? i18n.translate('xpack.ingestManager.unenrollAgents.failureMultipleNotificationTitle', {
               defaultMessage: 'Error unenrolling {count} agents',
               values: { count: failedResults.length },
             })
-          : i18n.translate('xpack.fleet.unenrollAgents.failureSingleNotificationTitle', {
+          : i18n.translate('xpack.ingestManager.unenrollAgents.failureSingleNotificationTitle', {
               defaultMessage: "Error unenrolling agent '{id}'",
               values: { id: failedResults[0].id },
             });
@@ -111,7 +112,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
       }
     } catch (e) {
       core.notifications.toasts.addDanger(
-        i18n.translate('xpack.fleet.unenrollAgents.fatalErrorNotificationTitle', {
+        i18n.translate('xpack.ingestManager.unenrollAgents.fatalErrorNotificationTitle', {
           defaultMessage: 'Error unenrolling agents',
         })
       );
@@ -134,13 +135,13 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
           title={
             isSingle && !unenrollByKuery ? (
               <FormattedMessage
-                id="xpack.fleet.unenrollAgents.confirmModal.deleteSingleTitle"
+                id="xpack.ingestManager.unenrollAgents.confirmModal.deleteSingleTitle"
                 defaultMessage="Unenroll agent '{id}'?"
                 values={{ id: agents[0] }}
               />
             ) : (
               <FormattedMessage
-                id="xpack.fleet.unenrollAgents.confirmModal.deleteMultipleTitle"
+                id="xpack.ingestManager.unenrollAgents.confirmModal.deleteMultipleTitle"
                 defaultMessage="Unenroll {count, plural, one {# agent} other {# agents}}?"
                 values={{ count: agentsCount }}
               />
@@ -150,19 +151,19 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
           onConfirm={unenrollAgents}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.confirmModal.cancelButtonLabel"
+              id="xpack.ingestManager.unenrollAgents.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isLoading ? (
               <FormattedMessage
-                id="xpack.fleet.unenrollAgents.confirmModal.loadingButtonLabel"
+                id="xpack.ingestManager.unenrollAgents.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.fleet.unenrollAgents.confirmModal.confirmButtonLabel"
+                id="xpack.ingestManager.unenrollAgents.confirmModal.confirmButtonLabel"
                 defaultMessage="Unenroll"
               />
             )

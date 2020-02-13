@@ -11,14 +11,14 @@ import { NoDataLayout } from './components/no_data_layout';
 export const EnforceSecurityPage = injectI18n(({ intl }) => (
   <NoDataLayout
     title={intl.formatMessage({
-      id: 'xpack.fleet.disabledSecurityTitle',
+      id: 'xpack.ingestManager.disabledSecurityTitle',
       defaultMessage: 'Security is not enabled',
     })}
     actionSection={[]}
   >
     <p>
       <FormattedMessage
-        id="xpack.fleet.disabledSecurityDescription"
+        id="xpack.ingestManager.disabledSecurityDescription"
         defaultMessage="You must enable security in Kibana and Elasticsearch to use Elastic Fleet."
       />
     </p>

@@ -32,6 +32,7 @@ import { ConnectedLink } from '../components';
 import { SearchBar } from '../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
+import { agentRouteService, agentConfigRouteService } from '../../../services';
 
 export const AgentListPage: React.FC<{}> = () => {
   const core = useCore();
@@ -72,7 +73,7 @@ export const AgentListPage: React.FC<{}> = () => {
   }
   const agentsRequest = useRequest<GetAgentsResponse>({
     method: 'get',
-    path: '/api/ingest_manager/fleet/agents',
+    path: agentRouteService.getListPath(),
     query: {
       page: pagination.currentPage,
       perPage: pagination.pageSize,
@@ -86,9 +87,9 @@ export const AgentListPage: React.FC<{}> = () => {
   const totalAgents = agentsRequest.data ? agentsRequest.data.total : 0;
   const { isLoading } = agentsRequest;
 
-  const policiesRequest = useRequest<GetAgentConfigsResponse>({
+  const agentConfigsRequest = useRequest<GetAgentConfigsResponse>({
     method: 'get',
-    path: '/api/ingest_manager/agent_configs',
+    path: agentConfigRouteService.getListPath(),
     query: {
       page: 1,
       perPage: 1000,
@@ -96,27 +97,27 @@ export const AgentListPage: React.FC<{}> = () => {
     pollIntervalMs: 10000,
   });
 
-  const policies = policiesRequest.data ? policiesRequest.data.items : [];
-  const { isLoading: isPoliciesLoading } = policiesRequest;
+  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
   const columns = [
     {
       field: 'local_metadata.host',
-      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
       footer: () => {
         if (selectedAgents.length === agents.length && totalAgents > selectedAgents.length) {
           return areAllAgentsSelected ? (
             <FormattedMessage
-              id="xpack.fleet.agentList.allAgentsSelectedMessage"
+              id="xpack.ingestManager.agentList.allAgentsSelectedMessage"
               defaultMessage="All {count} agents are selected. {clearSelectionLink}"
               values={{
                 count: totalAgents,
                 clearSelectionLink: (
                   <EuiLink onClick={() => setAreAllAgentsSelected(false)}>
                     <FormattedMessage
-                      id="xpack.fleet.agentList.selectPageAgentsLinkText"
+                      id="xpack.ingestManager.agentList.selectPageAgentsLinkText"
                       defaultMessage="Select just this page"
                     />
                   </EuiLink>
@@ -125,14 +126,14 @@ export const AgentListPage: React.FC<{}> = () => {
             />
           ) : (
             <FormattedMessage
-              id="xpack.fleet.agentList.agentsOnPageSelectedMessage"
+              id="xpack.ingestManager.agentList.agentsOnPageSelectedMessage"
               defaultMessage="{count, plural, one {# agent} other {# agents}} on this page are selected. {selectAllLink}"
               values={{
                 count: selectedAgents.length,
                 selectAllLink: (
                   <EuiLink onClick={() => setAreAllAgentsSelected(true)}>
                     <FormattedMessage
-                      id="xpack.fleet.agentList.selectAllAgentsLinkText"
+                      id="xpack.ingestManager.agentList.selectAllAgentsLinkText"
                       defaultMessage="Select all {count} agents"
                       values={{
                         count: totalAgents,
@@ -149,14 +150,14 @@ export const AgentListPage: React.FC<{}> = () => {
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
-        defaultMessage: 'Policy',
+      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
+        defaultMessage: 'Agent Config',
       }),
       truncateText: true,
       render: (policyId: string) => {
-        const policyName = policies.find(p => p.id === policyId)?.name;
+        const policyName = agentConfigs.find(p => p.id === policyId)?.name;
         return policyName ? (
-          <ConnectedLink color="primary" path={`/policies/${policyId}`}>
+          <ConnectedLink color="primary" path={`/configs/${policyId}`}>
             {policyName}
           </ConnectedLink>
         ) : (
@@ -166,14 +167,14 @@ export const AgentListPage: React.FC<{}> = () => {
     },
     {
       field: 'active',
-      name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       truncateText: true,
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
-      name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentList.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -182,7 +183,7 @@ export const AgentListPage: React.FC<{}> = () => {
             return (
               <ConnectedLink color="primary" path={`/fleet/agents/${agent.id}`}>
                 <FormattedMessage
-                  id="xpack.fleet.agentList.viewActionLinkText"
+                  id="xpack.ingestManager.agentList.viewActionLinkText"
                   defaultMessage="view"
                 />
               </ConnectedLink>
@@ -199,16 +200,16 @@ export const AgentListPage: React.FC<{}> = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.fleet.agentList.noAgentsPrompt"
+            id="xpack.ingestManager.agentList.noAgentsPrompt"
             defaultMessage="No agents installed"
           />
         </h2>
       }
       actions={
-        core.application.capabilities.fleet.write ? (
+        core.application.capabilities.ingestManager.write ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage
-              id="xpack.fleet.agentList.addButton"
+              id="xpack.ingestManager.agentList.addButton"
               defaultMessage="Install new agent"
             />
           </EuiButton>
@@ -222,13 +223,16 @@ export const AgentListPage: React.FC<{}> = () => {
       <EuiPageContent>
         {isEnrollmentFlyoutOpen ? (
           <AgentEnrollmentFlyout
-            policies={policies}
+            policies={agentConfigs}
             onClose={() => setIsEnrollmentFlyoutOpen(false)}
           />
         ) : null}
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Agents" />
+            <FormattedMessage
+              id="xpack.ingestManager.agentList.pageTitle"
+              defaultMessage="Agents"
+            />
           </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -237,7 +241,7 @@ export const AgentListPage: React.FC<{}> = () => {
             <EuiTitle size="s">
               <EuiText color="subdued">
                 <FormattedMessage
-                  id="xpack.fleet.agentList.pageDescription"
+                  id="xpack.ingestManager.agentList.pageDescription"
                   defaultMessage="Use agents to faciliate data collection for your Elastic stack."
                 />
               </EuiText>
@@ -245,7 +249,7 @@ export const AgentListPage: React.FC<{}> = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label={i18n.translate('xpack.fleet.agentList.showInactiveSwitchLabel', {
+              label={i18n.translate('xpack.ingestManager.agentList.showInactiveSwitchLabel', {
                 defaultMessage: 'Show inactive agents',
               })}
               checked={showInactive}
@@ -286,7 +290,7 @@ export const AgentListPage: React.FC<{}> = () => {
                     }}
                   >
                     <FormattedMessage
-                      id="xpack.fleet.agentList.unenrollButton"
+                      id="xpack.ingestManager.agentList.unenrollButton"
                       defaultMessage="Unenroll {count, plural, one {# agent} other {# agents}}"
                       values={{
                         count: areAllAgentsSelected ? totalAgents : selectedAgents.length,
@@ -322,7 +326,7 @@ export const AgentListPage: React.FC<{}> = () => {
                         onClick={() => setIsPoliciesFilterOpen(!isPoliciesFilterOpen)}
                         isSelected={isPoliciesFilterOpen}
                         hasActiveFilters={selectedPolicies.length > 0}
-                        disabled={isPoliciesLoading}
+                        disabled={isAgentConfigsLoading}
                       >
                         Policies
                       </EuiFilterButton>
@@ -332,7 +336,7 @@ export const AgentListPage: React.FC<{}> = () => {
                     panelPaddingSize="none"
                   >
                     <div className="euiFilterSelect__items">
-                      {policies.map((policy, index) => (
+                      {agentConfigs.map((policy, index) => (
                         <EuiFilterSelectItem
                           checked={selectedPolicies.includes(policy.id) ? 'on' : undefined}
                           key={index}
@@ -353,7 +357,7 @@ export const AgentListPage: React.FC<{}> = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {core.application.capabilities.fleet.write && (
+          {core.application.capabilities.ingestManager.write && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -361,7 +365,7 @@ export const AgentListPage: React.FC<{}> = () => {
                 onClick={() => setIsEnrollmentFlyoutOpen(true)}
               >
                 <FormattedMessage
-                  id="xpack.fleet.agentList.addButton"
+                  id="xpack.ingestManager.agentList.addButton"
                   defaultMessage="Install new agent"
                 />
               </EuiButton>
@@ -376,20 +380,20 @@ export const AgentListPage: React.FC<{}> = () => {
           noItemsMessage={
             isLoading ? (
               <FormattedMessage
-                id="xpack.fleet.agentList.loadingAgentsMessage"
+                id="xpack.ingestManager.agentList.loadingAgentsMessage"
                 defaultMessage="Loading agents…"
               />
             ) : !search.trim() && selectedPolicies.length === 0 && totalAgents === 0 ? (
               emptyPrompt
             ) : (
               <FormattedMessage
-                id="xpack.fleet.agentList.noFilteredAgentsPrompt"
+                id="xpack.ingestManager.agentList.noFilteredAgentsPrompt"
                 defaultMessage="No agents found. {clearFiltersLink}"
                 values={{
                   clearFiltersLink: (
                     <EuiLink onClick={() => setSearch('')}>
                       <FormattedMessage
-                        id="xpack.fleet.agentList.clearFiltersLinkText"
+                        id="xpack.ingestManager.agentList.clearFiltersLinkText"
                         defaultMessage="Clear filters"
                       />
                     </EuiLink>

@@ -24,21 +24,21 @@ export const EnrollmentApiKeysTable: React.FC<{
   const columns: any[] = [
     {
       field: 'name',
-      name: i18n.translate('xpack.fleet.apiKeysList.nameColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.apiKeysList.nameColumnTitle', {
         defaultMessage: 'Name',
       }),
       width: '300px',
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
         defaultMessage: 'Policy',
       }),
       width: '100px',
     },
     {
       field: null,
-      name: i18n.translate('xpack.fleet.agentList.apiKeyColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.agentList.apiKeyColumnTitle', {
         defaultMessage: 'API Key',
       }),
       render: (key: EnrollmentAPIKey) => <ApiKeyField apiKeyId={key.id} />,
@@ -75,7 +75,7 @@ export const EnrollmentApiKeysTable: React.FC<{
         loading={isLoading}
         noItemsMessage={
           <FormattedMessage
-            id="xpack.fleet.agentList.emptyEnrollmentKeysMessage"
+            id="xpack.ingestManager.agentList.emptyEnrollmentKeysMessage"
             defaultMessage="No api keys"
           />
         }
@@ -108,7 +108,7 @@ const CreateApiKeyButton: React.FC<{ onChange: () => void }> = ({ onChange }) =>
           size="xs"
         >
           <FormattedMessage
-            id="xpack.fleet.enrollmentApiKeyList.createNewButton"
+            id="xpack.ingestManager.enrollmentApiKeyList.createNewButton"
             defaultMessage="Create a new key"
           />
         </EuiButtonEmpty>
@@ -137,12 +137,12 @@ const ApiKeyField: React.FC<{ apiKeyId: string }> = ({ apiKeyId }) => {
       <EuiButtonEmpty size="xs" color={'text'} onClick={() => setVisible(!visible)}>
         {visible ? (
           <FormattedMessage
-            id="xpack.fleet.enrollmentApiKeyList.hideTableButton"
+            id="xpack.ingestManager.enrollmentApiKeyList.hideTableButton"
             defaultMessage="Hide"
           />
         ) : (
           <FormattedMessage
-            id="xpack.fleet.enrollmentApiKeyList.viewTableButton"
+            id="xpack.ingestManager.enrollmentApiKeyList.viewTableButton"
             defaultMessage="View"
           />
         )}

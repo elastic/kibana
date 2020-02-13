@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 
-export {
-  agentConfigRouteService,
-  fleetSetupRouteService,
-  agentRouteService,
-} from '../../../../common';
+export const PolicyRefreshContext = React.createContext({ refresh: () => {} });
+
+export function usePolicyRefresh() {
+  return React.useContext(PolicyRefreshContext).refresh;
+}

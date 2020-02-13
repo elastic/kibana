@@ -65,7 +65,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       <EuiTitle size="m">
         <h2 id="FleetAgentEnrollmentFlyoutTitle">
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.flyoutTitle"
+            id="xpack.ingestManager.agentEnrollment.flyoutTitle"
             defaultMessage="Install agent"
           />
         </h2>
@@ -74,7 +74,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       <EuiText color="subdued">
         <p>
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.flyoutDescription"
+            id="xpack.ingestManager.agentEnrollment.flyoutDescription"
             defaultMessage="Enroll a new agent into Fleet."
           />
         </p>
@@ -95,7 +95,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.selectKeyTitle"
+            id="xpack.ingestManager.agentEnrollment.selectKeyTitle"
             defaultMessage="Select API key"
           />
         }
@@ -118,12 +118,12 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       >
         {apiKeyListVisible ? (
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.hideKeysButton"
+            id="xpack.ingestManager.agentEnrollment.hideKeysButton"
             defaultMessage="Hide API keys"
           />
         ) : (
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.manageKeysButton"
+            id="xpack.ingestManager.agentEnrollment.manageKeysButton"
             defaultMessage="Manage API keys"
           />
         )}
@@ -142,7 +142,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       <EuiText>
         <h5>
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.quickInstallTitle"
+            id="xpack.ingestManager.agentEnrollment.quickInstallTitle"
             defaultMessage="Quick installation"
           />
         </h5>
@@ -154,7 +154,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
           onClick={() => setQuickInstallType('shell')}
         >
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.shellInstallButtonText"
+            id="xpack.ingestManager.agentEnrollment.shellInstallButtonText"
             defaultMessage="Shell"
           />
         </EuiFilterButton>
@@ -163,7 +163,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
           onClick={() => setQuickInstallType('container')}
         >
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.containerInstallButtonText"
+            id="xpack.ingestManager.agentEnrollment.containerInstallButtonText"
             defaultMessage="Container"
           />
         </EuiFilterButton>
@@ -172,7 +172,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
           onClick={() => setQuickInstallType('tools')}
         >
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.toolsInstallButtonText"
+            id="xpack.ingestManager.agentEnrollment.toolsInstallButtonText"
             defaultMessage="Tools"
           />
         </EuiFilterButton>

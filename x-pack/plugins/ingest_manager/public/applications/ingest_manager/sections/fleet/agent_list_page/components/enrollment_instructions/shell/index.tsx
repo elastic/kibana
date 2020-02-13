@@ -32,24 +32,33 @@ const PLATFORM_INSTRUCTIONS: {
 } = {
   macos: [
     {
-      title: i18n.translate('xpack.fleet.agentEnrollment.typeShell.manualInstall.stepOneTitle', {
-        defaultMessage: 'Download and install Elastic Agent',
-      }),
+      title: i18n.translate(
+        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepOneTitle',
+        {
+          defaultMessage: 'Download and install Elastic Agent',
+        }
+      ),
       textPre: 'Lorem ipsum instructions here.',
       commands: MAC_COMMANDS.INSTALL,
     },
     {
-      title: i18n.translate('xpack.fleet.agentEnrollment.typeShell.manualInstall.stepTwoTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
+      title: i18n.translate(
+        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepTwoTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
       textPre: 'Modify the configuration file to set the connection information:',
       commands: MAC_COMMANDS.CONFIG,
       commandsLang: 'yaml',
     },
     {
-      title: i18n.translate('xpack.fleet.agentEnrollment.typeShell.manualInstall.stepThreeTitle', {
-        defaultMessage: 'Start the agent',
-      }),
+      title: i18n.translate(
+        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepThreeTitle',
+        {
+          defaultMessage: 'Start the agent',
+        }
+      ),
       commands: MAC_COMMANDS.START,
     },
   ],
@@ -110,7 +119,7 @@ export const ShellEnrollmentInstructions: React.FC<Props> = ({ kibanaUrl, apiKey
             {copy => (
               <EuiButtonEmpty onClick={copy} color="primary" size="s">
                 <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.copyInstructionsButtonText"
+                  id="xpack.ingestManager.agentEnrollment.copyInstructionsButtonText"
                   defaultMessage="copy"
                 />
               </EuiButtonEmpty>
@@ -129,7 +138,7 @@ export const ShellEnrollmentInstructions: React.FC<Props> = ({ kibanaUrl, apiKey
         flush="left"
       >
         <FormattedMessage
-          id="xpack.fleet.agentEnrollment.manualInstructionsToggleLinkText"
+          id="xpack.ingestManager.agentEnrollment.manualInstructionsToggleLinkText"
           defaultMessage="Manual installation"
         />
       </EuiButtonEmpty>

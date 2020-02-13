@@ -15,27 +15,42 @@ interface Props {
 const Status = {
   Online: (
     <EuiHealth color="success">
-      <FormattedMessage id="xpack.fleet.agentHealth.onlineStatusText" defaultMessage="Online" />
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.onlineStatusText"
+        defaultMessage="Online"
+      />
     </EuiHealth>
   ),
   Offline: (
     <EuiHealth color="subdued">
-      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.offlineStatusText"
+        defaultMessage="Offline"
+      />
     </EuiHealth>
   ),
   Inactive: (
     <EuiHealth color="subdued">
-      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.inactiveStatusText"
+        defaultMessage="Inactive"
+      />
     </EuiHealth>
   ),
   Warning: (
     <EuiHealth color="warning">
-      <FormattedMessage id="xpack.fleet.agentHealth.warningStatusText" defaultMessage="Error" />
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.warningStatusText"
+        defaultMessage="Error"
+      />
     </EuiHealth>
   ),
   Error: (
     <EuiHealth color="danger">
-      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Error" />
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.errorStatusText"
+        defaultMessage="Error"
+      />
     </EuiHealth>
   ),
 };
@@ -66,7 +81,7 @@ export const AgentHealth: React.FC<Props> = ({ agent }) => {
         msLastCheckIn ? (
           <>
             <FormattedMessage
-              id="xpack.fleet.agentHealth.checkInTooltipText"
+              id="xpack.ingestManager.agentHealth.checkInTooltipText"
               defaultMessage="Last checked in {lastCheckIn}"
               values={{
                 lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
@@ -78,7 +93,7 @@ export const AgentHealth: React.FC<Props> = ({ agent }) => {
           </>
         ) : (
           <FormattedMessage
-            id="xpack.fleet.agentHealth.noCheckInTooltipText"
+            id="xpack.ingestManager.agentHealth.noCheckInTooltipText"
             defaultMessage="Never checked in"
           />
         )

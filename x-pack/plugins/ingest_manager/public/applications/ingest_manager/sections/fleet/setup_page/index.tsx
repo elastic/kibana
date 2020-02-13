@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { sendRequest, useInput, useCore } from '../../../hooks';
+import { fleetSetupRouteService } from '../../../services';
 
 export const SetupPage: React.FC<{
   refresh: () => Promise<void>;
@@ -33,7 +34,7 @@ export const SetupPage: React.FC<{
     try {
       await sendRequest({
         method: 'post',
-        path: '/api/ingest_manager/fleet/setup',
+        path: fleetSetupRouteService.postFleetSetupPath(),
         body: JSON.stringify({
           admin_username: usernameInput.value,
           admin_password: passwordInput.value,

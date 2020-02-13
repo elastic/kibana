@@ -81,7 +81,7 @@ export class IngestManagerPlugin implements Plugin {
               all: ['agents', 'events', 'enrollment_api_keys'],
               read: [],
             },
-            ui: ['show'],
+            ui: ['show', 'read', 'write'],
           },
           read: {
             api: [PLUGIN_ID],
@@ -89,7 +89,7 @@ export class IngestManagerPlugin implements Plugin {
               all: [],
               read: ['agents', 'events', 'enrollment_api_keys'],
             },
-            ui: ['show'],
+            ui: ['show', 'read'],
           },
         },
       });

@@ -6,15 +6,19 @@
 import React from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Loading } from '../../components';
-import { useRequest } from '../../hooks';
+import { useRequest, useCore } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
+import { NoAccessPage } from './error_pages/no_access';
+import { fleetSetupRouteService } from '../../services';
 
 export const FleetApp: React.FC = () => {
+  const core = useCore();
+
   const setupRequest = useRequest({
     method: 'get',
-    path: '/api/ingest_manager/fleet/setup',
+    path: fleetSetupRouteService.getFleetSetupPath(),
   });
 
   if (setupRequest.isLoading) {
@@ -29,6 +33,9 @@ export const FleetApp: React.FC = () => {
         }}
       />
     );
+  }
+  if (!core.application.capabilities.ingestManager.read) {
+    return <NoAccessPage />;
   }
 
   return (
