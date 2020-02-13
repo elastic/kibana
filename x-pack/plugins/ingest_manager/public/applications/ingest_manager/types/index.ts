@@ -5,9 +5,12 @@
  */
 export {
   // Object types
+  Agent,
   AgentConfig,
   NewAgentConfig,
-  // API schemas
+  AgentEvent,
+  EnrollmentAPIKey,
+  // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
@@ -16,4 +19,12 @@ export {
   UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
   DeleteAgentConfigsResponse,
+  // API schemas - Agents
+  GetAgentsResponse,
+  GetOneAgentResponse,
+  PostAgentUnenrollResponse,
+  GetOneAgentEventsResponse,
+  // API schemas - Enrollment API Keys
+  GetEnrollmentAPIKeysResponse,
+  GetOneEnrollmentAPIKeyResponse,
 } from '../../../../common';

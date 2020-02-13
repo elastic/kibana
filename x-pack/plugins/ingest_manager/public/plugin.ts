@@ -44,7 +44,6 @@ export class IngestManagerPlugin implements Plugin {
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
-
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,
