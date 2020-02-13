@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
+import { ActionGroup } from '../../../../alerting/server/types';
 
 export interface StatusCheckExecutorParams {
   filters?: string;
@@ -21,6 +22,8 @@ const getResponse = () => ({
   lastChecked: new Date(),
 });
 
+const actionGroup: ActionGroup | undefined = undefined;
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
   id: 'xpack.uptime.alerts.downMonitor',
   name: 'X-Pack Alerting',
@@ -35,7 +38,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       locations: schema.arrayOf(schema.string()),
     }),
   },
-  actionGroups: ['uptime.downMonitor'],
+  actionGroups: [
+    {
+      id: 'alert',
+      name: 'Alert',
+    },
+  ],
   async executor(options) {
     const params = options.params as StatusCheckExecutorParams;
 

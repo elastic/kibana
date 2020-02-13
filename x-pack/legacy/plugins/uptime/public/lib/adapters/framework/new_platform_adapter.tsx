@@ -40,13 +40,14 @@ export const getKibanaFrameworkAdapter = (
   } = core;
   const { triggers_actions_ui } = plugins;
   const getAlertyType = (): AlertTypeModel => ({
-    id: 'uptime',
+    id: 'xpack.uptime.alerts.downMonitor',
     name: 'Uptime Monitor Status',
     iconClass: 'alert',
     alertParamsExpression: params => {
       return <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />;
     },
     validate: (alertParams: any): ValidationResult => ({ errors: {} }),
+    defaultActionMessage: 'Monitor [{{ctx.metadata.name}}] is down',
   });
   triggers_actions_ui.alertTypeRegistry.register(getAlertyType());
   let breadcrumbs: ChromeBreadcrumb[] = [];

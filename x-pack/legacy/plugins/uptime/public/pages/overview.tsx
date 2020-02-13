@@ -105,7 +105,6 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
       <AlertsContextProvider value={vals}>
         <AlertAdd consumer="uptime" />
       </AlertsContextProvider>
-      <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
