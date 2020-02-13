@@ -20,6 +20,7 @@
 import { clog } from './clog';
 import { font } from './font';
 import { kibana } from './kibana';
+import { kibanaContextFunction } from './kibana_context';
 import { variableSet } from './var_set';
 import { variable } from './var';
 import { AnyExpressionFunctionDefinition } from '../types';
@@ -28,6 +29,7 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   clog,
   font,
   kibana,
+  kibanaContextFunction,
   variableSet,
   variable,
 ];

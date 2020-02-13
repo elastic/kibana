@@ -109,9 +109,8 @@ export class ExpressionsPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { expressions } = this;
-    const { executor, renderers } = expressions;
+  private configureExecutor(core: CoreSetup) {
+    const { executor } = this.expressions;
 
     const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
       const [start] = await core.getStartServices();
@@ -122,7 +121,13 @@ export class ExpressionsPublicPlugin
       environment: 'client',
       getSavedObject,
     });
-    executor.registerFunction(kibanaContextFunction);
+  }
+
+  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
+    this.configureExecutor(core);
+
+    const { expressions } = this;
+    const { executor, renderers } = expressions;
 
     setRenderersRegistry(renderers);
 

@@ -66,7 +66,6 @@ export class ExpressionsServerPlugin
     executor.extendContext({
       environment: 'server',
     });
-    executor.registerFunction(kibanaContextFunction);
 
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);
