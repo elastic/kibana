@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/static/lib';
 import * as utils from '../../../lib/utils/utils';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
@@ -480,7 +481,7 @@ export class SenseEditor {
       let ret = 'curl -X' + esMethod + ' "' + url + '"';
       if (esData && esData.length) {
         ret += " -H 'Content-Type: application/json' -d'\n";
-        const dataAsString = utils.collapseLiteralStrings(esData.join('\n'));
+        const dataAsString = collapseLiteralStrings(esData.join('\n'));
         // since Sense doesn't allow single quote json string any single qoute is within a string.
         ret += dataAsString.replace(/'/g, '\\"');
         if (esData.length > 1) {
