@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../../common/constants';
+import { LICENSE_TYPE_BASIC, LicenseType } from '../../../../legacy/common/constants';
 
 export const PLUGIN = {
   ID: 'alerting',

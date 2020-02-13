@@ -6,17 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { Root } from 'joi';
-import { init } from './server';
 import mappings from './mappings.json';
-
-export {
-  AlertingPlugin,
-  AlertsClient,
-  AlertType,
-  AlertExecutorOptions,
-  PluginSetupContract,
-  PluginStartContract,
-} from './server';
 
 export function alerting(kibana: any) {
   return new kibana.Plugin({
@@ -38,7 +28,6 @@ export function alerting(kibana: any) {
         })
         .default();
     },
-    init,
     uiExports: {
       mappings,
     },

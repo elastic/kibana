@@ -5,13 +5,10 @@
  */
 
 import sinon from 'sinon';
-import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
-import {
-  savedObjectsClientMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 
 const alertType = {
   id: 'test',

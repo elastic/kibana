@@ -4,36 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import uuid from 'uuid';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { SecurityPluginStartContract } from './shim';
-import { KibanaRequest, Logger } from '../../../../../src/core/server';
-import { InvalidateAPIKeyParams } from '../../../../plugins/security/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
+import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 
-export interface ConstructorOpts {
+export interface AlertsClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
-  securityPluginSetup?: SecurityPluginStartContract;
-  getSpaceId: (request: Hapi.Request) => string | undefined;
+  securityPluginSetup?: SecurityPluginSetup;
+  getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 }
 
 export class AlertsClientFactory {
-  private readonly logger: Logger;
-  private readonly taskManager: TaskManagerStartContract;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly securityPluginSetup?: SecurityPluginStartContract;
-  private readonly getSpaceId: (request: Hapi.Request) => string | undefined;
-  private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  private isInitialized = false;
+  private logger!: Logger;
+  private taskManager!: TaskManagerStartContract;
+  private alertTypeRegistry!: AlertTypeRegistry;
+  private securityPluginSetup?: SecurityPluginSetup;
+  private getSpaceId!: (request: KibanaRequest) => string | undefined;
+  private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
+  private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
 
-  constructor(options: ConstructorOpts) {
+  public initialize(options: AlertsClientFactoryOpts) {
+    if (this.isInitialized) {
+      throw new Error('AlertsClientFactory already initialized');
+    }
+    this.isInitialized = true;
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
     this.taskManager = options.taskManager;
@@ -43,15 +46,18 @@ export class AlertsClientFactory {
     this.encryptedSavedObjectsPlugin = options.encryptedSavedObjectsPlugin;
   }
 
-  public create(request: KibanaRequest, legacyRequest: Hapi.Request): AlertsClient {
+  public create(
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ): AlertsClient {
     const { securityPluginSetup } = this;
-    const spaceId = this.getSpaceId(legacyRequest);
+    const spaceId = this.getSpaceId(request);
     return new AlertsClient({
       spaceId,
       logger: this.logger,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
-      savedObjectsClient: legacyRequest.getSavedObjectsClient(),
+      savedObjectsClient,
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
       async getUserName() {

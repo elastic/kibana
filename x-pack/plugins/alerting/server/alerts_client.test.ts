@@ -6,13 +6,13 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
+import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { TaskStatus } from '../../../../plugins/task_manager/server';
+import { TaskStatus } from '../../../plugins/task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
-import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();

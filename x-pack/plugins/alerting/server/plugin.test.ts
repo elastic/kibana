@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from './plugin';
-import { coreMock } from '../../../../../src/core/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
+import { AlertingPlugin } from './plugin';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../../plugins/licensing/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
       const context = coreMock.createPluginInitializerContext();
-      const plugin = new Plugin(context);
+      const plugin = new AlertingPlugin(context);
 
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -49,7 +49,7 @@ describe('Alerting Plugin', () => {
     describe('getAlertsClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
         const context = coreMock.createPluginInitializerContext();
-        const plugin = new Plugin(context);
+        const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();
         const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -87,7 +87,7 @@ describe('Alerting Plugin', () => {
 
       it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
         const context = coreMock.createPluginInitializerContext();
-        const plugin = new Plugin(context);
+        const plugin = new AlertingPlugin(context);
 
         const coreSetup = coreMock.createSetup();
         const encryptedSavedObjectsSetup = {

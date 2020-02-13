@@ -4,83 +4,87 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import Hapi from 'hapi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { FindOptions } from '../../../alerting/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-import { WithoutQueryAndParams } from '../types';
+// config definition
+const querySchema = schema.object({
+  per_page: schema.number({ defaultValue: 20, min: 0 }),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+  search: schema.maybe(schema.string()),
+  default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
+    defaultValue: 'OR',
+  }),
+  search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  sort_field: schema.maybe(schema.string()),
+  has_reference: schema.maybe(
+    // use nullable as maybe is currently broken
+    // in config-schema
+    schema.nullable(
+      schema.object({
+        type: schema.string(),
+        id: schema.string(),
+      })
+    )
+  ),
+  fields: schema.maybe(schema.arrayOf(schema.string())),
+  filter: schema.maybe(schema.string()),
+});
 
-interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    default_search_operator: 'AND' | 'OR';
-    search_fields?: string[];
-    sort_field?: string;
-    has_reference?: {
-      type: string;
-      id: string;
-    };
-    fields?: string[];
-    filter?: string;
-  };
-}
-
-export const findAlertRoute = {
-  method: 'GET',
-  path: '/api/alert/_find',
-  config: {
-    tags: ['access:alerting-read'],
-    validate: {
-      query: Joi.object()
-        .keys({
-          per_page: Joi.number()
-            .min(0)
-            .default(20),
-          page: Joi.number()
-            .min(1)
-            .default(1),
-          search: Joi.string()
-            .allow('')
-            .optional(),
-          default_search_operator: Joi.string()
-            .valid('OR', 'AND')
-            .default('OR'),
-          search_fields: Joi.array()
-            .items(Joi.string())
-            .single(),
-          sort_field: Joi.string(),
-          has_reference: Joi.object()
-            .keys({
-              type: Joi.string().required(),
-              id: Joi.string().required(),
-            })
-            .optional(),
-          fields: Joi.array()
-            .items(Joi.string())
-            .single(),
-          filter: Joi.string()
-            .allow('')
-            .optional(),
-        })
-        .default(),
-    },
-  },
-  async handler(request: FindRequest) {
-    const { query } = request;
-    const alertsClient = request.getAlertsClient!();
-    return await alertsClient.find({
+export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.get(
+    {
+      path: '/api/alert/_find',
+      validate: {
+        query: querySchema,
+      },
       options: {
+        tags: ['access:alerting-read'],
+      },
+    },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const query = req.query;
+      const options: FindOptions['options'] = {
         perPage: query.per_page,
         page: query.page,
         search: query.search,
         defaultSearchOperator: query.default_search_operator,
-        searchFields: query.search_fields,
         sortField: query.sort_field,
-        hasReference: query.has_reference,
         fields: query.fields,
         filter: query.filter,
-      },
-    });
-  },
+      };
+
+      if (query.search_fields) {
+        options.searchFields = Array.isArray(query.search_fields)
+          ? query.search_fields
+          : [query.search_fields];
+      }
+
+      if (query.has_reference) {
+        options.hasReference = query.has_reference;
+      }
+
+      const findResult = await alertsClient.find({
+        options,
+      });
+      return res.ok({
+        body: findResult,
+      });
+    })
+  );
 };

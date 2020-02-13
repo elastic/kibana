@@ -4,19 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from './_mock_server';
 import { disableAlertRoute } from './disable';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, alertsClient } = createMockServer();
-server.route(disableAlertRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
-test('disables an alert', async () => {
-  const request = {
-    method: 'POST',
-    url: '/api/alert/1/_disable',
-  };
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
-  const { statusCode } = await server.inject(request);
-  expect(statusCode).toBe(204);
-  expect(alertsClient.disable).toHaveBeenCalledWith({ id: '1' });
+describe('disableAlertRoute', () => {
+  it('disables an alert', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    disableAlertRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/_disable"`);
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "tags": Array [
+          "access:alerting-all",
+        ],
+      }
+    `);
+
+    const alertsClient = {
+      disable: jest.fn().mockResolvedValueOnce({}),
+    };
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: {
+          id: '1',
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(alertsClient.disable).toHaveBeenCalledTimes(1);
+    expect(alertsClient.disable.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.noContent).toHaveBeenCalled();
+  });
 });

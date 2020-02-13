@@ -4,69 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Joi from 'joi';
-import { getDurationSchema } from '../lib';
-import { IntervalSchedule } from '../types';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+// import { getDurationSchema } from '../lib';
+import { Alert } from '../types';
 
-interface ScheduleRequest extends Hapi.Request {
-  payload: {
-    enabled: boolean;
-    name: string;
-    tags: string[];
-    alertTypeId: string;
-    consumer: string;
-    schedule: IntervalSchedule;
-    actions: Array<{
-      group: string;
-      id: string;
-      params: Record<string, any>;
-    }>;
-    params: Record<string, any>;
-    throttle: string | null;
-  };
-}
+export const bodySchema = schema.object({
+  name: schema.string(),
+  alertTypeId: schema.string(),
+  enabled: schema.boolean({ defaultValue: true }),
+  consumer: schema.string(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  throttle: schema.nullable(schema.string()), // getDurationSchema().default(null),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  actions: schema.arrayOf(
+    schema.object({
+      group: schema.string(),
+      id: schema.string(),
+      actionTypeId: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    }),
+    { defaultValue: [] }
+  ),
+});
 
-export const createAlertRoute = {
-  method: 'POST',
-  path: '/api/alert',
-  options: {
-    tags: ['access:alerting-all'],
-    validate: {
-      options: {
-        abortEarly: false,
+export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.post(
+    {
+      path: '/api/alert',
+      validate: {
+        body: bodySchema,
       },
-      payload: Joi.object()
-        .keys({
-          enabled: Joi.boolean().default(true),
-          name: Joi.string().required(),
-          tags: Joi.array()
-            .items(Joi.string())
-            .default([]),
-          alertTypeId: Joi.string().required(),
-          consumer: Joi.string().required(),
-          throttle: getDurationSchema().default(null),
-          schedule: Joi.object()
-            .keys({
-              interval: getDurationSchema().required(),
-            })
-            .required(),
-          params: Joi.object().required(),
-          actions: Joi.array()
-            .items(
-              Joi.object().keys({
-                group: Joi.string().required(),
-                id: Joi.string().required(),
-                params: Joi.object().required(),
-              })
-            )
-            .required(),
-        })
-        .required(),
+      options: {
+        tags: ['access:alerting-all'],
+      },
     },
-  },
-  async handler(request: ScheduleRequest) {
-    const alertsClient = request.getAlertsClient!();
-    return await alertsClient.create({ data: request.payload });
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+
+      const alertsClient = context.alerting.getAlertsClient();
+      const alert = req.body;
+      const alertRes: Alert = await alertsClient.create({ data: alert });
+      return res.ok({
+        body: alertRes,
+      });
+    })
+  );
 };

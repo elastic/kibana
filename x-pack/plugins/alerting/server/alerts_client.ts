@@ -29,9 +29,9 @@ import {
   InvalidateAPIKeyParams,
   CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../../plugins/security/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
+} from '../../../plugins/security/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;

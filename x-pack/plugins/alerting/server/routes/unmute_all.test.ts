@@ -3,20 +3,62 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { createMockServer } from './_mock_server';
 import { unmuteAllAlertRoute } from './unmute_all';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, alertsClient } = createMockServer();
-server.route(unmuteAllAlertRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
-test('unmutes an alert', async () => {
-  const request = {
-    method: 'POST',
-    url: '/api/alert/1/_unmute_all',
-  };
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
-  const { statusCode } = await server.inject(request);
-  expect(statusCode).toBe(204);
-  expect(alertsClient.unmuteAll).toHaveBeenCalledWith({ id: '1' });
+describe('unmuteAllAlertRoute', () => {
+  it('unmutes an alert', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    unmuteAllAlertRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/_unmute_all"`);
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "tags": Array [
+          "access:alerting-all",
+        ],
+      }
+    `);
+
+    const alertsClient = {
+      unmuteAll: jest.fn().mockResolvedValueOnce({}),
+    };
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: {
+          id: '1',
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(alertsClient.unmuteAll).toHaveBeenCalledTimes(1);
+    expect(alertsClient.unmuteAll.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.noContent).toHaveBeenCalled();
+  });
 });

@@ -4,32 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import Hapi from 'hapi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-interface GetAlertStateRequest extends Hapi.Request {
-  params: {
-    id: string;
-  };
-}
+const paramSchema = schema.object({
+  id: schema.string(),
+});
 
-export const getAlertStateRoute = {
-  method: 'GET',
-  path: '/api/alert/{id}/state',
-  options: {
-    tags: ['access:alerting-read'],
-    validate: {
-      params: Joi.object()
-        .keys({
-          id: Joi.string().required(),
-        })
-        .required(),
+export const getAlertStateRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.get(
+    {
+      path: '/api/alert/{id}/state',
+      validate: {
+        params: paramSchema,
+      },
+      options: {
+        tags: ['access:alerting-read'],
+      },
     },
-  },
-  async handler(request: GetAlertStateRequest, h: Hapi.ResponseToolkit) {
-    const { id } = request.params;
-    const alertsClient = request.getAlertsClient!();
-    const state = await alertsClient.getAlertState({ id });
-    return state ? state : h.response().code(204);
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const { id } = req.params;
+      const state = await alertsClient.getAlertState({ id });
+      return state ? res.ok({ body: state }) : res.noContent();
+    })
+  );
 };

@@ -4,60 +4,148 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from './_mock_server';
 import { findAlertRoute } from './find';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, alertsClient } = createMockServer();
-server.route(findAlertRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
-test('sends proper arguments to alert find function', async () => {
-  const request = {
-    method: 'GET',
-    url:
-      '/api/alert/_find?' +
-      'per_page=1&' +
-      'page=1&' +
-      'search=text*&' +
-      'default_search_operator=AND&' +
-      'search_fields=description&' +
-      'sort_field=description&' +
-      'fields=description',
-  };
+describe('findAlertRoute', () => {
+  it('finds alerts with proper parameters', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
 
-  const expectedResult = {
-    page: 1,
-    perPage: 1,
-    total: 0,
-    data: [],
-  };
+    findAlertRoute(router, licenseState);
 
-  alertsClient.find.mockResolvedValueOnce(expectedResult);
-  const { payload, statusCode } = await server.inject(request);
-  expect(statusCode).toBe(200);
-  const response = JSON.parse(payload);
-  expect(response).toEqual(expectedResult);
-  expect(alertsClient.find).toHaveBeenCalledTimes(1);
-  expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
+    const [config, handler] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/_find"`);
+    expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "options": Object {
-          "defaultSearchOperator": "AND",
-          "fields": Array [
-            "description",
-          ],
-          "filter": undefined,
-          "hasReference": undefined,
-          "page": 1,
-          "perPage": 1,
-          "search": "text*",
-          "searchFields": Array [
-            "description",
-          ],
-          "sortField": "description",
+        "tags": Array [
+          "access:alerting-read",
+        ],
+      }
+    `);
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+    };
+    const alertsClient = {
+      find: jest.fn().mockResolvedValueOnce(findResult),
+    };
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
         },
       },
-    ]
-  `);
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "data": Array [],
+          "page": 1,
+          "perPage": 1,
+          "total": 0,
+        },
+      }
+    `);
+
+    expect(alertsClient.find).toHaveBeenCalledTimes(1);
+    expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "options": Object {
+            "defaultSearchOperator": "OR",
+            "fields": undefined,
+            "filter": undefined,
+            "page": 1,
+            "perPage": 1,
+            "search": undefined,
+            "sortField": undefined,
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: findResult,
+    });
+  });
+
+  it('ensures the license allows finding alerts', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    findAlertRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const alertsClient = {
+      find: jest.fn().mockResolvedValueOnce({
+        page: 1,
+        perPage: 1,
+        total: 0,
+        data: [],
+      }),
+    };
+
+    const [context, req, res] = mockHandlerArguments(alertsClient, {
+      query: {
+        per_page: 1,
+        page: 1,
+        default_search_operator: 'OR',
+      },
+    });
+
+    await handler(context, req, res);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the license check prevents finding alerts', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    findAlertRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      {},
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+        },
+      },
+      ['ok']
+    );
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
 });

@@ -7,14 +7,11 @@
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
-import {
-  savedObjectsClientMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 
 const alertType = {
   id: 'test',

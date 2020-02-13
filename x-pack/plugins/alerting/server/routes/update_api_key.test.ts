@@ -4,19 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from './_mock_server';
 import { updateApiKeyRoute } from './update_api_key';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, alertsClient } = createMockServer();
-server.route(updateApiKeyRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
-test('updates api key for an alert', async () => {
-  const request = {
-    method: 'POST',
-    url: '/api/alert/1/_update_api_key',
-  };
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
-  const { statusCode } = await server.inject(request);
-  expect(statusCode).toBe(204);
-  expect(alertsClient.updateApiKey).toHaveBeenCalledWith({ id: '1' });
+describe('updateApiKeyRoute', () => {
+  it('updates api key for an alert', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    updateApiKeyRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/_update_api_key"`);
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "tags": Array [
+          "access:alerting-all",
+        ],
+      }
+    `);
+
+    const alertsClient = {
+      updateApiKey: jest.fn().mockResolvedValueOnce({}),
+    };
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: {
+          id: '1',
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(alertsClient.updateApiKey).toHaveBeenCalledTimes(1);
+    expect(alertsClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.noContent).toHaveBeenCalled();
+  });
 });

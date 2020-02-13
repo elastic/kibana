@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
+import { alertsClientMock } from '../../../../../../../../plugins/alerting/server/mocks';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../../common/constants';
 import { ServerFacade } from '../../../../types';

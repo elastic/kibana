@@ -4,32 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Joi from 'joi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-interface DeleteRequest extends Hapi.Request {
-  params: {
-    id: string;
-  };
-}
+const paramSchema = schema.object({
+  id: schema.string(),
+});
 
-export const deleteAlertRoute = {
-  method: 'DELETE',
-  path: '/api/alert/{id}',
-  config: {
-    tags: ['access:alerting-all'],
-    validate: {
-      params: Joi.object()
-        .keys({
-          id: Joi.string().required(),
-        })
-        .required(),
+export const deleteAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.delete(
+    {
+      path: '/api/alert/{id}',
+      validate: {
+        params: paramSchema,
+      },
+      options: {
+        tags: ['access:alerting-all'],
+      },
     },
-  },
-  async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
-    const { id } = request.params;
-    const alertsClient = request.getAlertsClient!();
-    await alertsClient.delete({ id });
-    return h.response().code(204);
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const { id } = req.params;
+      await alertsClient.delete({ id });
+      return res.noContent();
+    })
+  );
 };

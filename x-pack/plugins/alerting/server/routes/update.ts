@@ -4,70 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import Hapi from 'hapi';
-import { getDurationSchema } from '../lib';
-import { IntervalSchedule } from '../types';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-interface UpdateRequest extends Hapi.Request {
-  params: {
-    id: string;
-  };
-  payload: {
-    alertTypeId: string;
-    name: string;
-    tags: string[];
-    schedule: IntervalSchedule;
-    actions: Array<{
-      group: string;
-      id: string;
-      params: Record<string, any>;
-    }>;
-    params: Record<string, any>;
-    throttle: string | null;
-  };
-}
+const paramSchema = schema.object({
+  id: schema.string(),
+});
 
-export const updateAlertRoute = {
-  method: 'PUT',
-  path: '/api/alert/{id}',
-  options: {
-    tags: ['access:alerting-all'],
-    validate: {
-      options: {
-        abortEarly: false,
+const bodySchema = schema.object({
+  name: schema.string(),
+  alertTypeId: schema.string(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  throttle: schema.nullable(schema.string()),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  actions: schema.arrayOf(
+    schema.object({
+      group: schema.string(),
+      id: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    }),
+    { defaultValue: [] }
+  ),
+});
+
+export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.put(
+    {
+      path: '/api/alert/{id}',
+      validate: {
+        body: bodySchema,
+        params: paramSchema,
       },
-      payload: Joi.object()
-        .keys({
-          throttle: getDurationSchema()
-            .required()
-            .allow(null),
-          name: Joi.string().required(),
-          tags: Joi.array()
-            .items(Joi.string())
-            .required(),
-          schedule: Joi.object()
-            .keys({
-              interval: getDurationSchema().required(),
-            })
-            .required(),
-          params: Joi.object().required(),
-          actions: Joi.array()
-            .items(
-              Joi.object().keys({
-                group: Joi.string().required(),
-                id: Joi.string().required(),
-                params: Joi.object().required(),
-              })
-            )
-            .required(),
-        })
-        .required(),
+      options: {
+        tags: ['access:alerting-all'],
+      },
     },
-  },
-  async handler(request: UpdateRequest) {
-    const { id } = request.params;
-    const alertsClient = request.getAlertsClient!();
-    return await alertsClient.update({ id, data: request.payload });
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const { id } = req.params;
+      const { name, actions, params, schedule, tags } = req.body;
+      return res.ok({
+        body: await alertsClient.update({
+          id,
+          data: { name, actions, params, schedule, tags },
+        }),
+      });
+    })
+  );
 };

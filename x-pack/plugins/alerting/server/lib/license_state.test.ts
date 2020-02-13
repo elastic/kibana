@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 import { LicenseState } from './license_state';
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
-import { LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/server';
+import { licensingMock } from '../../../../plugins/licensing/server/mocks';
+import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 
 describe('license_state', () => {
   let getRawLicense: any;

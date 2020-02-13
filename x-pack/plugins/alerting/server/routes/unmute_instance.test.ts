@@ -4,19 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from './_mock_server';
 import { unmuteAlertInstanceRoute } from './unmute_instance';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, alertsClient } = createMockServer();
-server.route(unmuteAlertInstanceRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
-test('unmutes an alert instance', async () => {
-  const request = {
-    method: 'POST',
-    url: '/api/alert/1/alert_instance/2/_unmute',
-  };
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
-  const { statusCode } = await server.inject(request);
-  expect(statusCode).toBe(204);
-  expect(alertsClient.unmuteInstance).toHaveBeenCalledWith({ alertId: '1', alertInstanceId: '2' });
+describe('unmuteAlertInstanceRoute', () => {
+  it('unmutes an alert instance', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    unmuteAlertInstanceRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(
+      `"/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
+    );
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "tags": Array [
+          "access:alerting-all",
+        ],
+      }
+    `);
+
+    const alertsClient = {
+      unmuteInstance: jest.fn().mockResolvedValueOnce({}),
+    };
+
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: {
+          alertId: '1',
+          alertInstanceId: '2',
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(alertsClient.unmuteInstance).toHaveBeenCalledTimes(1);
+    expect(alertsClient.unmuteInstance.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "alertId": "1",
+          "alertInstanceId": "2",
+        },
+      ]
+    `);
+
+    expect(res.noContent).toHaveBeenCalled();
+  });
 });

@@ -4,20 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-export const updateApiKeyRoute = {
-  method: 'POST',
-  path: '/api/alert/{id}/_update_api_key',
-  config: {
-    tags: ['access:alerting-all'],
-    response: {
-      emptyStatusCode: 204,
+const paramSchema = schema.object({
+  id: schema.string(),
+});
+
+export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.post(
+    {
+      path: '/api/alert/{id}/_update_api_key',
+      validate: {
+        params: paramSchema,
+      },
+      options: {
+        tags: ['access:alerting-all'],
+      },
     },
-  },
-  async handler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-    const alertsClient = request.getAlertsClient!();
-    await alertsClient.updateApiKey({ id: request.params.id });
-    return h.response();
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const { id } = req.params;
+      await alertsClient.updateApiKey({ id });
+      return res.noContent();
+    })
+  );
 };

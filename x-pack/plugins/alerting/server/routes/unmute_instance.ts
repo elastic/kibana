@@ -4,27 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-interface UnmuteInstanceRequest extends Hapi.Request {
-  params: {
-    alertId: string;
-    alertInstanceId: string;
-  };
-}
+const paramSchema = schema.object({
+  alertId: schema.string(),
+  alertInstanceId: schema.string(),
+});
 
-export const unmuteAlertInstanceRoute = {
-  method: 'POST',
-  path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute',
-  config: {
-    tags: ['access:alerting-all'],
-    response: {
-      emptyStatusCode: 204,
+export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.post(
+    {
+      path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute',
+      validate: {
+        params: paramSchema,
+      },
+      options: {
+        tags: ['access:alerting-all'],
+      },
     },
-  },
-  async handler(request: UnmuteInstanceRequest, h: Hapi.ResponseToolkit) {
-    const alertsClient = request.getAlertsClient!();
-    await alertsClient.unmuteInstance(request.params);
-    return h.response();
-  },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const alertsClient = context.alerting.getAlertsClient();
+      const { alertId, alertInstanceId } = req.params;
+      await alertsClient.unmuteInstance({ alertId, alertInstanceId });
+      return res.noContent();
+    })
+  );
 };
