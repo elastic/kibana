@@ -74,13 +74,14 @@ export function paginatedResults(
   if (response.hits.hits.length === 0) {
     return { total, results: [], next: null };
   }
-  let next: ResolverEvent;
+
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);
-    next = hit._source;
   }
 
+  // results will be at least 1 because of length check at the top of the function
+  const next = results[results.length - 1];
   const cursor = {
     timestamp: next['@timestamp'],
     eventID: extractEventID(next),
