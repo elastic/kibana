@@ -28,6 +28,7 @@ describe('alert_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
+    defaultActionGroup: 'testDefaultActionGroup',
   };
 
   const actionType = {
@@ -158,6 +159,7 @@ describe('alert_form', () => {
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
 
       const initialAlert = ({
         name: 'test',
@@ -221,6 +223,12 @@ describe('alert_form', () => {
         '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
       );
       expect(actionTypeSelectOptions.exists()).toBeTruthy();
+
+      actionTypeSelectOptions.first().simulate('click');
+      const actionTypeForm = wrapper.find(
+        '[data-test-subj="alertActionAccordion-testDefaultActionGroup"]'
+      );
+      expect(actionTypeForm.exists()).toBeTruthy();
     });
   });
 
