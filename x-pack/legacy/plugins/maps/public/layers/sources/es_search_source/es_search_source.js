@@ -54,6 +54,36 @@ function addFieldToDSL(dsl, field) {
       };
 }
 
+function getDocValueAndSourceFields(indexPattern, fieldNames) {
+  const docValueFields = [];
+  const sourceOnlyFields = [];
+  const scriptFields = {};
+  fieldNames.forEach(fieldName => {
+    const field = getField(indexPattern, fieldName);
+    if (field.scripted) {
+      scriptFields[field.name] = {
+        script: {
+          source: field.script,
+          lang: field.lang,
+        },
+      };
+    } else if (field.readFromDocValues) {
+      const docValueField =
+        field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'epoch_millis',
+            }
+          : fieldName;
+      docValueFields.push(docValueField);
+    } else {
+      sourceOnlyFields.push(fieldName);
+    }
+  });
+
+  return { docValueFields, sourceOnlyFields, scriptFields };
+}
+
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
   static title = i18n.translate('xpack.maps.source.esSearchTitle', {
@@ -244,58 +274,12 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  _getDocValueAndSourceFields(indexPattern, fieldNames) {
-    const docValueFields = [];
-    const sourceOnlyFields = [];
-    const scriptedFields = [];
-    fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.getByName(fieldName);
-      if (!field) {
-        throw new Error(
-          i18n.translate('xpack.maps.source.esSearch.unknownFieldErrorMsg', {
-            defaultMessage: `Unable to find '{fieldName}' in index pattern '{indexPatternTitle}'`,
-            values: { fieldName, indexPatternTitle: indexPattern.title },
-          })
-        );
-      }
-      if (field.scripted) {
-        scriptedFields.push(fieldName);
-      } else if (field.readFromDocValues) {
-        const docValueField =
-          field.type === 'date'
-            ? {
-                field: fieldName,
-                format: 'epoch_millis',
-              }
-            : fieldName;
-        docValueFields.push(docValueField);
-      } else {
-        sourceOnlyFields.push(fieldName);
-      }
-    });
-
-    return { docValueFields, sourceOnlyFields, scriptedFields };
-  }
-
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
     const indexPattern = await this.getIndexPattern();
 
-    const scriptFields = {};
-    searchFilters.fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.getByName(fieldName);
-      if (field && field.scripted) {
-        scriptFields[field.name] = {
-          script: {
-            source: field.script,
-            lang: field.lang,
-          },
-        };
-      }
-    });
-
-    const { docValueFields, sourceOnlyFields } = this._getDocValueAndSourceFields(
+    const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
       searchFilters.fieldNames
     );
@@ -378,7 +362,7 @@ export class ESSearchSource extends AbstractESSource {
   async _getSearchHits(layerName, searchFilters, maxResultWindow, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
 
-    const { docValueFields, sourceOnlyFields } = this._getDocValueAndSourceFields(
+    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
       searchFilters.fieldNames
     );
