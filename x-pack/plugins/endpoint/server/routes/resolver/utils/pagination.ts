@@ -38,7 +38,7 @@ function urlDecodeCursor(value: string): PaginationCursor {
   return { timestamp, eventID };
 }
 
-export function getPaginationParams(limit: number, after?: string): Promise<PaginationParams> {
+export function getPaginationParams(limit: number, after?: string): PaginationParams {
   if (after) {
     try {
       const cursor = urlDecodeCursor(after);
