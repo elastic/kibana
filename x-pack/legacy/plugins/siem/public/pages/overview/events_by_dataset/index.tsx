@@ -21,7 +21,7 @@ import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/in
 import { eventsStackByOptions } from '../../hosts/navigation';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import {
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
   Query,
@@ -32,7 +32,7 @@ import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
 
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -40,7 +40,7 @@ const ID = 'eventsByDatasetOverview';
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   indexPattern: IIndexPattern;
   query?: Query;

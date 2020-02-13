@@ -103,5 +103,9 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await this.assertFieldsPanelTypeInputValue(filterFieldType);
       await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
     },
+
+    async clickCreateAdvancedJobButton() {
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
+    },
   };
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters, IndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
+import { PhraseFilter, IndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
 import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 
 export function createSearchSource(
@@ -26,7 +26,7 @@ export function createSearchSource(
   indexPattern: IndexPattern,
   aggs: any,
   useTimeFilter: boolean,
-  filters: esFilters.PhraseFilter[] = [],
+  filters: PhraseFilter[] = [],
   timefilter: TimefilterSetup['timefilter']
 ) {
   const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();

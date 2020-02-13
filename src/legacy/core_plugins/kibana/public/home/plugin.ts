@@ -26,6 +26,7 @@ import {
 } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
@@ -36,20 +37,13 @@ import {
   FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
-export interface LegacyAngularInjectedDependencies {
-  telemetryOptInProvider: any;
-  shouldShowTelemetryOptIn: boolean;
-}
-
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   home: HomePublicPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
   usageCollection: UsageCollectionSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
@@ -60,24 +54,16 @@ export class HomePlugin implements Plugin {
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
   private directories: readonly FeatureCatalogueEntry[] | null = null;
+  private telemetry?: TelemetryPluginStart;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  setup(
-    core: CoreSetup,
-    {
-      home,
-      kibanaLegacy,
-      usageCollection,
-      __LEGACY: { getAngularDependencies, ...legacyServices },
-    }: HomePluginSetupDependencies
-  ) {
+  setup(core: CoreSetup, { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies) {
     kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
-        const angularDependencies = await getAngularDependencies();
         const [coreStart] = await core.getStartServices();
         setServices({
           trackUiMetric,
@@ -89,6 +75,7 @@ export class HomePlugin implements Plugin {
           docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
           chrome: coreStart.chrome,
+          telemetry: this.telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
@@ -97,7 +84,6 @@ export class HomePlugin implements Plugin {
           config: kibanaLegacy.config,
           homeConfig: home.config,
           directories: this.directories!,
-          ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -105,10 +91,11 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+  start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
     this.directories = home.featureCatalogue.get();
     this.dataStart = data;
+    this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;
   }
 
