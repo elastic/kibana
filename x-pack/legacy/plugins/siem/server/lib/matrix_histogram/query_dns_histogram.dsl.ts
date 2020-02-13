@@ -42,7 +42,7 @@ export const buildDnsHistogramQuery = ({
       NetworkDns: {
         ...dateHistogram,
         aggs: {
-          histogram: {
+          dns: {
             terms: {
               field: stackByField,
               order: {

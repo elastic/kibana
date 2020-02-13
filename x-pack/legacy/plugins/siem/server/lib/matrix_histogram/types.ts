@@ -61,7 +61,7 @@ export interface EventsActionGroupData {
   doc_count: number;
 }
 
-interface DnsHistogramSubBucket {
+export interface DnsHistogramSubBucket {
   key: string;
   doc_count: number;
   orderAgg: {

@@ -20,7 +20,9 @@ import {
   AnomaliesActionGroupData,
   AnomalyHit,
   EventsActionGroupData,
+  DnsHistogramBucket,
   DnsHistogramGroupData,
+  DnsHistogramSubBucket,
   AuthenticationsActionGroupData,
 } from './types';
 import { TermAggregation } from '../types';
@@ -36,6 +38,10 @@ interface MatrixHistogramSchema<T> {
   buildDsl: (options: MatrixHistogramRequestOptions) => {};
   aggName: string;
   parseKey: string;
+  parser?: <T>(
+    data: MatrixHistogramParseData<T>,
+    keyBucket: string
+  ) => MatrixOverTimeHistogramData[];
 }
 
 type MatrixHistogramParseData<T> = T extends HistogramType.alerts
@@ -64,6 +70,25 @@ type MatrixHistogramHit<T> = T extends HistogramType.alerts
 
 type MatrixHistogramConfig = Record<HistogramType, MatrixHistogramSchema<HistogramType>>;
 
+const getDnsParsedData = (
+  data: MatrixHistogramParseData<HistogramType.dns>,
+  keyBucket: string
+): MatrixOverTimeHistogramData[] => {
+  let result: MatrixOverTimeHistogramData[] = [];
+  data.forEach((bucketData: DnsHistogramBucket) => {
+    const time = get('key', bucketData);
+    const histData = getOr([], keyBucket, bucketData).map(
+      ({ key, doc_count }: DnsHistogramSubBucket) => ({
+        x: time,
+        y: doc_count,
+        g: key,
+      })
+    );
+    result = [...result, ...histData];
+  });
+  return result;
+};
+
 const getGenericData = <T>(
   data: MatrixHistogramParseData<T>,
   keyBucket: string
@@ -83,27 +108,28 @@ const getGenericData = <T>(
 };
 
 const matrixHistogramConfig: MatrixHistogramConfig = {
-  alerts: {
+  [HistogramType.alerts]: {
     buildDsl: buildAlertsHistogramQuery,
     aggName: 'aggregations.alertsGroup.buckets',
     parseKey: 'alerts.buckets',
   },
-  anomalies: {
+  [HistogramType.anomalies]: {
     buildDsl: buildAnomaliesOverTimeQuery,
     aggName: 'aggregations.anomalyActionGroup.buckets',
     parseKey: 'anomalies.buckets',
   },
-  authentications: {
+  [HistogramType.authentications]: {
     buildDsl: buildAuthenticationsOverTimeQuery,
     aggName: 'aggregations.eventActionGroup.buckets',
     parseKey: 'events.buckets',
   },
-  dns: {
+  [HistogramType.dns]: {
     buildDsl: buildDnsHistogramQuery,
     aggName: 'aggregations.NetworkDns.buckets',
-    parseKey: 'histogram.buckets',
+    parseKey: 'dns.buckets',
+    parser: getDnsParsedData,
   },
-  events: {
+  [HistogramType.events]: {
     buildDsl: buildEventsOverTimeQuery,
     aggName: 'aggregations.eventActionGroup.buckets',
     parseKey: 'events.buckets',
@@ -132,12 +158,12 @@ export class ElasticsearchMatrixHistogramAdapter implements MatrixHistogramAdapt
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+
     return {
       inspect,
-      matrixHistogramData: getGenericData<typeof options.histogramType>(
-        matrixHistogramData,
-        myConfig.parseKey
-      ),
+      matrixHistogramData: myConfig.parser
+        ? myConfig.parser<typeof options.histogramType>(matrixHistogramData, myConfig.parseKey)
+        : getGenericData<typeof options.histogramType>(matrixHistogramData, myConfig.parseKey),
       totalCount,
     };
   }

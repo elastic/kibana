@@ -161,7 +161,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 
     setQuery({ id, inspect, loading, refetch });
 
-    if (isInitialLoading && !!barChartData && data) {
+    if (isInitialLoading || totalCount === -1) {
       setIsInitialLoading(false);
     }
   }, [
@@ -227,7 +227,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
               <HeaderSection
                 id={id}
                 title={titleWithStackByField}
-                subtitle={!isInitialLoading && (totalCount >= 0 ? subtitleWithCounts : null)}
+                subtitle={
+                  !isInitialLoading &&
+                  (totalCount != null && totalCount >= 0 ? subtitleWithCounts : null)
+                }
               >
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
