@@ -96,6 +96,11 @@ export class KibanaMigrator {
    * to Kibana itself alters the kibana index causing the saved objects mappings or data to change
    * after the Kibana server performed the initial migration.
    *
+   * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
+   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can leads to
+   * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
+   * code should ensure that the initial call resolves before calling the function again.
+   *
    * @returns - A promise which resolves once all migrations have been applied.
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
