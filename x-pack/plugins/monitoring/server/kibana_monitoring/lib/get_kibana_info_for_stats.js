@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 const snapshotRegex = /-snapshot/i;
 
 /**
@@ -17,17 +15,15 @@ const snapshotRegex = /-snapshot/i;
  * @param {String} host Kibana host
  * @return {Object} The object containing a "kibana" field and source instance details.
  */
-export function getKibanaInfoForStats({ kbnServerStatus, kbnServerVersion, config }) {
-  const status = kbnServerStatus.toJSON();
-
+export function getKibanaInfoForStats({ uuid, name, index, host, port, version, status }) {
   return {
-    uuid: config.get('server.uuid'),
-    name: config.get('server.name'),
-    index: config.get('kibana.index'),
-    host: config.get('server.host'),
-    transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
-    version: kbnServerVersion.replace(snapshotRegex, ''),
-    snapshot: snapshotRegex.test(kbnServerVersion),
-    status: get(status, 'overall.state'),
+    uuid,
+    name,
+    index,
+    host,
+    transport_address: `${host}:${port}`,
+    version,
+    snapshot: snapshotRegex.test(version),
+    status,
   };
 }

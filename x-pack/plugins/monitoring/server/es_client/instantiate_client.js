@@ -21,8 +21,6 @@ export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) 
     logQueries: Boolean(elasticsearchConfig.logQueries),
   });
 
-  // TODO: NP
-  // events.on('stop', bindKey(cluster, 'close'));
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';
   log.info(`config sourced from: ${configSource} cluster`);
   return cluster;

@@ -22,11 +22,10 @@ export function verifyMonitoringLicense(server) {
   if (config.get('monitoring.cluster_alerts.enabled')) {
     const xpackInfo = get(server.plugins.monitoring, 'info');
     if (xpackInfo) {
-      const monitoringCluster = xpackInfo.feature('monitoring').getLicenseCheckResults();
-
+      const watcherFeature = xpackInfo.getWatcherFeature();
       return {
-        enabled: monitoringCluster.clusterAlerts.enabled,
-        message: monitoringCluster.message,
+        enabled: watcherFeature.enabled,
+        message: xpackInfo.getMessage(),
       };
     }
 

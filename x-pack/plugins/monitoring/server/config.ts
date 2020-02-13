@@ -18,6 +18,9 @@ export const configSchema = schema.object({
     ccs: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    logs: schema.object({
+      index: schema.string({ defaultValue: 'filebeat-*' }),
+    }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: schema.object({
       logFetchCount: schema.number({ defaultValue: 10 }),
@@ -147,16 +150,3 @@ export const configSchema = schema.object({
 });
 
 export type MonitoringConfig = TypeOf<typeof configSchema>;
-
-/**
- * User-configurable settings for xpack.monitoring via configuration schema
- * @param {Object} Joi - HapiJS Joi module that allows for schema validation
- * @return {Object} config schema
- */
-// export const config = Joi => {
-//   const DEFAULT_REQUEST_HEADERS = ['authorization'];
-
-//   return Joi.object({
-//     enabled: schema.boolean({ defaultValue: true }),
-
-// };

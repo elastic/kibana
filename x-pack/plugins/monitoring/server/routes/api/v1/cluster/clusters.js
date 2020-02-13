@@ -9,7 +9,6 @@ import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_fro
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
 import { handleError } from '../../../../lib/errors';
-import { INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
 export function clustersRoute(server) {
@@ -33,6 +32,7 @@ export function clustersRoute(server) {
     },
     handler: async req => {
       let clusters = [];
+      const config = server.config();
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
@@ -41,7 +41,7 @@ export function clustersRoute(server) {
         await verifyMonitoringAuth(req);
         await verifyCcsAvailability(req);
         const indexPatterns = getIndexPatterns(server, {
-          filebeatIndexPattern: INDEX_PATTERN_FILEBEAT,
+          filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
         });
         clusters = await getClustersFromRequest(req, indexPatterns, {
           codePaths: req.payload.codePaths,

@@ -27,15 +27,7 @@ import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({
-    config,
-    log,
-    interval,
-    elasticsearchPlugin,
-    callClusterFactory,
-    kbnServerStatus,
-    kbnServerVersion,
-  }) {
+  constructor({ log, interval, elasticsearch, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -52,19 +44,11 @@ export class BulkUploader {
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
     this._log = log;
 
-    this._cluster = elasticsearchPlugin.createCluster('admin', {
+    this._cluster = elasticsearch.createClient('admin', {
       plugins: [monitoringBulk],
     });
 
-    this._callClusterWithInternalUser = callClusterFactory({
-      plugins: { elasticsearch: elasticsearchPlugin },
-    }).getCallClusterInternal();
-    this._getKibanaInfoForStats = () =>
-      getKibanaInfoForStats({
-        kbnServerStatus,
-        kbnServerVersion,
-        config,
-      });
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats(kibanaStats);
   }
 
   filterCollectorSet(usageCollection) {
@@ -145,7 +129,7 @@ export class BulkUploader {
       return;
     }
 
-    const data = await usageCollection.bulkFetch(this._callClusterWithInternalUser);
+    const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
 
     if (payload) {
