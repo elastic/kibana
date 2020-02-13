@@ -12,7 +12,69 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 
-jest.mock('ui/new_platform');
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              enableTimeRangeSelector: jest.fn(),
+              enableAutoRefreshSelector: jest.fn(),
+              getRefreshInterval: jest.fn(),
+              setRefreshInterval: jest.fn(),
+              getTime: jest.fn(),
+              isAutoRefreshSelectorEnabled: jest.fn(),
+              isTimeRangeSelectorEnabled: jest.fn(),
+              getRefreshIntervalUpdate$: jest.fn(),
+              getTimeUpdate$: jest.fn(),
+              getEnabledUpdated$: jest.fn(),
+            },
+            history: { get: jest.fn() },
+          },
+        },
+      },
+    },
+  },
+}));
+
+jest.mock('../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        uiSettings: { get: jest.fn() },
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                enableTimeRangeSelector: jest.fn(),
+                enableAutoRefreshSelector: jest.fn(),
+                getRefreshInterval: jest.fn(),
+                setRefreshInterval: jest.fn(),
+                getTime: jest.fn(),
+                isAutoRefreshSelectorEnabled: jest.fn(),
+                isTimeRangeSelectorEnabled: jest.fn(),
+                getRefreshIntervalUpdate$: jest.fn(),
+                getTimeUpdate$: jest.fn(),
+                getEnabledUpdated$: jest.fn(),
+              },
+              history: { get: jest.fn() },
+            },
+          },
+        },
+        notifications: {
+          toasts: {
+            addDanger: () => {},
+          },
+        },
+      },
+    };
+  },
+}));
+
+jest.mock('../../util/dependency_cache', () => ({
+  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
+}));
 
 describe('TimeSeriesExplorerUrlStateManager', () => {
   test('Initial render shows "No single metric jobs found"', () => {

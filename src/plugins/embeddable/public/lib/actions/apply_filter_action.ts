@@ -20,14 +20,14 @@
 import { i18n } from '@kbn/i18n';
 import { Action, createAction, IncompatibleActionError } from '../ui_actions';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
-import { esFilters } from '../../../../../plugins/data/public';
+import { Filter } from '../../../../../plugins/data/public';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
-type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: esFilters.Filter[] }>;
+type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
 interface ActionContext {
   embeddable: IEmbeddable;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 async function isCompatible(context: ActionContext) {
