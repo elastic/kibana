@@ -123,5 +123,165 @@ describe('getNavLinks', () => {
         );
       }).toThrowErrorMatchingInlineSnapshot(`"Unknown plugin id \\"notExistingPlugin\\""`);
     });
+
+    it('uses all known properties of the navlink', () => {
+      const navlinks = getNavLinks(
+        createLegacyExports({
+          uiAppSpecs: [
+            {
+              id: 'app-a',
+              title: 'AppA',
+              category: {
+                label: 'My Category',
+              },
+              order: 42,
+              url: '/some-custom-url',
+              subUrlBase: '/some-custom-url/sub',
+              disableSubUrlTracking: true,
+              icon: 'fa-snowflake',
+              euiIconType: 'euiIcon',
+              linkToLastSubUrl: true,
+              hidden: false,
+              tooltip: 'My tooltip',
+            },
+          ],
+        }),
+        []
+      );
+      expect(navlinks.length).toBe(1);
+      expect(navlinks[0]).toEqual({
+        id: 'app-a',
+        title: 'AppA',
+        category: {
+          label: 'My Category',
+        },
+        order: 42,
+        url: '/some-custom-url',
+        subUrlBase: '/some-custom-url/sub',
+        disableSubUrlTracking: true,
+        icon: 'fa-snowflake',
+        euiIconType: 'euiIcon',
+        linkToLastSubUrl: true,
+        hidden: false,
+        disabled: false,
+        tooltip: 'My tooltip',
+      });
+    });
+  });
+
+  describe('generating from navLinkSpecs', () => {
+    it('generates navlinks from legacy navLink specs', () => {
+      const navlinks = getNavLinks(
+        createLegacyExports({
+          navLinkSpecs: [
+            {
+              id: 'link-a',
+              title: 'AppA',
+              url: '/some-custom-url',
+            },
+            {
+              id: 'link-b',
+              disableSubUrlTracking: true,
+            },
+          ],
+        }),
+        createPluginSpecs('pluginA')
+      );
+
+      expect(navlinks.length).toEqual(2);
+      expect(navlinks[0]).toEqual(
+        expect.objectContaining({
+          id: 'link-a',
+          title: 'AppA',
+          url: '/some-custom-url',
+          hidden: false,
+          disabled: false,
+        })
+      );
+      expect(navlinks[1]).toEqual(
+        expect.objectContaining({
+          id: 'link-b',
+          title: 'link-b',
+          url: '/app/link-b',
+          disableSubUrlTracking: true,
+        })
+      );
+    });
+
+    it('uses all known properties of the navlink', () => {
+      const navlinks = getNavLinks(
+        createLegacyExports({
+          navLinkSpecs: [
+            {
+              id: 'link-a',
+              title: 'AppA',
+              category: {
+                label: 'My Second Cat',
+              },
+              order: 72,
+              url: '/some-other-custom',
+              subUrlBase: '/some-other-custom/sub',
+              disableSubUrlTracking: true,
+              icon: 'fa-corn',
+              euiIconType: 'euiIconBis',
+              linkToLastSubUrl: false,
+              hidden: false,
+              tooltip: 'My other tooltip',
+            },
+          ],
+        }),
+        []
+      );
+      expect(navlinks.length).toBe(1);
+      expect(navlinks[0]).toEqual({
+        id: 'link-a',
+        title: 'AppA',
+        category: {
+          label: 'My Second Cat',
+        },
+        order: 72,
+        url: '/some-other-custom',
+        subUrlBase: '/some-other-custom/sub',
+        disableSubUrlTracking: true,
+        icon: 'fa-corn',
+        euiIconType: 'euiIconBis',
+        linkToLastSubUrl: false,
+        hidden: false,
+        disabled: false,
+        tooltip: 'My other tooltip',
+      });
+    });
+  });
+
+  describe('generating from both apps and navlinks', () => {
+    const navlinks = getNavLinks(
+      createLegacyExports({
+        uiAppSpecs: [
+          {
+            id: 'app-a',
+            title: 'AppA',
+          },
+          {
+            id: 'app-b',
+            title: 'AppB',
+          },
+        ],
+        navLinkSpecs: [
+          {
+            id: 'link-a',
+            title: 'AppA',
+            url: '/some-custom-url',
+          },
+          {
+            id: 'link-b',
+            disableSubUrlTracking: true,
+          },
+        ],
+      }),
+      []
+    );
+
+    expect(navlinks.length).toBe(4);
+    expect(navlinks).toMatchSnapshot();
   });
 });

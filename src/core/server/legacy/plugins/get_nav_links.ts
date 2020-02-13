@@ -17,62 +17,51 @@
  * under the License.
  */
 
-import { LegacyUiExports, LegacyNavLink, LegacyPluginSpec } from '../types';
+import {
+  LegacyUiExports,
+  LegacyNavLink,
+  LegacyPluginSpec,
+  LegacyNavLinkSpec,
+  LegacyAppSpec,
+} from '../types';
 
-const REMOVE_FROM_ARRAY: LegacyNavLink[] = [];
+function convertToNavLink(spec: LegacyNavLinkSpec | LegacyAppSpec): LegacyNavLink {
+  if (!spec.id) {
+    throw new Error('Every app must specify an id');
+  }
+  return {
+    id: spec.id,
+    category: spec.category,
+    title: spec.title ?? spec.id,
+    order: typeof spec.order === 'number' ? spec.order : 0,
+    url: spec.url ?? `/app/${spec.id}`,
+    subUrlBase: spec.subUrlBase ?? spec.url,
+    disableSubUrlTracking: spec.disableSubUrlTracking,
+    icon: spec.icon,
+    euiIconType: spec.euiIconType,
+    linkToLastSubUrl: spec.linkToLastSubUrl ?? false,
+    hidden: spec.hidden ?? false,
+    disabled: spec.disabled ?? false,
+    tooltip: spec.tooltip ?? '',
+  };
+}
 
-function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
-  return uiAppSpecs.flatMap(spec => {
-    if (!spec) {
-      return REMOVE_FROM_ARRAY;
-    }
-
-    const id = spec.id;
-
-    if (!id) {
-      throw new Error('Every app must specify an id');
-    }
-
-    if (spec.pluginId && !pluginSpecs.some(plugin => plugin.getId() === spec.pluginId)) {
-      throw new Error(`Unknown plugin id "${spec.pluginId}"`);
-    }
-
-    const listed = typeof spec.listed === 'boolean' ? spec.listed : true;
-
-    if (spec.hidden || !listed) {
-      return REMOVE_FROM_ARRAY;
-    }
-
-    return {
-      id,
-      category: spec.category,
-      title: spec.title,
-      order: typeof spec.order === 'number' ? spec.order : 0,
-      icon: spec.icon,
-      euiIconType: spec.euiIconType,
-      url: spec.url || `/app/${id}`,
-      linkToLastSubUrl: spec.linkToLastSubUrl,
-    };
-  });
+function isHidden(app: LegacyAppSpec) {
+  return app.listed === false || app.hidden === true;
 }
 
 export function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
-  return (uiExports.navLinkSpecs || [])
-    .map<LegacyNavLink>(spec => ({
-      id: spec.id,
-      category: spec.category,
-      title: spec.title,
-      order: typeof spec.order === 'number' ? spec.order : 0,
-      url: spec.url,
-      subUrlBase: spec.subUrlBase || spec.url,
-      disableSubUrlTracking: spec.disableSubUrlTracking,
-      icon: spec.icon,
-      euiIconType: spec.euiIconType,
-      linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
-      hidden: 'hidden' in spec ? spec.hidden : false,
-      disabled: 'disabled' in spec ? spec.disabled : false,
-      tooltip: spec.tooltip || '',
-    }))
-    .concat(getUiAppsNavLinks(uiExports, pluginSpecs))
-    .sort((a, b) => a.order - b.order);
+  const navLinkSpecs = uiExports.navLinkSpecs || [];
+  const appSpecs = (uiExports.uiAppSpecs || []).filter(
+    app => app !== undefined && !isHidden(app)
+  ) as LegacyAppSpec[];
+
+  const pluginIds = (pluginSpecs || []).map(spec => spec.getId());
+  appSpecs.forEach(spec => {
+    if (spec.pluginId && !pluginIds.includes(spec.pluginId)) {
+      throw new Error(`Unknown plugin id "${spec.pluginId}"`);
+    }
+  });
+
+  return [...navLinkSpecs, ...appSpecs].map(convertToNavLink).sort((a, b) => a.order - b.order);
 }
