@@ -20,10 +20,10 @@
 import sinon from 'sinon';
 
 import { State } from 'ui/state_management/state';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { Filter } from '../../../../../../../plugins/data/public';
 
 export class StubState implements State {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   save: sinon.SinonSpy<any[], any>;
 
   constructor() {

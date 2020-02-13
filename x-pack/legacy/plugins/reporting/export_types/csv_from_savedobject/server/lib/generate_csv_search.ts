@@ -27,7 +27,7 @@ import { getFilters } from './get_filters';
 import {
   esQuery,
   EsQueryConfig,
-  esFilters,
+  Filter,
   IIndexPattern,
   Query,
   // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
@@ -146,7 +146,7 @@ export async function generateCsvSearch(
       query: esQuery.buildEsQuery(
         indexPatternSavedObject as IIndexPattern,
         (searchSourceQuery as unknown) as Query,
-        (combinedFilter as unknown) as esFilters.Filter,
+        (combinedFilter as unknown) as Filter,
         esQueryConfig
       ),
       script_fields: scriptFieldsConfig,
