@@ -60,7 +60,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
     >
       {sections.map((section, idx) => (
-        <div key={idx}>
+        <React.Fragment key={idx}>
           {section.map(item => (
             <Section key={item.key} marginBottom={px(units.plus)}>
               {item.title && <SectionTitle>{item.title}</SectionTitle>}
@@ -79,7 +79,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
             </Section>
           ))}
           {idx !== sections.length - 1 && <ActionMenuDivider />}
-        </div>
+        </React.Fragment>
       ))}
     </ActionMenu>
   );
