@@ -40,12 +40,14 @@ export class LayerPanel extends React.Component {
   state = {
     displayName: '',
     immutableSourceProps: [],
+    leftJoinFields: null,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadDisplayName();
     this.loadImmutableSourceProperties();
+    this.loadLeftJoinFields();
   }
 
   componentWillUnmount() {
@@ -74,6 +76,29 @@ export class LayerPanel extends React.Component {
     }
   };
 
+  async loadLeftJoinFields() {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
+      return;
+    }
+
+    let leftJoinFields;
+    try {
+      const leftFieldsInstances = await this.props.selectedLayer.getLeftJoinFields();
+      const leftFieldPromises = leftFieldsInstances.map(async field => {
+        return {
+          name: field.getName(),
+          label: await field.getLabel(),
+        };
+      });
+      leftJoinFields = await Promise.all(leftFieldPromises);
+    } catch (error) {
+      leftJoinFields = [];
+    }
+    if (this._isMounted) {
+      this.setState({ leftJoinFields });
+    }
+  }
+
   _onSourceChange = ({ propName, value }) => {
     this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
   };
@@ -101,7 +126,10 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <JoinEditor />
+          <JoinEditor
+            leftJoinFields={this.state.leftJoinFields}
+            layerDisplayName={this.state.displayName}
+          />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
