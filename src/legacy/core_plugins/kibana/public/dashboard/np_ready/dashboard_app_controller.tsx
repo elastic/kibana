@@ -30,8 +30,7 @@ import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_emp
 
 import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
 import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
+  esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -319,10 +318,10 @@ export class DashboardAppController {
             // appState.save which will cause refreshDashboardContainer to be called.
 
             if (
-              !compareFilters(
+              !esFilters.compareFilters(
                 container.getInput().filters,
                 queryFilter.getFilters(),
-                COMPARE_ALL_OPTIONS
+                esFilters.COMPARE_ALL_OPTIONS
               )
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
@@ -422,7 +421,11 @@ export class DashboardAppController {
 
       // Filters shouldn't  be compared using regular isEqual
       if (
-        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+        !esFilters.compareFilters(
+          containerInput.filters,
+          appStateDashboardInput.filters,
+          esFilters.COMPARE_ALL_OPTIONS
+        )
       ) {
         differences.filters = appStateDashboardInput.filters;
       }
