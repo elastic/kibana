@@ -80,7 +80,8 @@ describe('Transaction action menu', () => {
         {
           key: 'podDetails',
           title: 'Pod details',
-          subtitle: 'View logs and metrics of this pod to get further details.',
+          subtitle:
+            'View logs and metrics for this pod to get further details.',
           actions: [
             {
               key: 'podLogs',
@@ -147,7 +148,7 @@ describe('Transaction action menu', () => {
         {
           key: 'hostDetails',
           title: 'Host details',
-          subtitle: 'View host logs to get further details.',
+          subtitle: 'View host logs and metrics to get further details.',
           actions: [
             {
               key: 'hostLogs',

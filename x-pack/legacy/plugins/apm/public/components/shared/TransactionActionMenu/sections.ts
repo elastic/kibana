@@ -220,7 +220,7 @@ export const getSections = ({
           'xpack.apm.transactionActionMenu.pod.subtitle',
           {
             defaultMessage:
-              'View logs and metrics of this pod to get further details.'
+              'View logs and metrics for this pod to get further details.'
           }
         ),
         actions: podActions
@@ -237,7 +237,7 @@ export const getSections = ({
           'xpack.apm.transactionActionMenu.container.subtitle',
           {
             defaultMessage:
-              'View logs and metrics of this container to get further details.'
+              'View logs and metrics for this container to get further details.'
           }
         ),
         actions: containerActions
@@ -250,7 +250,7 @@ export const getSections = ({
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.host.subtitle',
           {
-            defaultMessage: 'View host logs to get further details.'
+            defaultMessage: 'View host logs and metrics to get further details.'
           }
         ),
         actions: hostActions
