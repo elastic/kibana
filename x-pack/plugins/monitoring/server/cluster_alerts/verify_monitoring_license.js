@@ -24,7 +24,7 @@ export function verifyMonitoringLicense(server) {
     if (xpackInfo) {
       const watcherFeature = xpackInfo.getWatcherFeature();
       return {
-        enabled: watcherFeature.enabled,
+        enabled: watcherFeature.isEnabled,
         message: xpackInfo.getMessage(),
       };
     }

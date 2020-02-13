@@ -9,7 +9,7 @@ import { LicenseFeature, ILicense } from '../../licensing/server';
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
   license$: Observable<ILicense>;
-  getMessage: () => string;
+  getMessage: () => string | undefined;
   getWatcherFeature: () => LicenseFeature;
   getMonitoringFeature: () => LicenseFeature;
   getSecurityFeature: () => LicenseFeature;

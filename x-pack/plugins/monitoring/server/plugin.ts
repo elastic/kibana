@@ -245,6 +245,10 @@ export class Plugin {
           return get(legacyConfig, key);
         }
 
+        if (key === 'server.uuid') {
+          return core.uuid.getInstanceUuid();
+        }
+
         throw new Error(`Unknown key '${_key}'`);
       },
     });
