@@ -166,7 +166,11 @@ The channel handlers are only defined inside the pulse context and are used to n
 
 #### Data storage
 
-For the purpose of transparency, we want the user to be able to retrieve the telemetry we send at any point, so we should store the information we send for each channel in their own local internal indices (similar to a copy of the `pulse-raw-*` and `pulse-instructions-*` indices in our remote service). In the same effort, we could even provide some _dashboards_ in Kibana for specific roles in the cluster to understand more about their deployment.
+For the purpose of transparency, we want the user to be able to retrieve the telemetry we send at any point, so we should store the information we send for each channel in their own local _dot_ internal indices (similar to a copy of the `pulse-raw-*` and `pulse-instructions-*` indices in our remote service). We may want to also sync back from the remote service any updates we do to the documents: enrichment of the document, anonymisation, categorisation when it makes sense in that specific channel, ...
+
+In the same effort, we could even provide some _dashboards_ in Kibana for specific roles in the cluster to understand more about their deployment.
+
+Only those specific roles (admin?) should have access to these local indices, unless they grant permissions to other users they want to share this information with.
 
 The users should be able to control how long they want to keep that information for (via ILM?).
 
@@ -196,7 +200,7 @@ Depending on the subscriptions to the channels by the plugins, the polling will 
 - Pushing data into telemetry nowadays is as simple as implementing your own `usageCollector`. For consuming, though, the telemetry team needs to update the mappings. But as soon as they do so, the previous data is available. Now we'll be more strict about the mapping. Rejecting any data that does not comply. Changing the structure of the reported data will result in data loss in that channel.
 - Hard dependency on the Pulse team's availability to update the metrics and on the Infra team to deploy the instruction handlers.
 - Testing architecture: any dockerised way to test the local dev environment?
-- We'll increase the local usage of indices. Making it more expensive to users to maintain the cluster. We need to careful with this! Although it might not change much, compared to the current implementation, if any plugin decides to maintain its own index/saved objects to do aggregations afterwards.
+- We'll increase the local usage of indices. Making it more expensive to users to maintain the cluster. We need be to careful with this! Although it might not change much, compared to the current implementation, if any plugin decides to maintain its own index/saved objects to do aggregations afterwards. Similarly, more granularity per channel, may involve more network usage.
 - It is indeed a breaking change, but it can be migrated over-time as new features, making use of the instructions.
 - We need to update other products already reporting telemetry from outside Kibana (like Beats, Enterprise Search, Logstash, ...) to use the new way of pushing telemetry.
 
