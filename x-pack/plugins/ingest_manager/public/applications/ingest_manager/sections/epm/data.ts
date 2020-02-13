@@ -17,12 +17,6 @@ export function setClient(client: HttpHandler): void {
   _fetch = client;
 }
 
-export async function getPackages(params?: { category?: string }): Promise<PackageList> {
-  const path = epmRouteService.getListPath();
-  const options = params ? { query: { ...params } } : undefined;
-  return _fetch(path, options);
-}
-
 export async function getPackagesGroupedByStatus() {
   const path = epmRouteService.getListPath();
   const list: PackageList = await _fetch(path);

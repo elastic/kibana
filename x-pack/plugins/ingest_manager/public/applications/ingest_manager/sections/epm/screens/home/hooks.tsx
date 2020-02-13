@@ -6,23 +6,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { PackageList } from '../../../../types';
-import { getPackages } from '../../data';
 import { fieldsToSearch, LocalSearch, searchIdField } from './search_packages';
 
-export function useCategoryPackages(selectedCategory: string) {
-  const [categoryPackages, setCategoryPackages] = useState<PackageList>([]);
-
-  useEffect(() => {
-    getPackages({ category: selectedCategory }).then(setCategoryPackages);
-  }, [selectedCategory]);
-
-  return [categoryPackages, setCategoryPackages] as [
-    typeof categoryPackages,
-    typeof setCategoryPackages
-  ];
-}
-
-export function useAllPackages(selectedCategory: string, categoryPackages: PackageList) {
+export function useAllPackages(selectedCategory: string, categoryPackages: PackageList = []) {
   const [allPackages, setAllPackages] = useState<PackageList>([]);
 
   useEffect(() => {

@@ -146,7 +146,7 @@ interface PackageAdditions {
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 
-export type PackageListItem = Installable<RegistrySearchResult & PackageAdditions>;
+export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 export type PackageInfo = Installable<RegistryPackage & PackageAdditions>;
 
