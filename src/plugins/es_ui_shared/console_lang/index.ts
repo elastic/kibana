@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+// Lib is intentionally not included in this barrel export file to separate worker logic
+// from being imported with pure functions
+
+export {
+  ElasticsearchSqlHighlightRules,
+  ScriptHighlightRules,
+  XJsonHighlightRules,
+  addXJsonToRules,
+  XJsonMode,
+  installXJsonMode,
+} from './ace/modes';

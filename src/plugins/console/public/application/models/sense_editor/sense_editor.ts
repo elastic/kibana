@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/static/lib';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore

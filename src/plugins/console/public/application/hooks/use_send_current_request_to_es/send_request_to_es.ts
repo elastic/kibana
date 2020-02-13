@@ -18,10 +18,10 @@
  */
 
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/static/lib';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types/common';
+import { BaseResponseType } from '../../../types';
 
 export interface EsRequestArgs {
   requests: any;

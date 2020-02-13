@@ -28,8 +28,8 @@ import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
-import { XJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/public';
-import { collapseLiteralStrings } from '../../../../../../../../../src/plugins/es_ui_shared/static/lib';
+import { XJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/console_lang';
+import { collapseLiteralStrings } from '../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib';
 
 const xJsonMode = new XJsonMode();
 

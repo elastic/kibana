@@ -26,7 +26,7 @@ import {
   useRequestReadContext,
 } from '../../../../contexts';
 
-import { expandLiteralStrings } from '../../../../../../../es_ui_shared/static/lib';
+import { expandLiteralStrings } from '../../../../../../../es_ui_shared/console_lang/lib';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';

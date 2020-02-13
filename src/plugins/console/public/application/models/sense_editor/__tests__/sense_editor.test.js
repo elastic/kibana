@@ -22,7 +22,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
-import { collapseLiteralStrings } from '../../../../../../es_ui_shared/static/lib';
+import { collapseLiteralStrings } from '../../../../../../es_ui_shared/console_lang/lib';
 const editorInput1 = require('./editor_input1.txt');
 
 describe('Editor', () => {

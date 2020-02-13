@@ -17,11 +17,6 @@
  * under the License.
  */
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
+jest.mock('./ace/modes/x_json/worker', () => ({
+  workerModule: { id: 'ace/mode/json_worker', src: '' },
+}));

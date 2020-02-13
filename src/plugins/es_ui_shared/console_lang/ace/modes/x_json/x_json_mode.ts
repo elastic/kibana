@@ -19,7 +19,7 @@
 
 import ace from 'brace';
 
-import { XJsonHighlightRules } from '../';
+import { XJsonHighlightRules } from '../index';
 import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
