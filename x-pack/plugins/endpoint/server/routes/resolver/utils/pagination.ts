@@ -6,8 +6,8 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../common/types';
-import { extractEventID } from './utils/normalize';
+import { ResolverEvent } from '../../../../common/types';
+import { extractEventID } from './normalize';
 
 export interface PaginationParams {
   size: number;
@@ -61,7 +61,7 @@ export function paginatedResults(response: SearchResponse<ResolverEvent>) {
   if (response.hits.hits.length === 0) {
     return { total, results: [], next: null };
   }
-  let next: string | null = null;
+  let next: string;
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);

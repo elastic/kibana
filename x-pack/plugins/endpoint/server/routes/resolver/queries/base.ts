@@ -6,25 +6,13 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppConstants } from '../../../../common/types';
-import { paginate, paginatedResults, PaginationParams } from '../pagination';
-import { parseLegacyEntityID } from '../utils/normalize';
+import { paginate, paginatedResults, PaginationParams } from '../utils/pagination';
 
 export abstract class ResolverQuery {
-  private endpointID: string | undefined;
-  private entityID: string;
-  private pagination: PaginationParams | undefined;
-
-  constructor(entityID: string, pagination?: PaginationParams) {
-    this.pagination = pagination;
-    const legacyID = parseLegacyEntityID(entityID);
-    if (legacyID !== null) {
-      const { endpointID, uniquePID } = legacyID;
-      this.endpointID = endpointID;
-      this.entityID = uniquePID;
-    } else {
-      this.entityID = entityID;
-    }
-  }
+  constructor(
+    private readonly endpointID?: string,
+    private readonly pagination?: PaginationParams
+  ) {}
 
   protected paginateBy(field: string, query: any) {
     if (!this.pagination) {
@@ -33,17 +21,15 @@ export abstract class ResolverQuery {
     return paginate(this.pagination, field, query);
   }
 
-  build(overrides?: string[]) {
-    const ids = overrides || [this.entityID];
-
+  build(...ids: string[]) {
     if (this.endpointID) {
       return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
     }
     return this.query(ids, EndpointAppConstants.EVENT_INDEX_NAME);
   }
 
-  async search(client: IScopedClusterClient, overrides?: string[]) {
-    return paginatedResults(await client.callAsCurrentUser('search', this.build(overrides)));
+  async search(client: IScopedClusterClient, ...ids: string[]) {
+    return paginatedResults(await client.callAsCurrentUser('search', this.build(...ids)));
   }
 
   protected abstract legacyQuery(endpointID: string, uniquePIDs: string[], index: string): any;

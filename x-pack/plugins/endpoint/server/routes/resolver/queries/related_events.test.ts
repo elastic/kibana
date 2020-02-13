@@ -10,7 +10,7 @@ describe('related events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date();
     expect(
-      new RelatedEventsQuery('endgame-5-awesome-id', { size: 1, timestamp, eventID: 'foo' }).build()
+      new RelatedEventsQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -51,7 +51,7 @@ describe('related events query', () => {
     const timestamp = new Date();
 
     expect(
-      new RelatedEventsQuery('baz', { size: 1, timestamp, eventID: 'bar' }).build()
+      new RelatedEventsQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
     ).toStrictEqual({
       body: {
         query: {

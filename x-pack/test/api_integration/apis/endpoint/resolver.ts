@@ -21,11 +21,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     after(() => esArchiver.unload('endpoint/resolver/api_feature'));
 
     describe('related events endpoint', () => {
-      const entityID = 'endgame-94042-5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const entityID = '94042';
 
       it('should return details for the root node', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/related`)
+          .get(`/api/endpoint/resolver/${entityID}/related?legacyEndpointID=${endpointID}`)
           .set(commonHeaders)
           .expect(200);
         expect(body.events.length).to.eql(1);
@@ -38,7 +39,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       it('returns no values when there is no more data', async () => {
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
-          .get(`/api/endpoint/resolver/${entityID}/related?after=t7QkNnABvfrOPnsMY1cl`)
+          .get(
+            `/api/endpoint/resolver/${entityID}/related?legacyEndpointID=${endpointID}&after=t7QkNnABvfrOPnsMY1cl`
+          )
           .set(commonHeaders)
           .expect(200);
         expect(body.events).be.empty();
@@ -48,7 +51,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('should return the first page of information when the cursor is invalid', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/related?after=blah`)
+          .get(
+            `/api/endpoint/resolver/${entityID}/related?legacyEndpointID=${endpointID}&after=blah`
+          )
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
@@ -80,9 +85,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.events).to.be.empty();
       });
 
-      it('should return no results for an invalid entity ID', async () => {
+      it('should return no results for an invalid endpoint ID', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/endgame-5-slkdfjs/related`)
+          .get(`/api/endpoint/resolver/${entityID}/related?legacyEndpointID=foo`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(0);
@@ -92,11 +97,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     });
 
     describe('lifecycle events endpoint', () => {
-      const entityID = 'endgame-94042-5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const entityID = '94042';
 
       it('should return details for the root node', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}?ancestors=5`)
+          .get(`/api/endpoint/resolver/${entityID}?legacyEndpointID=${endpointID}&ancestors=5`)
           .set(commonHeaders)
           .expect(200);
         expect(body.lifecycle.length).to.eql(2);
@@ -108,21 +114,21 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('should have a populated next parameter', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}`)
+          .get(`/api/endpoint/resolver/${entityID}?legacyEndpointID=${endpointID}`)
           .set(commonHeaders)
           .expect(200);
-        expect(body.pagination.next).to.eql('endgame-94041-5a0c957f-b8e7-4538-965e-57e8bb86ad3a');
+        expect(body.pagination.next).to.eql('94041');
       });
 
-      it('should handle a next param request', async () => {
+      it('should handle an ancestors param request', async () => {
         let { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}`)
+          .get(`/api/endpoint/resolver/${entityID}?legacyEndpointID=${endpointID}`)
           .set(commonHeaders)
           .expect(200);
         const next = body.pagination.next;
 
         ({ body } = await supertest
-          .get(`/api/endpoint/resolver/${next}?ancestors=1`)
+          .get(`/api/endpoint/resolver/${next}?legacyEndpointID=${endpointID}&ancestors=1`)
           .set(commonHeaders)
           .expect(200));
         expect(body.lifecycle.length).to.eql(1);
@@ -142,11 +148,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     });
 
     describe('children endpoint', () => {
-      const entityID = 'endgame-94041-5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+      const entityID = '94041';
 
       it('returns child process lifecycle events', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/children`)
+          .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
@@ -162,7 +169,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       it('returns no values when there is no more data', async () => {
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
-          .get(`/api/endpoint/resolver/${entityID}/children?after=trQkNnABvfrOPnsMY1cl`)
+          .get(
+            `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&after=trQkNnABvfrOPnsMY1cl`
+          )
           .set(commonHeaders)
           .expect(200);
         expect(body.children).be.empty();
@@ -172,7 +181,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('returns the first page of information when the cursor is invalid', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/children?after=blah`)
+          .get(
+            `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&after=blah`
+          )
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
@@ -189,7 +200,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(400);
         await supertest
-          .get(`/api/endpoint/resolver/${entityID}/children?page_size=-1`)
+          .get(`/api/endpoint/resolver/${entityID}/children?limit=-1`)
           .set(commonHeaders)
           .expect(400);
       });
@@ -204,9 +215,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.children).to.be.empty();
       });
 
-      it('returns empty events with an invalid legacy id', async () => {
+      it('returns empty events with an invalid endpoint id', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/endgame-5-slkdfjs/children`)
+          .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=foo`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(0);

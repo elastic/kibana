@@ -7,11 +7,12 @@
 import _ from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { extractUniqueID, getParentEntityID } from './utils/normalize';
+import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
 
 interface LifecycleQueryParams {
   ancestors: number;
+  legacyEndpointID?: string;
 }
 
 interface LifecyclePathParams {
@@ -22,8 +23,13 @@ export const validateLifecycle = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
     ancestors: schema.number({ defaultValue: 0, min: 0, max: 10 }),
+    legacyEndpointID: schema.maybe(schema.string()),
   }),
 };
+
+function getParentEntityID(results: ResolverEvent[]) {
+  return results.length === 0 ? undefined : extractParentEntityID(results[0]);
+}
 
 export function handleLifecycle(
   log: Logger
@@ -31,21 +37,19 @@ export function handleLifecycle(
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { ancestors },
+      query: { ancestors, legacyEndpointID },
     } = req;
     try {
       const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
 
-      const lifecycleQuery = new LifecycleQuery(id);
-      const { results: processLifecycle } = await lifecycleQuery.search(client);
+      const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
+      const { results: processLifecycle } = await lifecycleQuery.search(client, id);
       let next = getParentEntityID(processLifecycle);
 
       if (next) {
         for (let i = 0; i < ancestors; i++) {
-          const { results: lifecycle } = await lifecycleQuery.search(client, [
-            extractUniqueID(next),
-          ]);
+          const { results: lifecycle } = await lifecycleQuery.search(client, next);
           next = getParentEntityID(lifecycle);
 
           if (!next) {
