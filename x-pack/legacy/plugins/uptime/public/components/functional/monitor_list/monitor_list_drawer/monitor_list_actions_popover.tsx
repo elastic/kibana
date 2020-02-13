@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiButton } from '@elastic/eui';
-import React, { useContext } from 'react';
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { connect } from 'react-redux';
-import { MonitorSummary } from '../../../../common/graphql/types';
-import { IntegrationGroup } from '../integration_group';
-import { UptimeSettingsContext } from '../../../contexts';
-import { isIntegrationsPopupOpen } from '../../../state/selectors';
-import { AppState } from '../../../state';
-import { toggleIntegrationsPopover, PopoverState } from '../../../state/actions';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiPopover, EuiButton } from '@elastic/eui';
+import { IntegrationGroup } from './integration_group';
+import { MonitorSummary } from '../../../../../common/graphql/types';
+import { toggleIntegrationsPopover, PopoverState } from '../../../../state/actions';
 
 interface MonitorListActionsPopoverProps {
   summary: MonitorSummary;
@@ -22,20 +18,12 @@ interface MonitorListActionsPopoverProps {
   togglePopoverIsVisible: typeof toggleIntegrationsPopover;
 }
 
-const MonitorListActionsPopoverComponent = ({
+export const MonitorListActionsPopoverComponent = ({
   summary,
   popoverState,
   togglePopoverIsVisible,
 }: MonitorListActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
-  const {
-    basePath,
-    dateRangeStart,
-    dateRangeEnd,
-    isApmAvailable,
-    isInfraAvailable,
-    isLogsAvailable,
-  } = useContext(UptimeSettingsContext);
 
   const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);
   const isPopoverOpen: boolean =
@@ -64,30 +52,7 @@ const MonitorListActionsPopoverComponent = ({
       id={popoverId}
       isOpen={isPopoverOpen}
     >
-      <IntegrationGroup
-        basePath={basePath}
-        dateRangeStart={dateRangeStart}
-        dateRangeEnd={dateRangeEnd}
-        isApmAvailable={isApmAvailable}
-        isInfraAvailable={isInfraAvailable}
-        isLogsAvailable={isLogsAvailable}
-        summary={summary}
-      />
+      <IntegrationGroup summary={summary} />
     </EuiPopover>
   );
 };
-
-const mapStateToProps = (state: AppState) => ({
-  popoverState: isIntegrationsPopupOpen(state),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  togglePopoverIsVisible: (popoverState: PopoverState) => {
-    return dispatch(toggleIntegrationsPopover(popoverState));
-  },
-});
-
-export const MonitorListActionsPopover = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MonitorListActionsPopoverComponent);
