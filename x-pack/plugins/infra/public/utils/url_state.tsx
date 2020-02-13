@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
 import { throttle } from 'lodash';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
-import qs from 'querystring';
+import { url } from '../../../../../src/plugins/kibana_utils/public';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -144,7 +145,9 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = qs.parse(queryString)[key];
+  const parsedQueryString: Record<string, any> = parse(queryString, { sort: false });
+  const queryParam = parsedQueryString[key];
+
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
@@ -152,14 +155,17 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = qs.parse(queryString);
+  const previousQueryValues = parse(queryString, { sort: false });
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return encodeQueryParams({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+  return stringify(
+    url.encodeQuery({
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    }),
+    { sort: false, encode: false }
+  );
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
@@ -171,17 +177,4 @@ const replaceQueryStringInLocation = (location: Location, queryString: string): 
       search: `?${queryString}`,
     };
   }
-};
-
-/* We need a custom method because encodeURIComponent (used by qs.stringify) is too aggressive and
-encodes stuff that doesn't have to be encoded per http://tools.ietf.org/html/rfc3986. This mimics the
-legacy encodeQueryComponent() Kibana function */
-export const encodeQueryParams = (params: Record<string, any>) => {
-  return qs
-    .stringify(params)
-    .replace(/%40/gi, '@')
-    .replace(/%3A/gi, ':')
-    .replace(/%24/g, '$')
-    .replace(/%2C/gi, ',')
-    .replace(/%20/g, '%20');
 };

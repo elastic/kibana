@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
-import qs from 'querystring';
+import { url } from '../../../../../src/plugins/kibana_utils/public';
+
 import { useHistory } from './history_context';
-import { encodeQueryParams } from './url_state';
 
 export const useUrlState = <State>({
   defaultState,
@@ -84,7 +85,7 @@ export const useUrlState = <State>({
   return [state, setState] as [typeof state, typeof setState];
 };
 
-const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
+const decodeRisonUrlState = (value: string | undefined | null): RisonValue | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -99,8 +100,10 @@ const encodeRisonUrlState = (state: any) => encode(state);
 
 const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
-const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = qs.parse(queryString)[key];
+const getParamFromQueryString = (queryString: string, key: string) => {
+  const parsedQueryString = parse(queryString, { sort: false });
+  const queryParam = parsedQueryString[key];
+
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
@@ -108,13 +111,17 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = qs.parse(queryString);
+  const previousQueryValues = parse(queryString, { sort: false });
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return encodeQueryParams({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+
+  return stringify(
+    url.encodeQuery({
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    }),
+    { sort: false, encode: false }
+  );
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
