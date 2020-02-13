@@ -18,9 +18,6 @@ export enum Comparator {
 export enum AlertStates {
   OK,
   ALERT,
-  WARN,
-  NO_DATA,
-  SNOOZED,
 }
 
 export interface MetricThresholdAlertTypeParams {

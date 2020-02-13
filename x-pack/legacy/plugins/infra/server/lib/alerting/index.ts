@@ -5,4 +5,3 @@
  */
 
 export { registerAlertTypes } from './register_alert_types';
-export * from './saved_object_mappings';

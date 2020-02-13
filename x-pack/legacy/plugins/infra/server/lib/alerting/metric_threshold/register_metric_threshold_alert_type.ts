@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import {
@@ -12,7 +13,10 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from './types';
 import { AlertServices } from '../../../../../alerting/server/types';
-import { infraMetricAlertSavedObjectType } from '../saved_object_mappings';
+
+const FIRED_ACTIONS = i18n.translate('xpack.metrics.alerting.threshold.fired', {
+  defaultMessage: 'fired',
+});
 
 async function getMetric(
   { callCluster }: AlertServices,
@@ -91,7 +95,7 @@ export async function registerMetricThresholdAlertType(server: Server) {
     );
   }
 
-  alerting.registerType({
+  alerting.setup.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric Alert - Threshold',
     validate: {
@@ -108,8 +112,8 @@ export async function registerMetricThresholdAlertType(server: Server) {
         indexPattern: schema.string(),
       }),
     },
-    actionGroups: ['fired', 'recovered'],
-    async executor({ alertId, services, params }) {
+    actionGroups: [FIRED_ACTIONS],
+    async executor({ services, params }) {
       const { threshold, comparator, searchField } = params as MetricThresholdAlertTypeParams;
       const alertInstance = services.alertInstanceFactory(
         `${searchField.name}:${searchField.value}`
@@ -133,18 +137,17 @@ export async function registerMetricThresholdAlertType(server: Server) {
 
       // Only schedule actions when the value tranverses the threshold; don't renotify
       // over and over again if the value remains in an alert state
-      if (shouldFire || shouldRecover) {
-        alertInstance.scheduleActions(shouldFire ? 'fired' : 'recovered', {
+      if (shouldFire) {
+        alertInstance.scheduleActions(FIRED_ACTIONS, {
           value: currentValue,
         });
+      }
+      if (shouldFire || shouldRecover) {
         nextAlertState = shouldFire ? AlertStates.ALERT : AlertStates.OK;
       }
 
       alertInstance.replaceState({
         alertState: nextAlertState,
-      });
-      services.savedObjectsClient.update(infraMetricAlertSavedObjectType, alertId, {
-        currentAlertState: nextAlertState,
       });
     },
   });
