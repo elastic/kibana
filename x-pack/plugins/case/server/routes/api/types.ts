@@ -25,9 +25,9 @@ export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;
 
 export interface CaseAttributes extends NewCaseType, SavedObjectAttributes {
-  created_at: number;
+  created_at: string;
   created_by: UserType;
-  updated_at: number;
+  updated_at: string;
 }
 
 export type FlattenedCaseSavedObject = CaseAttributes & {
@@ -68,5 +68,5 @@ export interface UpdatedCaseType {
   state?: UpdatedCaseTyped['state'];
   tags?: UpdatedCaseTyped['tags'];
   title?: UpdatedCaseTyped['title'];
-  updated_at: number;
+  updated_at: string;
 }

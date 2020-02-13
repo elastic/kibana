@@ -27,7 +27,7 @@ export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
           commentId: request.params.id,
           updatedAttributes: {
             ...request.body,
-            updated_at: new Date().valueOf(),
+            updated_at: new Date().toISOString(),
           },
         });
         return response.ok({ body: updatedComment.attributes });
