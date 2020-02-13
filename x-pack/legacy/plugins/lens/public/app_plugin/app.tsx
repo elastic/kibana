@@ -321,16 +321,16 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModal
             onSave={props => {
-              const pinnedFilters = lastKnownDoc.state?.filters.filter(esFilters.isFilterPinned);
-
-              const lastDocWithoutPinned = pinnedFilters
+              const [pinnedFilters, appFilters] = _.partition(
+                lastKnownDoc.state?.filters,
+                esFilters.isFilterPinned
+              );
+              const lastDocWithoutPinned = pinnedFilters?.length
                 ? {
                     ...lastKnownDoc,
                     state: {
                       ...lastKnownDoc.state,
-                      filters: lastKnownDoc.state?.filters.filter(
-                        f => !esFilters.isFilterPinned(f)
-                      ),
+                      filters: appFilters,
                     },
                   }
                 : lastKnownDoc;
