@@ -146,11 +146,7 @@ export class Fetch {
     try {
       response = await window.fetch(request);
     } catch (err) {
-      if (err.name === 'AbortError') {
-        throw err;
-      } else {
-        throw new HttpFetchError(err.message, request);
-      }
+      throw new HttpFetchError(err.message, err.name ?? 'FetchError', request);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -170,11 +166,11 @@ export class Fetch {
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, request, response, body);
+      throw new HttpFetchError(err.message, err.name ?? 'FetchError', request, response, body);
     }
 
     if (!response.ok) {
-      throw new HttpFetchError(response.statusText, request, response, body);
+      throw new HttpFetchError(response.statusText, 'FetchError', request, response, body);
     }
 
     return { fetchOptions, request, response, body };
