@@ -17,12 +17,18 @@
  * under the License.
  */
 
+import chalk from 'chalk';
+
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-export const PidConversion: Conversion = {
-  pattern: /%pid/g,
-  convert(record: LogRecord) {
-    return String(record.pid);
+export const LoggerConversion: Conversion = {
+  pattern: /%logger/g,
+  convert(record: LogRecord, highlight: boolean) {
+    let message = record.context;
+    if (highlight) {
+      message = chalk.magenta(message);
+    }
+    return message;
   },
 };
