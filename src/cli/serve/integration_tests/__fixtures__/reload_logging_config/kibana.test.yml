@@ -1,8 +1,11 @@
 server:
+  autoListen: false
   port: 8274
 logging:
-  json: true
+  json: false
 optimize:
   enabled: false
 plugins:
   initialize: false
+migrations:
+  skip: true
