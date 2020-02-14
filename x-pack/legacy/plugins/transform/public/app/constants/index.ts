@@ -8,6 +8,7 @@ export const CLIENT_BASE_PATH = '/management/elasticsearch/transform';
 
 export enum SECTION_SLUG {
   HOME = 'transform_management',
+  CLONE_TRANSFORM = 'clone_transform',
   CREATE_TRANSFORM = 'create_transform',
 }
 

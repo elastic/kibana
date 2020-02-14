@@ -11,25 +11,21 @@ import {
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../../src/plugins/data/public';
-import { KibanaConfig } from '../../../../../../../../src/legacy/server/kbn_server';
-
-// set() method is missing in original d.ts
-interface KibanaConfigTypeFix extends KibanaConfig {
-  set(key: string, value: any): void;
-}
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IUiSettingsClient } from '../../../../../../../../src/core/public/ui_settings';
 
 interface UninitializedKibanaContextValue {
-  initialized: boolean;
+  initialized: false;
 }
 
 export interface InitializedKibanaContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPattern;
-  currentSavedSearch: SavedSearch;
   indexPatterns: IndexPatternsContract;
-  initialized: boolean;
+  initialized: true;
   kbnBaseUrl: string;
-  kibanaConfig: KibanaConfigTypeFix;
+  kibanaConfig: IUiSettingsClient;
+  currentIndexPattern: IndexPattern;
+  currentSavedSearch?: SavedSearch;
 }
 
 export type KibanaContextValue = UninitializedKibanaContextValue | InitializedKibanaContextValue;

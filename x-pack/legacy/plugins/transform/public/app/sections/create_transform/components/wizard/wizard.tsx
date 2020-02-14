@@ -10,9 +10,20 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
+import { Dictionary } from '../../../../../../common/types/common';
+
 import { useKibanaContext } from '../../../../lib/kibana';
 
-import { getCreateRequestBody } from '../../../../common';
+import {
+  getCreateRequestBody,
+  PivotAggsConfig,
+  PivotAggsConfigDict,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
+  TransformPivotConfig,
+  PIVOT_SUPPORTED_AGGS,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
+} from '../../../../common';
 
 import {
   StepDefineExposedState,
@@ -67,117 +78,157 @@ const StepDefine: FC<DefinePivotStepProps> = ({
   );
 };
 
-export const Wizard: FC = React.memo(() => {
-  const kibanaContext = useKibanaContext();
+interface WizardProps {
+  transformConfig?: TransformPivotConfig;
+}
 
-  // The current WIZARD_STEP
-  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
+export const Wizard: FC<WizardProps> = React.memo(
+  ({ transformConfig: originalTransformConfig }) => {
+    const kibanaContext = useKibanaContext();
 
-  // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(kibanaContext));
+    // The current WIZARD_STEP
+    const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
-  // The DETAILS state
-  const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());
+    // The DEFINE state
+    const originalStepDefineState = getDefaultStepDefineState(kibanaContext);
+    if (originalTransformConfig !== undefined) {
+      originalStepDefineState.aggList = Object.keys(
+        originalTransformConfig.pivot.aggregations
+      ).reduce((aggList, aggName) => {
+        const aggConfig = originalTransformConfig.pivot.aggregations[aggName] as Dictionary<any>;
+        const agg = Object.keys(aggConfig)[0];
+        aggList[aggName] = {
+          agg: agg as PIVOT_SUPPORTED_AGGS,
+          aggName,
+          dropDownName: aggName,
+          ...aggConfig[agg],
+        } as PivotAggsConfig;
+        return aggList;
+      }, {} as PivotAggsConfigDict);
 
-  const stepDetails =
-    currentStep === WIZARD_STEPS.DETAILS ? (
-      <StepDetailsForm onChange={setStepDetailsState} overrides={stepDetailsState} />
-    ) : (
-      <StepDetailsSummary {...stepDetailsState} />
-    );
+      originalStepDefineState.groupByList = Object.keys(
+        originalTransformConfig.pivot.group_by
+      ).reduce((groupByList, groupByName) => {
+        const groupByConfig = originalTransformConfig.pivot.group_by[groupByName] as Dictionary<
+          any
+        >;
+        const groupBy = Object.keys(groupByConfig)[0];
+        groupByList[groupByName] = {
+          agg: groupBy as PIVOT_SUPPORTED_GROUP_BY_AGGS,
+          aggName: groupByName,
+          dropDownName: groupByName,
+          ...groupByConfig[groupBy],
+        } as PivotGroupByConfig;
+        return groupByList;
+      }, {} as PivotGroupByConfigDict);
 
-  // The CREATE state
-  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
-
-  useEffect(() => {
-    // The transform plugin doesn't control the wrapping management page via React
-    // so we use plain JS to add and remove a custom CSS class to set the full
-    // page width to 100% for the transform wizard. It's done to replicate the layout
-    // as it was when transforms were part of the ML plugin. This will be revisited
-    // to come up with an approach that's more in line with the overall layout
-    // of the Kibana management section.
-    const managementBody = document.getElementsByClassName(
-      KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
-    );
-
-    if (managementBody.length > 0) {
-      managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
-      return () => {
-        managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
-      };
+      originalStepDefineState.valid = true;
     }
-  }, []);
+    const [stepDefineState, setStepDefineState] = useState(originalStepDefineState);
 
-  const indexPattern = kibanaContext.currentIndexPattern;
+    // The DETAILS state
+    const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());
 
-  const transformConfig = getCreateRequestBody(
-    indexPattern.title,
-    stepDefineState,
-    stepDetailsState
-  );
+    const stepDetails =
+      currentStep === WIZARD_STEPS.DETAILS ? (
+        <StepDetailsForm onChange={setStepDetailsState} overrides={stepDetailsState} />
+      ) : (
+        <StepDetailsSummary {...stepDetailsState} />
+      );
 
-  const stepCreate =
-    currentStep === WIZARD_STEPS.CREATE ? (
-      <StepCreateForm
-        createIndexPattern={stepDetailsState.createIndexPattern}
-        transformId={stepDetailsState.transformId}
-        transformConfig={transformConfig}
-        onChange={setStepCreateState}
-        overrides={stepCreateState}
-      />
-    ) : (
-      <StepCreateSummary />
+    // The CREATE state
+    const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
+
+    useEffect(() => {
+      // The transform plugin doesn't control the wrapping management page via React
+      // so we use plain JS to add and remove a custom CSS class to set the full
+      // page width to 100% for the transform wizard. It's done to replicate the layout
+      // as it was when transforms were part of the ML plugin. This will be revisited
+      // to come up with an approach that's more in line with the overall layout
+      // of the Kibana management section.
+      const managementBody = document.getElementsByClassName(
+        KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
+      );
+
+      if (managementBody.length > 0) {
+        managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+        return () => {
+          managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+        };
+      }
+    }, []);
+
+    const indexPattern = kibanaContext.currentIndexPattern;
+
+    const transformConfig = getCreateRequestBody(
+      indexPattern.title,
+      stepDefineState,
+      stepDetailsState
     );
 
-  const stepsConfig = [
-    {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDefineTitle', {
-        defaultMessage: 'Define pivot',
-      }),
-      children: (
-        <StepDefine
-          isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
-          stepDefineState={stepDefineState}
-          setCurrentStep={setCurrentStep}
-          setStepDefineState={setStepDefineState}
+    const stepCreate =
+      currentStep === WIZARD_STEPS.CREATE ? (
+        <StepCreateForm
+          createIndexPattern={stepDetailsState.createIndexPattern}
+          transformId={stepDetailsState.transformId}
+          transformConfig={transformConfig}
+          onChange={setStepCreateState}
+          overrides={stepCreateState}
         />
-      ),
-    },
-    {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
-        defaultMessage: 'Transform details',
-      }),
-      children: (
-        <Fragment>
-          {stepDetails}
-          {currentStep === WIZARD_STEPS.DETAILS && (
-            <WizardNav
-              previous={() => {
-                setCurrentStep(WIZARD_STEPS.DEFINE);
-              }}
-              next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-              nextActive={stepDetailsState.valid}
-            />
-          )}
-        </Fragment>
-      ),
-      status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-    },
-    {
-      title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
-        defaultMessage: 'Create',
-      }),
-      children: (
-        <Fragment>
-          {stepCreate}
-          {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
-          )}
-        </Fragment>
-      ),
-      status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-    },
-  ];
+      ) : (
+        <StepCreateSummary />
+      );
 
-  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
-});
+    const stepsConfig = [
+      {
+        title: i18n.translate('xpack.transform.transformsWizard.stepDefineTitle', {
+          defaultMessage: 'Define pivot',
+        }),
+        children: (
+          <StepDefine
+            isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
+            stepDefineState={stepDefineState}
+            setCurrentStep={setCurrentStep}
+            setStepDefineState={setStepDefineState}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
+          defaultMessage: 'Transform details',
+        }),
+        children: (
+          <Fragment>
+            {stepDetails}
+            {currentStep === WIZARD_STEPS.DETAILS && (
+              <WizardNav
+                previous={() => {
+                  setCurrentStep(WIZARD_STEPS.DEFINE);
+                }}
+                next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
+                nextActive={stepDetailsState.valid}
+              />
+            )}
+          </Fragment>
+        ),
+        status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+      },
+      {
+        title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
+          defaultMessage: 'Create',
+        }),
+        children: (
+          <Fragment>
+            {stepCreate}
+            {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
+              <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
+            )}
+          </Fragment>
+        ),
+        status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
+      },
+    ];
+
+    return <EuiSteps className="transform__steps" steps={stepsConfig} />;
+  }
+);

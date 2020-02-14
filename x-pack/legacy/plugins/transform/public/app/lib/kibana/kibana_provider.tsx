@@ -17,7 +17,7 @@ import {
   loadCurrentSavedSearch,
 } from './common';
 
-import { KibanaContext, KibanaContextValue } from './kibana_context';
+import { InitializedKibanaContextValue, KibanaContext, KibanaContextValue } from './kibana_context';
 
 const indexPatterns = npStart.plugins.data.indexPatterns;
 const savedObjectsClient = npStart.core.savedObjects.client;
@@ -52,20 +52,20 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
 
     const kibanaConfig = npStart.core.uiSettings;
 
-    const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
-      fetchedIndexPattern,
-      fetchedSavedSearch,
-      kibanaConfig
-    );
-
-    const kibanaContext = {
+    const {
+      indexPattern: currentIndexPattern,
+      savedSearch: currentSavedSearch,
       combinedQuery,
-      currentIndexPattern: indexPattern,
-      currentSavedSearch: savedSearch,
+    } = createSearchItems(fetchedIndexPattern, fetchedSavedSearch, kibanaConfig);
+
+    const kibanaContext: InitializedKibanaContextValue = {
       indexPatterns,
       initialized: true,
       kbnBaseUrl: npStart.core.injectedMetadata.getBasePath(),
       kibanaConfig,
+      combinedQuery,
+      currentIndexPattern,
+      currentSavedSearch,
     };
 
     setContextValue(kibanaContext);
