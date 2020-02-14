@@ -13,4 +13,3 @@ export const plugin = (context: PluginInitializerContext) => {
 
 export { ReportingCore } from './core';
 export { ReportingPlugin } from './plugin';
-export { ReportingSetupDeps, ReportingStartDeps } from './types.d';

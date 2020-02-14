@@ -16,7 +16,8 @@ jest.mock('../log_configuration');
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
-import { ReportingCore, ReportingPlugin, ReportingSetupDeps, ReportingStartDeps } from '../server';
+import { ReportingPlugin, ReportingCore } from '../server';
+import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
 
 export const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => ({
   elasticsearch: setupMock.elasticsearch,
