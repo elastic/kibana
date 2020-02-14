@@ -32,14 +32,14 @@ export const EnrollmentApiKeysTable: React.FC<{
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.apiKeysList.policyColumnTitle', {
         defaultMessage: 'Policy',
       }),
       width: '100px',
     },
     {
       field: null,
-      name: i18n.translate('xpack.ingestManager.agentList.apiKeyColumnTitle', {
+      name: i18n.translate('xpack.ingestManager.apiKeysList.apiKeyColumnTitle', {
         defaultMessage: 'API Key',
       }),
       render: (key: EnrollmentAPIKey) => <ApiKeyField apiKeyId={key.id} />,
@@ -76,7 +76,7 @@ export const EnrollmentApiKeysTable: React.FC<{
         loading={isLoading}
         noItemsMessage={
           <FormattedMessage
-            id="xpack.ingestManager.agentList.emptyEnrollmentKeysMessage"
+            id="xpack.ingestManager.apiKeysList.emptyEnrollmentKeysMessage"
             defaultMessage="No api keys"
           />
         }
