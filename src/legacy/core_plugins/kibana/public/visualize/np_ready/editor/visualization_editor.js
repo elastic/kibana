@@ -36,7 +36,7 @@ export function initVisEditorDirective(app, deps) {
           editor.render({
             core: deps.core,
             data: deps.data,
-            embeddables: deps.embeddables,
+            embeddable: deps.embeddable,
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,
