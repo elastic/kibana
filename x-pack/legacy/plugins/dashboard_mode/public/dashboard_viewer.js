@@ -40,9 +40,7 @@ import { localApplicationService } from 'plugins/kibana/local_application_servic
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
-uiModules
-  .get('kibana')
-  .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+npStart.plugins.kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
 
 localApplicationService.attachToAngular(routes);
 
@@ -60,7 +58,7 @@ uiModules.get('kibana').run(showAppRedirectNotification);
  * show that dashboard, otherwise, we'll show the default dasbhoard landing page.
  */
 function defaultUrl() {
-  const defaultAppId = npStart.plugins.kibana_legacy.config.defaultAppId || '';
+  const defaultAppId = npStart.plugins.kibanaLegacy.config.defaultAppId || '';
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());
   return isDashboardId ? `/${defaultAppId}` : DashboardConstants.LANDING_PAGE_PATH;
 }

@@ -21,8 +21,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiPage,
+  EuiPageBody,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -74,8 +78,7 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
-import { timefilter } from 'ui/timefilter';
-import { toastNotifications } from 'ui/notify';
+import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -87,8 +90,17 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
-    <JobSelector {...jobSelectorProps} />
-    {children}
+    <EuiPage style={{ padding: '0px', background: 'none' }}>
+      <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+          </h1>
+        </EuiScreenReaderOnly>
+        <JobSelector {...jobSelectorProps} />
+        {children}
+      </EuiPageBody>
+    </EuiPage>
   </div>
 );
 
@@ -242,6 +254,7 @@ export class Explorer extends React.Component {
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
 
+      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable', {
           defaultMessage:
@@ -338,12 +351,13 @@ export class Explorer extends React.Component {
       viewBySwimlaneData.laneLabels &&
       viewBySwimlaneData.laneLabels.length > 0;
 
+    const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
 
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
-          {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
+          {/* Make sure ChartTooltip is inside wrapping div with 0px left/right padding so positioning can be inferred correctly. */}
           <ChartTooltip />
 
           {noInfluencersConfigured === false && influencers !== undefined && (
@@ -372,27 +386,28 @@ export class Explorer extends React.Component {
           )}
 
           {noInfluencersConfigured === false && (
-            <div
-              className="column col-xs-2 euiText"
-              data-test-subj="mlAnomalyExplorerInfluencerList"
-            >
-              <span className="panel-title">
-                <FormattedMessage
-                  id="xpack.ml.explorer.topInfuencersTitle"
-                  defaultMessage="Top Influencers"
-                />
-              </span>
+            <div className="column col-xs-2" data-test-subj="mlAnomalyExplorerInfluencerList">
+              <EuiTitle className="panel-title">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.explorer.topInfuencersTitle"
+                    defaultMessage="Top influencers"
+                  />
+                </h2>
+              </EuiTitle>
               <InfluencersList influencers={influencers} influencerFilter={this.applyFilter} />
             </div>
           )}
 
           <div className={mainColumnClasses}>
-            <span className="panel-title euiText">
-              <FormattedMessage
-                id="xpack.ml.explorer.anomalyTimelineTitle"
-                defaultMessage="Anomaly timeline"
-              />
-            </span>
+            <EuiTitle className="panel-title">
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.explorer.anomalyTimelineTitle"
+                  defaultMessage="Anomaly timeline"
+                />
+              </h2>
+            </EuiTitle>
 
             <div
               className="ml-explorer-swimlane euiText"
@@ -507,12 +522,14 @@ export class Explorer extends React.Component {
 
             {annotationsData.length > 0 && (
               <>
-                <span className="panel-title euiText">
-                  <FormattedMessage
-                    id="xpack.ml.explorer.annotationsTitle"
-                    defaultMessage="Annotations"
-                  />
-                </span>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </h2>
+                </EuiTitle>
                 <AnnotationsTable
                   annotations={annotationsData}
                   drillDown={true}
@@ -523,9 +540,14 @@ export class Explorer extends React.Component {
               </>
             )}
 
-            <span className="panel-title euiText">
-              <FormattedMessage id="xpack.ml.explorer.anomaliesTitle" defaultMessage="Anomalies" />
-            </span>
+            <EuiTitle className="panel-title">
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.explorer.anomaliesTitle"
+                  defaultMessage="Anomalies"
+                />
+              </h2>
+            </EuiTitle>
 
             <EuiFlexGroup
               direction="row"

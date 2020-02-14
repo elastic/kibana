@@ -6,7 +6,25 @@
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
 
+/**
+ * A JSON-like structure.
+ */
+export interface JSONish {
+  [key: string]: number | string | null | undefined | JSONish | JSONish[];
+}
+
+/**
+ * The context for Endpoint apps.
+ */
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
+}
+
+/**
+ * Request params for alert queries.
+ */
+export interface AlertRequestParams {
+  page_index?: number;
+  page_size?: number;
 }
