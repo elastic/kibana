@@ -16,7 +16,7 @@ import { AlertServices } from '../../../../../alerting/server/types';
 
 const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
-  name: i18n.translate('xpack.metrics.alerting.threshold.fired', {
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
     defaultMessage: 'Fired',
   }),
 };
