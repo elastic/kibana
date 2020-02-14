@@ -37,6 +37,7 @@ describe('Fetch', () => {
   });
   afterEach(() => {
     fetchMock.restore();
+    fetchInstance.removeAllInterceptors();
   });
 
   describe('http requests', () => {
@@ -287,6 +288,42 @@ describe('Fetch', () => {
       });
     });
 
+    it('preserves the name of the original error', async () => {
+      expect.assertions(1);
+
+      const abortError = new DOMException('The operation was aborted.', 'AbortError');
+
+      fetchMock.get('*', Promise.reject(abortError));
+
+      await fetchInstance.fetch('/my/path').catch(e => {
+        expect(e.name).toEqual('AbortError');
+      });
+    });
+
+    it('exposes the request to the interceptors in case of aborted request', async () => {
+      const responseErrorSpy = jest.fn();
+      const abortError = new DOMException('The operation was aborted.', 'AbortError');
+
+      fetchMock.get('*', Promise.reject(abortError));
+
+      fetchInstance.intercept({
+        responseError: responseErrorSpy,
+      });
+
+      await expect(fetchInstance.fetch('/my/path')).rejects.toThrow();
+
+      expect(responseErrorSpy).toHaveBeenCalledTimes(1);
+      const interceptedResponse = responseErrorSpy.mock.calls[0][0];
+
+      expect(interceptedResponse.request).toEqual(
+        expect.objectContaining({
+          method: 'GET',
+          url: 'http://localhost/myBase/my/path',
+        })
+      );
+      expect(interceptedResponse.error.name).toEqual('AbortError');
+    });
+
     it('should support get() helper', async () => {
       fetchMock.get('*', {});
       await fetchInstance.get('/my/path', { method: 'POST' });
@@ -366,11 +403,6 @@ describe('Fetch', () => {
   describe('interception', () => {
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });
-    });
-
-    afterEach(() => {
-      fetchMock.restore();
-      fetchInstance.removeAllInterceptors();
     });
 
     it('should make request and receive response', async () => {

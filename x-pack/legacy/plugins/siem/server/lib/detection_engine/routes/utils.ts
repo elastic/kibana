@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
+import { LegacyServices } from '../../../types';
 
 export interface OutputError {
   message: string;
@@ -174,21 +174,9 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-): string => {
-  const spaceId = server.plugins.spaces?.getSpaceId?.(request) ?? 'default';
-  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  return `${signalsIndex}-${spaceId}`;
-};
+export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
+  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  const spaceId = getSpaceId();
 
-export const callWithRequestFactory = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  return <T, U>(endpoint: string, params: T, options?: U) => {
-    return callWithRequest(request, endpoint, params, options);
-  };
+  return `${signalsIndex}-${spaceId}`;
 };

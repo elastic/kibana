@@ -9,13 +9,8 @@ import {
   NetworkHttpData,
   NetworkTopCountriesData,
   NetworkTopNFlowData,
-  NetworkDsOverTimeData,
 } from '../../graphql/types';
-import {
-  FrameworkRequest,
-  RequestOptionsPaginated,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TotalValue } from '../types';
 import { NetworkDnsRequestOptions } from '.';
 
@@ -29,10 +24,6 @@ export interface NetworkAdapter {
     options: RequestOptionsPaginated
   ): Promise<NetworkTopNFlowData>;
   getNetworkDns(req: FrameworkRequest, options: NetworkDnsRequestOptions): Promise<NetworkDnsData>;
-  getNetworkDnsHistogramData(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<NetworkDsOverTimeData>;
   getNetworkHttp(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkHttpData>;
 }
 

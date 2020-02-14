@@ -303,6 +303,14 @@ export enum FlowTarget {
   source = 'source',
 }
 
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns',
+}
+
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
@@ -462,22 +470,14 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-
-  AlertsHistogram: AlertsOverTimeData;
-
-  AnomaliesHistogram: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-
-  AuthenticationsHistogram: AuthenticationsOverTimeData;
 
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
-
-  EventsHistogram: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -494,6 +494,8 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
+
+  MatrixHistogram: MatrixHistogramOverTimeData;
 
   NetworkTopCountries: NetworkTopCountriesData;
 
@@ -566,36 +568,6 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
-}
-
-export interface AlertsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
-export interface AnomaliesOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -732,12 +704,10 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface AuthenticationsOverTimeData {
-  inspect?: Maybe<Inspect>;
+export interface Inspect {
+  dsl: string[];
 
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
+  response: string[];
 }
 
 export interface TimelineData {
@@ -1392,14 +1362,6 @@ export interface LastEventTimeData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface EventsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1598,6 +1560,22 @@ export interface KpiHostDetailsData {
   uniqueDestinationIpsHistogram?: Maybe<KpiHostHistogramData[]>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface MatrixHistogramOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x?: Maybe<number>;
+
+  y?: Maybe<number>;
+
+  g?: Maybe<string>;
 }
 
 export interface NetworkTopCountriesData {
@@ -2243,24 +2221,6 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
-export interface AlertsHistogramSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  timerange: TimerangeInput;
-
-  stackByField?: Maybe<string>;
-}
-export interface AnomaliesHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
-}
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
@@ -2269,15 +2229,6 @@ export interface AuthenticationsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
-}
-export interface AuthenticationsHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2307,15 +2258,6 @@ export interface LastEventTimeSourceArgs {
   details: LastTimeDetails;
 
   defaultIndex: string[];
-}
-export interface EventsHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2398,6 +2340,17 @@ export interface KpiHostDetailsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+}
+export interface MatrixHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField: string;
+
+  histogramType: HistogramType;
 }
 export interface NetworkTopCountriesSourceArgs {
   id?: Maybe<string>;
@@ -2910,26 +2863,14 @@ export namespace SourceResolvers {
     configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, TContext>;
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, TContext>;
-
-    AlertsHistogram?: AlertsHistogramResolver<AlertsOverTimeData, TypeParent, TContext>;
-
-    AnomaliesHistogram?: AnomaliesHistogramResolver<AnomaliesOverTimeData, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
-
-    AuthenticationsHistogram?: AuthenticationsHistogramResolver<
-      AuthenticationsOverTimeData,
-      TypeParent,
-      TContext
-    >;
 
     Timeline?: TimelineResolver<TimelineData, TypeParent, TContext>;
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, TContext>;
 
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, TContext>;
-
-    EventsHistogram?: EventsHistogramResolver<EventsOverTimeData, TypeParent, TContext>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, TContext>;
 
@@ -2946,6 +2887,8 @@ export namespace SourceResolvers {
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, TContext>;
 
     KpiHostDetails?: KpiHostDetailsResolver<KpiHostDetailsData, TypeParent, TContext>;
+
+    MatrixHistogram?: MatrixHistogramResolver<MatrixHistogramOverTimeData, TypeParent, TContext>;
 
     NetworkTopCountries?: NetworkTopCountriesResolver<
       NetworkTopCountriesData,
@@ -2987,36 +2930,6 @@ export namespace SourceResolvers {
     Parent,
     TContext
   >;
-  export type AlertsHistogramResolver<
-    R = AlertsOverTimeData,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, AlertsHistogramArgs>;
-  export interface AlertsHistogramArgs {
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-
-    timerange: TimerangeInput;
-
-    stackByField?: Maybe<string>;
-  }
-
-  export type AnomaliesHistogramResolver<
-    R = AnomaliesOverTimeData,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, AnomaliesHistogramArgs>;
-  export interface AnomaliesHistogramArgs {
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-
-    stackByField?: Maybe<string>;
-  }
-
   export type AuthenticationsResolver<
     R = AuthenticationsData,
     Parent = Source,
@@ -3030,21 +2943,6 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
-  }
-
-  export type AuthenticationsHistogramResolver<
-    R = AuthenticationsOverTimeData,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, AuthenticationsHistogramArgs>;
-  export interface AuthenticationsHistogramArgs {
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-
-    stackByField?: Maybe<string>;
   }
 
   export type TimelineResolver<
@@ -3092,21 +2990,6 @@ export namespace SourceResolvers {
     details: LastTimeDetails;
 
     defaultIndex: string[];
-  }
-
-  export type EventsHistogramResolver<
-    R = EventsOverTimeData,
-    Parent = Source,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext, EventsHistogramArgs>;
-  export interface EventsHistogramArgs {
-    timerange: TimerangeInput;
-
-    filterQuery?: Maybe<string>;
-
-    defaultIndex: string[];
-
-    stackByField?: Maybe<string>;
   }
 
   export type HostsResolver<R = HostsData, Parent = Source, TContext = SiemContext> = Resolver<
@@ -3239,6 +3122,23 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
+  }
+
+  export type MatrixHistogramResolver<
+    R = MatrixHistogramOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, MatrixHistogramArgs>;
+  export interface MatrixHistogramArgs {
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+
+    timerange: TimerangeInput;
+
+    stackByField: string;
+
+    histogramType: HistogramType;
   }
 
   export type NetworkTopCountriesResolver<
@@ -3575,111 +3475,6 @@ export namespace IndexFieldResolvers {
   export type FormatResolver<
     R = Maybe<string>,
     Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace AlertsOverTimeDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-
-    matrixHistogramData?: MatrixHistogramDataResolver<
-      MatrixOverTimeHistogramData[],
-      TypeParent,
-      TContext
-    >;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-  }
-
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = AlertsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type MatrixHistogramDataResolver<
-    R = MatrixOverTimeHistogramData[],
-    Parent = AlertsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = AlertsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace InspectResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = Inspect> {
-    dsl?: DslResolver<string[], TypeParent, TContext>;
-
-    response?: ResponseResolver<string[], TypeParent, TContext>;
-  }
-
-  export type DslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type ResponseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-}
-
-export namespace MatrixOverTimeHistogramDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
-
-    y?: YResolver<number, TypeParent, TContext>;
-
-    g?: GResolver<string, TypeParent, TContext>;
-  }
-
-  export type XResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type YResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GResolver<
-    R = string,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace AnomaliesOverTimeDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-
-    matrixHistogramData?: MatrixHistogramDataResolver<
-      MatrixOverTimeHistogramData[],
-      TypeParent,
-      TContext
-    >;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-  }
-
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = AnomaliesOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type MatrixHistogramDataResolver<
-    R = MatrixOverTimeHistogramData[],
-    Parent = AnomaliesOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = AnomaliesOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -4129,34 +3924,23 @@ export namespace PageInfoPaginatedResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace AuthenticationsOverTimeDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+export namespace InspectResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = Inspect> {
+    dsl?: DslResolver<string[], TypeParent, TContext>;
 
-    matrixHistogramData?: MatrixHistogramDataResolver<
-      MatrixOverTimeHistogramData[],
-      TypeParent,
-      TContext
-    >;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+    response?: ResponseResolver<string[], TypeParent, TContext>;
   }
 
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = AuthenticationsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type MatrixHistogramDataResolver<
-    R = MatrixOverTimeHistogramData[],
-    Parent = AuthenticationsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = AuthenticationsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
+  export type DslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type ResponseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
 }
 
 export namespace TimelineDataResolvers {
@@ -6343,36 +6127,6 @@ export namespace LastEventTimeDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace EventsOverTimeDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = EventsOverTimeData> {
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-
-    matrixHistogramData?: MatrixHistogramDataResolver<
-      MatrixOverTimeHistogramData[],
-      TypeParent,
-      TContext
-    >;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-  }
-
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = EventsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type MatrixHistogramDataResolver<
-    R = MatrixOverTimeHistogramData[],
-    Parent = EventsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = EventsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace HostsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostsData> {
     edges?: EdgesResolver<HostsEdges[], TypeParent, TContext>;
@@ -7073,6 +6827,62 @@ export namespace KpiHostDetailsDataResolvers {
   export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = KpiHostDetailsData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixHistogramOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixHistogramOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    matrixHistogramData?: MatrixHistogramDataResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = MatrixHistogramOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MatrixHistogramDataResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = MatrixHistogramOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = MatrixHistogramOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<Maybe<number>, TypeParent, TContext>;
+
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
+
+    g?: GResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = Maybe<number>,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = Maybe<number>,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = Maybe<string>,
+    Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9224,10 +9034,6 @@ export type IResolvers<TContext = SiemContext> = {
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
-  AlertsOverTimeData?: AlertsOverTimeDataResolvers.Resolvers<TContext>;
-  Inspect?: InspectResolvers.Resolvers<TContext>;
-  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
-  AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
@@ -9240,7 +9046,7 @@ export type IResolvers<TContext = SiemContext> = {
   OsEcsFields?: OsEcsFieldsResolvers.Resolvers<TContext>;
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
-  AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers.Resolvers<TContext>;
+  Inspect?: InspectResolvers.Resolvers<TContext>;
   TimelineData?: TimelineDataResolvers.Resolvers<TContext>;
   TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
@@ -9294,7 +9100,6 @@ export type IResolvers<TContext = SiemContext> = {
   TimelineDetailsData?: TimelineDetailsDataResolvers.Resolvers<TContext>;
   DetailItem?: DetailItemResolvers.Resolvers<TContext>;
   LastEventTimeData?: LastEventTimeDataResolvers.Resolvers<TContext>;
-  EventsOverTimeData?: EventsOverTimeDataResolvers.Resolvers<TContext>;
   HostsData?: HostsDataResolvers.Resolvers<TContext>;
   HostsEdges?: HostsEdgesResolvers.Resolvers<TContext>;
   HostItem?: HostItemResolvers.Resolvers<TContext>;
@@ -9315,6 +9120,8 @@ export type IResolvers<TContext = SiemContext> = {
   KpiHostsData?: KpiHostsDataResolvers.Resolvers<TContext>;
   KpiHostHistogramData?: KpiHostHistogramDataResolvers.Resolvers<TContext>;
   KpiHostDetailsData?: KpiHostDetailsDataResolvers.Resolvers<TContext>;
+  MatrixHistogramOverTimeData?: MatrixHistogramOverTimeDataResolvers.Resolvers<TContext>;
+  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   NetworkTopCountriesData?: NetworkTopCountriesDataResolvers.Resolvers<TContext>;
   NetworkTopCountriesEdges?: NetworkTopCountriesEdgesResolvers.Resolvers<TContext>;
   NetworkTopCountriesItem?: NetworkTopCountriesItemResolvers.Resolvers<TContext>;
