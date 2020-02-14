@@ -29,7 +29,12 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade, elasticsearch: unknown, logger: Logger) {
+>> = function createJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: unknown,
+  logger: Logger
+) {
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
 
