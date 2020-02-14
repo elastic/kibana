@@ -20,8 +20,16 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
     search: (request, options) => {
+      const params = {
+        ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
+        ...request.params,
+      };
       return search(
-        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
+        {
+          ...request,
+          params,
+          serverStrategy: ES_SEARCH_STRATEGY,
+        },
         options,
         ASYNC_SEARCH_STRATEGY
       ) as Observable<IEsSearchResponse>;

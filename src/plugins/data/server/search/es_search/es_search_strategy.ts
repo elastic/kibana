@@ -36,10 +36,6 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
         ...request.params,
       };
-      if (request.debug) {
-        // eslint-disable-next-line
-        console.log(JSON.stringify(params, null, 2));
-      }
       const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
