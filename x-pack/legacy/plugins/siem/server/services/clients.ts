@@ -12,19 +12,18 @@ import {
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
 import { ActionsClient } from '../../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../../legacy/plugins/alerting/server';
+import { AlertsClient } from '../../../../../plugins/alerting/server';
 import { SpacesServiceSetup } from '../../../../../plugins/spaces/server';
 import { CoreStart, StartPlugins } from '../plugin';
 
 export interface Clients {
   actionsClient?: ActionsClient;
+  alertsClient?: AlertsClient;
   clusterClient: IScopedClusterClient;
   spacesClient: { getSpaceId: () => string };
   savedObjectsClient: SavedObjectsClientContract;
 }
-interface LegacyClients {
-  alertsClient?: AlertsClient;
-}
+
 export type GetScopedClients = (request: LegacyRequest) => Promise<Clients & LegacyClients>;
 
 export class ClientsService {
