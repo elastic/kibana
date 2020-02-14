@@ -5,23 +5,14 @@
  */
 
 import React, { useEffect } from 'react';
-import * as i18n from './translations';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { MatrixHistogramContainer } from '../../matrix_histogram';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramGqlQuery } from '../../matrix_histogram/index.gql_query';
-
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { histogramConfigs } from './histogram_configs';
 const ID = 'anomaliesOverTimeQuery';
-const anomaliesStackByOptions: MatrixHistogramOption[] = [
-  {
-    text: i18n.ANOMALIES_STACK_BY_JOB_ID,
-    value: 'job_id',
-  },
-];
 
 export const AnomaliesQueryTabBody = ({
   deleteQuery,
@@ -33,7 +24,6 @@ export const AnomaliesQueryTabBody = ({
   narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
-  updateDateRange = () => {},
   AnomaliesTableComponent,
   flowTarget,
   ip,
@@ -61,23 +51,14 @@ export const AnomaliesQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        isAnomaliesHistogram={true}
-        dataKey="AnomaliesHistogram"
-        defaultStackByOption={anomaliesStackByOptions[0]}
         endDate={endDate}
-        errorMessage={i18n.ERROR_FETCHING_ANOMALIES_DATA}
         filterQuery={mergedFilterQuery}
-        hideHistogramIfEmpty={true}
         id={ID}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
-        skip={skip}
         sourceId="default"
-        stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
-        title={i18n.ANOMALIES_TITLE}
         type={type}
-        updateDateRange={updateDateRange}
+        {...histogramConfigs}
       />
       <AnomaliesTableComponent
         startDate={startDate}
