@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { DetailViewPanelName } from '../../types';
 import { PackageInfo } from '../../../../types';
 import { useSetPackageInstallStatus } from '../../hooks';
-// import { useCore } from '../../hooks/use_core';
 import { InstallStatus } from '../../types';
 import { Content } from './content';
 import { Header } from './header';
