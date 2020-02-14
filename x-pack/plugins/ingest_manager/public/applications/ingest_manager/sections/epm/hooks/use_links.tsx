@@ -30,7 +30,10 @@ export function useLinks() {
   }
 
   return {
-    toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/epm/assets/${path}`),
+    toAssets: (path: string) =>
+      http.basePath.prepend(
+        `/plugins/${PLUGIN_ID}/applications/ingest_manager/sections/epm/assets/${path}`
+      ),
     toImage: (path: string) => http.basePath.prepend(epmRouteService.getFilePath(path)),
     toRelativeImage: ({
       path,
