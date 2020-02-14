@@ -131,9 +131,6 @@ describe('getNavLinks', () => {
             {
               id: 'app-a',
               title: 'AppA',
-              category: {
-                label: 'My Category',
-              },
               order: 42,
               url: '/some-custom-url',
               icon: 'fa-snowflake',
@@ -149,9 +146,6 @@ describe('getNavLinks', () => {
       expect(navlinks[0]).toEqual({
         id: 'app-a',
         title: 'AppA',
-        category: {
-          label: 'My Category',
-        },
         order: 42,
         url: '/some-custom-url',
         icon: 'fa-snowflake',
@@ -209,9 +203,6 @@ describe('getNavLinks', () => {
             {
               id: 'link-a',
               title: 'AppA',
-              category: {
-                label: 'My Second Cat',
-              },
               order: 72,
               url: '/some-other-custom',
               subUrlBase: '/some-other-custom/sub',
@@ -230,9 +221,6 @@ describe('getNavLinks', () => {
       expect(navlinks[0]).toEqual({
         id: 'link-a',
         title: 'AppA',
-        category: {
-          label: 'My Second Cat',
-        },
         order: 72,
         url: '/some-other-custom',
         subUrlBase: '/some-other-custom/sub',

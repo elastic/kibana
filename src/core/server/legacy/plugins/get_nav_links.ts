@@ -31,7 +31,6 @@ function legacyAppToNavLink(spec: LegacyAppSpec): LegacyNavLink {
   }
   return {
     id: spec.id,
-    category: spec.category,
     title: spec.title ?? spec.id,
     order: typeof spec.order === 'number' ? spec.order : 0,
     icon: spec.icon,
@@ -44,7 +43,6 @@ function legacyAppToNavLink(spec: LegacyAppSpec): LegacyNavLink {
 function legacyLinkToNavLink(spec: LegacyNavLinkSpec): LegacyNavLink {
   return {
     id: spec.id,
-    category: spec.category,
     title: spec.title,
     order: typeof spec.order === 'number' ? spec.order : 0,
     url: spec.url,

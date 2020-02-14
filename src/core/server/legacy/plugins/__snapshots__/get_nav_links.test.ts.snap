@@ -3,7 +3,6 @@
 exports[` 1`] = `
 Array [
   Object {
-    "category": undefined,
     "disableSubUrlTracking": undefined,
     "disabled": false,
     "euiIconType": undefined,
@@ -18,7 +17,6 @@ Array [
     "url": "/some-custom-url",
   },
   Object {
-    "category": undefined,
     "disableSubUrlTracking": true,
     "disabled": false,
     "euiIconType": undefined,
@@ -33,7 +31,6 @@ Array [
     "url": "/url-b",
   },
   Object {
-    "category": undefined,
     "euiIconType": undefined,
     "icon": undefined,
     "id": "app-a",
@@ -43,7 +40,6 @@ Array [
     "url": "/app/app-a",
   },
   Object {
-    "category": undefined,
     "euiIconType": undefined,
     "icon": undefined,
     "id": "app-b",
