@@ -10,7 +10,7 @@ import { NotificationsStart } from 'src/core/public';
 import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../../../../common/types';
-import { installPackage as fetchInstallPackage, removePackage } from '../data';
+import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
 import { InstallStatus } from '../types';
 
 interface PackagesInstall {
@@ -43,7 +43,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       const pkgkey = `${name}-${version}`;
 
       try {
-        await fetchInstallPackage(pkgkey);
+        await sendInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
         const SuccessMsg = <p>Successfully installed {name}</p>;
 
@@ -89,7 +89,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       const pkgkey = `${name}-${version}`;
 
       try {
-        await removePackage(pkgkey);
+        await sendRemovePackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
 
         const SuccessMsg = <p>Successfully deleted {title}</p>;

@@ -5,9 +5,15 @@
  */
 
 import { HttpFetchQuery } from 'kibana/public';
-import { useRequest } from './use_request';
+import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
-import { GetCategoriesResponse, GetPackagesResponse } from '../../types';
+import {
+  GetCategoriesResponse,
+  GetPackagesResponse,
+  GetInfoResponse,
+  InstallPackageResponse,
+  DeletePackageResponse,
+} from '../../types';
 
 export const useGetCategories = () => {
   return useRequest<GetCategoriesResponse>({
@@ -21,5 +27,33 @@ export const useGetPackages = (query: HttpFetchQuery = {}) => {
     path: epmRouteService.getListPath(),
     method: 'get',
     query,
+  });
+};
+
+export const sendGetPackageInfoByKey = (pkgKey: string) => {
+  return sendRequest<GetInfoResponse>({
+    path: epmRouteService.getInfoPath(pkgKey),
+    method: 'get',
+  });
+};
+
+export const sendGetFileByPath = (filePath: string) => {
+  return sendRequest<string>({
+    path: epmRouteService.getFilePath(filePath),
+    method: 'get',
+  });
+};
+
+export const sendInstallPackage = (pkgkey: string) => {
+  return sendRequest<InstallPackageResponse>({
+    path: epmRouteService.getInstallPath(pkgkey),
+    method: 'get',
+  });
+};
+
+export const sendRemovePackage = (pkgkey: string) => {
+  return sendRequest<DeletePackageResponse>({
+    path: epmRouteService.getRemovePath(pkgkey),
+    method: 'get',
   });
 };

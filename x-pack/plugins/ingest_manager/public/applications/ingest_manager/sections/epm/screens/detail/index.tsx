@@ -14,7 +14,7 @@ import { useSetPackageInstallStatus } from '../../hooks';
 import { InstallStatus } from '../../types';
 import { Content } from './content';
 import { Header } from './header';
-import { getPackageInfoByKey } from '../../data';
+import { sendGetPackageInfoByKey } from '../../../../hooks';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -30,12 +30,19 @@ export function Detail() {
   const [info, setInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   useEffect(() => {
-    getPackageInfoByKey(pkgkey).then(response => {
-      const { title, name } = response;
-      const status: InstallStatus = response.status as any;
+    sendGetPackageInfoByKey(pkgkey).then(response => {
+      const packageInfo = response.data?.response;
+      const title = packageInfo?.title;
+      const name = packageInfo?.name;
+      const status: InstallStatus = packageInfo?.status as any;
+
       // track install status state
-      setPackageInstallStatus({ name, status });
-      setInfo({ ...response, title });
+      if (name) {
+        setPackageInstallStatus({ name, status });
+      }
+      if (packageInfo) {
+        setInfo({ ...packageInfo, title: title || '' });
+      }
     });
   }, [pkgkey, setPackageInstallStatus]);
 
