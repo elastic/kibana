@@ -61,7 +61,7 @@ export function paginate(pagination: PaginationParams, field: string, query: Jso
   query.aggs = { total: { value_count: { field } } };
   query.size = size;
   if (timestamp && eventID) {
-    query.search_after = ([timestamp, eventID] as unknown) as JsonObject[];
+    query.search_after = [+timestamp, eventID] as Array<number | string>;
   }
   return query;
 }
