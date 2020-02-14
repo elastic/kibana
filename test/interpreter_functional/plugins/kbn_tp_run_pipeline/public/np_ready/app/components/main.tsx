@@ -22,7 +22,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@ela
 import { first } from 'rxjs/operators';
 import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
 import { RequestAdapter, DataAdapter } from '../../../../../../../../src/plugins/inspector';
-import { Adapters, ExpressionRenderHandler, ExpressionDataHandler } from '../../types';
+import { Adapters, ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
@@ -31,7 +31,7 @@ declare global {
       expressions: string,
       context?: ExpressionValue,
       initialContext?: ExpressionValue
-    ) => ReturnType<ExpressionDataHandler['getData']>;
+    ) => any;
     renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
   }
 }
