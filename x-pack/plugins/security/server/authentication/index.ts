@@ -14,7 +14,6 @@ import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
-import { LegacyAPI } from '../plugin';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
 
@@ -36,7 +35,6 @@ interface SetupAuthenticationParams {
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  getLegacyAPI(): Pick<LegacyAPI, 'isSystemAPIRequest'>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -47,7 +45,6 @@ export async function setupAuthentication({
   config,
   license,
   loggers,
-  getLegacyAPI,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -83,7 +80,6 @@ export async function setupAuthentication({
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
-    isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
