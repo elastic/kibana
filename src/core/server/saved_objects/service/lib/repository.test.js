@@ -703,9 +703,6 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const _expectErrorNotFound = obj =>
-        expectErrorResult(obj, { statusCode: 404, message: 'Not found' });
-
       const bulkGetErrorInvalidType = async ([obj1, obj, obj2]) => {
         const response = getMockMgetResponse([obj1, obj2]);
         callAdminCluster.mockResolvedValue(response);
@@ -721,7 +718,7 @@ describe('SavedObjectsRepository', () => {
         const result = await bulkGet([obj1, obj, obj2], options);
         expect(callAdminCluster).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), _expectErrorNotFound(obj), expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
         });
       };
 

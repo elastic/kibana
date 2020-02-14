@@ -761,7 +761,7 @@ export class SavedObjectsRepository {
             return ({
               id,
               type,
-              error: { statusCode: 404, message: 'Not found' },
+              error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
             } as any) as SavedObject<T>;
           }
 
