@@ -1,20 +1,24 @@
 [[numeral]]
-== Elastic Numeral Formatting
+== Numeral Formatting
 
-Number formatting in {kib} is done through a pattern syntax that {kib}
-maintains. These patterns are originally based on Numeral.js, but this
-page contains complete documentation for use in {kib}.
+Numeral formatting in {kib} is done through a pattern-based syntax.
+These patterns express common number formats in a concise way, similar
+to date formatting. While these patterns are originally based on Numeral.js,
+they are now maintained by {kib}.
 
 The simplest pattern format is `0`, and the default {kib} pattern is `0,0.[000]`.
-These highlight the composability of the pattern syntax, which gives you control
-over:
+The numeral pattern syntax expresses:
 
-Number of decimal places:: The pattern `0.0` will always show one decimal in the locale-specific way. The patterns `0[.]0`, `0.[0]`, `0.0[0]` allow for optional display of decimal places.
-Thousands separator:: The thousands separator `,` will be displayed as a locale-specific
-separator.
+Number of decimal places:: The `.` character turns on the option to show decimal
+places using a locale-specific decimal separator, most often `.` or `,`.
+To add trailing zeroes such as `5.00`, use a pattern like `0.00`.
+To have optional zeroes, use the `[]` characters. Examples below.
+Thousands separator:: The thousands separator `,` turns on the option to group
+thousands using a locale-specific separator. The separator is most often `,` or `.`,
+and sometimes ` `.
 Accounting notation:: Putting parentheses around your format like `(0.00)` will use accounting notation to show negative numbers.
 
-The display of these patterns is affect by the <<kibana-general-settings, advanced setting>> `format:number:defaultLocale`.
+The display of these patterns is affected by the <<kibana-general-settings, advanced setting>> `format:number:defaultLocale`.
 The default locale is `en`, but some examples will specify that they are using an alternate locale.
 
 Most basic examples:
@@ -25,7 +29,7 @@ Most basic examples:
 | 10000.23 | 0.0 | en (English) | 10000.0
 | 10000.23 | 0,0.0 | fr (French) | 10 000,0
 | 10000.23 | 0,0[.]0 | en (English) | 10,000
-| 10000.23 | 0.0[0] | en (English) | 10,000.23
+| 10000.23 | 0.00[0] | en (English) | 10,000.23
 | -10000.23 | (0) | en (English) | (10000)
 |===
 
@@ -49,10 +53,7 @@ up to three decimal places.
 [float]
 === Bytes and bits
 
-The bytes and bits formatter take a number representing bytes or bits and
-display scaled values. The base number formatting options are the same as above.
-
-Bytes and bits formatters include the following suffixes:
+The bytes and bits formatters will shorten the input by adding a suffix like `GB` or `TB`. Bytes and bits formatters include the following suffixes:
 
 `b`:: Bytes with binary values and suffixes. 1024 = `1KB`
 `bb`:: Bytes with binary values and binary suffixes. 1024 = `1KiB`
@@ -89,7 +90,7 @@ The number formatting locale will affect the result.
 [float]
 === Duration formatting
 
-Converts a value in seconds to display hours, minutes and seconds.
+Converts a value in seconds to display hours, minutes, and seconds.
 
 |===
 | **Input** | **Pattern** | **Output**
@@ -123,7 +124,7 @@ abbreviated to a specific order of magnitude.
 
 The `o` pattern will display a locale-specific positional value like `1st` or `2nd`.
 This pattern has limited support for localization, especially in languages
-with multiple forms such as German.
+with multiple forms, such as German.
 
 |===
 | **Input** | **Pattern** | **Locale** | **Output**
