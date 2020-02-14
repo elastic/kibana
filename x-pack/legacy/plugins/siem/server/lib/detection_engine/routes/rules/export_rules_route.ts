@@ -5,17 +5,21 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { ExportRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 import { transformError } from '../utils';
 
-export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createExportRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -29,15 +33,15 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         query: exportRulesQuerySchema,
       },
     },
-    async handler(request: ExportRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    async handler(request: ExportRulesRequest & LegacyRequest, headers) {
+      const { alertsClient } = await getClients(request);
 
       if (!alertsClient) {
         return headers.response().code(404);
       }
 
       try {
-        const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+        const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
         if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
           return headers
             .response({
@@ -82,6 +86,10 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const exportRulesRoute = (server: ServerFacade): void => {
-  server.route(createExportRulesRoute(server));
+export const exportRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createExportRulesRoute(config, getClients));
 };
