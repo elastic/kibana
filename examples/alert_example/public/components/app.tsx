@@ -21,7 +21,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiHorizontalRule,
@@ -34,17 +33,28 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
+import {
+  AlertsContextProvider,
+  AlertAdd,
+} from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
-import { CoreStart } from '../../../../src/core/public';
+import { CoreStart, IUiSettingsClient, ToastsSetup } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 interface AlertExampleAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
+  triggers_actions_ui: any;
+  dataPlugin: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  uiSettings: IUiSettingsClient;
+  toastNotifications: ToastsSetup;
 }
 
 export const AlertExampleApp = ({
@@ -52,9 +62,15 @@ export const AlertExampleApp = ({
   notifications,
   http,
   navigation,
+  triggers_actions_ui,
+  charts,
+  uiSettings,
+  dataPlugin,
+  toastNotifications,
 }: AlertExampleAppDeps) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
+  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
@@ -119,9 +135,34 @@ export const AlertExampleApp = ({
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage id="alertExample.buttonText" defaultMessage="Get data" />
                     </EuiButton>
+                    <EuiButton
+                      type="primary"
+                      size="s"
+                      onClick={() => setAlertFlyoutVisibility(true)}
+                    >
+                      <FormattedMessage
+                        id="alertExample.testAlertButtonText"
+                        defaultMessage="Create test alert"
+                      />
+                    </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>
               </EuiPageContent>
+              <AlertsContextProvider
+                value={{
+                  addFlyoutVisible: alertFlyoutVisible,
+                  setAddFlyoutVisibility: setAlertFlyoutVisibility,
+                  http,
+                  actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+                  alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+                  toastNotifications,
+                  uiSettings,
+                  charts,
+                  dataFieldsFormats: dataPlugin.fieldFormats,
+                }}
+              >
+                <AlertAdd consumer={'workbench'} />
+              </AlertsContextProvider>
             </EuiPageBody>
           </EuiPage>
         </>

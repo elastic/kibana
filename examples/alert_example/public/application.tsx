@@ -24,8 +24,8 @@ import { AppPluginStartDependencies } from './types';
 import { AlertExampleApp } from './components/app';
 
 export const renderApp = (
-  { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  { notifications, http, uiSettings }: CoreStart,
+  { navigation, triggers_actions_ui, data, charts }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -34,6 +34,12 @@ export const renderApp = (
       notifications={notifications}
       http={http}
       navigation={navigation}
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      triggers_actions_ui={triggers_actions_ui}
+      uiSettings={uiSettings}
+      charts={charts}
+      toastNotifications={notifications.toasts}
+      dataPlugin={data}
     />,
     element
   );

@@ -28,8 +28,8 @@ import { PLUGIN_NAME } from '../common';
 
 export class AlertExamplePlugin
   implements Plugin<AlertExamplePluginSetup, AlertExamplePluginStart> {
-  public setup(core: CoreSetup): AlertExamplePluginSetup {
-    // Register an application into the side navigation menu
+  public setup(core: CoreSetup, deps: AppPluginStartDependencies): AlertExamplePluginSetup {
+    // Register an application into the side navigation menus
     core.application.register({
       id: 'alertExample',
       title: PLUGIN_NAME,
@@ -38,8 +38,16 @@ export class AlertExamplePlugin
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
+
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(
+          coreStart,
+          {
+            ...(depsStart as AppPluginStartDependencies),
+            ...{ triggers_actions_ui: deps.triggers_actions_ui },
+          },
+          params
+        );
       },
     });
 

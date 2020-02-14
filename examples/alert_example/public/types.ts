@@ -18,6 +18,9 @@
  */
 
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
+import { ChartsPluginStart } from '../../../src/plugins/charts/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 
 export interface AlertExamplePluginSetup {
   getGreeting: () => string;
@@ -27,4 +30,7 @@ export interface AlertExamplePluginStart {}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
 }
