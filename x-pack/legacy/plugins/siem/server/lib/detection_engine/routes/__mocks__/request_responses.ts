@@ -84,7 +84,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestP
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
-  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
@@ -102,6 +102,14 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
+  url: DETECTION_ENGINE_RULES_URL,
+  payload: {
+    ...typicalPayload(),
+  },
+});
+
+export const getPatchRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
@@ -126,6 +134,12 @@ export const getReadBulkRequest = (): ServerInjectOptions => ({
 
 export const getUpdateBulkRequest = (): ServerInjectOptions => ({
   method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  payload: [typicalPayload()],
+});
+
+export const getPatchBulkRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
   payload: [typicalPayload()],
 });

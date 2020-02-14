@@ -142,6 +142,7 @@ export default function({ getService }: FtrProviderContext) {
           'enabled',
           'authentication_realm',
           'lookup_realm',
+          'authentication_provider',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');

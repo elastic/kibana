@@ -192,7 +192,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -214,5 +214,21 @@ describe('toJSON', () => {
     expect(JSON.stringify(alertInstance)).toEqual(
       '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
     );
+  });
+});
+
+describe('toRaw', () => {
+  test('returns unserialised underlying state and meta', () => {
+    const raw = {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    };
+    const alertInstance = new AlertInstance(raw);
+    expect(alertInstance.toRaw()).toEqual(raw);
   });
 });

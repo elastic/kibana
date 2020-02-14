@@ -7,8 +7,6 @@
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common';
-import { Plugin as RemoteClustersPlugin } from './plugin';
-import { createShim } from './shim';
 
 export function remoteClusters(kibana: any) {
   return new kibana.Plugin({
@@ -43,25 +41,6 @@ export function remoteClusters(kibana: any) {
         config.get('xpack.remote_clusters.enabled') && config.get('xpack.index_management.enabled')
       );
     },
-    init(server: Legacy.Server) {
-      const {
-        coreSetup,
-        pluginsSetup: {
-          license: { registerLicenseChecker },
-        },
-      } = createShim(server, PLUGIN.ID);
-
-      const remoteClustersPlugin = new RemoteClustersPlugin();
-
-      // Set up plugin.
-      remoteClustersPlugin.setup(coreSetup);
-
-      registerLicenseChecker(
-        server,
-        PLUGIN.ID,
-        PLUGIN.getI18nName(),
-        PLUGIN.MINIMUM_LICENSE_REQUIRED
-      );
-    },
+    init(server: any) {},
   });
 }

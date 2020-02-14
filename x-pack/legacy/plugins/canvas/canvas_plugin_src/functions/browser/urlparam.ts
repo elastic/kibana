@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'url';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,12 @@ interface Arguments {
   default: string;
 }
 
-export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, string | string[]> {
+export function urlparam(): ExpressionFunctionDefinition<
+  'urlparam',
+  null,
+  Arguments,
+  string | string[]
+> {
   const { help, args: argHelp } = getFunctionHelp().urlparam;
 
   return {
@@ -21,9 +26,7 @@ export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, stri
     aliases: [],
     type: 'string',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       param: {
         types: ['string'],
@@ -38,7 +41,7 @@ export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, stri
         help: argHelp.default,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const query = parse(window.location.href, true).query;
       return query[args.param] || args.default;
     },
