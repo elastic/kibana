@@ -39,8 +39,9 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
+
+  filters: esFilters.Filter[];
 }
 
 export function App({
@@ -76,7 +77,7 @@ export function App({
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
     };
   });
 
@@ -89,6 +90,12 @@ export function App({
         trackUiEvent('app_filters_updated');
       },
     });
+
+    // If Lens was opened from another app, unpinned filters need to be cleared
+    if (data.query.filterManager.getAppFilters().length > 0) {
+      data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+    }
+
     return () => {
       filterSubscription.unsubscribe();
     };
@@ -123,13 +130,22 @@ export function App({
             core.notifications
           )
             .then(indexPatterns => {
+              data.query.filterManager.setFilters(
+                data.query.filterManager
+                  .getGlobalFilters()
+                  .concat(
+                    (doc.state.filters || []).filter(
+                      filter => filter.$state?.store === esFilters.FilterStateStore.APP_STATE
+                    )
+                  )
+              );
+
               setState(s => ({
                 ...s,
                 isLoading: false,
                 persistedDoc: doc,
                 lastKnownDoc: doc,
                 query: doc.state.query,
-                filters: doc.state.filters,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })
@@ -239,7 +255,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
+                data.query.filterManager.setFilters(savedQuery.attributes.filters || []);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -256,7 +272,6 @@ export function App({
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
-                  filters: [],
                   query: {
                     query: '',
                     language:

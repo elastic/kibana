@@ -12,7 +12,7 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -46,7 +46,18 @@ function createMockFilterManager() {
   const unsubscribe = jest.fn();
 
   let subscriber: () => void;
-  let filters: unknown = [];
+  let filters: esFilters.Filter[] = [
+    {
+      meta: { alias: null, negate: false, disabled: false },
+      query: { match_phrase: { global: 'yes' } },
+      $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+    },
+    {
+      meta: { alias: null, negate: false, disabled: false },
+      query: { match_phrase: { test: 'yes' } },
+      $state: { store: esFilters.FilterStateStore.APP_STATE },
+    },
+  ];
 
   return {
     getUpdates$: () => ({
@@ -55,11 +66,15 @@ function createMockFilterManager() {
         return unsubscribe;
       },
     }),
-    setFilters: (newFilters: unknown[]) => {
+    setFilters: jest.fn((newFilters: esFilters.Filter[]) => {
       filters = newFilters;
-      subscriber();
-    },
+      if (subscriber) subscriber();
+    }),
     getFilters: () => filters,
+    getAppFilters: () =>
+      filters.filter(filter => filter.$state?.store === esFilters.FilterStateStore.APP_STATE),
+    getGlobalFilters: () =>
+      filters.filter(filter => filter.$state?.store === esFilters.FilterStateStore.GLOBAL_STATE),
     removeAll: () => {
       filters = [];
       subscriber();
@@ -166,7 +181,74 @@ describe('Lens App', () => {
               "toDate": "now",
             },
             "doc": undefined,
-            "filters": Array [],
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "globalState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "negate": false,
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "global": "yes",
+                  },
+                },
+              },
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "negate": false,
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "test": "yes",
+                  },
+                },
+              },
+            ],
+            "onChange": [Function],
+            "onError": [Function],
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
+            "savedQuery": undefined,
+          },
+        ],
+        Array [
+          <div
+            class="lnsApp__frame"
+          />,
+          Object {
+            "dateRange": Object {
+              "fromDate": "now-7d",
+              "toDate": "now",
+            },
+            "doc": undefined,
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "globalState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "negate": false,
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "global": "yes",
+                  },
+                },
+              },
+            ],
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
@@ -178,6 +260,15 @@ describe('Lens App', () => {
         ],
       ]
     `);
+  });
+
+  it('clears app filters on load', () => {
+    const defaultArgs = makeDefaultArgs();
+    mount(<App {...defaultArgs} />);
+
+    expect(defaultArgs.data.query.filterManager.setFilters).toHaveBeenCalledWith(
+      defaultArgs.data.query.filterManager.getGlobalFilters()
+    );
   });
 
   it('sets breadcrumbs when the document title changes', async () => {
@@ -217,14 +308,20 @@ describe('Lens App', () => {
       expect(args.docStorage.load).not.toHaveBeenCalled();
     });
 
-    it('loads a document and uses query if there is a document id', async () => {
+    it('loads a document and uses query and filters if there is a document id', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
+      const savedFilter = {
+        query: { match_phrase: { src: 'test' } },
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        meta: { disabled: false, negate: false, alias: null },
+      };
       (args.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
         expression: 'valid expression',
         state: {
           query: 'fake query',
+          filters: [savedFilter],
           datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
       });
@@ -236,6 +333,9 @@ describe('Lens App', () => {
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
       expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.data.query.filterManager.setFilters).toHaveBeenCalledWith(
+        args.data.query.filterManager.getGlobalFilters().concat([savedFilter])
+      );
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -251,6 +351,7 @@ describe('Lens App', () => {
             expression: 'valid expression',
             state: {
               query: 'fake query',
+              filters: [savedFilter],
               datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             },
           },
@@ -695,22 +796,25 @@ describe('Lens App', () => {
       );
     });
 
-    it('updates the filters when the user changes them', () => {
+    it('updates the filters when the user changes them', async () => {
       const args = defaultArgs;
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      const filter = {
+        meta: { alias: null, negate: false, disabled: false, index: 'index1' },
+        exists: { name: 'myfield' },
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+      };
+      args.data.query.filterManager.setFilters([filter]);
 
       instance.update();
 
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [filter],
         })
       );
     });
@@ -832,10 +936,13 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
-
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      args.data.query.filterManager.setFilters([
+        {
+          meta: { alias: null, negate: false, disabled: false, index: 'index1' },
+          exists: { field: 'myfield' },
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
+        } as esFilters.ExistsFilter,
+      ]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
