@@ -38,13 +38,6 @@ jest.mock('./components/field', () => ({
   },
 }));
 
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: () => {},
-    add: jest.fn(),
-  },
-}));
-
 jest.mock('./components/call_outs', () => ({
   CallOuts: () => {
     return 'callOuts';

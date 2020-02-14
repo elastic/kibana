@@ -346,7 +346,7 @@ export class Form extends PureComponent<FormProps> {
       <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false} className="mgtAdvancedSettingsForm__unsavedCount">
-            {this.renderCountOfUnsaved()}
+            <p id="aria-describedby.countOfUnsavedSettings">{this.renderCountOfUnsaved()}</p>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
@@ -356,9 +356,7 @@ export class Form extends PureComponent<FormProps> {
                   size="s"
                   iconType="cross"
                   onClick={this.clearAllUnsaved}
-                  aria-label={i18n.translate('advancedSettings.form.cancelButtonAriaLabel', {
-                    defaultMessage: 'Cancel changes',
-                  })}
+                  aria-describedby="aria-describedby.countOfUnsavedSettings"
                   data-test-subj="advancedSetting-cancelButton"
                 >
                   {i18n.translate('advancedSettings.form.cancelButtonLabel', {
@@ -383,9 +381,7 @@ export class Form extends PureComponent<FormProps> {
                     size="s"
                     iconType="check"
                     onClick={this.saveAll}
-                    aria-label={i18n.translate('advancedSettings.form.saveButtonAriaLabel', {
-                      defaultMessage: 'Save changes',
-                    })}
+                    aria-describedby="aria-describedby.countOfUnsavedSettings"
                     isLoading={this.state.loading}
                     data-test-subj="advancedSetting-saveButton"
                   >

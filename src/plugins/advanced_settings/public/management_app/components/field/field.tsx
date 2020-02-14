@@ -636,6 +636,13 @@ export class Field extends PureComponent<FieldProps> {
 
     return (
       <EuiDescribedFormGroup
+        aria-describedby={
+          unsavedChanges
+            ? i18n.translate('advancedSettings.field.settingIsUnsaved', {
+                defaultMessage: 'Setting is currently not saved.',
+              })
+            : null
+        }
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}
