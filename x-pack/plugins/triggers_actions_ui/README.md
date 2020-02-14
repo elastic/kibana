@@ -389,7 +389,7 @@ interface GroupByExpressionProps {
 |onChangeSelectedGroupBy|Event handler that will be excuted if selected group by is changed.|
 |fields|Fields list with options for the `termField` dropdown.|
 |customGroupByTypes|(Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
 ### FOR THE LAST expression component
 
