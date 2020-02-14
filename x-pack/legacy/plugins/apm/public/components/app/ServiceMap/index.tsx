@@ -27,10 +27,10 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { getCytoscapeElements } from './get_cytoscape_elements';
-import { LoadingOverlay } from './LoadingOverlay';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefHeight } from './useRefHeight';
+import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -79,8 +79,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const openToast = useRef<string | null>(null);
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [percentageLoaded, setPercentageLoaded] = useState(0);
+
+  const { setIsLoading } = useLoadingIndicator();
+
   const [, _setUnusedState] = useState(false);
 
   const elements = useMemo(() => getCytoscapeElements(responses, search), [
@@ -115,14 +116,14 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
             }
           });
           setResponses(resp => resp.concat(data));
-          setIsLoading(false);
 
           const shouldGetNext =
             responses.length + 1 < MAX_REQUESTS && data.after;
 
           if (shouldGetNext) {
-            setPercentageLoaded(value => value + 30); // increase loading bar 30%
             await getNext({ after: data.after });
+          } else {
+            setIsLoading(false);
           }
         } catch (error) {
           setIsLoading(false);
@@ -134,14 +135,12 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         }
       }
     },
-    [callApmApi, params, responses.length, notifications.toasts]
+    [params, setIsLoading, callApmApi, responses.length, notifications.toasts]
   );
 
   useEffect(() => {
     const loadServiceMaps = async () => {
-      setPercentageLoaded(5);
       await getNext({ reset: true });
-      setPercentageLoaded(100);
     };
 
     loadServiceMaps();
@@ -167,7 +166,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       forceUpdate();
     };
 
-    if (newElements.length > 0 && percentageLoaded === 100) {
+    if (newElements.length > 0 && renderedElements.current.length > 0) {
       openToast.current = notifications.toasts.add({
         title: i18n.translate('xpack.apm.newServiceMapData', {
           defaultMessage: `Newly discovered connections are available.`
@@ -193,7 +192,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, percentageLoaded]);
+  }, [elements]);
 
   const isValidPlatinumLicense =
     license?.isActive &&
@@ -212,10 +211,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         height={height}
         style={cytoscapeDivStyle}
       >
-        <LoadingOverlay
-          isLoading={isLoading}
-          percentageLoaded={percentageLoaded}
-        />
         <Controls />
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  AggConfig,
+  IAggConfig,
   AggParam,
   OptionedValueProp,
   OptionedParamEditorProps,
@@ -32,13 +32,13 @@ import {
 import { AggParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {
-  isCompatible(aggConfig: AggConfig): boolean;
+  isCompatible(aggConfig: IAggConfig): boolean;
 }
 
 export type TopAggregateParamEditorProps = AggParamEditorProps<AggregateValueProp> &
   OptionedParamEditorProps<AggregateValueProp>;
 
-export function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
+export function getCompatibleAggs(agg: IAggConfig): AggregateValueProp[] {
   const { options = [] } = agg
     .getAggParams()
     .find(({ name }: AggParam) => name === 'aggregate') as OptionedParamType;

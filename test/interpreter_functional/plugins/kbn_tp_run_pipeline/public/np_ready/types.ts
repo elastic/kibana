@@ -19,19 +19,10 @@
 
 import {
   ExpressionsStart,
-  Context,
   ExpressionRenderHandler,
   ExpressionDataHandler,
-  RenderId,
 } from 'src/plugins/expressions/public';
 
 import { Adapters } from 'src/plugins/inspector/public';
 
-export {
-  ExpressionsStart,
-  Context,
-  ExpressionRenderHandler,
-  ExpressionDataHandler,
-  RenderId,
-  Adapters,
-};
+export { ExpressionsStart, ExpressionRenderHandler, ExpressionDataHandler, Adapters };
