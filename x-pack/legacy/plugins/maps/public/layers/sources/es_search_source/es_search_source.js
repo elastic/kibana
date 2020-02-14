@@ -122,7 +122,7 @@ export class ESSearchSource extends AbstractESSource {
     return (
       <UpdateSourceEditor
         source={this}
-        indexPatternId={this._descriptor.indexPatternId}
+        indexPatternId={this.getIndexPatternId()}
         getGeoField={this._getGeoField}
         onChange={onChange}
         tooltipFields={this._tooltipFields}
@@ -202,7 +202,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this._descriptor.indexPatternId;
+    let indexPatternTitle = this.getIndexPatternId();
     let geoFieldType = '';
     try {
       const indexPattern = await this.getIndexPattern();

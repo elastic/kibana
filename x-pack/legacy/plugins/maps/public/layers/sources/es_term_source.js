@@ -72,10 +72,6 @@ export class ESTermSource extends AbstractESAggSource {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getIndexPatternIds() {
-    return [this._descriptor.indexPatternId];
-  }
-
   getTermField() {
     return this._termField;
   }
@@ -183,7 +179,7 @@ export class ESTermSource extends AbstractESAggSource {
 
   async getDisplayName() {
     //no need to localize. this is never rendered.
-    return `es_table ${this._descriptor.indexPatternId}`;
+    return `es_table ${this.getIndexPatternId()}`;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {

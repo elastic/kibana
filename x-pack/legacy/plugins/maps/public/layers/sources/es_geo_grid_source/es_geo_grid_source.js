@@ -87,7 +87,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
-        indexPatternId={this._descriptor.indexPatternId}
+        indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
@@ -97,7 +97,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this._descriptor.indexPatternId;
+    let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;

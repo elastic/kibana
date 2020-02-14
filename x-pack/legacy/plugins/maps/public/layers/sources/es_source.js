@@ -48,12 +48,12 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   getIndexPatternIds() {
-    return [this._descriptor.indexPatternId];
+    return [this.getIndexPatternId()];
   }
 
   getQueryableIndexPatternIds() {
     if (this.getApplyGlobalQuery()) {
-      return [this._descriptor.indexPatternId];
+      return [this.getIndexPatternId()];
     }
     return [];
   }
@@ -203,19 +203,27 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
+  getIndexPatternId() {
+    return this._descriptor.indexPatternId;
+  }
+
+  getGeoFieldName() {
+    return this._descriptor.geoField;
+  }
+
   async getIndexPattern() {
     if (this.indexPattern) {
       return this.indexPattern;
     }
 
     try {
-      this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      this.indexPattern = await indexPatternService.get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
           defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
-          values: { indexPatternId: this._descriptor.indexPatternId },
+          values: { indexPatternId: this.getIndexPatternId() },
         })
       );
     }
@@ -252,7 +260,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return indexPattern.title;
     } catch (error) {
       // Unable to load index pattern, just return id as display name
-      return this._descriptor.indexPatternId;
+      return this.getIndexPatternId();
     }
   }
 
