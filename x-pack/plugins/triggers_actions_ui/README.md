@@ -164,7 +164,7 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 ```
-Fields of this object `AlertTypeModel` will be mapped properly in UI below.
+Fields of this object `AlertTypeModel` will be mapped properly in the UI below.
 
 2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
 ```
