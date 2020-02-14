@@ -79,7 +79,7 @@ export const WithLogPositionUrlState = () => {
               ? datemathToEpochMillis(initialStartDate)
               : undefined;
             const initialEndTimestamp = initialEndDate
-              ? datemathToEpochMillis(initialEndDate)
+              ? datemathToEpochMillis(initialEndDate, 'up')
               : undefined;
 
             // Adjust the start-end range if the target position falls outside

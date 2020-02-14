@@ -134,7 +134,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
       // Dates are valid, so the function cannot return `null`
       const nextStartTimestamp = datemathToEpochMillis(nextStartDate)!;
-      const nextEndTimestamp = datemathToEpochMillis(nextEndDate)!;
+      const nextEndTimestamp = datemathToEpochMillis(nextEndDate, 'up')!;
 
       // Reset the target position if it doesn't fall within the new range.
       if (
@@ -161,7 +161,9 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   // endTimestamp needs to be synced to `now` to allow auto-streaming
   const endTimestampDep = dateRange.endDate === 'now' ? Date.now() : dateRange.endDate;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate), [endTimestampDep]);
+  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate, 'up'), [
+    endTimestampDep,
+  ]);
 
   const state = {
     initialized,

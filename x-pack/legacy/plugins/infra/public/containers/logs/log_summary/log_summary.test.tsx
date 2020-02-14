@@ -161,6 +161,6 @@ const createMockDateRange = (startDate = 'now-10s', endDate = 'now') => {
     startDate,
     endDate,
     startTimestamp: datemathToEpochMillis(startDate)!,
-    endTimestamp: datemathToEpochMillis(endDate)!,
+    endTimestamp: datemathToEpochMillis(endDate, 'up')!,
   };
 };

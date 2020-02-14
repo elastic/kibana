@@ -11,8 +11,8 @@ export function isValidDatemath(value: string): boolean {
   return !!(parsedValue && parsedValue.isValid());
 }
 
-export function datemathToEpochMillis(value: string): number | null {
-  const parsedValue = dateMath.parse(value);
+export function datemathToEpochMillis(value: string, round: 'down' | 'up' = 'down'): number | null {
+  const parsedValue = dateMath.parse(value, { roundUp: round === 'up' });
   if (!parsedValue || !parsedValue.isValid()) {
     return null;
   }
