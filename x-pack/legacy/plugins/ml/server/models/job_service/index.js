@@ -17,7 +17,6 @@ export function jobServiceProvider(callAsCurrentUser) {
     ...groupsProvider(callAsCurrentUser),
     ...newJobCapsProvider(callAsCurrentUser),
     ...newJobChartsProvider(callAsCurrentUser),
-    ...categorizationExamplesProvider(callAsCurrentUser),
     ...topCategoriesProvider(callAsCurrentUser),
   };
 }
