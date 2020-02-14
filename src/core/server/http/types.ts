@@ -266,7 +266,7 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
-  createRouter: <Context extends RequestHandlerContext>(
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;

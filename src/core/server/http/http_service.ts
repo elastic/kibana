@@ -100,9 +100,12 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     const contract: InternalHttpServiceSetup = {
       ...serverContract,
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+        path: string,
+        pluginId: PluginOpaqueId = this.coreContext.coreId
+      ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },

@@ -42,11 +42,10 @@ interface RouterRoute {
  *
  * @public
  */
-export type RouteRegistrar<Method extends RouteMethod, Context extends RequestHandlerContext> = <
-  P,
-  Q,
-  B
->(
+export type RouteRegistrar<
+  Method extends RouteMethod,
+  Context extends RequestHandlerContext = RequestHandlerContext
+> = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Method, Context>
 ) => void;
