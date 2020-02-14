@@ -48,7 +48,6 @@ import { dataVisualizerRoutes } from '../routes/data_visualizer';
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
-// @ts-ignore: could not find declaration file for module
 import { filtersRoutes } from '../routes/filters';
 // @ts-ignore: could not find declaration file for module
 import { resultsServiceRoutes } from '../routes/results_service';
