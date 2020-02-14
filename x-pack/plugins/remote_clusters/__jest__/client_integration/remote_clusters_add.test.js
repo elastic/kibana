@@ -77,7 +77,7 @@ describe('Create Remote cluster', () => {
       beforeEach(async () => {
         ({ component, form, actions } = setup());
 
-        await nextTick(100);
+        await nextTick();
         component.update();
       });
 

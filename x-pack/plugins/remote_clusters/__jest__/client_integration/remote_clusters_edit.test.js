@@ -31,7 +31,7 @@ describe('Edit Remote cluster', () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
     ({ component, find, exists } = setup());
-    await nextTick(100);
+    await nextTick(100); // We need to wait next tick for the mock server response to kick in
     component.update();
   });
 
@@ -52,7 +52,7 @@ describe('Edit Remote cluster', () => {
   test('should use the same Form component as the "<RemoteClusterEdit />" component', async () => {
     const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
 
-    await nextTick(100);
+    await nextTick();
     addRemoteClusterComponent.update();
 
     const formEdit = component.find(RemoteClusterForm);
