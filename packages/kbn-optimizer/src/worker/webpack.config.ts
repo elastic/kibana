@@ -31,8 +31,6 @@ import * as SharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig } from '../common';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
@@ -180,9 +178,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+              presets: BABEL_PRESET_PATH,
             },
           },
         },
