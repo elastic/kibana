@@ -334,7 +334,7 @@ interface OfExpressionProps {
 |aggField|Selected aggregation field that will be set as the alert type property.|
 |errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.|
 |onChangeSelectedAggField|Event handler that will be excuted if selected aggregation field is changed.|
-|fields|Fields list that will be available in the OF `Select a field` dropdow.|
+|fields|Fields list that will be available in the OF `Select a field` dropdown.|
 |customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
 |popupPosition|(Optional) expression popup position. Default is `downRight`, recomemded to change it for a small parent window space.|
 
