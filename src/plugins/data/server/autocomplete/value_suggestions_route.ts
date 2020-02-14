@@ -21,7 +21,8 @@ import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 
-import { IFieldType, indexPatterns, esFilters } from '../index';
+import { IFieldType, Filter } from '../index';
+import { findIndexPatternById, getFieldByName } from '../index_patterns';
 
 export function registerValueSuggestionsRoute(router: IRouter) {
   router.post(
@@ -55,12 +56,9 @@ export function registerValueSuggestionsRoute(router: IRouter) {
         terminate_after: await uiSettings.get<number>('kibana.autocompleteTerminateAfter'),
       };
 
-      const indexPattern = await indexPatterns.findIndexPatternById(
-        context.core.savedObjects.client,
-        index
-      );
+      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
 
-      const field = indexPattern && indexPatterns.getFieldByName(fieldName, indexPattern);
+      const field = indexPattern && getFieldByName(fieldName, indexPattern);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
@@ -82,7 +80,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  boolFilter: esFilters.Filter[] = []
+  boolFilter: Filter[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 

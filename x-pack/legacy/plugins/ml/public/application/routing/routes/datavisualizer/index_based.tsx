@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-// @ts-ignore
-import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
@@ -32,13 +30,13 @@ const breadcrumbs = [
 
 export const indexBasedRoute: MlRoute = {
   path: '/jobs/new_job/datavisualizer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
-  const { context } = useResolver(index, savedSearchId, config, {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { context } = useResolver(index, savedSearchId, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsPrivilege,

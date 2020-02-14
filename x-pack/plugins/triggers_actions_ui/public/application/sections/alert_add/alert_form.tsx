@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiKeyPadMenuItem,
-  EuiLink,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
@@ -27,6 +26,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -40,6 +40,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   AlertTypeIndex,
+  ActionGroup,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
@@ -118,7 +119,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<string | undefined>(undefined);
+  const [defaultActionGroup, setDefaultActionGroup] = useState<ActionGroup | undefined>(undefined);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
@@ -158,7 +159,11 @@ export const AlertForm = ({
         // temp hack of API result
         alertTypes.push({
           id: 'threshold',
-          actionGroups: ['Alert', 'Warning', 'If unacknowledged'],
+          actionGroups: [
+            { id: 'alert', name: 'Alert' },
+            { id: 'warning', name: 'Warning' },
+            { id: 'ifUnacknowledged', name: 'If unacknowledged' },
+          ],
           name: 'threshold',
           actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
         });
@@ -261,7 +266,7 @@ export const AlertForm = ({
         alert.actions.push({
           id: '',
           actionTypeId: actionTypeModel.id,
-          group: defaultActionGroup ?? 'Alert',
+          group: defaultActionGroup?.id ?? 'Alert',
           params: {},
         });
         setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
@@ -273,7 +278,7 @@ export const AlertForm = ({
       alert.actions.push({
         id: '',
         actionTypeId: actionTypeModel.id,
-        group: defaultActionGroup ?? 'Alert',
+        group: defaultActionGroup?.id ?? 'Alert',
         params: {},
       });
       setActionProperty('id', alert.actions.length, alert.actions.length - 1);
@@ -351,7 +356,7 @@ export const AlertForm = ({
         id,
       }));
     const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     const actionParamsErrors: { errors: IErrorObject } =
       Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
@@ -474,7 +479,7 @@ export const AlertForm = ({
       ? actionTypesIndex[actionItem.actionTypeId].name
       : actionItem.actionTypeId;
     const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
     return (
       <EuiAccordion
         initialIsOpen={true}
@@ -590,12 +595,13 @@ export const AlertForm = ({
 
   const alertTypeDetails = (
     <Fragment>
+      <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: {alertType}"
+                defaultMessage="{alertType}"
                 id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
                 values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
               />
@@ -604,17 +610,20 @@ export const AlertForm = ({
         </EuiFlexItem>
         {canChangeTrigger ? (
           <EuiFlexItem grow={false}>
-            <EuiLink
+            <EuiButtonIcon
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertForm.changeAlertTypeAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
               }}
-            >
-              <FormattedMessage
-                defaultMessage="Change"
-                id="xpack.triggersActionsUI.sections.alertForm.changeAlertTypeLink"
-              />
-            </EuiLink>
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
@@ -631,7 +640,7 @@ export const AlertForm = ({
       {selectedGroupActions}
       {isAddActionPanelOpen ? (
         <Fragment>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h5 id="alertActionTypeTitle">
               <FormattedMessage
                 defaultMessage="Actions: Select an action type"
@@ -834,6 +843,7 @@ export const AlertForm = ({
         <Fragment>{alertTypeDetails}</Fragment>
       ) : (
         <Fragment>
+          <EuiHorizontalRule />
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
