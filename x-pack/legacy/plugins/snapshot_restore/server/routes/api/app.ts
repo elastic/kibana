@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RouteDependencies } from '../../types';
-import { addBasePath } from '../helpers';
-import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
+import { Privileges } from '../../../public/app/lib/authorization';
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
   APP_SLM_CLUSTER_PRIVILEGES,
 } from '../../../common/constants';
-import { Privileges } from '../../../public/app/lib/authorization';
+import { RouteDependencies } from '../../types';
+import { addBasePath } from '../helpers';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
@@ -21,70 +20,84 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export function registerAppRoutes({ router, isSecurityEnabled, license, lib }: RouteDependencies) {
-  // xpackMainPlugin = plugins.xpack_main;
-  router.get({ path: addBasePath('privileges'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-    // const xpackInfo = getXpackMainPlugin() && getXpackMainPlugin().info;
-    // if (!xpackInfo) {
-    //   // xpackInfo is updated via poll, so it may not be available until polling has begun.
-    //   // In this rare situation, tell the client the service is temporarily unavailable.
-    //   throw wrapCustomError(new Error('Security info unavailable'), 503);
-    // }
+export function registerAppRoutes({
+  router,
+  config: { isSecurityEnabled },
+  license,
+  lib: { isEsError },
+}: RouteDependencies) {
+  router.get(
+    { path: addBasePath('privileges'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
 
-    const privilegesResult: Privileges = {
-      hasAllPrivileges: true,
-      missingPrivileges: {
-        cluster: [],
-        index: [],
-      },
-    };
-
-    if (!isSecurityEnabled) {
-      // If security isn't enabled, let the user use app.
-      return res.ok({ body: privilegesResult });
-    }
-
-    // Get cluster priviliges
-    const { has_all_requested: hasAllPrivileges, cluster } = await callAsCurrentUser(
-      'transport.request',
-      {
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
+      const privilegesResult: Privileges = {
+        hasAllPrivileges: true,
+        missingPrivileges: {
+          cluster: [],
+          index: [],
         },
-      }
-    );
+      };
 
-    // Find missing cluster privileges and set overall app privileges
-    privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-    privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
-    // Get all index privileges the user has
-    const { indices } = await callAsCurrentUser('transport.request', {
-      path: '/_security/user/_privileges',
-      method: 'GET',
-    });
-
-    // Check if they have all the required index privileges for at least one index
-    const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
-      if (privileges.includes('all')) {
-        return true;
+      if (!isSecurityEnabled) {
+        // If security isn't enabled, let the user use app.
+        return res.ok({ body: privilegesResult });
       }
 
-      const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
-        privileges.includes(privilege)
-      );
+      try {
+        // Get cluster priviliges
+        const { has_all_requested: hasAllPrivileges, cluster } = await callAsCurrentUser(
+          'transport.request',
+          {
+            path: '/_security/user/_has_privileges',
+            method: 'POST',
+            body: {
+              cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
+            },
+          }
+        );
 
-      return indexHasAllPrivileges;
-    });
+        // Find missing cluster privileges and set overall app privileges
+        privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
+        privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
-    // If they don't, return list of required index privileges
-    if (!oneIndexWithAllPrivileges) {
-      privilegesResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
-    }
+        // Get all index privileges the user has
+        const { indices } = await callAsCurrentUser('transport.request', {
+          path: '/_security/user/_privileges',
+          method: 'GET',
+        });
 
-    return res.ok({ body: privilegesResult });
-  });
+        // Check if they have all the required index privileges for at least one index
+        const oneIndexWithAllPrivileges = indices.find(
+          ({ privileges }: { privileges: string[] }) => {
+            if (privileges.includes('all')) {
+              return true;
+            }
+
+            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+              privileges.includes(privilege)
+            );
+
+            return indexHasAllPrivileges;
+          }
+        );
+
+        // If they don't, return list of required index privileges
+        if (!oneIndexWithAllPrivileges) {
+          privilegesResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
+        }
+
+        return res.ok({ body: privilegesResult });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }
