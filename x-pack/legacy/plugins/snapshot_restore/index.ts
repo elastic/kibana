@@ -40,7 +40,7 @@ export function snapshotRestore(kibana: any) {
     },
     init(server: ServerFacade) {
       const coreSetup = server.newPlatform.setup.core;
-      const { licensing, security } = server.newPlatform.setup.plugins;
+      const { licensing, security, cloud } = server.newPlatform.setup.plugins;
 
       const coreInitializerContext = ({
         logger: server.newPlatform.coreContext.logger,
@@ -49,6 +49,7 @@ export function snapshotRestore(kibana: any) {
       const pluginsSetup: Dependencies = {
         licensing: licensing as any,
         security: security as any,
+        cloud: cloud as any,
       };
 
       const serverPlugin = initServerPlugin(coreInitializerContext as any);

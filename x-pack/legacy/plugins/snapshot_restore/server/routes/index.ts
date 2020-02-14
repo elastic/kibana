@@ -6,7 +6,7 @@
 import { RouteDependencies } from '../types';
 import { registerAppRoutes } from './api/app';
 // import { registerRepositoriesRoutes } from './api/repositories';
-// import { registerSnapshotsRoutes } from './api/snapshots';
+import { registerSnapshotsRoutes } from './api/snapshots';
 // import { registerRestoreRoutes } from './api/restore';
 // import { registerPolicyRoutes } from './api/policy';
 
@@ -14,7 +14,7 @@ export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
     registerAppRoutes(dependencies);
     // registerRepositoriesRoutes(dependencies);
-    // registerSnapshotsRoutes(dependencies);
+    registerSnapshotsRoutes(dependencies);
     // registerRestoreRoutes(dependencies);
 
     // if (dependencies.isSlmEnabled) {
