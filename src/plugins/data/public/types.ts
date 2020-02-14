@@ -28,7 +28,7 @@ import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
 
-export { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../common/types';
+export { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../common';
 
 export interface DataSetupDependencies {
   uiActions: UiActionsSetup;
