@@ -116,7 +116,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
     {
       path: '/api/ml/filters',
       validate: {
-        body: schema.object({ ...createFilterSchema }),
+        body: schema.object(createFilterSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -148,7 +148,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
       path: '/api/ml/filters/{filterId}',
       validate: {
         params: schema.object({ filterId: schema.string() }),
-        body: schema.object({ ...updateFilterSchema }),
+        body: schema.object(updateFilterSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
