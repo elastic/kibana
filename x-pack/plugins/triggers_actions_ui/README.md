@@ -97,14 +97,14 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |Property|Description|
 |---|---|
 |id|Alert type id. Should be the same as on the server side.|
-|name|Name of alert type, that will be displayed on the select card in UI.|
-|iconClass|Icon of alert type, that will be displayed on the select card in UI.|
+|name|Name of the alert type that will be displayed on the select card in the UI.|
+|iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
 |alertParamsExpression|React functional component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 
-IMPORTANT! The current UI support only a single action group. 
-Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
+IMPORTANT: The current UI supports a single action group only. 
+Action groups are mapped from the server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {
@@ -124,11 +124,11 @@ Design of user interface and server API for multiple action groups is under disc
 
 There are two ways of registering a new alert type:
 
-1. Directly in `triggers_actions_ui` plugin. In this case alert type will be available in Create Alert flyout of the Alerts and Actions management section.
+1. Directly in the `triggers_actions_ui` plugin. In this case, the alert type will be available in the Create Alert flyout of the Alerts and Actions management section.
 Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 Only registered alert types are available in UI.
 
-2. Register alert type in other plugin. In this case alert type will be available only in current plugin UI. 
+2. Register the alert type in another plugin. In this case, the alert type will be available only in the current plugin UI. 
 It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
 
 ```
@@ -147,7 +147,7 @@ Alert type UI is expected to be defined as `AlertTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
-1. At any suitable place in Kibana create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
+1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 ```
 import { AlertTypeModel } from '../../../../types';
 import { ExampleExpression } from './expression';
@@ -164,7 +164,7 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 ```
-Fields of this object `AlertTypeModel` will be mapped properly in UI below.
+Fields of this object `AlertTypeModel` will be mapped properly in the UI below.
 
 2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
 ```
@@ -217,8 +217,8 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
-Each expression word here is `EuiExpression` component and implement the basic aggregation, grouping and comparison methods.
-Expression components, which can be embed to different alert types are described here [Common expression components](#common-expression-components).
+Each expression word here is `EuiExpression` component and implements the basic aggregation, grouping and comparison methods.
+Expression components, which can be embedded to different alert types, are described here [Common expression components](#common-expression-components).
 
 3. Define alert type params validation using the property of `AlertTypeModel` `validate`: 
 ```
@@ -258,7 +258,7 @@ alertTypeRegistry.register(getExampledAlertType());
 After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
 ![Example Alert Type is in the select cards list](https://i.imgur.com/j71AEQV.png)
 
-Click on select card for `Example Alert Type` will open expression form that was created in step 2:
+Click on the select card for `Example Alert Type` to open the expression form that was created in step 2:
 ![Example Alert Type expression with validation](https://i.imgur.com/Z0jIwCS.png)
 
 ## Common expression components
@@ -291,8 +291,8 @@ interface WhenExpressionProps {
 |---|---|
 |aggType|Selected aggregation type that will be set as the alert type property.|
 |customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|onChangeSelectedAggType|event handler that will be excuted selected aggregation type is changed.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|onChangeSelectedAggType|event handler that will be executed when selected aggregation type is changed.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`.  Recommend changing it for a small parent window space.|
 
 ### OF expression component
 
@@ -334,9 +334,9 @@ interface OfExpressionProps {
 |aggField|Selected aggregation field that will be set as the alert type property.|
 |errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.|
 |onChangeSelectedAggField|Event handler that will be excuted if selected aggregation field is changed.|
-|fields|Fields list that will be available in the OF `Select a field` dropdow.|
+|fields|Fields list that will be available in the OF `Select a field` dropdown.|
 |customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downRight`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downRight`. Recommend changing it for a small parent window space.|
 
 ### GROUPED BY expression component
 
@@ -387,9 +387,9 @@ interface GroupByExpressionProps {
 |onChangeSelectedTermSize|Event handler that will be excuted if selected term size is changed.|
 |onChangeSelectedTermField|Event handler that will be excuted if selected term field is changed.|
 |onChangeSelectedGroupBy|Event handler that will be excuted if selected group by is changed.|
-|fields|Fields list that will an options for the `termField` dropdow.|
+|fields|Fields list with options for the `termField` dropdown.|
 |customGroupByTypes|(Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
 ### FOR THE LAST expression component
 
@@ -429,7 +429,7 @@ interface ForLastExpressionProps {
 |errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termWindowSize`.|
 |onChangeWindowSize|Event handler that will be excuted if selected window size is changed.|
 |onChangeWindowUnit|Event handler that will be excuted if selected window unit is changed.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
 ### THRESHOLD expression component
 
