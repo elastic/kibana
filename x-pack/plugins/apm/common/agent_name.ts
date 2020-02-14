@@ -11,7 +11,7 @@
  * definitions in mappings.json (for telemetry), the AgentName type, and the
  * agentNames object.
  */
-import { AgentName } from '../typings/es_schemas/ui/fields/Agent';
+import { AgentName } from '../typings/es_schemas/ui/fields/agent';
 
 const agentNames: { [agentName in AgentName]: agentName } = {
   python: 'python',

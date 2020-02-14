@@ -13,9 +13,9 @@ import {
   TRANSACTION_ID,
   ERROR_LOG_LEVEL
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../typings/es_schemas/ui/APMError';
+import { Span } from '../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';

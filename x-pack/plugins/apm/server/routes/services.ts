@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
+import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 import {
   createApmTelementry,
   storeApmServicesTelemetry

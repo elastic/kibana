@@ -6,9 +6,9 @@
 
 import { get } from 'lodash';
 import { AllowUnknownProperties } from '../typings/common';
-import { APMError } from '../typings/es_schemas/ui/APMError';
-import { Span } from '../typings/es_schemas/ui/Span';
-import { Transaction } from '../typings/es_schemas/ui/Transaction';
+import { APMError } from '../typings/es_schemas/ui/apm_error';
+import { Span } from '../typings/es_schemas/ui/span';
+import { Transaction } from '../typings/es_schemas/ui/transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {

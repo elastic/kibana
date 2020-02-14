@@ -5,7 +5,7 @@
  */
 
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { UIFilters } from '../../../../typings/ui-filters';
+import { UIFilters } from '../../../../typings/ui_filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import {
   localUIFilters,

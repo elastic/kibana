@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { rangeFilter } from '../../helpers/range_filter';
 import {
   Setup,

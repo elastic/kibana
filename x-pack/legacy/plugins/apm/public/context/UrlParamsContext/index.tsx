@@ -16,7 +16,7 @@ import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
-import { UIFilters } from '../../../../../../plugins/apm/typings/ui-filters';
+import { UIFilters } from '../../../../../../plugins/apm/typings/ui_filters';
 import {
   localUIFilterNames,
   LocalUIFilterName

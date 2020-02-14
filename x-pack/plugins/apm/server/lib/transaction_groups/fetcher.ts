@@ -14,7 +14,7 @@ import { getTransactionGroupsProjection } from '../../../common/projections/tran
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
   Setup,
   SetupTimeRange,

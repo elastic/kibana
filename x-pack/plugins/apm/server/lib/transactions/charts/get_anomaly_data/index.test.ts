@@ -5,8 +5,8 @@
  */
 
 import { getAnomalySeries } from '.';
-import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
-import { mlBucketSpanResponse } from './mock-responses/mlBucketSpanResponse';
+import { mlAnomalyResponse } from './mock_responses/ml_anomaly_response';
+import { mlBucketSpanResponse } from './mock_responses/ml_bucket_span_response';
 import { PromiseReturnType } from '../../../../../typings/common';
 import { APMConfig } from '../../../..';
 

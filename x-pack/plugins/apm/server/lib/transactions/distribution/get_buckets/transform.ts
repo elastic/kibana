@@ -5,7 +5,7 @@
  */
 
 import { PromiseReturnType } from '../../../../../typings/common';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { bucketFetcher } from './fetcher';
 
 type DistributionBucketResponse = PromiseReturnType<typeof bucketFetcher>;

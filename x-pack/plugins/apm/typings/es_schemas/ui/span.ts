@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpanRaw } from '../raw/SpanRaw';
-import { Agent } from './fields/Agent';
+import { SpanRaw } from '../raw/span_raw';
+import { Agent } from './fields/agent';
 
 export interface Span extends SpanRaw {
   agent: Agent;

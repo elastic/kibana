@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timeseriesResponse } from './mock-responses/timeseries_response';
+import { timeseriesResponse } from './mock_responses/timeseries_response';
 import {
   ApmTimeSeriesResponse,
   getTpmBuckets,

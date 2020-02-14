@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMBaseDoc } from './APMBaseDoc';
-import { Container } from './fields/Container';
-import { Host } from './fields/Host';
-import { Http } from './fields/Http';
-import { Kubernetes } from './fields/Kubernetes';
-import { Page } from './fields/Page';
-import { Process } from './fields/Process';
-import { Service } from './fields/Service';
-import { Url } from './fields/Url';
-import { User } from './fields/User';
-import { UserAgent } from './fields/UserAgent';
+import { APMBaseDoc } from './apm_base_doc';
+import { Container } from './fields/container';
+import { Host } from './fields/host';
+import { Http } from './fields/http';
+import { Kubernetes } from './fields/kubernetes';
+import { Page } from './fields/page';
+import { Process } from './fields/process';
+import { Service } from './fields/service';
+import { Url } from './fields/url';
+import { User } from './fields/user';
+import { UserAgent } from './fields/user_agent';
 
 interface Processor {
   name: 'transaction';

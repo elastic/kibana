@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMBaseDoc } from './APMBaseDoc';
-import { IStackframe } from './fields/Stackframe';
+import { APMBaseDoc } from './apm_base_doc';
+import { IStackframe } from './fields/stackframe';
 
 interface Processor {
   name: 'transaction';

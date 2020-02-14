@@ -9,7 +9,7 @@ import {
   ERROR_GROUP_ID,
   SERVICE_NAME
 } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {

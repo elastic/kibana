@@ -10,7 +10,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {

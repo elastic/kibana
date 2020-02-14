@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { first } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupAPIResponse } from '../../../../../../../../plugins/apm/server/lib/errors/get_error_group';
-import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit, units } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';

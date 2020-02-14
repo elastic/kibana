@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME
 } from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
 import { TransactionOverviewLink } from '../../../../../shared/Links/apm/TransactionOverviewLink';

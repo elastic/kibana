@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransactionRaw } from '../raw/TransactionRaw';
-import { Agent } from './fields/Agent';
+import { TransactionRaw } from '../raw/transaction_raw';
+import { Agent } from './fields/agent';
 
 // Make `transaction.name` required instead of optional.
 // `transaction.name` can be missing in Elasticsearch but the UI will only aggregate on transactions with a name,

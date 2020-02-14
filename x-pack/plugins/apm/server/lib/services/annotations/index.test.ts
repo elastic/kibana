@@ -8,10 +8,10 @@ import {
   SearchParamsMock,
   inspectSearchParams
 } from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
-import noVersions from './__fixtures__/no-versions.json';
-import oneVersion from './__fixtures__/one-version.json';
-import multipleVersions from './__fixtures__/multiple-versions.json';
-import versionsFirstSeen from './__fixtures__/versions-first-seen.json';
+import noVersions from './__fixtures__/no_versions.json';
+import oneVersion from './__fixtures__/one_version.json';
+import multipleVersions from './__fixtures__/multiple_versions.json';
+import versionsFirstSeen from './__fixtures__/versions_first_seen.json';
 
 describe('getServiceAnnotations', () => {
   let mock: SearchParamsMock;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { cloneDeep, sortByOrder } from 'lodash';
-import { UIFilters } from '../../../../typings/ui-filters';
+import { UIFilters } from '../../../../typings/ui_filters';
 import { Projection } from '../../../../common/projections/typings';
 import { PromiseReturnType } from '../../../../typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';

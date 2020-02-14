@@ -12,7 +12,7 @@ import {
   ERROR_LOG_MESSAGE
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import {
   Setup,
   SetupTimeRange,

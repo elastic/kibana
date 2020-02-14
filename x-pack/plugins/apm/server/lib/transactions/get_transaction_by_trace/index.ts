@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   PARENT_ID
 } from '../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 

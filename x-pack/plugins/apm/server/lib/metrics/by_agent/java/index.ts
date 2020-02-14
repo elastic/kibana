@@ -14,8 +14,8 @@ import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
-import { getGcRateChart } from './gc/getGcRateChart';
-import { getGcTimeChart } from './gc/getGcTimeChart';
+import { getGcRateChart } from './gc/get_gc_rate_chart';
+import { getGcTimeChart } from './gc/get_gc_time_chart';
 
 export async function getJavaMetricsCharts(
   setup: Setup & SetupTimeRange & SetupUIFilters,

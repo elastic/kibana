@@ -5,7 +5,7 @@
  */
 
 import { ESResponse } from './fetcher';
-import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
+import { mlAnomalyResponse } from './mock_responses/ml_anomaly_response';
 import { anomalySeriesTransform, replaceFirstAndLastBucket } from './transform';
 
 describe('anomalySeriesTransform', () => {

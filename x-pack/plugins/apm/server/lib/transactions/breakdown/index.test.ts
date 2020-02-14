@@ -6,8 +6,8 @@
 
 import { getTransactionBreakdown } from '.';
 import * as constants from './constants';
-import noDataResponse from './mock-responses/noData.json';
-import dataResponse from './mock-responses/data.json';
+import noDataResponse from './mock_responses/no_data.json';
+import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 
 const mockIndices = {
