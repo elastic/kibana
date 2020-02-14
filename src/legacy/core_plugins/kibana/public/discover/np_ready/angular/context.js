@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getAngularModule, getServices, subscribeWithScope } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../kibana_services';
 import './context_app';
 import { getState } from './context_state';
 import contextAppRouteTemplate from './context.html';
@@ -82,28 +82,12 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     config.get('state:storeInSessionStorage')
   );
   this.state = { ...appState.getState() };
-  this.filters = [...getGlobalFilters(), ...getAppFilters()];
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
 
-  filterManager.setFilters(_.cloneDeep(this.filters));
+  filterManager.setFilters(_.cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
   startStateSync();
-
-  // take care of changes in State/URL
-  appState.subscribe(newState => {
-    if (newState && !_.isEqual(this.state, newState)) {
-      this.state = newState;
-      this.filters = [...getGlobalFilters(), ...newState.filters];
-    }
-  });
-  globalState.subscribe(newState => {
-    if (newState && Array.isArray(newState.filters)) {
-      this.filters = [...newState.filters, ...getAppFilters()];
-    } else {
-      this.filters = getAppFilters();
-    }
-  });
 
   // take care of parameter changes in UI
   $scope.$watchGroup(
@@ -114,33 +98,34 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     ],
     newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
-      if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
-        appState.set({
-          ...this.state,
-          ...{ columns, predecessorCount, successorCount },
-        });
+      const newState = {
+        ...appState.getState(),
+        ...{ columns, predecessorCount, successorCount },
+      };
+      const hasChanged = !_.isEqual(appState.getState(), newState);
+
+      if (hasChanged && Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
+        appState.set(newState);
       }
     }
   );
-
-  // take care of filtermanager changes
-  const updateSubscription = subscribeWithScope($scope, filterManager.getUpdates$(), {
-    next: () => {
-      const appFiltersState = getAppFilters();
-      const appFilters = filterManager.getAppFilters();
-      if (!_.isEqual(appFiltersState, appFilters)) {
-        appState.set({ ...this.state, ...{ filters: appFilters } });
-      }
-      const globalFiltersState = getGlobalFilters();
-      const globalFilters = filterManager.getGlobalFilters();
-      if (!_.isEqual(globalFilters, globalFiltersState)) {
-        globalState.set({ filters: globalFilters });
-      }
-    },
+  // take care of parameter filter changes
+  const filterObservable = filterManager.getUpdates$().subscribe(() => {
+    const appFiltersState = getAppFilters();
+    const appFilters = filterManager.getAppFilters();
+    if (!_.isEqual(appFiltersState, appFilters)) {
+      appState.set({ ...appState.getState(), ...{ filters: appFilters } });
+    }
+    const globalFiltersState = getGlobalFilters();
+    const globalFilters = filterManager.getGlobalFilters();
+    if (!_.isEqual(globalFilters, globalFiltersState)) {
+      globalState.set({ filters: globalFilters });
+    }
+    $route.reload();
   });
 
   $scope.$on('$destroy', () => {
     stopStateSync();
-    updateSubscription.unsubscribe();
+    filterObservable.unsubscribe();
   });
 }
