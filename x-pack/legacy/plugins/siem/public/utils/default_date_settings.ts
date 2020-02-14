@@ -9,8 +9,6 @@ import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
 import {
-  DEFAULT_SIEM_TIME_RANGE,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
@@ -18,19 +16,7 @@ import {
 } from '../../common/constants';
 import { CoreStart } from '../plugin';
 import { Policy } from '../store/inputs/model';
-
-interface DefaultTimeRange {
-  from?: string | null;
-  to?: string | null;
-}
-
-interface DefaultInterval {
-  pause?: boolean | null;
-  value?: number | null;
-}
-
-export type DefaultTimeRangeSetting = DefaultTimeRange | null | undefined;
-export type DefaultIntervalSetting = DefaultInterval | null | undefined;
+import { State, keys } from '../store/ui_settings/model';
 
 // Defaults for if everything fails including dateMath.parse(DEFAULT_FROM) or dateMath.parse(DEFAULT_TO)
 // These should not really be hit unless we are in an extreme buggy state.
@@ -44,7 +30,7 @@ const DEFAULT_TO_MOMENT = moment();
  */
 export const getTimeRangeSettings = (uiSettings?: CoreStart['uiSettings']) => {
   const timeRange = uiSettings
-    ? uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
+    ? uiSettings.get<State['timeFilterRange']>(keys.timeFilterRange)
     : null;
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
@@ -62,7 +48,7 @@ export const getTimeRangeSettings = (uiSettings?: CoreStart['uiSettings']) => {
  */
 export const getIntervalSettings = (uiSettings?: CoreStart['uiSettings']): Policy => {
   const interval = uiSettings
-    ? uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
+    ? uiSettings.get<State['timeFilterRefreshInterval']>(keys.timeFilterRefreshInterval)
     : null;
 
   const duration = (isNumber(interval?.value) && interval?.value) || DEFAULT_INTERVAL_VALUE;

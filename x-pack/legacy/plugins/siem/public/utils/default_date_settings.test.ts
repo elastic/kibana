@@ -10,8 +10,6 @@ import { uiSettingsServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   getTimeRangeSettings,
   getIntervalSettings,
-  DefaultTimeRangeSetting,
-  DefaultIntervalSetting,
   parseDateWithDefault,
 } from './default_date_settings';
 import {
@@ -37,22 +35,6 @@ jest.mock('../../common/constants', () => ({
   DEFAULT_SIEM_REFRESH_INTERVAL: 'siem:refreshIntervalDefaults',
   DEFAULT_SIEM_TIME_RANGE: 'siem:timeDefaults',
 }));
-
-/**
- * Return that this unknown is only an object but we recognize in Typescript that we are ok
- * with the object being malformed.
- * @param timeRange Malformed object
- */
-const isMalformedTimeRange = (timeRange: unknown): timeRange is DefaultTimeRangeSetting =>
-  typeof timeRange === 'object';
-
-/**
- * Return that this unknown is only an object but we recognize in Typescript that we are ok
- * with the object being malformed.
- * @param interval Malformed object
- */
-const isMalformedInterval = (interval: unknown): interval is DefaultIntervalSetting =>
-  typeof interval === 'object';
 
 describe('getTimeRangeSettings', () => {
   let uiSettingsMock = uiSettingsServiceMock.createStartContract();
@@ -99,19 +81,14 @@ describe('getTimeRangeSettings', () => {
     });
 
     test('should return the DEFAULT_FROM when the from value is malformed', () => {
-      const malformedTimeRange = { from: true };
-      if (isMalformedTimeRange(malformedTimeRange)) {
-        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
+      uiSettingsMock.get.mockReturnValue({ from: true });
 
-        const { fromStr } = getTimeRangeSettings(uiSettingsMock);
-        expect(fromStr).toBe(DEFAULT_FROM);
-      } else {
-        throw Error('Was expecting an object to be used for the malformed time range');
-      }
+      const { fromStr } = getTimeRangeSettings(uiSettingsMock);
+      expect(fromStr).toBe(DEFAULT_FROM);
     });
 
     describe('without UISettings', () => {
-      it('is DEFAULT_FROM', () => {
+      it('is DEFAULT_FROM without UI Settings', () => {
         const { fromStr } = getTimeRangeSettings();
         expect(fromStr).toBe(DEFAULT_FROM);
       });
@@ -155,14 +132,9 @@ describe('getTimeRangeSettings', () => {
     });
 
     test('should return the DEFAULT_TO when the to value is malformed', () => {
-      const malformedTimeRange = { to: true };
-      if (isMalformedTimeRange(malformedTimeRange)) {
-        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
-        const { toStr } = getTimeRangeSettings(uiSettingsMock);
-        expect(toStr).toBe(DEFAULT_TO);
-      } else {
-        throw Error('Was expecting an object to be used for the malformed time range');
-      }
+      uiSettingsMock.get.mockReturnValue({ to: true });
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
+      expect(toStr).toBe(DEFAULT_TO);
     });
 
     describe('without UISettings', () => {
@@ -211,14 +183,9 @@ describe('getTimeRangeSettings', () => {
     });
 
     test('should return the DEFAULT_FROM when the from value is malformed', () => {
-      const malformedTimeRange = { from: true };
-      if (isMalformedTimeRange(malformedTimeRange)) {
-        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
-        const { from } = getTimeRangeSettings(uiSettingsMock);
-        expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
-      } else {
-        throw Error('Was expecting an object to be used for the malformed time range');
-      }
+      uiSettingsMock.get.mockReturnValue({ from: true });
+      const { from } = getTimeRangeSettings(uiSettingsMock);
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     describe('without UISettings', () => {
@@ -267,14 +234,9 @@ describe('getTimeRangeSettings', () => {
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is malformed', () => {
-      const malformedTimeRange = { from: true };
-      if (isMalformedTimeRange(malformedTimeRange)) {
-        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
-        const { to } = getTimeRangeSettings(uiSettingsMock);
-        expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
-      } else {
-        throw Error('Was expecting an object to be used for the malformed time range');
-      }
+      uiSettingsMock.get.mockReturnValue({ from: true });
+      const { to } = getTimeRangeSettings(uiSettingsMock);
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     describe('without UISettings', () => {
@@ -342,14 +304,9 @@ describe('getIntervalSettings', () => {
     });
 
     test('should return the default when the from value is malformed', () => {
-      const malformedInterval = { pause: 'whoops a string' };
-      if (isMalformedInterval(malformedInterval)) {
-        uiSettingsMock.get.mockReturnValue(malformedInterval);
-        const { kind } = getIntervalSettings(uiSettingsMock);
-        expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
-      } else {
-        throw Error('Was expecting an object to be used for the malformed interval');
-      }
+      uiSettingsMock.get.mockReturnValue({ pause: 'whoops a string' });
+      const { kind } = getIntervalSettings(uiSettingsMock);
+      expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     describe('without UISettings', () => {
@@ -398,14 +355,9 @@ describe('getIntervalSettings', () => {
     });
 
     test('should return the default when the value is malformed', () => {
-      const malformedInterval = { value: 'whoops a string' };
-      if (isMalformedInterval(malformedInterval)) {
-        uiSettingsMock.get.mockReturnValue(malformedInterval);
-        const { duration } = getIntervalSettings(uiSettingsMock);
-        expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
-      } else {
-        throw Error('Was expecting an object to be used for the malformed interval');
-      }
+      uiSettingsMock.get.mockReturnValue({ value: 'whoops a string' });
+      const { duration } = getIntervalSettings(uiSettingsMock);
+      expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     describe('without UISettings', () => {
