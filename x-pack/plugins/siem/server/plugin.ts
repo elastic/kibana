@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 
-import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Logger } from '../../../../src/core/server';
 import { createConfig$, ConfigType } from './config';
 
 export class Plugin {
