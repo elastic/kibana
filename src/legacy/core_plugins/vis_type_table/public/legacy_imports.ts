@@ -19,11 +19,7 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
-// @ts-ignore
-export { PaginateDirectiveProvider } from 'ui/directives/paginate';
-// @ts-ignore
-export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
+export { IAggConfig, AggGroupNames, Schemas } from '../../data/public';
 export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';

@@ -21,6 +21,7 @@ import { PluginInitializerContext } from 'kibana/public';
 import { legacyChrome, npSetup, npStart } from './legacy_imports';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
+import { start as dataShim } from '../../../data/public/legacy';
 
 const instance = plugin({
   env: npSetup.plugins.kibanaLegacy.env,
@@ -33,5 +34,6 @@ instance.setup(npSetup.core, {
 });
 instance.start(npStart.core, {
   ...npStart.plugins,
+  dataShim,
   visualizations,
 });

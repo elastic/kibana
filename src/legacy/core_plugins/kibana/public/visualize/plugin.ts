@@ -43,9 +43,11 @@ import {
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { Chrome } from './legacy_imports';
+import { DataStart } from '../../../data/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
+  dataShim: DataStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
@@ -64,6 +66,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
+    dataShim: DataStart;
     embeddable: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
@@ -92,6 +95,7 @@ export class VisualizePlugin implements Plugin {
           navigation,
           visualizations,
           data,
+          dataShim,
           share,
         } = this.startDependencies;
 
@@ -102,6 +106,7 @@ export class VisualizePlugin implements Plugin {
           core: coreStart,
           chrome: coreStart.chrome,
           data,
+          dataShim,
           embeddable,
           getBasePath: core.http.basePath.get,
           indexPatterns: data.indexPatterns,
@@ -142,10 +147,18 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
+    {
+      embeddable,
+      navigation,
+      data,
+      dataShim,
+      share,
+      visualizations,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
+      dataShim,
       embeddable,
       navigation,
       savedObjectsClient: core.savedObjects.client,

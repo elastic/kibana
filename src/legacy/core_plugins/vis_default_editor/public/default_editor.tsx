@@ -38,7 +38,7 @@ function DefaultEditor({
   appState,
   optionTabs,
   query,
-}: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
+}: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'dataShim' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
   const visHandler = useRef<VisualizeEmbeddable | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);

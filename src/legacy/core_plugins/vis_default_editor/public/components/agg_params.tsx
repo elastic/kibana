@@ -40,6 +40,8 @@ import {
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { VisDefaultEditorKibanaServices } from '../types';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -76,11 +78,19 @@ function DefaultEditorAggParams({
   setTouched,
   setValidity,
 }: DefaultEditorAggParamsProps) {
-  const groupedAggTypeOptions = useMemo(() => getAggTypeOptions(agg, indexPattern, groupName), [
-    agg,
-    indexPattern,
-    groupName,
-  ]);
+  const {
+    services: {
+      dataShim: {
+        search: {
+          aggs: { types: aggTypes, aggTypeFieldFilters },
+        },
+      },
+    },
+  } = useKibana<VisDefaultEditorKibanaServices>();
+  const groupedAggTypeOptions = useMemo(
+    () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName),
+    [agg, indexPattern, groupName, aggTypes]
+  );
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
@@ -94,12 +104,10 @@ function DefaultEditorAggParams({
     aggTypeName,
     fieldName,
   ]);
-  const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
-    agg,
-    editorConfig,
-    metricAggs,
-    state,
-  ]);
+  const params = useMemo(
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state }, aggTypeFieldFilters),
+    [agg, editorConfig, metricAggs, state, aggTypeFieldFilters]
+  );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,

@@ -25,16 +25,9 @@ import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
-import {
-  aggTypeFilters,
-  aggTypeFieldFilters,
-  aggTypes,
-  IAggConfig,
-  AggParam,
-  IFieldParamType,
-  IAggType,
-} from '../legacy_imports';
+import { aggTypeFilters, IAggConfig, AggParam, IFieldParamType, IAggType } from '../legacy_imports';
 import { EditorConfig } from './utils';
+import { AggConfig } from '../../../data/public/search/aggs';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
@@ -50,7 +43,12 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamInstanceBase) {
+function getAggParamsToRender(
+  { agg, editorConfig, metricAggs, state }: ParamInstanceBase,
+  aggTypeFieldFilters: {
+    filter(fields: IndexPatternField[], aggConfig: AggConfig): IndexPatternField[];
+  }
+) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -117,6 +115,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 }
 
 function getAggTypeOptions(
+  aggTypes: any,
   agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string

@@ -26,13 +26,15 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 import {
   PrivateProvider,
-  PaginateDirectiveProvider,
-  PaginateControlsDirectiveProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
   configureAppAngularModule,
 } from './legacy_imports';
-import { initAngularBootstrap } from '../../../../plugins/kibana_legacy/public';
+import {
+  initAngularBootstrap,
+  PaginateDirectiveProvider,
+  PaginateControlsDirectiveProvider,
+} from '../../../../plugins/kibana_legacy/public';
 
 initAngularBootstrap();
 

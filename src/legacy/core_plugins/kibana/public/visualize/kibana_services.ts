@@ -37,6 +37,7 @@ import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { Chrome } from './legacy_imports';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
+import { DataStart } from '../../../data/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -44,6 +45,7 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
+  dataShim: DataStart;
   embeddable: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;

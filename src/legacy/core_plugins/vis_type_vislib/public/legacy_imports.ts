@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
+export { AggGroupNames, IAggConfig, IAggType, Schemas } from '../../data/public';
 export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';

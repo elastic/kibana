@@ -24,12 +24,15 @@ import { Vis, VisState, VisParams } from 'src/legacy/core_plugins/visualizations
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction, updateStateParams } from './actions';
+import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';
 export * from './actions';
 
 export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorAction>] {
-  const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
+  const { services } = useKibana<VisDefaultEditorKibanaServices>();
+  const [state, dispatch] = useReducer(editorStateReducer(services.dataShim), vis, initEditorState);
 
   useEffect(() => {
     const handleVisUpdate = (params: VisParams) => {

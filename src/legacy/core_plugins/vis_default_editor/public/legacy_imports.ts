@@ -19,34 +19,33 @@
 
 /* `ui/agg_types` dependencies */
 export {
-  AggType,
   IAggType,
   IAggConfig,
-  AggConfigs,
   IAggConfigs,
   AggParam,
   AggGroupNames,
   aggGroupNamesMap,
-  aggTypes,
-  FieldParamType,
   IFieldParamType,
   BUCKET_TYPES,
   METRIC_TYPES,
   ISchemas,
   Schema,
   termsAggFilter,
-} from 'ui/agg_types';
-export { aggTypeFilters, propFilter } from 'ui/agg_types';
-export { aggTypeFieldFilters } from 'ui/agg_types';
-export { AggParamType } from 'ui/agg_types';
-export { MetricAggType, IMetricAggType } from 'ui/agg_types';
-export { parentPipelineType } from 'ui/agg_types';
-export { siblingPipelineType } from 'ui/agg_types';
-export { isType, isStringType } from 'ui/agg_types';
-export { OptionedValueProp, OptionedParamEditorProps, OptionedParamType } from 'ui/agg_types';
-export { isValidJson, isValidInterval } from 'ui/agg_types';
-export { AggParamOption } from 'ui/agg_types';
-export { CidrMask } from 'ui/agg_types';
+  aggTypeFilters,
+  propFilter,
+  AggParamType,
+  IMetricAggType,
+  parentPipelineType,
+  siblingPipelineType,
+  isType,
+  isStringType,
+  OptionedValueProp,
+  OptionedParamEditorProps,
+  OptionedParamType,
+  isValidJson,
+  isValidInterval,
+  AggParamOption,
+  CidrMask,
+} from '../../data/public';
 
 export { PersistedState } from 'ui/persisted_state';
-export * from 'ui/vis/lib';
