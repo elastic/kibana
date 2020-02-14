@@ -49,12 +49,10 @@ export const ConfigSchema = schema.object(
       oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
       saml: providerOptionsSchema(
         'saml',
-        schema.maybe(
-          schema.object({
-            realm: schema.maybe(schema.string()),
-            maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
-          })
-        )
+        schema.object({
+          realm: schema.maybe(schema.string()),
+          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        })
       ),
     }),
   },
