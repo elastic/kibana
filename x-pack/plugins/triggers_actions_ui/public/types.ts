@@ -70,10 +70,14 @@ export interface ActionConnectorTableItem extends ActionConnector {
   actionType: ActionType['name'];
 }
 
+export interface ActionGroup {
+  id: string;
+  name: string;
+}
 export interface AlertType {
   id: string;
   name: string;
-  actionGroups: string[];
+  actionGroups: ActionGroup[];
   actionVariables: string[];
 }
 

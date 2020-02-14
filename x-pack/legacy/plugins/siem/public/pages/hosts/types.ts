@@ -5,7 +5,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern, Query, Filter } from 'src/plugins/data/public';
 
 import { SiemPageName } from '../home/types';
 import { hostsModel } from '../../store';
@@ -17,10 +17,10 @@ export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 
 export interface HostsComponentReduxProps {
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
-export interface HostsComponentDispatchProps {
+interface HostsComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;

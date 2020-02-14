@@ -5,7 +5,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern, Query, Filter } from 'src/plugins/data/public';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -23,7 +23,7 @@ type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 interface IPDetailsComponentReduxProps {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   flowTarget: FlowTarget;
   query: Query;
 }
