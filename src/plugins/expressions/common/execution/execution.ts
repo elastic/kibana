@@ -24,7 +24,13 @@ import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError } from '../expression_types/specs/error';
-import { ExpressionAstExpression, ExpressionAstFunction, parse, formatExpression } from '../ast';
+import {
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+  parse,
+  formatExpression,
+  parseExpression,
+} from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
@@ -35,7 +41,7 @@ export interface ExecutionParams<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>
 > {
   executor: Executor<any>;
-  ast: ExpressionAstExpression;
+  ast?: ExpressionAstExpression;
   expression?: string;
   context?: ExtraContext;
 }
@@ -109,9 +115,16 @@ export class Execution<
   }
 
   constructor(public readonly params: ExecutionParams<ExtraContext>) {
-    const { executor, ast, expression } = params;
+    const { executor } = params;
 
-    this.expression = expression || formatExpression(ast);
+    if (!params.ast && !params.expression) {
+      throw new TypeError('Execution params should contain at least .ast or .expression key.');
+    } else if (params.ast && params.expression) {
+      throw new TypeError('Execution params cannot contain both .ast and .expression key.');
+    }
+
+    this.expression = params.expression || formatExpression(params.ast!);
+    const ast = params.ast || parseExpression(this.expression);
 
     this.state = createExecutionContainer<Output>({
       ...executor.state.get(),

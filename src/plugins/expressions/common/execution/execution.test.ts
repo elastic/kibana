@@ -133,7 +133,6 @@ describe('Execution', () => {
       const expression = 'add val="1"';
       const executor = createUnitTestExecutor();
       const execution = new Execution({
-        ast: parseExpression('add val="WRONG"'),
         executor,
         expression,
       });
