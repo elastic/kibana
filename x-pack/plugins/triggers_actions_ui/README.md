@@ -258,7 +258,7 @@ alertTypeRegistry.register(getExampledAlertType());
 After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
 ![Example Alert Type is in the select cards list](https://i.imgur.com/j71AEQV.png)
 
-Click on select card for `Example Alert Type` will open expression form that was created in step 2:
+Click on the select card for `Example Alert Type` to open the expression form that was created in step 2:
 ![Example Alert Type expression with validation](https://i.imgur.com/Z0jIwCS.png)
 
 ## Common expression components
