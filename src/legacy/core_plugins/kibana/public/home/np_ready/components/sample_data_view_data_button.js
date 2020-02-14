@@ -112,6 +112,7 @@ export class SampleDataViewDataButton extends React.Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downCenter"
+        data-test-subj={`launchSampleDataSet${this.props.id}`}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

@@ -56,6 +56,7 @@
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
     - [Updates an application navlink at runtime](#updates-an-app-navlink-at-runtime)
+    - [Logging config migration](#logging-config-migration)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1163,6 +1164,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 
 | Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                |
 | ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `import 'ui/management'`                          | `management.sections`                                        |                                                                                                                                      |
 | `import 'ui/apply_filters'`                       | N/A. Replaced by triggering an APPLY_FILTER_TRIGGER trigger. | Directive is deprecated.                                                                                                             |
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
@@ -1240,7 +1242,7 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `inspectorViews`             |                                                                                                                           | Should be an API on the data (?) plugin.                                                                                              |
 | `interpreter`                |                                                                                                                           | Should be an API on the interpreter plugin.                                                                                           |
 | `links`                      | n/a                                                                                                                       | Not necessary, just register your app via `core.application.register`                                                                 |
-| `managementSections`         | [`plugins.management.sections.register`](/rfcs/text/0006_management_section_service.md)                                   | API finalized, implementation in progress.                                                                                            |
+| `managementSections`         | [`plugins.management.sections.register`](/rfcs/text/0006_management_section_service.md)                                   |                                                                                                                                       |
 | `mappings`                   |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `migrations`                 |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `navbarExtensions`           | n/a                                                                                                                       | Deprecated                                                                                                                            |
@@ -1655,3 +1657,6 @@ export class MyPlugin implements Plugin {
      })
   }
 ```
+
+### Logging config migration
+[Read](./server/logging/README.md#logging-config-migration)
