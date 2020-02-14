@@ -178,7 +178,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: BABEL_PRESET_PATH,
+              presets: [BABEL_PRESET_PATH],
             },
           },
         },
