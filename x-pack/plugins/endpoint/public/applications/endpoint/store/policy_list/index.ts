@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { endpointListReducer } from './reducer';
-export { EndpointListAction } from './action';
-export { endpointListSaga } from './saga';
-export * from './types';
+export { policyListReducer } from './reducer';
+export { PolicyListAction } from './action';
+export { policyListMiddlewareFactory } from './middleware';

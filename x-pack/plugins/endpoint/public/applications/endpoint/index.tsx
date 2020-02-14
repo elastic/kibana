@@ -13,6 +13,8 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
+import { ManagementList } from './view/managing';
+import { PolicyList } from './view/policy';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -20,13 +22,12 @@ import { AlertIndex } from './view/alerts';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const [store, stopSagas] = appStoreFactory(coreStart);
+  const store = appStoreFactory(coreStart);
 
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    stopSagas();
   };
 }
 
@@ -49,23 +50,9 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
               </h1>
             )}
           />
-          <Route
-            path="/management"
-            render={() => {
-              // FIXME: This is temporary. Will be removed in next PR for endpoint list
-              store.dispatch({ type: 'userEnteredEndpointListPage' });
-
-              return (
-                <h1 data-test-subj="endpointManagement">
-                  <FormattedMessage
-                    id="xpack.endpoint.endpointManagement"
-                    defaultMessage="Manage Endpoints"
-                  />
-                </h1>
-              );
-            }}
-          />
+          <Route path="/management" component={ManagementList} />
           <Route path="/alerts" component={AlertIndex} />
+          <Route path="/policy" exact component={PolicyList} />
           <Route
             render={() => (
               <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
