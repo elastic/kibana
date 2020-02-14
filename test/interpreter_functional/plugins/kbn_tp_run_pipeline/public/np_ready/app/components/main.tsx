@@ -61,15 +61,10 @@ class Main extends React.Component<{}, State> {
         data: new DataAdapter(),
       };
       return getExpressions()
-        .execute(
-          expression,
-          { type: 'null' },
-          {
-            inspectorAdapters: adapters,
-            context,
-            search: initialContext as any,
-          }
-        )
+        .execute(expression, context || { type: 'null' }, {
+          inspectorAdapters: adapters,
+          search: initialContext as any,
+        })
         .getData();
     };
 
