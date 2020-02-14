@@ -7,7 +7,7 @@
 import { CallWithRequest } from '../types';
 
 export const setPolicy = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'PUT'; body: unknown }, {}, unknown>,
+  callWithRequest: CallWithRequest<{ path: string; method: 'PUT'; body: unknown }, unknown>,
   policy: string,
   body: unknown
 ): Promise<unknown> => {
