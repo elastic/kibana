@@ -42,6 +42,7 @@ export const LAYER_TYPE = {
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
   HEATMAP: 'HEATMAP',
+  BLENDED_VECTOR: 'BLENDED_VECTOR',
 };
 
 export const SORT_ORDER = {

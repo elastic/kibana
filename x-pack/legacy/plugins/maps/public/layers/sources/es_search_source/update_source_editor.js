@@ -28,6 +28,7 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   SORT_ORDER,
   SCALING_TYPES,
+  LAYER_TYPE,
 } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -133,7 +134,9 @@ export class UpdateSourceEditor extends Component {
   };
 
   _onScalingTypeChange = optionId => {
-    this.props.onChange({ propName: 'scalingType', value: optionId });
+    const layerType =
+      optionId === SCALING_TYPES.CLUSTERS ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR;
+    this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });
   };
 
   _onFilterByMapBoundsChange = event => {

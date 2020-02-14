@@ -16,5 +16,18 @@ export class BlendedVectorLayer extends VectorLayer {
     return layerDescriptor;
   }
 
+  isJoinable() {
+    return false;
+  }
+
+  getJoins() {
+    return [];
+  }
+
+  async syncData(syncContext) {
+    console.log('BlendedVectorLayer.syncData');
+    super.syncData(syncContext);
+  }
+
   /*syncLayerWithMB(mbMap) {}*/
 }

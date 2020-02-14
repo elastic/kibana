@@ -68,7 +68,7 @@ export class VectorLayer extends AbstractLayer {
     if (this._source) {
       this._source.destroy();
     }
-    this._joins.forEach(joinSource => {
+    this.getJoins().forEach(joinSource => {
       joinSource.destroy();
     });
   }
@@ -78,7 +78,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getValidJoins() {
-    return this._joins.filter(join => {
+    return this.getJoins().filter(join => {
       return join.hasCompleteConfig();
     });
   }
@@ -118,7 +118,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     if (
-      this._joins.length &&
+      this.getJoins().length &&
       !featureCollection.features.some(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
     ) {
       return {
@@ -838,9 +838,13 @@ export class VectorLayer extends AbstractLayer {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
-      for (let j = 0; j < this._joins.length; j++) {
-        if (this._joins[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
-          matchingJoins.push(this._joins[j]);
+      for (let j = 0; j < this.getJoins().length; j++) {
+        if (
+          this.getJoins()
+            [j].getLeftField()
+            .getName() === tooltipProperty.getPropertyKey()
+        ) {
+          matchingJoins.push(this.getJoins()[j]);
         }
       }
       if (matchingJoins.length) {
@@ -853,15 +857,19 @@ export class VectorLayer extends AbstractLayer {
     let allTooltips = await this._source.filterAndFormatPropertiesToHtml(properties);
     this._addJoinsToSourceTooltips(allTooltips);
 
-    for (let i = 0; i < this._joins.length; i++) {
-      const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
+    for (let i = 0; i < this.getJoins().length; i++) {
+      const propsFromJoin = await this.getJoins()[i].filterAndFormatPropertiesForTooltip(
+        properties
+      );
       allTooltips = [...allTooltips, ...propsFromJoin];
     }
     return allTooltips;
   }
 
   canShowTooltip() {
-    return this.isVisible() && (this._source.canFormatFeatureProperties() || this._joins.length);
+    return (
+      this.isVisible() && (this._source.canFormatFeatureProperties() || this.getJoins().length)
+    );
   }
 
   getFeatureById(id) {
