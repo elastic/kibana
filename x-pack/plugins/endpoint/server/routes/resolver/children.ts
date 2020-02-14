@@ -47,7 +47,7 @@ export function handleChildren(
       const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
 
       // Retrieve the related child process events for a given process
-      const { total, results: events, next } = await childrenQuery.search(client, id);
+      const { total, results: events, nextCursor } = await childrenQuery.search(client, id);
       const childIDs = events.map(extractEntityID);
 
       // Retrieve the lifecycle events for the child processes (e.g. started, terminated etc)
@@ -64,7 +64,7 @@ export function handleChildren(
           children,
           pagination: {
             total,
-            next,
+            next: nextCursor,
             limit,
           },
         },

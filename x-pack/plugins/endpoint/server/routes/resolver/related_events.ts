@@ -44,12 +44,12 @@ export function handleRelatedEvents(
       const relatedEventsQuery = new RelatedEventsQuery(legacyEndpointID, pagination);
       const relatedEvents = await relatedEventsQuery.search(client, id);
 
-      const { total, results: events, next } = relatedEvents;
+      const { total, results: events, nextCursor } = relatedEvents;
 
       return res.ok({
         body: {
           events,
-          pagination: { total, next, limit },
+          pagination: { total, next: nextCursor, limit },
         },
       });
     } catch (err) {

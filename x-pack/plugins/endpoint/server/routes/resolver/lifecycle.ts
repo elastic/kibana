@@ -46,14 +46,14 @@ export function handleLifecycle(
 
       const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
       const { results: processLifecycle } = await lifecycleQuery.search(client, id);
-      let next = getParentEntityID(processLifecycle);
+      let nextParentID = getParentEntityID(processLifecycle);
 
-      if (next) {
+      if (nextParentID) {
         for (let i = 0; i < ancestors; i++) {
-          const { results: lifecycle } = await lifecycleQuery.search(client, next);
-          next = getParentEntityID(lifecycle);
+          const { results: lifecycle } = await lifecycleQuery.search(client, nextParentID);
+          nextParentID = getParentEntityID(lifecycle);
 
-          if (!next) {
+          if (!nextParentID) {
             break;
           }
 
@@ -68,7 +68,7 @@ export function handleLifecycle(
           lifecycle: processLifecycle,
           ancestors: ancestorLifecycles,
           pagination: {
-            next: next || null,
+            next: nextParentID || null,
             ancestors,
           },
         },

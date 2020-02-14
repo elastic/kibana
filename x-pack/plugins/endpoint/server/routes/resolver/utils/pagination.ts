@@ -68,10 +68,10 @@ export function paginate(pagination: PaginationParams, field: string, query: Jso
 
 export function paginatedResults(
   response: SearchResponse<ResolverEvent>
-): { total: number; results: ResolverEvent[]; next: string | null } {
+): { total: number; results: ResolverEvent[]; nextCursor: string | null } {
   const total = response.aggregations?.total?.value || 0;
   if (response.hits.hits.length === 0) {
-    return { total, results: [], next: null };
+    return { total, results: [], nextCursor: null };
   }
 
   const results: ResolverEvent[] = [];
@@ -86,5 +86,5 @@ export function paginatedResults(
     eventID: extractEventID(next),
   };
 
-  return { total, results, next: urlEncodeCursor(cursor) };
+  return { total, results, nextCursor: urlEncodeCursor(cursor) };
 }
