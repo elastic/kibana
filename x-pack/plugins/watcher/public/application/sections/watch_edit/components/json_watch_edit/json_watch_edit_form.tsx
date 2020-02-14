@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
 import { onWatchSave } from '../../watch_edit_actions';
@@ -28,13 +29,7 @@ import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
-import { XJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/console_lang';
-import {
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from '../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib';
-
-const xJsonMode = new XJsonMode();
+import { useXJsonMode } from './use_x_json_mode';
 
 export const JsonWatchEditForm = () => {
   const {
@@ -43,7 +38,7 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const [xjsonEditorValue, setXJsonEditorValue] = useState(expandLiteralStrings(watch.watchString));
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
 
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
@@ -179,14 +174,14 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Code editor',
               }
             )}
-            value={xjsonEditorValue}
+            value={xJson}
             onChange={(xjson: string) => {
               if (validationError) {
                 setValidationError(null);
               }
-              setXJsonEditorValue(xjson);
+              setXJson(xjson);
               // Keep the watch in sync with the editor content
-              setWatchProperty('watchString', collapseLiteralStrings(xjson));
+              setWatchProperty('watchString', convertToJson(xjson));
             }}
           />
         </ErrableFormRow>
