@@ -19,7 +19,7 @@
 
 import { ExpressionType } from '../expression_types';
 import { DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, esFilters } from '../../../data/common';
+import { TimeRange, Query, Filter } from '../../../data/common';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -66,7 +66,7 @@ export interface DefaultInspectorAdapters {
 }
 
 export interface ExecutionContextSearch {
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;
 }

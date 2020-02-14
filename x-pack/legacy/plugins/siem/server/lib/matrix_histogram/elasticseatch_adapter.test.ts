@@ -29,7 +29,6 @@ describe('alerts elasticsearch_adapter', () => {
         return mockAlertsHistogramDataResponse;
       });
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),

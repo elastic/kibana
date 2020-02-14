@@ -16,7 +16,7 @@ import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import {
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
   Query,
@@ -33,13 +33,13 @@ import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/typ
 
 const ID = 'alertsByCategoryOverview';
 
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;

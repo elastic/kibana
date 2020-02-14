@@ -37,3 +37,4 @@ export * from './transpile_scss_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
 export * from './path_length_task';
+export * from './build_kibana_platform_plugins';

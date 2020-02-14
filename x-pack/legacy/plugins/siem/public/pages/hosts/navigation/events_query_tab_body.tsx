@@ -51,6 +51,7 @@ export const EventsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
+  pageFilters,
   setQuery,
   startDate,
 }: HostsComponentsQueryProps) => {
@@ -79,6 +80,7 @@ export const EventsQueryTabBody = ({
         end={endDate}
         id={HOSTS_PAGE_TIMELINE_ID}
         start={startDate}
+        pageFilters={pageFilters}
       />
     </>
   );
