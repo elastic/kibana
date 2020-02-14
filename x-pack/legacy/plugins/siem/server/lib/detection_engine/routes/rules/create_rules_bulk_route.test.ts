@@ -4,57 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-  getMockEmptyIndex,
-} from '../__mocks__/_mock_server';
-import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { omit } from 'lodash/fp';
+
 import {
   getFindResult,
   getResult,
   createActionResult,
   typicalPayload,
   getReadBulkRequest,
+  getEmptyIndex,
 } from '../__mocks__/request_responses';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
+import { BulkError } from '../utils';
+import { OutputRuleAlertRest } from '../../types';
 
 describe('create_rules_bulk', () => {
-  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let server = createMockServer();
+  let config = createMockConfig();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
-    createRulesBulkRoute(server);
+    server = createMockServer();
+    config = createMockConfig();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+    getClients.mockResolvedValue(clients);
+
+    createRulesBulkRoute(server.route, config, getClients);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getReadBulkRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getReadBulkRequest());
+      getClients.mockResolvedValue(omit('alertsClient', clients));
+      const { inject, route } = createMockServer();
+      createRulesBulkRoute(route, config, getClients);
+      const { statusCode } = await inject(getReadBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
     test('it gets a 409 if the index does not exist', async () => {
-      elasticsearch.getCluster = getMockEmptyIndex();
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await server.inject(getReadBulkRequest());
       expect(JSON.parse(payload)).toEqual([
         {
@@ -69,10 +78,10 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 200 if rule_id is not given as the id is auto generated from the alert framework', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       // missing rule_id should return 200 as it will be auto generated if not given
       const { rule_id, ...noRuleId } = typicalPayload();
       const request: ServerInjectOptions = {
@@ -85,10 +94,10 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 200 if type is query', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
@@ -105,10 +114,10 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 400 if type is not filter or kql', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
@@ -123,5 +132,35 @@ describe('create_rules_bulk', () => {
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
+  });
+
+  test('returns 409 if duplicate rule_ids found in request payload', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
+  });
+
+  test('returns one error object in response when duplicate rule_ids found in request payload', async () => {
+    clients.alertsClient.find.mockResolvedValue(getFindResult());
+    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.actionsClient.create.mockResolvedValue(createActionResult());
+    clients.alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.length).toBe(1);
   });
 });
