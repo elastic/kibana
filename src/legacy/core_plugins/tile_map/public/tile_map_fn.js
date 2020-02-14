@@ -43,6 +43,10 @@ export const createTileMapFn = () => ({
       geocentroid,
     });
 
+    if (geohash && geohash.accessor) {
+      convertedData.meta.geohash = context.columns[geohash.accessor].meta;
+    }
+
     return {
       type: 'render',
       as: 'visualization',

@@ -6,9 +6,8 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { RequestAuth } from 'hapi';
 
-import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import {
@@ -19,14 +18,12 @@ import {
   TimerangeInput,
   Maybe,
 } from '../../graphql/types';
-import { RequestFacade } from '../../types';
 
 export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  version: string;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
@@ -46,22 +43,10 @@ export interface FrameworkAdapter {
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
 }
 
-export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {
-  [internalFrameworkRequest]: InternalRequest;
+export interface FrameworkRequest extends Pick<KibanaRequest, 'body'> {
+  [internalFrameworkRequest]: KibanaRequest;
   context: RequestHandlerContext;
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
-  auth: InternalRequest['auth'];
   user: AuthenticatedUser | null;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface WrappableRequest<Payload = any, Params = any, Query = any> {
-  payload: Payload;
-  params: Params;
-  query: Query;
-  auth: RequestAuth;
 }
 
 export interface DatabaseResponse {

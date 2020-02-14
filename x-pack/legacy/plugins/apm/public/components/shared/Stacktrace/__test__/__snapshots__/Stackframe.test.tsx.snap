@@ -4,7 +4,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 .c0 {
   color: #69707d;
   padding: 8px 0;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
   font-size: 14px;
 }
 
@@ -97,7 +97,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 
 .c2 {
   position: relative;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
   font-size: 14px;
   border: 1px solid #d3dae6;
   border-radius: 4px;
