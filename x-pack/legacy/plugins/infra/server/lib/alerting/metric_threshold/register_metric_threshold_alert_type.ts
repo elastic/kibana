@@ -14,9 +14,12 @@ import {
 } from './types';
 import { AlertServices } from '../../../../../alerting/server/types';
 
-const FIRED_ACTIONS = i18n.translate('xpack.metrics.alerting.threshold.fired', {
-  defaultMessage: 'fired',
-});
+const FIRED_ACTIONS = {
+  id: 'metrics.threshold.fired',
+  name: i18n.translate('xpack.metrics.alerting.threshold.fired', {
+    defaultMessage: 'Fired',
+  }),
+};
 
 async function getMetric(
   { callCluster }: AlertServices,
