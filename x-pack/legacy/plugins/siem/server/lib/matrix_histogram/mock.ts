@@ -5,6 +5,7 @@
  */
 
 import { defaultIndexPattern } from '../../../default_index_pattern';
+import { HistogramType } from '../../graphql/types';
 
 export const mockAlertsHistogramDataResponse = {
   took: 513,
@@ -36,7 +37,7 @@ export const mockAlertsHistogramDataResponse = {
     hits: [],
   },
   aggregations: {
-    alertsByModuleGroup: {
+    alertsGroup: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 802087,
       buckets: [
@@ -112,4 +113,6 @@ export const mockOptions = {
   },
   defaultIndex: defaultIndexPattern,
   filterQuery: '',
+  stackByField: 'event.module',
+  histogramType: HistogramType.alerts,
 };
