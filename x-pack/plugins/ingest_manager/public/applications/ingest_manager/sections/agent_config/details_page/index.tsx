@@ -29,9 +29,8 @@ import {
   EditPolicyFlyout,
   AssignDatasourcesFlyout,
 } from './components';
-import { useRequest, sendRequest, useCore } from '../../../hooks';
-import { agentConfigRouteService } from '../../../services';
-import { GetOneAgentConfigResponse, Datasource } from '../../../types';
+import { sendRequest, useCore, useGetOneAgentConfig } from '../../../hooks';
+import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { ConnectedLink } from '../../fleet/components';
 import { AgentConfigDeleteProvider } from '../components';
@@ -47,10 +46,7 @@ export const AgentConfigDetailsPage: React.FC = () => {
     params: { configId },
   } = useRouteMatch<{ configId: string }>();
   const core = useCore();
-  const agentConfigRequest = useRequest<GetOneAgentConfigResponse>({
-    path: agentConfigRouteService.getInfoPath(configId),
-    method: 'get',
-  });
+  const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
   const [redirectToAgentConfigList, setRedirectToAgentConfigsList] = useState<boolean>(false);

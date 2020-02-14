@@ -17,10 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
-import { Agent, GetOneAgentEventsResponse, AgentEvent } from '../../../../types';
-import { usePagination, useRequest } from '../../../../hooks';
+import { Agent, AgentEvent } from '../../../../types';
+import { usePagination, useGetOneAgentEvents } from '../../../../hooks';
 import { SearchBar } from '../../components/search_bar';
-import { agentRouteService } from '../../../../services';
 
 function useSearch() {
   const [state, setState] = useState<{ search: string }>({
@@ -42,17 +41,11 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 
-  const eventsRequest = useRequest<GetOneAgentEventsResponse>({
-    path: agentRouteService.getEventsPath(agent.id),
-    method: 'get',
-    query: {
-      page: pagination.currentPage,
-      perPage: pagination.pageSize,
-      kuery: search && search.trim() !== '' ? search.trim() : undefined,
-    },
+  const { isLoading, data, sendRequest } = useGetOneAgentEvents(agent.id, {
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+    kuery: search && search.trim() !== '' ? search.trim() : undefined,
   });
-
-  const { isLoading, data, sendRequest } = eventsRequest;
 
   const refresh = () => sendRequest();
 

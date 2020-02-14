@@ -26,13 +26,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentEnrollmentFlyout } from './components';
-import { Agent, GetAgentsResponse, GetAgentConfigsResponse } from '../../../types';
-import { usePagination, useRequest, useCore } from '../../../hooks';
+import { Agent } from '../../../types';
+import { usePagination, useCore, useGetAgentConfigs, useGetAgents } from '../../../hooks';
 import { ConnectedLink } from '../components';
 import { SearchBar } from '../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
-import { agentRouteService, agentConfigRouteService } from '../../../services';
 
 export const AgentListPage: React.FC<{}> = () => {
   const core = useCore();
@@ -71,30 +70,26 @@ export const AgentListPage: React.FC<{}> = () => {
       .map(policy => `"${policy}"`)
       .join(' or ')})`;
   }
-  const agentsRequest = useRequest<GetAgentsResponse>({
-    method: 'get',
-    path: agentRouteService.getListPath(),
-    query: {
+
+  const agentsRequest = useGetAgents(
+    {
       page: pagination.currentPage,
       perPage: pagination.pageSize,
       kuery: kuery && kuery !== '' ? kuery : undefined,
       showInactive,
     },
-    pollIntervalMs: 10000,
-  });
+    {
+      pollIntervalMs: 5000,
+    }
+  );
 
   const agents = agentsRequest.data ? agentsRequest.data.list : [];
   const totalAgents = agentsRequest.data ? agentsRequest.data.total : 0;
   const { isLoading } = agentsRequest;
 
-  const agentConfigsRequest = useRequest<GetAgentConfigsResponse>({
-    method: 'get',
-    path: agentConfigRouteService.getListPath(),
-    query: {
-      page: 1,
-      perPage: 1000,
-    },
-    pollIntervalMs: 10000,
+  const agentConfigsRequest = useGetAgentConfigs({
+    page: 1,
+    perPage: 1000,
   });
 
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];

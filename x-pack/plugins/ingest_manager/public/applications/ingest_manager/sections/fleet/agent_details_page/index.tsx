@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AgentEventsTable, AgentDetailSection } from './components';
 import { AgentRefreshContext } from './hooks';
 import { Loading } from '../../../components';
-import { useRequest } from '../../../hooks';
-import { GetOneAgentResponse } from '../../../types';
-import { agentRouteService } from '../../../services';
+import { useGetOneAgent } from '../../../hooks';
 
 export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
@@ -25,9 +23,7 @@ export const AgentDetailsPage: React.FC = () => {
   const {
     params: { agentId },
   } = useRouteMatch();
-  const agentRequest = useRequest<GetOneAgentResponse>({
-    path: agentRouteService.getInfoPath(agentId),
-    method: 'get',
+  const agentRequest = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
   });
 

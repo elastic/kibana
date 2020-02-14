@@ -22,8 +22,10 @@ export {
   DeleteAgentConfigsResponse,
   // API schemas - Agents
   GetAgentsResponse,
+  GetAgentsRequestSchema,
   GetOneAgentResponse,
   PostAgentUnenrollResponse,
+  GetOneAgentEventsRequestSchema,
   GetOneAgentEventsResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,

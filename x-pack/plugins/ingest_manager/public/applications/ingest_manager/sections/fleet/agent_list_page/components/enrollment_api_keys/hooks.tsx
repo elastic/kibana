@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Pagination, useRequest } from '../../../../../hooks';
 import {
-  GetEnrollmentAPIKeysResponse,
-  GetOneEnrollmentAPIKeyResponse,
-  GetAgentConfigsResponse,
-} from '../../../../../types';
-import { enrollmentAPIKeyRouteService, agentConfigRouteService } from '../../../../../services';
+  Pagination,
+  useGetAgentConfigs,
+  useGetEnrollmentAPIKeys,
+  useGetOneEnrollmentAPIKey,
+} from '../../../../../hooks';
 
 export function useEnrollmentApiKeys(pagination: Pagination) {
-  const request = useRequest<GetEnrollmentAPIKeysResponse>({
-    method: 'get',
-    path: enrollmentAPIKeyRouteService.getListPath(),
-  });
+  const request = useGetEnrollmentAPIKeys();
 
   return {
     data: request.data,
@@ -26,10 +22,7 @@ export function useEnrollmentApiKeys(pagination: Pagination) {
 }
 
 export function usePolicies() {
-  const request = useRequest<GetAgentConfigsResponse>({
-    method: 'get',
-    path: agentConfigRouteService.getListPath(),
-  });
+  const request = useGetAgentConfigs();
 
   return {
     data: request.data ? request.data.items : [],
@@ -38,10 +31,7 @@ export function usePolicies() {
 }
 
 export function useEnrollmentApiKey(apiKeyId: string | null) {
-  const request = useRequest<GetOneEnrollmentAPIKeyResponse>({
-    method: 'get',
-    path: enrollmentAPIKeyRouteService.getInfoPath(apiKeyId as string),
-  });
+  const request = useGetOneEnrollmentAPIKey(apiKeyId as string);
 
   return {
     data: request.data,

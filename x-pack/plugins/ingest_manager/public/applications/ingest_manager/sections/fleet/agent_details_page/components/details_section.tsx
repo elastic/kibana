@@ -24,11 +24,10 @@ import { useAgentRefresh } from '../hooks';
 import { AgentMetadataFlyout } from './metadata_flyout';
 import { Agent } from '../../../../types';
 import { AgentHealth } from '../../components/agent_health';
-import { useRequest } from '../../../../hooks';
+import { useGetOneAgentConfig } from '../../../../hooks';
 import { Loading } from '../../../../components';
 import { ConnectedLink } from '../../components';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
-import { agentConfigRouteService } from '../../../../services';
 
 const Item: React.FC<{ label: string }> = ({ label, children }) => {
   return (
@@ -57,11 +56,10 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 
-  // Fetch policy information
-  const { isLoading: isPolicyLoading, data: agentConfigData } = useRequest({
-    path: agentConfigRouteService.getInfoPath(agent.policy_id as string),
-    method: 'get',
-  });
+  // Fetch AgentConfig information
+  const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
+    agent.policy_id as string
+  );
 
   const items = [
     {
@@ -86,10 +84,10 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
       title: i18n.translate('xpack.ingestManager.agentDetails.agentConfigLabel', {
         defaultMessage: 'AgentConfig',
       }),
-      description: isPolicyLoading ? (
+      description: isAgentConfigLoading ? (
         <Loading />
       ) : agentConfigData && agentConfigData.item ? (
-        <ConnectedLink color="primary" path={`/policies/${agent.policy_id}`}>
+        <ConnectedLink color="primary" path={`/configs/${agent.policy_id}`}>
           {agentConfigData.item.name}
         </ConnectedLink>
       ) : (
@@ -99,8 +97,8 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
             color="primary"
             content={
               <FormattedMessage
-                id="xpack.ingestManager.agentDetails.unavailablePolicyTooltipText"
-                defaultMessage="This policy is no longer available"
+                id="xpack.ingestManager.agentDetails.unavailableConfigTooltipText"
+                defaultMessage="This config is no longer available"
               />
             }
           />{' '}
