@@ -6,7 +6,7 @@
 import 'brace';
 import 'brace/mode/json';
 
-import '../../../../../../src/plugins/es_ui_shared/console_lang/mocks';
+import '../../../../es_ui_shared/console_lang/mocks';
 
 import { registerTestBed } from '../../../../../test_utils';
 import { Editor, Props } from '.';

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { installXJsonMode, XJsonMode } from './x_json_mode';
+export { XJsonMode } from './x_json_mode';

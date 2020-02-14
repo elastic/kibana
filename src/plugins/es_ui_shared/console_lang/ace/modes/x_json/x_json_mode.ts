@@ -20,7 +20,6 @@
 import ace from 'brace';
 
 import { XJsonHighlightRules } from '../index';
-import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
 const { Mode: JSONMode } = ace.acequire('ace/mode/json');
@@ -28,7 +27,6 @@ const { Tokenizer: AceTokenizer } = ace.acequire('ace/tokenizer');
 const { MatchingBraceOutdent } = ace.acequire('ace/mode/matching_brace_outdent');
 const { CstyleBehaviour } = ace.acequire('ace/mode/behaviour/cstyle');
 const { FoldMode: CStyleFoldMode } = ace.acequire('ace/mode/folding/cstyle');
-const { WorkerClient } = ace.acequire('ace/worker/worker_client');
 
 export function XJsonMode(this: any) {
   const ruleset: any = new XJsonHighlightRules();
@@ -39,29 +37,4 @@ export function XJsonMode(this: any) {
   this.foldingRules = new CStyleFoldMode();
 }
 
-// Order here matters here:
-
-// 1. We first inherit
 oop.inherits(XJsonMode, JSONMode);
-
-// 2. Then clobber `createWorker` method to install our worker source. Per ace's wiki: https://github.com/ajaxorg/ace/wiki/Syntax-validation
-XJsonMode.prototype.createWorker = function(session: ace.IEditSession) {
-  const xJsonWorker = new WorkerClient(['ace'], workerModule, 'JsonWorker');
-
-  xJsonWorker.attachToDocument(session.getDocument());
-
-  xJsonWorker.on('annotate', function(e: { data: any }) {
-    session.setAnnotations(e.data);
-  });
-
-  xJsonWorker.on('terminate', function() {
-    session.clearAnnotations();
-  });
-
-  return xJsonWorker;
-};
-
-export function installXJsonMode(editor: ace.Editor) {
-  const session = editor.getSession();
-  session.setMode(new (XJsonMode as any)());
-}

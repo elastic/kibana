@@ -26,5 +26,4 @@ export {
   XJsonHighlightRules,
   addXJsonToRules,
   XJsonMode,
-  installXJsonMode,
 } from './ace/modes';

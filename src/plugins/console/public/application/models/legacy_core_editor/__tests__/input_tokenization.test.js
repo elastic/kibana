@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../../../../es_ui_shared/console_lang/mocks';
 import '../legacy_core_editor.test.mocks';
 import RowParser from '../../../../lib/row_parser';
 import { createTokenIterator } from '../../../factories';

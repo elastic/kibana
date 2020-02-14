@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../../../../es_ui_shared/console_lang/mocks';
 import '../sense_editor.test.mocks';
 import { create } from '../create';
 import _ from 'lodash';

@@ -26,11 +26,6 @@ export declare const XJsonHighlightRules: FunctionConstructor;
 export declare const XJsonMode: FunctionConstructor;
 
 /**
- * @param editor The Ace editor instance against which to install XJsonMode.
- */
-export declare const installXJsonMode: (editor: Editor) => void;
-
-/**
  * @param otherRules Another Ace ruleset
  * @param embedUnder The state name under which the rules will be embedded. Defaults to "json".
  */
