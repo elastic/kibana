@@ -29,7 +29,6 @@ This document outlines best practices and patterns for testing Kibana Plugins.
     - [Testing dependencies usages](#testing-dependencies-usages)
     - [Testing components consuming the dependencies](#testing-components-consuming-the-dependencies)
     - [Testing optional plugin dependencies](#testing-optional-plugin-dependencies)
-  - [Plugin Contracts](#plugin-contracts)
 
 ## Strategy
 
@@ -1082,7 +1081,3 @@ describe('Plugin', () => {
   });
 });
 ```
-
-## Plugin Contracts
-
-_How to test your plugin's exposed API_
