@@ -128,7 +128,7 @@ There are two ways of registering a new alert type:
 Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 Only registered alert types are available in UI.
 
-2. Register alert type in other plugin. In this case alert type will be available only in current plugin UI. 
+2. Register the alert type in another plugin. In this case, the alert type will be available only in the current plugin UI. 
 It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
 
 ```
