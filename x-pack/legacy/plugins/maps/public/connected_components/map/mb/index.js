@@ -16,7 +16,6 @@ import {
   setMapInitError,
 } from '../../../actions/map_actions';
 import {
-  getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
@@ -33,7 +32,6 @@ function mapStateToProps(state = {}) {
     layerList: getLayerList(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    tooltipState: getTooltipState(state),
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),

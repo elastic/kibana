@@ -28,7 +28,6 @@ function getMockOptions(config: Partial<AuthenticatorOptions['config']> = {}) {
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     loggers: loggingServiceMock.create(),
-    isSystemAPIRequest: jest.fn(),
     getServerBaseURL: jest.fn(),
     config: {
       session: { idleTimeout: null, lifespan: null },
@@ -287,10 +286,11 @@ describe('Authenticator', () => {
 
     it('creates session whenever authentication provider returns state for system API requests', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: { authorization } })
       );
@@ -308,10 +308,11 @@ describe('Authenticator', () => {
 
     it('creates session whenever authentication provider returns state for non-system API requests', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: { authorization } })
       );
@@ -329,9 +330,10 @@ describe('Authenticator', () => {
 
     it('does not extend session for system API calls.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
@@ -347,9 +349,10 @@ describe('Authenticator', () => {
 
     it('extends session for non-system API calls.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
@@ -511,9 +514,10 @@ describe('Authenticator', () => {
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(new Error('some error'))
       );
@@ -527,9 +531,10 @@ describe('Authenticator', () => {
     });
 
     it('does not touch session for non-system API calls if authentication fails with non-401 reason.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(new Error('some error'))
       );
@@ -545,9 +550,10 @@ describe('Authenticator', () => {
     it('replaces existing session with the one returned by authentication provider for system API requests', async () => {
       const user = mockAuthenticatedUser();
       const newState = { authorization: 'Basic yyy' };
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
@@ -568,9 +574,10 @@ describe('Authenticator', () => {
     it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
       const user = mockAuthenticatedUser();
       const newState = { authorization: 'Basic yyy' };
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
@@ -589,9 +596,10 @@ describe('Authenticator', () => {
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(Boom.unauthorized())
       );
@@ -605,9 +613,10 @@ describe('Authenticator', () => {
     });
 
     it('clears session if provider failed to authenticate non-system API request with 401 with active session.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(Boom.unauthorized())
       );
@@ -636,9 +645,10 @@ describe('Authenticator', () => {
     });
 
     it('does not clear session if provider can not handle system API request authentication with active session.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
@@ -652,9 +662,10 @@ describe('Authenticator', () => {
     });
 
     it('does not clear session if provider can not handle non-system API request authentication with active session.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
@@ -668,9 +679,10 @@ describe('Authenticator', () => {
     });
 
     it('clears session for system API request if it belongs to not configured provider.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'true' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
@@ -684,9 +696,10 @@ describe('Authenticator', () => {
     });
 
     it('clears session for non-system API request if it belongs to not configured provider.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );

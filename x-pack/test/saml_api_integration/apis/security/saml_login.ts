@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
@@ -330,7 +330,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -443,7 +443,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -479,7 +479,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
