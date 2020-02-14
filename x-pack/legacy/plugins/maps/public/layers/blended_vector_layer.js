@@ -5,7 +5,15 @@
  */
 
 import { VectorLayer } from './vector_layer';
-import { ES_GEO_GRID, LAYER_TYPE } from '../../common/constants';
+import { VectorStyle } from './styles/vector/vector_style';
+import { getDefaultDynamicProperties, VECTOR_STYLES } from './styles/vector/vector_style_defaults';
+import { DynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
+import {
+  COUNT_PROP_NAME,
+  ES_GEO_GRID,
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN,
+} from '../../common/constants';
 import { ESGeoGridSource, RENDER_AS } from './sources/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 
@@ -35,8 +43,9 @@ export class BlendedVectorLayer extends VectorLayer {
 
   _initActiveSourceAndStyle() {
     this._documentSource = this._source; // VectorLayer constructor sets _source as document source
-    this._activeSource = this._documentSource;
+    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
+    // derive cluster source from document source
     const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
       indexPatternId: this._documentSource.getIndexPatternId(),
       geoField: this._documentSource.getGeoFieldName(),
@@ -46,11 +55,44 @@ export class BlendedVectorLayer extends VectorLayer {
       clusterSourceDescriptor,
       this._documentSource.getInspectorAdapters()
     );
+
+    // derive cluster style from document style
+    const defaultDynamicProperties = getDefaultDynamicProperties();
+    const clusterStyleDescriptor = VectorStyle.createDescriptor({
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
+    });
+    const documentIconSizeStyle = this._documentStyle.getIconSizeStyle();
+    if (!documentIconSizeStyle.isDynamic()) {
+      clusterStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE] = {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
+          field: {
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      };
+    }
+    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+
+    this._activeSource = this._documentSource;
+    this._activeStyle = this._documentStyle;
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       const requestMeta = sourceDataRequest.getMeta();
       if (requestMeta && requestMeta.sourceType === ES_GEO_GRID) {
         this._activeSource = this._clusterSource;
+        this._activeStyle = this._clusterStyle;
       }
     }
   }
@@ -74,10 +116,15 @@ export class BlendedVectorLayer extends VectorLayer {
     return this._documentSource;
   }
 
-  async syncData(syncContext) {
-    console.log('BlendedVectorLayer.syncData');
-    //console.log(syncContext);
+  getCurrentStyle() {
+    return this._activeStyle;
+  }
 
+  getStyleForEditing() {
+    return this._documentStyle;
+  }
+
+  async syncData(syncContext) {
     const searchFilters = this._getSearchFilters(syncContext.dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
@@ -90,8 +137,10 @@ export class BlendedVectorLayer extends VectorLayer {
       const resp = await searchSource.fetch();
       if (resp.hits.total > 100) {
         this._activeSource = this._clusterSource;
+        this._activeStyle = this._clusterStyle;
       } else {
         this._activeSource = this._documentSource;
+        this._activeStyle = this._documentStyle;
       }
     }
 

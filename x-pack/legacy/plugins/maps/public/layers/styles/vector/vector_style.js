@@ -121,6 +121,10 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
+  getIconSizeStyle() {
+    return this._iconSizeStyleProperty;
+  }
+
   _getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,

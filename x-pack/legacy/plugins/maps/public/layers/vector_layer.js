@@ -134,7 +134,7 @@ export class VectorLayer extends AbstractLayer {
       sourceDataRequest
     );
     return {
-      icon: this._style.getIcon(),
+      icon: this.getCurrentStyle().getIcon(),
       tooltipContent: tooltipContent,
       areResultsTrimmed: areResultsTrimmed,
     };
@@ -145,11 +145,11 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async hasLegendDetails() {
-    return this._style.hasLegendDetails();
+    return this.getCurrentStyle().hasLegendDetails();
   }
 
   renderLegendDetails() {
-    return this._style.renderLegendDetails();
+    return this.getCurrentStyle().renderLegendDetails();
   }
 
   _getBoundsBasedOnData() {
@@ -311,7 +311,7 @@ export class VectorLayer extends AbstractLayer {
   _getSearchFilters(dataFilters) {
     const fieldNames = [
       ...this.getSource().getFieldNames(),
-      ...this._style.getSourceFieldNames(),
+      ...this.getCurrentStyle().getSourceFieldNames(),
       ...this.getValidJoins().map(join => join.getLeftField().getName()),
     ];
 
@@ -411,7 +411,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext) {
-    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (this.getCurrentStyle().constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
@@ -419,12 +419,14 @@ export class VectorLayer extends AbstractLayer {
       source: this.getSource(),
       sourceQuery: this.getQuery(),
       dataRequestId: SOURCE_META_ID_ORIGIN,
-      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
-        return (
-          dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE &&
-          dynamicStyleProp.isFieldMetaEnabled()
-        );
-      }),
+      dynamicStyleProps: this.getCurrentStyle()
+        .getDynamicPropertiesArray()
+        .filter(dynamicStyleProp => {
+          return (
+            dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE &&
+            dynamicStyleProp.isFieldMetaEnabled()
+          );
+        }),
       ...syncContext,
     });
   }
@@ -435,16 +437,18 @@ export class VectorLayer extends AbstractLayer {
       source: joinSource,
       sourceQuery: joinSource.getWhereQuery(),
       dataRequestId: join.getSourceMetaDataRequestId(),
-      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
-        const matchingField = joinSource.getMetricFieldForName(
-          dynamicStyleProp.getField().getName()
-        );
-        return (
-          dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
-          !!matchingField &&
-          dynamicStyleProp.isFieldMetaEnabled()
-        );
-      }),
+      dynamicStyleProps: this.getCurrentStyle()
+        .getDynamicPropertiesArray()
+        .filter(dynamicStyleProp => {
+          const matchingField = joinSource.getMetricFieldForName(
+            dynamicStyleProp.getField().getName()
+          );
+          return (
+            dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
+            !!matchingField &&
+            dynamicStyleProp.isFieldMetaEnabled()
+          );
+        }),
       ...syncContext,
     });
   }
@@ -471,7 +475,7 @@ export class VectorLayer extends AbstractLayer {
     const nextMeta = {
       dynamicStyleFields: _.uniq(dynamicStyleFields).sort(),
       sourceQuery,
-      isTimeAware: this._style.isTimeAware() && (await source.isTimeAware()),
+      isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
     };
     const prevDataRequest = this._findDataRequestById(dataRequestId);
@@ -486,7 +490,7 @@ export class VectorLayer extends AbstractLayer {
       const layerName = await this.getDisplayName();
       const styleMeta = await source.loadStylePropsMeta(
         layerName,
-        this._style,
+        this.getCurrentStyle(),
         dynamicStyleProps,
         registerCancelCallback,
         nextMeta
@@ -500,14 +504,14 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceFormatters(syncContext) {
-    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (this.getCurrentStyle().constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
     return this._syncFormatters({
       source: this.getSource(),
       dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
-      fields: this._style
+      fields: this.getCurrentStyle()
         .getDynamicPropertiesArray()
         .filter(dynamicStyleProp => {
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
@@ -524,7 +528,7 @@ export class VectorLayer extends AbstractLayer {
     return this._syncFormatters({
       source: joinSource,
       dataRequestId: join.getSourceFormattersDataRequestId(),
-      fields: this._style
+      fields: this.getCurrentStyle()
         .getDynamicPropertiesArray()
         .filter(dynamicStyleProp => {
           const matchingField = joinSource.getMetricFieldForName(
@@ -605,7 +609,7 @@ export class VectorLayer extends AbstractLayer {
 
     if (!featureCollection) {
       if (featureCollectionOnMap) {
-        this._style.clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
+        this.getCurrentStyle().clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
       }
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
@@ -614,7 +618,7 @@ export class VectorLayer extends AbstractLayer {
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    const hasGeoJsonProperties = this._style.setFeatureStateAndStyleProps(
+    const hasGeoJsonProperties = this.getCurrentStyle().setFeatureStateAndStyleProps(
       featureCollection,
       mbMap,
       this.getId()
@@ -635,7 +639,7 @@ export class VectorLayer extends AbstractLayer {
     // Point layers symbolized as icons only contain a single mapbox layer.
     let markerLayerId;
     let textLayerId;
-    if (this._style.arePointsSymbolizedAsCircles()) {
+    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
       textLayerId = this._getMbTextLayerId();
       if (symbolLayer) {
@@ -689,13 +693,13 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(textLayerId, filterExpr);
     }
 
-    this._style.setMBPaintPropertiesForPoints({
+    this.getCurrentStyle().setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId,
     });
 
-    this._style.setMBPropertiesForLabelText({
+    this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId,
@@ -720,13 +724,13 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
 
-    this._style.setMBSymbolPropertiesForPoints({
+    this.getCurrentStyle().setMBSymbolPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       symbolLayerId,
     });
 
-    this._style.setMBPropertiesForLabelText({
+    this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId: symbolLayerId,
@@ -754,7 +758,7 @@ export class VectorLayer extends AbstractLayer {
         paint: {},
       });
     }
-    this._style.setMBPaintProperties({
+    this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
       fillLayerId,

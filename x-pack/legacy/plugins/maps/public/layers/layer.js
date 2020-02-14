@@ -229,6 +229,10 @@ export class AbstractLayer {
     return this._style;
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
   async getImmutableSourceProperties() {
     return this.getSource().getImmutableProperties();
   }
@@ -322,10 +326,11 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
-    if (!this._style) {
+    const style = this.getStyleForEditing();
+    if (!style) {
       return null;
     }
-    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
+    return style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {

@@ -84,7 +84,7 @@ export class HeatmapLayer extends VectorLayer {
     }
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
-    this._style.setMBPaintProperties({
+    this.getCurrentStyle().setMBPaintProperties({
       mbMap,
       layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
@@ -104,6 +104,6 @@ export class HeatmapLayer extends VectorLayer {
 
   renderLegendDetails() {
     const metricFields = this.getSource().getMetricFields();
-    return this._style.renderLegendDetails(metricFields[0]);
+    return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
   }
 }
