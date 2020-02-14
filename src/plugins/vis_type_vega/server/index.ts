@@ -17,30 +17,22 @@
  * under the License.
  */
 
-import { IHttpFetchError } from './types';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-/** @internal */
-export class HttpFetchError extends Error implements IHttpFetchError {
-  public readonly name: string;
-  public readonly req: Request;
-  public readonly res?: Response;
+import { configSchema, ConfigSchema } from '../config';
 
-  constructor(
-    message: string,
-    name: string,
-    public readonly request: Request,
-    public readonly response?: Response,
-    public readonly body?: any
-  ) {
-    super(message);
-    this.name = name;
-    this.req = request;
-    this.res = response;
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    enableExternalUrls: true,
+  },
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
+    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
+  ],
+};
 
-    // captureStackTrace is only available in the V8 engine, so any browser using
-    // a different JS engine won't have access to this method.
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, HttpFetchError);
-    }
-  }
-}
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});

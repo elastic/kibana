@@ -17,30 +17,11 @@
  * under the License.
  */
 
-import { IHttpFetchError } from './types';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-/** @internal */
-export class HttpFetchError extends Error implements IHttpFetchError {
-  public readonly name: string;
-  public readonly req: Request;
-  public readonly res?: Response;
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  enableExternalUrls: schema.boolean({ defaultValue: false }),
+});
 
-  constructor(
-    message: string,
-    name: string,
-    public readonly request: Request,
-    public readonly response?: Response,
-    public readonly body?: any
-  ) {
-    super(message);
-    this.name = name;
-    this.req = request;
-    this.res = response;
-
-    // captureStackTrace is only available in the V8 engine, so any browser using
-    // a different JS engine won't have access to this method.
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, HttpFetchError);
-    }
-  }
-}
+export type ConfigSchema = TypeOf<typeof configSchema>;
