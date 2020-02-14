@@ -17,15 +17,22 @@
  * under the License.
  */
 
-const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-/**
- * Checks on the *server-side*, if an HTTP request is a system API request
- *
- * @param request HAPI request object
- * @return        true if request is a system API request; false, otherwise
- * @deprecated Use KibanaRequest#isSystemApi
- */
-export function isSystemApiRequest(request) {
-  return !!request.headers[SYSTEM_API_HEADER_NAME];
-}
+import { configSchema, ConfigSchema } from '../config';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    enableExternalUrls: true,
+  },
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
+    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
+  ],
+};
+
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
