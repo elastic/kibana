@@ -28,7 +28,6 @@ const mockLogger = loggingServiceMock.createLogger();
 
 const createService = async (serverBasePath: string = '') => {
   const legacyAPI = {
-    legacyConfig: {},
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue({
         get: jest.fn().mockImplementation((type, id) => {
