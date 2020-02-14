@@ -7,6 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
@@ -17,7 +18,6 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
