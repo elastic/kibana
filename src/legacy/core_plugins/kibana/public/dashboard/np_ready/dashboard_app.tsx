@@ -25,12 +25,12 @@ import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
   TimeRange,
   Query,
-  esFilters,
+  Filter,
   SavedQuery,
 } from '../../../../../../plugins/data/public';
 
@@ -44,7 +44,7 @@ export interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query;
-    filters: esFilters.Filter[];
+    filters: Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -69,9 +69,9 @@ export interface DashboardAppScope extends ng.IScope {
     isPaused: boolean;
     refreshInterval: any;
   }) => void;
-  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
+  onFiltersUpdated: (filters: Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: esFilters.Filter[]) => void;
+  onApplyFilters: (filters: Filter[]) => void;
   onQuerySaved: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
@@ -87,8 +87,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -105,8 +103,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $route,
           $scope,
           $routeParams,
-          confirmModal,
-          indexPatterns: deps.npDataStart.indexPatterns,
+          indexPatterns: deps.data.indexPatterns,
           kbnUrlStateStorage,
           history,
           ...deps,

@@ -19,7 +19,7 @@
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { VisualizeListingTable } from './visualize_listing_table';
-import { NewVisModal } from '../wizard/new_vis_modal';
+
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
@@ -30,20 +30,9 @@ export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>
     reactDirective(wrapInI18nContext(VisualizeListingTable))
   );
-  app.directive('newVisModal', reactDirective =>
-    reactDirective(wrapInI18nContext(NewVisModal), [
-      ['visTypesRegistry', { watchDepth: 'collection' }],
-      ['onClose', { watchDepth: 'reference' }],
-      ['addBasePath', { watchDepth: 'reference' }],
-      ['uiSettings', { watchDepth: 'reference' }],
-      ['savedObjects', { watchDepth: 'reference' }],
-      ['usageCollection', { watchDepth: 'reference' }],
-      'isOpen',
-    ])
-  );
 }
 
-export function VisualizeListingController($injector, createNewVis) {
+export function VisualizeListingController($injector, $scope, createNewVis) {
   const {
     addBasePath,
     chrome,
@@ -59,21 +48,18 @@ export function VisualizeListingController($injector, createNewVis) {
     uiSettings,
     visualizations,
     core: { docLinks, savedObjects },
-    usageCollection,
   } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
-  this.showNewVisModal = false;
   this.addBasePath = addBasePath;
   this.uiSettings = uiSettings;
   this.savedObjects = savedObjects;
-  this.usageCollection = usageCollection;
 
   this.createNewVis = () => {
-    this.showNewVisModal = true;
+    this.closeNewVisModal = visualizations.showNewVisModal();
   };
 
   this.editItem = ({ editUrl }) => {
@@ -85,19 +71,15 @@ export function VisualizeListingController($injector, createNewVis) {
     return addBasePath(editUrl);
   };
 
-  this.closeNewVisModal = () => {
-    this.showNewVisModal = false;
-    // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
-    if (createNewVis) {
-      kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
-    }
-  };
-
   if (createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
-    this.createNewVis();
+    this.closeNewVisModal = visualizations.showNewVisModal({
+      onClose: () => {
+        // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
+        kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
+      },
+    });
   }
-  this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
@@ -142,4 +124,10 @@ export function VisualizeListingController($injector, createNewVis) {
   this.listingLimit = uiSettings.get('savedObjects:listingLimit');
 
   addHelpMenuToAppChrome(chrome, docLinks);
+
+  $scope.$on('$destroy', () => {
+    if (this.closeNewVisModal) {
+      this.closeNewVisModal();
+    }
+  });
 }

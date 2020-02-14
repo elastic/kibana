@@ -20,10 +20,16 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
     subscribe: () => {},
+    pipe: () => {
+      return {
+        subscribe: () => {},
+      };
+    },
   };
 };
 
@@ -58,6 +64,12 @@ const mockCore = {
 export const npSetup = {
   core: mockCore,
   plugins: {
+    advancedSettings: {
+      component: {
+        register: sinon.fake(),
+        componentType: ComponentRegistry.componentType,
+      },
+    },
     usageCollection: {
       allowTrackUserAgent: sinon.fake(),
       reportUiStats: sinon.fake(),
@@ -88,9 +100,17 @@ export const npSetup = {
         getProvider: sinon.fake(),
       },
       query: {
-        filterManager: sinon.fake(),
+        filterManager: {
+          getGlobalFilters: sinon.fake(),
+          getUpdates$: mockObservable,
+        },
         timefilter: {
-          timefilter: sinon.fake(),
+          timefilter: {
+            getTime: sinon.fake(),
+            getRefreshInterval: sinon.fake(),
+            getTimeUpdate$: mockObservable,
+            getRefreshIntervalUpdate$: mockObservable,
+          },
           history: sinon.fake(),
         },
         savedQueries: {
@@ -113,10 +133,10 @@ export const npSetup = {
     share: {
       register: () => {},
     },
-    dev_tools: {
+    devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
       config: {
@@ -169,7 +189,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
@@ -196,14 +220,18 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    dev_tools: {
+    devTools: {
       getSortedDevTools: () => [],
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
       config: {
         defaultAppId: 'home',
+      },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
       },
     },
     data: {
@@ -211,7 +239,15 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
-      indexPatterns: sinon.fake(),
+      indexPatterns: {
+        get: sinon.spy(indexPatternId =>
+          Promise.resolve({
+            id: indexPatternId,
+            isTimeNanosBased: () => false,
+            popularizeField: () => {},
+          })
+        ),
+      },
       ui: {
         IndexPatternSelect: mockComponent,
         SearchBar: mockComponent,
@@ -301,6 +337,7 @@ export const npStart = {
     },
     home: {
       featureCatalogue: {
+        get: sinon.fake(),
         register: sinon.fake(),
       },
       environment: {

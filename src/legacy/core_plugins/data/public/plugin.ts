@@ -43,17 +43,28 @@ import {
   VALUE_CLICK_TRIGGER,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/embeddable/public/lib/triggers';
-import { IUiActionsSetup, IUiActionsStart } from '../../../../plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
+
+import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
+}
+
+/**
+ * Interface for this plugin's returned `setup` contract.
+ *
+ * @public
+ */
+export interface DataSetup {
+  search: SearchSetup;
 }
 
 /**
@@ -61,7 +72,9 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface DataStart {
+  search: SearchStart;
+}
 
 /**
  * Data Plugin - public
@@ -76,7 +89,10 @@ export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty
  */
 
 export class DataPlugin
-  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
+
   public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
     setInjectedMetadata(core.injectedMetadata);
 
@@ -89,6 +105,10 @@ export class DataPlugin
     uiActions.registerAction(
       valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
     );
+
+    return {
+      search: this.search.setup(core),
+    };
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
@@ -102,7 +122,9 @@ export class DataPlugin
     uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
     uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
 
-    return {};
+    return {
+      search: this.search.start(core),
+    };
   }
 
   public stop() {}

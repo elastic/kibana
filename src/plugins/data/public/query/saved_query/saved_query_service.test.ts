@@ -18,7 +18,8 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { esFilters, SavedQueryAttributes } from '../..';
+import { SavedQueryAttributes } from '../..';
+import { FilterStateStore } from '../../../common';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -42,7 +43,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   filters: [
     {
       query: { match_all: {} },
-      $state: { store: esFilters.FilterStateStore.APP_STATE },
+      $state: { store: FilterStateStore.APP_STATE },
       meta: {
         disabled: false,
         negate: false,

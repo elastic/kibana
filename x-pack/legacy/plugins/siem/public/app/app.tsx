@@ -16,9 +16,8 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { I18nContext } from 'ui/i18n';
 
-import { KibanaContextProvider, useUiSetting$ } from '../lib/kibana';
+import { KibanaContextProvider, useKibana, useUiSetting$ } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
@@ -27,7 +26,7 @@ import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
 import { CoreStart, StartPlugins } from '../plugin';
 import { PageRouter } from '../routes';
-import { createStore } from '../store';
+import { createStore, createInitialState } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
@@ -46,33 +45,30 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
   apolloClient,
   history,
 }) => (
-  <EuiErrorBoundary>
-    <I18nContext>
-      <ManageGlobalToaster>
-        <ReduxStoreProvider store={store}>
-          <ApolloProvider client={apolloClient}>
-            <ApolloClientContext.Provider value={apolloClient}>
-              <ThemeProvider theme={theme}>
-                <MlCapabilitiesProvider>
-                  <PageRouter history={history} />
-                </MlCapabilitiesProvider>
-              </ThemeProvider>
-              <ErrorToastDispatcher />
-              <GlobalToaster />
-            </ApolloClientContext.Provider>
-          </ApolloProvider>
-        </ReduxStoreProvider>
-      </ManageGlobalToaster>
-    </I18nContext>
-  </EuiErrorBoundary>
+  <ManageGlobalToaster>
+    <ReduxStoreProvider store={store}>
+      <ApolloProvider client={apolloClient}>
+        <ApolloClientContext.Provider value={apolloClient}>
+          <ThemeProvider theme={theme}>
+            <MlCapabilitiesProvider>
+              <PageRouter history={history} />
+            </MlCapabilitiesProvider>
+          </ThemeProvider>
+          <ErrorToastDispatcher />
+          <GlobalToaster />
+        </ApolloClientContext.Provider>
+      </ApolloProvider>
+    </ReduxStoreProvider>
+  </ManageGlobalToaster>
 );
 
 const AppPluginRoot = memo(AppPluginRootComponent);
 
 const StartAppComponent: FC<AppFrontendLibs> = libs => {
+  const { i18n } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
+  const store = createStore(createInitialState(), libs$.pipe(pluck('apolloClient')));
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const theme = useMemo(
     () => ({
@@ -83,7 +79,16 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
   );
 
   return (
-    <AppPluginRoot store={store} apolloClient={libs.apolloClient} history={history} theme={theme} />
+    <EuiErrorBoundary>
+      <i18n.Context>
+        <AppPluginRoot
+          store={store}
+          apolloClient={libs.apolloClient}
+          history={history}
+          theme={theme}
+        />
+      </i18n.Context>
+    </EuiErrorBoundary>
   );
 };
 
@@ -103,7 +108,7 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) =>
       ...plugins,
     }}
   >
-    <StartApp {...compose()} />
+    <StartApp {...compose(core)} />
   </KibanaContextProvider>
 );
 
