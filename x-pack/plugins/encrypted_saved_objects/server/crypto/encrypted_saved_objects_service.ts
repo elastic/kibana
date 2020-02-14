@@ -136,23 +136,27 @@ export class EncryptedSavedObjectsService {
     let decryptedAttributes: T | null = null;
     const clonedAttributes: Record<string, unknown> = {};
     for (const [attributeName, attributeValue] of Object.entries(responseAttributes)) {
-      if (!typeDefinition.attributesToStrip.has(attributeName)) {
-        if (typeDefinition.attributesToEncrypt.has(attributeName)) {
-          if (originalAttributes) {
-            clonedAttributes[attributeName] = originalAttributes[attributeName];
-          } else {
-            if (decryptedAttributes === null) {
-              decryptedAttributes = await this.decryptAttributes(
-                { type, id, namespace },
-                responseAttributes
-              );
-            }
-            clonedAttributes[attributeName] = decryptedAttributes[attributeName];
-          }
-        } else {
-          clonedAttributes[attributeName] = attributeValue;
-        }
+      if (typeDefinition.attributesToStrip.has(attributeName)) {
+        continue;
       }
+
+      if (!typeDefinition.attributesToEncrypt.has(attributeName)) {
+        clonedAttributes[attributeName] = attributeValue;
+        continue;
+      }
+
+      if (originalAttributes) {
+        clonedAttributes[attributeName] = originalAttributes[attributeName];
+        continue;
+      }
+
+      if (decryptedAttributes === null) {
+        decryptedAttributes = await this.decryptAttributes(
+          { type, id, namespace },
+          responseAttributes
+        );
+      }
+      clonedAttributes[attributeName] = decryptedAttributes[attributeName];
     }
 
     return clonedAttributes;
