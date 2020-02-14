@@ -191,7 +191,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         it(`doesn't show link to view logs`, async () => {
           await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+          const link = await testSubjects.find('~viewLogsContextMenuItem');
+          expect(await link.isEnabled()).to.be(false);
         });
 
         it(`shows link to view apm traces`, async () => {
@@ -239,7 +240,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         it(`doesn't show link to view apm traces`, async () => {
           await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+          const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+          expect(await link.isEnabled()).to.be(false);
         });
       });
     });

@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';

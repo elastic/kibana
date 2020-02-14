@@ -31,7 +31,7 @@ export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
   const config = server.config();
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',

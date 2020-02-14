@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
 import {
   transformAlertToRule,
   getIdError,
-  transformFindAlertsOrError,
-  transformOrError,
+  transformFindAlerts,
+  transform,
   transformTags,
   getIdBulkError,
   transformOrBulkError,
   transformRulesToNdjson,
   transformAlertsToRules,
   transformOrImportError,
+  getDuplicates,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -52,7 +51,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -60,7 +59,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -115,7 +114,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -123,7 +122,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -180,7 +179,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -188,7 +187,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -245,7 +244,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -253,7 +252,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -308,7 +307,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -316,7 +315,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -374,7 +373,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -382,7 +381,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -440,7 +439,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -448,7 +447,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -506,7 +505,7 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: ['tag 1', 'tag 2'],
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -514,7 +513,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -547,55 +546,87 @@ describe('utils', () => {
   });
 
   describe('getIdError', () => {
+    test('it should have a status code', () => {
+      const error = getIdError({ id: '123', ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
+    });
+
     test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
-      const boom = getIdError({ id: '123', ruleId: undefined });
-      expect(boom.message).toEqual('id: "123" not found');
+      const error = getIdError({ id: '123', ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about id not being found if only id is defined and ruleId is null', () => {
-      const boom = getIdError({ id: '123', ruleId: null });
-      expect(boom.message).toEqual('id: "123" not found');
+      const error = getIdError({ id: '123', ruleId: null });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id: "rule-id-123" not found');
+      const error = getIdError({ id: undefined, ruleId: 'rule-id-123' });
+      expect(error).toEqual({
+        message: 'rule_id: "rule-id-123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
-      const boom = getIdError({ id: null, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id: "rule-id-123" not found');
+      const error = getIdError({ id: null, ruleId: 'rule-id-123' });
+      expect(error).toEqual({
+        message: 'rule_id: "rule-id-123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when both are undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: undefined, ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when both are null', () => {
-      const boom = getIdError({ id: null, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: null, ruleId: null });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
-      const boom = getIdError({ id: null, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: null, ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
-      const boom = getIdError({ id: undefined, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: undefined, ruleId: null });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
   });
 
-  describe('transformFindAlertsOrError', () => {
+  describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlertsOrError({ data: [] });
+      const output = transformFindAlerts({ data: [] });
       expect(output).toEqual({ data: [] });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlertsOrError({
+      const output = transformFindAlerts({
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
@@ -623,7 +654,7 @@ describe('utils', () => {
         tags: [],
         to: 'now',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -631,7 +662,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -663,14 +694,14 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformFindAlertsOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+      const output = transformFindAlerts({ data: [{ random: 1 }] });
+      expect(output).toBeNull();
     });
   });
 
   describe('transformOrError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrError(getResult());
+      const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -696,7 +727,7 @@ describe('utils', () => {
         tags: [],
         to: 'now',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -704,7 +735,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -734,8 +765,8 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+      const output = transform({ data: [{ random: 1 }] });
+      expect(output).toBeNull();
     });
   });
 
@@ -858,7 +889,7 @@ describe('utils', () => {
         tags: [],
         to: 'now',
         type: 'query',
-        threats: [
+        threat: [
           {
             framework: 'MITRE ATT&CK',
             tactic: {
@@ -866,7 +897,7 @@ describe('utils', () => {
               name: 'impact',
               reference: 'https://attack.mitre.org/tactics/TA0040/',
             },
-            techniques: [
+            technique: [
               {
                 id: 'T1499',
                 name: 'endpoint denial of service',
@@ -979,7 +1010,7 @@ describe('utils', () => {
           saved_id: 'some-id',
           severity: 'high',
           tags: [],
-          threats: [
+          threat: [
             {
               framework: 'MITRE ATT&CK',
               tactic: {
@@ -987,7 +1018,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',
@@ -1039,7 +1070,7 @@ describe('utils', () => {
           saved_id: 'some-id',
           severity: 'high',
           tags: [],
-          threats: [
+          threat: [
             {
               framework: 'MITRE ATT&CK',
               tactic: {
@@ -1047,7 +1078,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',
@@ -1088,7 +1119,7 @@ describe('utils', () => {
           saved_id: 'some-id',
           severity: 'high',
           tags: [],
-          threats: [
+          threat: [
             {
               framework: 'MITRE ATT&CK',
               tactic: {
@@ -1096,7 +1127,7 @@ describe('utils', () => {
                 name: 'impact',
                 reference: 'https://attack.mitre.org/tactics/TA0040/',
               },
-              techniques: [
+              technique: [
                 {
                   id: 'T1499',
                   name: 'endpoint denial of service',
@@ -1169,6 +1200,27 @@ describe('utils', () => {
         ],
         success_count: 1,
       };
+      expect(output).toEqual(expected);
+    });
+  });
+
+  describe('getDuplicates', () => {
+    test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
+      const output = getDuplicates({
+        value1: 1,
+        value2: 2,
+        value3: 2,
+      });
+      const expected = ['value2', 'value3'];
+      expect(output).toEqual(expected);
+    });
+    test('returns null when given a map of no duplicates', () => {
+      const output = getDuplicates({
+        value1: 1,
+        value2: 1,
+        value3: 1,
+      });
+      const expected: string[] = [];
       expect(output).toEqual(expected);
     });
   });

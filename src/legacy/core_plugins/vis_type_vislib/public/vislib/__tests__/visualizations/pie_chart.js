@@ -25,8 +25,9 @@ import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
+import { Vis } from '../../../../../visualizations/public';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
-import { Vis, tabifyAggResponse } from '../../../legacy_imports';
+import { tabifyAggResponse } from '../../../legacy_imports';
 import { vislibSlicesResponseHandler } from '../../response_handler';
 
 const rowAgg = [

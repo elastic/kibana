@@ -3,41 +3,35 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { kfetch } from 'ui/kfetch';
-
+import { stringify } from 'query-string';
+import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import rison from 'rison-node';
-import chrome from 'ui/chrome';
-import { QueryString } from 'ui/utils/query_string';
-import { jobCompletionNotifications } from './job_completion_notifications';
+import { add } from './job_completion_notifications';
 
+const { core } = npStart;
 const API_BASE_URL = '/api/reporting/generate';
 
 interface JobParams {
   [paramName: string]: any;
 }
 
-class ReportingClient {
-  public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-    return `${chrome.addBasePath(API_BASE_URL)}/${exportType}?${QueryString.param(
-      'jobParams',
-      rison.encode(jobParams)
-    )}`;
-  };
+export const getReportingJobPath = (exportType: string, jobParams: JobParams) => {
+  const params = stringify({ jobParams: rison.encode(jobParams) });
 
-  public createReportingJob = async (exportType: string, jobParams: any) => {
-    const jobParamsRison = rison.encode(jobParams);
-    const resp = await kfetch({
-      method: 'POST',
-      pathname: `${API_BASE_URL}/${exportType}`,
-      body: JSON.stringify({
-        jobParams: jobParamsRison,
-      }),
-    });
-    jobCompletionNotifications.add(resp.job.id);
-    return resp;
-  };
-}
+  return `${core.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
+};
 
-export const reportingClient = new ReportingClient();
+export const createReportingJob = async (exportType: string, jobParams: any) => {
+  const jobParamsRison = rison.encode(jobParams);
+  const resp = await core.http.post(`${API_BASE_URL}/${exportType}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      jobParams: jobParamsRison,
+    }),
+  });
+
+  add(resp.job.id);
+
+  return resp;
+};

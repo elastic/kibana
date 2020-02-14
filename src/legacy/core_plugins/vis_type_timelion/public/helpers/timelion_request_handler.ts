@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { i18n } from '@kbn/i18n';
-import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
-import { timezoneProvider, VisParams } from '../legacy_imports';
+import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
+import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { TimeRange, Filter, esQuery, Query } from '../../../../../plugins/data/public';
+import { timezoneProvider } from '../legacy_imports';
 import { TimelionVisDependencies } from '../plugin';
 
 interface Stats {
@@ -74,7 +75,7 @@ export function getTimelionRequestHandler({
     visParams,
   }: {
     timeRange: TimeRange;
-    filters: esFilters.Filter[];
+    filters: Filter[];
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;

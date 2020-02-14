@@ -5,8 +5,13 @@
  */
 
 import React, { FC, useState } from 'react';
+import { encode } from 'rison-node';
+
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { useUrlState } from '../../util/url_state';
+
 import { TabId } from './navigation_menu';
 
 export interface Tab {
@@ -65,6 +70,7 @@ const TAB_DATA: Record<TabId, TabData> = {
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
+  const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: string) {
     setSelectedTabId(id);
@@ -78,10 +84,13 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         const id = tab.id;
         const testSubject = TAB_DATA[id].testSubject;
         const defaultPathId = TAB_DATA[id].pathId || id;
+        // globalState (e.g. selected jobs and time range) should be retained when changing pages.
+        // appState will not be considered.
+        const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
         return (
           <EuiLink
             data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-            href={`#/${defaultPathId}`}
+            href={`#/${defaultPathId}${fullGlobalStateString}`}
             key={`${id}-key`}
             color="text"
           >

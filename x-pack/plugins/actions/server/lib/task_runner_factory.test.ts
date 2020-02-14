@@ -13,7 +13,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
-import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '../../../event_log/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -59,28 +59,37 @@ const actionExecutorInitializerParams = {
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
-  eventLogger: createEventLoggerMock(),
+  eventLogger: eventLoggerMock.create(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
+  logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
+  getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
+  taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
+    services.savedObjectsClient
+  );
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)
@@ -133,6 +142,56 @@ test('executes the task by calling the executor with proper parameters', async (
       },
     },
   });
+});
+
+test('cleans up action_task_params object', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await taskRunner.run();
+
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
+});
+
+test('runs successfully when cleanup fails and logs the error', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
+
+  await taskRunner.run();
+
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
+  expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+    'Failed to cleanup action_task_params object [id="3"]: Fail'
+  );
 });
 
 test('throws an error with suggested retry logic when return status is error', async () => {

@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
@@ -32,10 +33,16 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: ['default'],
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
     validate: {
       params: schema.object({
-        createdAt: schema.string(),
         description: schema.string(),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
@@ -53,10 +60,9 @@ export const signalRulesAlertType = ({
         maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
-        threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+        threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
-        updatedAt: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
         version: schema.number({ defaultValue: 1 }),
       }),
@@ -121,7 +127,9 @@ export const signalRulesAlertType = ({
       const tags: string[] = savedObject.attributes.tags;
 
       const createdBy: string = savedObject.attributes.createdBy;
+      const createdAt: string = savedObject.attributes.createdAt;
       const updatedBy: string = savedObject.attributes.updatedBy;
+      const updatedAt: string = savedObject.updated_at ?? '';
       const interval: string = savedObject.attributes.schedule.interval;
       const enabled: boolean = savedObject.attributes.enabled;
       const gap = getGapBetweenRuns({
@@ -210,7 +218,9 @@ export const signalRulesAlertType = ({
             filter: esFilter,
             name,
             createdBy,
+            createdAt,
             updatedBy,
+            updatedAt,
             interval,
             enabled,
             pageSize: searchAfterSize,
@@ -264,8 +274,6 @@ export const signalRulesAlertType = ({
             }
           }
         } catch (err) {
-          // TODO: Error handling and writing of errors into a signal that has error
-          // handling/conditions
           logger.error(
             `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
           );

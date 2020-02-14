@@ -30,18 +30,18 @@ import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../../kibana_services';
 export function HomeApp({ directories }) {
   const {
-    getInjected,
+    config,
     savedObjectsClient,
     getBasePath,
     addBasePath,
     environment,
-    telemetryOptInProvider: { setOptInNoticeSeen, getOptIn },
+    telemetry,
   } = getServices();
   const isCloudEnabled = environment.cloud;
   const mlEnabled = environment.ml;
   const apmUiEnabled = environment.apmUi;
 
-  const defaultAppId = getInjected('kbnDefaultAppId', 'discover');
+  const defaultAppId = config.defaultAppId || 'discover';
 
   const renderTutorialDirectory = props => {
     return (
@@ -84,8 +84,7 @@ export function HomeApp({ directories }) {
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              onOptInSeen={setOptInNoticeSeen}
-              getOptInStatus={getOptIn}
+              telemetry={telemetry}
             />
           </Route>
           <Route path="/home">

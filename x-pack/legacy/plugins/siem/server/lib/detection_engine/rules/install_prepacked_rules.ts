@@ -40,7 +40,7 @@ export const installPrepackagedRules = (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = rule;
@@ -72,11 +72,9 @@ export const installPrepackagedRules = (
         tags,
         to,
         type,
-        threats,
+        threat,
         references,
         version,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       }),
     ];
   }, []);

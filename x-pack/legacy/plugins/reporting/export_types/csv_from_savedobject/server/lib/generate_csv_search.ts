@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../../../../../../../src/core/server';
+import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
@@ -27,7 +26,8 @@ import { getFilters } from './get_filters';
 
 import {
   esQuery,
-  esFilters,
+  EsQueryConfig,
+  Filter,
   IIndexPattern,
   Query,
   // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
@@ -46,7 +46,7 @@ const getEsQueryConfig = async (config: any) => {
     allowLeadingWildcards,
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
-  } as esQuery.EsQueryConfig;
+  } as EsQueryConfig;
 };
 
 const getUiSettings = async (config: any) => {
@@ -58,6 +58,7 @@ const getUiSettings = async (config: any) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
@@ -145,15 +146,18 @@ export async function generateCsvSearch(
       query: esQuery.buildEsQuery(
         indexPatternSavedObject as IIndexPattern,
         (searchSourceQuery as unknown) as Query,
-        (combinedFilter as unknown) as esFilters.Filter,
+        (combinedFilter as unknown) as Filter,
         esQueryConfig
       ),
       script_fields: scriptFieldsConfig,
       sort: sortConfig,
     },
   };
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
+
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+    KibanaRequest.from(req.getRawRequest())
+  );
+  const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

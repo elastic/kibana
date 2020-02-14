@@ -9,7 +9,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -44,7 +44,7 @@ interface StateReduxProps {
   dataProviders?: DataProvider[];
   eventType: EventType;
   end: number;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -166,7 +166,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const [loading, signalIndexExists, signalIndexName] = useSignalIndex();
+    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
     const indexToAdd = useMemo<string[]>(() => {
       if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {

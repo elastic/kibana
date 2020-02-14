@@ -6,21 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.siem.overview.alertsCountByTitle', {
-    values: { groupByField },
-    defaultMessage: 'Alerts count by {groupByField}',
-  });
-
 export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
-  defaultMessage: 'Alert detection frequency',
+  defaultMessage: 'External alerts count',
 });
 
-export const EVENTS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.siem.overview.eventsCountByTitle', {
-    values: { groupByField },
-    defaultMessage: 'Events count by {groupByField}',
-  });
+export const EVENTS = i18n.translate('xpack.siem.overview.eventsTitle', {
+  defaultMessage: 'Events count',
+});
 
 export const NEWS_FEED_TITLE = i18n.translate('xpack.siem.overview.newsFeedSidebarTitle', {
   defaultMessage: 'Security news',
@@ -38,8 +30,8 @@ export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimeli
   defaultMessage: 'Recent timelines',
 });
 
-export const SIGNALS_BY_CATEGORY = i18n.translate('xpack.siem.overview.signalsByCategoryTitle', {
-  defaultMessage: 'Signals count by MITRE ATT&CK\\u2122 category',
+export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle', {
+  defaultMessage: 'Signals count',
 });
 
 export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonLabel', {

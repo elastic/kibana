@@ -95,39 +95,42 @@ const ErrorGroupOverview: React.FC = () => {
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiPanel>
-              <ErrorDistribution
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                  {
-                    defaultMessage: 'Error occurrences'
-                  }
-                )}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localUIFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPanel>
+                <ErrorDistribution
+                  distribution={errorDistributionData}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                    {
+                      defaultMessage: 'Error occurrences'
+                    }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h3>Errors</h3>
-          </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ErrorGroupList items={errorGroupListData} />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>Errors</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+
+            <ErrorGroupList items={errorGroupListData} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

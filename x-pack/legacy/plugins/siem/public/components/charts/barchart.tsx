@@ -7,7 +7,9 @@
 import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
-import { useTimeZone } from '../../hooks';
+import deepmerge from 'deepmerge';
+
+import { useTimeZone } from '../../lib/kibana';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -52,8 +54,7 @@ export const BarChartBaseComponent = ({
   const yAxisId = `stat-items-barchart-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
-    theme,
-    ...get('configs.settings', chartConfigs),
+    ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
   return chartConfigs.width && chartConfigs.height ? (

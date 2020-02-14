@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { timefilter } from 'ui/timefilter';
 import { isFullLicense } from '../license/check_license';
+import { useMlKibana } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -49,6 +49,8 @@ function startTrialDescription() {
 }
 
 export const DatavisualizerSelector: FC = () => {
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
@@ -62,12 +64,12 @@ export const DatavisualizerSelector: FC = () => {
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
                     defaultMessage="Data Visualizer"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>

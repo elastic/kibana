@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
+import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from './components/shared_imports';
+import { FormData, FormHook } from '../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
@@ -76,7 +76,7 @@ export interface AboutStepRule extends StepRuleData {
   falsePositives: string[];
   tags: string[];
   timeline: FieldValueTimeline;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
 }
 
 export interface DefineStepRule extends StepRuleData {
@@ -93,7 +93,7 @@ export interface ScheduleStepRule extends StepRuleData {
 
 export interface DefineStepRuleJson {
   index: string[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   saved_id?: string;
   query: string;
   language: string;
@@ -109,7 +109,7 @@ export interface AboutStepRuleJson {
   tags: string[];
   timeline_id?: string;
   timeline_title?: string;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
 }
 
 export interface ScheduleStepRuleJson {
@@ -134,5 +134,5 @@ export interface IMitreAttack {
 export interface IMitreEnterpriseAttack {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }

@@ -29,6 +29,7 @@ import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
@@ -36,7 +37,7 @@ import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { HostsComponentProps, HostsComponentReduxProps } from './types';
-import { filterAlertsHosts } from './navigation';
+import { filterHostData } from './navigation';
 import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
@@ -56,9 +57,9 @@ export const HostsComponent = React.memo<HostsComponentProps>(
     const capabilities = React.useContext(MlCapabilitiesContext);
     const kibana = useKibana();
     const { tabName } = useParams();
-    const hostsFilters = React.useMemo(() => {
+    const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
+        return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
       }
       return filters;
     }, [tabName, filters]);
@@ -77,7 +78,13 @@ export const HostsComponent = React.memo<HostsComponentProps>(
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: hostsFilters,
+              filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
@@ -123,13 +130,13 @@ export const HostsComponent = React.memo<HostsComponentProps>(
                   <HostsTabs
                     deleteQuery={deleteQuery}
                     to={to}
-                    filterQuery={filterQuery}
+                    filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     setQuery={setQuery}
                     from={from}
                     type={hostsModel.HostsType.page}
                     indexPattern={indexPattern}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     hostsPagePath={hostsPagePath}
                   />
                 </WrapperPage>

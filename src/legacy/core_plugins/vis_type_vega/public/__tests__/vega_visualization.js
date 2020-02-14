@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
+import { Vis } from '../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -43,6 +43,11 @@ import { SearchCache } from '../data_model/search_cache';
 
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
+// TODO This is an integration test and thus requires a running platform. When moving to the new platform,
+// this test has to be migrated to the newly created integration test environment.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { npStart } from 'ui/new_platform';
+import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -56,14 +61,19 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
   let visRegComplete = false;
 
+  setInjectedVars({
+    emsTileLayerId: {},
+    enableExternalUrls: true,
+    esShardTimeout: 10000,
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
       vegaVisualizationDependencies = {
-        es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
         core: {
-          uiSettings: $injector.get('config'),
+          uiSettings: npStart.core.uiSettings,
         },
         plugins: {
           data: {
@@ -71,6 +81,9 @@ describe('VegaVisualizations', () => {
               timefilter: {
                 timefilter: {},
               },
+            },
+            __LEGACY: {
+              esClient: npStart.plugins.data.search.__LEGACY.esClient,
             },
           },
         },

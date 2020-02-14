@@ -22,10 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps, ColorSchema } from '../../legacy_imports';
+import { VisOptionsProps } from '../../../../vis_default_editor/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 import { ColorSchemaVislibParams } from '../../types';
+import { ColorSchema } from '../../../../../../plugins/charts/public';
 
 export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaVislibParams>(
   paramName: T,

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
@@ -25,6 +27,8 @@ export {
   APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
   PANEL_BADGE_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   Adapters,
   AddPanelAction,
   CONTEXT_MENU_TRIGGER,
@@ -51,7 +55,6 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
-  SavedObjectMetaData,
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,

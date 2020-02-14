@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -15,11 +14,12 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  MatrixHisrogramConfigs,
 } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import * as i18n from '../translations';
+import { HistogramType } from '../../../graphql/types';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
@@ -29,6 +29,7 @@ const authStackByOptions: MatrixHistogramOption[] = [
     value: 'event.type',
   },
 ];
+const DEFAULT_STACK_BY = 'event.type';
 
 enum AuthMatrixDataGroup {
   authSuccess = 'authentication_success',
@@ -48,6 +49,16 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
   },
 };
 
+const histogramConfigs: MatrixHisrogramConfigs = {
+  defaultStackByOption:
+    authStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
+  errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
+  histogramType: HistogramType.authentications,
+  mapping: authMatrixDataMappingFields,
+  stackByOptions: authStackByOptions,
+  title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+};
+
 export const AuthenticationsQueryTabBody = ({
   deleteQuery,
   endDate,
@@ -56,7 +67,6 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   useEffect(() => {
     return () => {
@@ -65,28 +75,19 @@ export const AuthenticationsQueryTabBody = ({
       }
     };
   }, [deleteQuery]);
+
   return (
     <>
       <MatrixHistogramContainer
-        isAuthenticationsHistogram={true}
-        dataKey="AuthenticationsHistogram"
-        defaultStackByOption={authStackByOptions[0]}
         endDate={endDate}
-        errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
         id={ID}
-        mapping={authMatrixDataMappingFields}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
-        skip={skip}
         sourceId="default"
         startDate={startDate}
-        stackByOptions={authStackByOptions}
-        title={i18n.NAVIGATION_AUTHENTICATIONS_TITLE}
         type={hostsModel.HostsType.page}
-        updateDateRange={updateDateRange}
+        {...histogramConfigs}
       />
-      <EuiSpacer size="l" />
       <AuthenticationsQuery
         endDate={endDate}
         filterQuery={filterQuery}

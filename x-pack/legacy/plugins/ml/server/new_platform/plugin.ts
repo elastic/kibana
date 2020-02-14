@@ -24,7 +24,6 @@ import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
@@ -41,13 +40,11 @@ import { makeMlUsageCollector } from '../lib/ml_telemetry';
 import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
-// @ts-ignore: could not find declaration file for module
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 // @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
 // @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
-// @ts-ignore: could not find declaration file for module
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
@@ -109,6 +106,7 @@ export interface RouteInitialization {
   xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  securityPlugin: any;
   cloud?: CloudSetup;
 }
 export interface UsageInitialization {
@@ -136,7 +134,7 @@ export class Plugin {
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
     const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
-    const { http, injectUiAppVars } = core;
+    const { http } = core;
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
@@ -199,13 +197,6 @@ export class Plugin {
       ],
     };
 
-    injectUiAppVars('ml', () => {
-      return {
-        kbnIndex: this.config.get('kibana.index'),
-        mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
-      };
-    });
-
     // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
     http.registerRouteHandlerContext('ml', (context, request) => {
@@ -222,6 +213,7 @@ export class Plugin {
       elasticsearchService: core.elasticsearch,
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
+      securityPlugin: plugins.security,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
@@ -248,7 +240,7 @@ export class Plugin {
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);
     systemRoutes(extendedRouteInitializationDeps);
-    dataRecognizer(routeInitializationDeps);
+    dataRecognizer(extendedRouteInitializationDeps);
     dataVisualizerRoutes(routeInitializationDeps);
     calendars(routeInitializationDeps);
     fieldsService(routeInitializationDeps);

@@ -4,20 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks_jest';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
 import { TopNav } from './top_nav';
 
-uiTimefilterMock.enableAutoRefreshSelector();
-uiTimefilterMock.enableTimeRangeSelector();
-
-jest.mock('../../../contexts/ui/use_ui_context');
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        uiSettings: { get: jest.fn() },
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                getRefreshInterval: jest.fn(),
+                setRefreshInterval: jest.fn(),
+                getTime: jest.fn(),
+                isAutoRefreshSelectorEnabled: jest.fn(),
+                isTimeRangeSelectorEnabled: jest.fn(),
+                getRefreshIntervalUpdate$: jest.fn(),
+                getTimeUpdate$: jest.fn(),
+                getEnabledUpdated$: jest.fn(),
+              },
+              history: { get: jest.fn() },
+            },
+          },
+        },
+      },
+    };
+  },
+}));
 
 const noop = () => {};
 
@@ -34,8 +56,12 @@ describe('Navigation Menu: <TopNav />', () => {
     const refreshListener = jest.fn();
     const refreshSubscription = mlTimefilterRefresh$.subscribe(refreshListener);
 
-    const wrapper = shallow(<TopNav />);
-    expect(wrapper).toMatchSnapshot();
+    const wrapper = mount(
+      <MemoryRouter>
+        <TopNav />
+      </MemoryRouter>
+    );
+    expect(wrapper.find(TopNav)).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();
