@@ -9,14 +9,14 @@ import {
   compose,
   applyMiddleware,
   Store,
-  Middleware,
-  Dispatch,
   MiddlewareAPI,
+  Dispatch,
+  Middleware,
 } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { appSagaFactory } from './saga';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
+import { managementMiddlewareFactory } from './managing';
 import { policyListMiddlewareFactory } from './policy_list';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
@@ -28,8 +28,7 @@ const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMP
 export type Selector<S, R> = (state: S) => R;
 
 /**
- * Wrap Redux Middleware and adjust `getState()` to return the namespace from `GlobalState`
- * that applies to the given Middleware concern.
+ * Wrap Redux Middleware and adjust 'getState()' to return the namespace from 'GlobalState that applies to the given Middleware concern.
  *
  * @param selector
  * @param middleware
@@ -49,19 +48,23 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
-export const appStoreFactory = (coreStart: CoreStart): [Store, () => void] => {
-  const sagaReduxMiddleware = appSagaFactory(coreStart);
+export const appStoreFactory = (coreStart: CoreStart): Store => {
   const store = createStore(
     appReducer,
     composeWithReduxDevTools(
       applyMiddleware(
         alertMiddlewareFactory(coreStart),
-        appSagaFactory(coreStart),
-        substateMiddlewareFactory(s => s.policyList, policyListMiddlewareFactory(coreStart))
+        substateMiddlewareFactory(
+          globalState => globalState.managementList,
+          managementMiddlewareFactory(coreStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.policyList,
+          policyListMiddlewareFactory(coreStart)
+        )
       )
     )
   );
 
-  sagaReduxMiddleware.start();
-  return [store, sagaReduxMiddleware.stop];
+  return store;
 };

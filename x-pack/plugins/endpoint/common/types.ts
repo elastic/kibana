@@ -118,4 +118,4 @@ export interface EndpointMetadata {
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'policyListPage' | 'endpointListPage';
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';

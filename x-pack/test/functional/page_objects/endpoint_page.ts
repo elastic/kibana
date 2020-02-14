@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const table = getService('table');
 
   return {
     /**
@@ -31,6 +32,10 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
 
     async welcomeEndpointTitle() {
       return await testSubjects.getVisibleText('welcomeTitle');
+    },
+
+    async getManagementTableData() {
+      return await table.getDataFromTestSubj('managementListTable');
     },
   };
 }
