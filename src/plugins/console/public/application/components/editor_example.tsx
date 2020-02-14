@@ -48,7 +48,7 @@ export function EditorExample(props: EditorExampleProps) {
     <>
       <EuiScreenReaderOnly>
         <label htmlFor={inputId}>
-          {i18n.translate('console.outputTextarea', {
+          {i18n.translate('console.exampleOutputTextarea', {
             defaultMessage: 'Dev Tools Console editor example',
           })}
         </label>

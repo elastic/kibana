@@ -245,7 +245,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         <EuiScreenReaderOnly>
           <label htmlFor={inputId}>
-            {i18n.translate('console.outputTextarea', {
+            {i18n.translate('console.inputTextarea', {
               defaultMessage: 'Dev Tools Console',
             })}
           </label>
