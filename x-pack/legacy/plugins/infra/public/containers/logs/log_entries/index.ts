@@ -179,6 +179,13 @@ const useFetchEntriesEffect = (
         setTimeout(() => {
           props.jumpToTargetPosition(payload.bottomCursor!);
         });
+      } else if (
+        props.timeKey &&
+        payload.topCursor &&
+        payload.bottomCursor &&
+        !timeKeyIsBetween(payload.topCursor, payload.bottomCursor, props.timeKey)
+      ) {
+        props.jumpToTargetPosition(payload.topCursor);
       }
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
