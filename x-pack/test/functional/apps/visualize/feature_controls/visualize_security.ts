@@ -24,7 +24,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('feature controls security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/50018
+  describe.skip('feature controls security', () => {
     before(async () => {
       await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -241,8 +242,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryString).to.eql('response:200');
       });
 
-      // https://github.com/elastic/kibana/issues/50018
-      it.skip('does not allow saving via the saved query management component popover with no query loaded', async () => {
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
