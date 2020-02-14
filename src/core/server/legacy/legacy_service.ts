@@ -40,7 +40,7 @@ import {
   LegacyVars,
 } from './types';
 import { LegacyInternals } from './legacy_internals';
-import { CoreSetup, CoreStart } from '..';
+import { CoreSetup, CoreStart, RequestHandlerContext } from '..';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<LegacyVars>) => void;
@@ -281,7 +281,8 @@ export class LegacyService implements CoreService {
           null,
           this.legacyId
         ),
-        createRouter: () => setupDeps.core.http.createRouter('', this.legacyId),
+        createRouter: <T extends RequestHandlerContext>() =>
+          setupDeps.core.http.createRouter<T>('', this.legacyId),
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,

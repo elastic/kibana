@@ -223,7 +223,9 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: () => IRouter;
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<
+    Context
+  >;
 
   /**
    * Register a context provider for a route handler.
@@ -264,7 +266,10 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  createRouter: <Context extends RequestHandlerContext>(
+    path: string,
+    plugin?: PluginOpaqueId
+  ) => IRouter<Context>;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,

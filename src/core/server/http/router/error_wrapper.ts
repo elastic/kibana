@@ -24,12 +24,12 @@ import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
 import { RouteMethod } from './route';
 
-export const wrapErrors = <P, Q, B>(
-  handler: RequestHandler<P, Q, B, RouteMethod>
-): RequestHandler<P, Q, B, RouteMethod> => {
+export const wrapErrors = <P, Q, B, M extends RouteMethod, C extends RequestHandlerContext>(
+  handler: RequestHandler<P, Q, B, M, C>
+): RequestHandler<P, Q, B, M, C> => {
   return async (
-    context: RequestHandlerContext,
-    request: KibanaRequest<P, Q, B, RouteMethod>,
+    context: C,
+    request: KibanaRequest<P, Q, B, M>,
     response: KibanaResponseFactory
   ) => {
     try {
