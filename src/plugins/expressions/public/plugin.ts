@@ -36,11 +36,11 @@ import {
   setInterpreter,
   setRenderersRegistry,
   setNotifications,
+  setExpressionsService,
 } from './services';
 import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
@@ -92,7 +92,6 @@ export interface ExpressionsSetup extends ExpressionsServiceSetup {
 }
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
@@ -117,6 +116,7 @@ export class ExpressionsPublicPlugin
     executor.registerFunction(kibanaContextFunction());
 
     setRenderersRegistry(renderers);
+    setExpressionsService(this.expressions);
 
     const expressionsSetup = expressions.setup();
 
@@ -179,7 +179,6 @@ export class ExpressionsPublicPlugin
 
     return {
       ...expressionsStart,
-      ExpressionDataHandler,
       ExpressionLoader,
       ExpressionRenderHandler,
       loader,
