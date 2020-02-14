@@ -23,6 +23,7 @@ interface Props {
   onClose: () => void;
   loadMLJob: () => void;
   createMLJob: () => void;
+  mlError: any;
 }
 
 export const MLFlyoutContainer: Component<Props> = ({
@@ -32,45 +33,32 @@ export const MLFlyoutContainer: Component<Props> = ({
   hasMLJob,
   createMLJob,
   isJobCreating,
+  mlError,
 }) => {
   const { notifications } = useKibana();
   useEffect(() => {
     loadMLJob(ML_JOB_ID);
   }, [loadMLJob]);
 
-  const onClickCreate = async () => {
-    try {
-      // const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
-      // if (!didSucceed) {
-      //   throw new Error('Creating ML job failed');
-      // }
-      createMLJob();
-      // addSuccessToast();
-    } catch (e) {
-      // addErrorToast();
-    }
+  useEffect(() => {
+    notifications.toasts.success({
+      title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+      body: toMountPoint(
+        <p>
+          {labels.JOB_CREATED_SUCCESS_MESSAGE}
+          <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
+        </p>
+      ),
+    });
+    onClose();
+  }, [hasMLJob, notifications, onClose]);
 
-    // onClose();
-  };
-
-  // useEffect(() => {
-  //   notifications.toasts.warning({
-  //     title: <p>{labels.JOB_CREATION_FAILED}</p>,
-  //     body: toMountPoint(<p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>),
-  //   });
-  // }, []);
-  //
-  // useEffect(() => {
-  //   notifications.toasts.success({
-  //     title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
-  //     body: toMountPoint(
-  //       <p>
-  //         {labels.JOB_CREATED_SUCCESS_MESSAGE}
-  //         <MLJobLink>{labels.VIEW_JOB}</MLJobLink>
-  //       </p>
-  //     ),
-  //   });
-  // }, []);
+  useEffect(() => {
+    notifications.toasts.warning({
+      title: <p>{labels.JOB_CREATION_FAILED}</p>,
+      body: toMountPoint(<p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>),
+    });
+  }, [mlError, notifications]);
 
   if (!isOpen) {
     return null;
