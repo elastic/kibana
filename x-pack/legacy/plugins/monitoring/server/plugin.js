@@ -19,7 +19,7 @@ import { getLicenseExpiration } from './alerts/license_expiration';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
-  setup(_coreSetup, pluginsSetup, __LEGACY) {
+  async setup(_coreSetup, pluginsSetup, __LEGACY) {
     const {
       plugins,
       _kbnServer: kbnServer,
@@ -59,6 +59,14 @@ export class Plugin {
      */
     const elasticsearchConfig = parseElasticsearchConfig(config);
 
+    // Create the dedicated client
+    await instantiateClient({
+      log,
+      events,
+      elasticsearchConfig,
+      elasticsearchPlugin: plugins.elasticsearch,
+    });
+
     xpackMainPlugin.status.once('green', async () => {
       // first time xpack_main turns green
       /*
@@ -67,12 +75,6 @@ export class Plugin {
       const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient({
-          log,
-          events,
-          elasticsearchConfig,
-          elasticsearchPlugin: plugins.elasticsearch,
-        }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
           log,
