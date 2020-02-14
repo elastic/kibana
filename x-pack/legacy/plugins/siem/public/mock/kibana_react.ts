@@ -16,8 +16,6 @@ import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_DARK_MODE,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_REFRESH_RATE_INTERVAL,
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_INTERVAL_PAUSE,
@@ -29,8 +27,6 @@ import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kiban
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mockUiSettings: Record<string, any> = {
-  [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
-  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
   [DEFAULT_SIEM_TIME_RANGE]: {
     from: DEFAULT_FROM,
     to: DEFAULT_TO,
