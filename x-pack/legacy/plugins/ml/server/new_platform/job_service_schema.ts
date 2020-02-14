@@ -14,7 +14,7 @@ export const categorizationFieldExamplesSchema = {
   timeField: schema.maybe(schema.string()),
   start: schema.number(),
   end: schema.number(),
-  analyzer: schema.any(), // TODO update this to be a schema for a custom analyzer, if one exists
+  analyzer: schema.any(),
 };
 
 export const chartSchema = {
