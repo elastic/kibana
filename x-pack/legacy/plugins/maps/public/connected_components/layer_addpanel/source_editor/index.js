@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { SourceEditor } from './view';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {

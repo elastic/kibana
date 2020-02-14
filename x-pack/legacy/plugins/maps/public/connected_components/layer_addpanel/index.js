@@ -6,11 +6,11 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
+import { FLYOUT_STATE, INDEXING_STAGE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import { getMapColors } from '../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
   setTransientLayer,
   addLayer,

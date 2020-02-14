@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
-import { FLYOUT_STATE } from '../../../reducers/ui';
+import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui';
 import { updateFlyout } from '../../../actions/ui_actions';
 import { hasDirtyState } from '../../../selectors/map_selectors';
 import {

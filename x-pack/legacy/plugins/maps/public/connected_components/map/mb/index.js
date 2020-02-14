@@ -24,7 +24,7 @@ import {
   isTooltipControlDisabled,
   isViewControlHidden,
 } from '../../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {

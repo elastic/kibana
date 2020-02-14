@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { FLYOUT_STATE } from '../../../../../reducers/ui';
+import { FLYOUT_STATE } from '../../../../../../../../../plugins/maps/public/reducers/ui.js';
 import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../../selectors/ui_selectors';
 import {

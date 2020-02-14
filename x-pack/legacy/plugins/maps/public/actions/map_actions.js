@@ -19,13 +19,13 @@ import {
   getOpenTooltips,
   getQuery,
 } from '../selectors/map_selectors';
-import { FLYOUT_STATE } from '../reducers/ui';
+import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
-} from '../reducers/non_serializable_instances';
+} from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import {
   FEATURE_ID_PROPERTY_NAME,

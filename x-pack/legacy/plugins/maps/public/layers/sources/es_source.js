@@ -17,7 +17,7 @@ import _ from 'lodash';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';

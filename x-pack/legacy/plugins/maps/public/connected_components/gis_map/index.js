@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-import { FLYOUT_STATE } from '../../reducers/ui';
+import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
