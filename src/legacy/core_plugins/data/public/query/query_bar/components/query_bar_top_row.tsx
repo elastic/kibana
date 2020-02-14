@@ -28,6 +28,7 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { TimeRange } from 'src/plugins/data/public';
+import { convertQuery } from '@logrhythm/nm-web-shared/services/query_mapping';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
@@ -36,6 +37,8 @@ import { Query, getQueryLog } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
 import { IDataPluginServices } from '../../../types';
 import { PersistedLog } from '../../persisted_log';
+
+import { SaveRule } from '../../../../../../../netmon/components/save_rule/save_rule';
 
 interface Props {
   query?: Query;
@@ -72,10 +75,45 @@ function QueryBarTopRowUI(props: Props) {
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
 
+  const currentQueryText = props.query && props.query.query ? (props.query.query as string) : '';
+
   useEffect(() => {
     if (!props.query) return;
     persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
   }, [queryLanguage]);
+
+  useEffect(() => {
+    if (!props.query || !props.query.query) return;
+
+    let shutdown: boolean = false;
+    convertQuery(props.query.query as string)
+      .then(newQueryText => {
+        if (!props.query || shutdown) return;
+        const newQuery = {
+          ...props.query,
+          query: newQueryText,
+        };
+        const dateRange = getDateRange();
+        props.onChange({
+          query: newQuery,
+          dateRange,
+        });
+        props.onSubmit({
+          query: newQuery,
+          dateRange,
+        });
+      })
+      .catch(err => {
+        console.warn( // eslint-disable-line
+          'An error occurred trying to correct the provided query for capitalization.',
+          err
+        );
+      });
+
+    return () => {
+      shutdown = true;
+    };
+  }, []);
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
@@ -146,7 +184,33 @@ function QueryBarTopRowUI(props: Props) {
       props.timeHistory.add(dateRange);
     }
 
-    props.onSubmit({ query, dateRange });
+    if (!query || !query.query) {
+      props.onSubmit({ query, dateRange });
+      return;
+    }
+
+    convertQuery(query.query as string)
+      .then(newQueryText => {
+        if (!query) return;
+        const newQuery = {
+          ...query,
+          query: newQueryText,
+        };
+        props.onChange({
+          query: newQuery,
+          dateRange,
+        });
+        props.onSubmit({
+          query: newQuery,
+          dateRange,
+        });
+      })
+      .catch(err => {
+        console.warn( // eslint-disable-line
+          'An error occurred trying to correct the provided query for capitalization.',
+          err
+        );
+      });
   }
 
   function onInputSubmit(query: Query) {
@@ -323,6 +387,9 @@ function QueryBarTopRowUI(props: Props) {
     >
       {renderQueryInput()}
       <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SaveRule query={currentQueryText} disabledForLanguage={queryLanguage !== 'lucene'} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

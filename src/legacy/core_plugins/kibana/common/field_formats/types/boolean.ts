@@ -17,38 +17,76 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import {
   FieldFormat,
   asPrettyString,
   KBN_FIELD_TYPES,
   TextContextTypeConvert,
+  HtmlContextTypeConvert,
 } from '../../../../../../plugins/data/common';
+import { getHighlightHtml } from '../../../../../../plugins/data/common/field_formats/utils/highlight/highlight_html';
+import { formatNetmonBoolean } from '../../../../../../netmon/field_formats/boolean_formats';
 
 export function createBoolFormat() {
+  const getTruthy = (value: any) => {
+    switch (value) {
+      case false:
+      case 0:
+      case 'false':
+      case 'no':
+        return false;
+      case true:
+      case 1:
+      case 'true':
+      case 'yes':
+        return true;
+      default:
+        return null;
+    }
+  };
+
+  const formatText = (value: any) => {
+    if (typeof value === 'string') {
+      value = value.trim().toLowerCase();
+    }
+
+    const truthy = getTruthy(value);
+
+    if (truthy) {
+      return 'true';
+    } else if (truthy === false) {
+      return 'false';
+    }
+
+    return asPrettyString(value);
+  };
+
+  const defaultHtml = (value: any, field?: any, hit?: Record<string, any>) => {
+    const formatted = _.escape(formatText(value));
+
+    if (!hit || !hit.highlight || !hit.highlight[field.name]) {
+      return formatted;
+    } else {
+      return getHighlightHtml(formatted, hit.highlight[field.name]);
+    }
+  };
+
   return class BoolFormat extends FieldFormat {
     static id = 'boolean';
     static title = 'Boolean';
     static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-    textConvert: TextContextTypeConvert = value => {
-      if (typeof value === 'string') {
-        value = value.trim().toLowerCase();
+    textConvert: TextContextTypeConvert = (value: any) => formatText(value);
+
+    htmlConvert: HtmlContextTypeConvert = (value: any, field?: any, hit?: Record<string, any>) => {
+      const truthy = getTruthy(value);
+
+      if (!field || truthy === null) {
+        return defaultHtml(value, field, hit);
       }
 
-      switch (value) {
-        case false:
-        case 0:
-        case 'false':
-        case 'no':
-          return 'false';
-        case true:
-        case 1:
-        case 'true':
-        case 'yes':
-          return 'true';
-        default:
-          return asPrettyString(value);
-      }
+      return formatNetmonBoolean(value, field, hit) || defaultHtml(value, field, hit);
     };
   };
 }
