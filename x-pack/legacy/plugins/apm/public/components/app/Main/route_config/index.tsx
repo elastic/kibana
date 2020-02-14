@@ -22,6 +22,7 @@ import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { TraceLink } from '../../TraceLink';
+import { CustomizeUI } from '../../Settings/CustomizeUI';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -212,5 +213,18 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Service Map'
     }),
     name: RouteName.SINGLE_SERVICE_MAP
+  },
+  {
+    exact: true,
+    path: '/settings/customize-ui',
+    component: () => (
+      <Settings>
+        <CustomizeUI />
+      </Settings>
+    ),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.customizeUI', {
+      defaultMessage: 'Customize UI'
+    }),
+    name: RouteName.CUSTOMIZE_UI
   }
 ];
