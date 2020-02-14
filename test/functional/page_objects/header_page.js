@@ -79,7 +79,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isGlobalLoadingIndicatorVisible() {
       log.debug('isGlobalLoadingIndicatorVisible');
-      return await testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+      return await testSubjects.exists('globalLoadingIndicator', {
+        timeout: config.get('timeouts.waitForExits') * 0.6,
+      });
     }
 
     async awaitGlobalLoadingIndicatorHidden() {

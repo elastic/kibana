@@ -8,6 +8,7 @@ import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/ki
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
+  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
@@ -61,7 +62,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLoader', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
       });
     });
 
@@ -96,7 +99,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
       });
 
       it(`edit visualization for object which doesn't exist redirects to the home page`, async () => {
@@ -109,7 +114,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
       });
 
       it(`edit visualization for object which exists redirects to the home page`, async () => {
@@ -122,7 +129,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
       });
     });
   });

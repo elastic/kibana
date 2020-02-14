@@ -25,6 +25,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
+  const config = getService('config');
   const browser = getService('browser');
   const find = getService('find');
   const flyout = getService('flyout');
@@ -298,12 +299,16 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getIndexPatternList() {
-      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      await testSubjects.existOrFail('indexPatternTable', {
+        timeout: config.get('timeouts.waitForExits') * 2,
+      });
       return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
     }
 
     async isIndexPatternListEmpty() {
-      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      await testSubjects.existOrFail('indexPatternTable', {
+        timeout: config.get('timeouts.waitForExits') * 2,
+      });
       const indexPatternList = await this.getIndexPatternList();
       return indexPatternList.length === 0;
     }
@@ -629,23 +634,33 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async checkImportSucceeded() {
-      await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+      await testSubjects.existOrFail('importSavedObjectsSuccess', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
     }
 
     async checkNoneImported() {
-      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
+      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
     }
 
     async checkImportConflictsWarning() {
-      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', { timeout: 20000 });
+      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
     }
 
     async checkImportLegacyWarning() {
-      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', { timeout: 20000 });
+      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
     }
 
     async checkImportFailedWarning() {
-      await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
+      await testSubjects.existOrFail('importSavedObjectsFailedWarning', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
     }
 
     async clickImportDone() {

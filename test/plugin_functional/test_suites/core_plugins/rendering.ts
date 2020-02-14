@@ -36,6 +36,7 @@ declare global {
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const appsMenu = getService('appsMenu');
+  const config = getService('config');
   const browser = getService('browser');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -62,7 +63,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
+  const exists = (selector: string) =>
+    testSubjects.exists(selector, { timeout: config.get('timeouts.waitForExits') * 2 });
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
     browser.execute(() => {

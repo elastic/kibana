@@ -24,6 +24,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
+  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker', 'visChart']);
@@ -54,7 +55,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
-      const isPresent = await testSubjects.exists(testSubj, { timeout: 10000 });
+      const isPresent = await testSubjects.exists(testSubj, {
+        timeout: config.get('timeouts.waitForExits') * 5,
+      });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
       }
@@ -503,7 +506,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
       log.debug(`Check color picker popup is present`);
-      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+      await testSubjects.existOrFail('tvbColorPickerPopUp', {
+        timeout: config.get('timeouts.waitForExits') * 2,
+      });
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {
@@ -515,7 +520,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkPreviewIsDisabled(): Promise<void> {
       log.debug(`Check no data message is present`);
-      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+      await testSubjects.existOrFail('noTSVBDataMessage', {
+        timeout: config.get('timeouts.waitForExits') * 2,
+      });
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {

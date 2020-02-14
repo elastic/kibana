@@ -23,6 +23,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
+  const config = getService('config');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -157,7 +158,9 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
     async showStartEndTimes() {
       // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-      await testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
+      await testSubjects.exists('superDatePickerToggleQuickMenuButton', {
+        timeout: config.get('timeouts.waitForExits') * 10,
+      });
       const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
       if (isShowDatesButton) {
         await testSubjects.click('superDatePickerShowDatesButton');

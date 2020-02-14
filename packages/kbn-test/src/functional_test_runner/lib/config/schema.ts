@@ -98,8 +98,6 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
-        kibanaStabilize: Joi.number().default(15000),
-        navigateStatusPageCheck: Joi.number().default(250),
 
         // Many of our tests use the `exists` functions to determine where the user is. For
         // example, you'll see a lot of code like:

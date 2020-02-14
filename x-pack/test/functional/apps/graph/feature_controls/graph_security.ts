@@ -13,6 +13,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const config = getService('config');
 
   describe('security', () => {
     before(async () => {
@@ -69,7 +70,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphLandingPage', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
@@ -132,7 +135,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show a "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphLandingPage', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
         await testSubjects.missingOrFail('newItemButton');
       });
 

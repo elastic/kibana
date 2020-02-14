@@ -11,6 +11,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security', 'settings']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const config = getService('config');
 
   describe('spaces', () => {
     describe('space with no features disabled', () => {
@@ -37,7 +38,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('uptimeApp', {
+          timeout: config.get('timeouts.waitForExits') * 5,
+        });
       });
     });
 
