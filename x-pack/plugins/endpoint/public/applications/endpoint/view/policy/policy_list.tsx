@@ -70,10 +70,10 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   );
 };
 
-const renderDate = (d: string, _item: PolicyData) => (
+const renderDate = (date: string, _item: PolicyData) => (
   <TruncateTooltipText>
-    <EuiToolTip content={d}>
-      <FormattedDateAndTime date={new Date(d)} />
+    <EuiToolTip content={date}>
+      <FormattedDateAndTime date={new Date(date)} />
     </EuiToolTip>
   </TruncateTooltipText>
 );
