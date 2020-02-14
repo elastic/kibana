@@ -167,3 +167,8 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };
+
+export interface TimelineUrl {
+  id: string;
+  isOpen: boolean;
+}
