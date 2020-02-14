@@ -10,16 +10,21 @@ import { SavedObject } from '../../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory, RawAlertInstance } from '../alert_instance';
+import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, AlertInfoParams } from '../types';
-import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import {
+  AlertType,
+  RawAlert,
+  IntervalSchedule,
+  Services,
+  AlertInfoParams,
+  RawAlertInstance,
   AlertTaskState,
-  AlertInstances,
-  taskInstanceToAlertTaskInstance,
-} from './alert_task_instance';
+} from '../types';
+import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { AlertInstances } from '../alert_instance/alert_instance';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 

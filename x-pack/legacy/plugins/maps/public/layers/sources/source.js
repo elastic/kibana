@@ -139,4 +139,8 @@ export class AbstractSource {
   async loadStylePropsMeta() {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
+
+  async getValueSuggestions(/* fieldName, query */) {
+    return [];
+  }
 }

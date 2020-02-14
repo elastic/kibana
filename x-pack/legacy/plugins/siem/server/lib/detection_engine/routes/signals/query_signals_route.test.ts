@@ -4,77 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../__mocks__/_mock_server';
-import { querySignalsRoute } from './query_signals_route';
-import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
 
+import { querySignalsRoute } from './query_signals_route';
+import * as myUtils from '../utils';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
 } from '../__mocks__/request_responses';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 
 describe('query for signal', () => {
-  let { server, elasticsearch } = createMockServer();
+  let server = createMockServer();
+  let config = createMockConfig();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ server, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn(() => ({
-      callWithRequest: jest.fn(() => true),
-    }));
-    querySignalsRoute(server);
+
+    server = createMockServer();
+    config = createMockConfig();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+
+    getClients.mockResolvedValue(clients);
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true);
+
+    querySignalsRoute(server.route, config, getClients);
   });
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-            return true;
-          }
-        ),
-      }));
-      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+      const { statusCode } = await server.inject(getSignalsQueryRequest());
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({ body: typicalSignalsQuery() })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using single agg', async () => {
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-            return true;
-          }
-        ),
-      }));
       const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({ body: typicalSignalsQueryAggs() })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using aggs and query together', async () => {
-      const allTogether = getSignalsQueryRequest();
-      allTogether.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({
-              ...typicalSignalsQueryAggs(),
-              ...typicalSignalsQuery(),
-            });
-            return true;
-          }
-        ),
-      }));
-      const { statusCode } = await server.inject(allTogether);
+      const request = getSignalsQueryRequest();
+      request.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
+      const { statusCode } = await server.inject(request);
+
       expect(statusCode).toBe(200);
+      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'search',
+        expect.objectContaining({
+          body: {
+            ...typicalSignalsQuery(),
+            ...typicalSignalsQueryAggs(),
+          },
+        })
+      );
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 

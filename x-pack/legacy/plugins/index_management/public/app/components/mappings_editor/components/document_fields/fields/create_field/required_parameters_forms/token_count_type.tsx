@@ -29,7 +29,6 @@ export const TokenCountTypeRequiredParameters = () => {
             'The analyzer which should be used to analyze the string value. For best performance, use an analyzer without token filters.',
         }
       )}
-      idAria="mappingsEditorAnalyzerParameter"
     >
       <AnalyzerParameter
         path="analyzer"

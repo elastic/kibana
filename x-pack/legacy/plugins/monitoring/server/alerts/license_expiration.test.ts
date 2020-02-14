@@ -102,7 +102,7 @@ describe('getLicenseExpiration', () => {
   it('should have the right id and actionGroups', () => {
     const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
-    expect(alert.actionGroups).toEqual(['default']);
+    expect(alert.actionGroups).toEqual([{ id: 'default', name: 'Default' }]);
   });
 
   it('should return the state if no license is provided', async () => {

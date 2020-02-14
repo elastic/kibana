@@ -31,12 +31,10 @@ import { applyFiltersPopover } from '../../../../../plugins/data/public/ui/apply
 // @ts-ignore
 import { createFiltersFromEvent } from './filters/create_filters_from_event';
 import {
-  esFilters,
+  Filter,
   FilterManager,
   TimefilterContract,
-  changeTimeFilter,
-  extractTimeFilter,
-  mapAndFlattenFilters,
+  esFilters,
 } from '../../../../../plugins/data/public';
 
 export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
@@ -48,7 +46,7 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: esFilters.Filter[] = (await createFiltersFromEvent(context.data)) || [];
+    const filters: Filter[] = (await createFiltersFromEvent(context.data)) || [];
     return filters.length > 0;
   } catch {
     return false;
@@ -73,9 +71,9 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = (await createFiltersFromEvent(data)) || [];
+      const filters: Filter[] = (await createFiltersFromEvent(data)) || [];
 
-      let selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
+      let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
@@ -84,7 +82,7 @@ export function valueClickAction(
           })
         );
 
-        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(
@@ -94,7 +92,7 @@ export function valueClickAction(
                   overlay.close();
                   resolve([]);
                 },
-                (filterSelection: esFilters.Filter[]) => {
+                (filterSelection: Filter[]) => {
                   overlay.close();
                   resolve(filterSelection);
                 }
@@ -110,13 +108,13 @@ export function valueClickAction(
       }
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);
