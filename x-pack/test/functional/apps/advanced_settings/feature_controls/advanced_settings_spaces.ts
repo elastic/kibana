@@ -58,7 +58,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Advanced Settings disabled', () => {
+    // https://github.com/elastic/kibana/issues/57413
+    describe.skip('space with Advanced Settings disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
