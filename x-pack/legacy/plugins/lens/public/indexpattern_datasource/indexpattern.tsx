@@ -37,7 +37,7 @@ import {
   IndexPatternPersistedState,
 } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
