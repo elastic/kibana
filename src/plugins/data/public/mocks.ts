@@ -49,6 +49,7 @@ const fieldFormatsMock: IFieldFormatsRegistry = {
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
+  deserialize: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {

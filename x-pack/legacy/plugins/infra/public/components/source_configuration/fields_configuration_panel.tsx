@@ -95,7 +95,6 @@ export const FieldsConfigurationPanel = ({
       </EuiCallOut>
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
-        idAria="timestampField"
         title={
           <h4>
             <FormattedMessage
@@ -112,7 +111,6 @@ export const FieldsConfigurationPanel = ({
         }
       >
         <EuiFormRow
-          describedByIds={['timestampField']}
           error={timestampFieldProps.error}
           fullWidth
           helpText={
@@ -144,7 +142,6 @@ export const FieldsConfigurationPanel = ({
       {displaySettings === 'logs' && (
         <>
           <EuiDescribedFormGroup
-            idAria="tiebreakerField"
             title={
               <h4>
                 <FormattedMessage
@@ -161,7 +158,6 @@ export const FieldsConfigurationPanel = ({
             }
           >
             <EuiFormRow
-              describedByIds={['tiebreakerField']}
               error={tiebreakerFieldProps.error}
               fullWidth
               helpText={
@@ -195,7 +191,6 @@ export const FieldsConfigurationPanel = ({
       {displaySettings === 'metrics' && (
         <>
           <EuiDescribedFormGroup
-            idAria="containerField"
             title={
               <h4>
                 <FormattedMessage
@@ -212,7 +207,6 @@ export const FieldsConfigurationPanel = ({
             }
           >
             <EuiFormRow
-              describedByIds={['containerField']}
               error={containerFieldProps.error}
               fullWidth
               helpText={
@@ -242,7 +236,6 @@ export const FieldsConfigurationPanel = ({
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
-            idAria="hostNameField"
             title={
               <h4>
                 <FormattedMessage
@@ -259,7 +252,6 @@ export const FieldsConfigurationPanel = ({
             }
           >
             <EuiFormRow
-              describedByIds={['hostNameField']}
               error={hostFieldProps.error}
               fullWidth
               helpText={
@@ -289,7 +281,6 @@ export const FieldsConfigurationPanel = ({
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
-            idAria="podField"
             title={
               <h4>
                 <FormattedMessage
@@ -306,7 +297,6 @@ export const FieldsConfigurationPanel = ({
             }
           >
             <EuiFormRow
-              describedByIds={['podField']}
               error={podFieldProps.error}
               fullWidth
               helpText={
