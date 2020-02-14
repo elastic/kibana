@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType, Position } from '@elastic/charts';
-import { SetStateAction } from 'react';
-import { DocumentNode } from 'graphql';
-import {
-  MatrixOverTimeHistogramData,
-  MatrixOverOrdinalHistogramData,
-  NetworkDnsSortField,
-  PaginationInputPaginated,
-} from '../../graphql/types';
-import { UpdateDateRange } from '../charts/common';
+import { ScaleType, Position, TickFormatter } from '@elastic/charts';
+import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
+import { InputsModelId } from '../../store/inputs/constants';
+import { HistogramType } from '../../graphql/types';
+import { UpdateDateRange } from '../charts/common';
 
-export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 export type MatrixHistogramMappingTypes = Record<
   string,
   { key: string; value: null; color?: string | undefined }
@@ -30,10 +24,27 @@ export interface MatrixHistogramOption {
 export type GetSubTitle = (count: number) => string;
 export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 
-export interface MatrixHistogramBasicProps {
+export interface MatrixHisrogramConfigs {
+  defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  hideHistogramIfEmpty?: boolean;
+  histogramType: HistogramType;
+  legendPosition?: Position;
+  mapping?: MatrixHistogramMappingTypes;
+  stackByOptions: MatrixHistogramOption[];
+  subtitle?: string | GetSubTitle;
+  title: string | GetTitle;
+}
+
+interface MatrixHistogramBasicProps {
   chartHeight?: number;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
+  dispatchSetAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
   endDate: number;
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
@@ -42,35 +53,20 @@ export interface MatrixHistogramBasicProps {
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
   setQuery: SetQuery;
-  sourceId: string;
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
-  title?: string;
-  updateDateRange: UpdateDateRange;
+  title?: string | GetTitle;
 }
 
 export interface MatrixHistogramQueryProps {
-  activePage?: number;
-  dataKey: string;
   endDate: number;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
-  limit?: number;
-  query: DocumentNode;
-  sort?: NetworkDnsSortField;
   stackByField: string;
-  skip: boolean;
   startDate: number;
-  title: string | GetTitle;
-  isAlertsHistogram?: boolean;
-  isAnomaliesHistogram?: boolean;
-  isAuthenticationsHistogram?: boolean;
-  isDnsHistogram?: boolean;
-  isEventsHistogram?: boolean;
   isInspected: boolean;
-  isPtrIncluded?: boolean;
-  pagination?: PaginationInputPaginated;
+  histogramType: HistogramType;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
@@ -98,31 +94,38 @@ export interface HistogramAggregation {
   };
 }
 
-export interface SignalsResponse {
-  took: number;
-  timeout: boolean;
-}
-
-export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
-  extends SignalsResponse {
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
+export interface BarchartConfigs {
+  series: {
+    xScaleType: ScaleType;
+    yScaleType: ScaleType;
+    stackAccessors: string[];
   };
-  aggregations?: Aggregations;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
+  axis: {
+    xTickFormatter: TickFormatter;
+    yTickFormatter: TickFormatter;
+    tickSize: number;
+  };
+  settings: {
+    legendPosition: Position;
+    onBrushEnd: UpdateDateRange;
+    showLegend: boolean;
+    theme: {
+      scales: {
+        barsPadding: number;
+      };
+      chartMargins: {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+      };
+      chartPaddings: {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+      };
     };
-    hits: Hit[];
   };
+  customHeight: number;
 }
-
-export type Return<Hit, Aggs> = [
-  boolean,
-  SignalSearchResponse<Hit, Aggs> | null,
-  React.Dispatch<SetStateAction<string>>
-];
