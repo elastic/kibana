@@ -143,9 +143,6 @@ export const security = kibana =>
           hostname: config.get('server.host'),
           port: config.get('server.port'),
         },
-        isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
-          server.plugins.kibana.systemApi
-        ),
       });
 
       // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
