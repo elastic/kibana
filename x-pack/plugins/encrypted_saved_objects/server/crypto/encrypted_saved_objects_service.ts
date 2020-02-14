@@ -121,19 +121,37 @@ export class EncryptedSavedObjectsService {
    * @param type Type of the saved object to strip encrypted attributes from.
    * @param attributes Dictionary of __ALL__ saved object attributes.
    */
-  public stripEncryptedAttributes<T extends Record<string, unknown>>(
+  public async handleEncryptedAttributes<T extends Record<string, unknown>>(
     type: string,
-    attributes: T
-  ): Record<string, unknown> {
+    id: string,
+    namespace: string | undefined,
+    responseAttributes: T,
+    originalAttributes?: T
+  ): Promise<Record<string, unknown>> {
     const typeDefinition = this.typeDefinitions.get(type);
     if (typeDefinition === undefined) {
-      return attributes;
+      return responseAttributes;
     }
 
+    let decryptedAttributes: T | null = null;
     const clonedAttributes: Record<string, unknown> = {};
-    for (const [attributeName, attributeValue] of Object.entries(attributes)) {
+    for (const [attributeName, attributeValue] of Object.entries(responseAttributes)) {
       if (!typeDefinition.attributesToStrip.has(attributeName)) {
-        clonedAttributes[attributeName] = attributeValue;
+        if (typeDefinition.attributesToEncrypt.has(attributeName)) {
+          if (originalAttributes) {
+            clonedAttributes[attributeName] = originalAttributes[attributeName];
+          } else {
+            if (decryptedAttributes === null) {
+              decryptedAttributes = await this.decryptAttributes(
+                { type, id, namespace },
+                responseAttributes
+              );
+            }
+            clonedAttributes[attributeName] = decryptedAttributes[attributeName];
+          }
+        } else {
+          clonedAttributes[attributeName] = attributeValue;
+        }
       }
     }
 
