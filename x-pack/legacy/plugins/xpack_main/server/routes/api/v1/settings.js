@@ -5,6 +5,7 @@
  */
 
 import { boomify } from 'boom';
+import { get } from 'lodash';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
 import { getKibanaInfoForStats } from '../../../../../../../plugins/monitoring/server';
 
@@ -32,11 +33,21 @@ export function settingsRoute(server, kbnServer) {
         }
         const uuid = await getClusterUuid(callCluster);
 
-        const kibana = getKibanaInfoForStats({
-          kbnServerStatus: kbnServer.status,
-          kbnServerVersion: kbnServer.version,
-          config: server.config(),
-        });
+        const snapshotRegex = /-snapshot/i;
+        const config = server.config();
+        const status = kbnServer.status.toJSON();
+        const kibanaStats = {
+          uuid: config.get('server.uuid'),
+          name: config.get('server.name'),
+          index: config.get('kibana.index'),
+          host: config.get('server.host'),
+          locale: config.get('i18n.locale'),
+          transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
+          version: kbnServer.version.replace(snapshotRegex, ''),
+          snapshot: snapshotRegex.test(kbnServer.version),
+          status: get(status, 'overall.state'),
+        };
+        const kibana = getKibanaInfoForStats(kibanaStats);
 
         return {
           cluster_uuid: uuid,
