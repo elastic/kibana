@@ -753,7 +753,7 @@ export interface HttpServiceSetup {
     };
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
-    createRouter: () => IRouter;
+    createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
     csp: ICspConfig;
     getServerInfo: () => HttpServerInfo;
     isTlsEnabled: boolean;
@@ -843,17 +843,17 @@ export interface IRenderOptions {
 }
 
 // @public
-export interface IRouter {
-    delete: RouteRegistrar<'delete'>;
-    get: RouteRegistrar<'get'>;
+export interface IRouter<Context extends RequestHandlerContext = RequestHandlerContext> {
+    delete: RouteRegistrar<'delete', Context>;
+    get: RouteRegistrar<'get', Context>;
     // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     //
     // @internal
     getRoutes: () => RouterRoute[];
     handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
-    patch: RouteRegistrar<'patch'>;
-    post: RouteRegistrar<'post'>;
-    put: RouteRegistrar<'put'>;
+    patch: RouteRegistrar<'patch', Context>;
+    post: RouteRegistrar<'post', Context>;
+    put: RouteRegistrar<'put', Context>;
     routerPath: string;
 }
 
@@ -1274,7 +1274,7 @@ export interface RenderingServiceSetup {
 }
 
 // @public
-export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any, Context extends RequestHandlerContext = RequestHandlerContext> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1345,7 +1345,7 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod, Context extends RequestHandlerContext = RequestHandlerContext> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method, Context>) => void;
 
 // @public
 export class RouteValidationError extends SchemaTypeError {
