@@ -7,7 +7,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
@@ -16,7 +16,7 @@ import { GroupByBar } from './group_by_bar';
 
 import { validateRegExpString } from '../../../utils';
 
-interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
+interface CheckupControlsProps {
   allDeprecations?: DeprecationInfo[];
   loadingState: LoadingState;
   loadData: () => void;
@@ -28,7 +28,7 @@ interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
+export const CheckupControls: FunctionComponent<CheckupControlsProps> = ({
   allDeprecations,
   loadingState,
   loadData,
@@ -38,7 +38,6 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
   availableGroupByOptions,
   currentGroupBy,
   onGroupByChange,
-  intl,
 }) => {
   const [searchTermError, setSearchTermError] = useState<null | string>(null);
   const filterInvalid = Boolean(searchTermError);
@@ -46,14 +45,19 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem>
             <EuiFieldSearch
               isInvalid={filterInvalid}
-              aria-label="Filter"
-              placeholder={intl.formatMessage({
-                id: 'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
-                defaultMessage: 'Filter',
-              })}
+              aria-label={i18n.translate(
+                'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholderAriaLabel',
+                { defaultMessage: 'Filter' }
+              )}
+              placeholder={i18n.translate(
+                'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
+                {
+                  defaultMessage: 'Filter',
+                }
+              )}
               onChange={e => {
                 const string = e.target.value;
                 const errorMessage = validateRegExpString(string);
@@ -97,7 +101,7 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
             title={i18n.translate(
               'xpack.upgradeAssistant.checkupTab.controls.filterErrorMessageLabel',
               {
-                defaultMessage: 'Filter Invalid: {searchTermError}',
+                defaultMessage: 'Filter invalid: {searchTermError}',
                 values: { searchTermError },
               }
             )}
@@ -108,5 +112,3 @@ export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
     </EuiFlexGroup>
   );
 };
-
-export const CheckupControls = injectI18n(CheckupControlsUI);
