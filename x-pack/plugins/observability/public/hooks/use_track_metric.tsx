@@ -6,7 +6,9 @@
 
 import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+
 
 /**
  * Note: The usage_collection plugin will take care of sending this data to the telemetry server.
@@ -25,28 +27,32 @@ interface TrackOptions {
 }
 type EffectDeps = unknown[];
 
+interface ServiceDeps {
+  usageCollection: UsageCollectionSetup; // TODO: This should really be start. Looking into it. 
+}
+
 export type TrackMetricOptions = TrackOptions & { metric: string };
 export type UiTracker = ReturnType<typeof useUiTracker>;
 
 export { METRIC_TYPE };
 
-export function useUiTracker({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
-  const reportUiStats = useKibana<any>().services?.usageCollection?.reportUiStats;
+export function useUiTracker<Services extends ServiceDeps>({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
+  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
       if (reportUiStats) {
-        reportUiStats(app, metricType, metric);
+        reportUiStats(app as string, metricType, metric);
       }
     };
   }, [defaultApp, reportUiStats]);
   return trackEvent;
 }
 
-export function useTrackMetric(
+export function useTrackMetric<Services extends ServiceDeps>(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
-  const reportUiStats = useKibana<any>().services?.usageCollection?.reportUiStats;
+  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
 
   useEffect(() => {
     if (!reportUiStats) {
@@ -60,7 +66,7 @@ export function useTrackMetric(
         decoratedMetric += `__delayed_${delay}ms`;
       }
       const id = setTimeout(
-        () => reportUiStats(app, metricType, decoratedMetric),
+        () => reportUiStats(app as string, metricType, decoratedMetric),
         Math.max(delay, 0)
       );
       return () => clearTimeout(id);
@@ -77,9 +83,9 @@ export function useTrackMetric(
  */
 type TrackPageviewProps = TrackOptions & { path: string };
 
-export function useTrackPageview(
+export function useTrackPageview<Services extends ServiceDeps>(
   { path, ...rest }: TrackPageviewProps,
   effectDependencies: EffectDeps = []
 ) {
-  useTrackMetric({ ...rest, metric: `pageview__${path}` }, effectDependencies);
+  useTrackMetric<Services>({ ...rest, metric: `pageview__${path}` }, effectDependencies);
 }
