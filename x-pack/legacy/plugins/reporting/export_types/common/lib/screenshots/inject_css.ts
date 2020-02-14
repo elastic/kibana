@@ -7,7 +7,7 @@
 import fs from 'fs';
 import { promisify } from 'util';
 import { LevelLogger } from '../../../../server/lib';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { Layout } from '../../layouts/layout';
 
 const fsp = { readFile: promisify(fs.readFile) };
@@ -21,13 +21,17 @@ export const injectCustomCss = async (
 
   const filePath = layout.getCssOverridesPath();
   const buffer = await fsp.readFile(filePath);
-  await browser.evaluate({
-    fn: css => {
-      const node = document.createElement('style');
-      node.type = 'text/css';
-      node.innerHTML = css; // eslint-disable-line no-unsanitized/property
-      document.getElementsByTagName('head')[0].appendChild(node);
+  await browser.evaluate(
+    {
+      fn: css => {
+        const node = document.createElement('style');
+        node.type = 'text/css';
+        node.innerHTML = css; // eslint-disable-line no-unsanitized/property
+        document.getElementsByTagName('head')[0].appendChild(node);
+      },
+      args: [buffer.toString()],
     },
-    args: [buffer.toString()],
-  });
+    { context: 'InjectCss' },
+    logger
+  );
 };

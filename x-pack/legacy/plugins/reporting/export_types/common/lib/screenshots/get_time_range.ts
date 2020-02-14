@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { TimeRange } from './types';
@@ -16,23 +16,27 @@ export const getTimeRange = async (
 ): Promise<TimeRange | null> => {
   logger.debug('getting timeRange');
 
-  const timeRange: TimeRange | null = await browser.evaluate({
-    fn: durationAttribute => {
-      const durationElement = document.querySelector(`[${durationAttribute}]`);
+  const timeRange: TimeRange | null = await browser.evaluate(
+    {
+      fn: durationAttribute => {
+        const durationElement = document.querySelector(`[${durationAttribute}]`);
 
-      if (!durationElement) {
-        return null;
-      }
+        if (!durationElement) {
+          return null;
+        }
 
-      const duration = durationElement.getAttribute(durationAttribute);
-      if (!duration) {
-        return null;
-      }
+        const duration = durationElement.getAttribute(durationAttribute);
+        if (!duration) {
+          return null;
+        }
 
-      return { duration };
+        return { duration };
+      },
+      args: [layout.selectors.timefilterDurationAttribute],
     },
-    args: [layout.selectors.timefilterDurationAttribute],
-  });
+    { context: 'GetTimeRange' },
+    logger
+  );
 
   if (timeRange) {
     logger.info(`timeRange: ${timeRange.duration}`);
