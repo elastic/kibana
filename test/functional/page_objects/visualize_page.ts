@@ -22,7 +22,6 @@ import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/publ
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const config = getService('config');
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
@@ -217,9 +216,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
       await header.waitUntilLoadingHasFinished();
-      const isOpen = await testSubjects.exists('savedObjectSaveModal', {
-        timeout: config.get('timeouts.waitForExits') * 2,
-      });
+      const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
       if (!isOpen) {
         await testSubjects.click('visualizeSaveButton');
       }

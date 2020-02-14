@@ -8,7 +8,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security', 'settings']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -39,7 +38,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('apm');
         await testSubjects.existOrFail('apmMainContainer', {
-          timeout: config.get('timeouts.waitForExits') * 5,
+          timeout: 10000,
         });
       });
     });

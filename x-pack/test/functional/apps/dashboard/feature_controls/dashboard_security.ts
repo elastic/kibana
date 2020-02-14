@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
@@ -88,9 +87,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -107,9 +104,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardWidget', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -117,9 +112,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
       it(`does not allow a visualization to be edited`, async () => {
@@ -272,9 +265,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
 
@@ -299,9 +290,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -387,9 +376,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
@@ -413,9 +400,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
@@ -423,9 +408,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -67,7 +66,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
         await testSubjects.existOrFail('apmMainContainer', {
-          timeout: config.get('timeouts.waitForExits') * 5,
+          timeout: 10000,
         });
       });
 
@@ -116,7 +115,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
         await testSubjects.existOrFail('apmMainContainer', {
-          timeout: config.get('timeouts.waitForExits') * 5,
+          timeout: 10000,
         });
       });
 

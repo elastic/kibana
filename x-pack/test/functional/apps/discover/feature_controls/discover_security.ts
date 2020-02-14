@@ -10,7 +10,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
-  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -174,9 +173,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverNewButton', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
@@ -307,9 +304,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

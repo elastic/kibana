@@ -11,7 +11,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error', 'settings']);
   const testSubjects = getService('testSubjects');
-  const config = getService('config');
   const appsMenu = getService('appsMenu');
 
   describe('spaces', () => {
@@ -44,9 +43,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphLandingPage', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 

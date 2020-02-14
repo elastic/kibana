@@ -22,7 +22,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const config = getService('config');
   const find = getService('find');
   const PageObjects = getPageObjects(['common']);
   let isOss = true;
@@ -84,7 +83,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');
         const successMsgExists = await testSubjects.exists('loadSavedObjects_success', {
-          timeout: config.get('timeouts.waitForExits') * 2,
+          timeout: 5000,
         });
         if (!successMsgExists) {
           throw new Error('Failed to load saved objects');

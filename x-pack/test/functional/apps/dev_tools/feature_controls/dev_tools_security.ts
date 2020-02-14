@@ -12,7 +12,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
-  const config = getService('config');
   const grokDebugger = getService('grokDebugger');
   const globalNav = getService('globalNav');
 
@@ -233,27 +232,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`navigating to search profiler redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`navigating to grok debugger redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

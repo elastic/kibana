@@ -28,7 +28,6 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const log = getService('log');
   const find = getService('find');
   const retry = getService('retry');
-  const config = getService('config');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -115,7 +114,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
       return await testSubjects.exists('dashboardLandingPage', {
-        timeout: config.get('timeouts.waitForExits') * 2,
+        timeout: 5000,
       });
     }
 
@@ -363,9 +362,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await listingTable.clickItemLink('dashboard', dashboardName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // check Dashboard landing page is not present
-        await testSubjects.missingOrFail('dashboardLandingPage', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
       });
     }
 
@@ -500,7 +497,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(
           `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
-          { timeout: config.get('timeouts.waitForExits') * 5 }
+          { timeout: 10000 }
         );
         checkList.push({ name, isPresent });
       }

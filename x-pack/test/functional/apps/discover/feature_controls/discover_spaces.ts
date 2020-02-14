@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -60,9 +59,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('discoverSaveButton', { timeout: 10000 });
       });
 
       it('shows "visualize" field button', async () => {
@@ -159,9 +156,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

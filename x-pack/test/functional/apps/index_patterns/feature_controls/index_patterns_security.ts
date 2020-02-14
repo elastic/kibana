@@ -14,7 +14,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const config = getService('config');
 
   describe('security', () => {
     before(async () => {
@@ -191,9 +190,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

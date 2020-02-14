@@ -21,7 +21,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const config = getService('config');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
@@ -34,19 +33,12 @@ export function FlyoutProvider({ getService }: FtrProviderContext) {
       await closeBtn.click();
       await retry.waitFor(
         'flyout closed',
-        async () =>
-          !(await testSubjects.exists(dataTestSubj, {
-            timeout: config.get('timeouts.waitForExits') * 0.4,
-          }))
+        async () => !(await testSubjects.exists(dataTestSubj, { timeout: 1000 }))
       );
     }
 
     public async ensureClosed(dataTestSubj: string): Promise<void> {
-      if (
-        await testSubjects.exists(dataTestSubj, {
-          timeout: config.get('timeouts.waitForExits') * 0.4,
-        })
-      ) {
+      if (await testSubjects.exists(dataTestSubj, { timeout: 1000 })) {
         await this.close(dataTestSubj);
       }
     }

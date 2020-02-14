@@ -13,7 +13,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const config = getService('config');
 
   describe('security', () => {
     before(async () => {
@@ -70,9 +69,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -123,9 +120,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', {
-          timeout: config.get('timeouts.waitForExits') * 5,
-        });
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`shows read-only badge`, async () => {
