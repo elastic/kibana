@@ -6,13 +6,13 @@
 
 import { StartServices } from '../../plugin';
 
-type GlobalServices = Pick<StartServices, 'http' | 'uiSettings'>;
+type GlobalServices = Pick<StartServices, 'http'>;
 
 export class KibanaServices {
   private static services?: GlobalServices;
 
-  public static init({ http, uiSettings }: StartServices) {
-    this.services = { http, uiSettings };
+  public static init({ http }: StartServices) {
+    this.services = { http };
   }
 
   public static get(): GlobalServices {
