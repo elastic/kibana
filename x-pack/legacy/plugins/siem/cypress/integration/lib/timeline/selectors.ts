@@ -45,3 +45,5 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 export const TIMELINE_SETTINGS = '[data-test-subj="settings-gear"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
+
+export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';

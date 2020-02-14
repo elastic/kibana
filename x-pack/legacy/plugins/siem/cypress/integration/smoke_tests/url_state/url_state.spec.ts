@@ -34,6 +34,8 @@ import { NAVIGATION_NETWORK, NAVIGATION_HOSTS } from '../../lib/navigation/selec
 import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { NAVIGATION_HOSTS_ALL_HOSTS, NAVIGATION_HOSTS_ANOMALIES } from '../../lib/hosts/selectors';
+import { closeTimeline } from '../../../tasks/timeline/main';
+import { TIMELINE_DESCRIPTION } from '../../lib/timeline/selectors';
 
 describe('url state', () => {
   it('sets the global start and end dates from the url', () => {
@@ -280,17 +282,25 @@ describe('url state', () => {
     toggleTimelineVisibility();
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
-    const timelineName = 'SIEM';
-    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`);
+    const timelineName = 'SIEM Timeline';
+    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`, { delay: 100 });
+    cy.get(TIMELINE_DESCRIPTION).type('This is the best timeline of the world{enter}', {
+      delay: 100,
+    });
     cy.url({ timeout: DEFAULT_TIMEOUT }).should('match', /\w*-\w*-\w*-\w*-\w*/);
     cy.url().then(url => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
       expect(matched).to.have.lengthOf(1);
+      closeTimeline();
       cy.visit('/app/kibana');
       cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
       cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
+      cy.get(TIMELINE_TITLE, { timeout: DEFAULT_TIMEOUT }).should(
+        'have.attr',
+        'value',
+        timelineName
+      );
     });
   });
 });

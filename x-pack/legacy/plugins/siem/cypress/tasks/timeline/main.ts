@@ -52,3 +52,7 @@ export const createNewTimeline = () => {
   cy.get(CREATE_NEW_TIMELINE).click();
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
+
+export const closeTimeline = () => {
+  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+};

@@ -19,11 +19,7 @@ import {
   mlHostVariableHostNullKqlQuery,
   mlHostVariableHostKqlQuery,
 } from '../../../urls/ml_conditional_links';
-import {
-  loginAndWaitForPage,
-  loginAndWaitForPageUrlState,
-  DEFAULT_TIMEOUT,
-} from '../../../tasks/login';
+import { loginAndWaitForPageUrlState } from '../../../tasks/login';
 import { KQL_INPUT } from '../../../screens/header';
 
 describe('ml conditional links', () => {
