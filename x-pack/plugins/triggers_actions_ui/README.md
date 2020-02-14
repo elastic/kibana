@@ -429,7 +429,7 @@ interface ForLastExpressionProps {
 |errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termWindowSize`.|
 |onChangeWindowSize|Event handler that will be excuted if selected window size is changed.|
 |onChangeWindowUnit|Event handler that will be excuted if selected window unit is changed.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
 ### THRESHOLD expression component
 
