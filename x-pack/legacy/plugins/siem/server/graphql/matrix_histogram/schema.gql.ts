@@ -6,19 +6,34 @@
 
 import gql from 'graphql-tag';
 
-export const anomaliesSchema = gql`
-  type AnomaliesOverTimeData {
+export const matrixHistogramSchema = gql`
+  type MatrixOverTimeHistogramData {
+    x: Float
+    y: Float
+    g: String
+  }
+
+  type MatrixHistogramOverTimeData {
     inspect: Inspect
     matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
+  enum HistogramType {
+    authentications
+    anomalies
+    events
+    alerts
+    dns
+  }
+
   extend type Source {
-    AnomaliesHistogram(
-      timerange: TimerangeInput!
+    MatrixHistogram(
       filterQuery: String
       defaultIndex: [String!]!
-      stackByField: String
-    ): AnomaliesOverTimeData!
+      timerange: TimerangeInput!
+      stackByField: String!
+      histogramType: HistogramType!
+    ): MatrixHistogramOverTimeData!
   }
 `;
