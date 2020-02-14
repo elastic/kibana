@@ -31,7 +31,8 @@ export function Detail() {
   const setPackageInstallStatus = useSetPackageInstallStatus();
   useEffect(() => {
     sendGetPackageInfoByKey(pkgkey).then(response => {
-      const packageInfo = response.data?.response;
+      /* TODO: fix type */
+      const packageInfo = response.data?.response as PackageInfo;
       const title = packageInfo?.title;
       const name = packageInfo?.name;
       const status: InstallStatus = packageInfo?.status as any;
