@@ -10,7 +10,13 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId, setInspector, setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+import {
+  setInspector,
+  setInjectedVarFunc,
+  setTimeFilter,
+  setLicenseId,
+  // @ts-ignore
+} from '../../../../plugins/maps/public/kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -53,5 +59,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
 
   public start(core: CoreStart, plugins: any) {
     setInspector(plugins.np.inspector);
+    setTimeFilter(plugins.np.data.query.timefilter);
   }
 }

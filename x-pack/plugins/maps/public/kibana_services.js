@@ -5,7 +5,6 @@
  */
 
 export let indexPatternService;
-export let timeFilter;
 
 let licenseId;
 export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
@@ -22,6 +21,10 @@ export const getInspector = () => {
 let getInjectedVar;
 export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
 export const getInjectedVarFunc = () => getInjectedVar;
+
+let timeFilter;
+export const setTimeFilter = queryTimeFilter => (timeFilter = queryTimeFilter);
+export const getTimeFilter = () => timeFilter;
 
 export const initKibanaServices = ({ injectedMetadata }, { data }) => {
   indexPatternService = data.indexPatterns;
