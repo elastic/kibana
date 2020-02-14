@@ -8,7 +8,7 @@ import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { PluginsSetup } from '../plugin';
@@ -109,10 +109,15 @@ const setup = (space: Space) => {
   const spacesService = spacesServiceMock.createSetupContract();
   spacesService.getActiveSpace.mockResolvedValue(space);
 
-  return setupCapabilitiesSwitcher(
+  const logger = loggingServiceMock.createLogger();
+
+  const switcher = setupCapabilitiesSwitcher(
     (coreSetup as unknown) as CoreSetup<PluginsSetup>,
-    spacesService
+    spacesService,
+    logger
   );
+
+  return { switcher, logger, spacesService };
 };
 
 describe('capabilitiesSwitcher', () => {
@@ -125,7 +130,7 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const switcher = setup(space);
+    const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
     const result = await switcher(request, capabilities);
 
@@ -141,12 +146,34 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const switcher = setup(space);
+    const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
 
     const result = await switcher(request, capabilities);
 
     expect(result).toEqual(buildCapabilities());
+  });
+
+  it('logs a warning, and does not toggle capabilities if an error is encountered', async () => {
+    const space: Space = {
+      id: 'space',
+      name: '',
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+    };
+
+    const capabilities = buildCapabilities();
+
+    const { switcher, logger, spacesService } = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+
+    spacesService.getActiveSpace.mockRejectedValue(new Error('Something terrible happened'));
+
+    const result = await switcher(request, capabilities);
+
+    expect(result).toEqual(buildCapabilities());
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Error toggling capabilities for request to /path: Error: Something terrible happened`
+    );
   });
 
   it('ignores unknown disabledFeatures', async () => {
@@ -158,7 +185,7 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const switcher = setup(space);
+    const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
     const result = await switcher(request, capabilities);
 
@@ -174,7 +201,7 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const switcher = setup(space);
+    const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
     const result = await switcher(request, capabilities);
 
@@ -198,7 +225,7 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const switcher = setup(space);
+    const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
     const result = await switcher(request, capabilities);
 

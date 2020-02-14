@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Capabilities, CapabilitiesSwitcher, CoreSetup } from 'src/core/server';
+import { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { SpacesServiceSetup } from '../spaces_service';
@@ -12,7 +12,8 @@ import { PluginsSetup } from '../plugin';
 
 export function setupCapabilitiesSwitcher(
   core: CoreSetup<PluginsSetup>,
-  spacesService: SpacesServiceSetup
+  spacesService: SpacesServiceSetup,
+  logger: Logger
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
@@ -21,16 +22,21 @@ export function setupCapabilitiesSwitcher(
       return capabilities;
     }
 
-    const [activeSpace, startServices] = await Promise.all([
-      spacesService.getActiveSpace(request),
-      core.getStartServices(),
-    ]);
+    try {
+      const [activeSpace, startServices] = await Promise.all([
+        spacesService.getActiveSpace(request),
+        core.getStartServices(),
+      ]);
 
-    const [, pluginsStart] = startServices;
+      const [, pluginsStart] = startServices;
 
-    const features = pluginsStart.features.getFeatures();
+      const features = pluginsStart.features.getFeatures();
 
-    return toggleCapabilities(features, capabilities, activeSpace);
+      return toggleCapabilities(features, capabilities, activeSpace);
+    } catch (e) {
+      logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
+      return capabilities;
+    }
   };
 }
 

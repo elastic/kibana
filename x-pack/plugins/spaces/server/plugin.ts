@@ -139,7 +139,7 @@ export class Plugin {
       features: plugins.features,
     });
 
-    setupCapabilities(core, spacesService);
+    setupCapabilities(core, spacesService, this.log);
 
     registerSpacesUsageCollector(plugins.usageCollection, {
       kibanaIndexConfig: this.kibanaIndexConfig,
