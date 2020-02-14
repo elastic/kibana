@@ -59,28 +59,31 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       anchorPosition="downRight"
       button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
     >
-      {sections.map((section, idx) => (
-        <React.Fragment key={idx}>
-          {section.map(item => (
-            <Section key={item.key} marginBottom={px(units.plus)}>
-              {item.title && <SectionTitle>{item.title}</SectionTitle>}
-              {item.subtitle && (
-                <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-              )}
-              <SectionLinks>
-                {item.actions.map(action => (
-                  <SectionLink
-                    key={action.key}
-                    label={action.label}
-                    href={action.href}
-                  />
-                ))}
-              </SectionLinks>
-            </Section>
-          ))}
-          {idx !== sections.length - 1 && <ActionMenuDivider />}
-        </React.Fragment>
-      ))}
+      {sections.map((section, idx) => {
+        const isLastSection = idx !== sections.length - 1;
+        return (
+          <React.Fragment key={idx}>
+            {section.map(item => (
+              <Section key={item.key} marginBottom={px(units.plus)}>
+                {item.title && <SectionTitle>{item.title}</SectionTitle>}
+                {item.subtitle && (
+                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
+                )}
+                <SectionLinks>
+                  {item.actions.map(action => (
+                    <SectionLink
+                      key={action.key}
+                      label={action.label}
+                      href={action.href}
+                    />
+                  ))}
+                </SectionLinks>
+              </Section>
+            ))}
+            {isLastSection && <ActionMenuDivider />}
+          </React.Fragment>
+        );
+      })}
     </ActionMenu>
   );
 };
