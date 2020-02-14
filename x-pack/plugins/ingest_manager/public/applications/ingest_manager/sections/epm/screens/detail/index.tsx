@@ -25,7 +25,7 @@ export interface DetailParams {
 
 export function Detail() {
   // TODO: fix forced cast if possible
-  const { pkgkey, panel } = useParams() as DetailParams;
+  const { pkgkey, panel = DEFAULT_PANEL } = useParams() as DetailParams;
 
   const [info, setInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
