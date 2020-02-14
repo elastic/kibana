@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorSchemas, colorSchemas, ColorModes } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
@@ -33,7 +32,6 @@ export const createMetricVisTypeDefinition = () => ({
     defaultMessage: 'Display a calculation as a single number',
   }),
   visConfig: {
-    component: MetricVisComponent,
     defaults: {
       addTooltip: true,
       addLegend: false,

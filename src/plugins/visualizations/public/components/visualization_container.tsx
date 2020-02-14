@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { MetricVisComponent } from './components/metric_vis_component';
+import React, { ReactNode } from 'react';
 
-describe('metric_vis - createMetricVisTypeDefinition', () => {
-  it('has metric vis component set', () => {
-    const def = createMetricVisTypeDefinition();
+interface VisualizationContainerProps {
+  className?: string;
+  children: ReactNode;
+}
 
-    expect(def.visConfig.component).toBe(MetricVisComponent);
-  });
-});
+export const VisualizationContainer = (props: VisualizationContainerProps) => {
+  const classes = `visualization ${props.className}`;
+  return <div className={classes}>{props.children}</div>;
+};

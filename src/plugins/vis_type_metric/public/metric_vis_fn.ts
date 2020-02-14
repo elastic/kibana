@@ -175,7 +175,7 @@ export const createMetricVisFn = (): ExpressionFunctionDefinition<
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'metric_vis',
       value: {
         visData: input,
         visType,

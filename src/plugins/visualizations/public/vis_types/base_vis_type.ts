@@ -31,7 +31,7 @@ export interface BaseVisTypeOptions {
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
   options?: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig?: Record<string, any>;
   editor?: any;
   editorConfig?: Record<string, any>;
@@ -54,7 +54,7 @@ export class BaseVisType {
   stage: 'experimental' | 'beta' | 'production';
   isExperimental: boolean;
   options: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig: Record<string, any>;
   editor: any;
   editorConfig: Record<string, any>;

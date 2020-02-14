@@ -31,6 +31,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { Vis } from './vis';
 export { TypesService } from './vis_types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
+export { VisualizationContainer, VisualizationNoResults } from './components';
 
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
