@@ -97,7 +97,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |Property|Description|
 |---|---|
 |id|Alert type id. Should be the same as on the server side.|
-|name|Name of alert type, that will be displayed on the select card in UI.|
+|name|Name of the alert type that will be displayed on the select card in the UI.|
 |iconClass|Icon of alert type, that will be displayed on the select card in UI.|
 |validate|Validation function for the alert params.|
 |alertParamsExpression|React functional component for building UI of the current alert type params.|
