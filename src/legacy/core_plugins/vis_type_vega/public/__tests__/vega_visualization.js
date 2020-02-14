@@ -47,6 +47,7 @@ import { createVegaTypeDefinition } from '../vega_type';
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
+import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -59,6 +60,12 @@ describe('VegaVisualizations', () => {
   let imageComparator;
   let vegaVisualizationDependencies;
   let visRegComplete = false;
+
+  setInjectedVars({
+    emsTileLayerId: {},
+    enableExternalUrls: true,
+    esShardTimeout: 10000,
+  });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
