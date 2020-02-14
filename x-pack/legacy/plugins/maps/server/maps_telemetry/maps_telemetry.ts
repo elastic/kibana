@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
 import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
@@ -148,7 +148,9 @@ async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract
 }
 
 async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
+  const indexPatternSavedObjects: SavedObjectsFindResponse = await savedObjectsClient.find({
+    type: 'index-pattern',
+  });
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
