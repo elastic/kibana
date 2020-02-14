@@ -103,7 +103,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |alertParamsExpression|React functional component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 
-IMPORTANT! The current UI support only a single action group. 
+IMPORTANT: The current UI supports a single action group only. 
 Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
