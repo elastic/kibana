@@ -30,11 +30,11 @@ export default function({ getService }: FtrProviderContext) {
       id: expectedJobId,
       description: jobDescription,
       jobGroups: [...new Set(expectedJobGroups)].sort(),
-      recordCount: '2,399',
+      recordCount: '1,501',
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2016-02-11 23:56:59',
+      latestTimestamp: '2019-11-21 06:01:13',
     };
   }
 
@@ -42,19 +42,20 @@ export default function({ getService }: FtrProviderContext) {
     return {
       job_id: expectedJobId,
       processed_record_count: '1,501',
-      processed_field_count: '4,798',
-      input_bytes: '180.6 KB',
-      input_field_count: '4,798',
+      processed_field_count: '1,501',
+      input_bytes: '335.4 KB',
+      input_field_count: '1,501',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
-      empty_bucket_count: '0',
+      empty_bucket_count: '21,428',
       sparse_bucket_count: '0',
-      bucket_count: '239',
-      earliest_record_timestamp: '2016-02-07 00:02:50',
+      bucket_count: '22,059',
+      earliest_record_timestamp: '2019-04-05 11:25:35',
       latest_record_timestamp: '2019-11-21 06:01:13',
-      input_record_count: '2,399',
-      latest_bucket_timestamp: '2016-02-11 23:30:00',
+      input_record_count: '1,501',
+      latest_bucket_timestamp: '2019-11-21 06:00:00',
+      latest_empty_bucket_timestamp: '2019-11-21 05:45:00',
     };
   }
 
@@ -64,12 +65,12 @@ export default function({ getService }: FtrProviderContext) {
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
       model_bytes_memory_limit: '15.0 MB',
-      total_by_field_count: '3',
+      total_by_field_count: '30',
       total_over_field_count: '0',
       total_partition_field_count: '2',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2016-02-11 23:00:00',
+      timestamp: '2019-11-21 05:45:00',
     };
   }
 
@@ -125,19 +126,19 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it(`job creation selects ${detectorTypeIdentifier} detector type`, async () => {
-      await ml.jobWizardCommon.assertCategorizationDetectorTypeSelectionExists();
-      await ml.jobWizardCommon.selectCategorizationDetectorType(detectorTypeIdentifier);
-      await ml.jobWizardCommon.assertCategorizationDetectorTypeSelected(detectorTypeIdentifier);
+      await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
+      await ml.jobWizardCategorization.selectCategorizationDetectorType(detectorTypeIdentifier);
     });
 
     it(`job creation selects the categorization field`, async () => {
-      await ml.jobWizardCommon.assertCategorizationFieldInputExists();
-      await ml.jobWizardCommon.selectCategorizationField(categorizationFieldIdentifier, true);
-      // await ml.jobWizardCommon.assertCategorizationFieldSelection([categorizationFieldIdentifier]);
-      await ml.jobWizardCommon.assertCategorizationExamplesCallout(
+      await ml.jobWizardCategorization.assertCategorizationFieldInputExists();
+      await ml.jobWizardCategorization.selectCategorizationField(categorizationFieldIdentifier);
+      await ml.jobWizardCategorization.assertCategorizationExamplesCallout(
         CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID
       );
-      await ml.jobWizardCommon.assertCategorizationExamplesTable(categorizationExampleCount);
+      await ml.jobWizardCategorization.assertCategorizationExamplesTable(
+        categorizationExampleCount
+      );
     });
 
     it('job creation inputs the bucket span', async () => {
@@ -185,6 +186,8 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job creation displays the model plot switch', async () => {
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
+      await ml.jobWizardCommon.assertModelPlotSwitchEnabled(false);
+      await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
     });
 
     it('job creation enables the dedicated index switch', async () => {
@@ -260,8 +263,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job cloning pre-fills field and aggregation', async () => {
-      await ml.jobWizardCommon.assertCategorizationDetectorTypeSelectionExists();
-      await ml.jobWizardCommon.assertCategorizationDetectorTypeSelected(detectorTypeIdentifier);
+      await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
     });
 
     it('job cloning pre-fills the bucket span', async () => {
@@ -316,7 +318,8 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job cloning pre-fills the model plot switch', async () => {
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
-      await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(true);
+      await ml.jobWizardCommon.assertModelPlotSwitchEnabled(false);
+      await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
     });
 
     it('job cloning pre-fills the dedicated index switch', async () => {
