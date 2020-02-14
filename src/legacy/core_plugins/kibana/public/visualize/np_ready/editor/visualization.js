@@ -31,7 +31,7 @@ export function initVisualizationDirective(app, deps) {
       link: function($scope, element) {
         $scope.renderFunction = async () => {
           if (!$scope._handler) {
-            $scope._handler = await deps.embeddables
+            $scope._handler = await deps.embeddable
               .getEmbeddableFactory('visualization')
               .createFromObject($scope.savedObj, {
                 timeRange: $scope.timeRange,
