@@ -61,13 +61,15 @@ class Main extends React.Component<{}, State> {
         data: new DataAdapter(),
       };
       return getExpressions()
-        .execute(expression, {
-          inspectorAdapters: adapters,
-          context,
-          // TODO: naming / typing is confusing and doesn't match here
-          // searchContext is also a way to set initialContext and Context can't be set to SearchContext
-          searchContext: initialContext as any,
-        })
+        .execute(
+          expression,
+          { type: 'null' },
+          {
+            inspectorAdapters: adapters,
+            context,
+            search: initialContext as any,
+          }
+        )
         .getData();
     };
 
