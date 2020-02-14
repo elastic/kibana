@@ -10,15 +10,13 @@ import { ui } from './ui';
 import { map } from './map';
 import { nonSerializableInstances } from './non_serializable_instances';
 
-const rootReducer = combineReducers({
-  map,
-  ui,
-  nonSerializableInstances,
-});
-
-const enhancers = [applyMiddleware(thunk)];
-
 export function createMapStore() {
+  const enhancers = [applyMiddleware(thunk)];
+  const rootReducer = combineReducers({
+    map,
+    ui,
+    nonSerializableInstances,
+  });
   const storeConfig = {};
   return createStore(rootReducer, storeConfig, compose(...enhancers));
 }

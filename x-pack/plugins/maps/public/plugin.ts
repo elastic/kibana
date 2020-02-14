@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Plugin,
-  CoreSetup,
-  CoreStart, AppMountParameters,
-} from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-import { initKibanaServices } from './kibana_services';
-import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { initKibanaServices, setInspector, setInjectedVarFunc } from './kibana_services';
 
 // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginSetupDependencies {
-  data: DataPublicPluginSetup
+  data: DataPublicPluginSetup;
+  inspector: InspectorSetupContract;
 }
 // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -37,9 +35,10 @@ export class MapsPlugin
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
     > {
-
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     initKibanaServices(core, plugins);
+    setInspector(plugins.inspector);
+    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
     // core.application.register({
     //   id: 'maps',
     //   title: i18n.translate('xpack.maps.pluginTitle', {
@@ -52,9 +51,8 @@ export class MapsPlugin
     //   },
     // });
     return {
-      maps: 'testing'
-    }
-
+      maps: 'testing',
+    };
   }
 
   public start(core: CoreStart, plugins: any) {}

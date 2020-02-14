@@ -7,7 +7,23 @@
 export let indexPatternService;
 export let timeFilter;
 
-export const initKibanaServices = ({ data }) => {
+let licenseId;
+export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
+export const getLicenseId = () => {
+  return licenseId;
+};
+
+let inspector;
+export const setInspector = newInspector => (inspector = newInspector);
+export const getInspector = () => {
+  return inspector;
+};
+
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;
+
+export const initKibanaServices = ({ injectedMetadata }, { data }) => {
   indexPatternService = data.indexPatterns;
-  timeFilter: data.query.timefilter
+  timeFilter = data.query.timefilter;
 };
