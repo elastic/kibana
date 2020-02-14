@@ -14,6 +14,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
 import { capabilities } from '../../np_imports/ui/capabilities';
 
+const getFormattedDateTimeLocal = timestamp => {
+  const injector = chrome.dangerouslyGetActiveInjector();
+  const timezone = injector.get('config').get('dateFormat:tz');
+  return formatDateTimeLocal(timestamp, timezone);
+};
+
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
   defaultMessage: 'Timestamp',
 });
@@ -43,7 +49,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp, true),
+    render: timestamp => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -73,7 +79,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp, true),
+    render: timestamp => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
