@@ -6,12 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import {
-  Installation,
-  Installed,
-  NotInstalled,
-  InstallationStatus,
-} from '../../../../common/types';
+import { Installation, InstallationStatus, PackageInfo } from '../../../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -69,7 +64,7 @@ export async function getPackageKeysByStatus(
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}): Promise<Installed | NotInstalled> {
+}): Promise<PackageInfo> {
   const { savedObjectsClient, pkgkey } = options;
   const [item, savedObject] = await Promise.all([
     Registry.fetchInfo(pkgkey),

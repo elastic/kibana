@@ -9,8 +9,7 @@ import {
   CategorySummaryList,
   Installable,
   RegistryPackage,
-  Installed,
-  NotInstalled,
+  PackageInfo,
 } from '../models/epm';
 
 export interface GetCategoriesResponse {
@@ -57,7 +56,7 @@ export const GetInfoRequestSchema = {
 };
 
 export interface GetInfoResponse {
-  response: Installed | NotInstalled;
+  response: PackageInfo;
   success: boolean;
 }
 
