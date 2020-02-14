@@ -61,7 +61,10 @@ export const appStoreFactory = (coreStart: CoreStart): Store => {
           globalState => globalState.policyList,
           policyListMiddlewareFactory(coreStart)
         ),
-        substateMiddlewareFactory(s => s.alertList, alertMiddlewareFactory(coreStart).middleware)
+        substateMiddlewareFactory(
+          globalState => globalState.alertList,
+          alertMiddlewareFactory(coreStart)
+        )
       )
     )
   );

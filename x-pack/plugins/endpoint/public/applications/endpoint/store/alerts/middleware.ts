@@ -11,16 +11,14 @@ import { MiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, paginationDataFromUrl } from './selectors';
 
 export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreStart => {
-  return {
-    middleware: api => next => async (action: AppAction) => {
-      next(action);
-      const state = api.getState();
-      if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
-        const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
-          query: paginationDataFromUrl(state) as HttpFetchQuery,
-        });
-        api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
-      }
-    },
+  return api => next => async (action: AppAction) => {
+    next(action);
+    const state = api.getState();
+    if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
+      const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
+        query: paginationDataFromUrl(state) as HttpFetchQuery,
+      });
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+    }
   };
 };

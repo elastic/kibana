@@ -12,12 +12,9 @@ import { AlertResultList, Immutable } from '../../../common/types';
 
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
-) => {
-  middleware: (
-    api: MiddlewareAPI<Dispatch<AppAction>, S>
-  ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
-  start?: () => void;
-};
+) => (
+  api: MiddlewareAPI<Dispatch<AppAction>, S>
+) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
 export interface ManagementListState {
   endpoints: EndpointMetadata[];
@@ -74,7 +71,7 @@ export type CreateStructuredSelector = <
   state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
-}
+};
 
 export interface EndpointAppLocation {
   pathname: string;

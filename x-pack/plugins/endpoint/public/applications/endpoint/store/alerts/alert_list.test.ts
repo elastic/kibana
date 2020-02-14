@@ -22,7 +22,7 @@ describe('alert list tests', () => {
   beforeEach(() => {
     coreStart = coreMock.createStart();
     history = createBrowserHistory();
-    const { middleware } = alertMiddlewareFactory(coreStart);
+    const middleware = alertMiddlewareFactory(coreStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
   });
   describe('when the user navigates to the alert list page', () => {
