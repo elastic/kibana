@@ -49,6 +49,7 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   return (
     <EuiPopover
       id={id}
+      anchorPosition="downLeft"
       button={
         <EuiExpression
           color={isOpen ? 'primary' : 'secondary'}
