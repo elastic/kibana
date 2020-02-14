@@ -66,6 +66,14 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     }
 
+    async launchSampleDashboard(id: string) {
+      await this.launchSampleDataSet(id);
+      isOss = await PageObjects.common.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
+      }
+    }
+
     async launchSampleDataSet(id: string) {
       await this.addSampleDataSet(id);
       await testSubjects.click(`launchSampleDataSet${id}`);

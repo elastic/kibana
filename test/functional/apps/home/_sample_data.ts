@@ -101,7 +101,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample flights data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('flights');
+        await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
@@ -113,7 +113,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render visualizations', async () => {
-        await PageObjects.home.launchSampleDataSet('flights');
+        await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         log.debug('Checking pie charts rendered');
@@ -132,7 +132,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample logs data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('logs');
+        await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
@@ -144,7 +144,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('ecommerce');
+        await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
