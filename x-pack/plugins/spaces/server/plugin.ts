@@ -26,11 +26,11 @@ import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
-import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
+import { setupCapabilities } from './capabilities';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -97,7 +97,10 @@ export class Plugin {
 
   public async start() {}
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
+  public async setup(
+    core: CoreSetup<PluginsSetup>,
+    plugins: PluginsSetup
+  ): Promise<SpacesPluginSetup> {
     const service = new SpacesService(this.log, this.getLegacyAPI);
 
     const spacesService = await service.setup({
@@ -136,15 +139,7 @@ export class Plugin {
       features: plugins.features,
     });
 
-    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(request);
-        const features = plugins.features.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
-    });
+    setupCapabilities(core, spacesService);
 
     registerSpacesUsageCollector(plugins.usageCollection, {
       kibanaIndexConfig: this.kibanaIndexConfig,

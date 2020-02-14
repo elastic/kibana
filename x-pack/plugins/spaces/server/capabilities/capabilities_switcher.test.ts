@@ -6,8 +6,12 @@
 
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
-import { toggleUICapabilities } from './toggle_ui_capabilities';
-import { Capabilities } from 'src/core/public';
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
+import { Capabilities, CoreSetup } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { PluginsSetup } from '../plugin';
 
 const features: Feature[] = [
   {
@@ -91,8 +95,28 @@ const buildCapabilities = () =>
     },
   }) as Capabilities;
 
-describe('toggleUiCapabilities', () => {
-  it('does not toggle capabilities when the space has no disabled features', () => {
+const setup = (space: Space) => {
+  const coreSetup = coreMock.createSetup();
+
+  const featuresStart = featuresPluginMock.createStart();
+  featuresStart.getFeatures.mockReturnValue(features);
+
+  coreSetup.getStartServices.mockResolvedValue([
+    coreMock.createStart(),
+    { features: featuresStart },
+  ]);
+
+  const spacesService = spacesServiceMock.createSetupContract();
+  spacesService.getActiveSpace.mockResolvedValue(space);
+
+  return setupCapabilitiesSwitcher(
+    (coreSetup as unknown) as CoreSetup<PluginsSetup>,
+    spacesService
+  );
+};
+
+describe('capabilitiesSwitcher', () => {
+  it('does not toggle capabilities when the space has no disabled features', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -100,11 +124,15 @@ describe('toggleUiCapabilities', () => {
     };
 
     const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+
+    const switcher = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
+
     expect(result).toEqual(buildCapabilities());
   });
 
-  it('ignores unknown disabledFeatures', () => {
+  it('ignores unknown disabledFeatures', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -112,11 +140,15 @@ describe('toggleUiCapabilities', () => {
     };
 
     const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+
+    const switcher = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
+
     expect(result).toEqual(buildCapabilities());
   });
 
-  it('disables the corresponding navLink, catalogue, management sections, and all capability flags for disabled features', () => {
+  it('disables the corresponding navLink, catalogue, management sections, and all capability flags for disabled features', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -124,7 +156,10 @@ describe('toggleUiCapabilities', () => {
     };
 
     const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+
+    const switcher = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
 
     const expectedCapabilities = buildCapabilities();
 
@@ -137,7 +172,7 @@ describe('toggleUiCapabilities', () => {
     expect(result).toEqual(expectedCapabilities);
   });
 
-  it('can disable everything', () => {
+  it('can disable everything', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -145,7 +180,10 @@ describe('toggleUiCapabilities', () => {
     };
 
     const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+
+    const switcher = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
 
     const expectedCapabilities = buildCapabilities();
 
