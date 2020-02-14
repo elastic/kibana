@@ -90,11 +90,11 @@ export const WithLogPositionUrlState = () => {
               initialEndDate = new Date(initialPosition.time + ONE_HOUR).toISOString();
             }
 
-            if (initialStartDate || initialEndDate) {
-              updateDateRange({ startDate: initialStartDate, endDate: initialEndDate });
-            }
-
             jumpToTargetPosition(initialPosition);
+          }
+
+          if (initialStartDate || initialEndDate) {
+            updateDateRange({ startDate: initialStartDate, endDate: initialEndDate });
           }
 
           if (initialUrlState.streamLive) {
