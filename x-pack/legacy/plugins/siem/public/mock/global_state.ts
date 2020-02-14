@@ -220,4 +220,31 @@ export const mockGlobalState: State = {
       },
     },
   },
+  uiSettings: {
+    anomalyThreshold: 50,
+    bytesFormat: '0,0.[0]b',
+    darkMode: false,
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    indexPattern: [
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'packetbeat-*',
+      'winlogbeat-*',
+    ],
+    newsFeedEnabled: true,
+    newsFeedUrl: 'https://feeds.elastic.co/security-solution',
+    numberFormat: '0,0.[000]',
+    timeFilterQuickRanges: [
+      {
+        from: 'now/d',
+        to: 'now/d',
+        display: 'Today',
+      },
+    ],
+    timeFilterRange: {},
+    timeFilterRefreshInterval: {},
+    timeZone: 'UTC',
+  },
 };
