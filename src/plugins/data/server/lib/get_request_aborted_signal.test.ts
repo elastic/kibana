@@ -21,6 +21,8 @@ import { Subject } from 'rxjs';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 
 describe('abortableRequestHandler', () => {
+  jest.useFakeTimers();
+
   it('should call abort if disconnected', () => {
     const abortedSubject = new Subject<void>();
     const aborted$ = abortedSubject.asObservable();
@@ -34,6 +36,7 @@ describe('abortableRequestHandler', () => {
     expect(onAborted).not.toBeCalled();
 
     abortedSubject.next();
+    jest.runAllTimers();
 
     // Should be aborted and call onAborted after disconnecting
     expect(signal.aborted).toBe(true);
