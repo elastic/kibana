@@ -75,7 +75,7 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('categorization', function() {
-    this.tags(['smoke', 'mlqa', 'james']);
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/categorization');
       await ml.api.createCalendar('wizard-test-calendar');
