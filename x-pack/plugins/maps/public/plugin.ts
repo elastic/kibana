@@ -7,22 +7,15 @@
 import {
   Plugin,
   CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  AppMountParameters
+  CoreStart, AppMountParameters,
 } from 'src/core/public';
-import { auto } from 'angular';
-import { IEmbeddableSetup } from '../../../../src/plugins/embeddable/public';
-// @ts-ignore
-import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory.js';
-// @ts-ignore
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { initKibanaServices } from './kibana_services';
-import {i18n} from "@kbn/i18n";
-import {createStore} from "../../../legacy/plugins/canvas/public/store";
+import { i18n } from '@kbn/i18n';
 
+// eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginSetupDependencies {
-  embeddable: IEmbeddableSetup;
+  data: DataPublicPluginSetup
 }
 // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -44,36 +37,25 @@ export class MapsPlugin
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
     > {
-  private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
-  constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    core.application.register({
-      id: 'maps',
-      title: i18n.translate('xpack.maps.pluginTitle', {
-        defaultMessage: 'Maps',
-      }),
-      async mount() {
-      },
-    });
-
-    initKibanaServices(plugins);
-    // Set up embeddables
-    const isEditable = () => core.application.capabilities.get().maps.save as boolean;
-    if (!this.getEmbeddableInjector) {
-      throw Error('Maps plugin method getEmbeddableInjector is undefined');
+    initKibanaServices(core, plugins);
+    // core.application.register({
+    //   id: 'maps',
+    //   title: i18n.translate('xpack.maps.pluginTitle', {
+    //     defaultMessage: 'Maps',
+    //   }),
+    //   async mount(params: AppMountParameters) {
+    //     const [coreStart] = await core.getStartServices();
+    //     const { renderApp } = await import('./applications/maps');
+    //     return renderApp(coreStart, params);
+    //   },
+    // });
+    return {
+      maps: 'testing'
     }
-    const addBasePath = core.http.basePath.prepend;
-    const factory = new MapEmbeddableFactory(
-      this.getEmbeddableInjector,
-      isEditable,
-      addBasePath
-    );
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
-    plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+
   }
 
-  public start(core: CoreStart, plugins: any) {
-    // setInspector(plugins.np.inspector);
-  }
+  public start(core: CoreStart, plugins: any) {}
 }

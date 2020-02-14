@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
-import { FLYOUT_STATE } from '../../../reducers/ui';
+import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui.js'
 import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
 import { setSelectedLayer } from '../../../actions/map_actions';
 import {
