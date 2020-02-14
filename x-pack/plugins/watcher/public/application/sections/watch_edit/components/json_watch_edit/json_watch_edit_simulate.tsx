@@ -378,7 +378,7 @@ export const JsonWatchEditSimulate = ({
               mode="json"
               width="100%"
               height="200px"
-              theme="github"
+              theme="textmate"
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
                 {
