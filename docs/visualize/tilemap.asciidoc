@@ -1,9 +1,52 @@
+[[visualize-maps]]
+== Maps
+
+To visualize and analyze your geographical data, Visualize provides you with several types of maps.
+
+Visualize supports the following types of maps:
+
+* Coordinate map - Displays geographic areas overlaid with circles keyed to the data determined by the buckets you specify. To use coordinate maps, you plot latitude and longitude coordinates.
+
+* Region (Choropleth) map - Displays colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
+
+* Heat map - Displays graphical representations of data where the individual values are represented as colors.
+
+NOTE: Coordinate, region, and heat maps have been replaced with <<maps>>, which offers more functionality.
+
+[float]
+[[maps-supported-aggregations]]
+=== Supported aggregations
+
+Each map type supports a different set of aggregations.
+
+[cols=2*,options="header"]
+|===
+|Map type
+|Supported aggregations
+
+|Coordinate
+a|
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
+
+|Region
+a|
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Terms bucket aggregation>>
+To join the results to the vector data, use the _key_ term.
+
+|Heat
+a|
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Bucket>>
+|===
+
+[float]
 [[tilemap]]
-== Coordinate map
-
-Coordinate maps display geographic areas overlaid with circles keyed to the data determined by the buckets you specify. To use coordinate maps, you plot latitude and longitude coordinates.
-
-NOTE: Coordinate maps have been replaced with <<maps>>, which offers more functionality and is easier to use.
+=== Create coordinate maps
 
 To create coordinate maps in Visualize:
 
@@ -12,16 +55,6 @@ To create coordinate maps in Visualize:
 * To display map tiles, {kib} uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
-
-[float]
-[[coordinate-map-aggregation]]
-=== Supported aggregations
-
-Coordinate maps support the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
 
 When you deselect *Change precision on map zoom*, the *Precision* slider appears. The *Precision* slider determines the granularity of the results displayed on the map. For details on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
 
@@ -37,7 +70,7 @@ of the geohash grid cell.
 
 [float]
 [[navigate-map]]
-=== Navigate the coordinate map
+==== Navigate the coordinate map
 
 Use the following navigation options:
 
@@ -45,3 +78,36 @@ Use the following navigation options:
 * To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
 * To automatically crop the map boundaries to the
 geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
+
+[float]
+[[region-map]]
+=== Create region maps
+
+Configure an inner join that joins the result of an {es} terms aggregation
+and a reference vector file based on a shared key.
+
+[float]
+[[heat-map]]
+=== Create heat maps
+
+Something cool.
+
+[float]
+[[navigate-heatmap]]
+=== Change the color ranges
+
+When only one color displays on the heat map, you might need to change the color ranges.
+
+To specify the number of color ranges:
+
+. Click *Options*.
+
+. Enter the *Number of colors* to display.
+
+To specify custom ranges:
+
+. Click *Options*.
+
+. Select *Use custom ranges*.
+
+. Enter the ranges to display.
