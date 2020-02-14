@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AuthenticatedUser } from '../../../../../plugins/security/public';
+import { RequestHandlerContext } from '../../../../../../src/core/server';
 export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
+
 import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
 import { Events } from './events';
@@ -54,6 +57,8 @@ export interface AppBackendLibs extends AppDomainLibs {
 
 export interface SiemContext {
   req: FrameworkRequest;
+  context: RequestHandlerContext;
+  user: AuthenticatedUser | null;
 }
 
 export interface TotalValue {
