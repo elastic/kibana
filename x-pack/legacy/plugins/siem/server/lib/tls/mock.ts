@@ -212,8 +212,7 @@ export const expectedTlsEdges = [
 ];
 
 export const mockRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetTlsQuery',
     variables: {
       defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -229,7 +228,6 @@ export const mockRequest = {
     query:
       'query GetTlsQuery($sourceId: ID!, $filterQuery: String, $flowTarget: FlowTarget!, $ip: String!, $pagination: PaginationInputPaginated!, $sort: TlsSortField!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $inspect: Boolean!) {\n  source(id: $sourceId) {\n    id\n    Tls(filterQuery: $filterQuery, flowTarget: $flowTarget, ip: $ip, pagination: $pagination, sort: $sort, timerange: $timerange, defaultIndex: $defaultIndex) {\n      totalCount\n      edges {\n        node {\n          _id\n          alternativeNames\n          commonNames\n          ja3\n          issuerNames\n          notAfter\n          __typename\n        }\n        cursor {\n          value\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        activePage\n        fakeTotalCount\n        showMorePagesIndicator\n        __typename\n      }\n      inspect @include(if: $inspect) {\n        dsl\n        response\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockResponse = {

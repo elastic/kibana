@@ -45,12 +45,6 @@ export const NetworkRoutes = ({
     },
     [setAbsoluteRangeDatePicker]
   );
-  const updateDateRange = useCallback(
-    (min: number, max: number) => {
-      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-    },
-    [setAbsoluteRangeDatePicker]
-  );
 
   const networkAnomaliesFilterQuery = {
     bool: {
@@ -83,7 +77,6 @@ export const NetworkRoutes = ({
   const tabProps = {
     ...commonProps,
     indexPattern,
-    updateDateRange,
   };
 
   const anomaliesProps = {

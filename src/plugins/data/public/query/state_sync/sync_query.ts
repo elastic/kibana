@@ -26,7 +26,7 @@ import {
   syncState,
 } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
-import { esFilters, RefreshInterval, TimeRange } from '../../../common';
+import { Filter, RefreshInterval, TimeRange } from '../../../common';
 import { QuerySetup, QueryStart } from '../query_service';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -34,7 +34,7 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
 export interface QuerySyncState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
 }
 
 /**
@@ -140,7 +140,7 @@ export const getQueryStateContainer = (
         ...state,
         refreshInterval,
       }),
-      setFilters: (state: QuerySyncState) => (filters: esFilters.Filter[]) => ({
+      setFilters: (state: QuerySyncState) => (filters: Filter[]) => ({
         ...state,
         filters,
       }),
