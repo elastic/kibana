@@ -8,8 +8,8 @@ import { head } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
+import { ColumnHeader } from '../../../../store/timeline/model';
 import { getEmptyTagValue } from '../../../empty_value';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
 import { parseValue } from './parse_value';

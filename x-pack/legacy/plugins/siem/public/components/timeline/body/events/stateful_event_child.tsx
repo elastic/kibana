@@ -9,12 +9,12 @@ import uuid from 'uuid';
 
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
+import { ColumnHeader } from '../../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { OnPinEvent, OnColumnResized, OnUnPinEvent, OnRowSelected } from '../../events';
 import { EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { EventColumnView } from './event_column_view';
 

@@ -10,8 +10,12 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
-import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import {
+  ColumnHeader,
+  KqlMode,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../store/timeline/model';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';

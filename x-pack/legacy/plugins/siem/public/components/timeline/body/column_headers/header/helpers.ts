@@ -6,8 +6,8 @@
 
 import { Direction } from '../../../../../graphql/types';
 import { assertUnreachable } from '../../../../../lib/helpers';
+import { ColumnHeader } from '../../../../../store/timeline/model';
 import { Sort, SortDirection } from '../../sort';
-import { ColumnHeader } from '../column_header';
 
 interface GetNewSortDirectionOnClickParams {
   clickedHeader: ColumnHeader;

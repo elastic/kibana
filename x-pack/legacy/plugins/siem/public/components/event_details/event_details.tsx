@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';

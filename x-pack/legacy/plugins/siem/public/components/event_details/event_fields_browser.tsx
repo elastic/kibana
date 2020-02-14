@@ -8,7 +8,7 @@ import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader } from '../../store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';

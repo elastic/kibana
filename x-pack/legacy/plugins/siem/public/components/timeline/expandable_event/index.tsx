@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
-import { ColumnHeader } from '../body/column_headers/column_header';
+import { ColumnHeader } from '../../../store/timeline/model';
 import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';

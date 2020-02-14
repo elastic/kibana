@@ -5,8 +5,8 @@
  */
 
 import { BrowserFields } from '../../containers/source';
+import { ColumnHeader } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export type OnFieldSelected = (fieldId: string) => void;
 export type OnHideFieldBrowser = () => void;

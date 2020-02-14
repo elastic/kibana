@@ -7,10 +7,10 @@
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 
+import { ColumnHeader } from '../../../../../store/timeline/model';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
-import { ColumnHeader } from '../column_header';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';

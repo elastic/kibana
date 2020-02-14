@@ -18,7 +18,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../with_hover_actions';

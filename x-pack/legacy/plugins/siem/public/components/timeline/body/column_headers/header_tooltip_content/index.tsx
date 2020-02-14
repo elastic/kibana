@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ColumnHeader } from '../../../../../store/timeline/model';
 import { getIconFromType } from '../../../../event_details/helpers';
-import { ColumnHeader } from '../column_header';
 import * as i18n from '../translations';
 
 const IconType = styled(EuiIcon)`

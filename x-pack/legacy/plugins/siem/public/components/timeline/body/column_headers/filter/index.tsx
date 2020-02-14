@@ -8,7 +8,7 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { OnFilterChange } from '../../../events';
-import { ColumnHeader } from '../column_header';
+import { ColumnHeader } from '../../../../../store/timeline/model';
 import { TextFilter } from '../text_filter';
 
 interface Props {

@@ -8,8 +8,8 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { ColumnHeader } from '../../../../../store/timeline/model';
 import { defaultHeaders } from '../../../../../mock';
-import { ColumnHeader } from '../column_header';
 
 import { HeaderToolTipContent } from '.';
 

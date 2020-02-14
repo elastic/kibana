@@ -12,12 +12,11 @@ import { ActionCreator } from 'typescript-fsa';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { EventType, KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
-
-import { ColumnHeader } from './body/column_headers/column_header';
+import { ColumnHeader, EventType, KqlMode, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';

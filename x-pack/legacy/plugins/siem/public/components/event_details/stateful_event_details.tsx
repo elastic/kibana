@@ -7,8 +7,8 @@
 import React, { useCallback, useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DetailItem } from '../../graphql/types';
+import { ColumnHeader } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 
 import { EventDetails, View } from './event_details';

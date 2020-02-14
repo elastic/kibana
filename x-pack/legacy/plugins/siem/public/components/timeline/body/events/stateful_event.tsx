@@ -13,6 +13,7 @@ import { TimelineDetailsQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
+import { ColumnHeader } from '../../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
 import {
@@ -26,7 +27,6 @@ import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';

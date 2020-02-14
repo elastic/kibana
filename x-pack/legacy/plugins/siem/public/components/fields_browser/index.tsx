@@ -13,7 +13,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader } from '../../store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';

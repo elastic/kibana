@@ -6,7 +6,6 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import {
   IS_OPERATOR,
   DataProvider,
@@ -15,9 +14,9 @@ import {
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
-  getColumnWidthFromType,
   DEFAULT_TIMELINE_WIDTH,
-} from '../../components/timeline/body/helpers';
+} from '../../components/timeline/body/constants';
+import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
@@ -41,7 +40,8 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { timelineDefaults } from './model';
+import { ColumnHeader } from './model';
+import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 const timelineByIdMock: TimelineById = {

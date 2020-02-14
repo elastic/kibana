@@ -8,6 +8,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
+import { ColumnHeader } from '../../../../store/timeline/model';
 import { maxDelay } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -19,7 +20,6 @@ import {
   OnUpdateColumns,
 } from '../../events';
 import { EventsTbody } from '../../styles';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEvent } from './stateful_event';

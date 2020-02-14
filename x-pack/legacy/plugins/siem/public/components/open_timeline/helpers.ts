@@ -19,13 +19,16 @@ import {
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
 
-import { TimelineModel, timelineDefaults } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import {
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';

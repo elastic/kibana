@@ -7,8 +7,11 @@
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { ColumnHeader } from '../../store/timeline/model';
+import {
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
 import { ToStringArray } from '../../graphql/types';
 
 import * as i18n from './translations';

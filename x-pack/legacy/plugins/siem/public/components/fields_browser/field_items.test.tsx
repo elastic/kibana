@@ -9,9 +9,9 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeader } from '../../store/timeline/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
 import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
