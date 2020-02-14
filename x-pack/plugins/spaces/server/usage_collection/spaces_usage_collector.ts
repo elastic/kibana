@@ -135,7 +135,7 @@ export function getSpacesUsageCollector(
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const kibanaIndex = (await deps.kibanaIndexConfig.toPromise()).kibana.index;
+      const kibanaIndex = (await deps.kibanaIndexConfig.pipe(take(1)).toPromise()).kibana.index;
 
       const usageStats = await getSpacesUsage(callCluster, kibanaIndex, deps.features, available);
 
