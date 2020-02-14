@@ -76,7 +76,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
 
   const showListView = useState<boolean>(
     typeof config.indices === 'string' ||
-    (Array.isArray(config.indices) && selectedIndices.length === config.indices.length)
+      (Array.isArray(config.indices) && selectedIndices.length === config.indices.length)
   );
 
   // State for using selectable indices list or custom patterns
@@ -96,10 +96,10 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     typeof config.indices === 'string'
       ? config.indices.split(',')
       : Array.isArray(config.indices)
-        ? config.indices
-        : []
+      ? config.indices
+      : []
   );
-  
+
   const renderIndicesField = () => {
     const indicesSwitch = (
       <EuiSwitch
