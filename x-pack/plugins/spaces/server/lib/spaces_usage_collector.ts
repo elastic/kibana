@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { CallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-// @ts-ignore
+import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../../legacy/plugins/monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { PluginsSetup } from '../plugin';
@@ -76,8 +75,8 @@ async function getSpacesUsage(
 
   const { hits, aggregations } = resp;
 
-  const count = get(hits, 'total.value', 0);
-  const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);
+  const count = hits?.total?.value ?? 0;
+  const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
 
   const initialCounts = knownFeatureIds.reduce(
     (acc, featureId) => ({ ...acc, [featureId]: 0 }),
@@ -116,7 +115,7 @@ export interface UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndex: string;
+  kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
 }
@@ -136,12 +135,9 @@ export function getSpacesUsageCollector(
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const usageStats = await getSpacesUsage(
-        callCluster,
-        deps.kibanaIndex,
-        deps.features,
-        available
-      );
+      const kibanaIndex = (await deps.kibanaIndexConfig.toPromise()).kibana.index;
+
+      const usageStats = await getSpacesUsage(callCluster, kibanaIndex, deps.features, available);
 
       return {
         available,

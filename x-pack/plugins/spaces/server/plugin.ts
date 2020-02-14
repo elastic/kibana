@@ -41,9 +41,6 @@ export interface LegacyAPI {
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
-  legacyConfig: {
-    kibanaIndex: string;
-  };
 }
 
 export interface PluginsSetup {
@@ -70,6 +67,8 @@ export class Plugin {
 
   private readonly config$: Observable<ConfigType>;
 
+  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+
   private readonly log: Logger;
 
   private legacyAPI?: LegacyAPI;
@@ -92,6 +91,7 @@ export class Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
+    this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
   }
 
@@ -146,6 +146,12 @@ export class Plugin {
       }
     });
 
+    registerSpacesUsageCollector(plugins.usageCollection, {
+      kibanaIndexConfig: this.kibanaIndexConfig,
+      features: plugins.features,
+      licensing: plugins.licensing,
+    });
+
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
     }
@@ -161,12 +167,7 @@ export class Plugin {
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
-          this.setupLegacyComponents(
-            spacesService,
-            plugins.features,
-            plugins.licensing,
-            plugins.usageCollection
-          );
+          this.setupLegacyComponents(spacesService);
         },
         createDefaultSpace: async () => {
           return await createDefaultSpace({
@@ -180,12 +181,7 @@ export class Plugin {
 
   public stop() {}
 
-  private setupLegacyComponents(
-    spacesService: SpacesServiceSetup,
-    featuresSetup: FeaturesPluginSetup,
-    licensingSetup: LicensingPluginSetup,
-    usageCollectionSetup?: UsageCollectionSetup
-  ) {
+  private setupLegacyComponents(spacesService: SpacesServiceSetup) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
@@ -193,11 +189,5 @@ export class Plugin {
       'spaces',
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
-    // Register a function with server to manage the collection of usage stats
-    registerSpacesUsageCollector(usageCollectionSetup, {
-      kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
-      features: featuresSetup,
-      licensing: licensingSetup,
-    });
   }
 }

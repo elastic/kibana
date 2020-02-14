@@ -110,14 +110,9 @@ export const spaces = (kibana: Record<string, any>) =>
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
 
-      const config = server.config();
-
       const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
-        legacyConfig: {
-          kibanaIndex: config.get('kibana.index'),
-        },
         savedObjects: server.savedObjects,
         auditLogger: {
           create: (pluginId: string) =>

@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { Feature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
+import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -73,11 +74,25 @@ describe('with a basic license', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
     usageStats = await getSpacesUsage(defaultCallClusterMock);
+
+    expect(defaultCallClusterMock).toHaveBeenCalledWith('search', {
+      body: {
+        aggs: {
+          disabledFeatures: {
+            terms: { field: 'space.disabledFeatures', include: ['feature1', 'feature2'], size: 2 },
+          },
+        },
+        query: { term: { type: { value: 'space' } } },
+        size: 0,
+        track_total_hits: true,
+      },
+      index: '.kibana-tests',
+    });
   });
 
   test('sets enabled to true', () => {
@@ -107,7 +122,7 @@ describe('with no license', () => {
   beforeAll(async () => {
     const { features, licensing, usageCollecion } = setup({ license: { isAvailable: false } });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
@@ -138,7 +153,7 @@ describe('with platinum license', () => {
       license: { isAvailable: true, type: 'platinum' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
