@@ -20,118 +20,42 @@
 import { fromEventPattern } from 'rxjs';
 import { map } from 'rxjs/operators';
 // import { tap } from 'rxjs/operators';
-import moment from 'moment';
 import jsonStream from './json_stream';
+import {
+  staticSite,
+  statsAndCoveredFilePath,
+  addPath,
+  testRunner,
+  truncate,
+  timeStamp,
+  distro,
+  buildId,
+  maybeDropCoveredFilePath } from './conversions';
 
-const XPACK = 'x-pack';
+const dropKibana = truncate('kibana');
 
 export default ({ coveragePath }, log) => {
-  const objStream = jsonStream(coveragePath).on('done', () =>
-    log.debug(`### Done streaming from \n\t${coveragePath}`)
+  const objStream = jsonStream(coveragePath).on('done', _ =>
+    log.debug(`### Done streaming from \n\t${coveragePath}`),
   );
 
-  const addCoveragePath = addPath.bind(null, coveragePath);
+  const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
+  const staticSiteUrl = staticSite(staticSiteUrlBase);
 
   return fromEventPattern(_ => objStream.on('node', '!.*', _)).pipe(
-    map(statsAndPath),
-    map(addCoveragePath),
+    map(statsAndCoveredFilePath),
+    map(buildId),
+    map(staticSiteUrl),
+    map(dropKibana),
+    map(addPath(coveragePath)),
     map(testRunner),
-    map(truncate),
     map(timeStamp),
     map(distro),
-    map(buildId),
-    map(last)
     // debug stream
-    // tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
+    // tap(x => {
+    //   console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)
+    //   return x;
+    // }),
   );
 };
-function statsAndPath(...xs) {
-  const [coveredFilePath] = xs[0][1];
-  const [stats] = xs[0];
-  return {
-    coveredFilePath,
-    ...stats,
-  };
-}
-function addPath(coveragePath, obj) {
-  return {
-    coveragePath: trimLeft('target', coveragePath),
-    ...obj,
-  };
-}
-function trimLeft(text, x) {
-  const re = new RegExp(`(?:.*)(${text}.*$)`, 'gm');
-  return x.replace(re, '$1');
-}
-function truncate(obj) {
-  const { coveredFilePath } = obj;
 
-  const text = 'kibana';
-  if (coveredFilePath.includes(text)) {
-    obj.coveredFilePath = trimLeft(text, coveredFilePath);
-  }
-
-  return obj;
-}
-function timeStamp(obj) {
-  return {
-    ...obj,
-    '@timestamp': process.env.TIME_STAMP || moment().format(),
-  };
-}
-function distro(obj) {
-  const { coveredFilePath } = obj;
-  let distro;
-  if (process.env.DISTRO) {
-    distro = process.env.DISTRO;
-  } else {
-    distro = coveredFilePath.includes(XPACK) ? XPACK : 'OSS';
-  }
-
-  return {
-    ...obj,
-    distro,
-  };
-}
-function testRunner(obj) {
-  const { coveragePath } = obj;
-
-  let coverageType = 'OTHER';
-
-  if (coveragePath.includes(`mocha`)) {
-    coverageType = 'MOCHA';
-  }
-
-  if (coveragePath.includes(`jest`)) {
-    coverageType = 'JEST';
-  }
-
-  if (coveragePath.includes('functional')) {
-    coverageType = 'FUNCTIONAL';
-  }
-
-  return {
-    coverageType,
-    ...obj,
-  };
-}
-// last :: obj -> obj
-// Since we do not wish to post a path if it's a total,
-// drop it when it's a total (totals go to a different index).
-function last(obj) {
-  const { coveredFilePath } = obj;
-  if (coveredFilePath === 'total') {
-    delete obj.coveredFilePath;
-  }
-  return obj;
-}
-function buildId(obj) {
-  const { env } = process;
-  if (env.BUILD_ID) {
-    obj.BUILD_ID = env.BUILD_ID;
-  }
-
-  return {
-    ...obj,
-  };
-}
