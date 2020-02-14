@@ -9,7 +9,6 @@ import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-
 /**
  * Note: The usage_collection plugin will take care of sending this data to the telemetry server.
  * You can find these metrics stored at:
@@ -28,7 +27,7 @@ interface TrackOptions {
 type EffectDeps = unknown[];
 
 interface ServiceDeps {
-  usageCollection: UsageCollectionSetup; // TODO: This should really be start. Looking into it. 
+  usageCollection: UsageCollectionSetup; // TODO: This should really be start. Looking into it.
 }
 
 export type TrackMetricOptions = TrackOptions & { metric: string };
@@ -36,7 +35,9 @@ export type UiTracker = ReturnType<typeof useUiTracker>;
 
 export { METRIC_TYPE };
 
-export function useUiTracker<Services extends ServiceDeps>({ app: defaultApp }: { app?: ObservabilityApp } = {}) {
+export function useUiTracker<Services extends ServiceDeps>({
+  app: defaultApp,
+}: { app?: ObservabilityApp } = {}) {
   const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
