@@ -13,7 +13,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe('spaces feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/57377
+  describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -57,7 +58,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Advanced Settings disabled', () => {
+    // https://github.com/elastic/kibana/issues/57413
+    describe.skip('space with Advanced Settings disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -74,15 +76,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`redirects to Kibana home`, async () => {
+      it(`redirects to management home`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: 10000,
-        });
+        await testSubjects.existOrFail('managementHome');
       });
     });
   });

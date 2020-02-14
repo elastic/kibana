@@ -73,18 +73,6 @@
             "deprecationReason": null
           },
           {
-            "name": "getDocCount",
-            "description": "Gets the number of documents in the target index",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "DocCount", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "getMonitors",
             "description": "",
             "args": [

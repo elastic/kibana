@@ -104,6 +104,7 @@
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
@@ -149,6 +150,7 @@
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services

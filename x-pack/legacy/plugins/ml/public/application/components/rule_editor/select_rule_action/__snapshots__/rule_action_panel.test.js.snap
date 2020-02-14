@@ -17,7 +17,7 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
           />,
         },
         Object {
-          "description": <InjectIntl(EditConditionLink)
+          "description": <EditConditionLink
             anomaly={
               Object {
                 "actual": Array [

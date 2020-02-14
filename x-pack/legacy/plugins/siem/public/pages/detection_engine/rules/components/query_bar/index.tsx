@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
 import {
-  esFilters,
+  Filter,
   IIndexPattern,
   Query,
   FilterManager,
@@ -29,11 +29,11 @@ import { convertKueryToElasticSearchQuery } from '../../../../../lib/keury';
 import { useKibana } from '../../../../../lib/kibana';
 import { TimelineModel } from '../../../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   saved_id: string | null;
 }

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-// @ts-ignore
-import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -28,13 +26,13 @@ const breadcrumbs = [
 
 export const jobTypeRoute: MlRoute = {
   path: '/jobs/new_job/step/job_type',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
-  const { context } = useResolver(index, savedSearchId, config, basicResolvers(deps));
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />
