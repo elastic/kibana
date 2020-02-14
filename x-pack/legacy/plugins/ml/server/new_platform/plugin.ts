@@ -25,7 +25,6 @@ import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
 import { LICENSE_TYPE } from '../../common/constants/license';
-// @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
 import { jobRoutes } from '../routes/anomaly_detectors';
 // @ts-ignore: could not find declaration file for module
@@ -39,9 +38,7 @@ import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
-// @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
-// @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module

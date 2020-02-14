@@ -10,7 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-import { estimateBucketSpanSchema } from '../new_platform/job_validation_schema';
+import {
+  estimateBucketSpanSchema,
+  modelMemoryLimitSchema,
+  validateJobSchema,
+} from '../new_platform/job_validation_schema';
+import { anomalyDetectionJobSchema } from '../new_platform/anomaly_detectors_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
@@ -46,9 +51,9 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/estimate_bucket_span
+   * @api {post} /api/ml/validate/estimate_bucket_span Estimate bucket span
    * @apiName EstimateBucketSpan
-   * @apiDescription
+   * @apiDescription  Estimates minimum viable bucket span based on the characteristics of a pre-viewed subset of the data
    */
   router.post(
     {
@@ -60,7 +65,6 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         let errorResp;
-
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
           context.core.elasticsearch.adminClient.callAsInternalUser,
@@ -84,8 +88,6 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
       } catch (e) {
         // this catch gets triggered when an actual error gets thrown when running
         // the estimation code, for example when the request payload is malformed
-        // const error = Boom.badRequest(e);
-        // return response.customError(wrapError(error));
         throw Boom.badRequest(e);
       }
     })
@@ -96,13 +98,15 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
    *
    * @api {post} /api/ml/validate/calculate_model_memory_limit
    * @apiName CalculateModelMemoryLimit
-   * @apiDescription
+   * @apiDescription Calculates the model memory limit
+   *
+   * @apiSuccess {String} modelMemoryLimit
    */
   router.post(
     {
       path: '/api/ml/validate/calculate_model_memory_limit',
       validate: {
-        body: schema.any(),
+        body: schema.object(modelMemoryLimitSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -123,13 +127,13 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
    *
    * @api {post} /api/ml/validate/cardinality
    * @apiName ValidateCardinality
-   * @apiDescription
+   * @apiDescription Validates cardinality for the given job configuration
    */
   router.post(
     {
       path: '/api/ml/validate/cardinality',
       validate: {
-        body: schema.any(),
+        body: schema.object(anomalyDetectionJobSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -151,15 +155,15 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/job
+   * @api {post} /api/ml/validate/job Validates job
    * @apiName ValidateJob
-   * @apiDescription
+   * @apiDescription Validates the given job configuration
    */
   router.post(
     {
       path: '/api/ml/validate/job',
       validate: {
-        body: schema.any(),
+        body: schema.object(validateJobSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
