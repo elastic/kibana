@@ -132,6 +132,23 @@ describe('capabilitiesSwitcher', () => {
     expect(result).toEqual(buildCapabilities());
   });
 
+  it('does not toggle capabilities when the request is not authenticated', async () => {
+    const space: Space = {
+      id: 'space',
+      name: '',
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+    };
+
+    const capabilities = buildCapabilities();
+
+    const switcher = setup(space);
+    const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+
+    const result = await switcher(request, capabilities);
+
+    expect(result).toEqual(buildCapabilities());
+  });
+
   it('ignores unknown disabledFeatures', async () => {
     const space: Space = {
       id: 'space',

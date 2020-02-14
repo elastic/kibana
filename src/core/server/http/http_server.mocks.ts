@@ -42,6 +42,7 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  routeAuthRequired?: false;
 }
 
 function createKibanaRequestMock({
@@ -53,6 +54,7 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
+  routeAuthRequired,
 }: RequestFixtureOptions = {}) {
   const queryString = stringify(query, { sort: false });
 
@@ -70,7 +72,9 @@ function createKibanaRequestMock({
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: { tags: routeTags } },
+      route: {
+        settings: { tags: routeTags, auth: routeAuthRequired },
+      },
       raw: {
         req: { socket },
       },

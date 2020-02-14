@@ -15,6 +15,12 @@ export function setupCapabilitiesSwitcher(
   spacesService: SpacesServiceSetup
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
+    const isAnonymousRequest = !request.route.options.authRequired;
+
+    if (isAnonymousRequest) {
+      return capabilities;
+    }
+
     const [activeSpace, startServices] = await Promise.all([
       spacesService.getActiveSpace(request),
       core.getStartServices(),
