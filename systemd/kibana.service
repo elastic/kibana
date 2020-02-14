@@ -23,6 +23,10 @@ Group=nginx
 # Run ExecStartPre with root-permissions
 PermissionsStartOnly=true
 
+# Cleanup old kibana 7.2.0 directory if it exists.
+# NOTE: the dash prefixed to the command causes systemd to ignore any error returned by rm.
+ExecStartPre=-/usr/bin/rm -rf /usr/local/kibana-7.2.0-linux-x64/
+
 # Ensure KibanaStartup.log file exists and is owned by nginx
 ExecStartPre=/usr/bin/touch /var/log/probe/KibanaStartup.log
 ExecStartPre=/usr/bin/chown nginx:nginx /var/log/probe/KibanaStartup.log
