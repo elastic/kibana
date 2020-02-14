@@ -13,8 +13,9 @@ import {
   TELEMETRY_TYPE,
   // @ts-ignore
 } from '../../common/constants';
+import { ILayerDescriptor } from '../../common/descriptor_types.d';
 
-interface Stats {
+interface IStats {
   [key: string]: {
     min: number;
     max: number;
@@ -22,11 +23,27 @@ interface Stats {
   };
 }
 
-function getUniqueLayerCounts(layerCountsList: object[], mapsCount: number) {
+interface ILayerTypeCount {
+  [key: string]: number;
+}
+
+interface IIndexPatternSavedObject {
+  attributes: IAttributes;
+}
+
+interface IAttributes {
+  fields: string;
+}
+
+interface IIndexPatternField {
+  type: string;
+}
+
+function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
 
-  return uniqueLayerTypes.reduce((accu: Stats, type: string) => {
-    const typeCounts = layerCountsList.reduce((tCountsAccu: number[], tCounts: any) => {
+  return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
+    const typeCounts = layerCountsList.reduce((tCountsAccu: number[], tCounts: ILayerTypeCount) => {
       if (tCounts[type]) {
         tCountsAccu.push(tCounts[type]);
       }
@@ -42,11 +59,13 @@ function getUniqueLayerCounts(layerCountsList: object[], mapsCount: number) {
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns: any[]) {
-  const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
+function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPatternSavedObject[]) {
+  const fieldLists = indexPatterns.map(indexPattern => {
+    return JSON.parse(indexPattern.attributes.fields);
+  });
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
-      (field: any) =>
+      (field: IIndexPatternField) =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
     )
   );
@@ -58,8 +77,8 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects,
   settings,
 }: {
-  mapSavedObjects: any[];
-  indexPatternSavedObjects: any[];
+  mapSavedObjects: any[]; // do similar as IIndexPatternSavedObject, but add type to common/descriptor_types.d, since tht's one of our own
+  indexPatternSavedObjects: IIndexPatternSavedObject[];
   settings: any;
 }) {
   const layerLists = mapSavedObjects.map(savedMapObject =>
@@ -68,7 +87,7 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
-    const sourceIdList = lList.map((layer: any) => layer.sourceDescriptor.id);
+    const sourceIdList = lList.map((layer: ILayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -78,7 +97,7 @@ export function buildMapsTelemetry({
   // Count of EMS Vector layers used
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
-      .countBy((layer: any) => {
+      .countBy((layer: ILayerDescriptor) => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
@@ -138,7 +157,7 @@ export async function getMapsTelemetry(
   config: Function
 ) {
   const mapSavedObjects: Array<Record<string, any>> = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: Array<Record<string, any>> = await getIndexPatternSavedObjects(
+  const indexPatternSavedObjects: IIndexPatternSavedObject[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );
   const settings = {
