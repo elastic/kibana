@@ -336,7 +336,7 @@ interface OfExpressionProps {
 |onChangeSelectedAggField|Event handler that will be excuted if selected aggregation field is changed.|
 |fields|Fields list that will be available in the OF `Select a field` dropdown.|
 |customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downRight`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downRight`. Recommend changing it for a small parent window space.|
 
 ### GROUPED BY expression component
 
