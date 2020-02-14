@@ -91,7 +91,7 @@ export class Form extends PureComponent<FormProps> {
 
   areChangesInvalid = (): boolean => {
     const { unsavedChanges } = this.state;
-    return Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid === true);
+    return Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
   };
 
   handleChange = (key: string, change: FieldState) => {
