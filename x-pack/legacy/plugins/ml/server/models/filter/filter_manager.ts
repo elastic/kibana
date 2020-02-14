@@ -60,7 +60,7 @@ interface PartialJob {
 export class FilterManager {
   private _client: IScopedClusterClient['callAsCurrentUser'];
 
-  constructor(client: any) {
+  constructor(client: IScopedClusterClient['callAsCurrentUser']) {
     this._client = client;
   }
 

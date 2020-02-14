@@ -53,7 +53,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
    * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection.
    *
    * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} filters list of filters
+   * @apiSuccess {Object[]} filters list of filters
    */
   router.get(
     {
@@ -205,7 +205,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
    *          with stats on the list of jobs and detectors which are using each filter.
    *
    * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} filters list of filters with stats on usage
+   * @apiSuccess {Object[]} filters list of filters with stats on usage
    */
   router.get(
     {

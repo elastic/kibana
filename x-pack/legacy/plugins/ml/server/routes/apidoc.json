@@ -57,7 +57,7 @@
     "DeleteJobs",
     "CloseJobs",
     "JobsSummary",
-    "JobsWithTimerange",
+    "JobsWithTimeRange",
     "CreateFullJobsList",
     "GetAllGroups",
     "UpdateGroups",
