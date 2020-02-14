@@ -60,9 +60,12 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timeline,
   ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  case: [],
 };
 
 export type LocationTypes =
+  | CONSTANTS.caseDetails
+  | CONSTANTS.casePage
   | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
