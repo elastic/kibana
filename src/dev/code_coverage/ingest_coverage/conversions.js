@@ -21,14 +21,15 @@ import moment from 'moment';
 
 const XPACK = 'x-pack';
 
+export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
+
 export const staticSite = urlBase => obj => {
-  // file:///Users/tre/development/projects/kibana/target/kibana-coverage/functional-combined/packages/elastic-datemath/target/index.html
-  // https://kibana-coverage.elastic.dev/
   const { BUILD_ID, coveredFilePath } = obj;
+  const ts = obj['@timestamp'];
 
   const trimmed = trimLeftFrom('kibana', coveredFilePath);
 
-  const coveredFilePathAsStaticSiteUrl = `${urlBase}${BUILD_ID}/${trimmed}`;
+  const coveredFilePathAsStaticSiteUrl = `${urlBase}${BUILD_ID}/${ts}/${trimmed}`;
 
   obj.coveredFilePath = coveredFilePathAsStaticSiteUrl;
 
@@ -47,9 +48,6 @@ export const addPath = coveragePath => obj => ({
   ...obj,
 });
 
-export const trimLeftFrom = (text, x) =>
-  x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
-
 export const truncate = text => obj => {
   const { coveredFilePath } = obj;
   if (coveredFilePath.includes(text)) obj.coveredFilePath = trimLeftFrom(text, coveredFilePath);
@@ -58,7 +56,7 @@ export const truncate = text => obj => {
 
 export const timeStamp = obj => ({
   ...obj,
-  '@timestamp': process.env.TIME_STAMP || moment().format(),
+  '@timestamp': process.env.TIME_STAMP || moment.utc().format(),
 });
 
 export const distro = obj => {
@@ -74,7 +72,7 @@ export const distro = obj => {
     ...obj,
     distro,
   };
-}
+};
 
 export const testRunner = obj => {
   const { coveragePath } = obj;
@@ -97,7 +95,7 @@ export const testRunner = obj => {
     coverageType,
     ...obj,
   };
-}
+};
 
 // Since we do not wish to post a path if it's a total,
 // drop it when it's a total (totals go to a different index).
@@ -107,7 +105,7 @@ export const maybeDropCoveredFilePath = obj => {
     delete obj.coveredFilePath;
   }
   return obj;
-}
+};
 
 export const buildId = obj => {
   const { env } = process;
@@ -116,4 +114,4 @@ export const buildId = obj => {
   return {
     ...obj,
   };
-}
+};

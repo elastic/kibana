@@ -39,21 +39,22 @@ const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
 export default ({ coveragePath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${ms} ms\n`);
 
+  const prokStatsTimeStampBuildIdCoveredFilePath = pipe(
+    statsAndCoveredFilePath,
+    buildId,
+    timeStamp,
+    staticSite(staticSiteUrlBase)
+  );
+  const addPathTestRunnerAndDistro = pipe(addPath(coveragePath), testRunner, distro);
 
-  const prokStatsBuildIdCoveredFilePath =
-    pipe(statsAndCoveredFilePath, buildId, staticSite(staticSiteUrlBase));
-  const addPathTestRunnerTimeStampAndDistro =
-    pipe(addPath(coveragePath), testRunner, timeStamp, distro);
-
-  const objStream = jsonStream(coveragePath)
-    .on('done', noop);
+  const objStream = jsonStream(coveragePath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
-      map(prokStatsBuildIdCoveredFilePath),
-      map(addPathTestRunnerTimeStampAndDistro),
+      map(prokStatsTimeStampBuildIdCoveredFilePath),
+      map(addPathTestRunnerAndDistro),
       map(maybeDropCoveredFilePath),
-      concatMap(x => of(x).pipe(delay(ms))),
+      concatMap(x => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
 };
