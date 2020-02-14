@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { getAppTitle } from './common/i18n_getters';
-import _ from 'lodash';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
   return new kibana.Plugin({
@@ -29,6 +30,7 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
@@ -52,7 +54,7 @@ export function maps(kibana) {
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
       inspectorViews: ['plugins/maps/inspector/views/register_views'],
-      home: ['plugins/maps/register_feature'],
+      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {

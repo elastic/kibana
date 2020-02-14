@@ -30,6 +30,7 @@ export interface ColumnHeader {
   format?: string;
   id: ColumnId;
   label?: string;
+  linkField?: string;
   placeholder?: string;
   type?: string;
   width: number;

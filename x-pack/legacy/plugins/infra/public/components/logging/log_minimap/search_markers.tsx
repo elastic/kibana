@@ -36,7 +36,7 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
       .range([0, height]);
 
     return (
-      <g className={classes}>
+      <g transform={`translate(${width / 2}, 0)`} className={classes}>
         {buckets.map(bucket => (
           <g
             key={`${bucket.representativeKey.time}:${bucket.representativeKey.tiebreaker}`}

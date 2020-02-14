@@ -6,11 +6,9 @@
 
 import React, { FC } from 'react';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { Example } from './example';
 
 interface Props {
   examples: Array<string | object>;
@@ -22,13 +20,20 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   }
 
   const examplesContent = examples.map((example, i) => {
-    return <Example key={`example_${i}`} example={example} />;
+    return (
+      <EuiListGroupItem
+        style={{ padding: 0, justifyContent: 'center' }}
+        size="xs"
+        key={`example_${i}`}
+        label={typeof example === 'string' ? example : JSON.stringify(example)}
+      />
+    );
   });
 
   return (
     <div>
-      <EuiText size="s">
-        <h6>
+      <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
+        <span>
           <FormattedMessage
             id="xpack.ml.fieldDataCard.cardText.examplesTitle"
             defaultMessage="{numExamples, plural, one {value} other {examples}}"
@@ -36,10 +41,12 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
               numExamples: examples.length,
             }}
           />
-        </h6>
-      </EuiText>
+        </span>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      {examplesContent}
+      <EuiListGroup flush={true} showToolTips={true}>
+        {examplesContent}
+      </EuiListGroup>
     </div>
   );
 };

@@ -25,8 +25,6 @@
  */
 // @ts-ignore Used only by tsvb, vega, input control vis
 export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-// @ts-ignore
-export { DefaultEditorSize } from 'ui/vis/editor_size';
 
 /**
  * Static np-ready code, re-exported here so consumers can import from

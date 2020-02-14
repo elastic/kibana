@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
 import {
   ICustomClusterClient,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
@@ -40,7 +39,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  * to function properly.
  */
 export interface LegacyAPI {
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -49,7 +47,7 @@ export interface LegacyAPI {
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
  */
-export interface PluginSetupContract {
+export interface SecurityPluginSetup {
   authc: Authentication;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
 
@@ -133,7 +131,6 @@ export class Plugin {
       config,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
     const authz = await setupAuthorization({
@@ -166,7 +163,7 @@ export class Plugin {
       csp: core.http.csp,
     });
 
-    return deepFreeze<PluginSetupContract>({
+    return deepFreeze<SecurityPluginSetup>({
       authc,
 
       authz: {

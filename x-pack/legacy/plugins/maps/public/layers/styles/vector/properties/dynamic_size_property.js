@@ -43,8 +43,16 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
-    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+  constructor(
+    options,
+    styleName,
+    field,
+    getFieldMeta,
+    getFieldFormatter,
+    getValueSuggestions,
+    isSymbolizedAsIcon
+  ) {
+    super(options, styleName, field, getFieldMeta, getFieldFormatter, getValueSuggestions);
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
@@ -67,15 +75,15 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
-  syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId) {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
-      const iconPixels =
-        this._options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-          ? LARGE_MAKI_ICON_SIZE
-          : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+  getIconPixelSize() {
+    return this._options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
+      ? LARGE_MAKI_ICON_SIZE
+      : SMALL_MAKI_ICON_SIZE;
+  }
 
-      const halfIconPixels = iconPixels / 2;
+  syncIconSizeWithMb(symbolLayerId, mbMap) {
+    if (this._isSizeDynamicConfigComplete(this._options)) {
+      const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getComputedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
@@ -88,7 +96,6 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
         this._options.maxSize / halfIconPixels,
       ]);
     } else {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', null);
     }
   }

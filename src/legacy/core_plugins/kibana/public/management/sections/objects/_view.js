@@ -28,9 +28,9 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from './lib/numeric';
 import { canViewInApp } from './lib/in_app_url';
+import { npStart } from 'ui/new_platform';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
@@ -46,22 +46,14 @@ uiRoutes.when('/management/kibana/objects/:service/:id', {
 
 uiModules
   .get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function(kbnIndex, confirmModal) {
+  .directive('kbnManagementObjectsView', function() {
     return {
       restrict: 'E',
-      controller: function(
-        $scope,
-        $injector,
-        $routeParams,
-        $location,
-        $window,
-        $rootScope,
-        Private,
-        uiCapabilities
-      ) {
+      controller: function($scope, $routeParams, $location, $window, $rootScope, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-        const service = $injector.get(serviceObj.service);
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        const service = serviceObj.service;
+        const savedObjectsClient = npStart.core.savedObjects.client;
+        const { overlays } = npStart.core;
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function
@@ -177,12 +169,15 @@ uiModules
             // sorts twice since we want numerical sort to prioritize over name,
             // and sortBy will do string comparison if trying to match against strings
             const nameSortedFields = _.sortBy(fields, 'name');
-            $scope.fields = _.sortBy(nameSortedFields, field => {
-              const orderIndex = service.Class.fieldOrder
-                ? service.Class.fieldOrder.indexOf(field.name)
-                : -1;
-              return orderIndex > -1 ? orderIndex : Infinity;
+            $scope.$evalAsync(() => {
+              $scope.fields = _.sortBy(nameSortedFields, field => {
+                const orderIndex = service.Class.fieldOrder
+                  ? service.Class.fieldOrder.indexOf(field.name)
+                  : -1;
+                return orderIndex > -1 ? orderIndex : Infinity;
+              });
             });
+            $scope.$digest();
           })
           .catch(error => fatalError(error, location));
 
@@ -239,7 +234,6 @@ uiModules
               .catch(error => fatalError(error, location));
           }
           const confirmModalOptions = {
-            onConfirm: doDelete,
             confirmButtonText: i18n.translate(
               'kbn.management.objects.confirmModalOptions.deleteButtonLabel',
               {
@@ -250,12 +244,19 @@ uiModules
               defaultMessage: 'Delete saved Kibana object?',
             }),
           };
-          confirmModal(
-            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
-              defaultMessage: "You can't recover deleted objects",
-            }),
-            confirmModalOptions
-          );
+
+          overlays
+            .openConfirm(
+              i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+                defaultMessage: "You can't recover deleted objects",
+              }),
+              confirmModalOptions
+            )
+            .then(isConfirmed => {
+              if (isConfirmed) {
+                doDelete();
+              }
+            });
         };
 
         $scope.submit = function() {

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutActionClientDecoration,
-  createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { omit } from 'lodash/fp';
 
 import { ServerInjectOptions } from 'hapi';
 import {
@@ -22,70 +17,75 @@ import {
   getDeleteAsPostBulkRequestById,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
+import { createMockServer, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('delete_rules', () => {
-  let { server, alertsClient, savedObjectsClient } = createMockServer();
+  let server = createMockServer();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
-    ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    deleteRulesBulkRoute(server);
-  });
-
-  afterEach(() => {
     jest.resetAllMocks();
+
+    server = createMockServer();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+
+    getClients.mockResolvedValue(clients);
+    deleteRulesBulkRoute(server.route, getClients);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteAsPostBulkRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteBulkRequestById());
       expect(statusCode).toBe(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id using POST', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteAsPostBulkRequestById());
       expect(statusCode).toBe(200);
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      savedObjectsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.savedObjectsClient.delete.mockResolvedValue({});
       const { payload } = await server.inject(getDeleteBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
@@ -97,35 +97,20 @@ describe('delete_rules', () => {
       expect(parsed).toEqual(expected);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteRulesBulkRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteBulkRequest());
+      getClients.mockResolvedValue(omit('alertsClient', clients));
+      const { route, inject } = createMockServer();
+      deleteRulesBulkRoute(route, getClients);
+      const { statusCode } = await inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
     test('returns 400 if given a non-existent id in the payload', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
         method: 'DELETE',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,

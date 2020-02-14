@@ -46,9 +46,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      urlStateStorage.flush();
+      expect(urlStateStorage.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
+
+      expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -60,6 +62,19 @@ describe('KbnUrlStateStorage', () => {
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
       expect(urlStateStorage.get(key)).toEqual(null);
+    });
+
+    it('should cancel url updates if synchronously returned to the same state', async () => {
+      const state1 = { test: 'test', ok: 1 };
+      const state2 = { test: 'test', ok: 2 };
+      const key = '_s';
+      const pr1 = urlStateStorage.set(key, state1);
+      await pr1;
+      const historyLength = history.length;
+      const pr2 = urlStateStorage.set(key, state2);
+      const pr3 = urlStateStorage.set(key, state1);
+      await Promise.all([pr2, pr3]);
+      expect(history.length).toBe(historyLength);
     });
 
     it('should notify about url changes', async () => {

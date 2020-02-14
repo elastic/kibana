@@ -61,7 +61,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -104,12 +104,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -174,7 +176,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -217,12 +219,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 

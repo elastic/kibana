@@ -5,4 +5,4 @@
  */
 
 export { ResultsLoader, Results, ModelItem, Anomaly } from './results_loader';
-export { CategorizationExamplesLoader, CategoryExample } from './categorization_examples_loader';
+export { CategorizationExamplesLoader } from './categorization_examples_loader';

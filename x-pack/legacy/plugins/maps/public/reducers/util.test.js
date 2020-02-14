@@ -6,7 +6,7 @@
 
 import { copyPersistentState } from './util';
 
-describe('store/util', () => {
+describe('reducers/util', () => {
   describe('copyPersistentState', () => {
     it('should ignore state preceded by double underscores', async () => {
       const copy = copyPersistentState({

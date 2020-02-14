@@ -7,7 +7,15 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
-import { EuiButton, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContentHeader,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { importerFactory } from './importer';
@@ -207,7 +215,7 @@ export class ImportView extends Component {
                 if (success) {
                   const importer = importerFactory(format, results, indexCreationSettings);
                   if (importer !== undefined) {
-                    const readResp = await importer.read(fileContents, this.setReadProgress);
+                    const readResp = importer.read(fileContents, this.setReadProgress);
                     success = readResp.success;
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
@@ -433,113 +441,121 @@ export class ImportView extends Component {
       initialized === true;
 
     return (
-      <React.Fragment>
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.importView.importDataTitle"
-                defaultMessage="Import data"
-              />
-              &nbsp;
-              <ExperimentalBadge
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureTooltip"
-                    defaultMessage="Experimental feature. We'd love to hear your feedback."
-                  />
-                }
-              />
-            </h3>
-          </EuiTitle>
-
-          <ImportSettings
-            index={index}
-            indexPattern={indexPattern}
-            initialized={initialized}
-            onIndexChange={this.onIndexChange}
-            createIndexPattern={createIndexPattern}
-            onCreateIndexPatternChange={this.onCreateIndexPatternChange}
-            onIndexPatternChange={this.onIndexPatternChange}
-            indexSettingsString={indexSettingsString}
-            mappingsString={mappingsString}
-            pipelineString={pipelineString}
-            onIndexSettingsStringChange={this.onIndexSettingsStringChange}
-            onMappingsStringChange={this.onMappingsStringChange}
-            onPipelineStringChange={this.onPipelineStringChange}
-            indexNameError={indexNameError}
-            indexPatternNameError={indexPatternNameError}
-          />
-
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContentHeader>
+            <EuiTitle>
+              <h1>{this.props.fileName}</h1>
+            </EuiTitle>
+          </EuiPageContentHeader>
           <EuiSpacer size="m" />
+          <EuiPanel>
+            <EuiTitle size="s">
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.importView.importDataTitle"
+                  defaultMessage="Import data"
+                />
+                &nbsp;
+                <ExperimentalBadge
+                  tooltipContent={
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.importView.experimentalFeatureTooltip"
+                      defaultMessage="Experimental feature. We'd love to hear your feedback."
+                    />
+                  }
+                />
+              </h2>
+            </EuiTitle>
 
-          {(initialized === false || importing === true) && (
-            <EuiButton
-              isDisabled={disableImport}
-              onClick={this.clickImport}
-              isLoading={importing}
-              iconSide="right"
-              fill
-            >
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.importView.importButtonLabel"
-                defaultMessage="Import"
-              />
-            </EuiButton>
-          )}
+            <ImportSettings
+              index={index}
+              indexPattern={indexPattern}
+              initialized={initialized}
+              onIndexChange={this.onIndexChange}
+              createIndexPattern={createIndexPattern}
+              onCreateIndexPatternChange={this.onCreateIndexPatternChange}
+              onIndexPatternChange={this.onIndexPatternChange}
+              indexSettingsString={indexSettingsString}
+              mappingsString={mappingsString}
+              pipelineString={pipelineString}
+              onIndexSettingsStringChange={this.onIndexSettingsStringChange}
+              onMappingsStringChange={this.onMappingsStringChange}
+              onPipelineStringChange={this.onPipelineStringChange}
+              indexNameError={indexNameError}
+              indexPatternNameError={indexPatternNameError}
+            />
 
-          {initialized === true && importing === false && (
-            <EuiButton onClick={this.clickReset}>
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.importView.resetButtonLabel"
-                defaultMessage="Reset"
-              />
-            </EuiButton>
-          )}
-        </EuiPanel>
-
-        {initialized === true && (
-          <React.Fragment>
             <EuiSpacer size="m" />
 
-            <EuiPanel>
-              <ImportProgress statuses={statuses} />
+            {(initialized === false || importing === true) && (
+              <EuiButton
+                isDisabled={disableImport}
+                onClick={this.clickImport}
+                isLoading={importing}
+                iconSide="right"
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.importView.importButtonLabel"
+                  defaultMessage="Import"
+                />
+              </EuiButton>
+            )}
 
-              {imported === true && (
-                <React.Fragment>
-                  <EuiSpacer size="m" />
+            {initialized === true && importing === false && (
+              <EuiButton onClick={this.clickReset}>
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.importView.resetButtonLabel"
+                  defaultMessage="Reset"
+                />
+              </EuiButton>
+            )}
+          </EuiPanel>
 
-                  <ImportSummary
-                    index={index}
-                    indexPattern={indexPattern === '' ? index : indexPattern}
-                    ingestPipelineId={ingestPipelineId}
-                    docCount={docCount}
-                    importFailures={importFailures}
-                    createIndexPattern={createIndexPattern}
-                    createPipeline={createPipeline}
-                  />
+          {initialized === true && (
+            <React.Fragment>
+              <EuiSpacer size="m" />
 
-                  <EuiSpacer size="l" />
+              <EuiPanel>
+                <ImportProgress statuses={statuses} />
 
-                  <ResultsLinks
-                    index={index}
-                    indexPatternId={indexPatternId}
-                    timeFieldName={timeFieldName}
-                    createIndexPattern={createIndexPattern}
-                  />
-                </React.Fragment>
-              )}
-            </EuiPanel>
-          </React.Fragment>
-        )}
-        {errors.length > 0 && (
-          <React.Fragment>
-            <EuiSpacer size="m" />
+                {imported === true && (
+                  <React.Fragment>
+                    <EuiSpacer size="m" />
 
-            <ImportErrors errors={errors} statuses={statuses} />
-          </React.Fragment>
-        )}
-      </React.Fragment>
+                    <ImportSummary
+                      index={index}
+                      indexPattern={indexPattern === '' ? index : indexPattern}
+                      ingestPipelineId={ingestPipelineId}
+                      docCount={docCount}
+                      importFailures={importFailures}
+                      createIndexPattern={createIndexPattern}
+                      createPipeline={createPipeline}
+                    />
+
+                    <EuiSpacer size="l" />
+
+                    <ResultsLinks
+                      index={index}
+                      indexPatternId={indexPatternId}
+                      timeFieldName={timeFieldName}
+                      createIndexPattern={createIndexPattern}
+                    />
+                  </React.Fragment>
+                )}
+              </EuiPanel>
+            </React.Fragment>
+          )}
+          {errors.length > 0 && (
+            <React.Fragment>
+              <EuiSpacer size="m" />
+
+              <ImportErrors errors={errors} statuses={statuses} />
+            </React.Fragment>
+          )}
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

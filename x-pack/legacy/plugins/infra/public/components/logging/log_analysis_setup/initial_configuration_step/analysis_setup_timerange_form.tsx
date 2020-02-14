@@ -5,8 +5,6 @@
  */
 
 import {
-  EuiDatePicker,
-  EuiDatePickerProps,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFormControlLayout,
@@ -16,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useMemo } from 'react';
-
-import { euiStyled } from '../../../../../../../common/eui_styled_components';
+import { FixedDatePicker } from '../../../fixed_datepicker';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -62,7 +59,6 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   }, [endTime]);
   return (
     <EuiDescribedFormGroup
-      idAria="timeRange"
       title={
         <h3>
           <FormattedMessage
@@ -78,13 +74,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow
-        describedByIds={['timeRange']}
-        error={false}
-        fullWidth
-        isInvalid={false}
-        label={startTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={startTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
@@ -101,13 +91,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow
-        describedByIds={['timeRange']}
-        error={false}
-        fullWidth
-        isInvalid={false}
-        label={endTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={endTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
@@ -138,18 +122,3 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     </EuiDescribedFormGroup>
   );
 };
-
-const FixedDatePicker = euiStyled(
-  ({
-    className,
-    inputClassName,
-    ...datePickerProps
-  }: {
-    className?: string;
-    inputClassName?: string;
-  } & EuiDatePickerProps) => (
-    <EuiDatePicker {...datePickerProps} className={inputClassName} popperClassName={className} />
-  )
-)`
-  z-index: 3 !important;
-`;

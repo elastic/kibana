@@ -18,12 +18,12 @@
  */
 
 import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
-import { IUiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
+import { UiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
-import { IAction } from '../actions';
+import { Action } from '../actions';
 
-let action: IAction<{ name: string }>;
-let uiActions: IUiActionsTestPluginReturn;
+let action: Action<{ name: string }>;
+let uiActions: UiActionsTestPluginReturn;
 beforeEach(() => {
   uiActions = uiActionsTestPlugin();
   action = createSayHelloAction({} as any);

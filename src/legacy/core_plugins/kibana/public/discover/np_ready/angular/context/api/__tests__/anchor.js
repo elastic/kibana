@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
@@ -32,12 +32,6 @@ describe('context app', function() {
   describe('function fetchAnchor', function() {
     let fetchAnchor;
     let searchSourceStub;
-
-    beforeEach(
-      ngMock.module(function createServiceStubs($provide) {
-        $provide.value('indexPatterns', createIndexPatternsStub());
-      })
-    );
 
     beforeEach(
       ngMock.inject(function createPrivateStubs() {

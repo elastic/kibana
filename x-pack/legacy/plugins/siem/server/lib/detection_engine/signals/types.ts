@@ -6,7 +6,7 @@
 
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { RequestFacade } from '../../../types';
+import { LegacyRequest } from '../../../types';
 import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server/types';
 
 export interface SignalsParams {
@@ -35,11 +35,11 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 
 export type SignalsQueryRestParams = SignalQueryParams;
 
-export interface SignalsStatusRequest extends RequestFacade {
+export interface SignalsStatusRequest extends LegacyRequest {
   payload: SignalsStatusRestParams;
 }
 
-export interface SignalsQueryRequest extends RequestFacade {
+export interface SignalsQueryRequest extends LegacyRequest {
   payload: SignalsQueryRestParams;
 }
 
@@ -51,11 +51,16 @@ export type SearchTypes =
   | boolean
   | boolean[]
   | object
-  | object[];
+  | object[]
+  | undefined;
 
 export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
+  signal?: {
+    parent: Ancestor;
+    ancestors: Ancestor[];
+  };
 }
 
 export interface BulkResponse {
@@ -123,14 +128,18 @@ export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
+export interface Ancestor {
+  rule: string;
+  id: string;
+  type: string;
+  index: string;
+  depth: number;
+}
+
 export interface Signal {
   rule: Partial<OutputRuleAlertRest>;
-  parent: {
-    id: string;
-    type: string;
-    index: string;
-    depth: number;
-  };
+  parent: Ancestor;
+  ancestors: Ancestor[];
   original_time: string;
   original_event?: SearchTypes;
   status: 'open' | 'closed';

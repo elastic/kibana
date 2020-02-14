@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { unmountComponentAtNode } from 'react-dom';
-
 import { i18n } from '@kbn/i18n';
-
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
-
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH } from './app/constants';
 import { renderReact } from './app/app';
@@ -19,6 +15,7 @@ import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
+import { createSavedSearchesLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/saved_searches';
 
 const REACT_ROOT_ID = 'transformReactRoot';
 const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
@@ -36,12 +33,13 @@ export class Plugin {
       docTitle,
       uiSettings,
       savedObjects,
+      overlays,
     } = core;
     const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const AppDependencies = {
-      core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects },
+      core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects, overlays },
       plugins: {
         management: { sections: management.sections },
         savedSearches: coreSavedSearches,
@@ -77,12 +75,13 @@ export class Plugin {
     routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
       controllerAs: 'transformController',
-      controller: (
-        $scope: any,
-        $route: any,
-        $http: ng.IHttpService,
-        savedSearches: SavedSearchLoader
-      ) => {
+      controller: ($scope: any, $route: any, $http: ng.IHttpService) => {
+        const savedSearches = createSavedSearchesLoader({
+          savedObjectsClient: core.savedObjects.client,
+          indexPatterns: plugins.data.indexPatterns,
+          chrome: core.chrome,
+          overlays: core.overlays,
+        });
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
         legacyHttp.setClient($http);

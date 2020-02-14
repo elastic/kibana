@@ -19,13 +19,14 @@ import { MlNetworkConditionalContainer } from '../../components/ml/conditional_l
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { UseUrlState } from '../../components/url_state';
-import { WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NotFoundPage } from '../404';
 import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Case } from '../case';
 import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
@@ -41,6 +42,11 @@ const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
+const Main = styled.main`
+  height: 100%;
+`;
+Main.displayName = 'Main';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
@@ -61,30 +67,34 @@ export const HomePage: React.FC = () => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
         <HeaderGlobal />
 
-        <main data-test-subj="pageContainer">
+        <Main data-test-subj="pageContainer">
           <WithSource sourceId="default">
-            {({ browserFields, indexPattern }) => (
+            {({ browserFields, indexPattern, indicesExist }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-                <AutoSaveWarningMsg />
-                <Flyout
-                  flyoutHeight={calculateFlyoutHeight({
-                    globalHeaderSize: globalHeaderHeightPx,
-                    windowHeight,
-                  })}
-                  headerHeight={flyoutHeaderHeight}
-                  timelineId="timeline-1"
-                  usersViewing={usersViewing}
-                >
-                  <StatefulTimeline
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    flyoutHeight={calculateFlyoutHeight({
-                      globalHeaderSize: globalHeaderHeightPx,
-                      windowHeight,
-                    })}
-                    id="timeline-1"
-                  />
-                </Flyout>
+                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                  <>
+                    <AutoSaveWarningMsg />
+                    <Flyout
+                      flyoutHeight={calculateFlyoutHeight({
+                        globalHeaderSize: globalHeaderHeightPx,
+                        windowHeight,
+                      })}
+                      headerHeight={flyoutHeaderHeight}
+                      timelineId="timeline-1"
+                      usersViewing={usersViewing}
+                    >
+                      <StatefulTimeline
+                        flyoutHeaderHeight={flyoutHeaderHeight}
+                        flyoutHeight={calculateFlyoutHeight({
+                          globalHeaderSize: globalHeaderHeightPx,
+                          windowHeight,
+                        })}
+                        id="timeline-1"
+                      />
+                    </Flyout>
+                  </>
+                )}
 
                 <Switch>
                   <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
@@ -127,12 +137,15 @@ export const HomePage: React.FC = () => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
+                  <Route path={`/:pageName(${SiemPageName.case})`}>
+                    <Case />
+                  </Route>
                   <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>
             )}
           </WithSource>
-        </main>
+        </Main>
 
         <HelpMenu />
 

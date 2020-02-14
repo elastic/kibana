@@ -22,7 +22,7 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { SelectOption, SwitchOption } from '../../common';
 import { BasicVislibParams, ValueAxis } from '../../../types';
 
@@ -42,7 +42,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
         value: id,
       })),
       {
-        text: i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.dontShowLabel', {
+        text: i18n.translate('visTypeVislib.controls.pointSeries.gridAxis.dontShowLabel', {
           defaultMessage: "Don't show",
         }),
         value: '',
@@ -62,7 +62,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText"
+            id="visTypeVislib.controls.pointSeries.gridAxis.gridText"
             defaultMessage="Grid"
           />
         </h3>
@@ -72,14 +72,14 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
 
       <SwitchOption
         disabled={hasHistogramAgg}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.gridAxis.xAxisLinesLabel', {
           defaultMessage: 'Show X-axis lines',
         })}
         paramName="categoryLines"
         tooltip={
           hasHistogramAgg
             ? i18n.translate(
-                'kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesDisabledTooltip',
+                'visTypeVislib.controls.pointSeries.gridAxis.yAxisLinesDisabledTooltip',
                 {
                   defaultMessage: "X-axis lines can't show for histograms.",
                 }
@@ -93,7 +93,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
 
       <SelectOption
         id="gridAxis"
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.gridAxis.yAxisLinesLabel', {
           defaultMessage: 'Y-axis lines',
         })}
         options={options}

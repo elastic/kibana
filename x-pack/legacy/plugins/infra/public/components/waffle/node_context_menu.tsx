@@ -4,26 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  EuiPopoverProps,
-} from '@elastic/eui';
+import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
-import { findInventoryModel } from '../../../common/inventory_models';
+import { findInventoryModel, findInventoryFields } from '../../../common/inventory_models';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import {
+  Section,
+  SectionLinkProps,
+  ActionMenu,
+  SectionTitle,
+  SectionSubtitle,
+  SectionLinks,
+  SectionLink,
+} from '../../../../../../plugins/observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;
   currentTime: number;
-  children: any;
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
   isPopoverOpen: boolean;
@@ -31,7 +35,7 @@ interface Props {
   popoverPosition: EuiPopoverProps['anchorPosition'];
 }
 
-export const NodeContextMenu = ({
+export const NodeContextMenu: React.FC<Props> = ({
   options,
   currentTime,
   children,
@@ -40,54 +44,15 @@ export const NodeContextMenu = ({
   closePopover,
   nodeType,
   popoverPosition,
-}: Props) => {
+}) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const inventoryModel = findInventoryModel(nodeType);
+  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   // Due to the changing nature of the fields between APM and this UI,
   // We need to have some exceptions until 7.0 & ECS is finalized. Reference
   // #26620 for the details for these fields.
   // TODO: This is tech debt, remove it after 7.0 & ECS migration.
   const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
-
-  const nodeLogsMenuItem = {
-    name: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
-      defaultMessage: 'View logs',
-    }),
-    href: getNodeLogsUrl({
-      nodeType,
-      nodeId: node.id,
-      time: currentTime,
-    }),
-    'data-test-subj': 'viewLogsContextMenuItem',
-  };
-
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-  const nodeDetailMenuItem = {
-    name: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
-      defaultMessage: 'View metrics',
-    }),
-    href: getNodeDetailUrl({
-      nodeType,
-      nodeId: node.id,
-      from: nodeDetailFrom,
-      to: currentTime,
-    }),
-  };
-
-  const apmTracesMenuItem = {
-    name: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
-      defaultMessage: 'View APM traces',
-    }),
-    href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
-    'data-test-subj': 'viewApmTracesContextMenuItem',
-  };
-
-  const uptimeMenuItem = {
-    name: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
-      defaultMessage: 'View in Uptime',
-    }),
-    href: createUptimeLink(options, nodeType, node),
-  };
 
   const showDetail = inventoryModel.crosslinkSupport.details;
   const showLogsLink =
@@ -97,29 +62,124 @@ export const NodeContextMenu = ({
   const showUptimeLink =
     inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
 
-  const items = [
-    ...(showLogsLink ? [nodeLogsMenuItem] : []),
-    ...(showDetail ? [nodeDetailMenuItem] : []),
-    ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
-    ...(showUptimeLink ? [uptimeMenuItem] : []),
-  ];
-  const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, title: '', items }];
+  const inventoryId = useMemo(() => {
+    if (nodeType === 'host') {
+      if (node.ip) {
+        return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+      }
+    } else {
+      if (options.fields) {
+        const { id } = findInventoryFields(nodeType, options.fields);
+        return {
+          label: <EuiCode>{id}</EuiCode>,
+          value: node.id,
+        };
+      }
+    }
+    return { label: '', value: '' };
+  }, [nodeType, node.ip, node.id, options.fields]);
 
-  // If there is nothing to show then we need to return the child as is
-  if (items.length === 0) {
-    return <>{children}</>;
-  }
+  const nodeLogsMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
+      defaultMessage: '{inventoryName} logs',
+      values: { inventoryName: inventoryModel.singularDisplayName },
+    }),
+    href: getNodeLogsUrl({
+      nodeType,
+      nodeId: node.id,
+      time: currentTime,
+    }),
+    'data-test-subj': 'viewLogsContextMenuItem',
+    isDisabled: !showLogsLink,
+  };
+
+  const nodeDetailMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
+      defaultMessage: '{inventoryName} metrics',
+      values: { inventoryName: inventoryModel.singularDisplayName },
+    }),
+    href: getNodeDetailUrl({
+      nodeType,
+      nodeId: node.id,
+      from: nodeDetailFrom,
+      to: currentTime,
+    }),
+    isDisabled: !showDetail,
+  };
+
+  const apmTracesMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
+      defaultMessage: '{inventoryName} APM traces',
+      values: { inventoryName: inventoryModel.singularDisplayName },
+    }),
+    href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
+    'data-test-subj': 'viewApmTracesContextMenuItem',
+    isDisabled: !showAPMTraceLink,
+  };
+
+  const uptimeMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
+      defaultMessage: '{inventoryName} in Uptime',
+      values: { inventoryName: inventoryModel.singularDisplayName },
+    }),
+    href: createUptimeLink(options, nodeType, node),
+    isDisabled: !showUptimeLink,
+  };
 
   return (
-    <EuiPopover
+    <ActionMenu
       closePopover={closePopover}
       id={`${node.pathId}-popover`}
       isOpen={isPopoverOpen}
-      button={children}
-      panelPaddingSize="none"
+      button={children!}
       anchorPosition={popoverPosition}
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="nodeContextMenu" />
-    </EuiPopover>
+      <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
+        <Section>
+          <SectionTitle>
+            <FormattedMessage
+              id="xpack.infra.nodeContextMenu.title"
+              defaultMessage="{inventoryName} details"
+              values={{ inventoryName: inventoryModel.singularDisplayName }}
+            />
+          </SectionTitle>
+          {inventoryId.label && (
+            <SectionSubtitle>
+              <div style={{ wordBreak: 'break-all' }}>
+                <FormattedMessage
+                  id="xpack.infra.nodeContextMenu.description"
+                  defaultMessage="View details for {label} {value}"
+                  values={{ label: inventoryId.label, value: inventoryId.value }}
+                />
+              </div>
+            </SectionSubtitle>
+          )}
+          <SectionLinks>
+            <SectionLink
+              data-test-subj="viewLogsContextMenuItem"
+              label={nodeLogsMenuItem.label}
+              href={nodeLogsMenuItem.href}
+              isDisabled={nodeLogsMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={nodeDetailMenuItem.label}
+              href={nodeDetailMenuItem.href}
+              isDisabled={nodeDetailMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={apmTracesMenuItem.label}
+              href={apmTracesMenuItem.href}
+              data-test-subj="viewApmTracesContextMenuItem"
+              isDisabled={apmTracesMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={uptimeMenuItem.label}
+              href={uptimeMenuItem.href}
+              isDisabled={uptimeMenuItem.isDisabled}
+            />
+          </SectionLinks>
+        </Section>
+      </div>
+    </ActionMenu>
   );
 };

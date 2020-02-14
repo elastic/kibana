@@ -19,6 +19,19 @@ export interface DataTypeDefinition {
   description?: () => ReactNode;
 }
 
+export interface ParameterDefinition {
+  title?: string;
+  description?: JSX.Element | string;
+  fieldConfig: FieldConfig;
+  schema?: any;
+  props?: { [key: string]: ParameterDefinition };
+  documentation?: {
+    main: string;
+    [key: string]: string;
+  };
+  [key: string]: any;
+}
+
 export type MainType =
   | 'text'
   | 'keyword'
@@ -88,6 +101,8 @@ export type ParameterName =
   | 'null_value_ip'
   | 'copy_to'
   | 'dynamic'
+  | 'dynamic_toggle'
+  | 'dynamic_strict'
   | 'enabled'
   | 'boost'
   | 'locale'
@@ -99,6 +114,7 @@ export type ParameterName =
   | 'index_options_flattened'
   | 'index_options_keyword'
   | 'eager_global_ordinals'
+  | 'eager_global_ordinals_join'
   | 'index_prefixes'
   | 'index_phrases'
   | 'norms'
@@ -119,7 +135,9 @@ export type ParameterName =
   | 'points_only'
   | 'path'
   | 'dims'
-  | 'depth_limit';
+  | 'depth_limit'
+  | 'relations'
+  | 'max_shingle_size';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -141,10 +159,10 @@ interface FieldBasic {
 }
 
 type FieldParams = {
-  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
+  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'] | unknown;
 };
 
-export type Field = FieldBasic & FieldParams;
+export type Field = FieldBasic & Partial<FieldParams>;
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
@@ -268,4 +286,8 @@ export interface SearchMetadata {
    * The field path substring that matches the search
    */
   stringMatch: string | null;
+}
+
+export interface GenericObject {
+  [key: string]: any;
 }

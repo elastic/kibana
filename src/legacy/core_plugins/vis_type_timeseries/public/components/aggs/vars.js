@@ -19,14 +19,17 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import uuid from 'uuid';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
 
-class CalculationVarsUi extends Component {
+export const newVariable = opts => ({ id: uuid.v1(), name: '', field: '', ...opts });
+
+export class CalculationVars extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -42,21 +45,19 @@ class CalculationVarsUi extends Component {
   }
 
   renderRow(row, i, items) {
-    const handleAdd = collectionActions.handleAdd.bind(null, this.props);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newVariable);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
-    const { intl } = this.props;
+
     return (
       <EuiFlexItem key={row.id} data-test-subj="varRow">
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
               className="tvbAggs__varName"
-              aria-label={intl.formatMessage({
-                id: 'visTypeTimeseries.vars.variableNameAriaLabel',
+              aria-label={i18n.translate('visTypeTimeseries.vars.variableNameAriaLabel', {
                 defaultMessage: 'Variable name',
               })}
-              placeholder={intl.formatMessage({
-                id: 'visTypeTimeseries.vars.variableNamePlaceholder',
+              placeholder={i18n.translate('visTypeTimeseries.vars.variableNamePlaceholder', {
                 defaultMessage: 'Variable name',
               })}
               onChange={this.handleChange(row, 'name')}
@@ -97,17 +98,15 @@ class CalculationVarsUi extends Component {
   }
 }
 
-CalculationVarsUi.defaultProps = {
+CalculationVars.defaultProps = {
   name: 'variables',
   includeSiblings: false,
 };
 
-CalculationVarsUi.propTypes = {
+CalculationVars.propTypes = {
   metrics: PropTypes.array,
   model: PropTypes.object,
   name: PropTypes.string,
   onChange: PropTypes.func,
   includeSiblings: PropTypes.bool,
 };
-
-export const CalculationVars = injectI18n(CalculationVarsUi);

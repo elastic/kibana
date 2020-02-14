@@ -5,13 +5,14 @@
  */
 
 import * as sinon from 'sinon';
-import { ServerFacade, HeadlessChromiumDriverFactory } from '../../types';
-import { ExportTypesRegistry } from './export_types_registry';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { HeadlessChromiumDriverFactory, ServerFacade } from '../../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
 import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
+import { ExportTypesRegistry } from './export_types_registry';
 
 const configGetStub = sinon.stub();
 configGetStub.withArgs('xpack.reporting.queue').returns({
@@ -25,10 +26,11 @@ const executeJobFactoryStub = sinon.stub();
 
 const getMockServer = (): ServerFacade => {
   return ({
-    log: sinon.stub(),
     config: () => ({ get: configGetStub }),
   } as unknown) as ServerFacade;
 };
+const getMockLogger = jest.fn();
+
 const getMockExportTypesRegistry = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
 ) => ({
@@ -47,10 +49,15 @@ describe('Create Worker', () => {
 
   test('Creates a single Esqueue worker for Reporting', async () => {
     const exportTypesRegistry = getMockExportTypesRegistry();
-    const createWorker = createWorkerFactory(getMockServer(), {
-      exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
-      browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-    });
+    const createWorker = createWorkerFactory(
+      getMockServer(),
+      {} as ElasticsearchServiceSetup,
+      getMockLogger(),
+      {
+        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      }
+    );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     createWorker(queue);
@@ -81,10 +88,15 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
       { executeJobFactory: executeJobFactoryStub },
     ]);
-    const createWorker = createWorkerFactory(getMockServer(), {
-      exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
-      browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-    });
+    const createWorker = createWorkerFactory(
+      getMockServer(),
+      {} as ElasticsearchServiceSetup,
+      getMockLogger(),
+      {
+        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      }
+    );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     createWorker(queue);

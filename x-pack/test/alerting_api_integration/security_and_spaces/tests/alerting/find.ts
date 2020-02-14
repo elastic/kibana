@@ -158,7 +158,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 createdBy: 'elastic',
                 throttle: '1m',
                 updatedBy: 'elastic',
-                apiKeyOwner: 'elastic',
+                apiKeyOwner: null,
                 muteAll: false,
                 mutedInstanceIds: [],
                 createdAt: match.createdAt,

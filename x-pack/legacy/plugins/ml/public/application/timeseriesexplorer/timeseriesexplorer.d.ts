@@ -6,8 +6,6 @@
 
 import { FC } from 'react';
 
-import { Timefilter } from 'ui/timefilter';
-
 import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{
@@ -19,8 +17,7 @@ declare const TimeSeriesExplorer: FC<{
   selectedJobId: string;
   selectedDetectorIndex: number;
   selectedEntities: any[];
-  selectedForecastId: string;
-  setGlobalState: (arg: any) => void;
+  selectedForecastId?: string;
   tableInterval: string;
   tableSeverity: number;
   zoom?: { from: string; to: string };

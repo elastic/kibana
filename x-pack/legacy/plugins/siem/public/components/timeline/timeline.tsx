@@ -13,7 +13,7 @@ import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { KqlMode } from '../../store/timeline/model';
+import { KqlMode, EventType } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -35,7 +35,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery, esFilters, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -60,7 +60,8 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
-  filters: esFilters.Filter[];
+  eventType: EventType;
+  filters: Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -92,6 +93,7 @@ export const TimelineComponent = ({
   columns,
   dataProviders,
   end,
+  eventType,
   filters,
   flyoutHeaderHeight,
   flyoutHeight,
@@ -159,6 +161,7 @@ export const TimelineComponent = ({
           <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
           {combinedQueries != null ? (
             <TimelineQuery
+              eventType={eventType}
               id={id}
               indexToAdd={indexToAdd}
               fields={columnsHeader.map(c => c.id)}

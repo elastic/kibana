@@ -6,11 +6,13 @@
 
 import Joi from 'joi';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
-// @ts-ignore
+import { Logger, ServerFacade } from '../../../types';
+import { ReportingSetupDeps } from '../../plugin';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
-// @ts-ignore
-import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
+import {
+  GetReportingFeatureIdFn,
+  reportingFeaturePreRoutingFactory,
+} from './reporting_feature_pre_routing';
 
 const API_TAG = 'api';
 
@@ -22,19 +24,20 @@ export interface RouteConfigFactory {
   };
 }
 
-type GetFeatureFunction = (request: RequestFacade) => any;
-type PreRoutingFunction = (getFeatureId?: GetFeatureFunction) => any;
-
 export type GetRouteConfigFactoryFn = (
-  getFeatureId?: GetFeatureFunction | undefined
+  getFeatureId?: GetReportingFeatureIdFn
 ) => RouteConfigFactory;
 
-export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting: PreRoutingFunction = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting: PreRoutingFunction = reportingFeaturePreRoutingFactory(server);
+export function getRouteConfigFactoryReportingPre(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, plugins, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, plugins, logger);
 
-  return (getFeatureId?: GetFeatureFunction): RouteConfigFactory => {
-    const preRouting = [{ method: authorizedUserPreRouting, assign: 'user' }];
+  return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
+    const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
     if (getFeatureId) {
       preRouting.push(reportingFeaturePreRouting(getFeatureId));
     }
@@ -46,8 +49,12 @@ export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRout
   };
 }
 
-export function getRouteOptionsCsv(server: ServerFacade) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+export function getRouteOptionsCsv(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+) {
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server, plugins, logger);
   return {
     ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
     validate: {
@@ -67,9 +74,13 @@ export function getRouteOptionsCsv(server: ServerFacade) {
   };
 }
 
-export function getRouteConfigFactoryManagementPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
+export function getRouteConfigFactoryManagementPre(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, plugins, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, plugins, logger);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
 
   return (): RouteConfigFactory => {
@@ -87,8 +98,12 @@ export function getRouteConfigFactoryManagementPre(server: ServerFacade): GetRou
 // TOC at the end of the PDF, but it's sending multiple cookies and causing our auth to fail with a 401.
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
-export function getRouteConfigFactoryDownloadPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server);
+export function getRouteConfigFactoryDownloadPre(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
     tags: [API_TAG],

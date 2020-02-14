@@ -27,7 +27,7 @@ export const LOADING = i18n.translate('xpack.siem.footer.loadingLabel', {
 });
 
 export const LOAD_MORE = i18n.translate('xpack.siem.footer.loadMoreLabel', {
-  defaultMessage: 'Load More',
+  defaultMessage: 'Load more',
 });
 
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.siem.footer.totalCountOfEvents', {

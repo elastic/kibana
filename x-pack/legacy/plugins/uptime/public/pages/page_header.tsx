@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { useRouteMatch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
-import { AppState } from '../state';
-import { selectSelectedMonitor } from '../state/selectors';
 import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { getTitle } from '../lib/helper/get_title';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { MONITOR_ROUTE } from '../routes';
+import { useUrlParams } from '../hooks';
+import { MONITOR_ROUTE } from '../../common/constants';
+import { Ping } from '../../common/graphql/types';
 
 interface PageHeaderProps {
-  monitorStatus?: any;
+  monitorStatus?: Ping;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -28,44 +27,44 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
     path: MONITOR_ROUTE,
   });
 
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useParams();
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
 
-  const headingText = i18n.translate('xpack.uptime.overviewPage.headerText', {
-    defaultMessage: 'Overview',
-    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-  });
+  const headingText = !monitorPage
+    ? i18n.translate('xpack.uptime.overviewPage.headerText', {
+        defaultMessage: 'Overview',
+        description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+      })
+    : monitorStatus?.url?.full;
 
   const [headerText, setHeaderText] = useState(headingText);
 
   useEffect(() => {
     if (monitorPage) {
-      setHeaderText(monitorStatus?.url?.full);
+      setHeaderText(monitorStatus?.url?.full ?? '');
       if (monitorStatus?.monitor) {
         const { name, id } = monitorStatus.monitor;
-        document.title = getTitle(name || id);
+        document.title = getTitle((name || id) ?? '');
       }
     } else {
+      setHeaderText(headingText);
       document.title = getTitle();
     }
-  }, [monitorStatus, monitorPage, setHeaderText]);
+  }, [monitorStatus, monitorPage, setHeaderText, headingText]);
 
   useEffect(() => {
     if (monitorPage) {
       if (headerText) {
-        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params)));
+        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params, true)));
       }
     } else {
       setBreadcrumbs(getOverviewPageBreadcrumbs());
     }
   }, [headerText, setBreadcrumbs, params, monitorPage]);
 
-  useEffect(() => {
-    document.title = getTitle();
-  }, []);
-
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <EuiTitle>
             <h1>{headerText}</h1>
@@ -79,9 +78,3 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
     </>
   );
 };
-
-const mapStateToProps = (state: AppState) => ({
-  monitorStatus: selectSelectedMonitor(state),
-});
-
-export const PageHeader = connect(mapStateToProps, null)(PageHeaderComponent);

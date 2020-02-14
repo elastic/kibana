@@ -10,6 +10,7 @@ import React, { memo, useState } from 'react';
 
 import {
   IIndexPattern,
+  Filter,
   esFilters,
   FilterManager,
   Query,
@@ -18,13 +19,13 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/searc
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
 import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../shared_imports';
+import { FormSchema } from '../../../../shared_imports';
 import { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
   buildStringArrayDescription,
-  buildThreatsDescription,
+  buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
 } from './helpers';
@@ -97,6 +98,16 @@ const buildListItems = (
     []
   );
 
+export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
+  return filters.map(filter => {
+    if (filter.$state == null) {
+      return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
+    } else {
+      return filter;
+    }
+  });
+};
+
 const getDescriptionItem = (
   field: string,
   label: string,
@@ -105,7 +116,7 @@ const getDescriptionItem = (
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = get('queryBar.filters', value) as esFilters.Filter[];
+    const filters = addFilterStateIfNotThere(get('queryBar.filters', value) ?? []);
     const query = get('queryBar.query', value) as Query;
     const savedId = get('queryBar.saved_id', value);
     return buildQueryBarDescription({
@@ -116,11 +127,11 @@ const getDescriptionItem = (
       savedId,
       indexPatterns,
     });
-  } else if (field === 'threats') {
-    const threats: IMitreEnterpriseAttack[] = get(field, value).filter(
-      (threat: IMitreEnterpriseAttack) => threat.tactic.name !== 'none'
+  } else if (field === 'threat') {
+    const threat: IMitreEnterpriseAttack[] = get(field, value).filter(
+      (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
-    return buildThreatsDescription({ label, threats });
+    return buildThreatDescription({ label, threat });
   } else if (field === 'description') {
     return [
       {

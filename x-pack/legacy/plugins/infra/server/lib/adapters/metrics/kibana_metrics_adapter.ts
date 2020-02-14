@@ -51,7 +51,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     const requests = options.metrics.map(metricId =>
-      this.makeTSVBRequest(metricId, options, nodeField, requestContext)
+      this.makeTSVBRequest(metricId, options, nodeField, requestContext, rawRequest)
     );
 
     return Promise.all(requests)
@@ -93,7 +93,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     metricId: InventoryMetric,
     options: InfraMetricsRequestOptions,
     nodeField: string,
-    requestContext: RequestHandlerContext
+    requestContext: RequestHandlerContext,
+    rawRequest: KibanaRequest
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
     if (!createTSVBModel) {
@@ -152,6 +153,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       ? [{ match: { [model.map_field_to]: id } }]
       : [{ match: { [nodeField]: id } }];
 
-    return this.framework.makeTSVBRequest(requestContext, model, timerange, filters);
+    return this.framework.makeTSVBRequest(requestContext, rawRequest, model, timerange, filters);
   }
 }

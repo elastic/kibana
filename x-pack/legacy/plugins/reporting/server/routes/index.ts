@@ -5,20 +5,22 @@
  */
 
 import {
-  ServerFacade,
   ExportTypesRegistry,
   HeadlessChromiumDriverFactory,
   Logger,
+  ServerFacade,
 } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 
 export function registerRoutes(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   exportTypesRegistry: ExportTypesRegistry,
   browserDriverFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) {
-  registerJobGenerationRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
-  registerJobInfoRoutes(server, exportTypesRegistry, logger);
+  registerJobGenerationRoutes(server, plugins, exportTypesRegistry, browserDriverFactory, logger);
+  registerJobInfoRoutes(server, plugins, exportTypesRegistry, logger);
 }

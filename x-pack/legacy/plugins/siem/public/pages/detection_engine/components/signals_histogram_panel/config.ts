@@ -9,6 +9,7 @@ import { SignalsHistogramOption } from './types';
 export const signalsHistogramOptions: SignalsHistogramOption[] = [
   { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
   { text: 'signal.rule.severity', value: 'signal.rule.severity' },
+  { text: 'signal.rule.threat.tactic.name', value: 'signal.rule.threat.tactic.name' },
   { text: 'destination.ip', value: 'destination.ip' },
   { text: 'event.action', value: 'event.action' },
   { text: 'event.category', value: 'event.category' },

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { inputsModel } from '../../../../store';
+
 export interface SignalsHistogramOption {
   text: string;
   value: string;
@@ -37,4 +39,11 @@ export interface SignalsGroupBucket {
 export interface SignalsTotal {
   value: number;
   relation: string;
+}
+
+export interface RegisterQuery {
+  id: string;
+  inspect: inputsModel.InspectQuery | null;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
 }

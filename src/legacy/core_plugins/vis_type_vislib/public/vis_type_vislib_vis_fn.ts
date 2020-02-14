@@ -18,17 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { KbnVislibVisTypesDependencies } from './plugin';
-
-const name = 'vislib';
-
-type Context = KibanaDatatable;
+// @ts-ignore
+import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
 interface Arguments {
   type: string;
@@ -42,17 +38,16 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
-export const createKbnVislibVisTypesFn = (
-  deps: KbnVislibVisTypesDependencies
-) => (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
+  'vislib',
+  KibanaDatatable,
+  Arguments,
+  Render<RenderValue>
+> => ({
   name: 'vislib',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
-  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
+  inputTypes: ['kibana_datatable'],
+  help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),
   args: {
@@ -67,11 +62,9 @@ export const createKbnVislibVisTypesFn = (
       help: '',
     },
   },
-  async fn(context, args) {
-    const responseHandler = deps.vislibSeriesResponseHandlerProvider().handler;
+  fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',

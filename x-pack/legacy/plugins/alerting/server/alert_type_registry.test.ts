@@ -118,13 +118,24 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'testActionGroup',
+          name: 'Test Action Group',
+        },
+      ],
       executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "actionGroups": Array [
+            Object {
+              "id": "testActionGroup",
+              "name": "Test Action Group",
+            },
+          ],
           "id": "test",
           "name": "Test",
         },
