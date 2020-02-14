@@ -24,7 +24,7 @@ export interface Clients {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export type GetScopedClients = (request: LegacyRequest) => Promise<Clients & LegacyClients>;
+export type GetScopedClients = (request: LegacyRequest) => Promise<Clients>;
 
 export class ClientsService {
   private actions?: StartPlugins['actions'];
