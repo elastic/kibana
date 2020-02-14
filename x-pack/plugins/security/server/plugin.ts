@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
 import {
   ICustomClusterClient,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
@@ -41,7 +40,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   serverConfig: { protocol: string; hostname: string; port: number };
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };

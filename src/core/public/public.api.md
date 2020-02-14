@@ -733,6 +733,8 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface IHttpFetchError extends Error {
     // (undocumented)
     readonly body?: any;
+    // (undocumented)
+    readonly name: string;
     // @deprecated (undocumented)
     readonly req: Request;
     // (undocumented)
