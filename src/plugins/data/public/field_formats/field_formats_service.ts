@@ -18,7 +18,8 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormatsRegistry } from '../../common/field_formats';
+import { DateFormat } from './converters/date';
+import { FieldFormatsRegistry, baseFormatters } from '../../common';
 
 export class FieldFormatsService {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
@@ -32,13 +33,17 @@ export class FieldFormatsService {
 
     const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-    this.fieldFormatsRegistry.init(getConfig, {
-      parsedUrl: {
-        origin: window.location.origin,
-        pathname: window.location.pathname,
-        basePath: core.http.basePath.get(),
+    this.fieldFormatsRegistry.init(
+      getConfig,
+      {
+        parsedUrl: {
+          origin: window.location.origin,
+          pathname: window.location.pathname,
+          basePath: core.http.basePath.get(),
+        },
       },
-    });
+      [DateFormat, ...baseFormatters]
+    );
 
     return this.fieldFormatsRegistry as FieldFormatsSetup;
   }

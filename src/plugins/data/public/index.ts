@@ -156,7 +156,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -169,6 +168,8 @@ import {
   StringFormat,
   TruncateFormat,
 } from '../common/field_formats';
+
+import { DateFormat } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
