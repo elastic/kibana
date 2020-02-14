@@ -8,15 +8,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { RequirementVersion } from '../../../types';
 
-// const CodeText = styled.span`
-//   font-family: ${props => props.theme.eui.euiCodeFontFamily};
-// `;
-// XXX restore once theme is available
-
 const CodeText = styled.span`
-  font-family: 'monospace';
+  font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
-
 export function Version({
   className,
   version,

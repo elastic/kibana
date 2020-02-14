@@ -29,24 +29,14 @@ import {
   ServiceIcons,
   ServiceTitleMap,
 } from '../constants';
-// import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
-  // const { theme } = useCore();
-  // const FirstHeaderRow = styled(EuiFlexGroup)`
-  //   padding: 0 0 ${theme.eui.paddingSizes.m} 0;
-  // `;
-  // XXX restore once theme is available
   const FirstHeaderRow = styled(EuiFlexGroup)`
-    padding: 0 0 0 0;
+    padding: 0 0 ${props => props.theme.eui.paddingSizes.m} 0;
   `;
 
-  // const HeaderRow = styled(EuiFlexGroup)`
-  //   padding: ${theme.eui.paddingSizes.m} 0;
-  // `;
-  // XXX restore once theme is available
   const HeaderRow = styled(EuiFlexGroup)`
-    padding: 0 0;
+    padding: ${props => props.theme.eui.paddingSizes.m} 0;
   `;
 
   const FacetGroup = styled(EuiFacetGroup)`
@@ -87,13 +77,8 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                 // only kibana assets have icons
                 const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
-                // const FacetButton = styled(EuiFacetButton)`
-                //   padding: '${theme.eui.paddingSizes.xs} 0';
-                //   height: 'unset';
-                // `;
-                // XXX restore once theme is available
                 const FacetButton = styled(EuiFacetButton)`
-                  padding: '0 0';
+                  padding: '${props => props.theme.eui.paddingSizes.xs} 0';
                   height: 'unset';
                 `;
                 return (

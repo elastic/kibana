@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 // import { useBreadcrumbs, useLinks } from '../../hooks';
-// import { useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
 import { Header } from './header';
 import { useAllPackages, useInstalledPackages, useLocalSearch } from './hooks';
@@ -23,10 +22,7 @@ export const FullBleedPage = styled(EuiPage)`
 
 export function Home() {
   const maxContentWidth = 1200;
-  // const { toListView } = useLinks();
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
-  // XXX
-  // useBreadcrumbs([{ text: 'PLUGIN.TITLE missing', href: toListView() }]);
 
   const state = useHomeState();
   const body = state.searchTerm ? (

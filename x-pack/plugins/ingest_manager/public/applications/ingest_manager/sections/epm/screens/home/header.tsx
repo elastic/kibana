@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
-// import { useCore, useLinks } from '../../hooks';
 import { useLinks } from '../../hooks';
 
 export type HeaderProps = Pick<EuiPageProps, 'restrictWidth'> & {
@@ -75,13 +74,8 @@ export function Header({ restrictWidth, onSearch }: HeaderProps) {
 }
 
 function HeroCopy() {
-  // XXX no theme on the fake core context
-  // const { theme } = useCore();
-  // const Subtitle = styled(EuiText)`
-  //   color: ${theme.eui.euiColorDarkShade};
-  // `;
   const Subtitle = styled(EuiText)`
-    color: red;
+    color: ${props => props.theme.eui.euiColorDarkShade};
   `;
 
   return (

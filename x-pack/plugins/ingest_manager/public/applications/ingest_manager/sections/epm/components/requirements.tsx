@@ -9,33 +9,23 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { RequirementsByServiceName, entries } from '../../../types';
 import { ServiceTitleMap } from '../constants';
-// import { useCore } from '../hooks/use_core';
 import { Version } from './version';
 
 export interface RequirementsProps {
   requirements: RequirementsByServiceName;
 }
 
+const FlexGroup = styled(EuiFlexGroup)`
+  padding: 0 0 ${props => props.theme.eui.paddingSizes.m} 0;
+  margin: 0;
+`;
+const StyledVersion = styled(Version)`
+  font-size: ${props => props.theme.eui.euiFontSizeXS};
+`;
+
 export function Requirements(props: RequirementsProps) {
   const { requirements } = props;
-  // const { theme } = useCore();
 
-  // const FlexGroup = styled(EuiFlexGroup)`
-  //   padding: 0 0 ${theme.eui.paddingSizes.m} 0;
-  //   margin: 0;
-  // `;
-  // XXX restore once theme is available
-  const FlexGroup = styled(EuiFlexGroup)`
-    padding: 0 0 0 0;
-    margin: 0;
-  `;
-  // const StyledVersion = styled(Version)`
-  //   font-size: ${theme.eui.euiFontSizeXS};
-  // `;
-  // XXX restore once theme is available
-  const StyledVersion = styled(Version)`
-    font-size: 1em;
-  `;
   return (
     <Fragment>
       <FlexGroup gutterSize="s" alignItems="center">

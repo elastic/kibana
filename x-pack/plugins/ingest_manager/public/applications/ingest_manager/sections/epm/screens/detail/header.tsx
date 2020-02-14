@@ -6,12 +6,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-// import { PLUGIN } from '../../../common/constants';
 import { PackageInfo } from '../../../../types';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';
-// import { useBreadcrumbs, useLinks } from '../../hooks';
+import { useLinks } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 
@@ -33,14 +32,13 @@ type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const { iconType, title, version } = props;
-  // XXX restore once hooks are available
-  // const { toListView } = useLinks();
+  const { toListView } = useLinks();
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
   return (
     <Fragment>
       <FullWidthNavRow>
-        <NavButtonBack href="broken_link" text="Browse Packages" />
+        <NavButtonBack href={toListView()} text="Browse Packages" />
       </FullWidthNavRow>
       <EuiFlexGroup>
         {iconType ? (
@@ -67,32 +65,3 @@ export function Header(props: HeaderProps) {
     </Fragment>
   );
 }
-
-// XXX restore once hooks are available
-/* <Fragment>
-      <FullWidthNavRow>
-        <NavButtonBack href={toListView()} text="Browse Packages" />
-      </FullWidthNavRow>
-      <EuiFlexGroup>
-        {iconType ? (
-          <LeftColumn>
-            <IconPanel iconType={iconType} />
-          </LeftColumn>
-        ) : null}
-        <CenterColumn>
-          <EuiTitle size="l">
-            <h1>
-              <Text>{title}</Text>
-              <StyledVersion version={version} />
-            </h1>
-          </EuiTitle>
-        </CenterColumn>
-        <RightColumn>
-          <EuiFlexGroup direction="column" alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <InstallationButton package={props} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </RightColumn>
-      </EuiFlexGroup>
-    </Fragment> */

@@ -34,7 +34,7 @@ export function Readme({
 
   useEffect(() => {
     sendGetFileByPath(readmePath).then(res => {
-      setMarkdown(res.data || undefined);
+      setMarkdown(res.data || '');
     });
   }, [readmePath]);
 

@@ -6,21 +6,10 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-// import { useCore } from '../hooks';
 
 export function NavButtonBack({ href, text }: { href: string; text: string }) {
-  // const { theme } = useCore();
-  // const ButtonEmpty = styled(EuiButtonEmpty)`
-  //   margin-right: ${theme.eui.spacerSizes.xl};
-  // `;
-  // return (
-  //   <ButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
-  //     {text}
-  //   </ButtonEmpty>
-  // );
-  // XXX restore when theme is available
   const ButtonEmpty = styled(EuiButtonEmpty)`
-    margin-right: 10;
+    margin-right: ${props => props.theme.eui.spacerSizes.xl};
   `;
   return (
     <ButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>

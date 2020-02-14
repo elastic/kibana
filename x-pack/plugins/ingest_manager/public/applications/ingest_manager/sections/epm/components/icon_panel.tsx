@@ -7,34 +7,18 @@
 import { EuiIcon, EuiPanel, IconType } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-// import { useCore } from '../hooks/use_core';
 
 export function IconPanel({ iconType }: { iconType: IconType }) {
-  // const { theme } = useCore();
-  // const Panel = styled(EuiPanel)`
-  //   /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-  //   &&& {
-  //     position: absolute;
-  //     text-align: center;
-  //     vertical-align: middle;
-  //     padding: ${theme.eui.spacerSizes.xl};
-  //     svg {
-  //       height: ${theme.eui.euiKeyPadMenuSize};
-  //       width: ${theme.eui.euiKeyPadMenuSize};
-  //     }
-  //   }
-  // `;
-  // XXX restore when theme is available
   const Panel = styled(EuiPanel)`
     /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
     &&& {
       position: absolute;
       text-align: center;
       vertical-align: middle;
-      padding: 0;
+      padding: ${props => props.theme.eui.spacerSizes.xl};
       svg {
-        height: 32;
-        width: 32};
+        height: ${props => props.theme.eui.euiKeyPadMenuSize};
+        width: ${props => props.theme.eui.euiKeyPadMenuSize};
       }
     }
   `;

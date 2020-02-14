@@ -51,37 +51,21 @@ export function Detail() {
   return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;
 }
 
+const FullWidthHeader = styled(EuiPage)`
+  border-bottom: ${props => props.theme.eui.euiBorderThin};
+  padding-bottom: ${props => props.theme.eui.paddingSizes.xl};
+`;
+
+const FullWidthContent = styled(EuiPage)`
+  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  padding-top: ${props => parseInt(props.theme.eui.paddingSizes.xl, 10) * 1.25}px;
+  flex-grow: 1;
+`;
+
 type LayoutProps = PackageInfo & Pick<DetailParams, 'panel'> & Pick<EuiPageProps, 'restrictWidth'>;
 export function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth } = props;
-  // const { theme } = useCore();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-
-  // const FullWidthHeader = styled(EuiPage)`
-  //   border-bottom: ${theme.eui.euiBorderThin};
-  //   padding-bottom: ${theme.eui.paddingSizes.xl};
-  // `;
-
-  // XXX restore once theme is available
-
-  const FullWidthHeader = styled(EuiPage)`
-    border-bottom: 0;
-    padding-bottom: 0;
-  `;
-
-  // const paddingSizeTop: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.25;
-  // const FullWidthContent = styled(EuiPage)`
-  //   background-color: ${theme.eui.euiColorEmptyShade};
-  //   padding-top: ${paddingSizeTop}px;
-  //   flex-grow: 1;
-  // `;
-
-  // XXX restore once theme is available
-  const FullWidthContent = styled(EuiPage)`
-    background-color: #ffcccc;
-    padding-top: 10px;
-    flex-grow: 1;
-  `;
 
   return (
     <Fragment>
