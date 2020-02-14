@@ -124,7 +124,7 @@ Design of user interface and server API for multiple action groups is on the sta
 
 There are two ways of registering a new alert type:
 
-1. Directly in `triggers_actions_ui` plugin. In this case alert type will be available in Create Alert flyout of the Alerts and Actions management section.
+1. Directly in the `triggers_actions_ui` plugin. In this case, the alert type will be available in the Create Alert flyout of the Alerts and Actions management section.
 Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 Only registered alert types are available in UI.
 
