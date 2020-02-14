@@ -1,12 +1,24 @@
 All files under the /resources directory
-Copyright 2019 LogRhythm, Inc
+Copyright 2020 LogRhythm, Inc
 Licensed under the LogRhythm Global End User License Agreement,
 which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
 ---
 package.json, tsconfig.json, yarn.lock
-THESE FILES HAVE BEEN MODIFIED FROM THE ORIGINAL SOURCE COMMIT OF e633644c43a0a0271e0b6c32c382ce1db6b413c3
-Copyright 2019 LogRhythm, Inc
+THESE FILES HAVE BEEN MODIFIED FROM THE ORIGINAL SOURCE COMMIT OF f421eec40b5a9f31383591e30bef86724afcd2b3
+Copyright 2020 LogRhythm, Inc
+Licensed under the LogRhythm Global End User License Agreement,
+which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+
+---
+All files under the /src/legacy/ui/public/styles/netmon directory
+Copyright 2020 LogRhythm, Inc
+Licensed under the LogRhythm Global End User License Agreement,
+which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+
+---
+All files added/modified after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
+Copyright 2020 LogRhythm, Inc
 Licensed under the LogRhythm Global End User License Agreement,
 which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
