@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 // THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL SOURCE
-// This comment only applies to modifications applied after the e633644c43a0a0271e0b6c32c382ce1db6b413c3 commit
-// Copyright 2019 LogRhythm, Inc
+// This comment only applies to modifications applied after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
+// Copyright 2020 LogRhythm, Inc
 // Licensed under the LogRhythm Global End User License Agreement,
 // which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -3760,7 +3760,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3850,7 +3850,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -4007,7 +4007,7 @@ exports[`Field for stringWithValidation setting should render default value if t
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -4097,7 +4097,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
