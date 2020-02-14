@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../__mocks__/_mock_server';
+import { ServerInjectOptions } from 'hapi';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import * as myUtils from '../utils';
-import { ServerInjectOptions } from 'hapi';
 
 import {
   getSetSignalStatusByIdsRequest,
@@ -16,19 +16,27 @@ import {
   typicalSetStatusSignalByQueryPayload,
   setStatusSignalMissingIdsAndQueryPayload,
 } from '../__mocks__/request_responses';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 
 describe('set signal status', () => {
-  let { server, elasticsearch } = createMockServer();
+  let server = createMockServer();
+  let config = createMockConfig();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ server, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn(() => ({
-      callWithRequest: jest.fn(() => true),
-    }));
-    setSignalsStatusRoute(server);
+
+    server = createMockServer();
+    config = createMockConfig();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+
+    getClients.mockResolvedValue(clients);
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true);
+
+    setSignalsStatusRoute(server.route, config, getClients);
   });
 
   describe('status on signal', () => {

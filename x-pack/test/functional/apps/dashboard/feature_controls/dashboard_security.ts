@@ -21,7 +21,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('dashboard security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/44631
+  describe.skip('dashboard security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -185,8 +186,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectExistsEditPanelAction();
       });
 
-      // https://github.com/elastic/kibana/issues/44631
-      it.skip('allow saving via the saved query management component popover with no query loaded', async () => {
+      it('allow saving via the saved query management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
       });
