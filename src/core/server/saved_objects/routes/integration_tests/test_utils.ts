@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ContextService } from '../../context';
-import { createHttpServer, createCoreContext } from '../../http/test_utils';
-import { coreMock } from '../../mocks';
+import { ContextService } from '../../../context';
+import { createHttpServer, createCoreContext } from '../../../http/test_utils';
+import { coreMock } from '../../../mocks';
 
 const coreId = Symbol('core');
 

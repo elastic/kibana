@@ -19,27 +19,35 @@
 
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { registerBulkGetRoute } from './bulk_get';
-import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { registerUpdateRoute } from '../update';
+import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-describe('POST /api/saved_objects/_bulk_get', () => {
+describe('PUT /api/saved_objects/{type}/{id?}', () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let handlerContext: setupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(async () => {
+    const clientResponse = {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      type: 'logstash-type',
+      attributes: {},
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      references: [],
+    };
+
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
+    savedObjectsClient.update.mockResolvedValue(clientResponse);
 
-    savedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [],
-    });
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerBulkGetRoute(router);
+    registerUpdateRoute(router);
 
     await server.start();
   });
@@ -50,46 +58,43 @@ describe('POST /api/saved_objects/_bulk_get', () => {
 
   it('formats successful response', async () => {
     const clientResponse = {
-      saved_objects: [
-        {
-          id: 'abc123',
-          type: 'index-pattern',
-          title: 'logstash-*',
-          version: 'foo',
-          references: [],
-          attributes: {},
-        },
-      ],
+      id: 'logstash-*',
+      title: 'logstash-*',
+      type: 'logstash-type',
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      attributes: {},
+      references: [],
     };
-    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
+    savedObjectsClient.update.mockResolvedValue(clientResponse);
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_get')
-      .send([
-        {
-          id: 'abc123',
-          type: 'index-pattern',
+      .put('/api/saved_objects/index-pattern/logstash-*')
+      .send({
+        attributes: {
+          title: 'Testing',
         },
-      ])
+        references: [],
+      })
       .expect(200);
 
     expect(result.body).toEqual(clientResponse);
   });
 
-  it('calls upon savedObjectClient.bulkGet', async () => {
-    const docs = [
-      {
-        id: 'abc123',
-        type: 'index-pattern',
-      },
-    ];
-
+  it('calls upon savedObjectClient.update', async () => {
     await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_get')
-      .send(docs)
+      .put('/api/saved_objects/index-pattern/logstash-*')
+      .send({
+        attributes: { title: 'Testing' },
+        version: 'foo',
+      })
       .expect(200);
 
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs);
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'logstash-*',
+      { title: 'Testing' },
+      { version: 'foo' }
+    );
   });
 });

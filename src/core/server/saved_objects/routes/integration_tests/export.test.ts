@@ -17,16 +17,16 @@
  * under the License.
  */
 
-jest.mock('../export', () => ({
+jest.mock('../../export', () => ({
   getSortedObjectsForExport: jest.fn(),
 }));
 
-import * as exportMock from '../export';
-import { createListStream } from '../../../../legacy/utils/streams';
+import * as exportMock from '../../export';
+import { createListStream } from '../../../../../legacy/utils/streams';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { SavedObjectConfig } from '../saved_objects_config';
-import { registerExportRoute } from './export';
+import { SavedObjectConfig } from '../../saved_objects_config';
+import { registerExportRoute } from '../export';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;

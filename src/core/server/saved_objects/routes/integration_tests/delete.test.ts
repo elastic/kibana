@@ -19,23 +19,24 @@
 
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { registerLogLegacyImportRoute } from './log_legacy_import';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { registerDeleteRoute } from '../delete';
+import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-describe('POST /api/saved_objects/_log_legacy_import', () => {
+describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
-  let logger: ReturnType<typeof loggingServiceMock.createLogger>;
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
-    logger = loggingServiceMock.createLogger();
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerLogLegacyImportRoute(router, logger);
+    registerDeleteRoute(router);
 
     await server.start();
   });
@@ -44,18 +45,19 @@ describe('POST /api/saved_objects/_log_legacy_import', () => {
     await server.stop();
   });
 
-  it('logs a warning when called', async () => {
+  it('formats successful response', async () => {
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_log_legacy_import')
+      .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
-    expect(result.body).toEqual({ success: true });
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Importing saved objects from a .json file has been deprecated",
-        ],
-      ]
-    `);
+    expect(result.body).toEqual({});
+  });
+
+  it('calls upon savedObjectClient.delete', async () => {
+    await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .expect(200);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });

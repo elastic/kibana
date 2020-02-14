@@ -18,12 +18,12 @@
  */
 
 import supertest from 'supertest';
-import { registerGetRoute } from './get';
-import { ContextService } from '../../context';
-import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
-import { HttpService, InternalHttpServiceSetup } from '../../http';
-import { createHttpServer, createCoreContext } from '../../http/test_utils';
-import { coreMock } from '../../mocks';
+import { registerGetRoute } from '../get';
+import { ContextService } from '../../../context';
+import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import { HttpService, InternalHttpServiceSetup } from '../../../http';
+import { createHttpServer, createCoreContext } from '../../../http/test_utils';
+import { coreMock } from '../../../mocks';
 
 const coreId = Symbol('core');
 
