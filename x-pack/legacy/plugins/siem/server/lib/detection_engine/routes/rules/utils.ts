@@ -7,6 +7,7 @@
 import { pickBy } from 'lodash/fp';
 import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
+import uuid from 'uuid';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -223,4 +224,40 @@ export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
     return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
   }
   return [];
+};
+
+export const getTupleDuplicateErrorsAndUniqueRules = <T>(
+  rules: T[],
+  isOverwrite: boolean
+): [BulkError[], T[]] => {
+  const errors: BulkError[] = [];
+  const uniqueRules = rules
+    .reduce(
+      (acc, parsedRule) => {
+        if (parsedRule instanceof Error) {
+          acc.set(uuid.v4(), parsedRule);
+        } else {
+          const { rule_id: ruleId } = parsedRule;
+          if (ruleId != null) {
+            if (acc.has(ruleId) && !isOverwrite) {
+              errors.push(
+                createBulkErrorObject({
+                  ruleId,
+                  statusCode: 400,
+                  message: `More than one rule with rule-id: "${ruleId}" found`,
+                })
+              );
+            }
+            acc.set(ruleId, parsedRule);
+          } else {
+            acc.set(uuid.v4(), parsedRule);
+          }
+        }
+        return acc;
+      }, // using map (preserves ordering)
+      new Map()
+    )
+    .values();
+
+  return [errors, Array.from(uniqueRules)];
 };

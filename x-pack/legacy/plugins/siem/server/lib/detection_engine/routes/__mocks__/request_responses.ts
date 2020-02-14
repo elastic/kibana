@@ -19,7 +19,6 @@ import {
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
-import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
