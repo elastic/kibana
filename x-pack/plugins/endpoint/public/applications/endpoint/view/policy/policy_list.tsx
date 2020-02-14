@@ -196,15 +196,13 @@ export const PolicyList = React.memo(() => {
         <EuiPageContent>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <EuiTitle size="l">
-                  <h1 data-test-subj="policyViewTitle">
-                    <FormattedMessage
-                      id="xpack.endpoint.policyList.viewTitle"
-                      defaultMessage="Policies"
-                    />
-                  </h1>
-                </EuiTitle>
+              <EuiTitle size="l">
+                <h1 data-test-subj="policyViewTitle">
+                  <FormattedMessage
+                    id="xpack.endpoint.policyList.viewTitle"
+                    defaultMessage="Policies"
+                  />
+                </h1>
               </EuiTitle>
               <h2>
                 <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
