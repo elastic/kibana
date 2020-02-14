@@ -1,7 +1,7 @@
 # Kibana Alerts and Actions UI
 
 The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
-As a developer you can reuse and extend buildin alerts and actions UI functionality:
+As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 - Create and register a new Alert Type.
 - Create and register a new Action Type.
@@ -53,7 +53,7 @@ Kibana ships with several built-in alert types:
 |[Index Threshold](#index-threshold-alert)|`threshold`|Index Threshold Alert|
 
 Every alert type must be registered server side, and can optionally be registered client side.
-Only alert types registered on both - client and server will be displayed in the Create Alert flyout, as a part of UI.
+Only alert types registered on both client and server will be displayed in the Create Alert flyout, as a part of the UI.
 Built-in alert types UI are located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types`
 and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts` for client side registration.
 
@@ -61,7 +61,7 @@ and this is a file `x-pack/plugins/triggers_actions_ui/public/application/compon
 
 ID: `threshold`
 
-In Kibana UI this alert type is available as a select cards on Create Alert flyout:
+In the Kibana UI, this alert type is available as a select card on the Create Alert flyout:
 ![Index Threshold select card](https://i.imgur.com/a0bqLwC.png)
 
 AlertTypeModel:
@@ -118,7 +118,7 @@ export interface AlertType {
 }
 ```
 Only the default (which means first item of the array) action group is displayed in the current UI.
-Design of user interface and server API for multiple action groups is on the stage of discussion and development.
+Design of user interface and server API for multiple action groups is under discussion and development.
 
 ## Register alert type model
 
@@ -473,7 +473,7 @@ interface ThresholdExpressionProps {
 |onChangeSelectedThresholdComparator|Event handler that will be excuted if selected threshold comparator is changed.|
 |onChangeSelectedThreshold|Event handler that will be excuted if selected threshold is changed.|
 |customComparators|(Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
 ## Embed the Create Alert flyout within any Kibana plugin
 
@@ -535,7 +535,7 @@ interface AlertAddProps {
 
 |Property|Description|
 |---|---|
-|consumer|Name of the plugin, which creating an alert.|
+|consumer|Name of the plugin that creates an alert.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
 
@@ -567,7 +567,7 @@ export interface AlertsContextValue {
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
-|toastNotifications|Optional toasts messages.|
+|toastNotifications|Optional toast messages.|
 |charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 
@@ -579,13 +579,13 @@ Kibana ships with a set of built-in action types UI:
 |---|---|---|
 |[Server log](#server-log)|`.log`|Logs messages to the Kibana log using `server.log()`|
 |[Email](#email)|`.email`|Sends an email using SMTP|
-|[Slack](#slack)|`.slack`|Posts a message to a slack channel|
+|[Slack](#slack)|`.slack`|Posts a message to a Slack channel|
 |[Index](#index)|`.index`|Indexes document(s) into Elasticsearch|
-|[Webhook](#webhook)|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
-|[PagerDuty](#pagerduty)|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
+|[Webhook](#webhook)|`.webhook`|Sends a payload to a web service using HTTP POST or PUT|
+|[PagerDuty](#pagerduty)|`.pagerduty`|Triggers, resolves, or acknowledges an incident to a PagerDuty service|
 
 Every action type should be registered server side, and can be optionally registered client side. 
-Only action types registered on both - client and server will be displayed in Alerts and Actions UI.
+Only action types registered on both client and server will be displayed in the Alerts and Actions UI.
 Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
 and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
 
@@ -816,7 +816,7 @@ and action params form available in Create Alert form:
 
 ## Action type model definition
 
-Each action type should be defined as `ActionTypeModel` object with the next properties:
+Each action type should be defined as an `ActionTypeModel` object with the following properties:
 ```
   id: string;
   iconClass: string;
@@ -841,11 +841,11 @@ Each action type should be defined as `ActionTypeModel` object with the next pro
 
 There are two ways to register a new action type UI:
 
-1. Directly in `triggers_actions_ui` plugin. In this case action type will be available in the Alerts and Actions management section.
+1. Directly in `triggers_actions_ui` plugin. In this case, the action type will be available in the Alerts and Actions management section.
 Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
 Only registered action types are available in UI.
 
-2. Register action type in other plugin. In this case action type will be available only in the current plugin UI. 
+2. Register action type in another plugin. In this case, the action type will be available only in the current plugin UI.
 It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
 
 ```
@@ -864,7 +864,7 @@ Action type UI is expected to be defined as `ActionTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new action type with the name `Example Action Type`:
 
-1. At any suitable place in Kibana create a file, which will expose an object implementing interface [ActionTypeModel]:
+1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
