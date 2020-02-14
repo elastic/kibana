@@ -12,7 +12,7 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -801,11 +801,10 @@ describe('Lens App', () => {
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
       const filter = {
-        ...esFilters.buildExistsFilter(field, indexPattern),
+        meta: { alias: null, negate: false, disabled: false, index: 'index1' },
+        exists: { name: 'myfield' },
         $state: { store: esFilters.FilterStateStore.APP_STATE },
       };
       args.data.query.filterManager.setFilters([filter]);
@@ -937,10 +936,13 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
-
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      args.data.query.filterManager.setFilters([
+        {
+          meta: { alias: null, negate: false, disabled: false, index: 'index1' },
+          exists: { field: 'myfield' },
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
+        } as esFilters.ExistsFilter,
+      ]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
