@@ -21,18 +21,19 @@ import { fromEventPattern } from 'rxjs';
 import { map } from 'rxjs/operators';
 // import { tap } from 'rxjs/operators';
 import jsonStream from './json_stream';
+import { pipe } from './utils';
 import {
   staticSite,
   statsAndCoveredFilePath,
   addPath,
   testRunner,
-  truncate,
+  // truncate,
   timeStamp,
   distro,
   buildId,
   maybeDropCoveredFilePath } from './conversions';
 
-const dropKibana = truncate('kibana');
+// const dropKibana = truncate('kibana');
 
 export default ({ coveragePath }, log) => {
   const objStream = jsonStream(coveragePath).on('done', _ =>
@@ -41,21 +42,14 @@ export default ({ coveragePath }, log) => {
 
   const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
   const staticSiteUrl = staticSite(staticSiteUrlBase);
+  const prokStatsAndCoveredFilePath = pipe(statsAndCoveredFilePath, buildId, staticSiteUrl);
+  const addTestRunnerAndTimeStampAndDistro = pipe(testRunner, timeStamp, distro);
 
   return fromEventPattern(_ => objStream.on('node', '!.*', _)).pipe(
-    map(statsAndCoveredFilePath),
-    map(buildId),
-    map(staticSiteUrl),
-    map(dropKibana),
+    map(prokStatsAndCoveredFilePath),
     map(addPath(coveragePath)),
-    map(testRunner),
-    map(timeStamp),
-    map(distro),
-    // debug stream
-    // tap(x => {
-    //   console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)
-    //   return x;
-    // }),
+    map(addTestRunnerAndTimeStampAndDistro),
+    map(maybeDropCoveredFilePath),
   );
 };
 
