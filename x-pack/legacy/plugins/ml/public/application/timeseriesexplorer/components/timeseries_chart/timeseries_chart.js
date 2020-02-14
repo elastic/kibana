@@ -231,8 +231,8 @@ const TimeseriesChartIntl = injectI18n(
       this.renderFocusChart();
     }
 
-    componentDidUpdate() {
-      if (this.props.renderFocusChartOnly === false) {
+    componentDidUpdate(prevProps) {
+      if (this.props.renderFocusChartOnly === false || prevProps.svgWidth !== this.props.svgWidth) {
         this.renderChart();
         this.drawContextChartSelection();
       }
