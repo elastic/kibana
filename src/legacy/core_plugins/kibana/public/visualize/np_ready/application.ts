@@ -20,7 +20,7 @@
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
-import { AppMountContext, LegacyCoreStart } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
 import {
   AppStateProvider,
   AppState,
@@ -53,7 +53,11 @@ export const renderApp = async (
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
   }
