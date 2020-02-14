@@ -8,11 +8,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
     timestamps {
       ansiColor('xterm') {
         githubPr.withDefaultPrComments {
-          catchError {
-            retryable.enable()
-            def queue = [oss: []]
-            def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
+          def queue = [oss: []]
+          def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
 
+          catchError {
+            // retryable.enable()
             parallel([
               'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
               'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
@@ -59,11 +59,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
               ]),
             ])
+          }
 
-            catchError {
-              print finishedSuites
-              print toJSON(finishedSuites).toString()
-            }
+          catchError {
+            print finishedSuites
+            print toJSON(finishedSuites).toString()
           }
         }
 
