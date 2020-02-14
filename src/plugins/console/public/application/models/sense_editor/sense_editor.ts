@@ -80,7 +80,7 @@ export class SenseEditor {
     } else {
       curRow = rowOrPos as number;
     }
-    const maxLines = this.coreEditor.getValue().split('\n').length;
+    const maxLines = this.coreEditor.getLineCount();
     for (; curRow < maxLines - 1; curRow++) {
       if (this.parser.isStartRequestRow(curRow, this.coreEditor)) {
         break;

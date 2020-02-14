@@ -298,7 +298,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionActionModesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -327,7 +326,6 @@ export const JsonWatchEditSimulate = ({
           }
         >
           <EuiFormRow
-            describedByIds={['simulateExecutionActionModesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.actionModesFieldLabel',
               {
@@ -346,7 +344,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionInputOverridesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -365,7 +362,6 @@ export const JsonWatchEditSimulate = ({
         >
           <ErrableFormRow
             id="executeWatchJson"
-            describedByIds={['simulateExecutionInputOverridesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
               {
