@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,32 +18,29 @@ import {
   getLoggingContainerHref,
   getLoggingIpHref,
   getLoggingKubernetesHref,
-} from '../../lib/helper';
-import { MonitorSummary } from '../../../common/graphql/types';
+} from '../../../../lib/helper';
+import { MonitorSummary } from '../../../../../common/graphql/types';
+import { UptimeSettingsContext } from '../../../../contexts';
 
 interface IntegrationGroupProps {
-  basePath: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  isApmAvailable: boolean;
-  isInfraAvailable: boolean;
-  isLogsAvailable: boolean;
   summary: MonitorSummary;
 }
 
-export const IntegrationGroup = ({
-  basePath,
-  dateRangeStart,
-  dateRangeEnd,
-  isApmAvailable,
-  isInfraAvailable,
-  isLogsAvailable,
-  summary,
-}: IntegrationGroupProps) => {
+export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
+  const {
+    basePath,
+    dateRangeStart,
+    dateRangeEnd,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+  } = useContext(UptimeSettingsContext);
+
   const domain = get<string>(summary, 'state.url.domain', '');
   const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
   const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
   const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
+
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
       {isApmAvailable ? (

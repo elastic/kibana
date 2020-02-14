@@ -24,7 +24,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('feature controls security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/50018
+  describe.skip('feature controls security', () => {
     before(async () => {
       await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
