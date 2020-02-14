@@ -213,8 +213,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  '[request body.name]: expected value of type [string] but got [undefined]. [request body.alertTypeId]: expected value of type [string] but got [undefined]. [request body.consumer]: expected value of type [string] but got [undefined]. [request body.schedule]: expected value of type [object] but got [undefined]. [request body.params]: expected value of type [object] but got [undefined]. [request body.actions]: expected value of type [array] but got [undefined]',
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -251,7 +250,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  '[request body.params]: expected value of type [object] but got [undefined]',
+                  'params invalid: [param1]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -281,19 +280,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
+                statusCode: 400,
               });
               break;
             default:
@@ -323,19 +312,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 0s',
+                statusCode: 400,
               });
               break;
             default:
