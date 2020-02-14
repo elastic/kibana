@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
 import {
   IndexPattern,
   IIndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
+import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
@@ -21,7 +20,7 @@ let indexPatternsContract: IndexPatternsContract | null = null;
 
 export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
   indexPatternsContract = indexPatterns;
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
     .find({
       type: 'index-pattern',
@@ -35,7 +34,7 @@ export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
 }
 
 export function loadSavedSearches() {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
     .find({
       type: 'search',
@@ -48,7 +47,7 @@ export function loadSavedSearches() {
 }
 
 export async function loadSavedSearchById(id: string) {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   const ss = await savedObjectsClient.get('search', id);
   return ss.error === undefined ? ss : null;
 }
@@ -122,6 +121,7 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
 export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification = false) {
   if (!indexPattern.isTimeBased()) {
     if (showNotification) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
           defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',

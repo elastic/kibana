@@ -10,6 +10,8 @@ import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
+import { initAngularBootstrap } from '../../../../../src/plugins/kibana_legacy/public';
+import { GraphSetup } from '../../../../plugins/graph/public';
 
 export interface GraphPluginStartDependencies {
   npData: ReturnType<DataPlugin['start']>;
@@ -18,6 +20,7 @@ export interface GraphPluginStartDependencies {
 
 export interface GraphPluginSetupDependencies {
   licensing: LicensingPluginSetup;
+  graph: GraphSetup;
 }
 
 export class GraphPlugin implements Plugin {
@@ -25,7 +28,8 @@ export class GraphPlugin implements Plugin {
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
 
-  setup(core: CoreSetup, { licensing }: GraphPluginSetupDependencies) {
+  setup(core: CoreSetup, { licensing, graph }: GraphPluginSetupDependencies) {
+    initAngularBootstrap();
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -39,10 +43,8 @@ export class GraphPlugin implements Plugin {
           savedObjectsClient: this.savedObjectsClient!,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
-          canEditDrillDownUrls: core.injectedMetadata.getInjectedVar(
-            'canEditDrillDownUrls'
-          ) as boolean,
-          graphSavePolicy: core.injectedMetadata.getInjectedVar('graphSavePolicy') as string,
+          canEditDrillDownUrls: graph.config.canEditDrillDownUrls,
+          graphSavePolicy: graph.config.savePolicy,
           storage: new Storage(window.localStorage),
           capabilities: contextCore.application.capabilities.graph,
           coreStart: contextCore,
@@ -50,6 +52,7 @@ export class GraphPlugin implements Plugin {
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
           indexPatterns: this.npDataStart!.indexPatterns,
+          overlays: contextCore.overlays,
         });
       },
     });

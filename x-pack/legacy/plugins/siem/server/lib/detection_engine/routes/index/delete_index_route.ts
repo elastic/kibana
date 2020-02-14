@@ -5,11 +5,11 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { deletePolicy } from '../../index/delete_policy';
@@ -27,7 +27,10 @@ import { deleteTemplate } from '../../index/delete_template';
  *
  * And ensuring they're all gone
  */
-export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteIndexRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -39,32 +42,49 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         },
       },
     },
-    async handler(request: RequestFacade) {
+    async handler(request: LegacyRequest, headers) {
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const { clusterClient, spacesClient } = await getClients(request);
+        const callCluster = clusterClient.callAsCurrentUser;
+
+        const index = getIndex(spacesClient.getSpaceId, config);
+        const indexExists = await getIndexExists(callCluster, index);
         if (!indexExists) {
-          return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
+          return headers
+            .response({
+              message: `index: "${index}" does not exist`,
+              status_code: 404,
+            })
+            .code(404);
         } else {
-          await deleteAllIndex(callWithRequest, `${index}-*`);
-          const policyExists = await getPolicyExists(callWithRequest, index);
+          await deleteAllIndex(callCluster, `${index}-*`);
+          const policyExists = await getPolicyExists(callCluster, index);
           if (policyExists) {
-            await deletePolicy(callWithRequest, index);
+            await deletePolicy(callCluster, index);
           }
-          const templateExists = await getTemplateExists(callWithRequest, index);
+          const templateExists = await getTemplateExists(callCluster, index);
           if (templateExists) {
-            await deleteTemplate(callWithRequest, index);
+            await deleteTemplate(callCluster, index);
           }
           return { acknowledged: true };
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const deleteIndexRoute = (server: ServerFacade) => {
-  server.route(createDeleteIndexRoute(server));
+export const deleteIndexRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(createDeleteIndexRoute(config, getClients));
 };

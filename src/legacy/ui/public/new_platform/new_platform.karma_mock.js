@@ -25,6 +25,11 @@ import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/
 const mockObservable = () => {
   return {
     subscribe: () => {},
+    pipe: () => {
+      return {
+        subscribe: () => {},
+      };
+    },
   };
 };
 
@@ -95,9 +100,17 @@ export const npSetup = {
         getProvider: sinon.fake(),
       },
       query: {
-        filterManager: sinon.fake(),
+        filterManager: {
+          getGlobalFilters: sinon.fake(),
+          getUpdates$: mockObservable,
+        },
         timefilter: {
-          timefilter: sinon.fake(),
+          timefilter: {
+            getTime: sinon.fake(),
+            getRefreshInterval: sinon.fake(),
+            getTimeUpdate$: mockObservable,
+            getRefreshIntervalUpdate$: mockObservable,
+          },
           history: sinon.fake(),
         },
         savedQueries: {
@@ -176,7 +189,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
@@ -212,13 +229,25 @@ export const npStart = {
       config: {
         defaultAppId: 'home',
       },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
+      },
     },
     data: {
       autocomplete: {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
-      indexPatterns: sinon.fake(),
+      indexPatterns: {
+        get: sinon.spy(indexPatternId =>
+          Promise.resolve({
+            id: indexPatternId,
+            isTimeNanosBased: () => false,
+            popularizeField: () => {},
+          })
+        ),
+      },
       ui: {
         IndexPatternSelect: mockComponent,
         SearchBar: mockComponent,
@@ -308,6 +337,7 @@ export const npStart = {
     },
     home: {
       featureCatalogue: {
+        get: sinon.fake(),
         register: sinon.fake(),
       },
       environment: {
