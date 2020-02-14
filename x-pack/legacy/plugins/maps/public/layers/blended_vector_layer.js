@@ -58,18 +58,22 @@ export class BlendedVectorLayer extends VectorLayer {
 
     // derive cluster style from document style
     const defaultDynamicProperties = getDefaultDynamicProperties();
-    const clusterStyleDescriptor = VectorStyle.createDescriptor({
-      [VECTOR_STYLES.LABEL_TEXT]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+    const clusterStyleDescriptor = {
+      ...this._documentStyle._descriptor,
+      properties: {
+        [VECTOR_STYLES.LABEL_TEXT]: {
+          type: DynamicStyleProperty.type,
+          options: {
+            ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+            field: {
+              name: COUNT_PROP_NAME,
+              origin: SOURCE_DATA_ID_ORIGIN,
+            },
           },
         },
       },
-    });
+    };
+
     const documentIconSizeStyle = this._documentStyle.getIconSizeStyle();
     if (!documentIconSizeStyle.isDynamic()) {
       clusterStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE] = {
