@@ -12,17 +12,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const browser = getService('browser');
 
+  // Ensure the start/end range is kept
+  const timestamp = Date.now() - 60000;
+  const traceId = '433b4651687e18be2c6c8e3b11f53d09';
+
   describe('Infra link-to', function() {
     this.tags('smoke');
     it('redirects to the logs app and parses URL search params correctly', async () => {
       const location = {
         hash: '',
         pathname: '/link-to/logs',
-        search: '?time=1565707203194&filter=trace.id:433b4651687e18be2c6c8e3b11f53d09',
+        search: `?time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
-      const expectedSearchString =
-        "sourceId=default&logPosition=(end:now,position:(tiebreaker:0,time:1565707203194),start:now-1d,streamLive:!f)&logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)";
+      const expectedSearchString = `sourceId=default&logPosition=(end:now,position:(tiebreaker:0,time:${timestamp}),start:now-1d,streamLive:!f)&logFilter=(expression:'trace.id:${traceId}',kind:kuery)`;
       const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToActualUrl(
