@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
+import { LicenseType } from '../../../../plugins/licensing/common/types';
 import { RepositoryType } from './types';
 
+const basicLicense: LicenseType = 'basic';
+
 export const PLUGIN = {
-  ID: 'snapshot_restore',
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
+  id: 'snapshot_restore',
+  minimumLicenseType: basicLicense,
   getI18nName: (i18n: any): string => {
     return i18n.translate('xpack.snapshotRestore.appName', {
       defaultMessage: 'Snapshot and Restore',

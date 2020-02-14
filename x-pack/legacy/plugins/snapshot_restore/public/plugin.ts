@@ -26,7 +26,7 @@ export class Plugin {
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
-    esSection.register(PLUGIN.ID, {
+    esSection.register(PLUGIN.id, {
       visible: true,
       display: i18n.translate('xpack.snapshotRestore.appName', {
         defaultMessage: 'Snapshot and Restore',

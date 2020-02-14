@@ -6,13 +6,16 @@
 
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
+import { PluginInitializerContext } from 'src/core/server';
+
 import { PLUGIN } from './common/constants';
-import { Plugin as SnapshotRestorePlugin } from './server/plugin';
-import { createShim } from './server/shim';
+import { plugin as initServerPlugin, Dependencies } from './server';
+
+export type ServerFacade = Legacy.Server;
 
 export function snapshotRestore(kibana: any) {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
+    id: PLUGIN.id,
     configPrefix: 'xpack.snapshot_restore',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -35,21 +38,21 @@ export function snapshotRestore(kibana: any) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-    init(server: Legacy.Server) {
-      const { core, plugins } = createShim(server, PLUGIN.ID);
-      const { i18n } = core;
-      const snapshotRestorePlugin = new SnapshotRestorePlugin();
+    init(server: ServerFacade) {
+      const coreSetup = server.newPlatform.setup.core;
+      const { licensing, security } = server.newPlatform.setup.plugins;
 
-      // Start plugin
-      snapshotRestorePlugin.start(core, plugins);
+      const coreInitializerContext = ({
+        logger: server.newPlatform.coreContext.logger,
+      } as unknown) as PluginInitializerContext;
 
-      // Register license checker
-      plugins.license.registerLicenseChecker(
-        server,
-        PLUGIN.ID,
-        PLUGIN.getI18nName(i18n),
-        PLUGIN.MINIMUM_LICENSE_REQUIRED
-      );
+      const pluginsSetup: Dependencies = {
+        licensing: licensing as any,
+        security: security as any,
+      };
+
+      const serverPlugin = initServerPlugin(coreInitializerContext as any);
+      serverPlugin.setup(coreSetup, pluginsSetup);
     },
   });
 }
