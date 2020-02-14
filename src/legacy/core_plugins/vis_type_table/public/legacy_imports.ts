@@ -24,7 +24,7 @@ export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
 export { PaginateDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
 export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
-export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
+export { tabifyGetColumns } from 'ui/agg_response/tabify/get_columns';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export {

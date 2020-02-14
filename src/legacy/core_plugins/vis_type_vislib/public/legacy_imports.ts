@@ -25,4 +25,4 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
-export { tabifyGetColumns } from '../../../ui/public/agg_response/tabify/_get_columns';
+export { tabifyGetColumns } from '../../../ui/public/agg_response/tabify/get_columns';
