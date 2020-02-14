@@ -18,7 +18,7 @@ import { verifyApiAccess } from '../lib/license_api_access';
 
 // config definition
 const querySchema = schema.object({
-  per_page: schema.number({ defaultValue: 20, min: 0 }),
+  per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   search: schema.maybe(schema.string()),
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
