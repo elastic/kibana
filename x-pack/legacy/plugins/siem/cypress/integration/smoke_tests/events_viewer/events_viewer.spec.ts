@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filterFieldsBrowser } from '../../lib/fields_browser/helpers';
+import { filterFieldsBrowser } from '../../../tasks/timeline/fields_browser';
 import {
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,

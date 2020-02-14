@@ -13,6 +13,7 @@ import {
   FIELDS_BROWSER_HEADER_DROP_AREA,
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
+  FIELDS_BROWSER_FIELDS_COUNT,
 } from '../../screens/timeline/fields_browser';
 import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
 import { KQL_SEARCH_BAR } from '../../screens/hosts/main';
@@ -22,9 +23,17 @@ export const clearFieldsBrowser = () => {
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT })
-    .type(fieldName)
-    .should('not.have.class', 'euiFieldSearch-isLoading');
+  cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+    .invoke('text')
+    .then(initialFieldsCount => {
+      cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT })
+        .type(fieldName)
+        .should('not.have.class', 'euiFieldSearch-isLoading');
+
+      cy.get(FIELDS_BROWSER_FIELDS_COUNT, { timeout: DEFAULT_TIMEOUT })
+        .invoke('text')
+        .should('not.equal', initialFieldsCount);
+    });
 };
 
 export const closeFieldsBrowser = () => {

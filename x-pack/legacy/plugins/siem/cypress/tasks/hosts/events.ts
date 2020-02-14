@@ -36,7 +36,7 @@ export const waitsForEventsToBeLoaded = () => {
 };
 
 export const addsHostGeoCityNameToHeader = () => {
-  cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
+  cy.get(HOST_GEO_CITY_NAME_CHECKBOX, { timeout: DEFAULT_TIMEOUT }).check({
     force: true,
   });
 };
