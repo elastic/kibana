@@ -130,7 +130,7 @@ export async function registerMetricThresholdAlertType(server: Server) {
       const isValueInAlertState = comparisonFunction(currentValue, threshold);
 
       if (isValueInAlertState) {
-        alertInstance.scheduleActions(FIRED_ACTIONS, {
+        alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           value: currentValue,
         });
       }
