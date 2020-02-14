@@ -478,7 +478,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta,
+      meta: { ...meta, sourceType: ES_SEARCH },
     };
   }
 

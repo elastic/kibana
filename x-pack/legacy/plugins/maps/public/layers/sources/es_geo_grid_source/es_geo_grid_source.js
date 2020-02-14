@@ -204,6 +204,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       data: featureCollection,
       meta: {
         areResultsTrimmed: false,
+        sourceType: ES_GEO_GRID,
       },
     };
   }

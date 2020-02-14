@@ -51,8 +51,8 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if (this._source) {
-      this._source.destroy();
+    if (this.getSource()) {
+      this.getSource().destroy();
     }
   }
 
@@ -62,7 +62,7 @@ export class AbstractLayer {
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
-    clonedDescriptor.sourceDescriptor = this._source.cloneDescriptor();
+    clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach(joinDescriptor => {
         // right.id is uuid used to track requests in inspector
@@ -77,15 +77,15 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return this._source.isJoinable();
+    return this.getSource().isJoinable();
   }
 
   supportsElasticsearchFilters() {
-    return this._source.isESSource();
+    return this.getSource().isESSource();
   }
 
   async supportsFitToBounds() {
-    return await this._source.supportsFitToBounds();
+    return await this.getSource().supportsFitToBounds();
   }
 
   async getDisplayName() {
@@ -93,12 +93,12 @@ export class AbstractLayer {
       return this._descriptor.label;
     }
 
-    return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
+    return (await this.getSource().getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
   async getAttributions() {
     if (!this.hasErrors()) {
-      return await this._source.getAttributions();
+      return await this.getSource().getAttributions();
     }
     return [];
   }
@@ -226,11 +226,11 @@ export class AbstractLayer {
   }
 
   async getImmutableSourceProperties() {
-    return this._source.getImmutableProperties();
+    return this.getSource().getImmutableProperties();
   }
 
   renderSourceSettingsEditor = ({ onChange }) => {
-    return this._source.renderSourceSettingsEditor({ onChange });
+    return this.getSource().renderSourceSettingsEditor({ onChange });
   };
 
   getPrevRequestToken(dataId) {
