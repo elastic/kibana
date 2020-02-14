@@ -61,7 +61,7 @@ and this is a file `x-pack/plugins/triggers_actions_ui/public/application/compon
 
 ID: `threshold`
 
-In Kibana UI this alert type is available as a select cards on Create Alert flyout:
+In the Kibana UI, this alert type is available as a select card on the Create Alert flyout:
 ![Index Threshold select card](https://i.imgur.com/a0bqLwC.png)
 
 AlertTypeModel:
