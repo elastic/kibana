@@ -46,7 +46,7 @@ export const ConfigSchema = schema.object(
     }),
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-      oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
+      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
       saml: providerOptionsSchema(
         'saml',
         schema.maybe(
