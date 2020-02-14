@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
-import { mount } from 'enzyme';
+import { MetricsExplorerChartContextMenu, createNodeDetailLink, Props } from './chart_context_menu';
+import { ReactWrapper, mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
 import DateMath from '@elastic/datemath';
-import { ReactWrapper } from 'enzyme';
 import { Capabilities } from 'src/core/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {
@@ -24,22 +24,36 @@ const getTestSubject = (component: ReactWrapper, name: string) => {
   return component.find(`[data-test-subj="${name}"]`).hostNodes();
 };
 
+const mountComponentWithProviders = (props: Props): ReactWrapper => {
+  const services = {
+    http: {
+      fetch: jest.fn(),
+    },
+    application: {
+      getUrlForApp: jest.fn(),
+    },
+  };
+
+  return mount(
+    <KibanaContextProvider services={services}>
+      <MetricsExplorerChartContextMenu {...props} />
+    </KibanaContextProvider>
+  );
+};
+
 describe('MetricsExplorerChartContextMenu', () => {
   describe('component', () => {
     it('should just work', async () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={options}
-          onFilter={onFilter}
-          uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
-        />
-      );
-
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options,
+        onFilter,
+        uiCapabilities,
+        chartOptions,
+      });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(1);
       expect(getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').length).toBe(1);
@@ -49,33 +63,28 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display View metrics for incompatible groupBy', async () => {
       const customOptions = { ...options, groupBy: 'system.network.name' };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={customOptions}
-          onFilter={onFilter}
-          uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
-        />
-      );
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options: customOptions,
+        onFilter,
+        uiCapabilities,
+        chartOptions,
+      });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-ViewNodeMetrics').length).toBe(0);
     });
 
     it('should not display "Add Filter" without onFilter', async () => {
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={options}
-          uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
-        />
-      );
-
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options,
+        uiCapabilities,
+        chartOptions,
+      });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
     });
@@ -83,35 +92,29 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display "Add Filter" without options.groupBy', async () => {
       const customOptions = { ...options, groupBy: void 0 };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={customOptions}
-          onFilter={onFilter}
-          uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
-        />
-      );
-
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options: customOptions,
+        onFilter,
+        uiCapabilities,
+        chartOptions,
+      });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
     });
 
     it('should disable "Open in Visualize" when options.metrics is empty', async () => {
       const customOptions = { ...options, metrics: [] };
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={customOptions}
-          uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
-        />
-      );
-
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options: customOptions,
+        uiCapabilities,
+        chartOptions,
+      });
       component.find('button').simulate('click');
       expect(
         getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').prop('disabled')
@@ -121,17 +124,15 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display "Open in Visualize" when unavailble in uiCapabilities', async () => {
       const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={options}
-          onFilter={onFilter}
-          uiCapabilities={customUICapabilities}
-          chartOptions={chartOptions}
-        />
-      );
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options,
+        onFilter,
+        uiCapabilities: customUICapabilities,
+        chartOptions,
+      });
 
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').length).toBe(0);
@@ -141,17 +142,15 @@ describe('MetricsExplorerChartContextMenu', () => {
       const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const customOptions = { ...options, groupBy: void 0 };
-      const component = mount(
-        <MetricsExplorerChartContextMenu
-          timeRange={timeRange}
-          source={source}
-          series={series}
-          options={customOptions}
-          onFilter={onFilter}
-          uiCapabilities={customUICapabilities}
-          chartOptions={chartOptions}
-        />
-      );
+      const component = mountComponentWithProviders({
+        timeRange,
+        source,
+        series,
+        options: customOptions,
+        onFilter,
+        uiCapabilities: customUICapabilities,
+        chartOptions,
+      });
       expect(component.find('button').length).toBe(0);
     });
   });

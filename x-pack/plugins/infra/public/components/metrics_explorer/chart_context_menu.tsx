@@ -26,7 +26,7 @@ import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 
-interface Props {
+export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
@@ -71,7 +71,7 @@ export const createNodeDetailLink = (
   });
 };
 
-export const MetricsExplorerChartContextMenu = ({
+export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   onFilter,
   options,
   series,

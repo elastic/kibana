@@ -46,7 +46,7 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'host', node)).toBe('uptime/#/?search=host.ip:"10.0.1.2"');
+    expect(createUptimeLink(options, 'host', node)).toBe('#/?search=host.ip:"10.0.1.2"');
   });
 
   it('should work for hosts without ip', () => {
@@ -62,7 +62,7 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'host', node)).toBe('uptime/#/?search=host.name:"host-01"');
+    expect(createUptimeLink(options, 'host', node)).toBe('#/?search=host.name:"host-01"');
   });
 
   it('should work for pods', () => {
@@ -79,7 +79,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'pod', node)).toBe(
-      'uptime/#/?search=kubernetes.pod.uid:"29193-pod-02939"'
+      '#/?search=kubernetes.pod.uid:"29193-pod-02939"'
     );
   });
 
@@ -97,7 +97,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'container', node)).toBe(
-      'uptime/#/?search=container.id:"docker-1234"'
+      '#/?search=container.id:"docker-1234"'
     );
   });
 });
