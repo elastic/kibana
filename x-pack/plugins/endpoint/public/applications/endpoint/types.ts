@@ -6,20 +6,42 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { EndpointListState } from './store/endpoint_list';
+import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
 import { AlertResultList } from '../../../common/types';
 
-export type MiddlewareFactory = (
+export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
 ) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
+  api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
+export interface ManagementListState {
+  endpoints: EndpointMetadata[];
+  total: number;
+  pageSize: number;
+  pageIndex: number;
+  loading: boolean;
+}
+
+export interface ManagementListPagination {
+  pageIndex: number;
+  pageSize: number;
+}
+
 export interface GlobalState {
-  readonly endpointList: EndpointListState;
+  readonly managementList: ManagementListState;
   readonly alertList: AlertListState;
 }
 
 export type AlertListData = AlertResultList;
 export type AlertListState = AlertResultList;
+export type CreateStructuredSelector = <
+  SelectorMap extends { [key: string]: (...args: never[]) => unknown }
+>(
+  selectorMap: SelectorMap
+) => (
+  state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
+) => {
+  [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
+};

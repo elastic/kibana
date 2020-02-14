@@ -134,6 +134,7 @@ export function createPluginStartContext<
 ): CoreStart {
   return {
     application: {
+      currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
       navigateToApp: deps.application.navigateToApp,
       getUrlForApp: deps.application.getUrlForApp,
