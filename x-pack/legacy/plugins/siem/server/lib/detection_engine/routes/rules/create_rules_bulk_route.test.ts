@@ -32,6 +32,8 @@ describe('create_rules_bulk', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();

@@ -54,7 +54,8 @@ describe('add_prepackaged_rules_route', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
