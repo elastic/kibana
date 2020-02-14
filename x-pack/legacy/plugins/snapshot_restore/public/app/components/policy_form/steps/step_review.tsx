@@ -13,7 +13,6 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
   EuiTitle,
   EuiLink,
   EuiIcon,
@@ -22,6 +21,7 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
+import { ShowHideIndices } from '../../show_hide_indices';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -38,15 +38,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     ignoreUnavailable: undefined,
     partial: undefined,
   };
-
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = indices
-    ? typeof indices === 'string'
-      ? indices.split(',')
-      : indices
-    : undefined;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const serializedPolicy = serializePolicy(policy);
   const { retention: serializedRetention } = serializedPolicy;
@@ -164,51 +155,11 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {displayIndices ? (
-                <div>
-                  <ul>
-                    {(isShowingFullIndicesList
-                      ? displayIndices
-                      : [...displayIndices].splice(0, 10)
-                    ).map(index => (
-                      <li key={index}>
-                        <EuiTitle size="xs">
-                          <span>{index}</span>
-                        </EuiTitle>
-                      </li>
-                    ))}
-                  </ul>
-                  <EuiSpacer size="xs" />
-                  {hiddenIndicesCount ? (
-                    <div>
-                      {isShowingFullIndicesList ? (
-                        <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesCollapseAllLink"
-                            defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                            values={{ count: hiddenIndicesCount }}
-                          />{' '}
-                          <EuiIcon type="arrowUp" />
-                        </EuiLink>
-                      ) : (
-                        <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesShowAllLink"
-                            defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                            values={{ count: hiddenIndicesCount }}
-                          />{' '}
-                          <EuiIcon type="arrowDown" />
-                        </EuiLink>
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.allIndicesValue"
-                  defaultMessage="All indices"
-                />
-              )}
+              <ShowHideIndices
+                indices={indices}
+                defaultState={false}
+                i18nId="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesCollapseAllLink"
+              />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

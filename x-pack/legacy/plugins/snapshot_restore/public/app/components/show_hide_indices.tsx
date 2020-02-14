@@ -5,27 +5,24 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiDescriptionListDescription,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiIcon,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
-
+import { EuiDescriptionListDescription, EuiTitle, EuiLink, EuiIcon } from '@elastic/eui';
 interface Props {
-  indices: string[] | string;
+  indices: string[] | string | undefined;
   defaultState: boolean;
   i18nId: string;
 }
+
+import { useAppDependencies } from '../index';
 
 export const ShowHideIndices: React.FunctionComponent<Props> = ({
   indices,
   defaultState,
   i18nId,
 }) => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(defaultState);
   const displayIndices = indices
     ? typeof indices === 'string'
@@ -49,22 +46,24 @@ export const ShowHideIndices: React.FunctionComponent<Props> = ({
               )
             )}
           </ul>
-          <EuiSpacer size="xs" />
           {hiddenIndicesCount ? (
-            <EuiText>
-              <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                <FormattedMessage
-                  id={i18nId}
-                  defaultMessage={
-                    isShowingFullIndicesList
-                      ? 'Show'
-                      : 'Hide' + '{count, plural, one {# index} other {# indices}}'
-                  }
-                  values={{ count: hiddenIndicesCount }}
-                />{' '}
-                <EuiIcon type="arrowUp" />
-              </EuiLink>
-            </EuiText>
+            <EuiLink
+              onClick={() =>
+                isShowingFullIndicesList
+                  ? setIsShowingFullIndicesList(false)
+                  : setIsShowingFullIndicesList(true)
+              }
+            >
+              <FormattedMessage
+                id={isShowingFullIndicesList ? i18nId.replace('Show', 'Collapse') : i18nId}
+                defaultMessage={
+                  (isShowingFullIndicesList ? 'Hide' : 'Show') +
+                  ' {count, plural, one {# index} other {# indices}}'
+                }
+                values={{ count: hiddenIndicesCount }}
+              />{' '}
+              <EuiIcon type="arrowUp" />
+            </EuiLink>
           ) : null}
         </div>
       ) : (
