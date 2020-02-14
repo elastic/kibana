@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import '../../../../../../es_ui_shared/console_lang/mocks';
 const $ = require('jquery');
 import RowParser from '../../../../lib/row_parser';
 import ace from 'brace';
