@@ -13,7 +13,7 @@ import {
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { getLicenseId } from './kibana_services';
+import { getLicenseId } from '../../../../plugins/maps/public/kibana_services';
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;

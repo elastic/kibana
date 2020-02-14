@@ -27,7 +27,10 @@ import {
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  FLYOUT_STATE,
+} from '../../../../../plugins/maps/public/reducers/ui';
 import {
   enableFullScreen,
   updateFlyout,

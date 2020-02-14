@@ -13,7 +13,10 @@ import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { timefilter } from 'ui/timefilter';
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../../../../../plugins/maps/public/reducers/util';
+import {
+  copyPersistentState,
+  TRACKED_LAYER_DESCRIPTOR,
+} from '../../../../../plugins/maps/public/reducers/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);

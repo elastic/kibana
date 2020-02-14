@@ -14,7 +14,7 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util.js'
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util.js';
 import { i18n } from '@kbn/i18n';
 
 export class AbstractLayer {

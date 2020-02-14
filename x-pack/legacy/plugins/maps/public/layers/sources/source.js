@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers';
+import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 
 export class AbstractSource {
   static isIndexingSource = false;

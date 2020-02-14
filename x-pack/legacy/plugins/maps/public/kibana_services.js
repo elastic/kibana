@@ -15,18 +15,6 @@ export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/plugins/data/public';
 export const indexPatternService = npStart.plugins.data.indexPatterns;
 
-let licenseId;
-export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
-export const getLicenseId = () => {
-  return licenseId;
-};
-
-let inspector;
-export const setInspector = newInspector => (inspector = newInspector);
-export const getInspector = () => {
-  return inspector;
-};
-
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
   requestId,

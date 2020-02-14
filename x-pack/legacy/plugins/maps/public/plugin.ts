@@ -10,7 +10,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId, setInspector } from './kibana_services';
+import { setLicenseId, setInspector, setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -43,6 +43,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
+    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
     if (licensing) {
       licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
     }
