@@ -24,7 +24,7 @@ import {
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
-import { FetchMoreOptionsArgs, QueryTemplate, QueryTemplateProps } from '../query_template';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { EventType } from '../../store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../store/timeline';
@@ -125,25 +125,12 @@ class TimelineQueryComponent extends QueryTemplate<
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const wrappedRefetch = () => {
-            clearSignalsState();
-            return refetch();
-          };
-          const wrappedFetchMore = (
-            fetchMoreOptions: FetchMoreOptionsArgs<
-              GetTimelineQuery.Query,
-              GetTimelineQuery.Variables
-            >
-          ) => {
-            clearSignalsState();
-            return fetchMore(fetchMoreOptions);
-          };
-          const wrappedLoadMore = (newCursor: string, tiebreaker?: string) => {
-            clearSignalsState();
-            return this.wrappedLoadMore(newCursor, tiebreaker);
-          };
+          this.setRefetch(refetch);
+          this.setExecuteBeforeRefetch(clearSignalsState);
+          this.setExecuteBeforeFetchMore(clearSignalsState);
+
           const timelineEdges = getOr([], 'source.Timeline.edges', data);
-          this.setFetchMore(wrappedFetchMore);
+          this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
             variables: {
               pagination: {
@@ -175,12 +162,12 @@ class TimelineQueryComponent extends QueryTemplate<
           return children!({
             id,
             inspect: getOr(null, 'source.Timeline.inspect', data),
-            refetch: wrappedRefetch,
+            refetch: this.wrappedRefetch,
             loading,
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
             pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
             events: this.memoizedTimelineEvents(JSON.stringify(variables), timelineEdges),
-            loadMore: wrappedLoadMore,
+            loadMore: this.wrappedLoadMore,
             getUpdatedAt: this.getUpdatedAt,
           });
         }}

@@ -40,6 +40,19 @@ export class QueryTemplate<
     tiebreaker?: string
   ) => FetchMoreOptionsArgs<TData, TVariables>;
 
+  private refetch!: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>;
+
+  private executeBeforeFetchMore!: () => void;
+
+  private executeBeforeRefetch!: () => void;
+
+  public setExecuteBeforeFetchMore = (val: () => void) => {
+    this.executeBeforeFetchMore = val;
+  };
+  public setExecuteBeforeRefetch = (val: () => void) => {
+    this.executeBeforeRefetch = val;
+  };
+
   public setFetchMore = (
     val: (fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>) => PromiseApolloQueryResult
   ) => {
@@ -52,6 +65,17 @@ export class QueryTemplate<
     this.fetchMoreOptions = val;
   };
 
-  public wrappedLoadMore = (newCursor: string, tiebreaker?: string) =>
-    this.fetchMore(this.fetchMoreOptions(newCursor, tiebreaker));
+  public setRefetch = (val: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>) => {
+    this.refetch = val;
+  };
+
+  public wrappedLoadMore = (newCursor: string, tiebreaker?: string) => {
+    this.executeBeforeFetchMore();
+    return this.fetchMore(this.fetchMoreOptions(newCursor, tiebreaker));
+  };
+
+  public wrappedRefetch = (variables?: TVariables) => {
+    this.executeBeforeRefetch();
+    return this.refetch(variables);
+  };
 }
