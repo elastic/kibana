@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import omit from 'lodash/fp/omit';
-import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 // eslint-disable-next-line @typescript-eslint/camelcase
@@ -102,7 +102,7 @@ const encodeRisonAppState = (state: AnyObject) => ({
 export const mapRisonAppLocationToState = <State extends {}>(
   mapState: (risonAppState: AnyObject) => State = (state: AnyObject) => state as State
 ) => (location: Location): State => {
-  const queryValues = parseQueryString(location.search.substring(1));
+  const queryValues = parse(location.search.substring(1), { sort: false });
   const decodedState = decodeRisonAppState(queryValues);
   return mapState(decodedState);
 };
@@ -110,17 +110,20 @@ export const mapRisonAppLocationToState = <State extends {}>(
 export const mapStateToRisonAppLocation = <State extends {}>(
   mapState: (state: State) => AnyObject = (state: State) => state
 ) => (state: State, location: Location): Location => {
-  const previousQueryValues = parseQueryString(location.search.substring(1));
+  const previousQueryValues = parse(location.search.substring(1), { sort: false });
   const previousState = decodeRisonAppState(previousQueryValues);
 
   const encodedState = encodeRisonAppState({
     ...previousState,
     ...mapState(state),
   });
-  const newQueryValues = stringifyQueryString({
-    ...previousQueryValues,
-    ...encodedState,
-  });
+  const newQueryValues = stringify(
+    {
+      ...previousQueryValues,
+      ...encodedState,
+    },
+    { sort: false }
+  );
   return {
     ...location,
     search: `?${newQueryValues}`,

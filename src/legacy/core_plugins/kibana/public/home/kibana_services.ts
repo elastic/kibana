@@ -29,16 +29,16 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
+import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginSetup,
+  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   metadata: {
     app: unknown;
     bundleId: string;
@@ -54,20 +54,20 @@ export interface HomeKibanaServices {
   };
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
-  telemetryOptInProvider: any;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
+  directories: readonly FeatureCatalogueEntry[];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
-  shouldShowTelemetryOptIn: boolean;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environment: Environment;
+  telemetry?: TelemetryPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;
