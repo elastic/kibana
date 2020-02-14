@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error', 'settings']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -39,7 +39,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Machine Learning');
       });

@@ -16,7 +16,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
-      await PageObjects.settings.setNavType('individual');
     });
 
     after(async () => {

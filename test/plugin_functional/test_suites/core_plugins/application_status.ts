@@ -28,7 +28,7 @@ import '../../plugins/core_app_status/public/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings']);
+  const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -48,10 +48,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   };
 
   describe('application status management', () => {
-    before(async () => {
-      await PageObjects.settings.setNavType('individual');
-    });
-
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('app_status_start');
     });

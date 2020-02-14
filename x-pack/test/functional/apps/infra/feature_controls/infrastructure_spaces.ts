@@ -12,13 +12,7 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects([
-    'common',
-    'infraHome',
-    'security',
-    'spaceSelector',
-    'settings',
-  ]);
+  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
@@ -53,7 +47,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Metrics');
       });

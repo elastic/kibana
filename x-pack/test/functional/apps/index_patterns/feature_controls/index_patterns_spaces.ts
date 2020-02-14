@@ -40,7 +40,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Management');
       });

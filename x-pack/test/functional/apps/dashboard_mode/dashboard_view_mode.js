@@ -37,10 +37,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        pageNavigation: 'individual',
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
