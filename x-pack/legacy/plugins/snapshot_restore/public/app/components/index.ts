@@ -16,7 +16,7 @@ export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
 export { PolicyExecuteProvider } from './policy_execute_provider';
 export { PolicyDeleteProvider } from './policy_delete_provider';
-export { ShowHideIndices } from './show_hide_indices';
+export { CollapsibleIndicesList } from './collapsible_indices_list';
 export {
   RetentionSettingsUpdateModalProvider,
   UpdateRetentionSettings,

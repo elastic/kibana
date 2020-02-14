@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -13,8 +13,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiIcon,
-  EuiText,
   EuiPanel,
   EuiStat,
   EuiSpacer,
@@ -23,7 +21,7 @@ import {
 
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-import { FormattedDateTime, ShowHideIndices } from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {
@@ -240,11 +238,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <ShowHideIndices
-                indices={indices}
-                i18nId="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
-                defaultState={false}
-              />
+              <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 

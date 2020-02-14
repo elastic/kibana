@@ -23,7 +23,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
-import { ShowHideIndices } from '../../show_hide_indices';
+import { CollapsibleIndicesList } from '../../collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -80,11 +80,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <ShowHideIndices
-                indices={restoreIndices}
-                defaultState={false}
-                i18nId="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesCollapseAllLink"
-              />
+              <CollapsibleIndicesList indices={restoreIndices} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

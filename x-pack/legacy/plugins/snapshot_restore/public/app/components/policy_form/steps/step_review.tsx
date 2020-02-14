@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -21,7 +21,7 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
 import { StepProps } from './';
-import { ShowHideIndices } from '../../show_hide_indices';
+import { CollapsibleIndicesList } from '../../collapsible_indices_list';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -155,11 +155,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <ShowHideIndices
-                indices={indices}
-                defaultState={false}
-                i18nId="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesCollapseAllLink"
-              />
+              <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

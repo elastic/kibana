@@ -19,7 +19,11 @@ import {
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useAppDependencies } from '../../../../../index';
-import { DataPlaceholder, FormattedDateTime, ShowHideIndices } from '../../../../../components';
+import {
+  DataPlaceholder,
+  FormattedDateTime,
+  CollapsibleIndicesList,
+} from '../../../../../components';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
 
@@ -128,11 +132,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <ShowHideIndices
-              indices={indices}
-              defaultState={false}
-              i18nId="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
-            />
+            <CollapsibleIndicesList indices={indices} />
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
