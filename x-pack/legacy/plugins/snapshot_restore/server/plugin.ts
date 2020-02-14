@@ -9,7 +9,7 @@ import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/se
 import { PLUGIN } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError } from './lib/is_es_error';
+import { isEsError, wrapEsError } from './lib';
 import { Dependencies } from './types';
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
@@ -23,7 +23,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public setup({ http, context }: CoreSetup, { licensing, security }: Dependencies): void {
+  public setup({ http, context }: CoreSetup, { licensing, security, cloud }: Dependencies): void {
     const router = http.createRouter();
 
     this.license.setup(
@@ -40,18 +40,17 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       }
     );
 
-    /**
-     * TODO: Check if checkinf for "security" defined is the same as
-     * const securityInfo = xpackInfo.feature('security');
-     * const isSecurityEnabled = securityInfo && securityInfo.isAvailable() && !securityInfo.isEnabled()
-     */
     this.apiRoutes.setup({
       router,
       license: this.license,
-      isSecurityEnabled: security !== undefined, // Check
-      isSlmEnabled: true, // TODO
+      config: {
+        isSecurityEnabled: security !== undefined,
+        isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
+        isSlmEnabled: true, // TODO
+      },
       lib: {
         isEsError,
+        wrapEsError,
       },
     });
   }

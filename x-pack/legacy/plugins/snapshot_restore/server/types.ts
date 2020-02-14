@@ -6,21 +6,27 @@
 import { ScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
+import { CloudSetup } from '../../../../plugins/cloud/server';
 import { License } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError, wrapEsError } from './lib';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface RouteDependencies {
   router: IRouter;
   license: License;
-  isSlmEnabled: boolean;
-  isSecurityEnabled: boolean;
+  config: {
+    isSlmEnabled: boolean;
+    isSecurityEnabled: boolean;
+    isCloudEnabled: boolean;
+  };
   lib: {
     isEsError: typeof isEsError;
+    wrapEsError: typeof wrapEsError;
   };
 }
 
