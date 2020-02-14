@@ -11,6 +11,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
           nextWorker++
 
           return {
+            // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+            def delay = (workerNumber-1)*20
+            sleep(delay)
+
             workerClosure(workerNumber)
           }
         }
@@ -114,6 +118,8 @@ def legacyJobRunner(name) {
 
 def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    agentInfo.print()
+
     if (useRamDisk) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE
@@ -258,10 +264,13 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
+  def status = buildUtils.getBuildStatus()
+  def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests
+      node scripts/report_failed_tests ${dryRun}
     """,
     "Report failed tests, if necessary"
   )

@@ -13,7 +13,7 @@ which ultimately routes them to the monitoring cluster. For an alternative
 method, see <<monitoring-metricbeat>>. 
 
 To learn about monitoring in general, see 
-{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster]. 
 
 . Set the `xpack.monitoring.collection.enabled` setting to `true` on each
 node in the production cluster. By default, it is is disabled (`false`). 

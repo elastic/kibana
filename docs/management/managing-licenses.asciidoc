@@ -25,4 +25,4 @@ license, extend the trial, or purchase a subscription.
 
 TIP: If {security-features} are enabled, before you revert to a Basic license or install 
 a Gold or Platinum license, you must configure Transport Layer Security (TLS) in {es}. 
-See {stack-ov}/encrypting-communications.html[Encrypting communications].
+See {ref}/encrypting-communications.html[Encrypting communications].

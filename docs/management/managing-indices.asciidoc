@@ -22,7 +22,7 @@ If security is enabled,
 you must have the `monitor` cluster privilege and the `view_index_metadata` 
 and `manage` index privileges to view the data.  
 For index templates, you must have the `manage_index_templates` cluster privilege.
-See {xpack-ref}/security-privileges.html[Security Privileges] for more
+See {ref}/security-privileges.html[Security privileges] for more
 information.
 
 Before using this feature, you should be familiar with index management 
