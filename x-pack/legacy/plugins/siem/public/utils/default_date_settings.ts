@@ -16,7 +16,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
-import { KibanaServices } from '../lib/kibana';
+import { CoreStart } from '../plugin';
 import { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
@@ -40,11 +40,11 @@ const DEFAULT_TO_MOMENT = moment();
 /**
  * Retrieves timeRange settings to populate filters
  *
- * @param {Boolean} uiSettings Whether to respect the user's UI settings. Defaults to true.
+ * @param {CoreStart['uiSettings']} uiSettings Optional client to retrieve overriding UI settings
  */
-export const getTimeRangeSettings = (uiSettings = true) => {
+export const getTimeRangeSettings = (uiSettings?: CoreStart['uiSettings']) => {
   const timeRange = uiSettings
-    ? KibanaServices.get().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
+    ? uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
     : null;
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
@@ -58,11 +58,11 @@ export const getTimeRangeSettings = (uiSettings = true) => {
 /**
  * Retrieves refreshInterval settings to populate filters
  *
- * @param {Boolean} uiSettings Whether to respect the user's UI settings. Defaults to true.
+ * @param {CoreStart['uiSettings']} uiSettings Optional client to retrieve overriding UI settings
  */
-export const getIntervalSettings = (uiSettings = true): Policy => {
+export const getIntervalSettings = (uiSettings?: CoreStart['uiSettings']): Policy => {
   const interval = uiSettings
-    ? KibanaServices.get().uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
+    ? uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
     : null;
 
   const duration = (isNumber(interval?.value) && interval?.value) || DEFAULT_INTERVAL_VALUE;

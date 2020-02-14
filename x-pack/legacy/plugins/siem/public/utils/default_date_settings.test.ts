@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 
+import { uiSettingsServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   getTimeRangeSettings,
   getIntervalSettings,
@@ -15,14 +16,11 @@ import {
 } from './default_date_settings';
 import {
   DEFAULT_FROM,
-  DEFAULT_SIEM_TIME_RANGE,
   DEFAULT_TO,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INTERVAL_TYPE,
 } from '../../common/constants';
-import { KibanaServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 
 // Change the constants to be static values so we can test against those instead of
@@ -39,38 +37,6 @@ jest.mock('../../common/constants', () => ({
   DEFAULT_SIEM_REFRESH_INTERVAL: 'siem:refreshIntervalDefaults',
   DEFAULT_SIEM_TIME_RANGE: 'siem:timeDefaults',
 }));
-
-jest.mock('../lib/kibana');
-const mockGetServices = KibanaServices.get as jest.Mock;
-
-/**
- * We utilize the internal chrome mocking that is built in to be able to mock different time range
- * scenarios here or the absence of a time range setting.
- * @param timeRange timeRange to use as a mock, including malformed data
- * @param interval interval to use as a mock, including malformed data
- */
-const mockTimeRange = (
-  timeRange: DefaultTimeRangeSetting = { from: DEFAULT_FROM, to: DEFAULT_TO },
-  interval: DefaultIntervalSetting = {
-    pause: DEFAULT_INTERVAL_PAUSE,
-    value: DEFAULT_INTERVAL_VALUE,
-  }
-) => {
-  mockGetServices.mockImplementation(() => ({
-    uiSettings: {
-      get: (key: string) => {
-        switch (key) {
-          case DEFAULT_SIEM_TIME_RANGE:
-            return timeRange;
-          case DEFAULT_SIEM_REFRESH_INTERVAL:
-            return interval;
-          default:
-            throw new Error(`Unexpected config key: ${key}`);
-        }
-      },
-    },
-  }));
-};
 
 /**
  * Return that this unknown is only an object but we recognize in Typescript that we are ok
@@ -89,39 +55,45 @@ const isMalformedInterval = (interval: unknown): interval is DefaultIntervalSett
   typeof interval === 'object';
 
 describe('getTimeRangeSettings', () => {
+  let uiSettingsMock = uiSettingsServiceMock.createStartContract();
+
+  beforeEach(() => {
+    uiSettingsMock = uiSettingsServiceMock.createStartContract();
+    uiSettingsMock.get.mockReturnValue({ from: DEFAULT_FROM, to: DEFAULT_TO });
+  });
+
   describe('fromStr', () => {
     test('should return the DEFAULT_FROM constant by default', () => {
-      mockTimeRange();
-      const { fromStr } = getTimeRangeSettings();
+      const { fromStr } = getTimeRangeSettings(uiSettingsMock);
       expect(fromStr).toBe(DEFAULT_FROM);
     });
 
     test('should return a custom from range', () => {
-      mockTimeRange({ from: 'now-15m' });
-      const { fromStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: 'now-15m' });
+      const { fromStr } = getTimeRangeSettings(uiSettingsMock);
       expect(fromStr).toBe('now-15m');
     });
 
     test('should return the DEFAULT_FROM when the whole object is null', () => {
-      mockTimeRange(null);
-      const { fromStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { fromStr } = getTimeRangeSettings(uiSettingsMock);
       expect(fromStr).toBe(DEFAULT_FROM);
     });
 
     test('should return the DEFAULT_FROM when the whole object is undefined', () => {
-      mockTimeRange(null);
-      const { fromStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { fromStr } = getTimeRangeSettings(uiSettingsMock);
       expect(fromStr).toBe(DEFAULT_FROM);
     });
 
     test('should return the DEFAULT_FROM when the from value is null', () => {
-      mockTimeRange({ from: null });
+      uiSettingsMock.get.mockReturnValue({ from: null });
       const { fromStr } = getTimeRangeSettings();
       expect(fromStr).toBe(DEFAULT_FROM);
     });
 
     test('should return the DEFAULT_FROM when the from value is undefined', () => {
-      mockTimeRange({ from: undefined });
+      uiSettingsMock.get.mockReturnValue({ from: undefined });
       const { fromStr } = getTimeRangeSettings();
       expect(fromStr).toBe(DEFAULT_FROM);
     });
@@ -129,8 +101,9 @@ describe('getTimeRangeSettings', () => {
     test('should return the DEFAULT_FROM when the from value is malformed', () => {
       const malformedTimeRange = { from: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
-        mockTimeRange(malformedTimeRange);
-        const { fromStr } = getTimeRangeSettings();
+        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
+
+        const { fromStr } = getTimeRangeSettings(uiSettingsMock);
         expect(fromStr).toBe(DEFAULT_FROM);
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
@@ -138,14 +111,8 @@ describe('getTimeRangeSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_FROM', () => {
-        const { fromStr } = getTimeRangeSettings(false);
+        const { fromStr } = getTimeRangeSettings();
         expect(fromStr).toBe(DEFAULT_FROM);
       });
     });
@@ -153,46 +120,45 @@ describe('getTimeRangeSettings', () => {
 
   describe('toStr', () => {
     test('should return the DEFAULT_TO constant by default', () => {
-      mockTimeRange();
-      const { toStr } = getTimeRangeSettings();
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe(DEFAULT_TO);
     });
 
     test('should return a custom from range', () => {
-      mockTimeRange({ to: 'now-15m' });
-      const { toStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ to: 'now-15m' });
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe('now-15m');
     });
 
     test('should return the DEFAULT_TO when the whole object is null', () => {
-      mockTimeRange(null);
-      const { toStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe(DEFAULT_TO);
     });
 
     test('should return the DEFAULT_TO when the whole object is undefined', () => {
-      mockTimeRange(null);
-      const { toStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe(DEFAULT_TO);
     });
 
     test('should return the DEFAULT_TO when the to value is null', () => {
-      mockTimeRange({ from: null });
-      const { toStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: null });
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe(DEFAULT_TO);
     });
 
     test('should return the DEFAULT_TO when the from value is undefined', () => {
-      mockTimeRange({ to: undefined });
-      const { toStr } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ to: undefined });
+      const { toStr } = getTimeRangeSettings(uiSettingsMock);
       expect(toStr).toBe(DEFAULT_TO);
     });
 
     test('should return the DEFAULT_TO when the to value is malformed', () => {
       const malformedTimeRange = { to: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
-        mockTimeRange(malformedTimeRange);
-        const { toStr } = getTimeRangeSettings();
+        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
+        const { toStr } = getTimeRangeSettings(uiSettingsMock);
         expect(toStr).toBe(DEFAULT_TO);
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
@@ -200,14 +166,8 @@ describe('getTimeRangeSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_TO', () => {
-        const { toStr } = getTimeRangeSettings(false);
+        const { toStr } = getTimeRangeSettings();
         expect(toStr).toBe(DEFAULT_TO);
       });
     });
@@ -215,47 +175,46 @@ describe('getTimeRangeSettings', () => {
 
   describe('from', () => {
     test('should return DEFAULT_FROM', () => {
-      mockTimeRange();
-      const { from } = getTimeRangeSettings();
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     test('should return a custom from range', () => {
       const mockFrom = '2019-08-30T17:49:18.396Z';
-      mockTimeRange({ from: mockFrom });
-      const { from } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: mockFrom });
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(mockFrom).valueOf());
     });
 
     test('should return the DEFAULT_FROM when the whole object is null', () => {
-      mockTimeRange(null);
-      const { from } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     test('should return the DEFAULT_FROM when the whole object is undefined', () => {
-      mockTimeRange(null);
-      const { from } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     test('should return the DEFAULT_FROM when the from value is null', () => {
-      mockTimeRange({ from: null });
-      const { from } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: null });
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     test('should return the DEFAULT_FROM when the from value is undefined', () => {
-      mockTimeRange({ from: undefined });
-      const { from } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: undefined });
+      const { from } = getTimeRangeSettings(uiSettingsMock);
       expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
     });
 
     test('should return the DEFAULT_FROM when the from value is malformed', () => {
       const malformedTimeRange = { from: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
-        mockTimeRange(malformedTimeRange);
-        const { from } = getTimeRangeSettings();
+        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
+        const { from } = getTimeRangeSettings(uiSettingsMock);
         expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
@@ -263,14 +222,8 @@ describe('getTimeRangeSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_FROM in epoch', () => {
-        const { from } = getTimeRangeSettings(false);
+        const { from } = getTimeRangeSettings();
         expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
       });
     });
@@ -278,47 +231,46 @@ describe('getTimeRangeSettings', () => {
 
   describe('to', () => {
     test('should return DEFAULT_TO', () => {
-      mockTimeRange();
-      const { to } = getTimeRangeSettings();
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     test('should return a custom from range', () => {
       const mockTo = '2000-08-30T17:49:18.396Z';
-      mockTimeRange({ to: mockTo });
-      const { to } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ to: mockTo });
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(mockTo).valueOf());
     });
 
     test('should return the DEFAULT_TO_DATE when the whole object is null', () => {
-      mockTimeRange(null);
-      const { to } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     test('should return the DEFAULT_TO_DATE when the whole object is undefined', () => {
-      mockTimeRange(null);
-      const { to } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is null', () => {
-      mockTimeRange({ from: null });
-      const { to } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: null });
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is undefined', () => {
-      mockTimeRange({ from: undefined });
-      const { to } = getTimeRangeSettings();
+      uiSettingsMock.get.mockReturnValue({ from: undefined });
+      const { to } = getTimeRangeSettings(uiSettingsMock);
       expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is malformed', () => {
       const malformedTimeRange = { from: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
-        mockTimeRange(malformedTimeRange);
-        const { to } = getTimeRangeSettings();
+        uiSettingsMock.get.mockReturnValue(malformedTimeRange);
+        const { to } = getTimeRangeSettings(uiSettingsMock);
         expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
@@ -326,14 +278,8 @@ describe('getTimeRangeSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_TO in epoch', () => {
-        const { to } = getTimeRangeSettings(false);
+        const { to } = getTimeRangeSettings();
         expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
       });
     });
@@ -341,58 +287,65 @@ describe('getTimeRangeSettings', () => {
 });
 
 describe('getIntervalSettings', () => {
+  let uiSettingsMock = uiSettingsServiceMock.createStartContract();
+
+  beforeEach(() => {
+    uiSettingsMock = uiSettingsServiceMock.createStartContract();
+    uiSettingsMock.get.mockReturnValue({
+      pause: DEFAULT_INTERVAL_PAUSE,
+      value: DEFAULT_INTERVAL_VALUE,
+    });
+  });
+
   describe('kind', () => {
     test('should return default', () => {
-      mockTimeRange();
-      const { kind } = getIntervalSettings();
+      const { kind } = getIntervalSettings(uiSettingsMock);
       expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     test('should return an interval when given non paused value', () => {
-      const interval: DefaultIntervalSetting = { pause: false };
-      mockTimeRange(undefined, interval);
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ pause: false });
+      const { kind } = getIntervalSettings(uiSettingsMock);
       const expected: Policy['kind'] = 'interval';
       expect(kind).toBe(expected);
     });
 
     test('should return a manual when given a paused value', () => {
-      const interval: DefaultIntervalSetting = { pause: true };
-      mockTimeRange(undefined, interval);
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ pause: true });
+      const { kind } = getIntervalSettings(uiSettingsMock);
       const expected: Policy['kind'] = 'manual';
       expect(kind).toBe(expected);
     });
 
     test('should return the default when the whole object is null', () => {
-      mockTimeRange(undefined, null);
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { kind } = getIntervalSettings(uiSettingsMock);
       expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     test('should return the default when the whole object is undefined', () => {
-      mockTimeRange(undefined, undefined);
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { kind } = getIntervalSettings(uiSettingsMock);
       expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     test('should return the default when the value is null', () => {
-      mockTimeRange(undefined, { pause: null });
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ pause: null });
+      const { kind } = getIntervalSettings(uiSettingsMock);
       expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     test('should return the default when the value is undefined', () => {
-      mockTimeRange(undefined, { pause: undefined });
-      const { kind } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ pause: undefined });
+      const { kind } = getIntervalSettings(uiSettingsMock);
       expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
     });
 
     test('should return the default when the from value is malformed', () => {
       const malformedInterval = { pause: 'whoops a string' };
       if (isMalformedInterval(malformedInterval)) {
-        mockTimeRange(undefined, malformedInterval);
-        const { kind } = getIntervalSettings();
+        uiSettingsMock.get.mockReturnValue(malformedInterval);
+        const { kind } = getIntervalSettings(uiSettingsMock);
         expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
       } else {
         throw Error('Was expecting an object to be used for the malformed interval');
@@ -400,14 +353,8 @@ describe('getIntervalSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_INTERVAL_TYPE', () => {
-        const { kind } = getIntervalSettings(false);
+        const { kind } = getIntervalSettings();
         expect(kind).toBe(DEFAULT_INTERVAL_TYPE);
       });
     });
@@ -415,48 +362,46 @@ describe('getIntervalSettings', () => {
 
   describe('duration', () => {
     test('should return default', () => {
-      mockTimeRange();
-      const { duration } = getIntervalSettings();
+      const { duration } = getIntervalSettings(uiSettingsMock);
       expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     test('should return a value when given a paused value', () => {
-      const interval: DefaultIntervalSetting = { value: 5 };
-      mockTimeRange(undefined, interval);
-      const { duration } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ value: 5 });
+      const { duration } = getIntervalSettings(uiSettingsMock);
       const expected: Policy['duration'] = 5;
       expect(duration).toBe(expected);
     });
 
     test('should return the default when the whole object is null', () => {
-      mockTimeRange(undefined, null);
-      const { duration } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue(null);
+      const { duration } = getIntervalSettings(uiSettingsMock);
       expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     test('should return the default when the whole object is undefined', () => {
-      mockTimeRange(undefined, undefined);
-      const { duration } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue(undefined);
+      const { duration } = getIntervalSettings(uiSettingsMock);
       expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     test('should return the default when the value is null', () => {
-      mockTimeRange(undefined, { value: null });
-      const { duration } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ value: null });
+      const { duration } = getIntervalSettings(uiSettingsMock);
       expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     test('should return the default when the value is undefined', () => {
-      mockTimeRange(undefined, { value: undefined });
-      const { duration } = getIntervalSettings();
+      uiSettingsMock.get.mockReturnValue({ value: undefined });
+      const { duration } = getIntervalSettings(uiSettingsMock);
       expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
     });
 
     test('should return the default when the value is malformed', () => {
       const malformedInterval = { value: 'whoops a string' };
       if (isMalformedInterval(malformedInterval)) {
-        mockTimeRange(undefined, malformedInterval);
-        const { duration } = getIntervalSettings();
+        uiSettingsMock.get.mockReturnValue(malformedInterval);
+        const { duration } = getIntervalSettings(uiSettingsMock);
         expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
       } else {
         throw Error('Was expecting an object to be used for the malformed interval');
@@ -464,14 +409,8 @@ describe('getIntervalSettings', () => {
     });
 
     describe('without UISettings', () => {
-      beforeEach(() => {
-        mockGetServices.mockImplementation(() => {
-          throw new Error('should not have been called');
-        });
-      });
-
       it('is DEFAULT_INTERVAL_VALUE', () => {
-        const { duration } = getIntervalSettings(false);
+        const { duration } = getIntervalSettings();
         expect(duration).toBe(DEFAULT_INTERVAL_VALUE);
       });
     });

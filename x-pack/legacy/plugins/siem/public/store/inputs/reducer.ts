@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { CoreStart } from '../../plugin';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
@@ -47,10 +48,10 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...getTimeRangeSettings(),
     },
     queries: [],
-    policy: getIntervalSettings(false),
+    policy: getIntervalSettings(),
     linkTo: ['timeline'],
     query: {
       query: '',
@@ -61,10 +62,10 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...getTimeRangeSettings(),
     },
     queries: [],
-    policy: getIntervalSettings(false),
+    policy: getIntervalSettings(),
     linkTo: ['global'],
     query: {
       query: '',
@@ -74,9 +75,9 @@ export const initialInputsState: InputsState = {
   },
 };
 
-export const createInitialInputsState = (): InputsState => {
-  const { from, fromStr, to, toStr } = getTimeRangeSettings();
-  const { kind, duration } = getIntervalSettings();
+export const createInitialInputsState = (uiSettings: CoreStart['uiSettings']): InputsState => {
+  const { from, fromStr, to, toStr } = getTimeRangeSettings(uiSettings);
+  const { kind, duration } = getIntervalSettings(uiSettings);
 
   return {
     global: {

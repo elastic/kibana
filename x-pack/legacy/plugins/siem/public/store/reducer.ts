@@ -43,7 +43,7 @@ export const initialState: State = {
 
 export const createInitialState = (uiSettings: CoreStart['uiSettings']): State => ({
   ...initialState,
-  inputs: createInitialInputsState(),
+  inputs: createInitialInputsState(uiSettings),
   uiSettings: createInitialUiSettingsState(uiSettings),
 });
 
