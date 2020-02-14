@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListState } from './types';
-
-export const endpointListData = (state: EndpointListState) => state.endpoints;
+export { managementListReducer } from './reducer';
+export { ManagementAction } from './action';
+export { managementMiddlewareFactory } from './middleware';
