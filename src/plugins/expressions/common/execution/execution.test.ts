@@ -49,7 +49,7 @@ const run = async (
 describe('Execution', () => {
   test('can instantiate', () => {
     const execution = createExecution('foo bar=123');
-    expect(execution.params.ast.chain[0].arguments.bar).toEqual([123]);
+    expect(execution.state.get().ast.chain[0].arguments.bar).toEqual([123]);
   });
 
   test('initial input is null at creation', () => {
