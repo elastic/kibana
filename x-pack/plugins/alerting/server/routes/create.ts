@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
-// import { getDurationSchema } from '../lib';
+import { validateDurationSchema } from '../lib';
 import { Alert } from '../types';
 
 export const bodySchema = schema.object({
@@ -23,10 +23,10 @@ export const bodySchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.nullable(schema.string()), // getDurationSchema().default(null),
+  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   schedule: schema.object({
-    interval: schema.string(),
+    interval: schema.string({ validate: validateDurationSchema }),
   }),
   actions: schema.arrayOf(
     schema.object({

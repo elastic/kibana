@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Joi from 'joi';
-
 const SECONDS_REGEX = /^[1-9][0-9]*s$/;
 const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
@@ -27,21 +24,20 @@ export function parseDuration(duration: string): number {
   );
 }
 
-export function getDurationSchema() {
-  return Joi.alternatives().try(
-    Joi.string()
-      .regex(SECONDS_REGEX, 'seconds')
-      .required(),
-    Joi.string()
-      .regex(MINUTES_REGEX, 'minutes')
-      .required(),
-    Joi.string()
-      .regex(HOURS_REGEX, 'hours')
-      .required(),
-    Joi.string()
-      .regex(DAYS_REGEX, 'days')
-      .required()
-  );
+export function validateDurationSchema(duration: string) {
+  if (duration.match(SECONDS_REGEX)) {
+    return;
+  }
+  if (duration.match(MINUTES_REGEX)) {
+    return;
+  }
+  if (duration.match(HOURS_REGEX)) {
+    return;
+  }
+  if (duration.match(DAYS_REGEX)) {
+    return;
+  }
+  return 'string is not a valid duration: ' + duration;
 }
 
 function isSeconds(duration: string) {
