@@ -1955,15 +1955,17 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.3.0.tgz#e21c6246624f694e2ae1c7c1f1a11b612faf260a"
-  integrity sha512-Rkj1rTtDa6iZMUF7pxYRojku1sLXzTU0FK1D9i0XE3H//exy3VyTV6qUlbdkiKXjO7emrgQqfzKDeXT+ZYztgg==
+"@elastic/eui@19.0.0":
+  version "19.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-19.0.0.tgz#cf7d644945c95997d442585cf614e853f173746e"
+  integrity sha512-8/USz56MYhu6bV4oecJct7tsdi0ktErOIFLobNmQIKdxDOni/KpttX6IHqxM7OuIWi1AEMXoIozw68+oyL/uKQ==
   dependencies:
     "@types/chroma-js" "^1.4.3"
+    "@types/enzyme" "^3.1.13"
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
+    "@types/react-virtualized" "^9.18.7"
     chroma-js "^2.0.4"
     classnames "^2.2.5"
     highlight.js "^9.12.0"
@@ -4389,10 +4391,10 @@
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"
   integrity sha512-n/g9pqJEpE4fyUE8VvHNGtl7E2Wv8TCroNwfgAeJKRV4ghDENahtrAo1KMsFNIejBD2gDAlEUa4CM4oEEd8p9Q==
 
-"@types/enzyme@^3.9.0":
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.9.3.tgz#d1029c0edd353d7b00f3924803eb88216460beed"
-  integrity sha512-jDKoZiiMA3lGO3skSO7dfqEHNvmiTLLV+PHD9EBQVlJANJvpY6qq1zzjRI24ZOtG7F+CS7BVWDXKewRmN8PjHQ==
+"@types/enzyme@^3.1.13", "@types/enzyme@^3.9.0":
+  version "3.10.5"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
+  integrity sha512-R+phe509UuUYy9Tk0YlSbipRpfVtIzb/9BHn5pTEtjJTF5LXvUjrIQcZvNyANNEyFrd2YGs196PniNT1fgvOQA==
   dependencies:
     "@types/cheerio" "*"
     "@types/react" "*"

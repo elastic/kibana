@@ -32,7 +32,6 @@ const fieldsMeta = {
     description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.nameDescription', {
       defaultMessage: 'A unique identifier for this template.',
     }),
-    idAria: 'stepLogisticsNameDescription',
     testSubject: 'nameField',
   },
   indexPatterns: {
@@ -45,7 +44,6 @@ const fieldsMeta = {
         defaultMessage: 'The index patterns to apply to the template.',
       }
     ),
-    idAria: 'stepLogisticsIndexPatternsDescription',
     testSubject: 'indexPatternsField',
   },
   order: {
@@ -55,7 +53,6 @@ const fieldsMeta = {
     description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderDescription', {
       defaultMessage: 'The merge order when multiple templates match an index.',
     }),
-    idAria: 'stepLogisticsOrderDescription',
     testSubject: 'orderField',
   },
   version: {
@@ -65,7 +62,6 @@ const fieldsMeta = {
     description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.versionDescription', {
       defaultMessage: 'A number that identifies the template to external management systems.',
     }),
-    idAria: 'stepLogisticsVersionDescription',
     testSubject: 'versionField',
   },
 };
@@ -123,11 +119,10 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       {/* Name */}
-      <FormRow title={name.title} description={name.description} idAria={name.idAria}>
+      <FormRow title={name.title} description={name.description}>
         <UseField
           path="name"
           componentProps={{
-            idAria: name.idAria,
             ['data-test-subj']: name.testSubject,
             euiFieldProps: { disabled: isEditing },
           }}
@@ -135,35 +130,28 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         />
       </FormRow>
       {/* Index patterns */}
-      <FormRow
-        title={indexPatterns.title}
-        description={indexPatterns.description}
-        idAria={indexPatterns.idAria}
-      >
+      <FormRow title={indexPatterns.title} description={indexPatterns.description}>
         <UseField
           path="indexPatterns"
           componentProps={{
-            idAria: indexPatterns.idAria,
             ['data-test-subj']: indexPatterns.testSubject,
           }}
         />
       </FormRow>
       {/* Order */}
-      <FormRow title={order.title} description={order.description} idAria={order.idAria}>
+      <FormRow title={order.title} description={order.description}>
         <UseField
           path="order"
           componentProps={{
-            idAria: order.idAria,
             ['data-test-subj']: order.testSubject,
           }}
         />
       </FormRow>
       {/* Version */}
-      <FormRow title={version.title} description={version.description} idAria={version.idAria}>
+      <FormRow title={version.title} description={version.description}>
         <UseField
           path="version"
           componentProps={{
-            idAria: version.idAria,
             ['data-test-subj']: version.testSubject,
           }}
         />
