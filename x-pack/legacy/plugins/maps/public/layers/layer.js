@@ -190,6 +190,10 @@ export class AbstractLayer {
     return this._source;
   }
 
+  getSourceForEditing() {
+    return this._source;
+  }
+
   isVisible() {
     return this._descriptor.visible;
   }
@@ -230,7 +234,7 @@ export class AbstractLayer {
   }
 
   renderSourceSettingsEditor = ({ onChange }) => {
-    return this.getSource().renderSourceSettingsEditor({ onChange });
+    return this.getSourceForEditing().renderSourceSettingsEditor({ onChange });
   };
 
   getPrevRequestToken(dataId) {

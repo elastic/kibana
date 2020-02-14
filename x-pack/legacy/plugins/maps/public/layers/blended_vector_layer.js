@@ -67,6 +67,13 @@ export class BlendedVectorLayer extends VectorLayer {
     return this._activeSource;
   }
 
+  getSourceForEditing() {
+    // Layer is based on this._documentSource
+    // this._clusterSource is a derived source for rendering only.
+    // Regardless of this._activeSource, this._documentSource should always be displayed in the editor
+    return this._documentSource;
+  }
+
   async syncData(syncContext) {
     console.log('BlendedVectorLayer.syncData');
     //console.log(syncContext);
