@@ -20,7 +20,7 @@ export interface HostsComponentReduxProps {
   filters: Filter[];
 }
 
-export interface HostsComponentDispatchProps {
+interface HostsComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
