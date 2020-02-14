@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { APICaller } from 'src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { validateJobSchema } from '../../new_platform/job_validation_schema';
+
+type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
 export function validateJob(
-  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  payload: any,
+  callAsCurrentUser: APICaller,
+  payload: ValidateJobPayload,
   kbnVersion: string,
-  callAsInternalUser: IScopedClusterClient['callAsInternalUser'],
+  callAsInternalUser: APICaller,
   xpackMainPlugin: any
 ): string[];

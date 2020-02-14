@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { APICaller } from 'src/core/server';
 import { Job, Datafeed } from '../../../public/application/jobs/new_job/common/job_creator/configs';
 
 interface ValidateCardinalityConfig extends Job {
@@ -12,6 +12,6 @@ interface ValidateCardinalityConfig extends Job {
 }
 
 export function validateCardinality(
-  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
+  callAsCurrentUser: APICaller,
   job: ValidateCardinalityConfig
 ): any[];

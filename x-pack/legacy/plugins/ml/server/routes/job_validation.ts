@@ -6,25 +6,30 @@
 
 import Boom from 'boom';
 import { RequestHandlerContext } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
+  validateCardinalitySchema,
   validateJobSchema,
 } from '../new_platform/job_validation_schema';
-import { anomalyDetectionJobSchema } from '../new_platform/anomaly_detectors_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
+
+type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
 /**
  * Routes for job validation
  */
 export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteInitialization) {
-  function calculateModelMemoryLimit(context: RequestHandlerContext, payload: any) {
+  function calculateModelMemoryLimit(
+    context: RequestHandlerContext,
+    payload: CalculateModelMemoryLimitPayload
+  ) {
     const {
       indexPattern,
       splitFieldName,
@@ -59,7 +64,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
     {
       path: '/api/ml/validate/estimate_bucket_span',
       validate: {
-        body: schema.object(estimateBucketSpanSchema),
+        body: estimateBucketSpanSchema,
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -96,7 +101,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/calculate_model_memory_limit
+   * @api {post} /api/ml/validate/calculate_model_memory_limit Calculates model memory limit
    * @apiName CalculateModelMemoryLimit
    * @apiDescription Calculates the model memory limit
    *
@@ -106,7 +111,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
     {
       path: '/api/ml/validate/calculate_model_memory_limit',
       validate: {
-        body: schema.object(modelMemoryLimitSchema),
+        body: modelMemoryLimitSchema,
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -125,7 +130,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
   /**
    * @apiGroup JobValidation
    *
-   * @api {post} /api/ml/validate/cardinality
+   * @api {post} /api/ml/validate/cardinality Validate cardinality
    * @apiName ValidateCardinality
    * @apiDescription Validates cardinality for the given job configuration
    */
@@ -133,7 +138,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
     {
       path: '/api/ml/validate/cardinality',
       validate: {
-        body: schema.object(anomalyDetectionJobSchema),
+        body: schema.object(validateCardinalitySchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -163,7 +168,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
     {
       path: '/api/ml/validate/job',
       validate: {
-        body: schema.object(validateJobSchema),
+        body: validateJobSchema,
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {

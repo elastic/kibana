@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 
-export const estimateBucketSpanSchema = {
+export const estimateBucketSpanSchema = schema.object({
   aggTypes: schema.arrayOf(schema.nullable(schema.string())),
   duration: schema.object({ start: schema.number(), end: schema.number() }),
   fields: schema.arrayOf(schema.nullable(schema.string())),
@@ -15,9 +15,9 @@ export const estimateBucketSpanSchema = {
   query: schema.any(),
   splitField: schema.maybe(schema.string()),
   timeField: schema.maybe(schema.string()),
-};
+});
 
-export const modelMemoryLimitSchema = {
+export const modelMemoryLimitSchema = schema.object({
   indexPattern: schema.string(),
   splitFieldName: schema.string(),
   query: schema.any(),
@@ -26,13 +26,34 @@ export const modelMemoryLimitSchema = {
   timeFieldName: schema.string(),
   earliestMs: schema.number(),
   latestMs: schema.number(),
-};
+});
 
-export const validateJobSchema = {
+export const validateJobSchema = schema.object({
   duration: schema.object({
     start: schema.maybe(schema.number()),
     end: schema.maybe(schema.number()),
   }),
   fields: schema.maybe(schema.any()),
   job: schema.object(anomalyDetectionJobSchema),
+});
+
+const datafeedConfigSchema = schema.object({
+  datafeed_id: schema.string(),
+  aggregations: schema.maybe(schema.any()),
+  aggs: schema.maybe(schema.any()),
+  chunking_config: schema.maybe(schema.any()),
+  frequency: schema.maybe(schema.string()),
+  indices: schema.arrayOf(schema.string()),
+  indexes: schema.maybe(schema.arrayOf(schema.string())),
+  job_id: schema.string(),
+  query: schema.any(),
+  query_delay: schema.string(),
+  script_fields: schema.any(),
+  scroll_size: schema.number(),
+  delayed_data_check_config: schema.any(),
+});
+
+export const validateCardinalitySchema = {
+  ...anomalyDetectionJobSchema,
+  datafeed_config: datafeedConfigSchema,
 };

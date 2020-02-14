@@ -54,10 +54,12 @@ export const anomalyDetectionUpdateJobSchema = {
     )
   ),
   custom_settings: schema.maybe(customSettingsSchema),
-  analysis_limits: schema.object({
-    categorization_examples_limit: schema.maybe(schema.number()),
-    model_memory_limit: schema.maybe(schema.string()),
-  }),
+  analysis_limits: schema.maybe(
+    schema.object({
+      categorization_examples_limit: schema.maybe(schema.number()),
+      model_memory_limit: schema.maybe(schema.string()),
+    })
+  ),
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
 };
 
@@ -69,10 +71,12 @@ export const anomalyDetectionJobSchema = {
     influencers: schema.arrayOf(schema.maybe(schema.string())),
     categorization_field_name: schema.maybe(schema.string()),
   }),
-  analysis_limits: schema.object({
-    categorization_examples_limit: schema.maybe(schema.number()),
-    model_memory_limit: schema.maybe(schema.string()),
-  }),
+  analysis_limits: schema.maybe(
+    schema.object({
+      categorization_examples_limit: schema.maybe(schema.number()),
+      model_memory_limit: schema.maybe(schema.string()),
+    })
+  ),
   background_persist_interval: schema.maybe(schema.string()),
   create_time: schema.maybe(schema.number()),
   custom_settings: schema.maybe(customSettingsSchema),
