@@ -38,8 +38,8 @@ const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
 
 /**
- * Builds and returns appState and globalState containers and helper functions
- * Used to sync URL with UI state
+ * Builds and returns appState and globalState containers and helper functions to start/stop syncing
+ * with URL
  */
 export function getState(
   defaultStepSize: string,
@@ -73,8 +73,8 @@ export function getState(
   return {
     globalState,
     appState,
-    start,
-    stop,
+    startSync: start,
+    stopSync: stop,
     getGlobalFilters: () => getFilters(globalState.getState()),
     getAppFilters: () => getFilters(appState.getState()),
   };

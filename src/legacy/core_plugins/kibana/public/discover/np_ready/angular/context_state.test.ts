@@ -37,8 +37,8 @@ describe('Test Discover Context State', () => {
       }
     `);
     expect(state.globalState.getState()).toMatchInlineSnapshot(`null`);
-    expect(state.start).toBeDefined();
-    expect(state.stop).toBeDefined();
+    expect(state.startSync()).toBeDefined();
+    expect(state.stopSync).toBeDefined();
     expect(state.getGlobalFilters()).toStrictEqual([]);
     expect(state.getAppFilters()).toStrictEqual([]);
   });

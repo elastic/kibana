@@ -69,28 +69,39 @@ getAngularModule().config($routeProvider => {
 function ContextAppRouteController($routeParams, $scope, config, $route) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
-  const { start, stop, appState, globalState, getAppFilters, getGlobalFilters } = getState(
+  const {
+    startSync: startStateSync,
+    stopSync: stopStateSync,
+    appState,
+    globalState,
+    getAppFilters,
+    getGlobalFilters,
+  } = getState(
     config.get('context:defaultSize'),
     indexPattern.timeFieldName,
     config.get('state:storeInSessionStorage')
   );
-  this.state = _.cloneDeep(appState.getState());
-  this.filters = _.cloneDeep([...getGlobalFilters(), ...getAppFilters()]);
-  filterManager.addFilters(this.filters);
-  start();
+  this.state = { ...appState.getState() };
+  this.filters = [...getGlobalFilters(), ...getAppFilters()];
+  this.anchorId = $routeParams.id;
+  this.indexPattern = indexPattern;
+  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
+
+  filterManager.addFilters(_.cloneDeep(this.filters));
+  startStateSync();
 
   // take care of changes in State/URL
   appState.subscribe(newState => {
     if (newState && !_.isEqual(this.state, newState)) {
       this.state = newState;
-      this.filters = _.cloneDeep([...getGlobalFilters(), ...newState.filters]);
+      this.filters = [...getGlobalFilters(), ...newState.filters];
     }
   });
   globalState.subscribe(newState => {
     if (newState && Array.isArray(newState.filters)) {
-      this.filters = _.cloneDeep([...newState.filters, ...this.state.filters]);
+      this.filters = [...newState.filters, ...getAppFilters()];
     } else {
-      this.filters = _.cloneDeep(getAppFilters());
+      this.filters = getAppFilters();
     }
   });
 
@@ -129,10 +140,7 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
   });
 
   $scope.$on('$destroy', () => {
-    stop();
+    stopStateSync();
     updateSubscription.unsubscribe();
   });
-  this.anchorId = $routeParams.id;
-  this.indexPattern = indexPattern;
-  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
 }
