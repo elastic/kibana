@@ -26,8 +26,6 @@ exports[`it renders without crashing 1`] = `
         </ForwardRef>
       </p>
     }
-    fullWidth={false}
-    gutterSize="l"
     title={
       <h3>
         <FormattedMessage
@@ -37,7 +35,6 @@ exports[`it renders without crashing 1`] = `
         />
       </h3>
     }
-    titleSize="xs"
   >
     <EuiFormRow
       describedByIds={Array []}
@@ -92,8 +89,6 @@ exports[`it renders without crashing 1`] = `
         </ForwardRef>
       </p>
     }
-    fullWidth={false}
-    gutterSize="l"
     title={
       <h3>
         <FormattedMessage
@@ -103,7 +98,6 @@ exports[`it renders without crashing 1`] = `
         />
       </h3>
     }
-    titleSize="xs"
   >
     <EuiFormRow
       describedByIds={Array []}
