@@ -21,7 +21,6 @@ export const DenseVectorRequiredParameters = () => {
         defaultMessage:
           'Each document’s dense vector is encoded as a binary doc value. Its size in bytes is equal to 4 * dimensions + 4.',
       })}
-      idAria="mappingsEditorDimsParameter"
     >
       <UseField path="dims" config={getFieldConfig('dims')} component={Field} />
     </FormRow>
