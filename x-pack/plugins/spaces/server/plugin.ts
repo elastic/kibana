@@ -22,7 +22,7 @@ import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { spacesSavedObjectsClientWrapperFactory } from './lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
+import { registerSpacesUsageCollector } from './usage_collection';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
