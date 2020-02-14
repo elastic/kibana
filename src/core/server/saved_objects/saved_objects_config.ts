@@ -36,8 +36,8 @@ export type SavedObjectsConfigType = TypeOf<typeof savedObjectsConfig.schema>;
 export const savedObjectsConfig = {
   path: 'savedObjects',
   schema: schema.object({
-    maxImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
-    maxImportExportSize: schema.number({ defaultValue: 10000 }),
+    maxImportPayloadBytes: schema.byteSize({ defaultValue: 10485760 }),
+    maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
   }),
 };
 
@@ -51,8 +51,8 @@ export class SavedObjectConfig {
     rawConfig: SavedObjectsConfigType,
     rawMigrationConfig: SavedObjectsMigrationConfigType
   ) {
-    this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes;
-    this.maxImportExportSize = rawConfig.maxImportExportSize;
+    this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
+    this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
     this.migration = rawMigrationConfig;
   }
 }
