@@ -74,7 +74,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     directAccessLinks.registerAccessLinkGenerator(
       DASHBOARD_APP_LINK_GENERATOR,
       createDirectAccessDashboardLinkGenerator(async () => ({
-        basePath: (await startServices)[0].http.basePath.get(),
+        appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
         useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
       }))
     );

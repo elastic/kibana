@@ -19,21 +19,21 @@
 
 import { createDirectAccessDashboardLinkGenerator } from './direct_access_link_generator';
 
-const BASE_PATH: string = 'xyz';
+const APP_BASE_PATH: string = 'xyz/app/kibana';
 
 test('creates a link to a saved dashboard', async () => {
   const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ basePath: BASE_PATH, useHashedUrl: false })
+    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
   );
-  const url = await generator.createUrl({});
+  const url = await generator.createUrl!({});
   expect(url).toMatchInlineSnapshot(`"http://localhost/xyz/app/kibana#dashboard?_a=()&_g=()"`);
 });
 
 test('creates a link with global time range set up', async () => {
   const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ basePath: BASE_PATH, useHashedUrl: false })
+    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
   );
-  const url = await generator.createUrl({
+  const url = await generator.createUrl!({
     timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
   });
   expect(url).toMatchInlineSnapshot(
@@ -43,9 +43,9 @@ test('creates a link with global time range set up', async () => {
 
 test('creates a link with filters, time range and query to a saved object', async () => {
   const generator = createDirectAccessDashboardLinkGenerator(() =>
-    Promise.resolve({ basePath: BASE_PATH, useHashedUrl: false })
+    Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
   );
-  const url = await generator.createUrl({
+  const url = await generator.createUrl!({
     timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     dashboardId: '123',
     filters: [

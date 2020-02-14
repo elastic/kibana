@@ -19,16 +19,21 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { AccessLinkGenerator, GeneratorId } from './direct_access_link_generator';
+import {
+  AccessLinkGenerator,
+  GeneratorId,
+  DirectAccessLinkOptions,
+  createDirectAccessLinkGenerator,
+} from './direct_access_link_generator';
 
 export interface DirectAccessLinksStart {
   getAccessLinkGenerator: (urlGeneratorId: GeneratorId) => AccessLinkGenerator<GeneratorId>;
 }
 
 export interface DirectAccessLinksSetup {
-  registerAccessLinkGenerator: (
-    id: GeneratorId,
-    generator: AccessLinkGenerator<GeneratorId>
+  registerAccessLinkGenerator: <Id extends GeneratorId>(
+    id: Id,
+    generator: DirectAccessLinkOptions<Id>
   ) => void;
 }
 
@@ -42,29 +47,39 @@ export class DirectAccessLinksPlugin
 
   public setup(core: CoreSetup) {
     const setup: DirectAccessLinksSetup = {
-      registerAccessLinkGenerator: (id, generator) => (this.accessLinkGenerators[id] = generator),
+      registerAccessLinkGenerator: <Id extends GeneratorId>(
+        id: Id,
+        generatorOptions: DirectAccessLinkOptions<Id>
+      ) => {
+        this.accessLinkGenerators[id] = createDirectAccessLinkGenerator(
+          generatorOptions,
+          this.getAccessLinkGenerator.bind(this)
+        );
+      },
     };
     return setup;
   }
 
   public start(core: CoreStart) {
     const start: DirectAccessLinksStart = {
-      getAccessLinkGenerator: id => {
-        const generator = this.accessLinkGenerators[id];
-        if (!generator) {
-          throw new Error(
-            i18n.translate('directAccessLinkService.errors.noGeneratorWithId', {
-              defaultMessage: 'No generator found with id {id}',
-              values: { id },
-            })
-          );
-        } else {
-          return generator;
-        }
-      },
+      getAccessLinkGenerator: this.getAccessLinkGenerator.bind(this),
     };
     return start;
   }
 
   public stop() {}
+
+  private getAccessLinkGenerator(id: GeneratorId) {
+    const generator = this.accessLinkGenerators[id];
+    if (!generator) {
+      throw new Error(
+        i18n.translate('directAccessLinks.errors.noGeneratorWithId', {
+          defaultMessage: 'No generator found with id {id}',
+          values: { id },
+        })
+      );
+    } else {
+      return generator;
+    }
+  }
 }

@@ -18,9 +18,9 @@
  */
 
 import url from 'url';
-import { TimeRange, esFilters, Query } from '../../data/public';
+import { TimeRange, Filter, Query } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { createDirectAccessLinkGenerator } from '../../direct_access_links/public';
+import { DirectAccessLinkOptions } from '../../direct_access_links/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -31,7 +31,7 @@ export interface DashboardAppLinkGeneratorState {
   State: {
     dashboardId?: string;
     timeRange?: TimeRange;
-    filters?: esFilters.Filter[];
+    filters?: Filter[];
     query?: Query;
     // If not given, will use the uiSettings configuration
     useHash?: boolean;
@@ -39,41 +39,40 @@ export interface DashboardAppLinkGeneratorState {
 }
 
 export const createDirectAccessDashboardLinkGenerator = (
-  getStartServices: () => Promise<{ basePath: string; useHashedUrl: boolean }>
-) =>
-  createDirectAccessLinkGenerator<typeof DASHBOARD_APP_LINK_GENERATOR>({
-    id: DASHBOARD_APP_LINK_GENERATOR,
-    createUrl: async state => {
-      const startServices = await getStartServices();
-      const useHash = state.useHash || startServices.useHashedUrl;
-      const basePath = startServices.basePath;
-      const parsedUrl = url.parse(window.location.href);
-      const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
+  getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
+): DirectAccessLinkOptions<typeof DASHBOARD_APP_LINK_GENERATOR> => ({
+  id: DASHBOARD_APP_LINK_GENERATOR,
+  createUrl: async state => {
+    const startServices = await getStartServices();
+    const useHash = state.useHash || startServices.useHashedUrl;
+    const appBasePath = startServices.appBasePath;
+    const parsedUrl = url.parse(window.location.href);
+    const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
-      const dashboardAppUrl = url.format({
-        protocol: parsedUrl.protocol,
-        host: parsedUrl.host,
-        pathname: `${basePath}/app/kibana`,
-        hash,
-      });
+    const dashboardAppUrl = url.format({
+      protocol: parsedUrl.protocol,
+      host: parsedUrl.host,
+      pathname: `${appBasePath}`,
+      hash,
+    });
 
-      const appStateUrl = setStateToKbnUrl(
-        STATE_STORAGE_KEY,
-        {
-          query: state.query,
-          filters: state.filters,
-        },
-        { useHash },
-        dashboardAppUrl
-      );
+    const appStateUrl = setStateToKbnUrl(
+      STATE_STORAGE_KEY,
+      {
+        query: state.query,
+        filters: state.filters,
+      },
+      { useHash },
+      dashboardAppUrl
+    );
 
-      return setStateToKbnUrl(
-        GLOBAL_STATE_STORAGE_KEY,
-        {
-          timeRange: state.timeRange,
-        },
-        { useHash },
-        appStateUrl
-      );
-    },
-  });
+    return setStateToKbnUrl(
+      GLOBAL_STATE_STORAGE_KEY,
+      {
+        timeRange: state.timeRange,
+      },
+      { useHash },
+      appStateUrl
+    );
+  },
+});

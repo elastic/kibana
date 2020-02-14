@@ -17,18 +17,35 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DirectAccessLinksPlugin } from './plugin';
+import React from 'react';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DirectAccessLinksPlugin(initializerContext);
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
+
+interface PageProps {
+  title: string;
+  children: React.ReactNode;
 }
 
-export { DirectAccessLinksSetup, DirectAccessLinksStart } from './plugin';
-
-export {
-  GeneratorId,
-  GeneratorState,
-  GeneratorStateMapping,
-  DirectAccessLinkOptions,
-} from './direct_access_link_generator';
+export function Page({ title, children }: PageProps) {
+  return (
+    <EuiPageBody data-test-subj="searchTestPage">
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody>{children}</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+}

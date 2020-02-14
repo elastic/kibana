@@ -1,0 +1,10 @@
+{
+  "id": "accessLinksExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["access_links_explorer"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["directAccessLinks", "accessLinksExamples"],
+  "optionalPlugins": []
+}

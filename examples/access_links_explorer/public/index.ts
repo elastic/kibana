@@ -17,18 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DirectAccessLinksPlugin } from './plugin';
+import { AccessLinksExplorerPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DirectAccessLinksPlugin(initializerContext);
-}
-
-export { DirectAccessLinksSetup, DirectAccessLinksStart } from './plugin';
-
-export {
-  GeneratorId,
-  GeneratorState,
-  GeneratorStateMapping,
-  DirectAccessLinkOptions,
-} from './direct_access_link_generator';
+export const plugin = () => new AccessLinksExplorerPlugin();
