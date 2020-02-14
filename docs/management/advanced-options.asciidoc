@@ -8,7 +8,7 @@ for displayed decimal values.
 . Go to *Management > {kib} > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
-. Click *Save*.
+. Click *Save changes*.
 
 
 [float]
