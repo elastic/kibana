@@ -180,7 +180,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                   </ul>
                   <EuiSpacer size="xs" />
                   {hiddenIndicesCount ? (
-                    <EuiText>
+                    <div>
                       {isShowingFullIndicesList ? (
                         <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
                           <FormattedMessage
@@ -200,7 +200,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                           <EuiIcon type="arrowDown" />
                         </EuiLink>
                       )}
-                    </EuiText>
+                    </div>
                   ) : null}
                 </div>
               ) : (

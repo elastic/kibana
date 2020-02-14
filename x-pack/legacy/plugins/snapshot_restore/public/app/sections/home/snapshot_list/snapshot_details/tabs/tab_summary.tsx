@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import {
   EuiDescriptionList,
@@ -15,15 +15,12 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiTitle,
-  EuiIcon,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useAppDependencies } from '../../../../../index';
-import { DataPlaceholder, FormattedDateTime } from '../../../../../components';
+import { DataPlaceholder, FormattedDateTime, ShowHideIndices } from '../../../../../components';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
 
@@ -54,77 +51,78 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   } = snapshotDetails;
 
   // Only show 10 indices initially
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const hiddenIndicesCount = indices.length > 10 ? indices.length - 10 : 0;
-  const shortIndicesList = indices.length ? (
-    <EuiText size="m">
-      <ul>
-        {[...indices].splice(0, 10).map((index: string) => (
-          <li key={index}>
-            <EuiTitle size="xs">
-              <span>{index}</span>
-            </EuiTitle>
-          </li>
-        ))}
-      </ul>
-      <EuiSpacer size="xs" />
-      {hiddenIndicesCount ? (
-        <div>
-          <EuiText>
-            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
-                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                values={{ count: hiddenIndicesCount }}
-              />{' '}
-              <EuiIcon type="arrowDown" />
-            </EuiLink>
-          </EuiText>
-        </div>
-      ) : null}
-    </EuiText>
-  ) : (
-    <FormattedMessage
-      id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
-      defaultMessage="-"
-    />
-  );
-  const fullIndicesList =
-    indices.length && indices.length > 10 ? (
-      <div>
-        <ul>
-          {indices.map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
-        <EuiSpacer size="xs" />
-        {hiddenIndicesCount ? (
-          <div>
-            <EuiText>
-              <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotDetails.itemIndicesCollapseAllLink"
-                  defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                  values={{ count: hiddenIndicesCount }}
-                />{' '}
-                <EuiIcon type="arrowUp" />
-              </EuiLink>
-            </EuiText>
-          </div>
-        ) : null}
-      </div>
-    ) : null;
+  // const shortIndicesList = indices.length ? (
+
+  // ) : null;
+
+  // const hiddenIndicesCount = indices.length > 10 ? indices.length - 10 : 0;
+  // const shortIndicesList = indices.length ? (
+  //   <EuiText size="m">
+  //     <ul>
+  //       {[...indices].splice(0, 10).map((index: string) => (
+  //         <li key={index}>
+  //           <EuiTitle size="xs">
+  //             <span>{index}</span>
+  //           </EuiTitle>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //     <EuiSpacer size="xs" />
+  //     {hiddenIndicesCount ? (
+  //       <div>
+  //         <EuiText>
+  //           <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+  //             <FormattedMessage
+  //               id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
+  //               defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+  //               values={{ count: hiddenIndicesCount }}
+  //             />{' '}
+  //             <EuiIcon type="arrowDown" />
+  //           </EuiLink>
+  //         </EuiText>
+  //       </div>
+  //     ) : null}
+  //   </EuiText>
+  // ) : (
+  //   <FormattedMessage
+  //     id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
+  //     defaultMessage="-"
+  //   />
+  // );
+  // const fullIndicesList =
+  //   indices.length && indices.length > 10 ? (
+  //     <div>
+  //       <ul>
+  //         {indices.map((index: string) => (
+  //           <li key={index}>
+  //             <EuiTitle size="xs">
+  //               <span>{index}</span>
+  //             </EuiTitle>
+  //           </li>
+  //         ))}
+  //       </ul>
+  //       <EuiSpacer size="xs" />
+  //       {hiddenIndicesCount ? (
+  //         <div>
+  //           <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+  //             <FormattedMessage
+  //               id="xpack.snapshotRestore.snapshotDetails.itemIndicesCollapseAllLink"
+  //               defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+  //               values={{ count: hiddenIndicesCount }}
+  //             />{' '}
+  //             <EuiIcon type="arrowUp" />
+  //           </EuiLink>
+  //         </div>
+  //       ) : null}
+  //     </div>
+  //   ) : null;
 
   // Reset indices list state when clicking through different snapshots
-  useEffect(() => {
-    return () => {
-      setIsShowingFullIndicesList(false);
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     setIsShowingFullIndicesList(false);
+  //   };
+  // }, []);
 
   return (
     <EuiDescriptionList textStyle="reverse">
@@ -205,7 +203,13 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiText>{isShowingFullIndicesList ? fullIndicesList : shortIndicesList}</EuiText>
+            <EuiText>
+              <ShowHideIndices
+                indices={indices}
+                defaultState={false}
+                i18nId="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
+              />
+            </EuiText>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
