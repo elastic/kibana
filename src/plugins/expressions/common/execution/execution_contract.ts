@@ -68,11 +68,23 @@ export class ExecutionContract<
     }
   };
 
+  /**
+   * Get string representation of the expression. Returns the original string
+   * if execution was started from a string. If execution was started from an
+   * AST this method returns a string generated from AST.
+   */
   getExpression = () => {
     return this.execution.expression;
   };
 
+  /**
+   * Get AST used to execute the expression.
+   */
   getAst = () => this.execution.state.get().ast;
 
+  /**
+   * Get Inspector adapters provided to all functions of expression through
+   * execution context.
+   */
   inspect = () => this.execution.inspectorAdapters;
 }
