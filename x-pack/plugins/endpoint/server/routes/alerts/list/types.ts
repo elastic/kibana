@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { decode, encode } from 'rison-node';
-import { LoggerFactory } from 'kibana/server';
-import { esFilters, TimeRange } from '../../../../src/plugins/data/common';
-import { JsonObject } from '../../../../src/plugins/data/common/es_query/kuery';
-import { EndpointConfigType } from './config';
+import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 /**
  * Request params for alert queries.
@@ -27,13 +24,6 @@ export interface AlertListRequestQuery {
 }
 
 /**
- * Data about the request.
- **/
-interface AlertListRequestQueryMeta {
-  pageUrl: string;
-}
-
-/**
  * Request metadata for additional context.
  *
  * Internal use: contains the validated request parameters for use
@@ -45,19 +35,17 @@ interface AlertListRequestQueryMeta {
  */
 export interface AlertListRequestQueryInternal {
   pageSize: number;
-  pageIndex?: number;
-  fromIndex?: number;
-  query?: string;
-  filters?: esFilters.Filter[];
+  pageIndex?: number | null | undefined;
+  fromIndex?: number | null | undefined;
+  query?: string | null | undefined;
+  filters: Filter[];
   dateRange?: TimeRange;
   sort: string;
   order: string;
   searchAfter?: [any, any];
   searchBefore?: [any, any];
-  next?: string;
-  prev?: string;
-
-  meta: AlertListRequestQueryMeta;
+  next?: string | null | undefined;
+  prev?: string | null | undefined;
 }
 
 /**
@@ -88,5 +76,3 @@ export interface AlertListRequest {
   from?: number;
   body: AlertListESRequestBody;
 }
-
-type AlertHits = AlertSource[];

@@ -19,7 +19,6 @@ export const alertListHandlerWrapper = function(
     res
   ) => {
     try {
-      // console.log(req);
       const reqData = await getRequestData(req, endpointAppContext);
 
       const reqWrapper = await buildAlertListESQuery(reqData);

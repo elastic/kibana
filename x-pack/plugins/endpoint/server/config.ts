@@ -28,7 +28,6 @@ export const EndpointConfigSchema = schema.object({
   alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
   alertResultListDefaultSort: schema.string({ defaultValue: '@timestamp' }),
   alertResultListDefaultOrder: schema.string({ defaultValue: 'desc' }),
-  alertResultListDefaultDateRange: schema.string({}),
   alertResultListDefaultDateRange: schema.string({
     defaultValue: encode({ from: 'now-2y', to: 'now' }),
   }),

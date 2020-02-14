@@ -3,12 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { encode, decode } from 'rison-node';
 import { schema } from '@kbn/config-schema';
+import { esKuery } from '../../../../../../../src/plugins/data/server';
 
 export const alertListReqSchema = schema.object(
   {
-    page_size: schema.maybe(schema.number()),
-    page_index: schema.maybe(schema.number()),
+    page_size: schema.maybe(
+      schema.number({
+        min: 1,
+        max: 100,
+      })
+    ),
+    page_index: schema.maybe(
+      schema.number({
+        min: 0,
+        // TODO: should we define a max to force cursor-based pagination after a certain point?
+      })
+    ),
     after: schema.maybe(
       schema.arrayOf(schema.any(), {
         minSize: 2,
@@ -21,29 +33,59 @@ export const alertListReqSchema = schema.object(
         maxSize: 2,
       })
     ),
-    sort: schema.string({ defaultValue: '@timestamp' }),
-    order: schema.string({
-      defaultValue: 'desc',
+    sort: schema.maybe(
+      schema.string({
+        validate(value) {
+          // TODO: check for valid key in `AlertData`
+        },
+      })
+    ),
+    order: schema.maybe(
+      schema.string({
+        validate(value) {
+          if (value !== 'asc' && value !== 'desc') {
+            return 'must be `asc` or `desc`';
+          }
+        },
+      })
+    ),
+    query: schema.maybe(
+      schema.string({
+        validate(value) {
+          try {
+            esKuery.fromKueryExpression(value);
+          } catch (err) {
+            return 'must be valid KQL';
+          }
+        },
+      })
+    ),
+
+    // rison-encoded string
+    filters: schema.maybe(
+      schema.string({
+        validate(value) {
+          try {
+            decode(value);
+          } catch (err) {
+            return 'must be a valid rison-encoded string';
+          }
+        },
+      })
+    ),
+
+    // rison-encoded string
+    date_range: schema.string({
+      // defaultValue: config.alertResultListDefaultDateRange,
+      defaultValue: encode({ from: 'now-2y', to: 'now' }),
       validate(value) {
-        if (value !== 'asc' && value !== 'desc') {
-          return 'must be `asc` or `desc`';
+        try {
+          decode(value);
+        } catch (err) {
+          return 'must be a valid rison-encoded string';
         }
       },
     }),
-    query: schema.maybe(schema.string()),
-
-    // rison-encoded string
-    filters: schema.maybe(schema.string()),
-
-    // rison-encoded string
-    date_range: schema.maybe(schema.string()),
-
-    /*
-    dateRange: schema.object({
-      to: schema.string({ defaultValue: 'now' }),
-      from: schema.string({ defaultValue: 'now-15m' }),
-    }),
-    */
   },
   {
     validate(value) {

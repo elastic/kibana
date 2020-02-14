@@ -25,6 +25,7 @@
                         "action": "open",
                         "category": "malware",
                         "dataset": "endpoint",
+                        "id": "0c85aee2-07d8-4794-8b03-982de79a85aa",
                         "kind": "alert",
                         "module": "endpoint",
                         "type": "access"

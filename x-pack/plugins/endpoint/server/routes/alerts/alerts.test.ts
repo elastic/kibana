@@ -48,7 +48,12 @@ describe('test alerts route', () => {
   });
 
   it('should return the latest of all alerts', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({});
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: '/api/endpoint/alerts',
+      query: {
+        date_range: encode({ from: 'now-2y', to: 'now' }),
+      },
+    });
 
     const response: SearchResponse<AlertData> = (data as unknown) as SearchResponse<AlertData>;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
@@ -96,6 +101,7 @@ describe('test alerts route', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: '/api/endpoint/alerts',
       query: {
+        date_range: encode({ from: 'now-2y', to: 'now' }),
         page_size: 3,
         page_index: 2,
       },
@@ -189,10 +195,10 @@ describe('test alerts route', () => {
     expect(alertResultList.result_from_index).toEqual(0);
     expect(alertResultList.request_page_size).toEqual(10);
     expect(alertResultList.next).toEqual(
-      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&page_size=10&sort=@timestamp&order=desc&after=1542341895000&after=undefined`
+      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&sort=@timestamp&order=desc&page_size=10&after=1542341895000&after=0c85aee2-07d8-4794-8b03-982de79a85aa`
     );
     expect(alertResultList.prev).toEqual(
-      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&page_size=10&sort=@timestamp&order=desc&before=1542341895000&before=undefined`
+      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&sort=@timestamp&order=desc&page_size=10&before=1542341895000&before=0c85aee2-07d8-4794-8b03-982de79a85aa`
     );
   });
 
@@ -208,7 +214,7 @@ describe('test alerts route', () => {
   it('should validate when `page_size` is a number', async () => {
     const validate = () => {
       alertListReqSchema.validate({
-        page_size: 123,
+        page_size: 25,
       });
     };
     expect(validate).not.toThrow();
@@ -217,7 +223,7 @@ describe('test alerts route', () => {
   it('should validate when `page_size` can be converted to a number', async () => {
     const validate = () => {
       alertListReqSchema.validate({
-        page_size: '123',
+        page_size: '50',
       });
     };
     expect(validate).not.toThrow();

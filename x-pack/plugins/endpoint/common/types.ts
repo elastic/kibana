@@ -47,22 +47,22 @@ export interface AlertResultList {
   /**
    * The index of the requested page, starting at 0.
    */
-  request_page_index: number | undefined;
+  request_page_index: number | null | undefined;
 
   /**
    * The offset of the requested page, starting at 0.
    */
-  result_from_index: number | undefined;
+  result_from_index: number | null | undefined;
 
   /**
    * A cursor-based URL for the next page.
    */
-  next: string | null;
+  next: string | null | undefined;
 
   /**
    * A cursor-based URL for the previous page.
    */
-  prev: string | null;
+  prev: string | null | undefined;
 }
 
 export interface EndpointResultList {
