@@ -215,7 +215,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 error: 'Bad Request',
                 message:
                   '[request body.name]: expected value of type [string] but got [undefined]. [request body.alertTypeId]: expected value of type [string] but got [undefined]. [request body.consumer]: expected value of type [string] but got [undefined]. [request body.schedule]: expected value of type [object] but got [undefined]. [request body.params]: expected value of type [object] but got [undefined]. [request body.actions]: expected value of type [array] but got [undefined]',
-                // message: '[request body.config]: expected value of type [object] but got [null]',
               });
               break;
             default:

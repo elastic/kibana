@@ -9,7 +9,9 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
+import { alertsClientMock } from '../alerts_client.mock';
 
+const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -54,9 +56,7 @@ describe('getAlertStateRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      getAlertState: jest.fn().mockResolvedValueOnce(mockedAlertState),
-    };
+    alertsClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -99,9 +99,7 @@ describe('getAlertStateRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      getAlertState: jest.fn().mockResolvedValueOnce(undefined),
-    };
+    alertsClient.getAlertState.mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -144,11 +142,9 @@ describe('getAlertStateRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      getAlertState: jest
-        .fn()
-        .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1')),
-    };
+    alertsClient.getAlertState = jest
+      .fn()
+      .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },

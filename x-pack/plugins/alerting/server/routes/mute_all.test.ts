@@ -8,7 +8,9 @@ import { muteAllAlertRoute } from './mute_all';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
 
+const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -35,9 +37,7 @@ describe('muteAllAlertRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      muteAll: jest.fn().mockResolvedValueOnce({}),
-    };
+    alertsClient.muteAll.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },

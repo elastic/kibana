@@ -8,6 +8,9 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
+
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -35,9 +38,7 @@ describe('deleteAlertRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -71,9 +72,7 @@ describe('deleteAlertRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const alertsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(alertsClient, {
       params: { id: '1' },
@@ -96,9 +95,7 @@ describe('deleteAlertRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const alertsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    alertsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(alertsClient, {
       id: '1',

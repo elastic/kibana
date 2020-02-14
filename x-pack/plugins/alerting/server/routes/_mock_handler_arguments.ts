@@ -7,6 +7,7 @@
 import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { alertsClientMock } from '../alerts_client.mock';
 
 export function mockHandlerArguments(
   { alertsClient, listTypes: listTypesRes = [] }: any,
@@ -19,17 +20,7 @@ export function mockHandlerArguments(
       alerting: {
         listTypes,
         getAlertsClient() {
-          return (
-            alertsClient || {
-              get: jest.fn(),
-              delete: jest.fn(),
-              update: jest.fn(),
-              find: jest.fn(),
-              create: jest.fn(),
-              enable: jest.fn(),
-              disable: jest.fn(),
-            }
-          );
+          return alertsClient || alertsClientMock.create();
         },
       },
     } as unknown) as RequestHandlerContext,

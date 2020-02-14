@@ -9,7 +9,9 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
 
+const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -67,9 +69,7 @@ describe('getAlertRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      get: jest.fn().mockResolvedValueOnce(mockedAlert),
-    };
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -96,9 +96,7 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const alertsClient = {
-      get: jest.fn().mockResolvedValueOnce(mockedAlert),
-    };
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
       alertsClient,
@@ -125,9 +123,7 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const alertsClient = {
-      get: jest.fn().mockResolvedValueOnce(mockedAlert),
-    };
+    alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
       alertsClient,

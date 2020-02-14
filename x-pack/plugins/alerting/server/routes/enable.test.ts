@@ -7,6 +7,9 @@ import { enableAlertRoute } from './enable';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
+
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -34,9 +37,7 @@ describe('enableAlertRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      enable: jest.fn().mockResolvedValueOnce({}),
-    };
+    alertsClient.enable.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },

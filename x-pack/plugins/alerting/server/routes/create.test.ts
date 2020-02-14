@@ -9,6 +9,9 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
+
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -80,9 +83,7 @@ describe('createAlertRoute', () => {
       }
     `);
 
-    const alertsClient = {
-      create: jest.fn().mockResolvedValueOnce(createResult),
-    };
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -131,7 +132,7 @@ describe('createAlertRoute', () => {
     });
   });
 
-  it('ensures the license allows creating actions', async () => {
+  it('ensures the license allows creating alerts', async () => {
     const licenseState = mockLicenseState();
     const router: RouterMock = mockRouter.create();
 
@@ -139,18 +140,16 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    const actionsClient = {
-      create: jest.fn().mockResolvedValueOnce(createResult),
-    };
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {});
+    const [context, req, res] = mockHandlerArguments(alertsClient, {});
 
     await handler(context, req, res);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('ensures the license check prevents creating actions', async () => {
+  it('ensures the license check prevents creating alerts', async () => {
     const licenseState = mockLicenseState();
     const router: RouterMock = mockRouter.create();
 
@@ -162,11 +161,9 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    const actionsClient = {
-      create: jest.fn().mockResolvedValueOnce(createResult),
-    };
+    alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {});
+    const [context, req, res] = mockHandlerArguments(alertsClient, {});
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
