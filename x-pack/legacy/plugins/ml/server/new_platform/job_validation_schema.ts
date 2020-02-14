@@ -47,10 +47,10 @@ const datafeedConfigSchema = schema.object({
   indexes: schema.maybe(schema.arrayOf(schema.string())),
   job_id: schema.string(),
   query: schema.any(),
-  query_delay: schema.string(),
-  script_fields: schema.any(),
-  scroll_size: schema.number(),
-  delayed_data_check_config: schema.any(),
+  query_delay: schema.maybe(schema.string()),
+  script_fields: schema.maybe(schema.any()),
+  scroll_size: schema.maybe(schema.number()),
+  delayed_data_check_config: schema.maybe(schema.any()),
 });
 
 export const validateCardinalitySchema = {
