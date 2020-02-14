@@ -8,7 +8,12 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 // @ts-ignore
-import { initKibanaServices, setInspector, setInjectedVarFunc } from './kibana_services';
+import {
+  initKibanaServices,
+  setInspector,
+  setInjectedVarFunc,
+  setTimeFilter,
+} from './kibana_services';
 
 // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginSetupDependencies {
@@ -39,6 +44,7 @@ export class MapsPlugin
     initKibanaServices(core, plugins);
     setInspector(plugins.inspector);
     setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    setTimeFilter(plugins.data.query.timefilter);
     // core.application.register({
     //   id: 'maps',
     //   title: i18n.translate('xpack.maps.pluginTitle', {
