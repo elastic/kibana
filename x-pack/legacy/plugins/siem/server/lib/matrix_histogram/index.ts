@@ -6,16 +6,16 @@
 
 import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { AnomaliesAdapter } from './types';
-import { AnomaliesOverTimeData } from '../../../public/graphql/types';
+import { MatrixHistogramAdapter } from './types';
+import { MatrixHistogramOverTimeData } from '../../graphql/types';
 
-export class Anomalies {
-  constructor(private readonly adapter: AnomaliesAdapter) {}
+export class MatrixHistogram {
+  constructor(private readonly adapter: MatrixHistogramAdapter) {}
 
-  public async getAnomaliesOverTime(
+  public async getMatrixHistogramData(
     req: FrameworkRequest,
     options: MatrixHistogramRequestOptions
-  ): Promise<AnomaliesOverTimeData> {
-    return this.adapter.getAnomaliesOverTime(req, options);
+  ): Promise<MatrixHistogramOverTimeData> {
+    return this.adapter.getHistogramData(req, options);
   }
 }
