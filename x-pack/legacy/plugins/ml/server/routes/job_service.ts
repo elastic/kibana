@@ -29,7 +29,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/force_start_datafeeds
+   * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
    * @apiName ForceStartDatafeeds
    * @apiDescription Starts one or more datafeeds
    */
@@ -58,7 +58,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/stop_datafeeds
+   * @api {post} /api/ml/jobs/stop_datafeeds Stop datafeeds
    * @apiName StopDatafeeds
    * @apiDescription Stops one or more datafeeds
    */
@@ -87,7 +87,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/delete_jobs
+   * @api {post} /api/ml/jobs/delete_jobs Delete jobs
    * @apiName DeleteJobs
    * @apiDescription Deletes an existing anomaly detection job
    */
@@ -116,7 +116,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/close_jobs
+   * @api {post} /api/ml/jobs/close_jobs Close jobs
    * @apiName CloseJobs
    * @apiDescription Closes one or more anomaly detection jobs
    */
@@ -145,7 +145,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_summary
+   * @api {post} /api/ml/jobs/jobs_summary Jobs summary
    * @apiName JobsSummary
    * @apiDescription Creates a summary jobs list. Jobs include job stats, datafeed stats, and calendars.
    */
@@ -174,9 +174,9 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_with_time_range
-   * @apiName JobsWithTimerange
-   * @apiDescription Creates a list of jobs with data about the job's timerange
+   * @api {post} /api/ml/jobs/jobs_with_time_range Jobs with time range
+   * @apiName JobsWithTimeRange
+   * @apiDescription Creates a list of jobs with data about the job's time range
    */
   router.post(
     {
@@ -203,7 +203,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs
+   * @api {post} /api/ml/jobs/jobs Create jobs list
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
    */
@@ -232,7 +232,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/groups
+   * @api {get} /api/ml/jobs/groups Get job groups
    * @apiName GetAllGroups
    * @apiDescription Returns array of group objects with job ids listed for each group
    */
@@ -258,7 +258,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/update_groups
+   * @api {post} /api/ml/jobs/update_groups Update job groups
    * @apiName UpdateGroups
    * @apiDescription Updates 'groups' property of an anomaly detection job
    */
@@ -287,7 +287,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/deleting_jobs_tasks
+   * @api {get} /api/ml/jobs/deleting_jobs_tasks Get deleting  job tasks
    * @apiName DeletingJobTasks
    * @apiDescription Gets the ids of deleting anomaly detection jobs
    */
@@ -313,7 +313,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_exist
+   * @api {post} /api/ml/jobs/jobs_exist Check if jobs exist
    * @apiName JobsExist
    * @apiDescription Checks if each of the jobs in the specified list of IDs exist
    */
@@ -342,7 +342,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/new_job_caps/:indexPattern
+   * @api {get} /api/ml/jobs/new_job_caps/:indexPattern Get new job capabilities
    * @apiName NewJobCaps
    * @apiDescription Retrieve the capabilities of fields for indices
    */
@@ -374,7 +374,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/new_job_line_chart
+   * @api {post} /api/ml/jobs/new_job_line_chart Get job line chart data
    * @apiName NewJobLineChart
    * @apiDescription Returns line chart data for anomaly detection job
    */
@@ -427,7 +427,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/new_job_population_chart
+   * @api {post} /api/ml/jobs/new_job_population_chart Get population job chart data
    * @apiName NewJobPopulationChart
    * @apiDescription Returns population job chart data
    */
@@ -477,7 +477,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/all_jobs_and_group_ids
+   * @api {get} /api/ml/jobs/all_jobs_and_group_ids Get all job and group IDs
    * @apiName GetAllJobAndGroupIds
    * @apiDescription Returns a list of all job IDs and all group IDs
    */
@@ -503,7 +503,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/look_back_progress
+   * @api {post} /api/ml/jobs/look_back_progress Get lookback progress
    * @apiName GetLookBackProgress
    * @apiDescription Returns current progress of anomaly detection job
    */
@@ -532,7 +532,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/categorization_field_examples
+   * @api {post} /api/ml/jobs/categorization_field_examples Get categorization field examples
    * @apiName ValidateCategoryExamples
    * @apiDescription Validates category examples
    */
@@ -582,7 +582,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/top_categories
+   * @api {post} /api/ml/jobs/top_categories Get top categories
    * @apiName TopCategories
    * @apiDescription Returns list of top categories
    */

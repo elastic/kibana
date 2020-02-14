@@ -6,7 +6,7 @@
 
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { RequestFacade } from '../../../types';
+import { LegacyRequest } from '../../../types';
 import {
   AlertType,
   State,
@@ -39,11 +39,11 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 
 export type SignalsQueryRestParams = SignalQueryParams;
 
-export interface SignalsStatusRequest extends RequestFacade {
+export interface SignalsStatusRequest extends LegacyRequest {
   payload: SignalsStatusRestParams;
 }
 
-export interface SignalsQueryRequest extends RequestFacade {
+export interface SignalsQueryRequest extends LegacyRequest {
   payload: SignalsQueryRestParams;
 }
 
