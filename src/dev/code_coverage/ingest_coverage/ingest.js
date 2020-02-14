@@ -20,8 +20,6 @@
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
-import { of } from 'rxjs';
-import { delay, concatMap } from 'rxjs/operators';
 
 const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
@@ -29,16 +27,7 @@ const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
-export default (obs$, log) => {
-  const ms = process.env.DELAY || 0;
-  log.debug(`### Code coverage indexer set to delay for: ${ms} milliseconds\n`);
-  log.debug(`### Code coverage indexer set to ES_HOST (redacted): ${redacted}`);
-
-  const postWithLogger = post.bind(null, log);
-
-  obs$.pipe(concatMap(x => of(x).pipe(delay(ms)))).subscribe(postWithLogger);
-};
-async function post(log, body) {
+export const ingest = log => async body => {
   let index = '';
   if (!body.coveredFilePath) {
     index = TOTALS_INDEX;

@@ -18,8 +18,7 @@
  */
 
 import { resolve } from 'path';
-import convert from './convert';
-import send from './ingest';
+import parseAndProcess from './process';
 import { run, createFlagError } from '@kbn/dev-utils';
 
 const ROOT = resolve(__dirname, '../../../..');
@@ -37,7 +36,7 @@ export function runCoverageIngestionCli() {
       if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
       const coveragePath = resolve(ROOT, flags.path);
-      send(convert({ coveragePath }, log), log);
+      parseAndProcess({ coveragePath }, log);
     },
     {
       description: `

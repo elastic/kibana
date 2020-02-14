@@ -17,39 +17,43 @@
  * under the License.
  */
 
-import { fromEventPattern } from 'rxjs';
-import { map } from 'rxjs/operators';
-// import { tap } from 'rxjs/operators';
+import { fromEventPattern, of } from 'rxjs';
+import { concatMap, delay, map } from 'rxjs/operators';
 import jsonStream from './json_stream';
-import { pipe } from './utils';
+import { pipe, noop } from './utils';
+import { ingest } from './ingest';
 import {
   staticSite,
   statsAndCoveredFilePath,
   addPath,
   testRunner,
-  // truncate,
   timeStamp,
   distro,
   buildId,
-  maybeDropCoveredFilePath } from './conversions';
+  maybeDropCoveredFilePath,
+} from './conversions';
 
-// const dropKibana = truncate('kibana');
+const ms = process.env.DELAY || 0;
+const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
 
 export default ({ coveragePath }, log) => {
-  const objStream = jsonStream(coveragePath).on('done', _ =>
-    log.debug(`### Done streaming from \n\t${coveragePath}`),
-  );
+  log.debug(`### Code coverage ingestion set to delay for: ${ms} ms\n`);
 
-  const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
-  const staticSiteUrl = staticSite(staticSiteUrlBase);
-  const prokStatsAndCoveredFilePath = pipe(statsAndCoveredFilePath, buildId, staticSiteUrl);
-  const addTestRunnerAndTimeStampAndDistro = pipe(testRunner, timeStamp, distro);
 
-  return fromEventPattern(_ => objStream.on('node', '!.*', _)).pipe(
-    map(prokStatsAndCoveredFilePath),
-    map(addPath(coveragePath)),
-    map(addTestRunnerAndTimeStampAndDistro),
-    map(maybeDropCoveredFilePath),
-  );
+  const prokStatsBuildIdCoveredFilePath =
+    pipe(statsAndCoveredFilePath, buildId, staticSite(staticSiteUrlBase));
+  const addPathTestRunnerTimeStampAndDistro =
+    pipe(addPath(coveragePath), testRunner, timeStamp, distro);
+
+  const objStream = jsonStream(coveragePath)
+    .on('done', noop);
+
+  fromEventPattern(_ => objStream.on('node', '!.*', _))
+    .pipe(
+      map(prokStatsBuildIdCoveredFilePath),
+      map(addPathTestRunnerTimeStampAndDistro),
+      map(maybeDropCoveredFilePath),
+      concatMap(x => of(x).pipe(delay(ms))),
+    )
+    .subscribe(ingest(log));
 };
-
