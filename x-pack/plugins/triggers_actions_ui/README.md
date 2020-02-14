@@ -291,7 +291,7 @@ interface WhenExpressionProps {
 |---|---|
 |aggType|Selected aggregation type that will be set as the alert type property.|
 |customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|onChangeSelectedAggType|event handler that will be excuted selected aggregation type is changed.|
+|onChangeSelectedAggType|event handler that will be executed when selected aggregation type is changed.|
 |popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
 ### OF expression component
