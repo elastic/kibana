@@ -16,6 +16,7 @@ import {
   createImportErrorObject,
   transformImportError,
 } from './utils';
+import { createMockConfig } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -295,34 +296,20 @@ describe('utils', () => {
   });
 
   describe('getIndex', () => {
-    it('appends the space ID to the configured index if spaces are enabled', () => {
-      const mockGet = jest.fn();
-      const mockGetSpaceId = jest.fn();
-      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
-      const server = { plugins: { spaces: { getSpaceId: mockGetSpaceId } }, config };
+    let mockConfig = createMockConfig();
 
-      mockGet.mockReturnValue('mockSignalsIndex');
-      mockGetSpaceId.mockReturnValue('myspace');
-      // @ts-ignore-next-line TODO these dependencies are simplified on
-      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
-      // out what we need.
-      const index = getIndex(null, server);
-
-      expect(index).toEqual('mockSignalsIndex-myspace');
+    beforeEach(() => {
+      mockConfig = () => ({
+        get: jest.fn(() => 'mockSignalsIndex'),
+        has: jest.fn(),
+      });
     });
 
-    it('appends the default space ID to the configured index if spaces are disabled', () => {
-      const mockGet = jest.fn();
-      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
-      const server = { plugins: {}, config };
+    it('appends the space id to the configured index', () => {
+      const getSpaceId = jest.fn(() => 'myspace');
+      const index = getIndex(getSpaceId, mockConfig);
 
-      mockGet.mockReturnValue('mockSignalsIndex');
-      // @ts-ignore-next-line TODO these dependencies are simplified on
-      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
-      // out what we need.
-      const index = getIndex(null, server);
-
-      expect(index).toEqual('mockSignalsIndex-default');
+      expect(index).toEqual('mockSignalsIndex-myspace');
     });
   });
 });
