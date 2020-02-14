@@ -30,6 +30,7 @@ import { SpacesManager } from '../spaces_manager';
 
 interface Props {
   spacesManager: SpacesManager;
+  serverBasePath: string;
 }
 
 interface State {
@@ -129,7 +130,7 @@ export class SpaceSelector extends Component<Props, State> {
             {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
             {!this.state.loading && (
-              <SpaceCards spaces={filteredSpaces} onSpaceSelect={this.onSelectSpace} />
+              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
             )}
 
             {!this.state.loading && filteredSpaces.length === 0 && (
@@ -178,10 +179,6 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase(),
     });
-  };
-
-  public onSelectSpace = (space: Space) => {
-    this.props.spacesManager.changeSelectedSpace(space);
   };
 }
 

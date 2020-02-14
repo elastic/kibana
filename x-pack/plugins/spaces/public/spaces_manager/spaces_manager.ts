@@ -99,10 +99,6 @@ export class SpacesManager {
     });
   }
 
-  public async changeSelectedSpace(space: Space) {
-    window.location.href = addSpaceIdToPath(this.serverBasePath, space.id, ENTER_SPACE_PATH);
-  }
-
   public redirectToSpaceSelector() {
     window.location.href = `${this.serverBasePath}/spaces/space_selector`;
   }
