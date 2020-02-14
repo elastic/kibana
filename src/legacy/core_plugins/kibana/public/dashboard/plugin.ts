@@ -48,8 +48,6 @@ import {
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import { connectToQueryGlobalState } from '../../../../../plugins/data/public';
-import { createStateContainer } from '../../../../../plugins/kibana_utils/common/state_containers/create_state_container';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -93,11 +91,6 @@ export class DashboardPlugin implements Plugin {
       npData,
     }: DashboardPluginSetupDependencies
   ) {
-    const globalQueryStateContainer = createStateContainer({});
-    const disconnectGlobalQueryStateContainer = connectToQueryGlobalState(
-      npData.query,
-      globalQueryStateContainer
-    );
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/dashboards',
@@ -107,12 +100,11 @@ export class DashboardPlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: globalQueryStateContainer.state$,
+          stateUpdate$: npData.query.global$,
         },
       ],
     });
     this.stopUrlTracking = () => {
-      disconnectGlobalQueryStateContainer();
       stopUrlTracker();
     };
     const app: App = {

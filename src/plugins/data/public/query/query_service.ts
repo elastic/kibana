@@ -17,11 +17,16 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
+import { QueryAppState, QueryGlobalState } from './state_sync';
+import { createGlobalQueryObservable } from './state_sync/create_global_query_observable';
+import { createAppQueryObservable } from './state_sync/create_app_query_observable';
 
 /**
  * Query Service
@@ -36,6 +41,9 @@ export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
 
+  app$!: Observable<QueryAppState>;
+  global$!: Observable<QueryGlobalState>;
+
   public setup({ uiSettings, storage }: QueryServiceDependencies) {
     this.filterManager = new FilterManager(uiSettings);
 
@@ -45,9 +53,21 @@ export class QueryService {
       storage,
     });
 
+    this.global$ = createGlobalQueryObservable({
+      filterManager: this.filterManager,
+      timefilter: this.timefilter,
+    }).pipe(share());
+
+    this.app$ = createAppQueryObservable({
+      filterManager: this.filterManager,
+      timefilter: this.timefilter,
+    }).pipe(share());
+
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
+      global$: this.global$,
+      app$: this.app$,
     };
   }
 
@@ -55,12 +75,14 @@ export class QueryService {
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
+      global$: this.global$,
+      app$: this.app$,
       savedQueries: createSavedQueryService(savedObjects.client),
     };
   }
 
   public stop() {
-    // nothing to do here yet
+    // nothing here yet
   }
 }
 

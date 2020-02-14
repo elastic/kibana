@@ -19,26 +19,22 @@
 
 import { Subscription } from 'rxjs';
 import _ from 'lodash';
-import { filter, map } from 'rxjs/operators';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
-import { esFilters, RefreshInterval, TimeRange } from '../../../common';
-import { QueryStart } from '../query_service';
-
-export interface QueryGlobalState {
-  time?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  filters?: esFilters.Filter[];
-}
+import { QuerySetup, QueryStart } from '../query_service';
+import { QueryGlobalState } from './types';
 
 /**
- * Helper utility to sync global data from query services: time, refreshInterval, global (pinned) filters
- * with state container
- * @param QueryStart
- * @param stateContainer
+ * Helper to setup two-way syncing of global data and a state container
+ * @param QueryService: either setup or start
+ * @param stateContainer to use for syncing
  */
 export const connectToQueryGlobalState = <S extends QueryGlobalState>(
-  { timefilter: { timefilter }, filterManager }: Pick<QueryStart, 'timefilter' | 'filterManager'>,
+  {
+    timefilter: { timefilter },
+    filterManager,
+    global$,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'global$'>,
   globalState: BaseStateContainer<S>
 ) => {
   // initial syncing
@@ -54,30 +50,9 @@ export const connectToQueryGlobalState = <S extends QueryGlobalState>(
   } as S);
 
   const subs: Subscription[] = [
-    timefilter.getTimeUpdate$().subscribe(() => {
-      globalState.set({ ...globalState.get(), time: timefilter.getTime() } as S);
+    global$.subscribe(newGlobalQueryState => {
+      globalState.set({ ...globalState.get(), ...newGlobalQueryState });
     }),
-    timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-      globalState.set({
-        ...globalState.get(),
-        refreshInterval: timefilter.getRefreshInterval(),
-      } as S);
-    }),
-    filterManager
-      .getUpdates$()
-      .pipe(
-        // we need to track only global filters here
-        map(() => filterManager.getGlobalFilters()),
-        // continue only if global filters changed
-        // and ignore app state filters
-        filter(
-          newGlobalFilters =>
-            !compareFilters(newGlobalFilters, globalState.get().filters || [], COMPARE_ALL_OPTIONS)
-        )
-      )
-      .subscribe(newGlobalFilters => {
-        globalState.set({ ...globalState.get(), filters: newGlobalFilters } as S);
-      }),
     globalState.state$.subscribe(({ time, filters: globalFilters, refreshInterval }) => {
       // cloneDeep is required because services are mutating passed objects
       // and state in state container is frozen

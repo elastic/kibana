@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export { connectToQueryGlobalState } from './connect_to_global_state';
-export { connectToQueryAppState } from './connect_to_app_state';
-export { syncGlobalQueryStateWithUrl } from './sync_global_state_with_url';
-export { QueryAppState, QueryGlobalState } from './types';
+import { esFilters, RefreshInterval, TimeRange } from '../../../common';
+
+/**
+ * State from data services that meant to be preserved between apps
+ */
+export interface QueryGlobalState {
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: esFilters.Filter[]; // pinned filters only
+}
+
+/**
+ * State from data services that should be scope to a single app
+ */
+export interface QueryAppState {
+  filters?: esFilters.Filter[]; // not pinned filters
+}

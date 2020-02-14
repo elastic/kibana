@@ -22,18 +22,19 @@ import {
   syncState,
   createStateContainer,
 } from '../../../../kibana_utils/public';
-import { QueryStart } from '../query_service';
-import { connectToQueryGlobalState, QueryGlobalState } from './connect_to_global_state';
+import { QuerySetup, QueryStart } from '../query_service';
+import { connectToQueryGlobalState } from './connect_to_global_state';
+import { QueryGlobalState } from './types';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 /**
- * Helper utility to sync global data from query services with url ('_g' query param)
- * @param QueryStart
- * @param kbnUrlStateStorage - url storage to use
+ * Helper to setup syncing of global data with the URL
+ * @param QueryService: either setup or start
+ * @param kbnUrlStateStorage to use for syncing
  */
 export const syncGlobalQueryStateWithUrl = (
-  query: Pick<QueryStart, 'filterManager' | 'timefilter'>,
+  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'global$'>,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) => {
   const {
