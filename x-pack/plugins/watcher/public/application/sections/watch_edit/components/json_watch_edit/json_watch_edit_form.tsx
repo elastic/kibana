@@ -29,7 +29,10 @@ import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
 import { XJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/console_lang';
-import { collapseLiteralStrings } from '../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib';
+import {
+  collapseLiteralStrings,
+  expandLiteralStrings,
+} from '../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib';
 
 const xJsonMode = new XJsonMode();
 
@@ -40,7 +43,7 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const [xjsonEditorValue, setXJsonEditorValue] = useState(watch.watchString);
+  const [xjsonEditorValue, setXJsonEditorValue] = useState(expandLiteralStrings(watch.watchString));
 
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
