@@ -50,6 +50,25 @@
     "Annotations",
     "GetAnnotations",
     "IndexAnnotations",
-    "DeleteAnnotation"
+    "DeleteAnnotation",
+    "JobService",
+    "ForceStartDatafeeds",
+    "StopDatafeeds",
+    "DeleteJobs",
+    "CloseJobs",
+    "JobsSummary",
+    "JobsWithTimerange",
+    "CreateFullJobsList",
+    "GetAllGroups",
+    "UpdateGroups",
+    "DeletingJobTasks",
+    "JobsExist",
+    "NewJobCaps",
+    "NewJobLineChart",
+    "NewJobPopulationChart",
+    "GetAllJobAndGroupIds",
+    "GetLookBackProgress",
+    "ValidateCategoryExamples",
+    "TopCategories"
   ]
 }
