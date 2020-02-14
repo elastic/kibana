@@ -31,6 +31,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -74,7 +75,6 @@ function VisualizeAppController(
   kbnUrl,
   redirectWhenMissing,
   Promise,
-  kbnBaseUrl,
   getAppState,
   globalState
 ) {
