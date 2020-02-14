@@ -218,7 +218,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
 Each expression word here is `EuiExpression` component and implements the basic aggregation, grouping and comparison methods.
-Expression components, which can be embed to different alert types are described here [Common expression components](#common-expression-components).
+Expression components, which can be embedded to different alert types, are described here [Common expression components](#common-expression-components).
 
 3. Define alert type params validation using the property of `AlertTypeModel` `validate`: 
 ```
