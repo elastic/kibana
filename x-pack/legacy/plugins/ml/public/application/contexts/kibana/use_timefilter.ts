@@ -14,22 +14,22 @@ interface UseTimefilterOptions {
 }
 
 export const useTimefilter = ({
-  timeRangeSelector = true,
-  autoRefreshSelector = true,
+  timeRangeSelector,
+  autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
   const { services } = useMlKibana();
   const { timefilter } = services.data.query.timefilter;
 
   useEffect(() => {
-    if (timeRangeSelector) {
+    if (timeRangeSelector === true) {
       timefilter.enableTimeRangeSelector();
-    } else {
+    } else if (timeRangeSelector === false) {
       timefilter.disableTimeRangeSelector();
     }
 
-    if (autoRefreshSelector) {
+    if (autoRefreshSelector === true) {
       timefilter.enableAutoRefreshSelector();
-    } else {
+    } else if (autoRefreshSelector === false) {
       timefilter.disableAutoRefreshSelector();
     }
   }, [timeRangeSelector, autoRefreshSelector]);

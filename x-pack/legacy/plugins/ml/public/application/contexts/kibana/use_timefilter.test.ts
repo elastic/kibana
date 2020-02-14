@@ -29,17 +29,17 @@ jest.mock('./kibana_context', () => ({
 }));
 
 describe('useTimefilter', () => {
-  test('defaults to enabled time range selector and auto refresh', () => {
+  test('will not trigger any date picker settings by default', () => {
     const { result } = renderHook(() => useTimefilter());
     const timefilter = result.current;
 
     expect(timefilter.disableTimeRangeSelector).toHaveBeenCalledTimes(0);
     expect(timefilter.disableAutoRefreshSelector).toHaveBeenCalledTimes(0);
-    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(1);
-    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(1);
+    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(0);
+    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(0);
   });
 
-  test('custom overrides', () => {
+  test('custom disabled overrides', () => {
     const { result } = renderHook(() =>
       useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false })
     );
@@ -49,5 +49,17 @@ describe('useTimefilter', () => {
     expect(timefilter.disableAutoRefreshSelector).toHaveBeenCalledTimes(1);
     expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(0);
     expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(0);
+  });
+
+  test('custom enabled overrides', () => {
+    const { result } = renderHook(() =>
+      useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true })
+    );
+    const timefilter = result.current;
+
+    expect(timefilter.disableTimeRangeSelector).toHaveBeenCalledTimes(0);
+    expect(timefilter.disableAutoRefreshSelector).toHaveBeenCalledTimes(0);
+    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(1);
+    expect(timefilter.enableTimeRangeSelector).toHaveBeenCalledTimes(1);
   });
 });
