@@ -82,8 +82,8 @@ export function getState(
         ...appState.getState(),
         ...props,
       };
-      const hasChanged = !_.isEqual(appState.getState(), newState);
-      if (hasChanged) {
+
+      if (!isEqualState(appState.getState(), newState)) {
         appState.set(newState);
       }
     },
@@ -114,14 +114,27 @@ export function getState(
 }
 
 /**
+ * Helper function to compare 2 different state, is needed since comparing filters
+ * works differently
+ */
+function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalState) {
+  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
+  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+  return (
+    _.isEqual(stateAPartial, stateBPartial) &&
+    esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
+  );
+}
+
+/**
  * Helper function to return array of filter object of a given state
  */
-const getFilters = (state: AppState | GlobalState): Filter[] => {
+function getFilters(state: AppState | GlobalState): Filter[] {
   if (!state || !Array.isArray(state.filters)) {
     return [];
   }
   return state.filters;
-};
+}
 
 /**
  * Helper function to return the initial app state, which is a merged object of url state and
