@@ -26,7 +26,7 @@ import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
-import { ServiceSection } from './ServiceSection';
+import { ServiceForm } from '../../../../shared/ServiceForm';
 import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
@@ -176,16 +176,16 @@ export function AddEditFlyout({
                 }
               }}
             >
-              <ServiceSection
+              <ServiceForm
                 isReadOnly={Boolean(selectedConfig)}
                 //
                 // environment
                 environment={environment}
-                setEnvironment={setEnvironment}
+                onEnvironmentChange={setEnvironment}
                 //
                 // serviceName
                 serviceName={serviceName}
-                setServiceName={setServiceName}
+                onServiceNameChange={setServiceName}
               />
 
               <EuiSpacer />
