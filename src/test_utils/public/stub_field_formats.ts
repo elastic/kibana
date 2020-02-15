@@ -18,12 +18,13 @@
  */
 import { CoreSetup } from 'kibana/public';
 import { fieldFormats } from '../../plugins/data/public';
+import { baseFormatters } from '../../plugins/data/common';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
   const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-  fieldFormatsRegistry.init(getConfig, {});
+  fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.DateFormat, ...baseFormatters]);
 
   return fieldFormatsRegistry;
 };
