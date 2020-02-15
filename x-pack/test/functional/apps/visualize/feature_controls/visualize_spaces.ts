@@ -20,8 +20,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45244
-  describe.skip('visualize', () => {
+  describe('visualize', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
