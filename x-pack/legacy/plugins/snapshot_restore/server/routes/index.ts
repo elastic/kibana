@@ -17,7 +17,7 @@ export class ApiRoutes {
     registerSnapshotsRoutes(dependencies);
     // registerRestoreRoutes(dependencies);
 
-    // if (dependencies.isSlmEnabled) {
+    // if (dependencies.config.isSlmEnabled) {
     //   registerPolicyRoutes(dependencies);
     // }
   }

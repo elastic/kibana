@@ -23,7 +23,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public setup({ http, context }: CoreSetup, { licensing, security, cloud }: Dependencies): void {
+  public setup({ http }: CoreSetup, { licensing, security, cloud }: Dependencies): void {
     const router = http.createRouter();
 
     this.license.setup(
