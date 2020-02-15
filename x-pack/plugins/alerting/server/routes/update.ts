@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { validateDurationSchema } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -21,18 +22,18 @@ const paramSchema = schema.object({
 
 const bodySchema = schema.object({
   name: schema.string(),
-  alertTypeId: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   schedule: schema.object({
-    interval: schema.string(),
+    interval: schema.string({ validate: validateDurationSchema }),
   }),
-  throttle: schema.nullable(schema.string()),
+  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: schema.arrayOf(
     schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      actionTypeId: schema.maybe(schema.string()),
     }),
     { defaultValue: [] }
   ),
