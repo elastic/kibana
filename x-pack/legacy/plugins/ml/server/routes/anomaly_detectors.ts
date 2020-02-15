@@ -379,6 +379,56 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/results/buckets  Obtain bucket scores for the specified job ID
+   * @apiName GetOverallBuckets
+   * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
+   *
+   * @apiParam {String} jobId Job ID.
+   * @apiParam {Number} timestamp.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} buckets
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/results/buckets/{timestamp?}',
+      validate: {
+        params: schema.object({
+          jobId: schema.string(),
+          timestamp: schema.maybe(schema.string()),
+        }),
+        body: schema.object({
+          anomaly_score: schema.maybe(schema.number()),
+          desc: schema.maybe(schema.boolean()),
+          end: schema.maybe(schema.string()),
+          exclude_interim: schema.maybe(schema.boolean()),
+          expand: schema.maybe(schema.boolean()),
+          'page.from': schema.maybe(schema.number()),
+          'page.size': schema.maybe(schema.number()),
+          sort: schema.maybe(schema.string()),
+          start: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+      try {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.buckets', {
+          jobId: request.params.jobId,
+          timestamp: request.params.timestamp,
+          ...request.body,
+        });
+        return response.ok({
+          body: { ...results },
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
    * @api {post} /api/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
    * @apiName GetOverallBuckets
    * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
