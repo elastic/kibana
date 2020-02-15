@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request, ResponseToolkit } from 'hapi';
-import { createHandler, getAllHandler } from './restore';
+import { addBasePath } from '../helpers';
+import { registerRestoreRoutes } from './restore';
+import { MockRouter, routeDependencies, RunRequestParam } from './test_helpers';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
-  const mockRequest = {} as Request;
-  const mockResponseToolkit = {} as ResponseToolkit;
   const mockEsShard = {
     type: 'SNAPSHOT',
     source: {},
@@ -16,32 +15,51 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     index: { size: {}, files: {} },
   };
 
-  describe('createHandler()', () => {
-    const mockCreateRequest = ({
+  const router = new MockRouter();
+
+  beforeAll(() => {
+    registerRestoreRoutes({
+      router: router as any,
+      ...routeDependencies,
+    });
+  });
+
+  describe('Restore snapshot', () => {
+    const mockRequest = {
       params: {
         repository: 'foo',
         snapshot: 'snapshot-1',
       },
-      payload: {},
-    } as unknown) as Request;
+      body: {},
+    };
+
+    const restoreSnapshotRequest: RunRequestParam = {
+      method: 'post',
+      path: addBasePath('restore/{repository}/{snapshot}'),
+      mockRequest,
+    };
 
     it('should return successful response from ES', async () => {
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
-      await expect(
-        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(mockEsResponse);
+      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
+
+      await expect(router.runRequest(restoreSnapshotRequest)).resolves.toEqual({
+        body: mockEsResponse,
+      });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(restoreSnapshotRequest)).rejects.toThrow();
     });
   });
 
   describe('getAllHandler()', () => {
+    const getAllRestoresRequest: RunRequestParam = {
+      method: 'get',
+      path: addBasePath('restores'),
+    };
+
     it('should arrify and filter restore shards returned from ES', async () => {
       const mockEsResponse = {
         fooIndex: {
@@ -59,7 +77,9 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
           ],
         },
       };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+
+      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
+
       const expectedResponse = [
         {
           index: 'fooIndex',
@@ -74,25 +94,23 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
           latestActivityTimeInMillis: 0,
         },
       ];
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(getAllRestoresRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
       const expectedResponse: any[] = [];
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(getAllRestoresRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(getAllRestoresRequest)).rejects.toThrow();
     });
   });
 });

@@ -20,6 +20,12 @@ const mockResponse = {
   },
 };
 
+export interface RunRequestParam {
+  method: RequestMethod;
+  path: string;
+  mockRequest?: { [key: string]: any };
+}
+
 export class MockRouter {
   private cacheHandlers: { [key: string]: HandlersByUrl } = {
     get: {},
@@ -29,7 +35,8 @@ export class MockRouter {
     patch: {},
   };
 
-  constructor(private callAsCurrentUser: any) {}
+  private _callAsCurrentUserCallCount = 0;
+  private _callAsCurrentUserResponses: any[] = [];
 
   get({ path }: { path: string }, handler: RequestHandler) {
     this.cacheHandlers.get[path] = handler;
@@ -51,11 +58,22 @@ export class MockRouter {
     this.cacheHandlers.patch[path] = handler;
   }
 
-  runRequest(method: RequestMethod, path: string, mockRequest = {}) {
+  private callAsCurrentUser() {
+    const index = this._callAsCurrentUserCallCount;
+    this._callAsCurrentUserCallCount += 1;
+    return this._callAsCurrentUserResponses[index]();
+  }
+
+  public set callAsCurrentUserResponses(responses: any[]) {
+    this._callAsCurrentUserCallCount = 0;
+    this._callAsCurrentUserResponses = responses;
+  }
+
+  runRequest({ method, path, mockRequest = {} }: RunRequestParam) {
     const mockContext = {
       core: {
         elasticsearch: {
-          dataClient: { callAsCurrentUser: this.callAsCurrentUser },
+          dataClient: { callAsCurrentUser: this.callAsCurrentUser.bind(this) },
         },
       },
     };
