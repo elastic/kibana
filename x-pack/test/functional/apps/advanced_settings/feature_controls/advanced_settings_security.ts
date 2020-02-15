@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -184,7 +185,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('managementHome', {
-          timeout: 10000,
+          timeout: config.get('timeouts.waitFor'),
         });
       });
     });

@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const config = getService('config');
 
   describe('spaces feature controls', () => {
     before(async () => {
@@ -80,7 +81,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('managementHome');
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });
