@@ -45,7 +45,6 @@ export const IndicesConfigurationPanel = ({
     <EuiSpacer size="m" />
     {displaySettings === 'metrics' && (
       <EuiDescribedFormGroup
-        idAria="metricIndices"
         title={
           <h4>
             <FormattedMessage
@@ -62,7 +61,6 @@ export const IndicesConfigurationPanel = ({
         }
       >
         <EuiFormRow
-          describedByIds={['metricIndices']}
           error={metricAliasFieldProps.error}
           fullWidth
           helpText={
@@ -95,7 +93,6 @@ export const IndicesConfigurationPanel = ({
     )}
     {displaySettings === 'logs' && (
       <EuiDescribedFormGroup
-        idAria="logIndices"
         title={
           <h4>
             <FormattedMessage
@@ -112,7 +109,6 @@ export const IndicesConfigurationPanel = ({
         }
       >
         <EuiFormRow
-          describedByIds={['logIndices']}
           error={logAliasFieldProps.error}
           fullWidth
           helpText={

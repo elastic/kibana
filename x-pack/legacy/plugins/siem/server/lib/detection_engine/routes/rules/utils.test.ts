@@ -15,6 +15,7 @@ import {
   transformRulesToNdjson,
   transformAlertsToRules,
   transformOrImportError,
+  getDuplicates,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -1199,6 +1200,27 @@ describe('utils', () => {
         ],
         success_count: 1,
       };
+      expect(output).toEqual(expected);
+    });
+  });
+
+  describe('getDuplicates', () => {
+    test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
+      const output = getDuplicates({
+        value1: 1,
+        value2: 2,
+        value3: 2,
+      });
+      const expected = ['value2', 'value3'];
+      expect(output).toEqual(expected);
+    });
+    test('returns null when given a map of no duplicates', () => {
+      const output = getDuplicates({
+        value1: 1,
+        value2: 1,
+        value3: 1,
+      });
+      const expected: string[] = [];
       expect(output).toEqual(expected);
     });
   });
