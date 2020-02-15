@@ -436,6 +436,12 @@ export class ESSearchSource extends AbstractESSource {
     return !!sortField && !!sortOrder;
   }
 
+  async getMaxResultWindow() {
+    const indexPattern = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(indexPattern.title);
+    return indexSettings.maxResultWindow;
+  }
+
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
 
@@ -537,7 +543,9 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.filterByMapBounds;
+    return this._descriptor.scalingType === SCALING_TYPES.CLUSTER
+      ? true
+      : this._descriptor.filterByMapBounds;
   }
 
   async getLeftJoinFields() {

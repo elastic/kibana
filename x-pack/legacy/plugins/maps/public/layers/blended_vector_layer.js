@@ -132,14 +132,15 @@ export class BlendedVectorLayer extends VectorLayer {
     const searchFilters = this._getSearchFilters(syncContext.dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
-      source: this._source,
+      source: this.getSource(),
       prevDataRequest,
       nextMeta: searchFilters,
     });
     if (!canSkipFetch) {
       const searchSource = await this._documentSource._makeSearchSource(searchFilters, 0);
       const resp = await searchSource.fetch();
-      if (resp.hits.total > 100) {
+      const maxResultWindow = await this._documentSource.getMaxResultWindow();
+      if (resp.hits.total > maxResultWindow) {
         this._activeSource = this._clusterSource;
         this._activeStyle = this._clusterStyle;
       } else {
