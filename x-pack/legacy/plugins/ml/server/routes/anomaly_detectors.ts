@@ -36,7 +36,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs');
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -67,7 +67,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs', { jobId });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -94,7 +94,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats');
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -125,7 +125,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
         const { jobId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats', { jobId });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -160,7 +160,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           body: request.body,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -195,7 +195,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           body: request.body,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -228,7 +228,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           jobId,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -265,7 +265,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
         }
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.closeJob', options);
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -302,7 +302,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
         }
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteJob', options);
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -332,7 +332,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           body: request.body,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -368,7 +368,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           duration,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -418,7 +418,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           ...request.body,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -463,7 +463,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
           end: request.body.end,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -499,7 +499,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
         };
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.categories', options);
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
