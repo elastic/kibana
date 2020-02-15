@@ -45,20 +45,15 @@ describe('#logout', () => {
     await expect(newUrlPromise).resolves.toBe(`${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`);
   });
 
-  it(`checks sessionStorage for the provider name for this tenant`, async () => {
-    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
-    sessionExpired.logout();
-
-    expect(mockGetItem).toHaveBeenCalledTimes(1);
-    expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);
-  });
-
   it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {
     const providerName = 'basic';
     mockGetItem.mockReturnValueOnce(providerName);
 
     const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
     sessionExpired.logout();
+
+    expect(mockGetItem).toHaveBeenCalledTimes(1);
+    expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     const provider = `&provider=${providerName}`;
