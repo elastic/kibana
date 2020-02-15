@@ -3,78 +3,99 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { RestoreSettings, SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
 import { deserializeRestoreShard } from '../../lib';
+import { RouteDependencies } from '../../types';
+import { addBasePath } from '../helpers';
+import { restoreSettingsSchema } from './validate_schemas';
 
-export function registerRestoreRoutes(router: Router) {
-  router.post('restore/{repository}/{snapshot}', createHandler);
-  router.get('restores', getAllHandler);
-}
+export function registerRestoreRoutes({ router, license }: RouteDependencies) {
+  // GET all snapshot restores
+  router.get(
+    { path: addBasePath('restores'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const snapshotRestores: SnapshotRestore[] = [];
+      const recoveryByIndexName: {
+        [key: string]: {
+          shards: SnapshotRestoreShardEs[];
+        };
+      } = await callAsCurrentUser('indices.recovery', {
+        human: true,
+      });
 
-export const createHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { repository, snapshot } = req.params;
-  const restoreSettings = req.payload as RestoreSettings;
+      // Filter to snapshot-recovered shards only
+      Object.keys(recoveryByIndexName).forEach(index => {
+        const recovery = recoveryByIndexName[index];
+        let latestActivityTimeInMillis: number = 0;
+        let latestEndTimeInMillis: number | null = null;
+        const snapshotShards = (recovery.shards || [])
+          .filter(shard => shard.type === 'SNAPSHOT')
+          .sort((a, b) => a.id - b.id)
+          .map(shard => {
+            const deserializedShard = deserializeRestoreShard(shard);
+            const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
 
-  return await callWithRequest('snapshot.restore', {
-    repository,
-    snapshot,
-    body: serializeRestoreSettings(restoreSettings),
-  });
-};
+            // Set overall latest activity time
+            latestActivityTimeInMillis = Math.max(
+              startTimeInMillis || 0,
+              stopTimeInMillis || 0,
+              latestActivityTimeInMillis
+            );
 
-export const getAllHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const snapshotRestores: SnapshotRestore[] = [];
-  const recoveryByIndexName: {
-    [key: string]: {
-      shards: SnapshotRestoreShardEs[];
-    };
-  } = await callWithRequest('indices.recovery', {
-    human: true,
-  });
+            // Set overall end time
+            if (stopTimeInMillis === undefined) {
+              latestEndTimeInMillis = null;
+            } else if (latestEndTimeInMillis === null || stopTimeInMillis > latestEndTimeInMillis) {
+              latestEndTimeInMillis = stopTimeInMillis;
+            }
 
-  // Filter to snapshot-recovered shards only
-  Object.keys(recoveryByIndexName).forEach(index => {
-    const recovery = recoveryByIndexName[index];
-    let latestActivityTimeInMillis: number = 0;
-    let latestEndTimeInMillis: number | null = null;
-    const snapshotShards = (recovery.shards || [])
-      .filter(shard => shard.type === 'SNAPSHOT')
-      .sort((a, b) => a.id - b.id)
-      .map(shard => {
-        const deserializedShard = deserializeRestoreShard(shard);
-        const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
+            return deserializedShard;
+          });
 
-        // Set overall latest activity time
-        latestActivityTimeInMillis = Math.max(
-          startTimeInMillis || 0,
-          stopTimeInMillis || 0,
-          latestActivityTimeInMillis
-        );
-
-        // Set overall end time
-        if (stopTimeInMillis === undefined) {
-          latestEndTimeInMillis = null;
-        } else if (latestEndTimeInMillis === null || stopTimeInMillis > latestEndTimeInMillis) {
-          latestEndTimeInMillis = stopTimeInMillis;
+        if (snapshotShards.length > 0) {
+          snapshotRestores.push({
+            index,
+            latestActivityTimeInMillis,
+            shards: snapshotShards,
+            isComplete: latestEndTimeInMillis !== null,
+          });
         }
-
-        return deserializedShard;
       });
 
-    if (snapshotShards.length > 0) {
-      snapshotRestores.push({
-        index,
-        latestActivityTimeInMillis,
-        shards: snapshotShards,
-        isComplete: latestEndTimeInMillis !== null,
-      });
-    }
+      // Sort by latest activity
+      snapshotRestores.sort((a, b) => b.latestActivityTimeInMillis - a.latestActivityTimeInMillis);
+
+      return res.ok({ body: snapshotRestores });
+    })
+  );
+
+  // Restore snapshot
+  const restoreParamsSchema = schema.object({
+    repository: schema.string(),
+    snapshot: schema.string(),
   });
 
-  // Sort by latest activity
-  snapshotRestores.sort((a, b) => b.latestActivityTimeInMillis - a.latestActivityTimeInMillis);
+  router.post(
+    {
+      path: addBasePath('restore/{repository}/{snapshot}'),
+      validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
+      const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
 
-  return snapshotRestores;
-};
+      const response = await callAsCurrentUser('snapshot.restore', {
+        repository,
+        snapshot,
+        body: serializeRestoreSettings(restoreSettings),
+      });
+
+      return res.ok({ body: response });
+    })
+  );
+}
