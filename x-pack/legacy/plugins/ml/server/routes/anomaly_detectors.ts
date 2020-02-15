@@ -384,7 +384,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
    * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
    *
    * @apiParam {String} jobId Job ID.
-   * @apiParam {Number} timestamp.
+   * @apiParam {String} timestamp.
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} buckets
