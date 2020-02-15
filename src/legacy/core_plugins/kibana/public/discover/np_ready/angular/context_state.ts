@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import _ from 'lodash';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
 } from '../../../../../../../plugins/kibana_utils/public';
+import { esFilters, FilterManager } from '../../../../../../../plugins/data/public';
 import { Filter } from '../../../../../../../plugins/data/common/es_query/filters';
 
 interface AppState {
@@ -75,8 +77,39 @@ export function getState(
     appState,
     startSync: start,
     stopSync: stop,
-    getGlobalFilters: () => getFilters(globalState.getState()),
-    getAppFilters: () => getFilters(appState.getState()),
+    setAppState: (props: Partial<AppState>) => {
+      const newState = {
+        ...appState.getState(),
+        ...props,
+      };
+      const hasChanged = !_.isEqual(appState.getState(), newState);
+      if (hasChanged) {
+        appState.set(newState);
+      }
+    },
+    getFilters: () => [...getFilters(globalState.getState()), ...getFilters(appState.getState())],
+    setFilters: (filterManager: FilterManager) => {
+      const globalFilters = filterManager.getGlobalFilters();
+      const appFilters = filterManager.getAppFilters();
+
+      const globalFilterChanged = !esFilters.compareFilters(
+        globalFilters,
+        getFilters(globalState.getState()),
+        esFilters.COMPARE_ALL_OPTIONS
+      );
+      const appFilterChanged = !esFilters.compareFilters(
+        appFilters,
+        getFilters(appState.getState()),
+        esFilters.COMPARE_ALL_OPTIONS
+      );
+
+      if (appFilterChanged) {
+        appState.set({ ...appState.getState(), ...{ filters: appFilters } });
+      }
+      if (globalFilterChanged) {
+        globalState.set({ filters: globalFilters });
+      }
+    },
   };
 }
 

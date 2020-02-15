@@ -73,9 +73,9 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     startSync: startStateSync,
     stopSync: stopStateSync,
     appState,
-    globalState,
-    getAppFilters,
-    getGlobalFilters,
+    getFilters,
+    setFilters,
+    setAppState,
   } = getState(
     config.get('context:defaultSize'),
     indexPattern.timeFieldName,
@@ -85,8 +85,9 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
+  this.filters = getFilters();
 
-  filterManager.setFilters(_.cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
+  filterManager.setFilters(_.cloneDeep(this.filters));
   startStateSync();
 
   // take care of parameter changes in UI
@@ -98,29 +99,14 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     ],
     newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
-      const newState = {
-        ...appState.getState(),
-        ...{ columns, predecessorCount, successorCount },
-      };
-      const hasChanged = !_.isEqual(appState.getState(), newState);
-
-      if (hasChanged && Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
-        appState.set(newState);
+      if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
+        setAppState({ columns, predecessorCount, successorCount });
       }
     }
   );
   // take care of parameter filter changes
   const filterObservable = filterManager.getUpdates$().subscribe(() => {
-    const appFiltersState = getAppFilters();
-    const appFilters = filterManager.getAppFilters();
-    if (!_.isEqual(appFiltersState, appFilters)) {
-      appState.set({ ...appState.getState(), ...{ filters: appFilters } });
-    }
-    const globalFiltersState = getGlobalFilters();
-    const globalFilters = filterManager.getGlobalFilters();
-    if (!_.isEqual(globalFilters, globalFiltersState)) {
-      globalState.set({ filters: globalFilters });
-    }
+    setFilters(filterManager);
     $route.reload();
   });
 
