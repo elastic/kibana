@@ -44,6 +44,9 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
+    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
+      return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
+    });
   });
 
   const setup = () => {

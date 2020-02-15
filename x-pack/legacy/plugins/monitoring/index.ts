@@ -44,6 +44,8 @@ const validConfigOptions: string[] = [
   'monitoring.ui.container.logstash.enabled',
   'monitoring.tests.cloud_detector.enabled',
   'monitoring.kibana.collection.interval',
+  'monitoring.elasticsearch.hosts',
+  'monitoring.elasticsearch',
   'monitoring.ui.elasticsearch.hosts',
   'monitoring.ui.elasticsearch',
   'monitoring.xpack_api_polling_frequency_millis',
@@ -77,7 +79,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
     uiExports: getUiExports(),
     deprecations,
 
-    init(server: Server) {
+    async init(server: Server) {
       const serverConfig = server.config();
       const { getOSInfo, plugins, injectUiAppVars } = server as typeof server & { getOSInfo?: any };
       const log = (...args: Parameters<typeof server.log>) => server.log(...args);
@@ -127,7 +129,8 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
         },
       };
 
-      new Plugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      const plugin = new Plugin();
+      await plugin.setup(coreSetup, pluginsSetup, __LEGACY);
     },
 
     postInit(server: Server) {
