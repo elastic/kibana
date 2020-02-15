@@ -21,6 +21,7 @@ import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 import { IFieldType } from '../../../../../../../../../../plugins/data/public';
+import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
 
 import { StepTimeField } from '../step_time_field';
 
@@ -41,14 +42,7 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 const noop = () => {};
-const indexPatternsService = {
-  make: async () => ({
-    fieldsFetcher: {
-      fetch: noop,
-      fetchForWildcard: noop,
-    },
-  }),
-};
+const indexPatternsService = dataPluginMock.createStartContract().indexPatterns;
 
 describe('StepTimeField', () => {
   it('should render normally', () => {

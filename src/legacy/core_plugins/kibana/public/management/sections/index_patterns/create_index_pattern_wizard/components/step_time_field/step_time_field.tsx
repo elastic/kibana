@@ -35,10 +35,11 @@ import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { DataPublicPluginStart } from '../../../../../../../../../../plugins/data/public';
 
 interface StepTimeFieldProps {
   indexPattern: string;
-  indexPatternsService: any; // todo
+  indexPatternsService: DataPublicPluginStart['indexPatterns'];
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
@@ -103,7 +104,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
-      indexPattern.fieldsFetcher.fetchForWildcard(pattern, getFetchForWildcardOptions())
+      indexPattern.getFieldsForWildcard({ pattern, ...getFetchForWildcardOptions() })
     );
     const timeFields = extractTimeFields(fields);
 

@@ -42,7 +42,7 @@ import { IndexPatternCreationConfig } from '../../../../../../../../management/p
 import { MatchedIndex } from '../../types';
 
 interface StepIndexPatternProps {
-  allIndices: any[]; // todo
+  allIndices: MatchedIndex[];
   isIncludingSystemIndices: boolean;
   esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
   savedObjectsClient: SavedObjectsClient;
