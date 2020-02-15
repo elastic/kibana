@@ -8,7 +8,7 @@ import { registerAppRoutes } from './api/app';
 import { registerRepositoriesRoutes } from './api/repositories';
 import { registerSnapshotsRoutes } from './api/snapshots';
 // import { registerRestoreRoutes } from './api/restore';
-// import { registerPolicyRoutes } from './api/policy';
+import { registerPolicyRoutes } from './api/policy';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -17,8 +17,8 @@ export class ApiRoutes {
     registerSnapshotsRoutes(dependencies);
     // registerRestoreRoutes(dependencies);
 
-    // if (dependencies.config.isSlmEnabled) {
-    //   registerPolicyRoutes(dependencies);
-    // }
+    if (dependencies.config.isSlmEnabled) {
+      registerPolicyRoutes(dependencies);
+    }
   }
 }

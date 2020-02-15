@@ -3,212 +3,244 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import {
-  wrapCustomError,
-  wrapEsError,
-} from '../../../../../server/lib/create_router/error_wrappers';
-import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { SlmPolicyEs } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
-import { Plugins } from '../../shim';
 import { getManagedPolicyNames } from '../../lib';
+import { RouteDependencies } from '../../types';
+import { addBasePath } from '../helpers';
+import { nameParameterSchema, policySchema } from './validate_schemas';
 
-let callWithInternalUser: any;
+export function registerPolicyRoutes({
+  router,
+  license,
+  lib: { isEsError, wrapEsError },
+}: RouteDependencies) {
+  // GET all policies
+  router.get(
+    { path: addBasePath('policies'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
 
-export function registerPolicyRoutes(router: Router, plugins: Plugins) {
-  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
-  router.get('policies', getAllHandler);
-  router.get('policy/{name}', getOneHandler);
-  router.post('policy/{name}/run', executeHandler);
-  router.delete('policies/{names}', deleteHandler);
-  router.put('policies', createHandler);
-  router.put('policies/{name}', updateHandler);
-  router.get('policies/indices', getIndicesHandler);
-  router.get('policies/retention_settings', getRetentionSettingsHandler);
-  router.put('policies/retention_settings', updateRetentionSettingsHandler);
-  router.post('policies/retention', executeRetentionHandler);
-}
+      // Get policies
+      const policiesByName: {
+        [key: string]: SlmPolicyEs;
+      } = await callAsCurrentUser('sr.policies', {
+        human: true,
+      });
 
-export const getAllHandler: RouterRouteHandler = async (
-  _req,
-  callWithRequest
-): Promise<{
-  policies: SlmPolicy[];
-}> => {
-  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
-
-  // Get policies
-  const policiesByName: {
-    [key: string]: SlmPolicyEs;
-  } = await callWithRequest('sr.policies', {
-    human: true,
-  });
-
-  // Deserialize policies
-  return {
-    policies: Object.entries(policiesByName).map(([name, policy]) => {
-      return deserializePolicy(name, policy, managedPolicies);
-    }),
-  };
-};
-
-export const getOneHandler: RouterRouteHandler = async (
-  req,
-  callWithRequest
-): Promise<{
-  policy: SlmPolicy;
-}> => {
-  // Get policy
-  const { name } = req.params;
-  const policiesByName: {
-    [key: string]: SlmPolicyEs;
-  } = await callWithRequest('sr.policy', {
-    name,
-    human: true,
-  });
-
-  if (!policiesByName[name]) {
-    // If policy doesn't exist, ES will return 200 with an empty object, so manually throw 404 here
-    throw wrapCustomError(new Error('Policy not found'), 404);
-  }
-
-  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
-
-  // Deserialize policy
-  return {
-    policy: deserializePolicy(name, policiesByName[name], managedPolicies),
-  };
-};
-
-export const executeHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { name } = req.params;
-  const { snapshot_name: snapshotName } = await callWithRequest('sr.executePolicy', {
-    name,
-  });
-  return { snapshotName };
-};
-
-export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { names } = req.params;
-  const policyNames = names.split(',');
-  const response: { itemsDeleted: string[]; errors: any[] } = {
-    itemsDeleted: [],
-    errors: [],
-  };
-
-  await Promise.all(
-    policyNames.map(name => {
-      return callWithRequest('sr.deletePolicy', { name })
-        .then(() => response.itemsDeleted.push(name))
-        .catch(e =>
-          response.errors.push({
-            name,
-            error: wrapEsError(e),
-          })
-        );
+      // Deserialize policies
+      return res.ok({
+        body: {
+          policies: Object.entries(policiesByName).map(([name, policy]) => {
+            return deserializePolicy(name, policy, managedPolicies);
+          }),
+        },
+      });
     })
   );
 
-  return response;
-};
+  // GET one policy
+  router.get(
+    { path: 'policy/{name}', validate: { params: nameParameterSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const policiesByName: {
+        [key: string]: SlmPolicyEs;
+      } = await callAsCurrentUser('sr.policy', {
+        name,
+        human: true,
+      });
 
-export const createHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const policy = req.payload as SlmPolicyPayload;
-  const { name } = policy;
-  const conflictError = wrapCustomError(
-    new Error('There is already a policy with that name.'),
-    409
+      if (!policiesByName[name]) {
+        // If policy doesn't exist, ES will return 200 with an empty object, so manually throw 404 here
+        return res.notFound({ body: 'Policy not found' });
+      }
+
+      const managedPolicies = await getManagedPolicyNames(callAsCurrentUser);
+
+      // Deserialize policy
+      return res.ok({
+        body: {
+          policy: deserializePolicy(name, policiesByName[name], managedPolicies),
+        },
+      });
+    })
   );
 
-  // Check that policy with the same name doesn't already exist
-  try {
-    const policyByName = await callWithRequest('sr.policy', { name });
-    if (policyByName[name]) {
-      throw conflictError;
-    }
-  } catch (e) {
-    // Rethrow conflict error but silently swallow all others
-    if (e === conflictError) {
-      throw e;
-    }
-  }
+  // Create policy
+  router.put(
+    { path: addBasePath('policies'), validate: { body: policySchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const policy = req.body as TypeOf<typeof policySchema>;
+      const { name } = policy;
 
-  // Otherwise create new policy
-  return await callWithRequest('sr.updatePolicy', {
-    name,
-    body: serializePolicy(policy),
-  });
-};
+      // Check that policy with the same name doesn't already exist
+      const policyByName = await callAsCurrentUser('sr.policy', { name });
 
-export const updateHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { name } = req.params;
-  const policy = req.payload as SlmPolicyPayload;
+      if (policyByName[name]) {
+        return res.conflict({ body: 'There is already a policy with that name.' });
+      }
 
-  // Check that policy with the given name exists
-  // If it doesn't exist, 404 will be thrown by ES and will be returned
-  await callWithRequest('sr.policy', { name });
+      // Otherwise create new policy
+      const response = await callAsCurrentUser('sr.updatePolicy', {
+        name,
+        body: serializePolicy(policy),
+      });
 
-  // Otherwise update policy
-  return await callWithRequest('sr.updatePolicy', {
-    name,
-    body: serializePolicy(policy),
-  });
-};
+      return res.ok({ body: response });
+    })
+  );
 
-export const getIndicesHandler: RouterRouteHandler = async (
-  _req,
-  callWithRequest
-): Promise<{
-  indices: string[];
-}> => {
-  // Get indices
-  const indices: Array<{
-    index: string;
-  }> = await callWithRequest('cat.indices', {
-    format: 'json',
-    h: 'index',
-  });
-
-  return {
-    indices: indices.map(({ index }) => index).sort(),
-  };
-};
-
-export const getRetentionSettingsHandler: RouterRouteHandler = async (): Promise<
-  | {
-      [key: string]: string;
-    }
-  | undefined
-> => {
-  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
-    filterPath: '**.slm.retention*',
-    includeDefaults: true,
-  });
-  const { slm: retentionSettings = undefined } = {
-    ...defaults,
-    ...persistent,
-    ...transient,
-  };
-
-  const { retention_schedule: retentionSchedule } = retentionSettings;
-
-  return { retentionSchedule };
-};
-
-export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { retentionSchedule } = req.payload as { retentionSchedule: string };
-
-  return await callWithRequest('cluster.putSettings', {
-    body: {
-      persistent: {
-        slm: {
-          retention_schedule: retentionSchedule,
-        },
-      },
+  // Update policy
+  router.put(
+    {
+      path: addBasePath('policies/{name}'),
+      validate: { params: nameParameterSchema, body: policySchema },
     },
-  });
-};
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const policy = req.body as TypeOf<typeof policySchema>;
 
-export const executeRetentionHandler: RouterRouteHandler = async (_req, callWithRequest) => {
-  return await callWithRequest('sr.executeRetention');
-};
+      // Check that policy with the given name exists
+      // If it doesn't exist, 404 will be thrown by ES and will be returned
+      await callAsCurrentUser('sr.policy', { name });
+
+      // Otherwise update policy
+      const response = await callAsCurrentUser('sr.updatePolicy', {
+        name,
+        body: serializePolicy(policy),
+      });
+
+      return res.ok({ body: response });
+    })
+  );
+
+  // Delete policy
+  router.delete(
+    { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const policyNames = name.split(',');
+
+      const response: { itemsDeleted: string[]; errors: any[] } = {
+        itemsDeleted: [],
+        errors: [],
+      };
+
+      await Promise.all(
+        policyNames.map(policyName => {
+          return callAsCurrentUser('sr.deletePolicy', { name: policyName })
+            .then(() => response.itemsDeleted.push(policyName))
+            .catch(e =>
+              response.errors.push({
+                name,
+                error: wrapEsError(e),
+              })
+            );
+        })
+      );
+
+      return res.ok({ body: response });
+    })
+  );
+
+  // Execute policy
+  router.post(
+    { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+
+      const { snapshot_name: snapshotName } = await callAsCurrentUser('sr.executePolicy', {
+        name,
+      });
+      return res.ok({ body: { snapshotName } });
+    })
+  );
+
+  // Get policy indices
+  router.get(
+    { path: addBasePath('policies/indices'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const indices: Array<{
+        index: string;
+      }> = await callAsCurrentUser('cat.indices', {
+        format: 'json',
+        h: 'index',
+      });
+
+      return res.ok({
+        body: {
+          indices: indices.map(({ index }) => index).sort(),
+        },
+      });
+    })
+  );
+
+  // Get retention settings
+  router.get(
+    { path: addBasePath('policies/retention_settings'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { persistent, transient, defaults } = await callAsCurrentUser('cluster.getSettings', {
+        filterPath: '**.slm.retention*',
+        includeDefaults: true,
+      });
+      const { slm: retentionSettings = undefined } = {
+        ...defaults,
+        ...persistent,
+        ...transient,
+      };
+
+      const { retention_schedule: retentionSchedule } = retentionSettings;
+
+      return res.ok({
+        body: { retentionSchedule },
+      });
+    })
+  );
+
+  // Update retention settings
+  const retentionSettingsSchema = schema.object({ retentionSchedule: schema.string() });
+
+  router.put(
+    {
+      path: addBasePath('policies/retention_settings'),
+      validate: { body: retentionSettingsSchema },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { retentionSchedule } = req.body as TypeOf<typeof retentionSettingsSchema>;
+
+      const response = await callAsCurrentUser('cluster.putSettings', {
+        body: {
+          persistent: {
+            slm: {
+              retention_schedule: retentionSchedule,
+            },
+          },
+        },
+      });
+
+      return res.ok({ body: response });
+    })
+  );
+
+  // Execute retention
+  router.post(
+    { path: addBasePath('policies/retention'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const response = await callAsCurrentUser('sr.executeRetention');
+      return res.ok({ body: response });
+    })
+  );
+}

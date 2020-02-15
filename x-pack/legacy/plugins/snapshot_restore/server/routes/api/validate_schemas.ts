@@ -9,6 +9,31 @@ export const nameParameterSchema = schema.object({
   name: schema.string(),
 });
 
+const snapshotConfigSchema = schema.object({
+  indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  ignoreUnavailable: schema.maybe(schema.boolean()),
+  includeGlobalState: schema.maybe(schema.boolean()),
+  partial: schema.maybe(schema.boolean()),
+  metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+});
+
+const snapshotRetentionSchema = schema.object({
+  expireAfterValue: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
+  expireAfterUnit: schema.maybe(schema.string()),
+  maxCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
+  minCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
+});
+
+export const policySchema = schema.object({
+  name: schema.string(),
+  snapshotName: schema.string(),
+  schedule: schema.string(),
+  repository: schema.string(),
+  config: schema.maybe(snapshotConfigSchema),
+  retention: schema.maybe(snapshotRetentionSchema),
+  isManagedPolicy: schema.boolean(),
+});
+
 const fsRepositorySettings = schema.object({
   location: schema.string(),
   compress: schema.maybe(schema.boolean()),
