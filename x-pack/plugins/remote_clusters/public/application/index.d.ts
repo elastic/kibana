@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext } from 'kibana/server';
-import { RemoteClustersServerPlugin } from './plugin';
 
-export { config } from './config';
+import { RegisterManagementAppArgs, I18nStart } from '../types';
 
-export const plugin = (ctx: PluginInitializerContext) => new RemoteClustersServerPlugin(ctx);
+export declare const renderApp: (
+  elem: HTMLElement | null,
+  I18nContext: I18nStart['Context']
+) => ReturnType<RegisterManagementAppArgs['mount']>;
