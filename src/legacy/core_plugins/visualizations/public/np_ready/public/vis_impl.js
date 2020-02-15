@@ -33,7 +33,7 @@ import { AggConfigs, PersistedState } from '../../legacy_imports';
 import { updateVisualizationConfig } from './legacy/vis_update';
 import { getTypes } from './services';
 
-class Vis extends EventEmitter {
+class VisImpl extends EventEmitter {
   constructor(indexPattern, visState) {
     super();
     visState = visState || {};
@@ -203,6 +203,6 @@ class Vis extends EventEmitter {
   }
 }
 
-Vis.prototype.type = 'histogram';
+VisImpl.prototype.type = 'histogram';
 
-export { Vis };
+export { VisImpl };
