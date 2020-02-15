@@ -67,33 +67,49 @@ const debouncedSubmit = debounce(submit, 800);
 
 // Render a heart as an example.
 const exampleScript = `
+boolean isInCircle(def posX, def posY, def circleX, def circleY, def radius) {
+  double distanceFromCircleCenter = Math.sqrt(Math.pow(circleX - posX, 2) + Math.pow(circleY - posY, 2));
+  return distanceFromCircleCenter <= radius;
+}
+
+boolean isOnCircle(def posX, def posY, def circleX, def circleY, def radius, def thickness) {
+  double distanceFromCircleCenter = Math.sqrt(Math.pow(circleX - posX, 2) + Math.pow(circleY - posY, 2));
+  return (
+    distanceFromCircleCenter >= radius - thickness
+    && distanceFromCircleCenter <= radius + thickness
+  );
+}
+
 def result = '';
 int charCount = 0;
 
-int n = 10;
-int threshold = n*n/2;
-int dimension = 3*n/2;
+int width = 31;
+int height = 25;
 
-for (int i = -dimension; i <= n; i++) {
-  int a = -n/2-i;
+int eyePositionX = 8;
+int eyePositionY = 6;
+int eyeSize = 3;
+int mouthSize = 11;
+int mouthPositionX = width / 2;
+int mouthPositionY = 9;
 
-  for (int j = -dimension; j <= dimension; j++) {
-    int b = n/2-j;
-    int c = -n/2-j;
+for (int y = 0; y < height; y++) {
+  for (int x = 0; x < width; x++) {
+    boolean isLeftEye = isInCircle(x, y, eyePositionX, eyePositionY, eyeSize);
+    boolean isRightEye = isInCircle(x, y, width - eyePositionX - 1, eyePositionY, eyeSize);
+    boolean isMouth = isOnCircle(x, y, mouthPositionX, mouthPositionY, mouthSize, 1) && y > mouthPositionY + 3;
 
-    def isHeartVentricles = (Math.abs(i) + Math.abs(j) < n);
-    def isRightAtrium = ((a * a) + (b * b) <= threshold);
-    def isLeftAtrium =  ((a * a) + (c * c) <= threshold);
-
-    if (isHeartVentricles || isRightAtrium || isLeftAtrium) {
-      result += "* ";
+    if (isLeftEye || isRightEye || isMouth) {
+      result += "*";
     } else {
-      result += ". ";
+      result += ".";
     }
 
-    // Make sure the heart doesn't deform as the container changes width.
+    result += " ";
+
+    // Make sure the smiley face doesn't deform as the container changes width.
     charCount++;
-    if (charCount % 31 === 0) {
+    if (charCount % width === 0) {
       result += "\\\\n";
     }
   }
