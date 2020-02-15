@@ -255,26 +255,7 @@ class LinksMenuUI extends Component {
       );
     };
 
-    function findFieldType(index) {
-      getFieldTypeFromMapping(index, categorizationFieldName)
-        .then(resp => {
-          if (resp !== '') {
-            createAndOpenUrl(index, resp);
-          } else {
-            i++;
-            if (i < datafeedIndices.length) {
-              findFieldType(datafeedIndices[i]);
-            } else {
-              error();
-            }
-          }
-        })
-        .catch(() => {
-          error();
-        });
-    }
-
-    function createAndOpenUrl(index, categorizationFieldType) {
+    const createAndOpenUrl = (index, categorizationFieldType) => {
       // Find the ID of the index pattern with a title attribute which matches the
       // index configured in the datafeed. If a Kibana index pattern has not been created
       // for this index, then the user will see a warning message on the Discover tab advising
@@ -358,6 +339,25 @@ class LinksMenuUI extends Component {
               },
             })
           );
+        });
+    };
+
+    function findFieldType(index) {
+      getFieldTypeFromMapping(index, categorizationFieldName)
+        .then(resp => {
+          if (resp !== '') {
+            createAndOpenUrl(index, resp);
+          } else {
+            i++;
+            if (i < datafeedIndices.length) {
+              findFieldType(datafeedIndices[i]);
+            } else {
+              error();
+            }
+          }
+        })
+        .catch(() => {
+          error();
         });
     }
   };
