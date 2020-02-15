@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import React from 'react';
 import { Subscription, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -25,7 +25,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
-import { getState } from './discover_state';
+import { getState, isEqualState, isEqualFilters, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 import {
@@ -211,13 +211,27 @@ function discoverController(
     setInitialAppState,
   } = getState(getStateDefaults(), false, onChangeAppState);
 
+  const $state = _.cloneDeep(appStateContainer.getState());
+  $scope.state = $state;
+
+  filterManager.setFilters(cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
+
   appStateContainer.subscribe(newState => {
-    if (!_.isEqual(newState, $scope.state)) {
+    const { filters: newStateFilters, state: newStatePartial } = splitState(newState);
+    const { state: oldStatePartial } = splitState($scope.state);
+
+    if (!isEqualState(newStatePartial, oldStatePartial)) {
       $scope.state = { ...newState };
+      $scope.$digest();
+    }
+    if (!isEqualFilters(newStateFilters, filterManager.getAppFilters())) {
+      filterManager.setAppFilters(Array.isArray(newStateFilters) ? cloneDeep(newStateFilters) : []);
     }
   });
 
   globalStateContainer.subscribe(newState => {
+    const { filters: newStateFilters } = splitState(newState);
+
     const { time, refreshInterval } = newState;
     if (time && time.from !== timefilter.from) {
       timefilter.setTime(time);
@@ -225,10 +239,12 @@ function discoverController(
     if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
       timefilter.setRefreshInterval(refreshInterval);
     }
+    if (!isEqualFilters(newStateFilters, filterManager.getGlobalFilters())) {
+      filterManager.setGlobalFilters(
+        Array.isArray(newStateFilters) ? cloneDeep(newStateFilters) : []
+      );
+    }
   });
-
-  const $state = _.cloneDeep(appStateContainer.getState());
-  $scope.state = $state;
 
   $scope.$watch('state.index', (index, prevIndex) => {
     syncAppState({ index });
@@ -242,19 +258,23 @@ function discoverController(
     }
   });
   // update data source when filters update
-
   subscriptions.add(
     subscribeWithScope($scope, filterManager.getUpdates$(), {
       next: () => {
-        const appFiltersState = getAppFilters();
-        const appFilters = filterManager.getAppFilters();
-        if (!_.isEqual(appFiltersState, appFilters)) {
-          syncAppState({ filters: appFilters });
-        }
         const globalFiltersState = getGlobalFilters();
         const globalFilters = filterManager.getGlobalFilters();
-        if (!_.isEqual(globalFilters, globalFiltersState)) {
+        if (!isEqualFilters(globalFilters, globalFiltersState)) {
           syncGlobalState({ filters: globalFilters });
+        }
+        const appFiltersState = getAppFilters();
+        const appFilters = filterManager.getAppFilters();
+        if (!isEqualFilters(appFiltersState, appFilters)) {
+          syncAppState({
+            filters: appFilters.map(filter => {
+              delete filter.meta.value;
+              return filter;
+            }),
+          });
         }
         $scope.updateDataSource();
       },

@@ -23,7 +23,7 @@ import {
   createKbnUrlStateStorage,
   syncStates,
 } from '../../../../../../../plugins/kibana_utils/public';
-import { Filter } from '../../../../../../../plugins/data/common/es_query/filters';
+import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 
 interface AppState {
   columns?: string[];
@@ -90,17 +90,17 @@ export function getState(
     syncGlobalState: (newPartial: GlobalState) => {
       const oldState = globalStateContainer.getState();
       const newState = { ...oldState, ...newPartial };
-      if (!_.isEqual(oldState, newState)) {
+      if (!isEqualState(oldState, newState)) {
         globalStateContainer.set(newState);
       }
     },
     syncAppState: (newPartial: AppState) => {
       const oldState = appStateContainer.getState();
       const newState = { ...oldState, ...newPartial };
-      if (!_.isEqual(oldState, newState)) {
+      if (!isEqualState(oldState, newState)) {
         appStateContainer.set(newState);
       }
-      if (!_.isEqual(initialAppState, newState)) {
+      if (!isEqualState(initialAppState, newState)) {
         onChangeAppStatus(true);
       }
     },
@@ -110,6 +110,38 @@ export function getState(
       initialAppState = newState;
     },
   };
+}
+
+/**
+ * Helper function to compare 2 different filter states
+ */
+export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+  if (!filtersA && !filtersB) {
+    return true;
+  } else if (!filtersA || !filtersB) {
+    return false;
+  }
+  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+}
+
+export function splitState(state: AppState | GlobalState = {}) {
+  const { filters = [], ...statePartial } = state;
+  return { filters, state: statePartial };
+}
+
+/**
+ * Helper function to compare 2 different state, is needed since comparing filters
+ * works differently
+ */
+export function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalState) {
+  if (!stateA && !stateB) {
+    return true;
+  } else if (!stateA || !stateB) {
+    return false;
+  }
+  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
+  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+  return _.isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
 /**
