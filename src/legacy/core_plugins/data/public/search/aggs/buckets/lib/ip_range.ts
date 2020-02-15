@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import { SerializedFieldFormat } from '../../../../expressions/common/types';
-import { IFieldFormat } from '../index';
+export type IpRangeKey =
+  | { type: 'mask'; mask: string }
+  | { type: 'range'; from: string; to: string };
 
-export { asPrettyString } from './as_pretty_string';
-export { getHighlightHtml, getHighlightRequest } from './highlight';
-export { serializeFieldFormat } from './serialize';
+export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
+  if (range.type === 'mask') {
+    return format(range.mask);
+  }
+  const from = range.from ? format(range.from) : '-Infinity';
+  const to = range.to ? format(range.to) : 'Infinity';
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+  return `${from} to ${to}`;
+};

@@ -77,7 +77,6 @@
   },
   "messages": {
     "common.ui.aggResponse.allDocsTitle": "すべてのドキュメント",
-    "common.ui.aggTypes.rangesFormatMessage": "{gte} {from} と {lt} {to}",
     "data.search.aggs.aggGroups.bucketsText": "バケット",
     "data.search.aggs.aggGroups.metricsText": "メトリック",
     "data.search.aggs.buckets.dateHistogramLabel": "{intervalDescription}ごとの {fieldName}",
