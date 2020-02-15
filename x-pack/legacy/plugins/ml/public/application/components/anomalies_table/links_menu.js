@@ -236,6 +236,25 @@ class LinksMenuUI extends Component {
     let i = 0;
     findFieldType(datafeedIndices[i]);
 
+    const error = () => {
+      console.log(
+        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
+        datafeedIndices
+      );
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
+          defaultMessage:
+            'Unable to view examples of documents with mlcategory {categoryId} ' +
+            'as no mapping could be found for the categorization field {categorizationFieldName}',
+          values: {
+            categoryId,
+            categorizationFieldName,
+          },
+        })
+      );
+    };
+
     function findFieldType(index) {
       getFieldTypeFromMapping(index, categorizationFieldName)
         .then(resp => {
@@ -340,25 +359,6 @@ class LinksMenuUI extends Component {
             })
           );
         });
-    }
-
-    function error() {
-      console.log(
-        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
-        datafeedIndices
-      );
-      const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
-        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
-          defaultMessage:
-            'Unable to view examples of documents with mlcategory {categoryId} ' +
-            'as no mapping could be found for the categorization field {categorizationFieldName}',
-          values: {
-            categoryId,
-            categorizationFieldName,
-          },
-        })
-      );
     }
   };
 
