@@ -18,7 +18,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -27,6 +27,8 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getIdError = ({
   id,
@@ -226,38 +228,40 @@ export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
   return [];
 };
 
-export const getTupleDuplicateErrorsAndUniqueRules = <T>(
-  rules: T[],
+export const getTupleDuplicateErrorsAndUniqueRules = (
+  rules: PromiseFromStreams[],
   isOverwrite: boolean
-): [BulkError[], T[]] => {
-  const errors: BulkError[] = [];
-  const uniqueRules = rules
-    .reduce(
-      (acc, parsedRule) => {
-        if (parsedRule instanceof Error) {
-          acc.set(uuid.v4(), parsedRule);
-        } else {
-          const { rule_id: ruleId } = parsedRule;
-          if (ruleId != null) {
-            if (acc.has(ruleId) && !isOverwrite) {
-              errors.push(
-                createBulkErrorObject({
-                  ruleId,
-                  statusCode: 400,
-                  message: `More than one rule with rule-id: "${ruleId}" found`,
-                })
-              );
-            }
-            acc.set(ruleId, parsedRule);
-          } else {
-            acc.set(uuid.v4(), parsedRule);
+): [BulkError[], PromiseFromStreams[]] => {
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId } = parsedRule;
+        if (ruleId != null) {
+          if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+            acc.errors.set(
+              uuid.v4(),
+              createBulkErrorObject({
+                ruleId,
+                statusCode: 400,
+                message: `More than one rule with rule-id: "${ruleId}" found`,
+              })
+            );
           }
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          acc.rulesAcc.set(uuid.v4(), parsedRule);
         }
-        return acc;
-      }, // using map (preserves ordering)
-      new Map()
-    )
-    .values();
+      }
 
-  return [errors, Array.from(uniqueRules)];
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
