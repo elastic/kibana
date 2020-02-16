@@ -22,12 +22,19 @@ import Fs from 'fs';
 import Path from 'path';
 import Os from 'os';
 import Del from 'del';
-import { clone } from 'lodash';
 
+import * as Rx from 'rxjs';
+import { map, filter, take } from 'rxjs/operators';
 import { safeDump } from 'js-yaml';
+
 import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
-const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
+const legacyConfig = follow('__fixtures__/reload_logging_config/kibana.test.yml');
+const configFileLogConsole = follow(
+  '__fixtures__/reload_logging_config/kibana_log_console.test.yml'
+);
+const configFileLogFile = follow('__fixtures__/reload_logging_config/kibana_log_file.test.yml');
+
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
 const second = 1000;
@@ -62,41 +69,32 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
   });
 }
 
-function containsJSON(content: string) {
-  return content
-    .split('\n')
-    .filter(Boolean)
-    .every(line => line.startsWith('{'));
+function containsJsonOnly(content: string[]) {
+  return content.every(line => line.startsWith('{'));
 }
 
-const config = {
-  read() {
-    return getConfigFromFiles([testConfigFile]);
-  },
-  modify(fn: (input: Record<string, any>) => Record<string, any>) {
-    const oldContent = clone(config.read());
-    const newContent = fn(oldContent);
-    config.write(newContent);
-  },
-  write(content: Record<string, any>) {
-    const yaml = safeDump(content);
-    Fs.writeFileSync(testConfigFile, yaml);
-  },
-};
+function createConfigManager(configPath: string) {
+  return {
+    modify(fn: (input: Record<string, any>) => Record<string, any>) {
+      const oldContent = getConfigFromFiles([configPath]);
+      const yaml = safeDump(fn(oldContent));
+      Fs.writeFileSync(configPath, yaml);
+    },
+  };
+}
 
-const defaultConfig = config.read();
 describe('Server logging configuration', function() {
   let child: Child.ChildProcess;
   beforeEach(() => {
-    config.write(defaultConfig);
     Fs.mkdirSync(tempDir, { recursive: true });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     if (child !== undefined) {
       child.kill();
+      // wait for child to be killed otherwise jest complains that process not finished
+      await new Promise(res => setTimeout(res, 1000));
     }
-
     Del.sync(tempDir, { force: true });
   });
 
@@ -110,33 +108,49 @@ describe('Server logging configuration', function() {
       it(
         'should be reloadable via SIGHUP process signaling',
         async function() {
-          config.modify(oldConfig => {
-            oldConfig.logging.json = true;
-            return oldConfig;
-          });
-          const logPath = Path.resolve(tempDir, 'kibana.log');
+          const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+          Fs.copyFileSync(legacyConfig, configFilePath);
 
           child = Child.spawn(process.execPath, [
             kibanaPath,
             '--oss',
             '--config',
-            testConfigFile,
-            '--logging.dest',
-            logPath,
+            configFilePath,
             '--verbose',
           ]);
 
-          const jsonContent = await watchFileUntil(logPath, /setting up root/, 30 * second);
-          expect(containsJSON(jsonContent)).toBe(true);
+          const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+            map(messages =>
+              String(messages)
+                .split('\n')
+                .filter(Boolean)
+            )
+          );
 
-          config.modify(oldConfig => {
+          await message$
+            .pipe(
+              // We know the sighup handler will be registered before this message logged
+              filter(messages => messages.some(m => m.includes('setting up root'))),
+              take(1)
+            )
+            .toPromise();
+
+          const lastMessage = await message$.pipe(take(1)).toPromise();
+          expect(containsJsonOnly(lastMessage)).toBe(true);
+
+          createConfigManager(configFilePath).modify(oldConfig => {
             oldConfig.logging.json = false;
             return oldConfig;
           });
+
           child.kill('SIGHUP');
 
-          const textContent = await watchFileUntil(logPath, /setting up root/, 50 * second);
-          expect(containsJSON(textContent)).toBe(false);
+          await message$
+            .pipe(
+              filter(messages => !containsJsonOnly(messages)),
+              take(1)
+            )
+            .toPromise();
         },
         minute
       );
@@ -151,7 +165,7 @@ describe('Server logging configuration', function() {
             kibanaPath,
             '--oss',
             '--config',
-            testConfigFile,
+            legacyConfig,
             '--logging.dest',
             logPath,
             '--verbose',
@@ -162,13 +176,85 @@ describe('Server logging configuration', function() {
           Fs.renameSync(logPath, logPathArchived);
           child.kill('SIGHUP');
 
-          const contents = await watchFileUntil(
+          await watchFileUntil(
             logPath,
             /Reloaded logging configuration due to SIGHUP/,
             10 * second
           );
-          const lines = contents.toString().split('\n');
-          expect(lines[0]).toMatch(/Reloaded logging configuration due to SIGHUP/);
+        },
+        minute
+      );
+    });
+
+    describe('platform logging', () => {
+      it(
+        'should be reloadable via SIGHUP process signaling',
+        async function() {
+          const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+          Fs.copyFileSync(configFileLogConsole, configFilePath);
+
+          child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
+
+          const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+            map(messages =>
+              String(messages)
+                .split('\n')
+                .filter(Boolean)
+            )
+          );
+
+          await message$
+            .pipe(
+              // We know the sighup handler will be registered before this message logged
+              filter(messages => messages.some(m => m.includes('setting up root'))),
+              take(1)
+            )
+            .toPromise();
+
+          const lastMessage = await message$.pipe(take(1)).toPromise();
+          expect(containsJsonOnly(lastMessage)).toBe(true);
+
+          createConfigManager(configFilePath).modify(oldConfig => {
+            oldConfig.logging.appenders.console.layout.kind = 'pattern';
+            return oldConfig;
+          });
+          child.kill('SIGHUP');
+
+          await message$
+            .pipe(
+              filter(messages => !containsJsonOnly(messages)),
+              take(1)
+            )
+            .toPromise();
+        },
+        30 * second
+      );
+      it(
+        'should recreate file handler on SIGHUP',
+        async function() {
+          const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+          Fs.copyFileSync(configFileLogFile, configFilePath);
+
+          const logPath = Path.resolve(tempDir, 'kibana.log');
+          const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
+
+          createConfigManager(configFilePath).modify(oldConfig => {
+            oldConfig.logging.appenders.file.path = logPath;
+            return oldConfig;
+          });
+
+          child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
+
+          await watchFileUntil(logPath, /setting up root/, 30 * second);
+          // once the server is running, archive the log file and issue SIGHUP
+          Fs.renameSync(logPath, logPathArchived);
+          child.kill('SIGHUP');
+
+          await watchFileUntil(
+            logPath,
+            /Reloaded logging configuration due to SIGHUP/,
+            10 * second
+          );
         },
         minute
       );
