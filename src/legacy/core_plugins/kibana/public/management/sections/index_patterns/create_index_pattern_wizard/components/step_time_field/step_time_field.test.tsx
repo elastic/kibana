@@ -36,10 +36,6 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
 
-process.on('unhandledRejection', reason => {
-  process._rawDebug('Unhandled Rejection:', reason);
-});
-
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
