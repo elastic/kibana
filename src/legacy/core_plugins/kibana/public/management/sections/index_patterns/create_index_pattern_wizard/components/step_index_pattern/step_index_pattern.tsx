@@ -76,7 +76,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     showingIndexPatternQueryErrors: false,
     indexPatternName: '',
   };
-  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS]; // todo consider refactoring out
+  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
   lastQuery: string | undefined;
 
   constructor(props: StepIndexPatternProps) {

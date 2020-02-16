@@ -45,7 +45,7 @@ export const TimeField = ({
 }: {
   isVisible: boolean;
   fetchTimeFields: () => void;
-  timeFieldOptions: Array<{ text: string; value: string }>;
+  timeFieldOptions: Array<{ text: string; value?: string }>;
   isLoading: boolean;
   selectedTimeField?: string;
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;

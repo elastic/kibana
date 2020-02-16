@@ -47,8 +47,8 @@ interface StepTimeFieldProps {
 
 interface StepTimeFieldState {
   error: string;
-  timeFields: TimeField[];
-  selectedTimeField?: TimeField;
+  timeFields: TimeFieldConfig[];
+  selectedTimeField?: string;
   timeFieldSet: boolean;
   isAdvancedOptionsVisible: boolean;
   isFetchingTimeFields: boolean;
@@ -58,7 +58,7 @@ interface StepTimeFieldState {
   indexPatternName: string;
 }
 
-interface TimeField {
+interface TimeFieldConfig {
   display: string;
   fieldName?: string;
   isDisabled?: boolean;
@@ -104,7 +104,9 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
-      indexPattern.getFieldsForWildcard({ pattern, ...getFetchForWildcardOptions() })
+      // indexPattern.fieldgetFieldsForWildcard({ pattern, ...getFetchForWildcardOptions() })
+      // indexPattern.fieldsFetcher.
+      indexPattern.fieldsFetcher.fetchForWildcard(pattern, getFetchForWildcardOptions())
     );
     const timeFields = extractTimeFields(fields);
 
@@ -115,15 +117,15 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     const value = e.target.value;
 
     // Find the time field based on the selected value
-    // @ts-ignore
-    const timeField = this.state.timeFields.find(timeFld => timeFld.fieldName === value);
+    const timeField = this.state.timeFields.find(
+      (timeFld: TimeFieldConfig) => timeFld.fieldName === value
+    );
 
     // If the value is an empty string, it's not a valid selection
     const validSelection = value !== '';
 
     this.setState({
-      // @ts-ignore
-      selectedTimeField: timeField ? timeField.fieldName : undefined,
+      selectedTimeField: timeField ? (timeField as TimeFieldConfig).fieldName : undefined,
       timeFieldSet: validSelection,
     });
   };
@@ -199,19 +201,17 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     const { indexPattern, goToPreviousStep } = this.props;
 
-    const timeFieldOptions = timeFields
-      ? [
-          { text: '', value: '' },
-          ...timeFields.map(timeField => ({
-            // @ts-ignore
-            text: timeField.display,
-            // @ts-ignore
-            value: timeField.fieldName,
-            // @ts-ignore
-            disabled: timeFields.isDisabled,
-          })),
-        ]
-      : [];
+    const timeFieldOptions =
+      timeFields.length > 0
+        ? [
+            { text: '', value: '' },
+            ...timeFields.map((timeField: TimeFieldConfig) => ({
+              text: timeField.display,
+              value: timeField.fieldName,
+              disabled: ((timeFields as unknown) as TimeFieldConfig).isDisabled,
+            })),
+          ]
+        : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;
     const submittable = !showTimeField || timeFieldSet;

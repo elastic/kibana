@@ -46,7 +46,10 @@ jest.mock('../../lib/get_indices', () => ({
   },
 }));
 
-const allIndices = [{ name: 'kibana' }, { name: 'es' }];
+const allIndices = [
+  { name: 'kibana', tags: [] },
+  { name: 'es', tags: [] },
+];
 
 const goToNextStep = () => {};
 
