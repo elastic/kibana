@@ -12,6 +12,7 @@ export const LOG_ENTRIES_ITEM_PATH = '/api/log_entries/item';
 export const logEntriesItemRequestRT = rt.type({
   sourceId: rt.string,
   id: rt.string,
+  index: rt.string,
 });
 
 export type LogEntriesItemRequest = rt.TypeOf<typeof logEntriesItemRequestRT>;

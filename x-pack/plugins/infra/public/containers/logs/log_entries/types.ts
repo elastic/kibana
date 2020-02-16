@@ -68,6 +68,8 @@ export interface InfraLogEntry {
   key: InfraTimeKey;
   /** The log entry's id */
   gid: string;
+  /** The log entry's index */
+  index: string;
   /** The source id */
   source: string;
   /** The columns used for rendering the log entry */

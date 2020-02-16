@@ -24,6 +24,7 @@ export const sharedFragments = {
   InfraLogEntryFields: gql`
     fragment InfraLogEntryFields on InfraLogEntry {
       gid
+      index
       key {
         time
         tiebreaker

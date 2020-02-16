@@ -187,6 +187,8 @@ export interface InfraLogEntry {
   key: InfraTimeKey;
   /** The log entry's id */
   gid: string;
+  /** The log entry's index */
+  index: string;
   /** The source id */
   source: string;
   /** The columns used for rendering the log entry */
@@ -1137,6 +1139,8 @@ export namespace InfraLogEntryResolvers {
     key?: KeyResolver<InfraTimeKey, TypeParent, Context>;
     /** The log entry's id */
     gid?: GidResolver<string, TypeParent, Context>;
+    /** The log entry's index */
+    index?: IndexResolver<string, TypeParent, Context>;
     /** The source id */
     source?: SourceResolver<string, TypeParent, Context>;
     /** The columns used for rendering the log entry */
@@ -1149,6 +1153,11 @@ export namespace InfraLogEntryResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
   export type GidResolver<R = string, Parent = InfraLogEntry, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IndexResolver<R = string, Parent = InfraLogEntry, Context = InfraContext> = Resolver<
     R,
     Parent,
     Context

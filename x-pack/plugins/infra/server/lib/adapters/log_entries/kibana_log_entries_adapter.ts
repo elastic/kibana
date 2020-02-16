@@ -195,13 +195,14 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   public async getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
+    index: string,
     sourceConfiguration: InfraSourceConfiguration
   ) {
     const search = (searchOptions: object) =>
       this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
 
     const params = {
-      index: sourceConfiguration.logAlias,
+      index,
       terminate_after: 1,
       body: {
         size: 1,
@@ -240,6 +241,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
 
     return {
       id: hit._id,
+      index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},

@@ -50,7 +50,7 @@ interface ScrollableLogTextStreamViewProps {
   }) => any;
   loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem: (id: string) => void;
+  setFlyoutRef: (ref: { id: string; index: string }) => void;
   setFlyoutVisibility: (visible: boolean) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -286,8 +286,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     );
   }
 
-  private handleOpenFlyout = (id: string) => {
-    this.props.setFlyoutItem(id);
+  private handleOpenFlyout = (id: string, index: string) => {
+    this.props.setFlyoutRef({ id, index });
     this.props.setFlyoutVisibility(true);
   };
 
