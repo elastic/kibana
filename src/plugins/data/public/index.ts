@@ -278,6 +278,19 @@ export {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
 
+/*
+ * UI components
+ */
+
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  FilterBar,
+  QueryStringInput,
+  IndexPatternSelect,
+} from './ui';
+
 /**
  * Types to be shared externally
  * @public
@@ -302,7 +315,6 @@ export {
   TimefilterContract,
   TimeHistoryContract,
 } from './query';
-export * from './ui';
 
 export {
   // kbn field types
