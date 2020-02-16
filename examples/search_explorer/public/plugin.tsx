@@ -21,14 +21,14 @@ import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { AppPluginStartDependencies } from './types';
 
 export class SearchExplorerPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<AppPluginStartDependencies>) {
     core.application.register({
       id: 'searchExplorer',
       title: 'Search Explorer',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
   }

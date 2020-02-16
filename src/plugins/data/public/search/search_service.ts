@@ -53,9 +53,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <T extends TStrategyTypes>(name: T): TSearchStrategyProvider<T> => {
     const strategyProvider = this.searchStrategies[name];
-    if (!strategyProvider) {
-      throw new Error(`Strategy with name ${name} does not exist`);
-    }
+    if (!strategyProvider) throw new Error('Search strategy not found');
     return strategyProvider;
   };
 
@@ -75,11 +73,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
-        const strategyPromise = strategyProvider({
+        const { search } = strategyProvider({
           core,
           getSearchStrategy: this.getSearchStrategy,
         });
-        return strategyPromise.search(request as any, options);
+        return search(request as any, options);
       },
       __LEGACY: {
         esClient: this.esClient!,

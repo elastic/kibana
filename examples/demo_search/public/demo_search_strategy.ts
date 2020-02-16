@@ -52,14 +52,13 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
 export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = (
   context: ISearchContext
 ): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
+  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const { search } = syncStrategyProvider(context);
   return {
     search: (request, options) => {
-      const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
-      if (!syncStrategyProvider) throw new Error('Search strategy not found');
-      return syncStrategyProvider(context).search(
-        { ...request, serverStrategy: DEMO_SEARCH_STRATEGY },
-        options
-      ) as Observable<IDemoResponse>;
+      return search({ ...request, serverStrategy: DEMO_SEARCH_STRATEGY }, options) as Observable<
+        IDemoResponse
+      >;
     },
   };
 };

@@ -34,7 +34,6 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         request.params.preference = getEsPreference(setPreference, customPreference);
       }
       const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
-      if (!syncStrategyProvider) throw new Error('Search strategy not found');
       return syncStrategyProvider(context).search(
         { ...request, serverStrategy: ES_SEARCH_STRATEGY },
         options

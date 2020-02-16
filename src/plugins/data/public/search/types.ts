@@ -24,7 +24,7 @@ import { LegacyApiCaller } from './es_client';
 
 export interface ISearchContext {
   core: CoreStart;
-  getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T> | undefined;
+  getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
 }
 
 /**
