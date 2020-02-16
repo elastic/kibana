@@ -59,11 +59,11 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       verifyApiAccess(licenseState);
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      const { name, actions, params, schedule, tags, throttle } = req.body;
+      const { name, actions, params, schedule, tags } = req.body;
       return res.ok({
         body: await alertsClient.update({
           id,
-          data: { name, actions, params, schedule, tags, throttle },
+          data: { name, actions, params, schedule, tags },
         }),
       });
     })
