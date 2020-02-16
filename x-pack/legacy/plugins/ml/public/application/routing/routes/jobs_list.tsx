@@ -7,7 +7,6 @@
 import React, { useEffect, FC } from 'react';
 import { useObservable } from 'react-use';
 import { i18n } from '@kbn/i18n';
-import { timefilter } from 'ui/timefilter';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useUrlState } from '../../util/url_state';
@@ -16,6 +15,7 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useMlKibana } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -36,6 +36,8 @@ export const jobListRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
 

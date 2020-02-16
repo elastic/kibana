@@ -48,7 +48,6 @@ import { dataVisualizerRoutes } from '../routes/data_visualizer';
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
-// @ts-ignore: could not find declaration file for module
 import { filtersRoutes } from '../routes/filters';
 // @ts-ignore: could not find declaration file for module
 import { resultsServiceRoutes } from '../routes/results_service';
@@ -106,6 +105,7 @@ export interface RouteInitialization {
   xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  securityPlugin: any;
   cloud?: CloudSetup;
 }
 export interface UsageInitialization {
@@ -212,6 +212,7 @@ export class Plugin {
       elasticsearchService: core.elasticsearch,
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
+      securityPlugin: plugins.security,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
