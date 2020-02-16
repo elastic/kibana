@@ -18,7 +18,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { IAggConfigs } from '../../agg_types';
+import { IAggConfigs } from '../aggs/agg_configs';
 import { AggColumn, tabifyGetColumns } from './get_columns';
 
 import { TabbedResponseWriterOptions } from './types';

@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { TimeRange } from '../../../../../plugins/data/public';
-
-export interface TabbedResponseWriterOptions {
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  timeRange?: { [key: string]: TimeRange };
-}
+export { TabbedResponseWriterOptions } from './types';
+export { tabifyAggResponse } from './tabify';
+export { tabifyGetColumns } from './get_columns';

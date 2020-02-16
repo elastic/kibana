@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { tabifyAggResponse } from './tabify';
+import { IAggConfigs } from '../aggs/agg_configs';
+import { TabbedResponseWriterOptions } from './types';
+
+export function tabifyAggResponse(
+  aggs: IAggConfigs,
+  esResponse: unknown,
+  respOpts?: Partial<TabbedResponseWriterOptions>
+): Record<string, string>;

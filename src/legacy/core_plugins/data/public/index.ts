@@ -47,6 +47,7 @@ export {
   ISchemas,
   OptionedParamEditorProps,
   OptionedValueProp,
+  TabbedResponseWriterOptions,
 } from './search/types';
 
 /** @public static code */
@@ -81,4 +82,6 @@ export {
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from './search';

@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
-import { buildPointSeriesData } from './point_series/point_series';
-import { tabifyAggResponse } from '../../../core_plugins/data/public';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
-export const aggResponseIndex = {
-  hierarchical: buildHierarchicalData,
-  pointSeries: buildPointSeriesData,
-  tabify: tabifyAggResponse,
-};
+export interface TabbedResponseWriterOptions {
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  timeRange?: { [key: string]: TimeRange };
+}

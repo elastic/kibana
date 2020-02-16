@@ -18,7 +18,7 @@
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { AggConfigs, AggGroupNames, Schemas, BUCKET_TYPES } from '../../agg_types';
+import { AggConfigs, AggGroupNames, Schemas, BUCKET_TYPES } from '../aggs';
 
 import { TabbedResponseWriterOptions } from './types';
 

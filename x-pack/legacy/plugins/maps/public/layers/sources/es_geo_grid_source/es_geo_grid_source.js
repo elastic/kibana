@@ -11,7 +11,7 @@ import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { AggConfigs, Schemas } from 'ui/agg_types';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { tabifyAggResponse } from '../../../../../../../../src/legacy/core_plugins/data/public';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {

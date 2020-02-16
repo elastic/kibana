@@ -39,8 +39,10 @@ import {
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
+import {
+  tabifyAggResponse,
+  TabbedResponseWriterOptions,
+} from '../../../../../core_plugins/data/public';
 import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -196,7 +198,7 @@ const handleCourierRequest = async ({
     metricsAtAllLevels,
     partialRows,
     timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
-  };
+  } as TabbedResponseWriterOptions;
 
   const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
   // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed

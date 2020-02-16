@@ -19,8 +19,8 @@
 
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { cloneDeep } from 'lodash';
-import { tabifyAggResponse } from '../tabify';
-import { AggConfigs, AggGroupNames, Schemas } from '../../agg_types';
+import { tabifyAggResponse } from './tabify';
+import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
 
 jest.mock('ui/new_platform');
 

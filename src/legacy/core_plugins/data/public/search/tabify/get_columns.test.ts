@@ -18,7 +18,7 @@
  */
 
 import { tabifyGetColumns, AggColumn } from './get_columns';
-import { AggConfigs, AggGroupNames, Schemas } from 'ui/agg_types';
+import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
 
 jest.mock('ui/new_platform');
 
