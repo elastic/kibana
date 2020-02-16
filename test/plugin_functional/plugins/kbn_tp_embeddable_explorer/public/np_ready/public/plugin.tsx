@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
 import {
@@ -37,10 +37,7 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
 import {
   IEmbeddableStart,
@@ -57,7 +54,7 @@ export interface SetupDependencies {
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
     ExitFullScreenButton: React.ComponentType<any>;
@@ -101,13 +98,6 @@ export class EmbeddableExplorerPublicPlugin
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
-      const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-        <SavedObjectFinderUi
-          {...props}
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-        />
-      );
       ReactDOM.render(
         <App
           getActions={plugins.uiActions.getTriggerCompatibleActions}
@@ -116,7 +106,7 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
-          SavedObjectFinder={SavedObjectFinder}
+          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           I18nContext={core.i18n.Context}
         />,
         root

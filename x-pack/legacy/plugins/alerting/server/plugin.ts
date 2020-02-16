@@ -25,6 +25,7 @@ import {
   deleteAlertRoute,
   findAlertRoute,
   getAlertRoute,
+  getAlertStateRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -68,6 +69,12 @@ export class Plugin {
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
+    if (this.isESOUsingEphemeralEncryptionKey) {
+      this.logger.warn(
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+      );
+    }
+
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
       type: 'alert',
@@ -92,6 +99,7 @@ export class Plugin {
     core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(findAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(getAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getAlertStateRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, this.licenseState));

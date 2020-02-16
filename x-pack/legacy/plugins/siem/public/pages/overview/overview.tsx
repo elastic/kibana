@@ -9,7 +9,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from './alerts_by_category';
@@ -29,7 +29,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -37,7 +37,7 @@ const SidebarFlexItem = styled(EuiFlexItem)`
 
 interface OverviewComponentReduxProps {
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   setAbsoluteRangeDatePicker?: SetAbsoluteRangeDatePicker;
 }
 
@@ -85,7 +85,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -98,7 +97,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />

@@ -12,29 +12,24 @@ import {
   ML_ANNOTATIONS_INDEX_PATTERN,
 } from '../../../common/constants/index_patterns';
 
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../common/constants/feature_flags';
-
 // Annotations Feature is available if:
-// - FEATURE_ANNOTATIONS_ENABLED is set to `true`
 // - ML_ANNOTATIONS_INDEX_PATTERN index is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_WRITE alias is present
-export async function isAnnotationsFeatureAvailable(callWithRequest) {
-  if (!FEATURE_ANNOTATIONS_ENABLED) return false;
-
+export async function isAnnotationsFeatureAvailable(callAsCurrentUser) {
   try {
     const indexParams = { index: ML_ANNOTATIONS_INDEX_PATTERN };
 
-    const annotationsIndexExists = await callWithRequest('indices.exists', indexParams);
+    const annotationsIndexExists = await callAsCurrentUser('indices.exists', indexParams);
     if (!annotationsIndexExists) return false;
 
-    const annotationsReadAliasExists = await callWithRequest('indices.existsAlias', {
+    const annotationsReadAliasExists = await callAsCurrentUser('indices.existsAlias', {
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
 
     if (!annotationsReadAliasExists) return false;
 
-    const annotationsWriteAliasExists = await callWithRequest('indices.existsAlias', {
+    const annotationsWriteAliasExists = await callAsCurrentUser('indices.existsAlias', {
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });
     if (!annotationsWriteAliasExists) return false;

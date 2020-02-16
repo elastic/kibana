@@ -15,7 +15,7 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
@@ -33,7 +33,7 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
-  pageFilters?: esFilters.Filter[];
+  pageFilters?: Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
@@ -41,7 +41,7 @@ export interface OwnProps {
 interface StateReduxProps {
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
