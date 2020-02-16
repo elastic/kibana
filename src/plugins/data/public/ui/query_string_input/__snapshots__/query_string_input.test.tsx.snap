@@ -191,7 +191,13 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {},
               "query": Object {
+                "app$": Observable {
+                  "_isScalar": false,
+                },
                 "filterManager": [MockFunction],
+                "global$": Observable {
+                  "_isScalar": false,
+                },
                 "savedQueries": [MockFunction],
                 "timefilter": Object {
                   "history": Object {
@@ -846,7 +852,13 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {},
                       "query": Object {
+                        "app$": Observable {
+                          "_isScalar": false,
+                        },
                         "filterManager": [MockFunction],
+                        "global$": Observable {
+                          "_isScalar": false,
+                        },
                         "savedQueries": [MockFunction],
                         "timefilter": Object {
                           "history": Object {
@@ -1483,7 +1495,13 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {},
               "query": Object {
+                "app$": Observable {
+                  "_isScalar": false,
+                },
                 "filterManager": [MockFunction],
+                "global$": Observable {
+                  "_isScalar": false,
+                },
                 "savedQueries": [MockFunction],
                 "timefilter": Object {
                   "history": Object {
@@ -2135,7 +2153,13 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {},
                       "query": Object {
+                        "app$": Observable {
+                          "_isScalar": false,
+                        },
                         "filterManager": [MockFunction],
+                        "global$": Observable {
+                          "_isScalar": false,
+                        },
                         "savedQueries": [MockFunction],
                         "timefilter": Object {
                           "history": Object {
@@ -2772,7 +2796,13 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {},
               "query": Object {
+                "app$": Observable {
+                  "_isScalar": false,
+                },
                 "filterManager": [MockFunction],
+                "global$": Observable {
+                  "_isScalar": false,
+                },
                 "savedQueries": [MockFunction],
                 "timefilter": Object {
                   "history": Object {
@@ -3424,7 +3454,13 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {},
                       "query": Object {
+                        "app$": Observable {
+                          "_isScalar": false,
+                        },
                         "filterManager": [MockFunction],
+                        "global$": Observable {
+                          "_isScalar": false,
+                        },
                         "savedQueries": [MockFunction],
                         "timefilter": Object {
                           "history": Object {
