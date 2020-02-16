@@ -17,8 +17,7 @@
  * under the License.
  */
 
-const { relative, resolve } = require('path');
-const fs = require('fs');
+const { relative } = require('path');
 
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
@@ -30,54 +29,9 @@ const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
 const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
-async function gitInit(dir) {
-  // Only plugins in /plugins get git init
-  try {
-    await execa('git', ['init', dir]);
-    console.log(`Git repo initialized in ${dir}`);
-  } catch (error) {
-    console.error(error);
-    throw new Error(`Failure to git init ${dir}: ${error.all || error}`);
-  }
-}
-
-async function moveToCustomFolder(from, to) {
-  try {
-    await execa('mv', [from, to]);
-  } catch (error) {
-    console.error(error);
-    throw new Error(`Failure to move plugin to ${to}: ${error.all || error}`);
-  }
-}
-
-async function eslintPlugin(dir) {
-  try {
-    await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
-  } catch (error) {
-    console.error(error);
-    throw new Error(`Failure when running prettier on the generated output: ${error.all || error}`);
-  }
-}
-
-module.exports = function({ name, targetPath }) {
+module.exports = function({ name, targetPath, isKibanaPlugin }) {
   return {
     prompts: {
-      customPath: {
-        message: 'Would you like to create the plugin in a different folder?',
-        default: '/plugins',
-        filter(value) {
-          // Keep default value empty
-          if (value === '/plugins') return '';
-          return value;
-        },
-        validate(customPath) {
-          const p = resolve(process.cwd(), customPath);
-          const exists = fs.existsSync(p);
-          if (!exists)
-            return `Folder should exist relative to the kibana root folder. Consider /src/plugins or /x-pack/plugins.`;
-          return true;
-        },
-      },
       description: {
         message: 'Provide a short description',
         default: 'An awesome Kibana plugin',
@@ -110,9 +64,7 @@ module.exports = function({ name, targetPath }) {
       generateEslint: {
         type: 'confirm',
         message: 'Would you like to use a custom eslint file?',
-        default({ customPath }) {
-          return !customPath;
-        },
+        default: !isKibanaPlugin,
       },
     },
     filters: {
@@ -134,32 +86,31 @@ module.exports = function({ name, targetPath }) {
           camelCase,
           snakeCase,
           name,
-          // kibana plugins are placed in a the non default path
-          isKibanaPlugin: !answers.customPath,
+          isKibanaPlugin,
           kbnVersion: answers.kbnVersion,
           upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
           hasScss: !!answers.generateScss,
-          relRoot: relative(resolve(answers.customPath || targetPath, 'public'), process.cwd()),
+          relRoot: isKibanaPlugin ? '../../../..' : '../../..',
         },
         answers
       ),
     enforceNewFolder: true,
     installDependencies: false,
-    async post({ log, answers }) {
-      let dir = relative(process.cwd(), targetPath);
-      if (answers.customPath) {
-        // Move to custom path
-        moveToCustomFolder(targetPath, answers.customPath);
-        dir = relative(process.cwd(), resolve(answers.customPath, snakeCase(name)));
-      } else {
-        // Init git only in the default path
-        await gitInit(dir);
-      }
+    gitInit: !isKibanaPlugin,
+    async post({ log }) {
+      const dir = relative(process.cwd(), targetPath);
 
       // Apply eslint to the generated plugin
-      eslintPlugin(dir);
+      try {
+        await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
+      } catch (error) {
+        console.error(error);
+        throw new Error(
+          `Failure when running prettier on the generated output: ${error.all || error}`
+        );
+      }
 
       log.success(chalk`🎉
 
