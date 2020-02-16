@@ -29,6 +29,7 @@ import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
@@ -131,11 +132,11 @@ export const HostsComponent = React.memo<HostsComponentProps>(
                     to={to}
                     filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     setQuery={setQuery}
                     from={from}
                     type={hostsModel.HostsType.page}
                     indexPattern={indexPattern}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     hostsPagePath={hostsPagePath}
                   />
                 </WrapperPage>
