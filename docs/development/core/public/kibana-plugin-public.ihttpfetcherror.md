@@ -16,6 +16,7 @@ export interface IHttpFetchError extends Error
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [body](./kibana-plugin-public.ihttpfetcherror.body.md) | <code>any</code> |  |
+|  [name](./kibana-plugin-public.ihttpfetcherror.name.md) | <code>string</code> |  |
 |  [req](./kibana-plugin-public.ihttpfetcherror.req.md) | <code>Request</code> |  |
 |  [request](./kibana-plugin-public.ihttpfetcherror.request.md) | <code>Request</code> |  |
 |  [res](./kibana-plugin-public.ihttpfetcherror.res.md) | <code>Response</code> |  |

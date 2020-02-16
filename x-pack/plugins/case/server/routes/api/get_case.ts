@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
+import { flattenCaseSavedObject, wrapError } from './utils';
 
 export function initGetCaseApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -33,14 +33,16 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         return response.customError(wrapError(error));
       }
       if (!includeComments) {
-        return response.ok({ body: theCase });
+        return response.ok({ body: flattenCaseSavedObject(theCase, []) });
       }
       try {
         const theComments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: { ...theCase, comments: theComments } });
+        return response.ok({
+          body: { ...flattenCaseSavedObject(theCase, theComments.saved_objects) },
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }
