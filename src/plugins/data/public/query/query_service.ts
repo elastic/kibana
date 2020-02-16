@@ -82,7 +82,7 @@ export class QueryService {
   }
 
   public stop() {
-    // nothing here yet
+    // nothing to do here yet
   }
 }
 
