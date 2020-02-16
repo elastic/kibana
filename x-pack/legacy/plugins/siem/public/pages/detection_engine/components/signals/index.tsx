@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
+import { Filter, esQuery } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
 import { HeaderSection } from '../../../../components/header_section';
@@ -50,7 +50,7 @@ const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
 interface OwnProps {
   canUserCRUD: boolean;
-  defaultFilters?: esFilters.Filter[];
+  defaultFilters?: Filter[];
   hasIndexWrite: boolean;
   from: number;
   loading: boolean;

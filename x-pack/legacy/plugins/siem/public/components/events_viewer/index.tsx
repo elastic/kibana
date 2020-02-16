@@ -12,7 +12,7 @@ import { inputsActions, timelineActions } from '../../store/actions';
 import { SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
@@ -29,7 +29,7 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
-  pageFilters?: esFilters.Filter[];
+  pageFilters?: Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }

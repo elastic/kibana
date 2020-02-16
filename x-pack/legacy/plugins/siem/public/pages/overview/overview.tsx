@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from './alerts_by_category';
@@ -27,7 +27,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -77,7 +77,6 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -90,7 +89,6 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />

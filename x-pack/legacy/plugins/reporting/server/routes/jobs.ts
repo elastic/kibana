@@ -9,7 +9,6 @@ import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
-  ExportTypesRegistry,
   JobDocOutput,
   JobSource,
   ListQuery,
@@ -18,7 +17,7 @@ import {
   ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
@@ -33,9 +32,9 @@ function isResponse(response: Boom<null> | ResponseObject): response is Response
 }
 
 export function registerJobInfoRoutes(
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  exportTypesRegistry: ExportTypesRegistry,
   logger: Logger
 ) {
   const { elasticsearch } = plugins;
@@ -138,6 +137,7 @@ export function registerJobInfoRoutes(
   });
 
   // trigger a download of the output from a job
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
   const jobResponseHandler = jobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,

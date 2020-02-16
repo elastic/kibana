@@ -47,10 +47,9 @@ jest.mock('./utils', () => ({
       })
   ),
 }));
-jest.mock('ui/timefilter', () => ({
-  timefilter: {
-    disableTimeRangeSelector: jest.fn(),
-    disableAutoRefreshSelector: jest.fn(),
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
   },
 }));
 
@@ -92,17 +91,31 @@ const calendars = [
 const props = {
   canCreateCalendar: true,
   canDeleteCalendar: true,
+  kibana: {
+    services: {
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              disableTimeRangeSelector: jest.fn(),
+              disableAutoRefreshSelector: jest.fn(),
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
-    const wrapper = shallowWithIntl(<NewCalendar.WrappedComponent {...props} />);
+    const wrapper = shallowWithIntl(<NewCalendar {...props} />);
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Import modal shown on Import Events button click', () => {
-    const wrapper = mountWithIntl(<NewCalendar.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
     const button = importButton.find('EuiButton');
@@ -112,7 +125,7 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal shown on New event button click', () => {
-    const wrapper = mountWithIntl(<NewCalendar.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
     const button = importButton.find('EuiButton');
@@ -122,7 +135,7 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
-    const wrapper = mountWithIntl(<NewCalendar.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const instance = wrapper.instance();
     instance.setState({
@@ -139,7 +152,7 @@ describe('NewCalendar', () => {
       canCreateCalendar: false,
     };
 
-    const wrapper = mountWithIntl(<NewCalendar.WrappedComponent {...noCreateProps} />);
+    const wrapper = mountWithIntl(<NewCalendar {...noCreateProps} />);
 
     const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');
     const saveButton = buttons.find('EuiButton');

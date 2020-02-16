@@ -24,12 +24,12 @@ const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
 
 export const settingsRoute: MlRoute = {
   path: '/settings',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     getMlNodeCount,

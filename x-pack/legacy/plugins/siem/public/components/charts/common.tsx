@@ -28,10 +28,10 @@ const chartDefaultRendering: Rendering = 'canvas';
 export type UpdateDateRange = (min: number, max: number) => void;
 
 export interface ChartData {
-  x: number | string | null;
-  y: number | string | null;
+  x?: number | string | null;
+  y?: number | string | null;
   y0?: number;
-  g?: number | string;
+  g?: number | string | null;
 }
 
 export interface ChartSeriesConfigs {
