@@ -42,9 +42,8 @@ export function connectToQueryAppState<S extends QueryAppState>(
       filterManagerFilters,
       COMPARE_ALL_OPTIONS
     );
-    if (areAppFiltersEqual) return false;
 
-    return true;
+    return !areAppFiltersEqual;
   }
 
   // initial syncing

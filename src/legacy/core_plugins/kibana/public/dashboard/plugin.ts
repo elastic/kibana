@@ -76,14 +76,7 @@ export class DashboardPlugin implements Plugin {
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    {
-      home,
-      kibanaLegacy,
-      data,
-    }: DashboardPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, { home, kibanaLegacy, data }: DashboardPluginSetupDependencies) {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/dashboards',

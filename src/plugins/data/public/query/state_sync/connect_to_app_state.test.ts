@@ -26,6 +26,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
+import { QueryAppState } from './types';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -46,7 +47,7 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
 describe('connect_to_app_state', () => {
   let queryServiceStart: QueryStart;
   let filterManager: FilterManager;
-  let appState: BaseStateContainer<{ filters: Filter[] }>;
+  let appState: BaseStateContainer<QueryAppState>;
   let appStateSub: Subscription;
   let appStateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
@@ -66,7 +67,7 @@ describe('connect_to_app_state', () => {
     queryServiceStart = queryService.start(startMock.savedObjects);
     filterManager = queryServiceStart.filterManager;
 
-    appState = createStateContainer({ filters: [] as esFilters.Filter[] });
+    appState = createStateContainer({});
     appStateChangeTriggered = jest.fn();
     appStateSub = appState.state$.subscribe(appStateChangeTriggered);
 

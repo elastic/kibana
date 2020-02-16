@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters, RefreshInterval, TimeRange } from '../../../common';
+import { Filter, RefreshInterval, TimeRange } from '../../../common';
 
 /**
  * State from data services that meant to be preserved between apps
@@ -25,12 +25,12 @@ import { esFilters, RefreshInterval, TimeRange } from '../../../common';
 export interface QueryGlobalState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
-  filters?: esFilters.Filter[]; // pinned filters only
+  filters?: Filter[]; // pinned filters only
 }
 
 /**
  * State from data services that should be scope to a single app
  */
 export interface QueryAppState {
-  filters?: esFilters.Filter[]; // not pinned filters
+  filters?: Filter[]; // not pinned filters
 }

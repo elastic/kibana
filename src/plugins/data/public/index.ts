@@ -288,11 +288,14 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  syncAppFilters,
-  syncQuery,
+  connectToQueryGlobalState,
+  connectToQueryAppState,
+  syncGlobalQueryStateWithUrl,
+  QueryGlobalState,
+  QueryAppState,
+  QueryStart,
   getTime,
   getQueryLog,
-  getQueryStateContainer,
   FilterManager,
   SavedQuery,
   SavedQueryService,

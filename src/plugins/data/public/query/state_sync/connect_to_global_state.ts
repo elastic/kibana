@@ -18,6 +18,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import _ from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
@@ -37,23 +38,47 @@ export const connectToQueryGlobalState = <S extends QueryGlobalState>(
   }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'global$'>,
   globalState: BaseStateContainer<S>
 ) => {
+  let updateInProgress = false;
+  function shouldSync() {
+    if (updateInProgress) return false;
+    const { filters, refreshInterval, time } = globalState.get();
+    if (!filters) return true;
+    const areGlobalFiltersEqual = compareFilters(
+      filters,
+      filterManager.getGlobalFilters(),
+      COMPARE_ALL_OPTIONS
+    );
+    if (!areGlobalFiltersEqual) return true;
+
+    const areRefreshIntervalsEqual = _.isEqual(refreshInterval, timefilter.getRefreshInterval());
+    if (!areRefreshIntervalsEqual) return true;
+
+    const areTimesEqual = _.isEqual(time, timefilter.getTime());
+    if (!areTimesEqual) return true;
+
+    return false;
+  }
+
   // initial syncing
   // TODO:
   // data services take precedence, this seems like a good default,
   // and apps could anyway set their own value after initialisation,
   // but maybe maybe this should be a configurable option?
-  globalState.set({
-    ...globalState.get(),
-    filters: filterManager.getGlobalFilters(),
-    time: timefilter.getTime(),
-    refreshInterval: timefilter.getRefreshInterval(),
-  } as S);
+  if (shouldSync()) {
+    globalState.set({
+      ...globalState.get(),
+      filters: filterManager.getGlobalFilters(),
+      time: timefilter.getTime(),
+      refreshInterval: timefilter.getRefreshInterval(),
+    });
+  }
 
   const subs: Subscription[] = [
-    global$.subscribe(newGlobalQueryState => {
+    global$.pipe(filter(shouldSync)).subscribe(newGlobalQueryState => {
       globalState.set({ ...globalState.get(), ...newGlobalQueryState });
     }),
     globalState.state$.subscribe(({ time, filters: globalFilters, refreshInterval }) => {
+      updateInProgress = true;
       // cloneDeep is required because services are mutating passed objects
       // and state in state container is frozen
       time = time || timefilter.getTimeDefaults();
@@ -70,6 +95,8 @@ export const connectToQueryGlobalState = <S extends QueryGlobalState>(
       if (!compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)) {
         filterManager.setGlobalFilters(_.cloneDeep(globalFilters));
       }
+
+      updateInProgress = false;
     }),
   ];
 
