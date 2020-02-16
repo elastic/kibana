@@ -14,7 +14,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
-  const log = getService('log');
   const es = getService('legacyEs');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
@@ -33,7 +32,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   interface Endpoint {
     req: {
       url: string;
-      method?: 'get' | 'post' | 'delete';
+      method?: 'get' | 'post' | 'delete' | 'put';
       body?: any;
     };
     expectForbidden: (result: any) => void;
@@ -196,7 +195,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     const { statusCode, req } = response;
     if (statusCode !== 200) {
-      log.debug(`Endpoint: ${req.method} ${req.path}
+      throw new Error(`Endpoint: ${req.method} ${req.path}
       Status code: ${statusCode}
       Response: ${response.body.message}`);
     }
@@ -244,26 +243,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   describe('apm feature controls', () => {
-    let res: any;
+    const config = {
+      service: { name: 'test-service' },
+      settings: { transaction_sample_rate: 0.5 },
+    };
     before(async () => {
       console.log(`Creating agent configuration`);
-      res = await executeAsAdmin({
-        method: 'post',
-        url: '/api/apm/settings/agent-configuration/new',
-        body: {
-          service: { name: 'test-service' },
-          settings: { transaction_sample_rate: 0.5 },
-        },
+      await executeAsAdmin({
+        method: 'put',
+        url: '/api/apm/settings/agent-configuration',
+        body: config,
       });
       console.log(`Agent configuration created`);
     });
 
     after(async () => {
       console.log('deleting agent configuration');
-      const configurationId = res.body._id;
       await executeAsAdmin({
         method: 'delete',
-        url: `/api/apm/settings/agent-configuration/${configurationId}`,
+        url: `/api/apm/settings/agent-configuration`,
+        body: {
+          service: config.service,
+        },
       });
     });
 

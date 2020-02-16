@@ -51,5 +51,5 @@ export async function getAgentNameByService({
   const agentName = aggregations?.agent_names.buckets[0].key as
     | string
     | undefined;
-  return { agentName };
+  return agentName;
 }

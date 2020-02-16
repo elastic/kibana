@@ -135,8 +135,8 @@ export function AddEditFlyout({
       sampleRate,
       captureBody,
       transactionMaxSpans,
-      configurationId: selectedConfig ? selectedConfig.id : undefined,
       agentName,
+      existingConfig: Boolean(selectedConfig),
       toasts,
       trackApmEvent
     });
