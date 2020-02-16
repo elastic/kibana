@@ -54,9 +54,8 @@ exports.run = function run(argv) {
   }
 
   const name = options._[0];
-  const isKibanaPlugin = options.internal;
   const template = resolve(__dirname, './sao_template');
-  const kibanaPlugins = resolve(__dirname, isKibanaPlugin ? '../../src/plugins' : '../../plugins');
+  const kibanaPlugins = resolve(process.cwd(), 'plugins');
   const targetPath = resolve(kibanaPlugins, snakeCase(name));
 
   sao({
@@ -64,7 +63,6 @@ exports.run = function run(argv) {
     targetPath: targetPath,
     configOptions: {
       name,
-      isKibanaPlugin,
       targetPath,
     },
   }).catch(error => {
