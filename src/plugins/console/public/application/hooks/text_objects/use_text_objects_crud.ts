@@ -23,6 +23,7 @@ import { useServicesContext, useEditorActionContext } from '../../contexts';
 import {
   TextObject,
   textObjectProps,
+  optionalTextObjectProps,
   throwIfUnknown,
   textObjectSchema,
   TextObjectWithId,
@@ -31,7 +32,10 @@ import { idObjectProps } from '../../../../common/id_object';
 
 const exactTextObjectSchema = t.exact(textObjectSchema);
 const partialTextObjectSchema = t.exact(
-  t.intersection([t.partial(textObjectProps), t.type(idObjectProps)])
+  t.intersection([
+    t.partial({ ...textObjectProps, ...optionalTextObjectProps }),
+    t.type(idObjectProps),
+  ])
 );
 
 export interface CreateTextObjectsArgs {

@@ -16,17 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
 import { EuiButton, EuiFieldText, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
 interface Props {
+  initial?: {
+    fileName: string;
+  };
   onSubmit: (fileName: string) => void;
   isSubmitting: boolean;
 }
 
-export const FileForm: FunctionComponent<Props> = ({ onSubmit, isSubmitting }) => {
-  const [fileName, setFileName] = useState('');
+export const FileForm: FunctionComponent<Props> = ({ onSubmit, isSubmitting, initial }) => {
+  const [fileName, setFileName] = useState(initial?.fileName ?? '');
   const [isPristine, setIsPristine] = useState(true);
   const [errors, setErrors] = useState<string | null>(null);
   const isInvalid = Boolean(!isPristine && errors);
@@ -51,6 +54,7 @@ export const FileForm: FunctionComponent<Props> = ({ onSubmit, isSubmitting }) =
             isLoading={isSubmitting}
             compressed
             isInvalid={isInvalid}
+            value={fileName}
             onChange={event => {
               if (isPristine) {
                 setIsPristine(false);
@@ -72,7 +76,13 @@ export const FileForm: FunctionComponent<Props> = ({ onSubmit, isSubmitting }) =
         )}
         <EuiFormRow display="rowCompressed">
           <EuiButton disabled={isSubmitting} size="s" type="submit" fill>
-            Create
+            {!initial
+              ? i18n.translate('console.fileTree.forms.createButtonLabel', {
+                  defaultMessage: 'Create',
+                })
+              : i18n.translate('console.fileTree.forms.editButtonLabel', {
+                  defaultMessage: 'Edit',
+                })}
           </EuiButton>
         </EuiFormRow>
       </form>

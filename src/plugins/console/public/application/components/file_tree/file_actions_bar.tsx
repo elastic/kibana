@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 
@@ -25,10 +25,11 @@ import { TextObjectWithId } from '../../../../common/text_object';
 
 export interface Props {
   currentTextObject: TextObjectWithId;
-  onCreate: (filename: string) => void;
+  onCreate: (fileName: string) => void;
   canDelete: boolean;
   onDelete: (textObject: TextObjectWithId) => void;
-  onEdit: () => void;
+  canEdit: boolean;
+  onEdit: (fileName: string) => void;
   disabled?: boolean;
 }
 
@@ -37,10 +38,30 @@ export const FileActionsBar: FunctionComponent<Props> = ({
   onCreate,
   canDelete,
   onDelete,
+  canEdit,
   onEdit,
   disabled,
 }) => {
   const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
+  const [showEditFilePopover, setShowEditFilePopover] = useState(false);
+
+  const setShowPopover = (popover: 'create' | 'edit' | 'delete' | false) => {
+    switch (popover) {
+      case 'create':
+        setShowCreateFilePopover(true);
+        setShowEditFilePopover(false);
+        break;
+      case 'edit':
+        setShowCreateFilePopover(false);
+        setShowEditFilePopover(true);
+        break;
+      case 'delete':
+      case false:
+      default:
+        setShowCreateFilePopover(false);
+        setShowEditFilePopover(false);
+    }
+  };
 
   return (
     <EuiFlexGroup
@@ -52,12 +73,51 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       <EuiFlexItem>
         <EuiText size="s">Files</EuiText>
       </EuiFlexItem>
+      {/* Edit Action */}
+      {canEdit && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            isOpen={showEditFilePopover && !disabled}
+            closePopover={() => setShowEditFilePopover(false)}
+            button={
+              <EuiButtonIcon
+                disabled={disabled}
+                onClick={() => {
+                  setShowPopover('edit');
+                }}
+                aria-label={i18n.translate('console.fileTree.forms.editButtonAriaLabel', {
+                  defaultMessage: 'Edit a file',
+                })}
+                color="ghost"
+                iconType="pencil"
+              />
+            }
+          >
+            <FileForm
+              initial={{
+                fileName: currentTextObject.name ?? '',
+              }}
+              isSubmitting={Boolean(disabled)}
+              onSubmit={(fileName: string) => {
+                onEdit(fileName);
+                setShowPopover(false);
+              }}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+      {/* Delete Action */}
       {canDelete && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             disabled={disabled}
-            onClick={() => onDelete(currentTextObject)}
-            aria-label="delete a file"
+            onClick={() => {
+              setShowPopover('delete');
+              onDelete(currentTextObject);
+            }}
+            aria-label={i18n.translate('console.fileTree.forms.deleteButtonAriaLabel', {
+              defaultMessage: 'Delete a file',
+            })}
             color="ghost"
             iconType="trash"
           />
@@ -66,13 +126,17 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           isOpen={showCreateFilePopover && !disabled}
-          closePopover={() => setShowCreateFilePopover(false)}
+          closePopover={() => setShowPopover(false)}
           button={
             <EuiButtonIcon
               disabled={disabled}
-              onClick={() => setShowCreateFilePopover(true)}
+              onClick={() => {
+                setShowPopover('create');
+              }}
               color="ghost"
-              aria-label="create a new file"
+              aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
+                defaultMessage: 'Create a file',
+              })}
               iconType="plusInCircle"
             />
           }
@@ -81,7 +145,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
             isSubmitting={Boolean(disabled)}
             onSubmit={(fileName: string) => {
               onCreate(fileName);
-              setShowCreateFilePopover(false);
+              setShowPopover(false);
             }}
           />
         </EuiPopover>

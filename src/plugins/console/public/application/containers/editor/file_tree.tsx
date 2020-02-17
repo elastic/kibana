@@ -47,7 +47,20 @@ export const FileTree: FunctionComponent = () => {
             disabled={isFileActionInProgress}
             canDelete={!currentTextObject.isScratchPad}
             currentTextObject={currentTextObject}
-            onEdit={() => {}}
+            canEdit={!currentTextObject.isScratchPad}
+            onEdit={fileName => {
+              setIsFileActionInProgress(true);
+              textObjectsCRUD
+                .update({
+                  textObject: {
+                    ...currentTextObject,
+                    name: fileName,
+                  },
+                })
+                .finally(() => {
+                  setIsFileActionInProgress(false);
+                });
+            }}
             onDelete={() => setShowDeleteFileModal(true)}
             onCreate={fileName => {
               setIsFileActionInProgress(true);
