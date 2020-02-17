@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchBeatsStats, processResults } from '../get_beats_stats';
+import { fetchBeatsStats, processResults } from './get_beats_stats';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
-import beatsStatsResultSet from './fixtures/beats_stats_results';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const beatsStatsResultSet = require('./__mocks__/fixtures/beats_stats_results');
 
 const getBaseOptions = () => ({
   clusters: {},
@@ -22,8 +22,8 @@ describe('Get Beats Stats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
     const start = 100;
     const end = 200;
-    let server;
-    let callCluster;
+    let server = { config: () => ({ get: sinon.stub() }) };
+    let callCluster = sinon.stub();
 
     beforeEach(() => {
       const getStub = { get: sinon.stub() };
@@ -32,34 +32,34 @@ describe('Get Beats Stats', () => {
       callCluster = sinon.stub();
     });
 
-    it('should set `from: 0, to: 10000` in the query', () => {
-      fetchBeatsStats(server, callCluster, clusterUuids, start, end);
+    it('should set `from: 0, to: 10000` in the query', async () => {
+      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, {} as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
-      expect(api).to.be('search');
-      expect(body.from).to.be(0);
-      expect(body.size).to.be(10000);
+      expect(api).toEqual('search');
+      expect(body.from).toEqual(0);
+      expect(body.size).toEqual(10000);
     });
 
-    it('should set `from: 10000, from: 10000` in the query', () => {
-      fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 1 });
+    it('should set `from: 10000, from: 10000` in the query', async () => {
+      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 1 } as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
-      expect(api).to.be('search');
-      expect(body.from).to.be(10000);
-      expect(body.size).to.be(10000);
+      expect(api).toEqual('search');
+      expect(body.from).toEqual(10000);
+      expect(body.size).toEqual(10000);
     });
 
-    it('should set `from: 20000, from: 10000` in the query', () => {
-      fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 2 });
+    it('should set `from: 20000, from: 10000` in the query', async () => {
+      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 2 } as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
-      expect(api).to.be('search');
-      expect(body.from).to.be(20000);
-      expect(body.size).to.be(10000);
+      expect(api).toEqual('search');
+      expect(body.from).toEqual(20000);
+      expect(body.size).toEqual(10000);
     });
   });
 
@@ -68,9 +68,9 @@ describe('Get Beats Stats', () => {
       const resultsEmpty = undefined;
 
       const options = getBaseOptions();
-      processResults(resultsEmpty, options);
+      processResults(resultsEmpty as any, options);
 
-      expect(options.clusters).to.eql({});
+      expect(options.clusters).toStrictEqual({});
     });
 
     it('should summarize single result with some missing fields', () => {
@@ -92,9 +92,9 @@ describe('Get Beats Stats', () => {
       };
 
       const options = getBaseOptions();
-      processResults(results, options);
+      processResults(results as any, options);
 
-      expect(options.clusters).to.eql({
+      expect(options.clusters).toStrictEqual({
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 1,
           versions: {},
@@ -122,11 +122,11 @@ describe('Get Beats Stats', () => {
       const options = getBaseOptions();
 
       // beatsStatsResultSet is an array of many small query results
-      beatsStatsResultSet.forEach(results => {
+      beatsStatsResultSet.forEach((results: any) => {
         processResults(results, options);
       });
 
-      expect(options.clusters).to.eql({
+      expect(options.clusters).toStrictEqual({
         W7hppdX7R229Oy3KQbZrTw: {
           count: 5,
           versions: { '7.0.0-alpha1': 5 },
