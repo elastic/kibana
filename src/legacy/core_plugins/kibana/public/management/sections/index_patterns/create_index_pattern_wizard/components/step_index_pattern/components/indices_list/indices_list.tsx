@@ -35,8 +35,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-// @ts-ignore
-import { Pager } from '@elastic/eui/lib/services';
+import { Pager } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
@@ -54,7 +53,7 @@ interface IndicesListState {
 }
 
 export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
-  pager: any;
+  pager: Pager;
   constructor(props: IndicesListProps) {
     super(props);
 
