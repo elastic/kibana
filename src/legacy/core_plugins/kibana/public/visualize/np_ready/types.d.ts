@@ -49,7 +49,7 @@ export interface EditorRenderProps {
   appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   filters: Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;

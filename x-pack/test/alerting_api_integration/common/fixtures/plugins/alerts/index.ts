@@ -202,7 +202,10 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: ['default', 'other'],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -253,7 +256,10 @@ export default function(kibana: any) {
       const cumulativeFiringAlertType: AlertType = {
         id: 'test.cumulative-firing',
         name: 'Test: Cumulative Firing',
-        actionGroups: ['default', 'other'],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
           const group = 'default';
@@ -383,7 +389,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
