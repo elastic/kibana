@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'src/legacy/server/kbn_server';
 import { SavedObject } from 'src/core/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { FieldId } from '../../../../common/types/fields';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
@@ -21,9 +21,9 @@ export interface RollupJob {
 export async function rollupServiceProvider(
   indexPattern: string,
   callWithRequest: any,
-  request: Request
+  savedObjectsClient: SavedObjectsClientContract
 ) {
-  const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, request);
+  const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, savedObjectsClient);
   let jobIndexPatterns: string[] = [indexPattern];
 
   async function getRollupJobs(): Promise<RollupJob[] | null> {
@@ -57,9 +57,8 @@ export async function rollupServiceProvider(
 
 async function loadRollupIndexPattern(
   indexPattern: string,
-  request: Request
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<SavedObject | null> {
-  const savedObjectsClient = request.getSavedObjectsClient();
   const resp = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title', 'type', 'typeMeta'],
