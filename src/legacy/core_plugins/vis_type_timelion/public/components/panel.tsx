@@ -70,18 +70,18 @@ const emptyCaption = '<br>';
 function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const [canvasElem, setCanvasElem] = useState();
-  const [chartElem, setChartElem] = useState();
+  const [canvasElem, setCanvasElem] = useState<HTMLElement>();
+  const [chartElem, setChartElem] = useState<HTMLElement>();
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
   const [highlightedSeries, setHighlightedSeries] = useState<number | null>(null);
-  const [focusedSeries, setFocusedSeries] = useState();
-  const [plot, setPlot] = useState();
+  const [focusedSeries, setFocusedSeries] = useState<number | null>();
+  const [plot, setPlot] = useState<jquery.flot.plot>();
 
   // Used to toggle the series, and for displaying values on hover
-  const [legendValueNumbers, setLegendValueNumbers] = useState();
-  const [legendCaption, setLegendCaption] = useState();
+  const [legendValueNumbers, setLegendValueNumbers] = useState<JQuery<HTMLElement>>();
+  const [legendCaption, setLegendCaption] = useState<JQuery<HTMLElement>>();
 
   const canvasRef = useCallback(node => {
     if (node !== null) {
@@ -97,7 +97,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(
     () => () => {
-      $(chartElem)
+      $(chartElem!)
         .off('plotselected')
         .off('plothover')
         .off('mouseleave');
@@ -156,11 +156,11 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
         caption.html(emptyCaption);
         setLegendCaption(caption);
 
-        const canvasNode = $(canvasElem);
+        const canvasNode = $(canvasElem!);
         canvasNode.find('div.legend table').append(caption);
         setLegendValueNumbers(canvasNode.find('.ngLegendValueNumber'));
 
-        const legend = $(canvasElem).find('.ngLegendValue');
+        const legend = $(canvasElem!).find('.ngLegendValue');
         if (legend) {
           legend.click(toggleSeries);
           legend.focus(focusSeries);
@@ -254,12 +254,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     (pos: Position) => {
       unhighlightSeries();
 
-      const axes = plot.getAxes();
-      if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
+      const axes = plot!.getAxes();
+      if (pos.x < axes.xaxis.min! || pos.x > axes.xaxis.max!) {
         return;
       }
 
-      const dataset = plot.getData();
+      const dataset = plot!.getData();
       if (legendCaption) {
         legendCaption.text(
           moment(pos.x).format(get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT))
@@ -267,7 +267,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       }
       for (let i = 0; i < dataset.length; ++i) {
         const series = dataset[i];
-        const useNearestPoint = series.lines.show && !series.lines.steps;
+        const useNearestPoint = series.lines!.show && !series.lines!.steps;
         const precision = get(series, '_meta.precision', 2);
 
         if (series._hide) {
@@ -289,12 +289,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
         if (y != null && legendValueNumbers) {
           let label = y.toFixed(precision);
-          if (series.yaxis.tickFormatter) {
-            label = series.yaxis.tickFormatter(Number(label), series.yaxis);
+          if (series.yaxis!.tickFormatter) {
+            label = series.yaxis!.tickFormatter(Number(label), series.yaxis);
           }
           legendValueNumbers.eq(i).text(`(${label})`);
         } else {
-          legendValueNumbers.eq(i).empty();
+          legendValueNumbers!.eq(i).empty();
         }
       }
     },
@@ -314,7 +314,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (legendCaption) {
       legendCaption.html(emptyCaption);
     }
-    each(legendValueNumbers, (num: Node) => {
+    each(legendValueNumbers!, (num: Node) => {
       $(num).empty();
     });
   }, [legendCaption, legendValueNumbers]);
