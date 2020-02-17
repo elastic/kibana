@@ -35,13 +35,22 @@ export class SenseEditor {
   parser: any;
 
   // @ts-ignore
-  private readonly autocomplete: any;
+  private autocomplete: any;
 
   constructor(private readonly coreEditor: CoreEditor) {
     this.currentReqRange = null;
     this.parser = new RowParser(this.coreEditor);
+  }
+
+  /**
+   * Enable initialization of autocomplete and other listeners as a separate, later step.
+   *
+   * This enables us to avoid the race condition of setting text at start up and it interfering
+   * with the autocomplete tooltip appearing.
+   */
+  init() {
     this.autocomplete = new (Autocomplete as any)({
-      coreEditor,
+      coreEditor: this.coreEditor,
       parser: this.parser,
     });
     this.coreEditor.on(

@@ -176,6 +176,8 @@ function EditorUI({ textObject }: EditorProps) {
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
+    editor.init();
+
     return () => {
       unsubscribeResizer();
       mappings.clearSubscriptions();

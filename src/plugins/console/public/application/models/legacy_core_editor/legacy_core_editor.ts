@@ -299,6 +299,17 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   destroy() {
+    const langTools = ace.acequire('ace/ext/language_tools');
+
+    langTools.setCompleters([
+      {
+        identifierRegexps: [
+          /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
+        ],
+        getCompletions: () => [],
+      },
+    ]);
+
     this.editor.destroy();
   }
 
