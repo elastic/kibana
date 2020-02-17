@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
-import { TabifyBuckets } from './_buckets';
+import { TabifyBuckets } from './buckets';
 
 /**
  * Sets up the ResponseWriter and kicks off bucket collection.
@@ -75,9 +75,9 @@ function collectBucket(aggs, write, bucket, key, aggScale, timeRange) {
 
   switch (agg.type.type) {
     case 'buckets':
-      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, timeRange);
-      if (buckets.length) {
-        buckets.forEach(function(subBucket, key) {
+      const tabifyBuckets = new TabifyBuckets(bucket[agg.id], agg.params, timeRange);
+      if (tabifyBuckets.length) {
+        tabifyBuckets.forEach(function(subBucket, key) {
           // if the bucket doesn't have value don't add it to the row
           // we don't want rows like: { column1: undefined, column2: 10 }
           const bucketValue = agg.getKey(subBucket, key);

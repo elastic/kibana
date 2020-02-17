@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import { TimeRange } from '../../../../../../plugins/data/public';
+import { RangeFilterParams } from '../../../../../../plugins/data/public';
 
+/** @internal **/
+export interface TimeRange extends RangeFilterParams {
+  name: string;
+}
+
+/** @public **/
 export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
-  timeRange?: { [key: string]: TimeRange };
+  timeRange?: { [key: string]: any };
 }

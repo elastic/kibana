@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { TabifyBuckets } from './_buckets';
+import { TabifyBuckets } from './buckets';
 
 describe('Buckets wrapper', () => {
-  function check(aggResp, count, keys) {
+  function check(aggResp: any, count: number, keys: string[]) {
     test('reads the length', () => {
       const buckets = new TabifyBuckets(aggResp);
       expect(buckets).toHaveLength(count);
@@ -28,7 +28,7 @@ describe('Buckets wrapper', () => {
 
     test('iterates properly, passing in the key', () => {
       const buckets = new TabifyBuckets(aggResp);
-      const keysSent = [];
+      const keysSent: string[] = [];
       buckets.forEach(function(bucket, key) {
         keysSent.push(key);
       });
@@ -39,7 +39,7 @@ describe('Buckets wrapper', () => {
   }
 
   describe('with object style buckets', () => {
-    const aggResp = {
+    let aggResp: any = {
       buckets: {
         '0-100': {},
         '100-200': {},
@@ -53,7 +53,7 @@ describe('Buckets wrapper', () => {
     check(aggResp, count, keys);
 
     test('should accept filters agg queries with strings', () => {
-      const aggResp = {
+      aggResp = {
         buckets: {
           'response:200': {},
           'response:404': {},
@@ -83,7 +83,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('should accept filters agg queries with query_string queries', () => {
-      const aggResp = {
+      aggResp = {
         buckets: {
           'response:200': {},
           'response:404': {},
@@ -113,7 +113,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('should accept filters agg queries with query dsl queries', () => {
-      const aggResp = {
+      aggResp = {
         buckets: {
           '{match_all: {}}': {},
         },
