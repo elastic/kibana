@@ -19,7 +19,7 @@
 
 import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useEditorReadContext, useEditorActionContext } from '../../contexts';
 import { useTextObjectsCRUD } from '../../hooks/text_objects';
@@ -44,6 +44,7 @@ export const FileTree: FunctionComponent = () => {
       >
         <EuiFlexItem grow={false}>
           <FileActionsBar
+            disabled={isFileActionInProgress}
             canDelete={!currentTextObject.isScratchPad}
             currentTextObject={currentTextObject}
             onEdit={() => {}}
@@ -64,32 +65,38 @@ export const FileTree: FunctionComponent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTreeView
-            aria-label="File tree view"
-            display="compressed"
-            items={Object.values(textObjects)
-              .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
-              .map(({ isScratchPad, name, id }, idx) => {
-                return {
-                  id,
-                  className: classNames({
-                    conApp__fileTree__scratchPadEntry: isScratchPad,
-                    conApp__fileTree__entry: true,
-                    'conApp__fileTree__entry--selected': id === currentTextObjectId,
-                  }),
-                  label: isScratchPad ? 'Scratch Pad' : name ?? `Untitled`,
-                  icon: isScratchPad ? <EuiIcon size="s" type="pencil" /> : undefined,
-                  useEmptyIcon: !isScratchPad,
-                  callback: () => {
-                    dispatch({
-                      type: 'textObject.setCurrent',
-                      payload: id,
-                    });
-                    return '';
-                  },
-                };
-              })}
-          />
+          {isFileActionInProgress ? (
+            <div className="conApp__fileTree__spinner">
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          ) : (
+            <EuiTreeView
+              aria-label="File tree view"
+              display="compressed"
+              items={Object.values(textObjects)
+                .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
+                .map(({ isScratchPad, name, id }, idx) => {
+                  return {
+                    id,
+                    className: classNames({
+                      conApp__fileTree__scratchPadEntry: isScratchPad,
+                      conApp__fileTree__entry: true,
+                      'conApp__fileTree__entry--selected': id === currentTextObjectId,
+                    }),
+                    label: isScratchPad ? 'Scratch Pad' : name ?? `Untitled`,
+                    icon: isScratchPad ? <EuiIcon size="s" type="pencil" /> : undefined,
+                    useEmptyIcon: !isScratchPad,
+                    callback: () => {
+                      dispatch({
+                        type: 'textObject.setCurrent',
+                        payload: id,
+                      });
+                      return '';
+                    },
+                  };
+                })}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {showDeleteFileModal && (

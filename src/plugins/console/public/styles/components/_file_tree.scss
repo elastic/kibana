@@ -4,6 +4,12 @@
   background-color: $euiColorLightestShade;
   min-width: 200px;
 
+  &__spinner {
+    text-align: center;
+    display: block;
+    margin: auto 0;
+  }
+
   &__actionBar {
     padding: 0 5px;
     background-color: $euiColorDarkestShade;

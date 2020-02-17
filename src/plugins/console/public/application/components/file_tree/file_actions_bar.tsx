@@ -55,6 +55,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       {canDelete && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            disabled={disabled}
             onClick={() => onDelete(currentTextObject)}
             aria-label="delete a file"
             color="ghost"
@@ -68,6 +69,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
           closePopover={() => setShowCreateFilePopover(false)}
           button={
             <EuiButtonIcon
+              disabled={disabled}
               onClick={() => setShowCreateFilePopover(true)}
               color="ghost"
               aria-label="create a new file"
