@@ -39,7 +39,7 @@ export const getInfraHref = ({
 }) => {
   const nextSearch = fromQuery(query);
   return url.format({
-    pathname: basePath.prepend(`/app/${app}${path}`),
+    pathname: basePath.prepend(`/app/${app}${path || ''}`),
     search: nextSearch
   });
 };
