@@ -128,11 +128,10 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const { appStateContainer, start, stop } = getState({});
-              start();
+              const { appStateContainer, replaceUrlState } = getState({});
               const { index } = appStateContainer.getState();
+              replaceUrlState();
               const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
-              stop();
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
@@ -245,8 +244,8 @@ function discoverController(
   });
 
   $scope.$watch('state.index', (index, prevIndex) => {
-    syncAppState({ index });
     if (prevIndex == null || prevIndex === index) return;
+    syncAppState({ index });
     $route.reload();
   });
 
@@ -845,9 +844,11 @@ function discoverController(
   };
 
   $scope.updateQuery = function({ query }) {
-    $state.query = query;
-    syncAppState({ query });
-    $fetchObservable.next();
+    if (!_.isEqual(query, $state.query)) {
+      $state.query = query;
+      syncAppState({ query });
+      $fetchObservable.next();
+    }
   };
 
   function onResults(resp) {

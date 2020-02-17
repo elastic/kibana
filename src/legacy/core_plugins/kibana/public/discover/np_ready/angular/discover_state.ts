@@ -51,7 +51,7 @@ interface GetStateArgs {
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export async function getState({
+export function getState({
   defaultAppState = {},
   storeInSessionStorage = false,
   hashHistory,
@@ -69,11 +69,6 @@ export async function getState({
     ...defaultAppState,
     ...appStateFromUrl,
   };
-
-  // make sure url ('_a') matches initial state
-  if (!_.isEqual(initialAppState, appStateFromUrl)) {
-    await stateStorage.set('_a', initialAppState, { replace: true });
-  }
 
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 
@@ -112,6 +107,12 @@ export async function getState({
     },
     flush: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    replaceUrlState: async () => {
+      // make sure url ('_a') matches initial state
+      if (!_.isEqual(initialAppState, appStateFromUrl)) {
+        await stateStorage.set('_a', initialAppState, { replace: true });
+      }
+    },
   };
 }
 
@@ -126,7 +127,7 @@ export function setState(
   const oldState = stateContainer.getState();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(newState);
+    stateContainer.set(mergedState);
   }
 }
 

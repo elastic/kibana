@@ -28,11 +28,12 @@ describe('Test discover state', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = await getState({
+    state = getState({
       defaultAppState: { index: 'test' },
       hashHistory: history,
     });
     state.start();
+    await state.replaceUrlState();
   });
   afterEach(() => {
     state.stop();
