@@ -52,10 +52,10 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-000001': { read: false },
-        'apm-7.5.1-metric-000001': { read: false },
-        'apm-7.5.1-transaction-000001': { read: false },
-        'apm-7.5.1-span-000001': { read: true }
+        'apm-7.5.1-error-*': { read: false },
+        'apm-7.5.1-metric-*': { read: false },
+        'apm-7.5.1-transaction-*': { read: false },
+        'apm-7.5.1-span-*': { read: true }
       }
     });
     const component = render(
@@ -65,22 +65,22 @@ describe('APMIndicesPermission', () => {
     );
     expectTextsInDocument(component, [
       'Missing permissions to access APM',
-      'apm-7.5.1-error-000001',
-      'apm-7.5.1-metric-000001',
-      'apm-7.5.1-transaction-000001',
+      'apm-7.5.1-error-*',
+      'apm-7.5.1-metric-*',
+      'apm-7.5.1-transaction-*',
       'Dismiss'
     ]);
-    expectTextsNotInDocument(component, ['apm-7.5.1-span-000001']);
+    expectTextsNotInDocument(component, ['apm-7.5.1-span-*']);
   });
 
   it('shows children component when indices have read privileges', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-000001': { read: true },
-        'apm-7.5.1-metric-000001': { read: true },
-        'apm-7.5.1-transaction-000001': { read: true },
-        'apm-7.5.1-span-000001': { read: true }
+        'apm-7.5.1-error-*': { read: true },
+        'apm-7.5.1-metric-*': { read: true },
+        'apm-7.5.1-transaction-*': { read: true },
+        'apm-7.5.1-span-*': { read: true }
       }
     });
     const component = render(
@@ -92,10 +92,10 @@ describe('APMIndicesPermission', () => {
     );
     expectTextsNotInDocument(component, [
       'Missing permissions to access APM',
-      'apm-7.5.1-error-000001',
-      'apm-7.5.1-metric-000001',
-      'apm-7.5.1-transaction-000001',
-      'apm-7.5.1-span-000001'
+      'apm-7.5.1-error-*',
+      'apm-7.5.1-metric-*',
+      'apm-7.5.1-transaction-*',
+      'apm-7.5.1-span-*'
     ]);
     expectTextsInDocument(component, ['My amazing component']);
   });
@@ -104,10 +104,10 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-000001': { read: false },
-        'apm-7.5.1-metric-000001': { read: false },
-        'apm-7.5.1-transaction-000001': { read: false },
-        'apm-7.5.1-span-000001': { read: true }
+        'apm-7.5.1-error-*': { read: false },
+        'apm-7.5.1-metric-*': { read: false },
+        'apm-7.5.1-transaction-*': { read: false },
+        'apm-7.5.1-span-*': { read: true }
       }
     });
     const component = render(

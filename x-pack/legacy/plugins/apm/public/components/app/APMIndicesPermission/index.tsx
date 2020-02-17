@@ -115,25 +115,16 @@ const PermissionWarning = ({
                   <p>
                     {i18n.translate('xpack.apm.permission.description', {
                       defaultMessage:
-                        'We’ve detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted to start using APM.'
+                        "Your user doesn't have access to all APM indices. You can still use the APM app but some data may be missing. You must be granted access to the following indices:"
                     })}
                   </p>
-                  <>
-                    <EuiText size="s">
-                      <span style={{ fontWeight: 'bold' }}>
-                        {i18n.translate('xpack.apm.permission.missingIndices', {
-                          defaultMessage: 'Missing indices permissions:'
-                        })}
-                      </span>
-                    </EuiText>
-                    <ul style={{ listStyleType: 'none' }}>
-                      {indicesWithoutPermission.map(index => (
-                        <li key={index} style={{ marginTop: units.half }}>
-                          <EuiText size="s">{index}</EuiText>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
+                  <ul style={{ listStyleType: 'none' }}>
+                    {indicesWithoutPermission.map(index => (
+                      <li key={index} style={{ marginTop: units.half }}>
+                        <EuiText size="s">{index}</EuiText>
+                      </li>
+                    ))}
+                  </ul>
                 </>
               }
               actions={
