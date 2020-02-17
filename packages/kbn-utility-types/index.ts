@@ -74,3 +74,16 @@ export type RecursiveReadonly<T> = T extends (...args: any) => any
  * Returns types or array or object values.
  */
 export type Values<T> = T extends any[] ? T[number] : T extends object ? T[keyof T] : never;
+
+/**
+ * Utility type for converting a union of types into an intersection.
+ *
+ * This is a bit of "black magic" that will interpret a Union type as an Intersection
+ * type.  This is necessary in the case of distinguishing one collection from
+ * another.
+ */
+export type UnionToIntersection<U> = (U extends any
+? (k: U) => void
+: never) extends (k: infer I) => void
+  ? I
+  : never;

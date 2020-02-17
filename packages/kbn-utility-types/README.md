@@ -26,3 +26,5 @@ type B = UnwrapPromise<A>; // string
 - `UnwrapPromise<T>` &mdash; Returns wrapped type of a promise.
 - `UnwrapPromiseOrReturn<T>` &mdash; Returns wrapped type of a promise or the type itself, if it isn't a promise.
 - `Values<T>` &mdash; Returns object or array value types.
+- `UnionToIntersection<T>` &mdash; Converts a union of types into an intersection.
+
