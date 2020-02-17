@@ -7,7 +7,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import * as React from 'react';
 import * as ApolloReactCommon from '@apollo/client';
 import * as ApolloReactComponents from '@apollo/react-components';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 export const persistTimelineMutation = gql`
   mutation PersistTimelineMutation($timelineId: ID, $version: String, $timeline: TimelineInput!) {
