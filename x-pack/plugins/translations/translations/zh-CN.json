@@ -77,7 +77,6 @@
   },
   "messages": {
     "common.ui.aggResponse.allDocsTitle": "所有文档",
-    "common.ui.aggTypes.rangesFormatMessage": "{gte} {from} 且 {lt} {to}",
     "data.search.aggs.aggGroups.bucketsText": "存储桶",
     "data.search.aggs.aggGroups.metricsText": "指标",
     "data.search.aggs.buckets.dateHistogramLabel": "{fieldName}/{intervalDescription}",

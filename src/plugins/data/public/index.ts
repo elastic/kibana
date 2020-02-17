@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from '../../../core/public';
 
 /*
@@ -166,12 +168,15 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
