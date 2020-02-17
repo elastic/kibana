@@ -15,13 +15,13 @@ interface Props {
   title: string | React.ReactNode;
   isEditTitle?: boolean;
   onChange: (a: string) => void;
-  onClick: (b: boolean) => void;
+  onCancel: () => void;
   onSubmit: () => void;
 }
 
 const EditableTitleComponent: React.FC<Props> = ({
   onChange,
-  onClick,
+  onCancel,
   onSubmit,
   isLoading,
   title,
@@ -39,7 +39,7 @@ const EditableTitleComponent: React.FC<Props> = ({
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={() => onClick(false)}>{cancelTitle}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel}>{cancelTitle}</EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiFlexItem />

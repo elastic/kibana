@@ -229,7 +229,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
       title={title}
       onChange={newTitle => setTitle(newTitle)}
       onSubmit={() => onUpdateField('title', title)}
-      onClick={isEdit => setIsEditTitle(isEdit)}
+      onCancel={() => setIsEditTitle(false)}
       submitTitle={i18n.SUBMIT}
       cancelTitle={i18n.CANCEL}
     />
