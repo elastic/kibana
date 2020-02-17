@@ -7,7 +7,8 @@
 import { useQuery } from '.';
 import { mount } from 'enzyme';
 import React from 'react';
-import { useApolloClient } from '../../utils/apollo_context';
+import { useApolloClient } from '@apollo/client';
+
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { MatrixOverTimeHistogramData, HistogramType } from '../../graphql/types';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
@@ -25,7 +26,7 @@ const mockQuery = jest.fn().mockResolvedValue({
 });
 
 const mockRejectQuery = jest.fn().mockRejectedValue(new Error());
-jest.mock('../../utils/apollo_context', () => ({
+jest.mock('@apollo/client', () => ({
   useApolloClient: jest.fn(),
 }));
 

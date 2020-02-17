@@ -25,19 +25,8 @@ export interface Scalars {
   ToNumberArray: number[] | number,
   ToDateArray: string[] | string,
   ToBooleanArray: boolean[] | boolean,
+  ToAny: any,
   EsValue: any,
-}
-
-export interface AlertsOverTimeData {
-  inspect?: Maybe<Inspect>,
-  alertsOverTimeByModule: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
-}
-
-export interface AnomaliesOverTimeData {
-  inspect?: Maybe<Inspect>,
-  anomaliesOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 }
 
 export interface AuditdData {
@@ -81,12 +70,6 @@ export interface AuthenticationsData {
 export interface AuthenticationsEdges {
   node: AuthenticationItem,
   cursor: CursorType,
-}
-
-export interface AuthenticationsOverTimeData {
-  inspect?: Maybe<Inspect>,
-  authenticationsOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 }
 
 export interface AutonomousSystem {
@@ -224,6 +207,8 @@ export interface Ecs {
   geo?: Maybe<GeoEcsFields>,
   host?: Maybe<HostEcsFields>,
   network?: Maybe<NetworkEcsField>,
+  rule?: Maybe<RuleEcsField>,
+  signal?: Maybe<SignalField>,
   source?: Maybe<SourceEcsFields>,
   suricata?: Maybe<SuricataEcsFields>,
   tls?: Maybe<TlsEcsFields>,
@@ -281,12 +266,6 @@ export interface EventEcsFields {
   start?: Maybe<Scalars['ToDateArray']>,
   timezone?: Maybe<Scalars['ToStringArray']>,
   type?: Maybe<Scalars['ToStringArray']>,
-}
-
-export interface EventsOverTimeData {
-  inspect?: Maybe<Inspect>,
-  eventsOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 }
 
 export interface EventsTimelineData {
@@ -414,6 +393,14 @@ export interface GeoEcsFields {
 export interface GeoItem {
   geo?: Maybe<GeoEcsFields>,
   flowTarget?: Maybe<FlowTargetSourceDest>,
+}
+
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns'
 }
 
 export interface HostEcsFields {
@@ -611,6 +598,12 @@ export interface Location {
   lat?: Maybe<Scalars['ToNumberArray']>,
 }
 
+export interface MatrixHistogramOverTimeData {
+  inspect?: Maybe<Inspect>,
+  matrixHistogramData: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
+}
+
 export interface MatrixOverOrdinalHistogramData {
   x: Scalars['String'],
   y: Scalars['Float'],
@@ -618,9 +611,9 @@ export interface MatrixOverOrdinalHistogramData {
 }
 
 export interface MatrixOverTimeHistogramData {
-  x: Scalars['Float'],
-  y: Scalars['Float'],
-  g: Scalars['String'],
+  x?: Maybe<Scalars['Float']>,
+  y?: Maybe<Scalars['Float']>,
+  g?: Maybe<Scalars['String']>,
 }
 
 export interface Mutation {
@@ -736,6 +729,12 @@ export interface NetworkDnsItem {
 export interface NetworkDnsSortField {
   field: NetworkDnsFields,
   direction: Direction,
+}
+
+export interface NetworkDsOverTimeData {
+  inspect?: Maybe<Inspect>,
+  matrixHistogramData: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
 }
 
 export interface NetworkEcsField {
@@ -894,7 +893,8 @@ export interface OverviewHostData {
   endgameRegistry?: Maybe<Scalars['Float']>,
   endgameSecurity?: Maybe<Scalars['Float']>,
   filebeatSystemModule?: Maybe<Scalars['Float']>,
-  winlogbeat?: Maybe<Scalars['Float']>,
+  winlogbeatSecurity?: Maybe<Scalars['Float']>,
+  winlogbeatMWSysmonOperational?: Maybe<Scalars['Float']>,
   inspect?: Maybe<Inspect>,
 }
 
@@ -1104,6 +1104,43 @@ export interface ResponseTimelines {
   totalCount?: Maybe<Scalars['Float']>,
 }
 
+export interface RuleEcsField {
+  reference?: Maybe<Scalars['ToStringArray']>,
+}
+
+export interface RuleField {
+  id?: Maybe<Scalars['ToStringArray']>,
+  rule_id?: Maybe<Scalars['ToStringArray']>,
+  false_positives: Array<Scalars['String']>,
+  saved_id?: Maybe<Scalars['ToStringArray']>,
+  timeline_id?: Maybe<Scalars['ToStringArray']>,
+  timeline_title?: Maybe<Scalars['ToStringArray']>,
+  max_signals?: Maybe<Scalars['ToNumberArray']>,
+  risk_score?: Maybe<Scalars['ToStringArray']>,
+  output_index?: Maybe<Scalars['ToStringArray']>,
+  description?: Maybe<Scalars['ToStringArray']>,
+  from?: Maybe<Scalars['ToStringArray']>,
+  immutable?: Maybe<Scalars['ToBooleanArray']>,
+  index?: Maybe<Scalars['ToStringArray']>,
+  interval?: Maybe<Scalars['ToStringArray']>,
+  language?: Maybe<Scalars['ToStringArray']>,
+  query?: Maybe<Scalars['ToStringArray']>,
+  references?: Maybe<Scalars['ToStringArray']>,
+  severity?: Maybe<Scalars['ToStringArray']>,
+  tags?: Maybe<Scalars['ToStringArray']>,
+  threat?: Maybe<Scalars['ToAny']>,
+  type?: Maybe<Scalars['ToStringArray']>,
+  size?: Maybe<Scalars['ToStringArray']>,
+  to?: Maybe<Scalars['ToStringArray']>,
+  enabled?: Maybe<Scalars['ToBooleanArray']>,
+  filters?: Maybe<Scalars['ToAny']>,
+  created_at?: Maybe<Scalars['ToStringArray']>,
+  updated_at?: Maybe<Scalars['ToStringArray']>,
+  created_by?: Maybe<Scalars['ToStringArray']>,
+  updated_by?: Maybe<Scalars['ToStringArray']>,
+  version?: Maybe<Scalars['ToStringArray']>,
+}
+
 export interface SayMyName {
   /** The id of the source */
   appName: Scalars['String'],
@@ -1125,6 +1162,11 @@ export interface SerializedKueryQueryInput {
 export interface SerializedKueryQueryResult {
   kuery?: Maybe<KueryFilterQueryResult>,
   serializedQuery?: Maybe<Scalars['String']>,
+}
+
+export interface SignalField {
+  rule?: Maybe<RuleField>,
+  original_time?: Maybe<Scalars['ToStringArray']>,
 }
 
 export interface SortField {
@@ -1171,15 +1213,11 @@ export interface Source {
   configuration: SourceConfiguration,
   /** The status of the source */
   status: SourceStatus,
-  AlertsHistogram: AlertsOverTimeData,
-  AnomaliesOverTime: AnomaliesOverTimeData,
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData,
-  AuthenticationsOverTime: AuthenticationsOverTimeData,
   Timeline: TimelineData,
   TimelineDetails: TimelineDetailsData,
   LastEventTime: LastEventTimeData,
-  EventsOverTime: EventsOverTimeData,
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData,
   HostOverview: HostItem,
@@ -1189,9 +1227,11 @@ export interface Source {
   KpiNetwork?: Maybe<KpiNetworkData>,
   KpiHosts: KpiHostsData,
   KpiHostDetails: KpiHostDetailsData,
+  MatrixHistogram: MatrixHistogramOverTimeData,
   NetworkTopCountries: NetworkTopCountriesData,
   NetworkTopNFlow: NetworkTopNFlowData,
   NetworkDns: NetworkDnsData,
+  NetworkDnsHistogram: NetworkDsOverTimeData,
   NetworkHttp: NetworkHttpData,
   OverviewNetwork?: Maybe<OverviewNetworkData>,
   OverviewHost?: Maybe<OverviewHostData>,
@@ -1203,30 +1243,9 @@ export interface Source {
 }
 
 
-export interface SourceAlertsHistogramArgs {
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>,
-  timerange: TimerangeInput
-}
-
-
-export interface SourceAnomaliesOverTimeArgs {
-  timerange: TimerangeInput,
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>
-}
-
-
 export interface SourceAuthenticationsArgs {
   timerange: TimerangeInput,
   pagination: PaginationInputPaginated,
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>
-}
-
-
-export interface SourceAuthenticationsOverTimeArgs {
-  timerange: TimerangeInput,
   filterQuery?: Maybe<Scalars['String']>,
   defaultIndex: Array<Scalars['String']>
 }
@@ -1253,13 +1272,6 @@ export interface SourceLastEventTimeArgs {
   id?: Maybe<Scalars['String']>,
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
-  defaultIndex: Array<Scalars['String']>
-}
-
-
-export interface SourceEventsOverTimeArgs {
-  timerange: TimerangeInput,
-  filterQuery?: Maybe<Scalars['String']>,
   defaultIndex: Array<Scalars['String']>
 }
 
@@ -1333,6 +1345,15 @@ export interface SourceKpiHostDetailsArgs {
 }
 
 
+export interface SourceMatrixHistogramArgs {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput,
+  stackByField: Scalars['String'],
+  histogramType: HistogramType
+}
+
+
 export interface SourceNetworkTopCountriesArgs {
   id?: Maybe<Scalars['String']>,
   filterQuery?: Maybe<Scalars['String']>,
@@ -1363,8 +1384,17 @@ export interface SourceNetworkDnsArgs {
   isPtrIncluded: Scalars['Boolean'],
   pagination: PaginationInputPaginated,
   sort: NetworkDnsSortField,
+  stackByField?: Maybe<Scalars['String']>,
   timerange: TimerangeInput,
   defaultIndex: Array<Scalars['String']>
+}
+
+
+export interface SourceNetworkDnsHistogramArgs {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput,
+  stackByField?: Maybe<Scalars['String']>
 }
 
 
@@ -1524,6 +1554,7 @@ export interface TimelineInput {
   columns?: Maybe<Array<ColumnHeaderInput>>,
   dataProviders?: Maybe<Array<DataProviderInput>>,
   description?: Maybe<Scalars['String']>,
+  eventType?: Maybe<Scalars['String']>,
   filters?: Maybe<Array<FilterTimelineInput>>,
   kqlMode?: Maybe<Scalars['String']>,
   kqlQuery?: Maybe<SerializedFilterQueryInput>,
@@ -1553,6 +1584,7 @@ export interface TimelineResult {
   dateRange?: Maybe<DateRangePickerResult>,
   description?: Maybe<Scalars['String']>,
   eventIdToNoteIds?: Maybe<Array<NoteResult>>,
+  eventType?: Maybe<Scalars['String']>,
   favorite?: Maybe<Array<FavoriteTimelineResult>>,
   filters?: Maybe<Array<FilterTimelineResult>>,
   kqlMode?: Maybe<Scalars['String']>,
@@ -1634,6 +1666,7 @@ export interface TlsSortField {
   field: TlsFields,
   direction: Direction,
 }
+
 
 
 
@@ -1893,6 +1926,8 @@ export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   info: GraphQLResolveInfo
 ) => Maybe<TTypes>;
 
+export type isTypeOfResolverFn = (obj: any, info: GraphQLResolveInfo) => boolean;
+
 export type NextResolverFn<T> = () => Promise<T>;
 
 export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
@@ -1923,10 +1958,6 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   IndexField: ResolverTypeWrapper<IndexField>,
   TimerangeInput: TimerangeInput,
-  AlertsOverTimeData: ResolverTypeWrapper<AlertsOverTimeData>,
-  Inspect: ResolverTypeWrapper<Inspect>,
-  MatrixOverTimeHistogramData: ResolverTypeWrapper<MatrixOverTimeHistogramData>,
-  AnomaliesOverTimeData: ResolverTypeWrapper<AnomaliesOverTimeData>,
   PaginationInputPaginated: PaginationInputPaginated,
   AuthenticationsData: ResolverTypeWrapper<AuthenticationsData>,
   AuthenticationsEdges: ResolverTypeWrapper<AuthenticationsEdges>,
@@ -1943,7 +1974,7 @@ export type ResolversTypes = ResolversObject<{
   OsEcsFields: ResolverTypeWrapper<OsEcsFields>,
   CursorType: ResolverTypeWrapper<CursorType>,
   PageInfoPaginated: ResolverTypeWrapper<PageInfoPaginated>,
-  AuthenticationsOverTimeData: ResolverTypeWrapper<AuthenticationsOverTimeData>,
+  Inspect: ResolverTypeWrapper<Inspect>,
   PaginationInput: PaginationInput,
   SortField: SortField,
   TimelineData: ResolverTypeWrapper<TimelineData>,
@@ -1962,6 +1993,11 @@ export type ResolversTypes = ResolversObject<{
   EventEcsFields: ResolverTypeWrapper<EventEcsFields>,
   ToDateArray: ResolverTypeWrapper<Scalars['ToDateArray']>,
   NetworkEcsField: ResolverTypeWrapper<NetworkEcsField>,
+  RuleEcsField: ResolverTypeWrapper<RuleEcsField>,
+  SignalField: ResolverTypeWrapper<SignalField>,
+  RuleField: ResolverTypeWrapper<RuleField>,
+  ToBooleanArray: ResolverTypeWrapper<Scalars['ToBooleanArray']>,
+  ToAny: ResolverTypeWrapper<Scalars['ToAny']>,
   SuricataEcsFields: ResolverTypeWrapper<SuricataEcsFields>,
   SuricataEveData: ResolverTypeWrapper<SuricataEveData>,
   SuricataAlertData: ResolverTypeWrapper<SuricataAlertData>,
@@ -1973,7 +2009,6 @@ export type ResolversTypes = ResolversObject<{
   TlsServerCertificateData: ResolverTypeWrapper<TlsServerCertificateData>,
   ZeekEcsFields: ResolverTypeWrapper<ZeekEcsFields>,
   ZeekConnectionData: ResolverTypeWrapper<ZeekConnectionData>,
-  ToBooleanArray: ResolverTypeWrapper<Scalars['ToBooleanArray']>,
   ZeekNoticeData: ResolverTypeWrapper<ZeekNoticeData>,
   ZeekDnsData: ResolverTypeWrapper<ZeekDnsData>,
   ZeekHttpData: ResolverTypeWrapper<ZeekHttpData>,
@@ -2001,7 +2036,6 @@ export type ResolversTypes = ResolversObject<{
   LastEventIndexKey: LastEventIndexKey,
   LastTimeDetails: LastTimeDetails,
   LastEventTimeData: ResolverTypeWrapper<LastEventTimeData>,
-  EventsOverTimeData: ResolverTypeWrapper<EventsOverTimeData>,
   HostsSortField: HostsSortField,
   HostsFields: HostsFields,
   HostsData: ResolverTypeWrapper<HostsData>,
@@ -2027,6 +2061,9 @@ export type ResolversTypes = ResolversObject<{
   KpiHostsData: ResolverTypeWrapper<KpiHostsData>,
   KpiHostHistogramData: ResolverTypeWrapper<KpiHostHistogramData>,
   KpiHostDetailsData: ResolverTypeWrapper<KpiHostDetailsData>,
+  HistogramType: HistogramType,
+  MatrixHistogramOverTimeData: ResolverTypeWrapper<MatrixHistogramOverTimeData>,
+  MatrixOverTimeHistogramData: ResolverTypeWrapper<MatrixOverTimeHistogramData>,
   FlowTargetSourceDest: FlowTargetSourceDest,
   NetworkTopTablesSortField: NetworkTopTablesSortField,
   NetworkTopTablesFields: NetworkTopTablesFields,
@@ -2049,6 +2086,7 @@ export type ResolversTypes = ResolversObject<{
   NetworkDnsEdges: ResolverTypeWrapper<NetworkDnsEdges>,
   NetworkDnsItem: ResolverTypeWrapper<NetworkDnsItem>,
   MatrixOverOrdinalHistogramData: ResolverTypeWrapper<MatrixOverOrdinalHistogramData>,
+  NetworkDsOverTimeData: ResolverTypeWrapper<NetworkDsOverTimeData>,
   NetworkHttpSortField: NetworkHttpSortField,
   NetworkHttpData: ResolverTypeWrapper<NetworkHttpData>,
   NetworkHttpEdges: ResolverTypeWrapper<NetworkHttpEdges>,
@@ -2126,10 +2164,6 @@ export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'],
   IndexField: IndexField,
   TimerangeInput: TimerangeInput,
-  AlertsOverTimeData: AlertsOverTimeData,
-  Inspect: Inspect,
-  MatrixOverTimeHistogramData: MatrixOverTimeHistogramData,
-  AnomaliesOverTimeData: AnomaliesOverTimeData,
   PaginationInputPaginated: PaginationInputPaginated,
   AuthenticationsData: AuthenticationsData,
   AuthenticationsEdges: AuthenticationsEdges,
@@ -2146,7 +2180,7 @@ export type ResolversParentTypes = ResolversObject<{
   OsEcsFields: OsEcsFields,
   CursorType: CursorType,
   PageInfoPaginated: PageInfoPaginated,
-  AuthenticationsOverTimeData: AuthenticationsOverTimeData,
+  Inspect: Inspect,
   PaginationInput: PaginationInput,
   SortField: SortField,
   TimelineData: TimelineData,
@@ -2165,6 +2199,11 @@ export type ResolversParentTypes = ResolversObject<{
   EventEcsFields: EventEcsFields,
   ToDateArray: Scalars['ToDateArray'],
   NetworkEcsField: NetworkEcsField,
+  RuleEcsField: RuleEcsField,
+  SignalField: SignalField,
+  RuleField: RuleField,
+  ToBooleanArray: Scalars['ToBooleanArray'],
+  ToAny: Scalars['ToAny'],
   SuricataEcsFields: SuricataEcsFields,
   SuricataEveData: SuricataEveData,
   SuricataAlertData: SuricataAlertData,
@@ -2176,7 +2215,6 @@ export type ResolversParentTypes = ResolversObject<{
   TlsServerCertificateData: TlsServerCertificateData,
   ZeekEcsFields: ZeekEcsFields,
   ZeekConnectionData: ZeekConnectionData,
-  ToBooleanArray: Scalars['ToBooleanArray'],
   ZeekNoticeData: ZeekNoticeData,
   ZeekDnsData: ZeekDnsData,
   ZeekHttpData: ZeekHttpData,
@@ -2204,7 +2242,6 @@ export type ResolversParentTypes = ResolversObject<{
   LastEventIndexKey: LastEventIndexKey,
   LastTimeDetails: LastTimeDetails,
   LastEventTimeData: LastEventTimeData,
-  EventsOverTimeData: EventsOverTimeData,
   HostsSortField: HostsSortField,
   HostsFields: HostsFields,
   HostsData: HostsData,
@@ -2230,6 +2267,9 @@ export type ResolversParentTypes = ResolversObject<{
   KpiHostsData: KpiHostsData,
   KpiHostHistogramData: KpiHostHistogramData,
   KpiHostDetailsData: KpiHostDetailsData,
+  HistogramType: HistogramType,
+  MatrixHistogramOverTimeData: MatrixHistogramOverTimeData,
+  MatrixOverTimeHistogramData: MatrixOverTimeHistogramData,
   FlowTargetSourceDest: FlowTargetSourceDest,
   NetworkTopTablesSortField: NetworkTopTablesSortField,
   NetworkTopTablesFields: NetworkTopTablesFields,
@@ -2252,6 +2292,7 @@ export type ResolversParentTypes = ResolversObject<{
   NetworkDnsEdges: NetworkDnsEdges,
   NetworkDnsItem: NetworkDnsItem,
   MatrixOverOrdinalHistogramData: MatrixOverOrdinalHistogramData,
+  NetworkDsOverTimeData: NetworkDsOverTimeData,
   NetworkHttpSortField: NetworkHttpSortField,
   NetworkHttpData: NetworkHttpData,
   NetworkHttpEdges: NetworkHttpEdges,
@@ -2309,22 +2350,11 @@ export type ResolversParentTypes = ResolversObject<{
   NetworkHttpFields: NetworkHttpFields,
 }>;
 
-export type AlertsOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AlertsOverTimeData'] = ResolversParentTypes['AlertsOverTimeData']> = ResolversObject<{
-  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
-  alertsOverTimeByModule?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
-  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-}>;
-
-export type AnomaliesOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AnomaliesOverTimeData'] = ResolversParentTypes['AnomaliesOverTimeData']> = ResolversObject<{
-  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
-  anomaliesOverTime?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
-  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-}>;
-
 export type AuditdDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuditdData'] = ResolversParentTypes['AuditdData']> = ResolversObject<{
   acct?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   terminal?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   op?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuditdEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuditdEcsFields'] = ResolversParentTypes['AuditdEcsFields']> = ResolversObject<{
@@ -2333,14 +2363,17 @@ export type AuditdEcsFieldsResolvers<ContextType = SiemContext, ParentType exten
   data?: Resolver<Maybe<ResolversTypes['AuditdData']>, ParentType, ContextType>,
   summary?: Resolver<Maybe<ResolversTypes['Summary']>, ParentType, ContextType>,
   sequence?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuditEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuditEcsFields'] = ResolversParentTypes['AuditEcsFields']> = ResolversObject<{
   package?: Resolver<Maybe<ResolversTypes['PackageEcsFields']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuthEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuthEcsFields'] = ResolversParentTypes['AuthEcsFields']> = ResolversObject<{
   ssh?: Resolver<Maybe<ResolversTypes['SshEcsFields']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuthenticationItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuthenticationItem'] = ResolversParentTypes['AuthenticationItem']> = ResolversObject<{
@@ -2350,6 +2383,7 @@ export type AuthenticationItemResolvers<ContextType = SiemContext, ParentType ex
   user?: Resolver<ResolversTypes['UserEcsFields'], ParentType, ContextType>,
   lastSuccess?: Resolver<Maybe<ResolversTypes['LastSourceHost']>, ParentType, ContextType>,
   lastFailure?: Resolver<Maybe<ResolversTypes['LastSourceHost']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuthenticationsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuthenticationsData'] = ResolversParentTypes['AuthenticationsData']> = ResolversObject<{
@@ -2357,31 +2391,30 @@ export type AuthenticationsDataResolvers<ContextType = SiemContext, ParentType e
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AuthenticationsEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuthenticationsEdges'] = ResolversParentTypes['AuthenticationsEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['AuthenticationItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
-}>;
-
-export type AuthenticationsOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AuthenticationsOverTimeData'] = ResolversParentTypes['AuthenticationsOverTimeData']> = ResolversObject<{
-  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
-  authenticationsOverTime?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
-  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AutonomousSystemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AutonomousSystem'] = ResolversParentTypes['AutonomousSystem']> = ResolversObject<{
   number?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   organization?: Resolver<Maybe<ResolversTypes['AutonomousSystemOrganization']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AutonomousSystemItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AutonomousSystemItem'] = ResolversParentTypes['AutonomousSystemItem']> = ResolversObject<{
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   number?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type AutonomousSystemOrganizationResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AutonomousSystemOrganization'] = ResolversParentTypes['AutonomousSystemOrganization']> = ResolversObject<{
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type CloudFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['CloudFields'] = ResolversParentTypes['CloudFields']> = ResolversObject<{
@@ -2389,14 +2422,17 @@ export type CloudFieldsResolvers<ContextType = SiemContext, ParentType extends R
   machine?: Resolver<Maybe<ResolversTypes['CloudMachine']>, ParentType, ContextType>,
   provider?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   region?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type CloudInstanceResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['CloudInstance'] = ResolversParentTypes['CloudInstance']> = ResolversObject<{
   id?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type CloudMachineResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['CloudMachine'] = ResolversParentTypes['CloudMachine']> = ResolversObject<{
   type?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ColumnHeaderResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ColumnHeaderResult'] = ResolversParentTypes['ColumnHeaderResult']> = ResolversObject<{
@@ -2411,11 +2447,13 @@ export type ColumnHeaderResultResolvers<ContextType = SiemContext, ParentType ex
   placeholder?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   searchable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type CursorTypeResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['CursorType'] = ResolversParentTypes['CursorType']> = ResolversObject<{
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   tiebreaker?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type DataProviderResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DataProviderResult'] = ResolversParentTypes['DataProviderResult']> = ResolversObject<{
@@ -2426,6 +2464,7 @@ export type DataProviderResultResolvers<ContextType = SiemContext, ParentType ex
   kqlQuery?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   queryMatch?: Resolver<Maybe<ResolversTypes['QueryMatchResult']>, ParentType, ContextType>,
   and?: Resolver<Maybe<Array<ResolversTypes['DataProviderResult']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -2435,6 +2474,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type DateRangePickerResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DateRangePickerResult'] = ResolversParentTypes['DateRangePickerResult']> = ResolversObject<{
   start?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   end?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type DestinationEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DestinationEcsFields'] = ResolversParentTypes['DestinationEcsFields']> = ResolversObject<{
@@ -2444,23 +2484,27 @@ export type DestinationEcsFieldsResolvers<ContextType = SiemContext, ParentType 
   domain?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   geo?: Resolver<Maybe<ResolversTypes['GeoEcsFields']>, ParentType, ContextType>,
   packets?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type DetailItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DetailItem'] = ResolversParentTypes['DetailItem']> = ResolversObject<{
   field?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   values?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   originalValue?: Resolver<Maybe<ResolversTypes['EsValue']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type DnsEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DnsEcsFields'] = ResolversParentTypes['DnsEcsFields']> = ResolversObject<{
   question?: Resolver<Maybe<ResolversTypes['DnsQuestionData']>, ParentType, ContextType>,
   resolved_ip?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   response_code?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type DnsQuestionDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['DnsQuestionData'] = ResolversParentTypes['DnsQuestionData']> = ResolversObject<{
   name?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type EcsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ECS'] = ResolversParentTypes['ECS']> = ResolversObject<{
@@ -2474,6 +2518,8 @@ export type EcsResolvers<ContextType = SiemContext, ParentType extends Resolvers
   geo?: Resolver<Maybe<ResolversTypes['GeoEcsFields']>, ParentType, ContextType>,
   host?: Resolver<Maybe<ResolversTypes['HostEcsFields']>, ParentType, ContextType>,
   network?: Resolver<Maybe<ResolversTypes['NetworkEcsField']>, ParentType, ContextType>,
+  rule?: Resolver<Maybe<ResolversTypes['RuleEcsField']>, ParentType, ContextType>,
+  signal?: Resolver<Maybe<ResolversTypes['SignalField']>, ParentType, ContextType>,
   source?: Resolver<Maybe<ResolversTypes['SourceEcsFields']>, ParentType, ContextType>,
   suricata?: Resolver<Maybe<ResolversTypes['SuricataEcsFields']>, ParentType, ContextType>,
   tls?: Resolver<Maybe<ResolversTypes['TlsEcsFields']>, ParentType, ContextType>,
@@ -2487,11 +2533,13 @@ export type EcsResolvers<ContextType = SiemContext, ParentType extends Resolvers
   process?: Resolver<Maybe<ResolversTypes['ProcessEcsFields']>, ParentType, ContextType>,
   file?: Resolver<Maybe<ResolversTypes['FileFields']>, ParentType, ContextType>,
   system?: Resolver<Maybe<ResolversTypes['SystemEcsField']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type EcsEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['EcsEdges'] = ResolversParentTypes['EcsEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['ECS'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type EndgameEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['EndgameEcsFields'] = ResolversParentTypes['EndgameEcsFields']> = ResolversObject<{
@@ -2508,6 +2556,7 @@ export type EndgameEcsFieldsResolvers<ContextType = SiemContext, ParentType exte
   target_domain_name?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   target_logon_id?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   target_user_name?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export interface EsValueScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EsValue'], any> {
@@ -2534,12 +2583,7 @@ export type EventEcsFieldsResolvers<ContextType = SiemContext, ParentType extend
   start?: Resolver<Maybe<ResolversTypes['ToDateArray']>, ParentType, ContextType>,
   timezone?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
-}>;
-
-export type EventsOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['EventsOverTimeData'] = ResolversParentTypes['EventsOverTimeData']> = ResolversObject<{
-  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
-  eventsOverTime?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
-  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type EventsTimelineDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['EventsTimelineData'] = ResolversParentTypes['EventsTimelineData']> = ResolversObject<{
@@ -2547,12 +2591,14 @@ export type EventsTimelineDataResolvers<ContextType = SiemContext, ParentType ex
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FavoriteTimelineResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FavoriteTimelineResult'] = ResolversParentTypes['FavoriteTimelineResult']> = ResolversObject<{
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   userName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   favoriteDate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FileFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FileFields'] = ResolversParentTypes['FileFields']> = ResolversObject<{
@@ -2571,6 +2617,7 @@ export type FileFieldsResolvers<ContextType = SiemContext, ParentType extends Re
   size?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   mtime?: Resolver<Maybe<ResolversTypes['ToDateArray']>, ParentType, ContextType>,
   ctime?: Resolver<Maybe<ResolversTypes['ToDateArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FilterMetaTimelineResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FilterMetaTimelineResult'] = ResolversParentTypes['FilterMetaTimelineResult']> = ResolversObject<{
@@ -2585,6 +2632,7 @@ export type FilterMetaTimelineResultResolvers<ContextType = SiemContext, ParentT
   params?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FilterTimelineResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FilterTimelineResult'] = ResolversParentTypes['FilterTimelineResult']> = ResolversObject<{
@@ -2595,16 +2643,19 @@ export type FilterTimelineResultResolvers<ContextType = SiemContext, ParentType 
   query?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   range?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   script?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FingerprintDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FingerprintData'] = ResolversParentTypes['FingerprintData']> = ResolversObject<{
   sha1?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type FirstLastSeenHostResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['FirstLastSeenHost'] = ResolversParentTypes['FirstLastSeenHost']> = ResolversObject<{
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
   firstSeen?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   lastSeen?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type GeoEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['GeoEcsFields'] = ResolversParentTypes['GeoEcsFields']> = ResolversObject<{
@@ -2615,11 +2666,13 @@ export type GeoEcsFieldsResolvers<ContextType = SiemContext, ParentType extends 
   location?: Resolver<Maybe<ResolversTypes['Location']>, ParentType, ContextType>,
   region_iso_code?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   region_name?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type GeoItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['GeoItem'] = ResolversParentTypes['GeoItem']> = ResolversObject<{
   geo?: Resolver<Maybe<ResolversTypes['GeoEcsFields']>, ParentType, ContextType>,
   flowTarget?: Resolver<Maybe<ResolversTypes['FlowTargetSourceDest']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HostEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HostEcsFields'] = ResolversParentTypes['HostEcsFields']> = ResolversObject<{
@@ -2630,6 +2683,7 @@ export type HostEcsFieldsResolvers<ContextType = SiemContext, ParentType extends
   name?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   os?: Resolver<Maybe<ResolversTypes['OsEcsFields']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HostFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HostFields'] = ResolversParentTypes['HostFields']> = ResolversObject<{
@@ -2640,6 +2694,7 @@ export type HostFieldsResolvers<ContextType = SiemContext, ParentType extends Re
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   os?: Resolver<Maybe<ResolversTypes['OsFields']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HostItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HostItem'] = ResolversParentTypes['HostItem']> = ResolversObject<{
@@ -2648,6 +2703,7 @@ export type HostItemResolvers<ContextType = SiemContext, ParentType extends Reso
   host?: Resolver<Maybe<ResolversTypes['HostEcsFields']>, ParentType, ContextType>,
   cloud?: Resolver<Maybe<ResolversTypes['CloudFields']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HostsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HostsData'] = ResolversParentTypes['HostsData']> = ResolversObject<{
@@ -2655,22 +2711,26 @@ export type HostsDataResolvers<ContextType = SiemContext, ParentType extends Res
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HostsEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HostsEdges'] = ResolversParentTypes['HostsEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['HostItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HttpBodyDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HttpBodyData'] = ResolversParentTypes['HttpBodyData']> = ResolversObject<{
   content?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HttpEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HttpEcsFields'] = ResolversParentTypes['HttpEcsFields']> = ResolversObject<{
   version?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   request?: Resolver<Maybe<ResolversTypes['HttpRequestData']>, ParentType, ContextType>,
   response?: Resolver<Maybe<ResolversTypes['HttpResponseData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HttpRequestDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HttpRequestData'] = ResolversParentTypes['HttpRequestData']> = ResolversObject<{
@@ -2678,12 +2738,14 @@ export type HttpRequestDataResolvers<ContextType = SiemContext, ParentType exten
   body?: Resolver<Maybe<ResolversTypes['HttpBodyData']>, ParentType, ContextType>,
   referrer?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type HttpResponseDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['HttpResponseData'] = ResolversParentTypes['HttpResponseData']> = ResolversObject<{
   status_code?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   body?: Resolver<Maybe<ResolversTypes['HttpBodyData']>, ParentType, ContextType>,
   bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type IndexFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['IndexField'] = ResolversParentTypes['IndexField']> = ResolversObject<{
@@ -2696,11 +2758,13 @@ export type IndexFieldResolvers<ContextType = SiemContext, ParentType extends Re
   aggregatable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   format?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type InspectResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Inspect'] = ResolversParentTypes['Inspect']> = ResolversObject<{
   dsl?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   response?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type IpOverviewDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['IpOverviewData'] = ResolversParentTypes['IpOverviewData']> = ResolversObject<{
@@ -2710,6 +2774,7 @@ export type IpOverviewDataResolvers<ContextType = SiemContext, ParentType extend
   server?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType>,
   source?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KpiHostDetailsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KpiHostDetailsData'] = ResolversParentTypes['KpiHostDetailsData']> = ResolversObject<{
@@ -2722,11 +2787,13 @@ export type KpiHostDetailsDataResolvers<ContextType = SiemContext, ParentType ex
   uniqueDestinationIps?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   uniqueDestinationIpsHistogram?: Resolver<Maybe<Array<ResolversTypes['KpiHostHistogramData']>>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KpiHostHistogramDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KpiHostHistogramData'] = ResolversParentTypes['KpiHostHistogramData']> = ResolversObject<{
   x?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   y?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KpiHostsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KpiHostsData'] = ResolversParentTypes['KpiHostsData']> = ResolversObject<{
@@ -2741,6 +2808,7 @@ export type KpiHostsDataResolvers<ContextType = SiemContext, ParentType extends 
   uniqueDestinationIps?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   uniqueDestinationIpsHistogram?: Resolver<Maybe<Array<ResolversTypes['KpiHostHistogramData']>>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KpiNetworkDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KpiNetworkData'] = ResolversParentTypes['KpiNetworkData']> = ResolversObject<{
@@ -2753,44 +2821,59 @@ export type KpiNetworkDataResolvers<ContextType = SiemContext, ParentType extend
   dnsQueries?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   tlsHandshakes?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KpiNetworkHistogramDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KpiNetworkHistogramData'] = ResolversParentTypes['KpiNetworkHistogramData']> = ResolversObject<{
   x?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   y?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type KueryFilterQueryResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['KueryFilterQueryResult'] = ResolversParentTypes['KueryFilterQueryResult']> = ResolversObject<{
   kind?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   expression?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type LastEventTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['LastEventTimeData'] = ResolversParentTypes['LastEventTimeData']> = ResolversObject<{
   lastSeen?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type LastSourceHostResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['LastSourceHost'] = ResolversParentTypes['LastSourceHost']> = ResolversObject<{
   timestamp?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   source?: Resolver<Maybe<ResolversTypes['SourceEcsFields']>, ParentType, ContextType>,
   host?: Resolver<Maybe<ResolversTypes['HostEcsFields']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type LocationResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Location'] = ResolversParentTypes['Location']> = ResolversObject<{
   lon?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   lat?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
+}>;
+
+export type MatrixHistogramOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['MatrixHistogramOverTimeData'] = ResolversParentTypes['MatrixHistogramOverTimeData']> = ResolversObject<{
+  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  matrixHistogramData?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
+  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type MatrixOverOrdinalHistogramDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['MatrixOverOrdinalHistogramData'] = ResolversParentTypes['MatrixOverOrdinalHistogramData']> = ResolversObject<{
   x?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   y?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   g?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type MatrixOverTimeHistogramDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['MatrixOverTimeHistogramData'] = ResolversParentTypes['MatrixOverTimeHistogramData']> = ResolversObject<{
-  x?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  y?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  g?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  x?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  y?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  g?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type MutationResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
@@ -2811,11 +2894,13 @@ export type NetworkDnsDataResolvers<ContextType = SiemContext, ParentType extend
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
   histogram?: Resolver<Maybe<Array<ResolversTypes['MatrixOverOrdinalHistogramData']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkDnsEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkDnsEdges'] = ResolversParentTypes['NetworkDnsEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['NetworkDnsItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkDnsItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkDnsItem'] = ResolversParentTypes['NetworkDnsItem']> = ResolversObject<{
@@ -2825,6 +2910,14 @@ export type NetworkDnsItemResolvers<ContextType = SiemContext, ParentType extend
   dnsName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   queryCount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   uniqueDomains?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
+}>;
+
+export type NetworkDsOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkDsOverTimeData'] = ResolversParentTypes['NetworkDsOverTimeData']> = ResolversObject<{
+  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  matrixHistogramData?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
+  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkEcsFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkEcsField'] = ResolversParentTypes['NetworkEcsField']> = ResolversObject<{
@@ -2834,6 +2927,7 @@ export type NetworkEcsFieldResolvers<ContextType = SiemContext, ParentType exten
   packets?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   protocol?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   transport?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkHttpDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkHttpData'] = ResolversParentTypes['NetworkHttpData']> = ResolversObject<{
@@ -2841,11 +2935,13 @@ export type NetworkHttpDataResolvers<ContextType = SiemContext, ParentType exten
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkHttpEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkHttpEdges'] = ResolversParentTypes['NetworkHttpEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['NetworkHttpItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkHttpItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkHttpItem'] = ResolversParentTypes['NetworkHttpItem']> = ResolversObject<{
@@ -2857,6 +2953,7 @@ export type NetworkHttpItemResolvers<ContextType = SiemContext, ParentType exten
   path?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   requestCount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   statuses?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopCountriesDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopCountriesData'] = ResolversParentTypes['NetworkTopCountriesData']> = ResolversObject<{
@@ -2864,11 +2961,13 @@ export type NetworkTopCountriesDataResolvers<ContextType = SiemContext, ParentTy
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopCountriesEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopCountriesEdges'] = ResolversParentTypes['NetworkTopCountriesEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['NetworkTopCountriesItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopCountriesItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopCountriesItem'] = ResolversParentTypes['NetworkTopCountriesItem']> = ResolversObject<{
@@ -2876,6 +2975,7 @@ export type NetworkTopCountriesItemResolvers<ContextType = SiemContext, ParentTy
   source?: Resolver<Maybe<ResolversTypes['TopCountriesItemSource']>, ParentType, ContextType>,
   destination?: Resolver<Maybe<ResolversTypes['TopCountriesItemDestination']>, ParentType, ContextType>,
   network?: Resolver<Maybe<ResolversTypes['TopNetworkTablesEcsField']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopNFlowDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopNFlowData'] = ResolversParentTypes['NetworkTopNFlowData']> = ResolversObject<{
@@ -2883,11 +2983,13 @@ export type NetworkTopNFlowDataResolvers<ContextType = SiemContext, ParentType e
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopNFlowEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopNFlowEdges'] = ResolversParentTypes['NetworkTopNFlowEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['NetworkTopNFlowItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NetworkTopNFlowItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NetworkTopNFlowItem'] = ResolversParentTypes['NetworkTopNFlowItem']> = ResolversObject<{
@@ -2895,6 +2997,7 @@ export type NetworkTopNFlowItemResolvers<ContextType = SiemContext, ParentType e
   source?: Resolver<Maybe<ResolversTypes['TopNFlowItemSource']>, ParentType, ContextType>,
   destination?: Resolver<Maybe<ResolversTypes['TopNFlowItemDestination']>, ParentType, ContextType>,
   network?: Resolver<Maybe<ResolversTypes['TopNetworkTablesEcsField']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type NoteResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['NoteResult'] = ResolversParentTypes['NoteResult']> = ResolversObject<{
@@ -2908,6 +3011,7 @@ export type NoteResultResolvers<ContextType = SiemContext, ParentType extends Re
   updated?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type OsEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['OsEcsFields'] = ResolversParentTypes['OsEcsFields']> = ResolversObject<{
@@ -2917,6 +3021,7 @@ export type OsEcsFieldsResolvers<ContextType = SiemContext, ParentType extends R
   family?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   kernel?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type OsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['OsFields'] = ResolversParentTypes['OsFields']> = ResolversObject<{
@@ -2926,6 +3031,7 @@ export type OsFieldsResolvers<ContextType = SiemContext, ParentType extends Reso
   family?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   kernel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type OverviewResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Overview'] = ResolversParentTypes['Overview']> = ResolversObject<{
@@ -2933,6 +3039,7 @@ export type OverviewResolvers<ContextType = SiemContext, ParentType extends Reso
   lastSeen?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   autonomousSystem?: Resolver<ResolversTypes['AutonomousSystem'], ParentType, ContextType>,
   geo?: Resolver<ResolversTypes['GeoEcsFields'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type OverviewHostDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['OverviewHostData'] = ResolversParentTypes['OverviewHostData']> = ResolversObject<{
@@ -2950,8 +3057,10 @@ export type OverviewHostDataResolvers<ContextType = SiemContext, ParentType exte
   endgameRegistry?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   endgameSecurity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   filebeatSystemModule?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  winlogbeat?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  winlogbeatSecurity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  winlogbeatMWSysmonOperational?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type OverviewNetworkDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['OverviewNetworkData'] = ResolversParentTypes['OverviewNetworkData']> = ResolversObject<{
@@ -2965,6 +3074,7 @@ export type OverviewNetworkDataResolvers<ContextType = SiemContext, ParentType e
   packetbeatFlow?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   packetbeatTLS?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type PackageEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['PackageEcsFields'] = ResolversParentTypes['PackageEcsFields']> = ResolversObject<{
@@ -2974,17 +3084,20 @@ export type PackageEcsFieldsResolvers<ContextType = SiemContext, ParentType exte
   size?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   summary?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type PageInfoResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = ResolversObject<{
   endCursor?: Resolver<Maybe<ResolversTypes['CursorType']>, ParentType, ContextType>,
   hasNextPage?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type PageInfoPaginatedResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['PageInfoPaginated'] = ResolversParentTypes['PageInfoPaginated']> = ResolversObject<{
   activePage?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   fakeTotalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   showMorePagesIndicator?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type PinnedEventResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['PinnedEvent'] = ResolversParentTypes['PinnedEvent']> = ResolversObject<{
@@ -2999,12 +3112,14 @@ export type PinnedEventResolvers<ContextType = SiemContext, ParentType extends R
   updated?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type PrimarySecondaryResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['PrimarySecondary'] = ResolversParentTypes['PrimarySecondary']> = ResolversObject<{
   primary?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   secondary?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ProcessEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ProcessEcsFields'] = ResolversParentTypes['ProcessEcsFields']> = ResolversObject<{
@@ -3017,12 +3132,14 @@ export type ProcessEcsFieldsResolvers<ContextType = SiemContext, ParentType exte
   title?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   thread?: Resolver<Maybe<ResolversTypes['Thread']>, ParentType, ContextType>,
   working_directory?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ProcessHashDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ProcessHashData'] = ResolversParentTypes['ProcessHashData']> = ResolversObject<{
   md5?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   sha1?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   sha256?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type QueryResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
@@ -3043,6 +3160,7 @@ export type QueryMatchResultResolvers<ContextType = SiemContext, ParentType exte
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   displayValue?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   operator?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ResponseFavoriteTimelineResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ResponseFavoriteTimeline'] = ResolversParentTypes['ResponseFavoriteTimeline']> = ResolversObject<{
@@ -3051,60 +3169,110 @@ export type ResponseFavoriteTimelineResolvers<ContextType = SiemContext, ParentT
   savedObjectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   favorite?: Resolver<Maybe<Array<ResolversTypes['FavoriteTimelineResult']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ResponseNoteResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ResponseNote'] = ResolversParentTypes['ResponseNote']> = ResolversObject<{
   code?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   note?: Resolver<ResolversTypes['NoteResult'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ResponseNotesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ResponseNotes'] = ResolversParentTypes['ResponseNotes']> = ResolversObject<{
   notes?: Resolver<Array<ResolversTypes['NoteResult']>, ParentType, ContextType>,
   totalCount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ResponseTimelineResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ResponseTimeline'] = ResolversParentTypes['ResponseTimeline']> = ResolversObject<{
   code?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   timeline?: Resolver<ResolversTypes['TimelineResult'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ResponseTimelinesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ResponseTimelines'] = ResolversParentTypes['ResponseTimelines']> = ResolversObject<{
   timeline?: Resolver<Array<Maybe<ResolversTypes['TimelineResult']>>, ParentType, ContextType>,
   totalCount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
+}>;
+
+export type RuleEcsFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['RuleEcsField'] = ResolversParentTypes['RuleEcsField']> = ResolversObject<{
+  reference?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
+}>;
+
+export type RuleFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['RuleField'] = ResolversParentTypes['RuleField']> = ResolversObject<{
+  id?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  rule_id?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  false_positives?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  saved_id?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  timeline_id?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  timeline_title?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  max_signals?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  risk_score?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  output_index?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  description?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  from?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  immutable?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
+  index?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  interval?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  language?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  query?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  references?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  severity?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  tags?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  threat?: Resolver<Maybe<ResolversTypes['ToAny']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  to?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  enabled?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
+  filters?: Resolver<Maybe<ResolversTypes['ToAny']>, ParentType, ContextType>,
+  created_at?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  updated_at?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  created_by?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  updated_by?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  version?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SayMyNameResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SayMyName'] = ResolversParentTypes['SayMyName']> = ResolversObject<{
   appName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SerializedFilterQueryResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SerializedFilterQueryResult'] = ResolversParentTypes['SerializedFilterQueryResult']> = ResolversObject<{
   filterQuery?: Resolver<Maybe<ResolversTypes['SerializedKueryQueryResult']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SerializedKueryQueryResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SerializedKueryQueryResult'] = ResolversParentTypes['SerializedKueryQueryResult']> = ResolversObject<{
   kuery?: Resolver<Maybe<ResolversTypes['KueryFilterQueryResult']>, ParentType, ContextType>,
   serializedQuery?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
+}>;
+
+export type SignalFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SignalField'] = ResolversParentTypes['SignalField']> = ResolversObject<{
+  rule?: Resolver<Maybe<ResolversTypes['RuleField']>, ParentType, ContextType>,
+  original_time?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SortTimelineResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SortTimelineResult'] = ResolversParentTypes['SortTimelineResult']> = ResolversObject<{
   columnId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   sortDirection?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SourceResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Source'] = ResolversParentTypes['Source']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   configuration?: Resolver<ResolversTypes['SourceConfiguration'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['SourceStatus'], ParentType, ContextType>,
-  AlertsHistogram?: Resolver<ResolversTypes['AlertsOverTimeData'], ParentType, ContextType, RequireFields<SourceAlertsHistogramArgs, 'defaultIndex' | 'timerange'>>,
-  AnomaliesOverTime?: Resolver<ResolversTypes['AnomaliesOverTimeData'], ParentType, ContextType, RequireFields<SourceAnomaliesOverTimeArgs, 'timerange' | 'defaultIndex'>>,
   Authentications?: Resolver<ResolversTypes['AuthenticationsData'], ParentType, ContextType, RequireFields<SourceAuthenticationsArgs, 'timerange' | 'pagination' | 'defaultIndex'>>,
-  AuthenticationsOverTime?: Resolver<ResolversTypes['AuthenticationsOverTimeData'], ParentType, ContextType, RequireFields<SourceAuthenticationsOverTimeArgs, 'timerange' | 'defaultIndex'>>,
   Timeline?: Resolver<ResolversTypes['TimelineData'], ParentType, ContextType, RequireFields<SourceTimelineArgs, 'pagination' | 'sortField' | 'fieldRequested' | 'defaultIndex'>>,
   TimelineDetails?: Resolver<ResolversTypes['TimelineDetailsData'], ParentType, ContextType, RequireFields<SourceTimelineDetailsArgs, 'eventId' | 'indexName' | 'defaultIndex'>>,
   LastEventTime?: Resolver<ResolversTypes['LastEventTimeData'], ParentType, ContextType, RequireFields<SourceLastEventTimeArgs, 'indexKey' | 'details' | 'defaultIndex'>>,
-  EventsOverTime?: Resolver<ResolversTypes['EventsOverTimeData'], ParentType, ContextType, RequireFields<SourceEventsOverTimeArgs, 'timerange' | 'defaultIndex'>>,
   Hosts?: Resolver<ResolversTypes['HostsData'], ParentType, ContextType, RequireFields<SourceHostsArgs, 'timerange' | 'pagination' | 'sort' | 'defaultIndex'>>,
   HostOverview?: Resolver<ResolversTypes['HostItem'], ParentType, ContextType, RequireFields<SourceHostOverviewArgs, 'hostName' | 'timerange' | 'defaultIndex'>>,
   HostFirstLastSeen?: Resolver<ResolversTypes['FirstLastSeenHost'], ParentType, ContextType, RequireFields<SourceHostFirstLastSeenArgs, 'hostName' | 'defaultIndex'>>,
@@ -3113,19 +3281,23 @@ export type SourceResolvers<ContextType = SiemContext, ParentType extends Resolv
   KpiNetwork?: Resolver<Maybe<ResolversTypes['KpiNetworkData']>, ParentType, ContextType, RequireFields<SourceKpiNetworkArgs, 'timerange' | 'defaultIndex'>>,
   KpiHosts?: Resolver<ResolversTypes['KpiHostsData'], ParentType, ContextType, RequireFields<SourceKpiHostsArgs, 'timerange' | 'defaultIndex'>>,
   KpiHostDetails?: Resolver<ResolversTypes['KpiHostDetailsData'], ParentType, ContextType, RequireFields<SourceKpiHostDetailsArgs, 'timerange' | 'defaultIndex'>>,
+  MatrixHistogram?: Resolver<ResolversTypes['MatrixHistogramOverTimeData'], ParentType, ContextType, RequireFields<SourceMatrixHistogramArgs, 'defaultIndex' | 'timerange' | 'stackByField' | 'histogramType'>>,
   NetworkTopCountries?: Resolver<ResolversTypes['NetworkTopCountriesData'], ParentType, ContextType, RequireFields<SourceNetworkTopCountriesArgs, 'flowTarget' | 'pagination' | 'sort' | 'timerange' | 'defaultIndex'>>,
   NetworkTopNFlow?: Resolver<ResolversTypes['NetworkTopNFlowData'], ParentType, ContextType, RequireFields<SourceNetworkTopNFlowArgs, 'flowTarget' | 'pagination' | 'sort' | 'timerange' | 'defaultIndex'>>,
   NetworkDns?: Resolver<ResolversTypes['NetworkDnsData'], ParentType, ContextType, RequireFields<SourceNetworkDnsArgs, 'isPtrIncluded' | 'pagination' | 'sort' | 'timerange' | 'defaultIndex'>>,
+  NetworkDnsHistogram?: Resolver<ResolversTypes['NetworkDsOverTimeData'], ParentType, ContextType, RequireFields<SourceNetworkDnsHistogramArgs, 'defaultIndex' | 'timerange'>>,
   NetworkHttp?: Resolver<ResolversTypes['NetworkHttpData'], ParentType, ContextType, RequireFields<SourceNetworkHttpArgs, 'pagination' | 'sort' | 'timerange' | 'defaultIndex'>>,
   OverviewNetwork?: Resolver<Maybe<ResolversTypes['OverviewNetworkData']>, ParentType, ContextType, RequireFields<SourceOverviewNetworkArgs, 'timerange' | 'defaultIndex'>>,
   OverviewHost?: Resolver<Maybe<ResolversTypes['OverviewHostData']>, ParentType, ContextType, RequireFields<SourceOverviewHostArgs, 'timerange' | 'defaultIndex'>>,
   Tls?: Resolver<ResolversTypes['TlsData'], ParentType, ContextType, RequireFields<SourceTlsArgs, 'ip' | 'pagination' | 'sort' | 'flowTarget' | 'timerange' | 'defaultIndex'>>,
   UncommonProcesses?: Resolver<ResolversTypes['UncommonProcessesData'], ParentType, ContextType, RequireFields<SourceUncommonProcessesArgs, 'timerange' | 'pagination' | 'defaultIndex'>>,
   whoAmI?: Resolver<Maybe<ResolversTypes['SayMyName']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SourceConfigurationResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SourceConfiguration'] = ResolversParentTypes['SourceConfiguration']> = ResolversObject<{
   fields?: Resolver<ResolversTypes['SourceFields'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SourceEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SourceEcsFields'] = ResolversParentTypes['SourceEcsFields']> = ResolversObject<{
@@ -3135,6 +3307,7 @@ export type SourceEcsFieldsResolvers<ContextType = SiemContext, ParentType exten
   domain?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   geo?: Resolver<Maybe<ResolversTypes['GeoEcsFields']>, ParentType, ContextType>,
   packets?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SourceFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SourceFields'] = ResolversParentTypes['SourceFields']> = ResolversObject<{
@@ -3144,16 +3317,19 @@ export type SourceFieldsResolvers<ContextType = SiemContext, ParentType extends 
   pod?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   tiebreaker?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SourceStatusResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SourceStatus'] = ResolversParentTypes['SourceStatus']> = ResolversObject<{
   indicesExist?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<SourceStatusIndicesExistArgs, 'defaultIndex'>>,
   indexFields?: Resolver<Array<ResolversTypes['IndexField']>, ParentType, ContextType, RequireFields<SourceStatusIndexFieldsArgs, 'defaultIndex'>>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SshEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SshEcsFields'] = ResolversParentTypes['SshEcsFields']> = ResolversObject<{
   method?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   signature?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SummaryResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Summary'] = ResolversParentTypes['Summary']> = ResolversObject<{
@@ -3162,31 +3338,37 @@ export type SummaryResolvers<ContextType = SiemContext, ParentType extends Resol
   how?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   message_type?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   sequence?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SuricataAlertDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SuricataAlertData'] = ResolversParentTypes['SuricataAlertData']> = ResolversObject<{
   signature?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   signature_id?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SuricataEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SuricataEcsFields'] = ResolversParentTypes['SuricataEcsFields']> = ResolversObject<{
   eve?: Resolver<Maybe<ResolversTypes['SuricataEveData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SuricataEveDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SuricataEveData'] = ResolversParentTypes['SuricataEveData']> = ResolversObject<{
   alert?: Resolver<Maybe<ResolversTypes['SuricataAlertData']>, ParentType, ContextType>,
   flow_id?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   proto?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type SystemEcsFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['SystemEcsField'] = ResolversParentTypes['SystemEcsField']> = ResolversObject<{
   audit?: Resolver<Maybe<ResolversTypes['AuditEcsFields']>, ParentType, ContextType>,
   auth?: Resolver<Maybe<ResolversTypes['AuthEcsFields']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ThreadResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['Thread'] = ResolversParentTypes['Thread']> = ResolversObject<{
   id?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   start?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineData'] = ResolversParentTypes['TimelineData']> = ResolversObject<{
@@ -3194,16 +3376,19 @@ export type TimelineDataResolvers<ContextType = SiemContext, ParentType extends 
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineDetailsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineDetailsData'] = ResolversParentTypes['TimelineDetailsData']> = ResolversObject<{
   data?: Resolver<Maybe<Array<ResolversTypes['DetailItem']>>, ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineEdges'] = ResolversParentTypes['TimelineEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['TimelineItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineItem'] = ResolversParentTypes['TimelineItem']> = ResolversObject<{
@@ -3211,11 +3396,13 @@ export type TimelineItemResolvers<ContextType = SiemContext, ParentType extends 
   _index?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   data?: Resolver<Array<ResolversTypes['TimelineNonEcsData']>, ParentType, ContextType>,
   ecs?: Resolver<ResolversTypes['ECS'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineNonEcsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineNonEcsData'] = ResolversParentTypes['TimelineNonEcsData']> = ResolversObject<{
   field?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   value?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TimelineResultResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TimelineResult'] = ResolversParentTypes['TimelineResult']> = ResolversObject<{
@@ -3226,6 +3413,7 @@ export type TimelineResultResolvers<ContextType = SiemContext, ParentType extend
   dateRange?: Resolver<Maybe<ResolversTypes['DateRangePickerResult']>, ParentType, ContextType>,
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   eventIdToNoteIds?: Resolver<Maybe<Array<ResolversTypes['NoteResult']>>, ParentType, ContextType>,
+  eventType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   favorite?: Resolver<Maybe<Array<ResolversTypes['FavoriteTimelineResult']>>, ParentType, ContextType>,
   filters?: Resolver<Maybe<Array<ResolversTypes['FilterTimelineResult']>>, ParentType, ContextType>,
   kqlMode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -3241,10 +3429,12 @@ export type TimelineResultResolvers<ContextType = SiemContext, ParentType extend
   updated?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsClientCertificateDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsClientCertificateData'] = ResolversParentTypes['TlsClientCertificateData']> = ResolversObject<{
   fingerprint?: Resolver<Maybe<ResolversTypes['FingerprintData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsData'] = ResolversParentTypes['TlsData']> = ResolversObject<{
@@ -3252,25 +3442,30 @@ export type TlsDataResolvers<ContextType = SiemContext, ParentType extends Resol
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsEcsFields'] = ResolversParentTypes['TlsEcsFields']> = ResolversObject<{
   client_certificate?: Resolver<Maybe<ResolversTypes['TlsClientCertificateData']>, ParentType, ContextType>,
   fingerprints?: Resolver<Maybe<ResolversTypes['TlsFingerprintsData']>, ParentType, ContextType>,
   server_certificate?: Resolver<Maybe<ResolversTypes['TlsServerCertificateData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsEdges'] = ResolversParentTypes['TlsEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['TlsNode'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsFingerprintsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsFingerprintsData'] = ResolversParentTypes['TlsFingerprintsData']> = ResolversObject<{
   ja3?: Resolver<Maybe<ResolversTypes['TlsJa3Data']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsJa3DataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsJa3Data'] = ResolversParentTypes['TlsJa3Data']> = ResolversObject<{
   hash?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsNodeResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsNode'] = ResolversParentTypes['TlsNode']> = ResolversObject<{
@@ -3281,11 +3476,17 @@ export type TlsNodeResolvers<ContextType = SiemContext, ParentType extends Resol
   commonNames?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>,
   ja3?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>,
   issuerNames?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TlsServerCertificateDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TlsServerCertificateData'] = ResolversParentTypes['TlsServerCertificateData']> = ResolversObject<{
   fingerprint?: Resolver<Maybe<ResolversTypes['FingerprintData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
+
+export interface ToAnyScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ToAny'], any> {
+  name: 'ToAny'
+}
 
 export interface ToBooleanArrayScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ToBooleanArray'], any> {
   name: 'ToBooleanArray'
@@ -3305,6 +3506,7 @@ export type TopCountriesItemDestinationResolvers<ContextType = SiemContext, Pare
   flows?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   location?: Resolver<Maybe<ResolversTypes['GeoItem']>, ParentType, ContextType>,
   source_ips?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TopCountriesItemSourceResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TopCountriesItemSource'] = ResolversParentTypes['TopCountriesItemSource']> = ResolversObject<{
@@ -3313,11 +3515,13 @@ export type TopCountriesItemSourceResolvers<ContextType = SiemContext, ParentTyp
   flows?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   location?: Resolver<Maybe<ResolversTypes['GeoItem']>, ParentType, ContextType>,
   source_ips?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TopNetworkTablesEcsFieldResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TopNetworkTablesEcsField'] = ResolversParentTypes['TopNetworkTablesEcsField']> = ResolversObject<{
   bytes_in?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   bytes_out?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TopNFlowItemDestinationResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TopNFlowItemDestination'] = ResolversParentTypes['TopNFlowItemDestination']> = ResolversObject<{
@@ -3327,6 +3531,7 @@ export type TopNFlowItemDestinationResolvers<ContextType = SiemContext, ParentTy
   location?: Resolver<Maybe<ResolversTypes['GeoItem']>, ParentType, ContextType>,
   flows?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   source_ips?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type TopNFlowItemSourceResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['TopNFlowItemSource'] = ResolversParentTypes['TopNFlowItemSource']> = ResolversObject<{
@@ -3336,6 +3541,7 @@ export type TopNFlowItemSourceResolvers<ContextType = SiemContext, ParentType ex
   location?: Resolver<Maybe<ResolversTypes['GeoItem']>, ParentType, ContextType>,
   flows?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   destination_ips?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export interface ToStringArrayScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ToStringArray'], any> {
@@ -3347,11 +3553,13 @@ export type UncommonProcessesDataResolvers<ContextType = SiemContext, ParentType
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UncommonProcessesEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UncommonProcessesEdges'] = ResolversParentTypes['UncommonProcessesEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['UncommonProcessItem'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UncommonProcessItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UncommonProcessItem'] = ResolversParentTypes['UncommonProcessItem']> = ResolversObject<{
@@ -3360,6 +3568,7 @@ export type UncommonProcessItemResolvers<ContextType = SiemContext, ParentType e
   process?: Resolver<ResolversTypes['ProcessEcsFields'], ParentType, ContextType>,
   hosts?: Resolver<Array<ResolversTypes['HostEcsFields']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UserEcsFields']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UrlEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UrlEcsFields'] = ResolversParentTypes['UrlEcsFields']> = ResolversObject<{
@@ -3367,6 +3576,7 @@ export type UrlEcsFieldsResolvers<ContextType = SiemContext, ParentType extends 
   original?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   username?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   password?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UserEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UserEcsFields'] = ResolversParentTypes['UserEcsFields']> = ResolversObject<{
@@ -3377,6 +3587,7 @@ export type UserEcsFieldsResolvers<ContextType = SiemContext, ParentType extends
   email?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   hash?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   group?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UsersDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UsersData'] = ResolversParentTypes['UsersData']> = ResolversObject<{
@@ -3384,11 +3595,13 @@ export type UsersDataResolvers<ContextType = SiemContext, ParentType extends Res
   totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   pageInfo?: Resolver<ResolversTypes['PageInfoPaginated'], ParentType, ContextType>,
   inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UsersEdgesResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UsersEdges'] = ResolversParentTypes['UsersEdges']> = ResolversObject<{
   node?: Resolver<ResolversTypes['UsersNode'], ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['CursorType'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UsersItemResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UsersItem'] = ResolversParentTypes['UsersItem']> = ResolversObject<{
@@ -3397,16 +3610,19 @@ export type UsersItemResolvers<ContextType = SiemContext, ParentType extends Res
   groupId?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   groupName?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   count?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type UsersNodeResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['UsersNode'] = ResolversParentTypes['UsersNode']> = ResolversObject<{
   _id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   user?: Resolver<Maybe<ResolversTypes['UsersItem']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type WinlogEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['WinlogEcsFields'] = ResolversParentTypes['WinlogEcsFields']> = ResolversObject<{
   event_id?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekConnectionDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekConnectionData'] = ResolversParentTypes['ZeekConnectionData']> = ResolversObject<{
@@ -3415,6 +3631,7 @@ export type ZeekConnectionDataResolvers<ContextType = SiemContext, ParentType ex
   missed_bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   state?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   history?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekDnsDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekDnsData'] = ResolversParentTypes['ZeekDnsData']> = ResolversObject<{
@@ -3429,6 +3646,7 @@ export type ZeekDnsDataResolvers<ContextType = SiemContext, ParentType extends R
   qclass?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   RA?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
   TC?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekEcsFieldsResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekEcsFields'] = ResolversParentTypes['ZeekEcsFields']> = ResolversObject<{
@@ -3439,6 +3657,7 @@ export type ZeekEcsFieldsResolvers<ContextType = SiemContext, ParentType extends
   http?: Resolver<Maybe<ResolversTypes['ZeekHttpData']>, ParentType, ContextType>,
   files?: Resolver<Maybe<ResolversTypes['ZeekFileData']>, ParentType, ContextType>,
   ssl?: Resolver<Maybe<ResolversTypes['ZeekSslData']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekFileDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekFileData'] = ResolversParentTypes['ZeekFileData']> = ResolversObject<{
@@ -3460,6 +3679,7 @@ export type ZeekFileDataResolvers<ContextType = SiemContext, ParentType extends 
   seen_bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   missing_bytes?: Resolver<Maybe<ResolversTypes['ToNumberArray']>, ParentType, ContextType>,
   md5?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekHttpDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekHttpData'] = ResolversParentTypes['ZeekHttpData']> = ResolversObject<{
@@ -3468,6 +3688,7 @@ export type ZeekHttpDataResolvers<ContextType = SiemContext, ParentType extends 
   status_msg?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   resp_fuids?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   tags?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekNoticeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekNoticeData'] = ResolversParentTypes['ZeekNoticeData']> = ResolversObject<{
@@ -3478,6 +3699,7 @@ export type ZeekNoticeDataResolvers<ContextType = SiemContext, ParentType extend
   dst?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
   dropped?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
   peer_descr?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type ZeekSslDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['ZeekSslData'] = ResolversParentTypes['ZeekSslData']> = ResolversObject<{
@@ -3485,11 +3707,10 @@ export type ZeekSslDataResolvers<ContextType = SiemContext, ParentType extends R
   established?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
   resumed?: Resolver<Maybe<ResolversTypes['ToBooleanArray']>, ParentType, ContextType>,
   version?: Resolver<Maybe<ResolversTypes['ToStringArray']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn,
 }>;
 
 export type Resolvers<ContextType = SiemContext> = ResolversObject<{
-  AlertsOverTimeData?: AlertsOverTimeDataResolvers<ContextType>,
-  AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers<ContextType>,
   AuditdData?: AuditdDataResolvers<ContextType>,
   AuditdEcsFields?: AuditdEcsFieldsResolvers<ContextType>,
   AuditEcsFields?: AuditEcsFieldsResolvers<ContextType>,
@@ -3497,7 +3718,6 @@ export type Resolvers<ContextType = SiemContext> = ResolversObject<{
   AuthenticationItem?: AuthenticationItemResolvers<ContextType>,
   AuthenticationsData?: AuthenticationsDataResolvers<ContextType>,
   AuthenticationsEdges?: AuthenticationsEdgesResolvers<ContextType>,
-  AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers<ContextType>,
   AutonomousSystem?: AutonomousSystemResolvers<ContextType>,
   AutonomousSystemItem?: AutonomousSystemItemResolvers<ContextType>,
   AutonomousSystemOrganization?: AutonomousSystemOrganizationResolvers<ContextType>,
@@ -3518,7 +3738,6 @@ export type Resolvers<ContextType = SiemContext> = ResolversObject<{
   EndgameEcsFields?: EndgameEcsFieldsResolvers<ContextType>,
   EsValue?: GraphQLScalarType,
   EventEcsFields?: EventEcsFieldsResolvers<ContextType>,
-  EventsOverTimeData?: EventsOverTimeDataResolvers<ContextType>,
   EventsTimelineData?: EventsTimelineDataResolvers<ContextType>,
   FavoriteTimelineResult?: FavoriteTimelineResultResolvers<ContextType>,
   FileFields?: FileFieldsResolvers<ContextType>,
@@ -3549,12 +3768,14 @@ export type Resolvers<ContextType = SiemContext> = ResolversObject<{
   LastEventTimeData?: LastEventTimeDataResolvers<ContextType>,
   LastSourceHost?: LastSourceHostResolvers<ContextType>,
   Location?: LocationResolvers<ContextType>,
+  MatrixHistogramOverTimeData?: MatrixHistogramOverTimeDataResolvers<ContextType>,
   MatrixOverOrdinalHistogramData?: MatrixOverOrdinalHistogramDataResolvers<ContextType>,
   MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers<ContextType>,
   Mutation?: MutationResolvers<ContextType>,
   NetworkDnsData?: NetworkDnsDataResolvers<ContextType>,
   NetworkDnsEdges?: NetworkDnsEdgesResolvers<ContextType>,
   NetworkDnsItem?: NetworkDnsItemResolvers<ContextType>,
+  NetworkDsOverTimeData?: NetworkDsOverTimeDataResolvers<ContextType>,
   NetworkEcsField?: NetworkEcsFieldResolvers<ContextType>,
   NetworkHttpData?: NetworkHttpDataResolvers<ContextType>,
   NetworkHttpEdges?: NetworkHttpEdgesResolvers<ContextType>,
@@ -3585,9 +3806,12 @@ export type Resolvers<ContextType = SiemContext> = ResolversObject<{
   ResponseNotes?: ResponseNotesResolvers<ContextType>,
   ResponseTimeline?: ResponseTimelineResolvers<ContextType>,
   ResponseTimelines?: ResponseTimelinesResolvers<ContextType>,
+  RuleEcsField?: RuleEcsFieldResolvers<ContextType>,
+  RuleField?: RuleFieldResolvers<ContextType>,
   SayMyName?: SayMyNameResolvers<ContextType>,
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers<ContextType>,
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers<ContextType>,
+  SignalField?: SignalFieldResolvers<ContextType>,
   SortTimelineResult?: SortTimelineResultResolvers<ContextType>,
   Source?: SourceResolvers<ContextType>,
   SourceConfiguration?: SourceConfigurationResolvers<ContextType>,
@@ -3615,6 +3839,7 @@ export type Resolvers<ContextType = SiemContext> = ResolversObject<{
   TlsJa3Data?: TlsJa3DataResolvers<ContextType>,
   TlsNode?: TlsNodeResolvers<ContextType>,
   TlsServerCertificateData?: TlsServerCertificateDataResolvers<ContextType>,
+  ToAny?: GraphQLScalarType,
   ToBooleanArray?: GraphQLScalarType,
   ToDateArray?: GraphQLScalarType,
   ToNumberArray?: GraphQLScalarType,

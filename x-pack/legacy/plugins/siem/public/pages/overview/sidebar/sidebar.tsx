@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useApolloClient } from '@apollo/client';
 
 import { Filters } from '../../../components/recent_timelines/filters';
 import { ENABLE_NEWS_FEED_SETTING, NEWS_FEED_URL_SETTING } from '../../../../common/constants';
@@ -14,7 +15,6 @@ import { StatefulRecentTimelines } from '../../../components/recent_timelines';
 import { StatefulNewsFeed } from '../../../components/news_feed';
 import { FilterMode } from '../../../components/recent_timelines/types';
 import { SidebarHeader } from '../../../components/sidebar_header';
-import { useApolloClient } from '../../../utils/apollo_context';
 
 import * as i18n from '../translations';
 

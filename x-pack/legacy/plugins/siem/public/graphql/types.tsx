@@ -27,21 +27,8 @@ export type Scalars = {
   ToNumberArray: number[],
   ToDateArray: string[],
   ToBooleanArray: boolean[],
+  ToAny: any,
   EsValue: any,
-};
-
-export type AlertsOverTimeData = {
-   __typename?: 'AlertsOverTimeData',
-  inspect?: Maybe<Inspect>,
-  alertsOverTimeByModule: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
-};
-
-export type AnomaliesOverTimeData = {
-   __typename?: 'AnomaliesOverTimeData',
-  inspect?: Maybe<Inspect>,
-  anomaliesOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 };
 
 export type AuditdData = {
@@ -92,13 +79,6 @@ export type AuthenticationsEdges = {
    __typename?: 'AuthenticationsEdges',
   node: AuthenticationItem,
   cursor: CursorType,
-};
-
-export type AuthenticationsOverTimeData = {
-   __typename?: 'AuthenticationsOverTimeData',
-  inspect?: Maybe<Inspect>,
-  authenticationsOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 };
 
 export type AutonomousSystem = {
@@ -251,6 +231,8 @@ export type Ecs = {
   geo?: Maybe<GeoEcsFields>,
   host?: Maybe<HostEcsFields>,
   network?: Maybe<NetworkEcsField>,
+  rule?: Maybe<RuleEcsField>,
+  signal?: Maybe<SignalField>,
   source?: Maybe<SourceEcsFields>,
   suricata?: Maybe<SuricataEcsFields>,
   tls?: Maybe<TlsEcsFields>,
@@ -311,13 +293,6 @@ export type EventEcsFields = {
   start?: Maybe<Scalars['ToDateArray']>,
   timezone?: Maybe<Scalars['ToStringArray']>,
   type?: Maybe<Scalars['ToStringArray']>,
-};
-
-export type EventsOverTimeData = {
-   __typename?: 'EventsOverTimeData',
-  inspect?: Maybe<Inspect>,
-  eventsOverTime: Array<MatrixOverTimeHistogramData>,
-  totalCount: Scalars['Float'],
 };
 
 export type EventsTimelineData = {
@@ -455,6 +430,14 @@ export type GeoItem = {
   geo?: Maybe<GeoEcsFields>,
   flowTarget?: Maybe<FlowTargetSourceDest>,
 };
+
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns'
+}
 
 export type HostEcsFields = {
    __typename?: 'HostEcsFields',
@@ -672,6 +655,13 @@ export type Location = {
   lat?: Maybe<Scalars['ToNumberArray']>,
 };
 
+export type MatrixHistogramOverTimeData = {
+   __typename?: 'MatrixHistogramOverTimeData',
+  inspect?: Maybe<Inspect>,
+  matrixHistogramData: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
+};
+
 export type MatrixOverOrdinalHistogramData = {
    __typename?: 'MatrixOverOrdinalHistogramData',
   x: Scalars['String'],
@@ -681,9 +671,9 @@ export type MatrixOverOrdinalHistogramData = {
 
 export type MatrixOverTimeHistogramData = {
    __typename?: 'MatrixOverTimeHistogramData',
-  x: Scalars['Float'],
-  y: Scalars['Float'],
-  g: Scalars['String'],
+  x?: Maybe<Scalars['Float']>,
+  y?: Maybe<Scalars['Float']>,
+  g?: Maybe<Scalars['String']>,
 };
 
 export type Mutation = {
@@ -803,6 +793,13 @@ export type NetworkDnsItem = {
 export type NetworkDnsSortField = {
   field: NetworkDnsFields,
   direction: Direction,
+};
+
+export type NetworkDsOverTimeData = {
+   __typename?: 'NetworkDsOverTimeData',
+  inspect?: Maybe<Inspect>,
+  matrixHistogramData: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
 };
 
 export type NetworkEcsField = {
@@ -976,7 +973,8 @@ export type OverviewHostData = {
   endgameRegistry?: Maybe<Scalars['Float']>,
   endgameSecurity?: Maybe<Scalars['Float']>,
   filebeatSystemModule?: Maybe<Scalars['Float']>,
-  winlogbeat?: Maybe<Scalars['Float']>,
+  winlogbeatSecurity?: Maybe<Scalars['Float']>,
+  winlogbeatMWSysmonOperational?: Maybe<Scalars['Float']>,
   inspect?: Maybe<Inspect>,
 };
 
@@ -1201,6 +1199,45 @@ export type ResponseTimelines = {
   totalCount?: Maybe<Scalars['Float']>,
 };
 
+export type RuleEcsField = {
+   __typename?: 'RuleEcsField',
+  reference?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type RuleField = {
+   __typename?: 'RuleField',
+  id?: Maybe<Scalars['ToStringArray']>,
+  rule_id?: Maybe<Scalars['ToStringArray']>,
+  false_positives: Array<Scalars['String']>,
+  saved_id?: Maybe<Scalars['ToStringArray']>,
+  timeline_id?: Maybe<Scalars['ToStringArray']>,
+  timeline_title?: Maybe<Scalars['ToStringArray']>,
+  max_signals?: Maybe<Scalars['ToNumberArray']>,
+  risk_score?: Maybe<Scalars['ToStringArray']>,
+  output_index?: Maybe<Scalars['ToStringArray']>,
+  description?: Maybe<Scalars['ToStringArray']>,
+  from?: Maybe<Scalars['ToStringArray']>,
+  immutable?: Maybe<Scalars['ToBooleanArray']>,
+  index?: Maybe<Scalars['ToStringArray']>,
+  interval?: Maybe<Scalars['ToStringArray']>,
+  language?: Maybe<Scalars['ToStringArray']>,
+  query?: Maybe<Scalars['ToStringArray']>,
+  references?: Maybe<Scalars['ToStringArray']>,
+  severity?: Maybe<Scalars['ToStringArray']>,
+  tags?: Maybe<Scalars['ToStringArray']>,
+  threat?: Maybe<Scalars['ToAny']>,
+  type?: Maybe<Scalars['ToStringArray']>,
+  size?: Maybe<Scalars['ToStringArray']>,
+  to?: Maybe<Scalars['ToStringArray']>,
+  enabled?: Maybe<Scalars['ToBooleanArray']>,
+  filters?: Maybe<Scalars['ToAny']>,
+  created_at?: Maybe<Scalars['ToStringArray']>,
+  updated_at?: Maybe<Scalars['ToStringArray']>,
+  created_by?: Maybe<Scalars['ToStringArray']>,
+  updated_by?: Maybe<Scalars['ToStringArray']>,
+  version?: Maybe<Scalars['ToStringArray']>,
+};
+
 export type SayMyName = {
    __typename?: 'SayMyName',
   /** The id of the source */
@@ -1225,6 +1262,12 @@ export type SerializedKueryQueryResult = {
    __typename?: 'SerializedKueryQueryResult',
   kuery?: Maybe<KueryFilterQueryResult>,
   serializedQuery?: Maybe<Scalars['String']>,
+};
+
+export type SignalField = {
+   __typename?: 'SignalField',
+  rule?: Maybe<RuleField>,
+  original_time?: Maybe<Scalars['ToStringArray']>,
 };
 
 export type SortField = {
@@ -1273,15 +1316,11 @@ export type Source = {
   configuration: SourceConfiguration,
   /** The status of the source */
   status: SourceStatus,
-  AlertsHistogram: AlertsOverTimeData,
-  AnomaliesOverTime: AnomaliesOverTimeData,
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData,
-  AuthenticationsOverTime: AuthenticationsOverTimeData,
   Timeline: TimelineData,
   TimelineDetails: TimelineDetailsData,
   LastEventTime: LastEventTimeData,
-  EventsOverTime: EventsOverTimeData,
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData,
   HostOverview: HostItem,
@@ -1291,9 +1330,11 @@ export type Source = {
   KpiNetwork?: Maybe<KpiNetworkData>,
   KpiHosts: KpiHostsData,
   KpiHostDetails: KpiHostDetailsData,
+  MatrixHistogram: MatrixHistogramOverTimeData,
   NetworkTopCountries: NetworkTopCountriesData,
   NetworkTopNFlow: NetworkTopNFlowData,
   NetworkDns: NetworkDnsData,
+  NetworkDnsHistogram: NetworkDsOverTimeData,
   NetworkHttp: NetworkHttpData,
   OverviewNetwork?: Maybe<OverviewNetworkData>,
   OverviewHost?: Maybe<OverviewHostData>,
@@ -1305,30 +1346,9 @@ export type Source = {
 };
 
 
-export type SourceAlertsHistogramArgs = {
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>,
-  timerange: TimerangeInput
-};
-
-
-export type SourceAnomaliesOverTimeArgs = {
-  timerange: TimerangeInput,
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>
-};
-
-
 export type SourceAuthenticationsArgs = {
   timerange: TimerangeInput,
   pagination: PaginationInputPaginated,
-  filterQuery?: Maybe<Scalars['String']>,
-  defaultIndex: Array<Scalars['String']>
-};
-
-
-export type SourceAuthenticationsOverTimeArgs = {
-  timerange: TimerangeInput,
   filterQuery?: Maybe<Scalars['String']>,
   defaultIndex: Array<Scalars['String']>
 };
@@ -1355,13 +1375,6 @@ export type SourceLastEventTimeArgs = {
   id?: Maybe<Scalars['String']>,
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
-  defaultIndex: Array<Scalars['String']>
-};
-
-
-export type SourceEventsOverTimeArgs = {
-  timerange: TimerangeInput,
-  filterQuery?: Maybe<Scalars['String']>,
   defaultIndex: Array<Scalars['String']>
 };
 
@@ -1435,6 +1448,15 @@ export type SourceKpiHostDetailsArgs = {
 };
 
 
+export type SourceMatrixHistogramArgs = {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput,
+  stackByField: Scalars['String'],
+  histogramType: HistogramType
+};
+
+
 export type SourceNetworkTopCountriesArgs = {
   id?: Maybe<Scalars['String']>,
   filterQuery?: Maybe<Scalars['String']>,
@@ -1465,8 +1487,17 @@ export type SourceNetworkDnsArgs = {
   isPtrIncluded: Scalars['Boolean'],
   pagination: PaginationInputPaginated,
   sort: NetworkDnsSortField,
+  stackByField?: Maybe<Scalars['String']>,
   timerange: TimerangeInput,
   defaultIndex: Array<Scalars['String']>
+};
+
+
+export type SourceNetworkDnsHistogramArgs = {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput,
+  stackByField?: Maybe<Scalars['String']>
 };
 
 
@@ -1640,6 +1671,7 @@ export type TimelineInput = {
   columns?: Maybe<Array<ColumnHeaderInput>>,
   dataProviders?: Maybe<Array<DataProviderInput>>,
   description?: Maybe<Scalars['String']>,
+  eventType?: Maybe<Scalars['String']>,
   filters?: Maybe<Array<FilterTimelineInput>>,
   kqlMode?: Maybe<Scalars['String']>,
   kqlQuery?: Maybe<SerializedFilterQueryInput>,
@@ -1672,6 +1704,7 @@ export type TimelineResult = {
   dateRange?: Maybe<DateRangePickerResult>,
   description?: Maybe<Scalars['String']>,
   eventIdToNoteIds?: Maybe<Array<NoteResult>>,
+  eventType?: Maybe<Scalars['String']>,
   favorite?: Maybe<Array<FavoriteTimelineResult>>,
   filters?: Maybe<Array<FilterTimelineResult>>,
   kqlMode?: Maybe<Scalars['String']>,
@@ -1761,6 +1794,7 @@ export type TlsSortField = {
   field: TlsFields,
   direction: Direction,
 };
+
 
 
 
@@ -1982,39 +2016,6 @@ export type ZeekSslData = {
   version?: Maybe<Scalars['ToStringArray']>,
 };
 
-export type GetAlertsOverTimeQueryQueryVariables = {
-  sourceId: Scalars['ID'],
-  timerange: TimerangeInput,
-  defaultIndex: Array<Scalars['String']>,
-  filterQuery?: Maybe<Scalars['String']>,
-  inspect: Scalars['Boolean']
-};
-
-
-export type GetAlertsOverTimeQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, AlertsHistogram: { __typename?: 'AlertsOverTimeData', totalCount: number, alertsOverTimeByModule: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: number, y: number, g: string }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
-
-export type GetAnomaliesOverTimeQueryQueryVariables = {
-  sourceId: Scalars['ID'],
-  timerange: TimerangeInput,
-  defaultIndex: Array<Scalars['String']>,
-  filterQuery?: Maybe<Scalars['String']>,
-  inspect: Scalars['Boolean']
-};
-
-
-export type GetAnomaliesOverTimeQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, AnomaliesOverTime: { __typename?: 'AnomaliesOverTimeData', totalCount: number, anomaliesOverTime: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: number, y: number, g: string }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
-
-export type GetAuthenticationsOverTimeQueryQueryVariables = {
-  sourceId: Scalars['ID'],
-  timerange: TimerangeInput,
-  defaultIndex: Array<Scalars['String']>,
-  filterQuery?: Maybe<Scalars['String']>,
-  inspect: Scalars['Boolean']
-};
-
-
-export type GetAuthenticationsOverTimeQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, AuthenticationsOverTime: { __typename?: 'AuthenticationsOverTimeData', totalCount: number, authenticationsOverTime: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: number, y: number, g: string }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
-
 export type GetAuthenticationsQueryQueryVariables = {
   sourceId: Scalars['ID'],
   timerange: TimerangeInput,
@@ -2026,17 +2027,6 @@ export type GetAuthenticationsQueryQueryVariables = {
 
 
 export type GetAuthenticationsQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, Authentications: { __typename?: 'AuthenticationsData', totalCount: number, edges: Array<{ __typename?: 'AuthenticationsEdges', node: { __typename?: 'AuthenticationItem', _id: string, failures: number, successes: number, user: { __typename?: 'UserEcsFields', name: Maybe<string[]> }, lastSuccess: Maybe<{ __typename?: 'LastSourceHost', timestamp: Maybe<string>, source: Maybe<{ __typename?: 'SourceEcsFields', ip: Maybe<string[]> }>, host: Maybe<{ __typename?: 'HostEcsFields', id: Maybe<string[]>, name: Maybe<string[]> }> }>, lastFailure: Maybe<{ __typename?: 'LastSourceHost', timestamp: Maybe<string>, source: Maybe<{ __typename?: 'SourceEcsFields', ip: Maybe<string[]> }>, host: Maybe<{ __typename?: 'HostEcsFields', id: Maybe<string[]>, name: Maybe<string[]> }> }> }, cursor: { __typename?: 'CursorType', value: Maybe<string> } }>, pageInfo: { __typename?: 'PageInfoPaginated', activePage: number, fakeTotalCount: number, showMorePagesIndicator: boolean }, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
-
-export type GetEventsOverTimeQueryQueryVariables = {
-  sourceId: Scalars['ID'],
-  timerange: TimerangeInput,
-  defaultIndex: Array<Scalars['String']>,
-  filterQuery?: Maybe<Scalars['String']>,
-  inspect: Scalars['Boolean']
-};
-
-
-export type GetEventsOverTimeQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, EventsOverTime: { __typename?: 'EventsOverTimeData', totalCount: number, eventsOverTime: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: number, y: number, g: string }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
 
 export type GetLastEventTimeQueryQueryVariables = {
   sourceId: Scalars['ID'],
@@ -2164,19 +2154,33 @@ export type GetKpiNetworkQueryQuery = { __typename?: 'Query', source: { __typena
         & KpiNetworkChartFieldsFragment
       )>>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> }> } };
 
-export type GetNetworkDnsQueryQueryVariables = {
-  sourceId: Scalars['ID'],
-  sort: NetworkDnsSortField,
-  isPtrIncluded: Scalars['Boolean'],
-  timerange: TimerangeInput,
-  pagination: PaginationInputPaginated,
-  filterQuery?: Maybe<Scalars['String']>,
+export type GetMatrixHistogramQueryQueryVariables = {
   defaultIndex: Array<Scalars['String']>,
-  inspect: Scalars['Boolean']
+  filterQuery?: Maybe<Scalars['String']>,
+  histogramType: HistogramType,
+  inspect: Scalars['Boolean'],
+  sourceId: Scalars['ID'],
+  stackByField: Scalars['String'],
+  timerange: TimerangeInput
 };
 
 
-export type GetNetworkDnsQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, NetworkDns: { __typename?: 'NetworkDnsData', totalCount: number, edges: Array<{ __typename?: 'NetworkDnsEdges', node: { __typename?: 'NetworkDnsItem', _id: Maybe<string>, dnsBytesIn: Maybe<number>, dnsBytesOut: Maybe<number>, dnsName: Maybe<string>, queryCount: Maybe<number>, uniqueDomains: Maybe<number> }, cursor: { __typename?: 'CursorType', value: Maybe<string> } }>, pageInfo: { __typename?: 'PageInfoPaginated', activePage: number, fakeTotalCount: number, showMorePagesIndicator: boolean }, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }>, histogram: Maybe<Array<{ __typename?: 'MatrixOverOrdinalHistogramData', x: string, y: number, g: string }>> } } };
+export type GetMatrixHistogramQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, MatrixHistogram: { __typename?: 'MatrixHistogramOverTimeData', totalCount: number, matrixHistogramData: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: Maybe<number>, y: Maybe<number>, g: Maybe<string> }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
+
+export type GetNetworkDnsQueryQueryVariables = {
+  defaultIndex: Array<Scalars['String']>,
+  filterQuery?: Maybe<Scalars['String']>,
+  inspect: Scalars['Boolean'],
+  isPtrIncluded: Scalars['Boolean'],
+  pagination: PaginationInputPaginated,
+  sort: NetworkDnsSortField,
+  sourceId: Scalars['ID'],
+  stackByField?: Maybe<Scalars['String']>,
+  timerange: TimerangeInput
+};
+
+
+export type GetNetworkDnsQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, NetworkDns: { __typename?: 'NetworkDnsData', totalCount: number, edges: Array<{ __typename?: 'NetworkDnsEdges', node: { __typename?: 'NetworkDnsItem', _id: Maybe<string>, dnsBytesIn: Maybe<number>, dnsBytesOut: Maybe<number>, dnsName: Maybe<string>, queryCount: Maybe<number>, uniqueDomains: Maybe<number> }, cursor: { __typename?: 'CursorType', value: Maybe<string> } }>, pageInfo: { __typename?: 'PageInfoPaginated', activePage: number, fakeTotalCount: number, showMorePagesIndicator: boolean }, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
 
 export type GetNetworkHttpQueryQueryVariables = {
   sourceId: Scalars['ID'],
@@ -2231,7 +2235,7 @@ export type GetOverviewHostQueryQueryVariables = {
 };
 
 
-export type GetOverviewHostQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, OverviewHost: Maybe<{ __typename?: 'OverviewHostData', auditbeatAuditd: Maybe<number>, auditbeatFIM: Maybe<number>, auditbeatLogin: Maybe<number>, auditbeatPackage: Maybe<number>, auditbeatProcess: Maybe<number>, auditbeatUser: Maybe<number>, endgameDns: Maybe<number>, endgameFile: Maybe<number>, endgameImageLoad: Maybe<number>, endgameNetwork: Maybe<number>, endgameProcess: Maybe<number>, endgameRegistry: Maybe<number>, endgameSecurity: Maybe<number>, filebeatSystemModule: Maybe<number>, winlogbeat: Maybe<number>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> }> } };
+export type GetOverviewHostQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, OverviewHost: Maybe<{ __typename?: 'OverviewHostData', auditbeatAuditd: Maybe<number>, auditbeatFIM: Maybe<number>, auditbeatLogin: Maybe<number>, auditbeatPackage: Maybe<number>, auditbeatProcess: Maybe<number>, auditbeatUser: Maybe<number>, endgameDns: Maybe<number>, endgameFile: Maybe<number>, endgameImageLoad: Maybe<number>, endgameNetwork: Maybe<number>, endgameProcess: Maybe<number>, endgameRegistry: Maybe<number>, endgameSecurity: Maybe<number>, filebeatSystemModule: Maybe<number>, winlogbeatSecurity: Maybe<number>, winlogbeatMWSysmonOperational: Maybe<number>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> }> } };
 
 export type GetOverviewNetworkQueryQueryVariables = {
   sourceId: Scalars['ID'],
@@ -2297,7 +2301,7 @@ export type GetTimelineQueryQueryVariables = {
 };
 
 
-export type GetTimelineQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, Timeline: { __typename?: 'TimelineData', totalCount: number, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: Maybe<boolean>, endCursor: Maybe<{ __typename?: 'CursorType', value: Maybe<string>, tiebreaker: Maybe<string> }> }, edges: Array<{ __typename?: 'TimelineEdges', node: { __typename?: 'TimelineItem', _id: string, _index: Maybe<string>, data: Array<{ __typename?: 'TimelineNonEcsData', field: string, value: Maybe<string[]> }>, ecs: { __typename?: 'ECS', _id: string, _index: Maybe<string>, timestamp: Maybe<string>, message: Maybe<string[]>, system: Maybe<{ __typename?: 'SystemEcsField', auth: Maybe<{ __typename?: 'AuthEcsFields', ssh: Maybe<{ __typename?: 'SshEcsFields', signature: Maybe<string[]>, method: Maybe<string[]> }> }>, audit: Maybe<{ __typename?: 'AuditEcsFields', package: Maybe<{ __typename?: 'PackageEcsFields', arch: Maybe<string[]>, entity_id: Maybe<string[]>, name: Maybe<string[]>, size: Maybe<number[]>, summary: Maybe<string[]>, version: Maybe<string[]> }> }> }>, event: Maybe<{ __typename?: 'EventEcsFields', action: Maybe<string[]>, category: Maybe<string[]>, code: Maybe<string[]>, created: Maybe<string[]>, dataset: Maybe<string[]>, duration: Maybe<number[]>, end: Maybe<string[]>, hash: Maybe<string[]>, id: Maybe<string[]>, kind: Maybe<string[]>, module: Maybe<string[]>, original: Maybe<string[]>, outcome: Maybe<string[]>, risk_score: Maybe<number[]>, risk_score_norm: Maybe<number[]>, severity: Maybe<number[]>, start: Maybe<string[]>, timezone: Maybe<string[]>, type: Maybe<string[]> }>, auditd: Maybe<{ __typename?: 'AuditdEcsFields', result: Maybe<string[]>, session: Maybe<string[]>, data: Maybe<{ __typename?: 'AuditdData', acct: Maybe<string[]>, terminal: Maybe<string[]>, op: Maybe<string[]> }>, summary: Maybe<{ __typename?: 'Summary', how: Maybe<string[]>, message_type: Maybe<string[]>, sequence: Maybe<string[]>, actor: Maybe<{ __typename?: 'PrimarySecondary', primary: Maybe<string[]>, secondary: Maybe<string[]> }>, object: Maybe<{ __typename?: 'PrimarySecondary', primary: Maybe<string[]>, secondary: Maybe<string[]>, type: Maybe<string[]> }> }> }>, file: Maybe<{ __typename?: 'FileFields', name: Maybe<string[]>, path: Maybe<string[]>, target_path: Maybe<string[]>, extension: Maybe<string[]>, type: Maybe<string[]>, device: Maybe<string[]>, inode: Maybe<string[]>, uid: Maybe<string[]>, owner: Maybe<string[]>, gid: Maybe<string[]>, group: Maybe<string[]>, mode: Maybe<string[]>, size: Maybe<number[]>, mtime: Maybe<string[]>, ctime: Maybe<string[]> }>, host: Maybe<{ __typename?: 'HostEcsFields', id: Maybe<string[]>, name: Maybe<string[]>, ip: Maybe<string[]> }>, source: Maybe<{ __typename?: 'SourceEcsFields', bytes: Maybe<number[]>, ip: Maybe<string[]>, packets: Maybe<number[]>, port: Maybe<number[]>, geo: Maybe<{ __typename?: 'GeoEcsFields', continent_name: Maybe<string[]>, country_name: Maybe<string[]>, country_iso_code: Maybe<string[]>, city_name: Maybe<string[]>, region_iso_code: Maybe<string[]>, region_name: Maybe<string[]> }> }>, destination: Maybe<{ __typename?: 'DestinationEcsFields', bytes: Maybe<number[]>, ip: Maybe<string[]>, packets: Maybe<number[]>, port: Maybe<number[]>, geo: Maybe<{ __typename?: 'GeoEcsFields', continent_name: Maybe<string[]>, country_name: Maybe<string[]>, country_iso_code: Maybe<string[]>, city_name: Maybe<string[]>, region_iso_code: Maybe<string[]>, region_name: Maybe<string[]> }> }>, dns: Maybe<{ __typename?: 'DnsEcsFields', resolved_ip: Maybe<string[]>, response_code: Maybe<string[]>, question: Maybe<{ __typename?: 'DnsQuestionData', name: Maybe<string[]>, type: Maybe<string[]> }> }>, endgame: Maybe<{ __typename?: 'EndgameEcsFields', exit_code: Maybe<number[]>, file_name: Maybe<string[]>, file_path: Maybe<string[]>, logon_type: Maybe<number[]>, parent_process_name: Maybe<string[]>, pid: Maybe<number[]>, process_name: Maybe<string[]>, subject_domain_name: Maybe<string[]>, subject_logon_id: Maybe<string[]>, subject_user_name: Maybe<string[]>, target_domain_name: Maybe<string[]>, target_logon_id: Maybe<string[]>, target_user_name: Maybe<string[]> }>, geo: Maybe<{ __typename?: 'GeoEcsFields', region_name: Maybe<string[]>, country_iso_code: Maybe<string[]> }>, suricata: Maybe<{ __typename?: 'SuricataEcsFields', eve: Maybe<{ __typename?: 'SuricataEveData', proto: Maybe<string[]>, flow_id: Maybe<number[]>, alert: Maybe<{ __typename?: 'SuricataAlertData', signature: Maybe<string[]>, signature_id: Maybe<number[]> }> }> }>, network: Maybe<{ __typename?: 'NetworkEcsField', bytes: Maybe<number[]>, community_id: Maybe<string[]>, direction: Maybe<string[]>, packets: Maybe<number[]>, protocol: Maybe<string[]>, transport: Maybe<string[]> }>, http: Maybe<{ __typename?: 'HttpEcsFields', version: Maybe<string[]>, request: Maybe<{ __typename?: 'HttpRequestData', method: Maybe<string[]>, referrer: Maybe<string[]>, body: Maybe<{ __typename?: 'HttpBodyData', bytes: Maybe<number[]>, content: Maybe<string[]> }> }>, response: Maybe<{ __typename?: 'HttpResponseData', status_code: Maybe<number[]>, body: Maybe<{ __typename?: 'HttpBodyData', bytes: Maybe<number[]>, content: Maybe<string[]> }> }> }>, tls: Maybe<{ __typename?: 'TlsEcsFields', client_certificate: Maybe<{ __typename?: 'TlsClientCertificateData', fingerprint: Maybe<{ __typename?: 'FingerprintData', sha1: Maybe<string[]> }> }>, fingerprints: Maybe<{ __typename?: 'TlsFingerprintsData', ja3: Maybe<{ __typename?: 'TlsJa3Data', hash: Maybe<string[]> }> }>, server_certificate: Maybe<{ __typename?: 'TlsServerCertificateData', fingerprint: Maybe<{ __typename?: 'FingerprintData', sha1: Maybe<string[]> }> }> }>, url: Maybe<{ __typename?: 'UrlEcsFields', original: Maybe<string[]>, domain: Maybe<string[]>, username: Maybe<string[]>, password: Maybe<string[]> }>, user: Maybe<{ __typename?: 'UserEcsFields', domain: Maybe<string[]>, name: Maybe<string[]> }>, winlog: Maybe<{ __typename?: 'WinlogEcsFields', event_id: Maybe<number[]> }>, process: Maybe<{ __typename?: 'ProcessEcsFields', pid: Maybe<number[]>, name: Maybe<string[]>, ppid: Maybe<number[]>, args: Maybe<string[]>, executable: Maybe<string[]>, title: Maybe<string[]>, working_directory: Maybe<string[]>, hash: Maybe<{ __typename?: 'ProcessHashData', md5: Maybe<string[]>, sha1: Maybe<string[]>, sha256: Maybe<string[]> }> }>, zeek: Maybe<{ __typename?: 'ZeekEcsFields', session_id: Maybe<string[]>, connection: Maybe<{ __typename?: 'ZeekConnectionData', local_resp: Maybe<boolean[]>, local_orig: Maybe<boolean[]>, missed_bytes: Maybe<number[]>, state: Maybe<string[]>, history: Maybe<string[]> }>, notice: Maybe<{ __typename?: 'ZeekNoticeData', suppress_for: Maybe<number[]>, msg: Maybe<string[]>, note: Maybe<string[]>, sub: Maybe<string[]>, dst: Maybe<string[]>, dropped: Maybe<boolean[]>, peer_descr: Maybe<string[]> }>, dns: Maybe<{ __typename?: 'ZeekDnsData', AA: Maybe<boolean[]>, qclass_name: Maybe<string[]>, RD: Maybe<boolean[]>, qtype_name: Maybe<string[]>, rejected: Maybe<boolean[]>, qtype: Maybe<string[]>, query: Maybe<string[]>, trans_id: Maybe<number[]>, qclass: Maybe<string[]>, RA: Maybe<boolean[]>, TC: Maybe<boolean[]> }>, http: Maybe<{ __typename?: 'ZeekHttpData', resp_mime_types: Maybe<string[]>, trans_depth: Maybe<string[]>, status_msg: Maybe<string[]>, resp_fuids: Maybe<string[]>, tags: Maybe<string[]> }>, files: Maybe<{ __typename?: 'ZeekFileData', session_ids: Maybe<string[]>, timedout: Maybe<boolean[]>, local_orig: Maybe<boolean[]>, tx_host: Maybe<string[]>, source: Maybe<string[]>, is_orig: Maybe<boolean[]>, overflow_bytes: Maybe<number[]>, sha1: Maybe<string[]>, duration: Maybe<number[]>, depth: Maybe<number[]>, analyzers: Maybe<string[]>, mime_type: Maybe<string[]>, rx_host: Maybe<string[]>, total_bytes: Maybe<number[]>, fuid: Maybe<string[]>, seen_bytes: Maybe<number[]>, missing_bytes: Maybe<number[]>, md5: Maybe<string[]> }>, ssl: Maybe<{ __typename?: 'ZeekSslData', cipher: Maybe<string[]>, established: Maybe<boolean[]>, resumed: Maybe<boolean[]>, version: Maybe<string[]> }> }> } } }> } } };
+export type GetTimelineQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, Timeline: { __typename?: 'TimelineData', totalCount: number, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: Maybe<boolean>, endCursor: Maybe<{ __typename?: 'CursorType', value: Maybe<string>, tiebreaker: Maybe<string> }> }, edges: Array<{ __typename?: 'TimelineEdges', node: { __typename?: 'TimelineItem', _id: string, _index: Maybe<string>, data: Array<{ __typename?: 'TimelineNonEcsData', field: string, value: Maybe<string[]> }>, ecs: { __typename?: 'ECS', _id: string, _index: Maybe<string>, timestamp: Maybe<string>, message: Maybe<string[]>, system: Maybe<{ __typename?: 'SystemEcsField', auth: Maybe<{ __typename?: 'AuthEcsFields', ssh: Maybe<{ __typename?: 'SshEcsFields', signature: Maybe<string[]>, method: Maybe<string[]> }> }>, audit: Maybe<{ __typename?: 'AuditEcsFields', package: Maybe<{ __typename?: 'PackageEcsFields', arch: Maybe<string[]>, entity_id: Maybe<string[]>, name: Maybe<string[]>, size: Maybe<number[]>, summary: Maybe<string[]>, version: Maybe<string[]> }> }> }>, event: Maybe<{ __typename?: 'EventEcsFields', action: Maybe<string[]>, category: Maybe<string[]>, code: Maybe<string[]>, created: Maybe<string[]>, dataset: Maybe<string[]>, duration: Maybe<number[]>, end: Maybe<string[]>, hash: Maybe<string[]>, id: Maybe<string[]>, kind: Maybe<string[]>, module: Maybe<string[]>, original: Maybe<string[]>, outcome: Maybe<string[]>, risk_score: Maybe<number[]>, risk_score_norm: Maybe<number[]>, severity: Maybe<number[]>, start: Maybe<string[]>, timezone: Maybe<string[]>, type: Maybe<string[]> }>, auditd: Maybe<{ __typename?: 'AuditdEcsFields', result: Maybe<string[]>, session: Maybe<string[]>, data: Maybe<{ __typename?: 'AuditdData', acct: Maybe<string[]>, terminal: Maybe<string[]>, op: Maybe<string[]> }>, summary: Maybe<{ __typename?: 'Summary', how: Maybe<string[]>, message_type: Maybe<string[]>, sequence: Maybe<string[]>, actor: Maybe<{ __typename?: 'PrimarySecondary', primary: Maybe<string[]>, secondary: Maybe<string[]> }>, object: Maybe<{ __typename?: 'PrimarySecondary', primary: Maybe<string[]>, secondary: Maybe<string[]>, type: Maybe<string[]> }> }> }>, file: Maybe<{ __typename?: 'FileFields', name: Maybe<string[]>, path: Maybe<string[]>, target_path: Maybe<string[]>, extension: Maybe<string[]>, type: Maybe<string[]>, device: Maybe<string[]>, inode: Maybe<string[]>, uid: Maybe<string[]>, owner: Maybe<string[]>, gid: Maybe<string[]>, group: Maybe<string[]>, mode: Maybe<string[]>, size: Maybe<number[]>, mtime: Maybe<string[]>, ctime: Maybe<string[]> }>, host: Maybe<{ __typename?: 'HostEcsFields', id: Maybe<string[]>, name: Maybe<string[]>, ip: Maybe<string[]> }>, rule: Maybe<{ __typename?: 'RuleEcsField', reference: Maybe<string[]> }>, source: Maybe<{ __typename?: 'SourceEcsFields', bytes: Maybe<number[]>, ip: Maybe<string[]>, packets: Maybe<number[]>, port: Maybe<number[]>, geo: Maybe<{ __typename?: 'GeoEcsFields', continent_name: Maybe<string[]>, country_name: Maybe<string[]>, country_iso_code: Maybe<string[]>, city_name: Maybe<string[]>, region_iso_code: Maybe<string[]>, region_name: Maybe<string[]> }> }>, destination: Maybe<{ __typename?: 'DestinationEcsFields', bytes: Maybe<number[]>, ip: Maybe<string[]>, packets: Maybe<number[]>, port: Maybe<number[]>, geo: Maybe<{ __typename?: 'GeoEcsFields', continent_name: Maybe<string[]>, country_name: Maybe<string[]>, country_iso_code: Maybe<string[]>, city_name: Maybe<string[]>, region_iso_code: Maybe<string[]>, region_name: Maybe<string[]> }> }>, dns: Maybe<{ __typename?: 'DnsEcsFields', resolved_ip: Maybe<string[]>, response_code: Maybe<string[]>, question: Maybe<{ __typename?: 'DnsQuestionData', name: Maybe<string[]>, type: Maybe<string[]> }> }>, endgame: Maybe<{ __typename?: 'EndgameEcsFields', exit_code: Maybe<number[]>, file_name: Maybe<string[]>, file_path: Maybe<string[]>, logon_type: Maybe<number[]>, parent_process_name: Maybe<string[]>, pid: Maybe<number[]>, process_name: Maybe<string[]>, subject_domain_name: Maybe<string[]>, subject_logon_id: Maybe<string[]>, subject_user_name: Maybe<string[]>, target_domain_name: Maybe<string[]>, target_logon_id: Maybe<string[]>, target_user_name: Maybe<string[]> }>, geo: Maybe<{ __typename?: 'GeoEcsFields', region_name: Maybe<string[]>, country_iso_code: Maybe<string[]> }>, signal: Maybe<{ __typename?: 'SignalField', original_time: Maybe<string[]>, rule: Maybe<{ __typename?: 'RuleField', id: Maybe<string[]>, saved_id: Maybe<string[]>, timeline_id: Maybe<string[]>, timeline_title: Maybe<string[]>, output_index: Maybe<string[]>, from: Maybe<string[]>, index: Maybe<string[]>, language: Maybe<string[]>, query: Maybe<string[]>, to: Maybe<string[]>, filters: Maybe<any> }> }>, suricata: Maybe<{ __typename?: 'SuricataEcsFields', eve: Maybe<{ __typename?: 'SuricataEveData', proto: Maybe<string[]>, flow_id: Maybe<number[]>, alert: Maybe<{ __typename?: 'SuricataAlertData', signature: Maybe<string[]>, signature_id: Maybe<number[]> }> }> }>, network: Maybe<{ __typename?: 'NetworkEcsField', bytes: Maybe<number[]>, community_id: Maybe<string[]>, direction: Maybe<string[]>, packets: Maybe<number[]>, protocol: Maybe<string[]>, transport: Maybe<string[]> }>, http: Maybe<{ __typename?: 'HttpEcsFields', version: Maybe<string[]>, request: Maybe<{ __typename?: 'HttpRequestData', method: Maybe<string[]>, referrer: Maybe<string[]>, body: Maybe<{ __typename?: 'HttpBodyData', bytes: Maybe<number[]>, content: Maybe<string[]> }> }>, response: Maybe<{ __typename?: 'HttpResponseData', status_code: Maybe<number[]>, body: Maybe<{ __typename?: 'HttpBodyData', bytes: Maybe<number[]>, content: Maybe<string[]> }> }> }>, tls: Maybe<{ __typename?: 'TlsEcsFields', client_certificate: Maybe<{ __typename?: 'TlsClientCertificateData', fingerprint: Maybe<{ __typename?: 'FingerprintData', sha1: Maybe<string[]> }> }>, fingerprints: Maybe<{ __typename?: 'TlsFingerprintsData', ja3: Maybe<{ __typename?: 'TlsJa3Data', hash: Maybe<string[]> }> }>, server_certificate: Maybe<{ __typename?: 'TlsServerCertificateData', fingerprint: Maybe<{ __typename?: 'FingerprintData', sha1: Maybe<string[]> }> }> }>, url: Maybe<{ __typename?: 'UrlEcsFields', original: Maybe<string[]>, domain: Maybe<string[]>, username: Maybe<string[]>, password: Maybe<string[]> }>, user: Maybe<{ __typename?: 'UserEcsFields', domain: Maybe<string[]>, name: Maybe<string[]> }>, winlog: Maybe<{ __typename?: 'WinlogEcsFields', event_id: Maybe<number[]> }>, process: Maybe<{ __typename?: 'ProcessEcsFields', pid: Maybe<number[]>, name: Maybe<string[]>, ppid: Maybe<number[]>, args: Maybe<string[]>, executable: Maybe<string[]>, title: Maybe<string[]>, working_directory: Maybe<string[]>, hash: Maybe<{ __typename?: 'ProcessHashData', md5: Maybe<string[]>, sha1: Maybe<string[]>, sha256: Maybe<string[]> }> }>, zeek: Maybe<{ __typename?: 'ZeekEcsFields', session_id: Maybe<string[]>, connection: Maybe<{ __typename?: 'ZeekConnectionData', local_resp: Maybe<boolean[]>, local_orig: Maybe<boolean[]>, missed_bytes: Maybe<number[]>, state: Maybe<string[]>, history: Maybe<string[]> }>, notice: Maybe<{ __typename?: 'ZeekNoticeData', suppress_for: Maybe<number[]>, msg: Maybe<string[]>, note: Maybe<string[]>, sub: Maybe<string[]>, dst: Maybe<string[]>, dropped: Maybe<boolean[]>, peer_descr: Maybe<string[]> }>, dns: Maybe<{ __typename?: 'ZeekDnsData', AA: Maybe<boolean[]>, qclass_name: Maybe<string[]>, RD: Maybe<boolean[]>, qtype_name: Maybe<string[]>, rejected: Maybe<boolean[]>, qtype: Maybe<string[]>, query: Maybe<string[]>, trans_id: Maybe<number[]>, qclass: Maybe<string[]>, RA: Maybe<boolean[]>, TC: Maybe<boolean[]> }>, http: Maybe<{ __typename?: 'ZeekHttpData', resp_mime_types: Maybe<string[]>, trans_depth: Maybe<string[]>, status_msg: Maybe<string[]>, resp_fuids: Maybe<string[]>, tags: Maybe<string[]> }>, files: Maybe<{ __typename?: 'ZeekFileData', session_ids: Maybe<string[]>, timedout: Maybe<boolean[]>, local_orig: Maybe<boolean[]>, tx_host: Maybe<string[]>, source: Maybe<string[]>, is_orig: Maybe<boolean[]>, overflow_bytes: Maybe<number[]>, sha1: Maybe<string[]>, duration: Maybe<number[]>, depth: Maybe<number[]>, analyzers: Maybe<string[]>, mime_type: Maybe<string[]>, rx_host: Maybe<string[]>, total_bytes: Maybe<number[]>, fuid: Maybe<string[]>, seen_bytes: Maybe<number[]>, missing_bytes: Maybe<number[]>, md5: Maybe<string[]> }>, ssl: Maybe<{ __typename?: 'ZeekSslData', cipher: Maybe<string[]>, established: Maybe<boolean[]>, resumed: Maybe<boolean[]>, version: Maybe<string[]> }> }> } } }> } } };
 
 export type PersistTimelineNoteMutationMutationVariables = {
   noteId?: Maybe<Scalars['ID']>,
@@ -2313,7 +2317,7 @@ export type GetOneTimelineQueryVariables = {
 };
 
 
-export type GetOneTimelineQuery = { __typename?: 'Query', getOneTimeline: { __typename?: 'TimelineResult', savedObjectId: string, description: Maybe<string>, kqlMode: Maybe<string>, noteIds: Maybe<Array<string>>, pinnedEventIds: Maybe<Array<string>>, title: Maybe<string>, savedQueryId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: string, columns: Maybe<Array<{ __typename?: 'ColumnHeaderResult', aggregatable: Maybe<boolean>, category: Maybe<string>, columnHeaderType: Maybe<string>, description: Maybe<string>, example: Maybe<string>, indexes: Maybe<Array<string>>, id: Maybe<string>, name: Maybe<string>, searchable: Maybe<boolean>, type: Maybe<string> }>>, dataProviders: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }>, and: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }> }>> }>>, dateRange: Maybe<{ __typename?: 'DateRangePickerResult', start: Maybe<number>, end: Maybe<number> }>, eventIdToNoteIds: Maybe<Array<{ __typename?: 'NoteResult', eventId: Maybe<string>, note: Maybe<string>, timelineId: Maybe<string>, noteId: string, created: Maybe<number>, createdBy: Maybe<string>, timelineVersion: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, favorite: Maybe<Array<{ __typename?: 'FavoriteTimelineResult', fullName: Maybe<string>, userName: Maybe<string>, favoriteDate: Maybe<number> }>>, filters: Maybe<Array<{ __typename?: 'FilterTimelineResult', query: Maybe<string>, exists: Maybe<string>, match_all: Maybe<string>, missing: Maybe<string>, range: Maybe<string>, script: Maybe<string>, meta: Maybe<{ __typename?: 'FilterMetaTimelineResult', alias: Maybe<string>, controlledBy: Maybe<string>, disabled: Maybe<boolean>, field: Maybe<string>, formattedValue: Maybe<string>, index: Maybe<string>, key: Maybe<string>, negate: Maybe<boolean>, params: Maybe<string>, type: Maybe<string>, value: Maybe<string> }> }>>, kqlQuery: Maybe<{ __typename?: 'SerializedFilterQueryResult', filterQuery: Maybe<{ __typename?: 'SerializedKueryQueryResult', serializedQuery: Maybe<string>, kuery: Maybe<{ __typename?: 'KueryFilterQueryResult', kind: Maybe<string>, expression: Maybe<string> }> }> }>, notes: Maybe<Array<{ __typename?: 'NoteResult', eventId: Maybe<string>, note: Maybe<string>, timelineId: Maybe<string>, timelineVersion: Maybe<string>, noteId: string, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, pinnedEventsSaveObject: Maybe<Array<{ __typename?: 'PinnedEvent', pinnedEventId: string, eventId: Maybe<string>, timelineId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, sort: Maybe<{ __typename?: 'SortTimelineResult', columnId: Maybe<string>, sortDirection: Maybe<string> }> } };
+export type GetOneTimelineQuery = { __typename?: 'Query', getOneTimeline: { __typename?: 'TimelineResult', savedObjectId: string, description: Maybe<string>, eventType: Maybe<string>, kqlMode: Maybe<string>, noteIds: Maybe<Array<string>>, pinnedEventIds: Maybe<Array<string>>, title: Maybe<string>, savedQueryId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: string, columns: Maybe<Array<{ __typename?: 'ColumnHeaderResult', aggregatable: Maybe<boolean>, category: Maybe<string>, columnHeaderType: Maybe<string>, description: Maybe<string>, example: Maybe<string>, indexes: Maybe<Array<string>>, id: Maybe<string>, name: Maybe<string>, searchable: Maybe<boolean>, type: Maybe<string> }>>, dataProviders: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }>, and: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }> }>> }>>, dateRange: Maybe<{ __typename?: 'DateRangePickerResult', start: Maybe<number>, end: Maybe<number> }>, eventIdToNoteIds: Maybe<Array<{ __typename?: 'NoteResult', eventId: Maybe<string>, note: Maybe<string>, timelineId: Maybe<string>, noteId: string, created: Maybe<number>, createdBy: Maybe<string>, timelineVersion: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, favorite: Maybe<Array<{ __typename?: 'FavoriteTimelineResult', fullName: Maybe<string>, userName: Maybe<string>, favoriteDate: Maybe<number> }>>, filters: Maybe<Array<{ __typename?: 'FilterTimelineResult', query: Maybe<string>, exists: Maybe<string>, match_all: Maybe<string>, missing: Maybe<string>, range: Maybe<string>, script: Maybe<string>, meta: Maybe<{ __typename?: 'FilterMetaTimelineResult', alias: Maybe<string>, controlledBy: Maybe<string>, disabled: Maybe<boolean>, field: Maybe<string>, formattedValue: Maybe<string>, index: Maybe<string>, key: Maybe<string>, negate: Maybe<boolean>, params: Maybe<string>, type: Maybe<string>, value: Maybe<string> }> }>>, kqlQuery: Maybe<{ __typename?: 'SerializedFilterQueryResult', filterQuery: Maybe<{ __typename?: 'SerializedKueryQueryResult', serializedQuery: Maybe<string>, kuery: Maybe<{ __typename?: 'KueryFilterQueryResult', kind: Maybe<string>, expression: Maybe<string> }> }> }>, notes: Maybe<Array<{ __typename?: 'NoteResult', eventId: Maybe<string>, note: Maybe<string>, timelineId: Maybe<string>, timelineVersion: Maybe<string>, noteId: string, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, pinnedEventsSaveObject: Maybe<Array<{ __typename?: 'PinnedEvent', pinnedEventId: string, eventId: Maybe<string>, timelineId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, version: Maybe<string> }>>, sort: Maybe<{ __typename?: 'SortTimelineResult', columnId: Maybe<string>, sortDirection: Maybe<string> }> } };
 
 export type PersistTimelineMutationMutationVariables = {
   timelineId?: Maybe<Scalars['ID']>,
@@ -2322,7 +2326,7 @@ export type PersistTimelineMutationMutationVariables = {
 };
 
 
-export type PersistTimelineMutationMutation = { __typename?: 'Mutation', persistTimeline: { __typename?: 'ResponseTimeline', code: Maybe<number>, message: Maybe<string>, timeline: { __typename?: 'TimelineResult', savedObjectId: string, version: string, description: Maybe<string>, kqlMode: Maybe<string>, title: Maybe<string>, savedQueryId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, columns: Maybe<Array<{ __typename?: 'ColumnHeaderResult', aggregatable: Maybe<boolean>, category: Maybe<string>, columnHeaderType: Maybe<string>, description: Maybe<string>, example: Maybe<string>, indexes: Maybe<Array<string>>, id: Maybe<string>, name: Maybe<string>, searchable: Maybe<boolean>, type: Maybe<string> }>>, dataProviders: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }>, and: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }> }>> }>>, favorite: Maybe<Array<{ __typename?: 'FavoriteTimelineResult', fullName: Maybe<string>, userName: Maybe<string>, favoriteDate: Maybe<number> }>>, filters: Maybe<Array<{ __typename?: 'FilterTimelineResult', query: Maybe<string>, exists: Maybe<string>, match_all: Maybe<string>, missing: Maybe<string>, range: Maybe<string>, script: Maybe<string>, meta: Maybe<{ __typename?: 'FilterMetaTimelineResult', alias: Maybe<string>, controlledBy: Maybe<string>, disabled: Maybe<boolean>, field: Maybe<string>, formattedValue: Maybe<string>, index: Maybe<string>, key: Maybe<string>, negate: Maybe<boolean>, params: Maybe<string>, type: Maybe<string>, value: Maybe<string> }> }>>, kqlQuery: Maybe<{ __typename?: 'SerializedFilterQueryResult', filterQuery: Maybe<{ __typename?: 'SerializedKueryQueryResult', serializedQuery: Maybe<string>, kuery: Maybe<{ __typename?: 'KueryFilterQueryResult', kind: Maybe<string>, expression: Maybe<string> }> }> }>, dateRange: Maybe<{ __typename?: 'DateRangePickerResult', start: Maybe<number>, end: Maybe<number> }>, sort: Maybe<{ __typename?: 'SortTimelineResult', columnId: Maybe<string>, sortDirection: Maybe<string> }> } } };
+export type PersistTimelineMutationMutation = { __typename?: 'Mutation', persistTimeline: { __typename?: 'ResponseTimeline', code: Maybe<number>, message: Maybe<string>, timeline: { __typename?: 'TimelineResult', savedObjectId: string, version: string, description: Maybe<string>, eventType: Maybe<string>, kqlMode: Maybe<string>, title: Maybe<string>, savedQueryId: Maybe<string>, created: Maybe<number>, createdBy: Maybe<string>, updated: Maybe<number>, updatedBy: Maybe<string>, columns: Maybe<Array<{ __typename?: 'ColumnHeaderResult', aggregatable: Maybe<boolean>, category: Maybe<string>, columnHeaderType: Maybe<string>, description: Maybe<string>, example: Maybe<string>, indexes: Maybe<Array<string>>, id: Maybe<string>, name: Maybe<string>, searchable: Maybe<boolean>, type: Maybe<string> }>>, dataProviders: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }>, and: Maybe<Array<{ __typename?: 'DataProviderResult', id: Maybe<string>, name: Maybe<string>, enabled: Maybe<boolean>, excluded: Maybe<boolean>, kqlQuery: Maybe<string>, queryMatch: Maybe<{ __typename?: 'QueryMatchResult', field: Maybe<string>, displayField: Maybe<string>, value: Maybe<string>, displayValue: Maybe<string>, operator: Maybe<string> }> }>> }>>, favorite: Maybe<Array<{ __typename?: 'FavoriteTimelineResult', fullName: Maybe<string>, userName: Maybe<string>, favoriteDate: Maybe<number> }>>, filters: Maybe<Array<{ __typename?: 'FilterTimelineResult', query: Maybe<string>, exists: Maybe<string>, match_all: Maybe<string>, missing: Maybe<string>, range: Maybe<string>, script: Maybe<string>, meta: Maybe<{ __typename?: 'FilterMetaTimelineResult', alias: Maybe<string>, controlledBy: Maybe<string>, disabled: Maybe<boolean>, field: Maybe<string>, formattedValue: Maybe<string>, index: Maybe<string>, key: Maybe<string>, negate: Maybe<boolean>, params: Maybe<string>, type: Maybe<string>, value: Maybe<string> }> }>>, kqlQuery: Maybe<{ __typename?: 'SerializedFilterQueryResult', filterQuery: Maybe<{ __typename?: 'SerializedKueryQueryResult', serializedQuery: Maybe<string>, kuery: Maybe<{ __typename?: 'KueryFilterQueryResult', kind: Maybe<string>, expression: Maybe<string> }> }> }>, dateRange: Maybe<{ __typename?: 'DateRangePickerResult', start: Maybe<number>, end: Maybe<number> }>, sort: Maybe<{ __typename?: 'SortTimelineResult', columnId: Maybe<string>, sortDirection: Maybe<string> }> } } };
 
 export type PersistTimelinePinnedEventMutationMutationVariables = {
   pinnedEventId?: Maybe<Scalars['ID']>,
@@ -2393,171 +2397,6 @@ export const KpiNetworkChartFieldsFragmentDoc = gql`
   y
 }
     `;
-export const GetAlertsOverTimeQueryDocument = gql`
-    query GetAlertsOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
-  source(id: $sourceId) {
-    id
-    AlertsHistogram(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
-      alertsOverTimeByModule {
-        x
-        y
-        g
-      }
-      totalCount
-      inspect @include(if: $inspect) {
-        dsl
-        response
-      }
-    }
-  }
-}
-    `;
-export type GetAlertsOverTimeQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>, 'query'> & ({ variables: GetAlertsOverTimeQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const GetAlertsOverTimeQueryComponent = (props: GetAlertsOverTimeQueryComponentProps) => (
-      <ApolloReactComponents.Query<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables> query={GetAlertsOverTimeQueryDocument} {...props} />
-    );
-    
-
-/**
- * __useGetAlertsOverTimeQueryQuery__
- *
- * To run a query within a React component, call `useGetAlertsOverTimeQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAlertsOverTimeQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetAlertsOverTimeQueryQuery({
- *   variables: {
- *      sourceId: // value for 'sourceId'
- *      timerange: // value for 'timerange'
- *      defaultIndex: // value for 'defaultIndex'
- *      filterQuery: // value for 'filterQuery'
- *      inspect: // value for 'inspect'
- *   },
- * });
- */
-export function useGetAlertsOverTimeQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>) {
-        return ApolloReactHooks.useQuery<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>(GetAlertsOverTimeQueryDocument, baseOptions);
-      }
-export function useGetAlertsOverTimeQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>(GetAlertsOverTimeQueryDocument, baseOptions);
-        }
-export type GetAlertsOverTimeQueryQueryHookResult = ReturnType<typeof useGetAlertsOverTimeQueryQuery>;
-export type GetAlertsOverTimeQueryLazyQueryHookResult = ReturnType<typeof useGetAlertsOverTimeQueryLazyQuery>;
-export type GetAlertsOverTimeQueryQueryResult = ApolloReactCommon.QueryResult<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>;
-export const GetAnomaliesOverTimeQueryDocument = gql`
-    query GetAnomaliesOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
-  source(id: $sourceId) {
-    id
-    AnomaliesOverTime(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
-      anomaliesOverTime {
-        x
-        y
-        g
-      }
-      totalCount
-      inspect @include(if: $inspect) {
-        dsl
-        response
-      }
-    }
-  }
-}
-    `;
-export type GetAnomaliesOverTimeQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>, 'query'> & ({ variables: GetAnomaliesOverTimeQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const GetAnomaliesOverTimeQueryComponent = (props: GetAnomaliesOverTimeQueryComponentProps) => (
-      <ApolloReactComponents.Query<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables> query={GetAnomaliesOverTimeQueryDocument} {...props} />
-    );
-    
-
-/**
- * __useGetAnomaliesOverTimeQueryQuery__
- *
- * To run a query within a React component, call `useGetAnomaliesOverTimeQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAnomaliesOverTimeQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetAnomaliesOverTimeQueryQuery({
- *   variables: {
- *      sourceId: // value for 'sourceId'
- *      timerange: // value for 'timerange'
- *      defaultIndex: // value for 'defaultIndex'
- *      filterQuery: // value for 'filterQuery'
- *      inspect: // value for 'inspect'
- *   },
- * });
- */
-export function useGetAnomaliesOverTimeQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>) {
-        return ApolloReactHooks.useQuery<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>(GetAnomaliesOverTimeQueryDocument, baseOptions);
-      }
-export function useGetAnomaliesOverTimeQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>(GetAnomaliesOverTimeQueryDocument, baseOptions);
-        }
-export type GetAnomaliesOverTimeQueryQueryHookResult = ReturnType<typeof useGetAnomaliesOverTimeQueryQuery>;
-export type GetAnomaliesOverTimeQueryLazyQueryHookResult = ReturnType<typeof useGetAnomaliesOverTimeQueryLazyQuery>;
-export type GetAnomaliesOverTimeQueryQueryResult = ApolloReactCommon.QueryResult<GetAnomaliesOverTimeQueryQuery, GetAnomaliesOverTimeQueryQueryVariables>;
-export const GetAuthenticationsOverTimeQueryDocument = gql`
-    query GetAuthenticationsOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
-  source(id: $sourceId) {
-    id
-    AuthenticationsOverTime(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
-      authenticationsOverTime {
-        x
-        y
-        g
-      }
-      totalCount
-      inspect @include(if: $inspect) {
-        dsl
-        response
-      }
-    }
-  }
-}
-    `;
-export type GetAuthenticationsOverTimeQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>, 'query'> & ({ variables: GetAuthenticationsOverTimeQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const GetAuthenticationsOverTimeQueryComponent = (props: GetAuthenticationsOverTimeQueryComponentProps) => (
-      <ApolloReactComponents.Query<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables> query={GetAuthenticationsOverTimeQueryDocument} {...props} />
-    );
-    
-
-/**
- * __useGetAuthenticationsOverTimeQueryQuery__
- *
- * To run a query within a React component, call `useGetAuthenticationsOverTimeQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAuthenticationsOverTimeQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetAuthenticationsOverTimeQueryQuery({
- *   variables: {
- *      sourceId: // value for 'sourceId'
- *      timerange: // value for 'timerange'
- *      defaultIndex: // value for 'defaultIndex'
- *      filterQuery: // value for 'filterQuery'
- *      inspect: // value for 'inspect'
- *   },
- * });
- */
-export function useGetAuthenticationsOverTimeQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>) {
-        return ApolloReactHooks.useQuery<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>(GetAuthenticationsOverTimeQueryDocument, baseOptions);
-      }
-export function useGetAuthenticationsOverTimeQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>(GetAuthenticationsOverTimeQueryDocument, baseOptions);
-        }
-export type GetAuthenticationsOverTimeQueryQueryHookResult = ReturnType<typeof useGetAuthenticationsOverTimeQueryQuery>;
-export type GetAuthenticationsOverTimeQueryLazyQueryHookResult = ReturnType<typeof useGetAuthenticationsOverTimeQueryLazyQuery>;
-export type GetAuthenticationsOverTimeQueryQueryResult = ApolloReactCommon.QueryResult<GetAuthenticationsOverTimeQueryQuery, GetAuthenticationsOverTimeQueryQueryVariables>;
 export const GetAuthenticationsQueryDocument = gql`
     query GetAuthenticationsQuery($sourceId: ID!, $timerange: TimerangeInput!, $pagination: PaginationInputPaginated!, $filterQuery: String, $defaultIndex: [String!]!, $inspect: Boolean!) {
   source(id: $sourceId) {
@@ -2647,61 +2486,6 @@ export function useGetAuthenticationsQueryLazyQuery(baseOptions?: ApolloReactHoo
 export type GetAuthenticationsQueryQueryHookResult = ReturnType<typeof useGetAuthenticationsQueryQuery>;
 export type GetAuthenticationsQueryLazyQueryHookResult = ReturnType<typeof useGetAuthenticationsQueryLazyQuery>;
 export type GetAuthenticationsQueryQueryResult = ApolloReactCommon.QueryResult<GetAuthenticationsQueryQuery, GetAuthenticationsQueryQueryVariables>;
-export const GetEventsOverTimeQueryDocument = gql`
-    query GetEventsOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
-  source(id: $sourceId) {
-    id
-    EventsOverTime(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
-      eventsOverTime {
-        x
-        y
-        g
-      }
-      totalCount
-      inspect @include(if: $inspect) {
-        dsl
-        response
-      }
-    }
-  }
-}
-    `;
-export type GetEventsOverTimeQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>, 'query'> & ({ variables: GetEventsOverTimeQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const GetEventsOverTimeQueryComponent = (props: GetEventsOverTimeQueryComponentProps) => (
-      <ApolloReactComponents.Query<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables> query={GetEventsOverTimeQueryDocument} {...props} />
-    );
-    
-
-/**
- * __useGetEventsOverTimeQueryQuery__
- *
- * To run a query within a React component, call `useGetEventsOverTimeQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetEventsOverTimeQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetEventsOverTimeQueryQuery({
- *   variables: {
- *      sourceId: // value for 'sourceId'
- *      timerange: // value for 'timerange'
- *      defaultIndex: // value for 'defaultIndex'
- *      filterQuery: // value for 'filterQuery'
- *      inspect: // value for 'inspect'
- *   },
- * });
- */
-export function useGetEventsOverTimeQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>) {
-        return ApolloReactHooks.useQuery<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>(GetEventsOverTimeQueryDocument, baseOptions);
-      }
-export function useGetEventsOverTimeQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>(GetEventsOverTimeQueryDocument, baseOptions);
-        }
-export type GetEventsOverTimeQueryQueryHookResult = ReturnType<typeof useGetEventsOverTimeQueryQuery>;
-export type GetEventsOverTimeQueryLazyQueryHookResult = ReturnType<typeof useGetEventsOverTimeQueryLazyQuery>;
-export type GetEventsOverTimeQueryQueryResult = ApolloReactCommon.QueryResult<GetEventsOverTimeQueryQuery, GetEventsOverTimeQueryQueryVariables>;
 export const GetLastEventTimeQueryDocument = gql`
     query GetLastEventTimeQuery($sourceId: ID!, $indexKey: LastEventIndexKey!, $details: LastTimeDetails!, $defaultIndex: [String!]!) {
   source(id: $sourceId) {
@@ -3242,11 +3026,68 @@ export function useGetKpiNetworkQueryLazyQuery(baseOptions?: ApolloReactHooks.La
 export type GetKpiNetworkQueryQueryHookResult = ReturnType<typeof useGetKpiNetworkQueryQuery>;
 export type GetKpiNetworkQueryLazyQueryHookResult = ReturnType<typeof useGetKpiNetworkQueryLazyQuery>;
 export type GetKpiNetworkQueryQueryResult = ApolloReactCommon.QueryResult<GetKpiNetworkQueryQuery, GetKpiNetworkQueryQueryVariables>;
-export const GetNetworkDnsQueryDocument = gql`
-    query GetNetworkDnsQuery($sourceId: ID!, $sort: NetworkDnsSortField!, $isPtrIncluded: Boolean!, $timerange: TimerangeInput!, $pagination: PaginationInputPaginated!, $filterQuery: String, $defaultIndex: [String!]!, $inspect: Boolean!) {
+export const GetMatrixHistogramQueryDocument = gql`
+    query GetMatrixHistogramQuery($defaultIndex: [String!]!, $filterQuery: String, $histogramType: HistogramType!, $inspect: Boolean!, $sourceId: ID!, $stackByField: String!, $timerange: TimerangeInput!) {
   source(id: $sourceId) {
     id
-    NetworkDns(isPtrIncluded: $isPtrIncluded, sort: $sort, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
+    MatrixHistogram(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex, stackByField: $stackByField, histogramType: $histogramType) {
+      matrixHistogramData {
+        x
+        y
+        g
+      }
+      totalCount
+      inspect @include(if: $inspect) {
+        dsl
+        response
+      }
+    }
+  }
+}
+    `;
+export type GetMatrixHistogramQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>, 'query'> & ({ variables: GetMatrixHistogramQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GetMatrixHistogramQueryComponent = (props: GetMatrixHistogramQueryComponentProps) => (
+      <ApolloReactComponents.Query<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables> query={GetMatrixHistogramQueryDocument} {...props} />
+    );
+    
+
+/**
+ * __useGetMatrixHistogramQueryQuery__
+ *
+ * To run a query within a React component, call `useGetMatrixHistogramQueryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMatrixHistogramQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMatrixHistogramQueryQuery({
+ *   variables: {
+ *      defaultIndex: // value for 'defaultIndex'
+ *      filterQuery: // value for 'filterQuery'
+ *      histogramType: // value for 'histogramType'
+ *      inspect: // value for 'inspect'
+ *      sourceId: // value for 'sourceId'
+ *      stackByField: // value for 'stackByField'
+ *      timerange: // value for 'timerange'
+ *   },
+ * });
+ */
+export function useGetMatrixHistogramQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>(GetMatrixHistogramQueryDocument, baseOptions);
+      }
+export function useGetMatrixHistogramQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>(GetMatrixHistogramQueryDocument, baseOptions);
+        }
+export type GetMatrixHistogramQueryQueryHookResult = ReturnType<typeof useGetMatrixHistogramQueryQuery>;
+export type GetMatrixHistogramQueryLazyQueryHookResult = ReturnType<typeof useGetMatrixHistogramQueryLazyQuery>;
+export type GetMatrixHistogramQueryQueryResult = ApolloReactCommon.QueryResult<GetMatrixHistogramQueryQuery, GetMatrixHistogramQueryQueryVariables>;
+export const GetNetworkDnsQueryDocument = gql`
+    query GetNetworkDnsQuery($defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!, $isPtrIncluded: Boolean!, $pagination: PaginationInputPaginated!, $sort: NetworkDnsSortField!, $sourceId: ID!, $stackByField: String, $timerange: TimerangeInput!) {
+  source(id: $sourceId) {
+    id
+    NetworkDns(isPtrIncluded: $isPtrIncluded, sort: $sort, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery, defaultIndex: $defaultIndex, stackByField: $stackByField) {
       totalCount
       edges {
         node {
@@ -3269,11 +3110,6 @@ export const GetNetworkDnsQueryDocument = gql`
       inspect @include(if: $inspect) {
         dsl
         response
-      }
-      histogram {
-        x
-        y
-        g
       }
     }
   }
@@ -3298,14 +3134,15 @@ export type GetNetworkDnsQueryComponentProps = Omit<ApolloReactComponents.QueryC
  * @example
  * const { data, loading, error } = useGetNetworkDnsQueryQuery({
  *   variables: {
- *      sourceId: // value for 'sourceId'
- *      sort: // value for 'sort'
- *      isPtrIncluded: // value for 'isPtrIncluded'
- *      timerange: // value for 'timerange'
- *      pagination: // value for 'pagination'
- *      filterQuery: // value for 'filterQuery'
  *      defaultIndex: // value for 'defaultIndex'
+ *      filterQuery: // value for 'filterQuery'
  *      inspect: // value for 'inspect'
+ *      isPtrIncluded: // value for 'isPtrIncluded'
+ *      pagination: // value for 'pagination'
+ *      sort: // value for 'sort'
+ *      sourceId: // value for 'sourceId'
+ *      stackByField: // value for 'stackByField'
+ *      timerange: // value for 'timerange'
  *   },
  * });
  */
@@ -3603,7 +3440,8 @@ export const GetOverviewHostQueryDocument = gql`
       endgameRegistry
       endgameSecurity
       filebeatSystemModule
-      winlogbeat
+      winlogbeatSecurity
+      winlogbeatMWSysmonOperational
       inspect @include(if: $inspect) {
         dsl
         response
@@ -4086,6 +3924,9 @@ export const GetTimelineQueryDocument = gql`
               name
               ip
             }
+            rule {
+              reference
+            }
             source {
               bytes
               ip
@@ -4140,6 +3981,22 @@ export const GetTimelineQueryDocument = gql`
             geo {
               region_name
               country_iso_code
+            }
+            signal {
+              original_time
+              rule {
+                id
+                saved_id
+                timeline_id
+                timeline_title
+                output_index
+                from
+                index
+                language
+                query
+                to
+                filters
+              }
             }
             suricata {
               eve {
@@ -4433,6 +4290,7 @@ export const GetOneTimelineDocument = gql`
       end
     }
     description
+    eventType
     eventIdToNoteIds {
       eventId
       note
@@ -4600,6 +4458,7 @@ export const PersistTimelineMutationDocument = gql`
         }
       }
       description
+      eventType
       favorite {
         fullName
         userName
@@ -4956,42 +4815,6 @@ export function useGetUsersQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type GetUsersQueryQueryHookResult = ReturnType<typeof useGetUsersQueryQuery>;
 export type GetUsersQueryLazyQueryHookResult = ReturnType<typeof useGetUsersQueryLazyQuery>;
 export type GetUsersQueryQueryResult = ApolloReactCommon.QueryResult<GetUsersQueryQuery, GetUsersQueryQueryVariables>;
-export namespace GetAlertsOverTimeQuery {
-  export type Variables = GetAlertsOverTimeQueryQueryVariables;
-  export type Query = GetAlertsOverTimeQueryQuery;
-  export type Source = GetAlertsOverTimeQueryQuery['source'];
-  export type AlertsHistogram = GetAlertsOverTimeQueryQuery['source']['AlertsHistogram'];
-  export type AlertsOverTimeByModule = (NonNullable<GetAlertsOverTimeQueryQuery['source']['AlertsHistogram']['alertsOverTimeByModule'][0]>);
-  export type Inspect = (NonNullable<GetAlertsOverTimeQueryQuery['source']['AlertsHistogram']['inspect']>);
-  export const Document = GetAlertsOverTimeQueryDocument;
-  export const Component = GetAlertsOverTimeQueryComponent;
-  export const use = useGetAlertsOverTimeQueryQuery;
-}
-
-export namespace GetAnomaliesOverTimeQuery {
-  export type Variables = GetAnomaliesOverTimeQueryQueryVariables;
-  export type Query = GetAnomaliesOverTimeQueryQuery;
-  export type Source = GetAnomaliesOverTimeQueryQuery['source'];
-  export type AnomaliesOverTime = GetAnomaliesOverTimeQueryQuery['source']['AnomaliesOverTime'];
-  export type _AnomaliesOverTime = (NonNullable<GetAnomaliesOverTimeQueryQuery['source']['AnomaliesOverTime']['anomaliesOverTime'][0]>);
-  export type Inspect = (NonNullable<GetAnomaliesOverTimeQueryQuery['source']['AnomaliesOverTime']['inspect']>);
-  export const Document = GetAnomaliesOverTimeQueryDocument;
-  export const Component = GetAnomaliesOverTimeQueryComponent;
-  export const use = useGetAnomaliesOverTimeQueryQuery;
-}
-
-export namespace GetAuthenticationsOverTimeQuery {
-  export type Variables = GetAuthenticationsOverTimeQueryQueryVariables;
-  export type Query = GetAuthenticationsOverTimeQueryQuery;
-  export type Source = GetAuthenticationsOverTimeQueryQuery['source'];
-  export type AuthenticationsOverTime = GetAuthenticationsOverTimeQueryQuery['source']['AuthenticationsOverTime'];
-  export type _AuthenticationsOverTime = (NonNullable<GetAuthenticationsOverTimeQueryQuery['source']['AuthenticationsOverTime']['authenticationsOverTime'][0]>);
-  export type Inspect = (NonNullable<GetAuthenticationsOverTimeQueryQuery['source']['AuthenticationsOverTime']['inspect']>);
-  export const Document = GetAuthenticationsOverTimeQueryDocument;
-  export const Component = GetAuthenticationsOverTimeQueryComponent;
-  export const use = useGetAuthenticationsOverTimeQueryQuery;
-}
-
 export namespace GetAuthenticationsQuery {
   export type Variables = GetAuthenticationsQueryQueryVariables;
   export type Query = GetAuthenticationsQueryQuery;
@@ -5012,18 +4835,6 @@ export namespace GetAuthenticationsQuery {
   export const Document = GetAuthenticationsQueryDocument;
   export const Component = GetAuthenticationsQueryComponent;
   export const use = useGetAuthenticationsQueryQuery;
-}
-
-export namespace GetEventsOverTimeQuery {
-  export type Variables = GetEventsOverTimeQueryQueryVariables;
-  export type Query = GetEventsOverTimeQueryQuery;
-  export type Source = GetEventsOverTimeQueryQuery['source'];
-  export type EventsOverTime = GetEventsOverTimeQueryQuery['source']['EventsOverTime'];
-  export type _EventsOverTime = (NonNullable<GetEventsOverTimeQueryQuery['source']['EventsOverTime']['eventsOverTime'][0]>);
-  export type Inspect = (NonNullable<GetEventsOverTimeQueryQuery['source']['EventsOverTime']['inspect']>);
-  export const Document = GetEventsOverTimeQueryDocument;
-  export const Component = GetEventsOverTimeQueryComponent;
-  export const use = useGetEventsOverTimeQueryQuery;
 }
 
 export namespace GetLastEventTimeQuery {
@@ -5158,6 +4969,18 @@ export namespace GetKpiNetworkQuery {
   export const use = useGetKpiNetworkQueryQuery;
 }
 
+export namespace GetMatrixHistogramQuery {
+  export type Variables = GetMatrixHistogramQueryQueryVariables;
+  export type Query = GetMatrixHistogramQueryQuery;
+  export type Source = GetMatrixHistogramQueryQuery['source'];
+  export type MatrixHistogram = GetMatrixHistogramQueryQuery['source']['MatrixHistogram'];
+  export type MatrixHistogramData = (NonNullable<GetMatrixHistogramQueryQuery['source']['MatrixHistogram']['matrixHistogramData'][0]>);
+  export type Inspect = (NonNullable<GetMatrixHistogramQueryQuery['source']['MatrixHistogram']['inspect']>);
+  export const Document = GetMatrixHistogramQueryDocument;
+  export const Component = GetMatrixHistogramQueryComponent;
+  export const use = useGetMatrixHistogramQueryQuery;
+}
+
 export namespace GetNetworkDnsQuery {
   export type Variables = GetNetworkDnsQueryQueryVariables;
   export type Query = GetNetworkDnsQueryQuery;
@@ -5168,7 +4991,6 @@ export namespace GetNetworkDnsQuery {
   export type Cursor = (NonNullable<GetNetworkDnsQueryQuery['source']['NetworkDns']['edges'][0]>)['cursor'];
   export type PageInfo = GetNetworkDnsQueryQuery['source']['NetworkDns']['pageInfo'];
   export type Inspect = (NonNullable<GetNetworkDnsQueryQuery['source']['NetworkDns']['inspect']>);
-  export type Histogram = (NonNullable<(NonNullable<GetNetworkDnsQueryQuery['source']['NetworkDns']['histogram']>)[0]>);
   export const Document = GetNetworkDnsQueryDocument;
   export const Component = GetNetworkDnsQueryComponent;
   export const use = useGetNetworkDnsQueryQuery;
@@ -5331,6 +5153,7 @@ export namespace GetTimelineQuery {
   export type Object = (NonNullable<(NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['auditd']>)['summary']>)['object']>);
   export type File = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['file']>);
   export type Host = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['host']>);
+  export type Rule = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['rule']>);
   export type _Source = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['source']>);
   export type Geo = (NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['source']>)['geo']>);
   export type Destination = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['destination']>);
@@ -5339,6 +5162,8 @@ export namespace GetTimelineQuery {
   export type Question = (NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['dns']>)['question']>);
   export type Endgame = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['endgame']>);
   export type __Geo = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['geo']>);
+  export type Signal = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['signal']>);
+  export type _Rule = (NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['signal']>)['rule']>);
   export type Suricata = (NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['suricata']>);
   export type Eve = (NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['suricata']>)['eve']>);
   export type Alert = (NonNullable<(NonNullable<(NonNullable<(NonNullable<GetTimelineQueryQuery['source']['Timeline']['edges'][0]>)['node']['ecs']['suricata']>)['eve']>)['alert']>);

@@ -35,8 +35,7 @@ export interface OverviewHostProps extends QueryTemplateProps {
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
-      query={overviewHostQuery}
+    <GetOverviewHostQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
@@ -60,7 +59,7 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux
           refetch,
         });
       }}
-    </Query>
+    </GetOverviewHostQueryComponent>
   )
 );
 

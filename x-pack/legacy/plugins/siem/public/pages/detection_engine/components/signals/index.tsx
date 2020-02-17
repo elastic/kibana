@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
+import { useApolloClient } from '@apollo/client';
 
 import { Filter, esQuery } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
@@ -19,7 +20,6 @@ import { useKibana } from '../../../../lib/kibana';
 import { inputsSelectors, State, inputsModel } from '../../../../store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
-import { useApolloClient } from '../../../../utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
 import {

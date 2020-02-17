@@ -6,7 +6,7 @@
 
 import { createHashHistory, History } from 'history';
 import React, { memo, useMemo, FC } from 'react';
-import { ApolloProvider } from '@apoll/client';
+import { ApolloProvider } from '@apollo/client';
 import { Store } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
