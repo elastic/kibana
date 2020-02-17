@@ -22,7 +22,8 @@ import { createEsContext, EsContext } from './es';
 
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
-const PROVIDER = 'event_log';
+const PROVIDER = 'eventLog';
+
 const ACTIONS = {
   starting: 'starting',
   stopping: 'stopping',
@@ -88,7 +89,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
-      message: 'event_log starting',
+      message: 'eventLog starting',
     });
   }
 
@@ -101,7 +102,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // when Kibana is actuaelly stopping, as it's written asynchronously
     this.eventLogger.logEvent({
       event: { action: ACTIONS.stopping },
-      message: 'event_log stopping',
+      message: 'eventLog stopping',
     });
   }
 }
