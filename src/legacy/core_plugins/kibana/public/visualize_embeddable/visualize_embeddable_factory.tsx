@@ -152,6 +152,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
       return new VisualizeEmbeddable(
+        npStart.plugins.data.query.timefilter.timefilter,
         {
           savedVisualization: savedObject,
           indexPatterns,
