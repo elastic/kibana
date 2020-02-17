@@ -18,4 +18,4 @@
  */
 
 export { useSaveCurrentTextObject } from './use_save_current_text_object';
-export { useCreateTextObject } from './use_create_text_object';
+export { useTextObjectsCRUD } from './use_text_objects_crud';

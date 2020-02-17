@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { useEditorReadContext, useEditorActionContext } from '../../contexts';
-import { useCreateTextObject } from '../../hooks';
+import { useTextObjectsCRUD } from '../../hooks';
 import { FileForm } from '../../components';
 
 export const FileTree: FunctionComponent = () => {
@@ -38,7 +38,7 @@ export const FileTree: FunctionComponent = () => {
   const [isCreatingOrUpdatingFile, setIsCreatingOrUpdatingFile] = useState(false);
   const { textObjects, currentTextObjectId } = useEditorReadContext();
   const dispatch = useEditorActionContext();
-  const createTextObject = useCreateTextObject();
+  const { create: createTextObject } = useTextObjectsCRUD();
 
   return (
     <EuiFlexGroup

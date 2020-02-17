@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { Type } from 'io-ts';
 
-import { Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
-import { TextObjectWithId, textObjectTypeName } from '../../../common/text_object';
-import { LocalObjectStorage } from './local_storage_object_client';
-
-export const create = (storage: Storage): ObjectStorageClient => {
-  return {
-    text: new LocalObjectStorage<TextObjectWithId>(storage, textObjectTypeName),
-  };
-};
+export const throwIfUnknown = <A, O>(codec: Type<A, O>, value: unknown) =>
+  pipe(
+    codec.decode(value),
+    fold(
+      () => {
+        throw new Error(`Cannot assign ${value} to TextObject`);
+      },
+      result => result
+    )
+  );

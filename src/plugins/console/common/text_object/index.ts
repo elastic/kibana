@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
-import { TextObjectWithId, textObjectTypeName } from '../../../common/text_object';
-import { LocalObjectStorage } from './local_storage_object_client';
-
-export const create = (storage: Storage): ObjectStorageClient => {
-  return {
-    text: new LocalObjectStorage<TextObjectWithId>(storage, textObjectTypeName),
-  };
-};
+export {
+  TextObject,
+  TextObjectWithId,
+  textObjectSchema,
+  textObjectTypeName,
+  textObjectSchemaWithId,
+  optionalTextObjectProps,
+  textObjectProps,
+} from './text_object';
+export { throwIfUnknown } from './throw_if_unknown';

@@ -42,10 +42,10 @@ import * as senseEditor from '../../../../models/sense_editor';
 import mappings from '../../../../../lib/mappings/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { TextObject } from '../../../../../../common/text_object';
+import { TextObjectWithId } from '../../../../../../common/text_object';
 
 export interface EditorProps {
-  textObject: TextObject;
+  textObject: TextObjectWithId;
 }
 
 interface QueryParams {

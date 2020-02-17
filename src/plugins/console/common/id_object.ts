@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { Storage } from '../../services';
-import { ObjectStorageClient } from '../../../common/types';
-import { TextObjectWithId, textObjectTypeName } from '../../../common/text_object';
-import { LocalObjectStorage } from './local_storage_object_client';
+import * as t from 'io-ts';
 
-export const create = (storage: Storage): ObjectStorageClient => {
-  return {
-    text: new LocalObjectStorage<TextObjectWithId>(storage, textObjectTypeName),
-  };
+export const idObjectProps = {
+  /**
+   * An ID that uniquely identifies this object.
+   */
+  id: t.string,
 };
+
+export const idObjectSchema = t.type(idObjectProps);
+
+export type IdObject = t.TypeOf<typeof idObjectSchema>;

@@ -16,40 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as t from 'io-ts';
+
+import { idObjectProps } from '../id_object';
 
 export const textObjectTypeName = 'text-object';
 
-/**
- * Describes the shape of persisted objects that contain information about the current text in the
- * text editor.
- */
-export interface TextObject {
-  /**
-   * An ID that uniquely identifies this object.
-   */
-  id: string;
-
-  /**
-   * UNIX timestamp of when the object was created.
-   */
-  createdAt: number;
-
-  /**
-   * UNIX timestamp of when the object was last updated.
-   */
-  updatedAt: number;
-
-  /**
-   * Text value input by the user.
-   *
-   * Used to re-populate a text editor buffer.
-   */
-  text: string;
-
+export const optionalTextObjectProps = {
   /**
    * An optional user provided name for the text object
    */
-  name?: string;
+  name: t.string,
 
   /**
    * An indication of whether a text object is the scratch pad. This
@@ -57,5 +34,40 @@ export interface TextObject {
    * should be that the first ever created text object is the scratch pad
    * which cannot be renamed or deleted.
    */
-  isScratchPad?: boolean;
-}
+  isScratchPad: t.boolean,
+};
+
+export const textObjectProps = {
+  /**
+   * UNIX timestamp of when the object was created.
+   */
+  createdAt: t.number,
+
+  /**
+   * UNIX timestamp of when the object was last updated.
+   */
+  updatedAt: t.number,
+
+  /**
+   * Text value input by the user.
+   *
+   * Used to re-populate a text editor buffer.
+   */
+  text: t.string,
+};
+
+export const textObjectSchema = t.intersection([
+  t.type(textObjectProps),
+  t.partial(optionalTextObjectProps),
+]);
+
+export const textObjectSchemaWithId = t.intersection([
+  t.type({
+    ...textObjectProps,
+    ...idObjectProps,
+  }),
+  t.partial(optionalTextObjectProps),
+]);
+
+export type TextObject = t.TypeOf<typeof textObjectSchema>;
+export type TextObjectWithId = t.TypeOf<typeof textObjectSchemaWithId>;

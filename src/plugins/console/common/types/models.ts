@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { TextObject } from '../text_object';
-
-export interface IdObject {
-  id: string;
-}
+import { TextObjectWithId } from '../text_object';
+import { IdObject } from '../id_object';
 
 export interface ObjectStorage<O extends IdObject> {
   /**
@@ -34,7 +31,12 @@ export interface ObjectStorage<O extends IdObject> {
   /**
    * This method should update specific object in the persistance layer.
    */
-  update(obj: O): Promise<void>;
+  update(obj: Partial<O>): Promise<void>;
+
+  /**
+   * Delete a text object from the persistence layer
+   */
+  delete(id: string): Promise<void>;
 
   /**
    * A function that will return all of the objects in the persistance layer.
@@ -45,5 +47,5 @@ export interface ObjectStorage<O extends IdObject> {
 }
 
 export interface ObjectStorageClient {
-  text: ObjectStorage<TextObject>;
+  text: ObjectStorage<TextObjectWithId>;
 }

@@ -18,7 +18,8 @@
  */
 
 import uuid from 'uuid';
-import { ObjectStorage, IdObject } from '../../../common/types';
+import { ObjectStorage } from '../../../common/types';
+import { IdObject } from '../../../common/id_object';
 import { Storage } from '../../services';
 
 export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> {
@@ -28,15 +29,23 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
     this.prefix = `console_local_${type}`;
   }
 
+  private getFullEntryName(id: string) {
+    return `${this.prefix}_${id}`;
+  }
+
   async create(obj: Omit<O, 'id'>): Promise<O> {
     const id = uuid.v4();
     const newObj = { id, ...obj } as O;
-    this.client.set(`${this.prefix}_${id}`, newObj);
+    this.client.set(this.getFullEntryName(id), newObj);
     return newObj;
   }
 
-  async update(obj: O): Promise<void> {
-    this.client.set(`${this.prefix}_${obj.id}`, obj);
+  async update(obj: Partial<O> & IdObject): Promise<void> {
+    this.client.set(this.getFullEntryName(obj.id), obj);
+  }
+
+  async delete(id: string) {
+    this.client.delete(this.getFullEntryName(id));
   }
 
   async findAll(): Promise<O[]> {
