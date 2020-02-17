@@ -24,7 +24,7 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
 } from '../../buckets/_terms_other_bucket_helper';
-import { Vis } from '../../../../../../../core_plugins/visualizations/public';
+import { start as visualizationsStart } from '../../../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 const visConfigSingleTerm = {
@@ -191,7 +191,7 @@ describe('Terms Agg Other bucket helper', () => {
     ngMock.inject(Private => {
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-      vis = new Vis(indexPattern, aggConfig);
+      vis = new visualizationsStart.Vis(indexPattern, aggConfig);
     });
   }
 
