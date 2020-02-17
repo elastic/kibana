@@ -32,6 +32,7 @@ describe('Integration', () => {
       '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
     senseEditor = create(document.querySelector('#ConAppEditor'));
+    senseEditor.init();
     $(senseEditor.getCoreEditor().getContainer()).show();
     senseEditor.autocomplete._test.removeChangeListener();
   });

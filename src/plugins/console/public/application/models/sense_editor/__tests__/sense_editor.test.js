@@ -38,6 +38,7 @@ describe('Editor', () => {
 
     input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
+    input.init();
     input.autocomplete._test.removeChangeListener();
   });
   afterEach(function() {
