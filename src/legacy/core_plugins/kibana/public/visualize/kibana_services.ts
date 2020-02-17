@@ -19,11 +19,12 @@
 
 import {
   ChromeStart,
-  LegacyCoreStart,
+  CoreStart,
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
   I18nStart,
+  PluginInitializerContext,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -38,11 +39,12 @@ import { Chrome } from './legacy_imports';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
 
 export interface VisualizeKibanaServices {
+  pluginInitializerContext: PluginInitializerContext;
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
-  core: LegacyCoreStart;
+  core: CoreStart;
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
   legacyChrome: Chrome;

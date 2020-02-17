@@ -1,0 +1,6 @@
+{
+  "id": "visTypeVega",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}
