@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export declare const workerModule: { id: string; src: string };
