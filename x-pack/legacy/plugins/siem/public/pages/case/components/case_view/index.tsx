@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiFieldText,
   EuiButtonIcon,
 } from '@elastic/eui';
 
@@ -28,6 +27,7 @@ import { FormattedRelativePreferenceDate } from '../../../../components/formatte
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { Title } from '../../../../components/header_page/title';
+import { EditableTitle } from '../../../../components/header_page/editable_title';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
@@ -75,40 +75,6 @@ interface CasesProps {
   initialData: Case;
   isLoading: boolean;
 }
-
-interface EditNodeComponentProps {
-  isLoading: boolean;
-  title: string | React.ReactNode;
-  isEditTitle?: boolean;
-  onChange: (a: string) => void;
-  onClick: (b: boolean) => void;
-  onSubmit: () => void;
-}
-
-const EditNodeComponent: React.FC<EditNodeComponentProps> = ({
-  onChange,
-  onClick,
-  onSubmit,
-  isLoading,
-  title,
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      <EuiFieldText onChange={e => onChange(e.target.value)} value={`${title}`} />
-    </EuiFlexItem>
-    <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-      <EuiFlexItem grow={false}>
-        <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-          {i18n.SUBMIT}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={() => onClick(false)}>{i18n.CANCEL}</EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexItem />
-  </EuiFlexGroup>
-);
 
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
@@ -258,12 +224,14 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
   ];
 
   const titleNode = isEditTitle ? (
-    <EditNodeComponent
+    <EditableTitle
       isLoading={isLoading}
       title={title}
       onChange={newTitle => setTitle(newTitle)}
       onSubmit={() => onUpdateField('title', title)}
       onClick={isEdit => setIsEditTitle(isEdit)}
+      submitTitle={i18n.SUBMIT}
+      cancelTitle={i18n.CANCEL}
     />
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="none">
