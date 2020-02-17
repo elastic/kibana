@@ -3945,7 +3945,6 @@
     "xpack.apm.tracesTable.tracesPerMinuteColumnLabel": "每分钟追溯次数",
     "xpack.apm.tracesTable.tracesPerMinuteUnitLabel": "tpm",
     "xpack.apm.transactionActionMenu.actionsButtonLabel": "操作",
-    "xpack.apm.transactionActionMenu.actionsLabel": "操作",
     "xpack.apm.transactionActionMenu.showContainerLogsLinkLabel": "显示容器日志",
     "xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel": "显示容器指标",
     "xpack.apm.transactionActionMenu.showHostLogsLinkLabel": "显示主机日志",
