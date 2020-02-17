@@ -45,7 +45,7 @@ const PageWrapper: FC<PageProps> = ({ config }) => {
 
   useEffect(() => {
     timefilter.disableTimeRangeSelector();
-    timefilter.enabledAutoRefreshSelector();
+    timefilter.enableAutoRefreshSelector();
   }, []);
 
   return (
