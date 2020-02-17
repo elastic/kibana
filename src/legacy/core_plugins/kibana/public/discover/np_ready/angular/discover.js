@@ -192,12 +192,6 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  const $appStatus = {
-    dirty: !savedSearch.id,
-  };
-  const onChangeAppState = dirty => {
-    $appStatus.dirty = dirty || !savedSearch.id;
-  };
 
   const {
     appStateContainer,
@@ -208,8 +202,12 @@ function discoverController(
     syncGlobalState,
     getAppFilters,
     getGlobalFilters,
-    setInitialAppState,
-  } = getState(getStateDefaults(), false, onChangeAppState);
+    resetInitialAppState,
+    isAppStateDirty,
+  } = getState({
+    defaultAppState: getStateDefaults(),
+    storeInSessionStorage: false,
+  });
 
   const $state = _.cloneDeep(appStateContainer.getState());
   $scope.state = $state;
@@ -427,7 +425,7 @@ function discoverController(
             ...sharingData,
             title: savedSearch.title,
           },
-          isDirty: $appStatus.dirty,
+          isDirty: !savedSearch.id || isAppStateDirty(),
         });
       },
     };
@@ -667,11 +665,6 @@ function discoverController(
         }
       });
 
-      // update data source when hitting forward/back and the query changes
-      //$scope.$listen($state, 'fetch_with_changes', function(diff) {
-      //  if (diff.indexOf('query') >= 0) $fetchObservable.next();
-      //});
-
       $scope.$watch('opts.timefield', function(timefield) {
         $scope.enableTimeRangeSelector = !!timefield;
       });
@@ -772,7 +765,7 @@ function discoverController(
     try {
       const id = await savedSearch.save(saveOptions);
       $scope.$evalAsync(() => {
-        setInitialAppState($state);
+        resetInitialAppState();
         if (id) {
           toastNotifications.addSuccess({
             title: i18n.translate('kbn.discover.notifications.savedSearchTitle', {

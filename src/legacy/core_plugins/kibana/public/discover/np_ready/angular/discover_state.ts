@@ -22,6 +22,7 @@ import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
+  ReduxLikeStateContainer,
 } from '../../../../../../../plugins/kibana_utils/public';
 import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 
@@ -39,18 +40,25 @@ interface GlobalState {
   time?: { from: string; to: string };
 }
 
+interface GetStateArgs {
+  defaultAppState?: AppState;
+  storeInSessionStorage?: boolean;
+  onChangeAppStatus?: (dirty: boolean) => void;
+  hashHistory?: any;
+}
+
 /**
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState(
-  defaultAppState: AppState,
-  storeInSessionStorage: boolean,
-  onChangeAppStatus: (dirty: boolean) => void
-) {
+export async function getState({
+  defaultAppState = {},
+  storeInSessionStorage = false,
+  hashHistory,
+}: GetStateArgs) {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
-    history: createHashHistory(),
+    history: hashHistory ? hashHistory : createHashHistory(),
   });
 
   const globalStateInitial = stateStorage.get('_g') as GlobalState;
@@ -64,7 +72,7 @@ export function getState(
 
   // make sure url ('_a') matches initial state
   if (!_.isEqual(initialAppState, appStateFromUrl)) {
-    stateStorage.set('_a', initialAppState, { replace: true });
+    await stateStorage.set('_a', initialAppState, { replace: true });
   }
 
   const appStateContainer = createStateContainer<AppState>(initialAppState);
@@ -72,12 +80,20 @@ export function getState(
   const { start, stop } = syncStates([
     {
       storageKey: '_a',
-      stateContainer: appStateContainer,
+      stateContainer: {
+        ...appStateContainer,
+        // handle null value when url switch doesn't contain state info
+        ...{ set: value => value && appStateContainer.set(value) },
+      },
       stateStorage,
     },
     {
       storageKey: '_g',
-      stateContainer: globalStateContainer,
+      stateContainer: {
+        ...globalStateContainer,
+        // handle null value when url switch doesn't contain state info
+        ...{ set: value => value && globalStateContainer.set(value) },
+      },
       stateStorage,
     },
   ]);
@@ -87,29 +103,31 @@ export function getState(
     appStateContainer,
     start,
     stop,
-    syncGlobalState: (newPartial: GlobalState) => {
-      const oldState = globalStateContainer.getState();
-      const newState = { ...oldState, ...newPartial };
-      if (!isEqualState(oldState, newState)) {
-        globalStateContainer.set(newState);
-      }
-    },
-    syncAppState: (newPartial: AppState) => {
-      const oldState = appStateContainer.getState();
-      const newState = { ...oldState, ...newPartial };
-      if (!isEqualState(oldState, newState)) {
-        appStateContainer.set(newState);
-      }
-      if (!isEqualState(initialAppState, newState)) {
-        onChangeAppStatus(true);
-      }
-    },
+    syncGlobalState: (newPartial: GlobalState) => setState(globalStateContainer, newPartial),
+    syncAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
     getGlobalFilters: () => getFilters(globalStateContainer.getState()),
     getAppFilters: () => getFilters(appStateContainer.getState()),
-    setInitialAppState: (newState: AppState) => {
-      initialAppState = newState;
+    resetInitialAppState: () => {
+      initialAppState = appStateContainer.getState();
     },
+    flush: () => stateStorage.flush(),
+    isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
+}
+
+/**
+ * Helper function to merge a given new state with the existing state and to set the given state
+ * container
+ */
+export function setState(
+  stateContainer: ReduxLikeStateContainer<AppState | GlobalState>,
+  newState: AppState | GlobalState
+) {
+  const oldState = stateContainer.getState();
+  const mergedState = { ...oldState, ...newState };
+  if (!isEqualState(oldState, mergedState)) {
+    stateContainer.set(newState);
+  }
 }
 
 /**
@@ -123,6 +141,11 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   }
   return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
 }
+
+/**
+ * helper function to extract filters of the given state
+ * returns a state object without filters and an array of filters
+ */
 
 export function splitState(state: AppState | GlobalState = {}) {
   const { filters = [], ...statePartial } = state;
