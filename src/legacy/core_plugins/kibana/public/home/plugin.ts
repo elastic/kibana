@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
@@ -30,33 +37,13 @@ import {
   FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
-export interface LegacyAngularInjectedDependencies {
-  telemetryOptInProvider: any;
-  shouldShowTelemetryOptIn: boolean;
-}
-
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   home: HomePublicPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  __LEGACY: {
-    metadata: {
-      app: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-    };
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
   usageCollection: UsageCollectionSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
@@ -67,32 +54,28 @@ export class HomePlugin implements Plugin {
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
   private directories: readonly FeatureCatalogueEntry[] | null = null;
+  private telemetry?: TelemetryPluginStart;
 
-  setup(
-    core: CoreSetup,
-    {
-      home,
-      kibanaLegacy,
-      usageCollection,
-      __LEGACY: { getAngularDependencies, ...legacyServices },
-    }: HomePluginSetupDependencies
-  ) {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  setup(core: CoreSetup, { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies) {
     kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
-        const angularDependencies = await getAngularDependencies();
+        const [coreStart] = await core.getStartServices();
         setServices({
-          ...legacyServices,
           trackUiMetric,
-          http: contextCore.http,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          http: coreStart.http,
           toastNotifications: core.notifications.toasts,
-          banners: contextCore.overlays.banners,
+          banners: coreStart.overlays.banners,
           getInjected: core.injectedMetadata.getInjectedVar,
-          docLinks: contextCore.docLinks,
+          docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
-          chrome: contextCore.chrome,
+          chrome: coreStart.chrome,
+          telemetry: this.telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
@@ -101,7 +84,6 @@ export class HomePlugin implements Plugin {
           config: kibanaLegacy.config,
           homeConfig: home.config,
           directories: this.directories!,
-          ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -109,10 +91,11 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+  start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
     this.directories = home.featureCatalogue.get();
     this.dataStart = data;
+    this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;
   }
 

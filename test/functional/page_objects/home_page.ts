@@ -19,9 +19,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HomePageProvider({ getService }: FtrProviderContext) {
+export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -61,6 +64,14 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
         // before action is complete
         await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
+    }
+
+    async launchSampleDashboard(id: string) {
+      await this.launchSampleDataSet(id);
+      isOss = await PageObjects.common.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
+      }
     }
 
     async launchSampleDataSet(id: string) {

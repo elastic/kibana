@@ -14,6 +14,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/types';
+import { useUrlParams } from '../../../hooks';
 
 export interface PingHistogramComponentProps {
   /**
@@ -30,7 +31,7 @@ export interface PingHistogramComponentProps {
    */
   height?: string;
 
-  data?: HistogramResult;
+  data: HistogramResult | null;
 
   loading?: boolean;
 }
@@ -45,6 +46,9 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   const {
     colors: { danger, gray },
   } = useContext(UptimeThemeContext);
+
+  const [, updateUrlParams] = useUrlParams();
+
   if (!data || !data.histogram)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
@@ -93,6 +97,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
     defaultMessage: 'Up',
   });
+
+  const onBrushEnd = (min: number, max: number) => {
+    updateUrlParams({
+      dateRangeStart: moment(min).toISOString(),
+      dateRangeEnd: moment(max).toISOString(),
+    });
+  };
   return (
     <>
       <EuiTitle size="xs">
@@ -122,6 +133,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
               max: absoluteEndDate,
             }}
             showLegend={false}
+            onBrushEnd={onBrushEnd}
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
@@ -142,6 +154,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
                 'The label on the y-axis of a chart that displays the number of times Heartbeat has pinged a set of services/websites.',
             })}
           />
+
           <BarSeries
             customSeriesColors={[danger]}
             data={histogram.map(({ x, downCount }) => [x, downCount || 0])}

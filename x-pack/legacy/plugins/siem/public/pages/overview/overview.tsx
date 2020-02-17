@@ -6,10 +6,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from './alerts_by_category';
@@ -20,7 +19,6 @@ import { GlobalTime } from '../../containers/global_time';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { EventsByDataset } from './events_by_dataset';
 import { EventCounts } from './event_counts';
-import { SetAbsoluteRangeDatePicker } from '../network/types';
 import { OverviewEmpty } from './overview_empty';
 import { StatefulSidebar } from './sidebar';
 import { SignalsByCategory } from './signals_by_category';
@@ -29,19 +27,13 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
 
-interface OverviewComponentReduxProps {
-  query?: Query;
-  filters?: esFilters.Filter[];
-  setAbsoluteRangeDatePicker?: SetAbsoluteRangeDatePicker;
-}
-
-const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
+const OverviewComponent: React.FC<PropsFromRedux> = ({
   filters = NO_FILTERS,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
@@ -85,7 +77,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -98,7 +89,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -135,7 +125,7 @@ const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
 
-  const mapStateToProps = (state: State): OverviewComponentReduxProps => ({
+  const mapStateToProps = (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
   });
@@ -145,6 +135,8 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
 
-export const StatefulOverview = compose<React.ComponentClass<OverviewComponentReduxProps>>(
-  connect(makeMapStateToProps, mapDispatchToProps)
-)(React.memo(OverviewComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulOverview = connector(React.memo(OverviewComponent));

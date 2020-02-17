@@ -21,14 +21,14 @@ const stateTimestamps = {
 
 describe('NewEventModal', () => {
   it('Add button disabled if description empty', () => {
-    const wrapper = shallowWithIntl(<NewEventModal.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
 
     const addButton = wrapper.find('EuiButton').first();
     expect(addButton.prop('disabled')).toBe(true);
   });
 
   it('if endDate is less than startDate should set startDate one day before endDate', () => {
-    const wrapper = shallowWithIntl(<NewEventModal.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
     const instance = wrapper.instance();
     instance.setState({
       startDate: moment(stateTimestamps.startDate),
@@ -51,7 +51,7 @@ describe('NewEventModal', () => {
   });
 
   it('if startDate is greater than endDate should set endDate one day after startDate', () => {
-    const wrapper = shallowWithIntl(<NewEventModal.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<NewEventModal {...testProps} />);
     const instance = wrapper.instance();
     instance.setState({
       startDate: moment(stateTimestamps.startDate),

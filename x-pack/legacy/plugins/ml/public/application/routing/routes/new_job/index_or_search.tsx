@@ -6,12 +6,11 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader, PageDependencies } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
-import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { checkBasicLicense } from '../../../license/check_license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
@@ -20,6 +19,11 @@ import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 enum MODE {
   NEW_JOB,
   DATAVISUALIZER,
+}
+
+interface IndexOrSearchPageProps extends PageProps {
+  nextStepPath: string;
+  mode: MODE;
 }
 
 const breadcrumbs = [
@@ -35,9 +39,9 @@ const breadcrumbs = [
 
 export const indexOrSearchRoute: MlRoute = {
   path: '/jobs/new_job/step/index_or_search',
-  render: (props, config, deps) => (
+  render: (props, deps) => (
     <PageWrapper
-      config={config}
+      {...props}
       nextStepPath="#/jobs/new_job/step/job_type"
       deps={deps}
       mode={MODE.NEW_JOB}
@@ -48,9 +52,9 @@ export const indexOrSearchRoute: MlRoute = {
 
 export const dataVizIndexOrSearchRoute: MlRoute = {
   path: '/datavisualizer_index_select',
-  render: (props, config, deps) => (
+  render: (props, deps) => (
     <PageWrapper
-      config={config}
+      {...props}
       nextStepPath="#jobs/new_job/datavisualizer"
       deps={deps}
       mode={MODE.DATAVISUALIZER}
@@ -59,12 +63,7 @@ export const dataVizIndexOrSearchRoute: MlRoute = {
   breadcrumbs,
 };
 
-const PageWrapper: FC<{
-  config: KibanaConfigTypeFix;
-  nextStepPath: string;
-  deps: PageDependencies;
-  mode: MODE;
-}> = ({ config, nextStepPath, deps, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
   const newJobResolvers = {
     ...basicResolvers(deps),
     preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns),
@@ -79,7 +78,7 @@ const PageWrapper: FC<{
   const { context } = useResolver(
     undefined,
     undefined,
-    config,
+    deps.config,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

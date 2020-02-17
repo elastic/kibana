@@ -21,6 +21,7 @@ export { MachineLearningJobTableProvider } from './job_table';
 export { MachineLearningJobTypeSelectionProvider } from './job_type_selection';
 export { MachineLearningJobWizardAdvancedProvider } from './job_wizard_advanced';
 export { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
+export { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
 export { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 export { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
 export { MachineLearningNavigationProvider } from './navigation';

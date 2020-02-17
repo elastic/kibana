@@ -12,5 +12,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./bucket_span_estimator'));
     loadTestFile(require.resolve('./calculate_model_memory_limit'));
+    loadTestFile(require.resolve('./categorization_field_examples'));
   });
 }
