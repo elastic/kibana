@@ -20,6 +20,7 @@
 import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
+import { ExecutionContract } from '../execution/execution_contract';
 
 export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
 export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
@@ -117,6 +118,26 @@ export class ExpressionsService {
     context?: ExtraContext
   ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
 
+  /**
+   * Starts expression execution and immediately returns `ExecutionContract`
+   * instance that tracks the progress of the execution and can be used to
+   * interact with the execution.
+   */
+  public readonly execute = <
+    Input = unknown,
+    Output = unknown,
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+  >(
+    ast: string | ExpressionAstExpression,
+    // This any is for legacy reasons.
+    input: Input = { type: 'null' } as any,
+    context?: ExtraContext
+  ): ExecutionContract<ExtraContext, Input, Output> => {
+    const execution = this.executor.createExecution<ExtraContext, Input, Output>(ast, context);
+    execution.start(input);
+    return execution.contract;
+  };
+
   public setup() {
     const { executor, renderers, registerFunction, run } = this;
 
@@ -144,7 +165,7 @@ export class ExpressionsService {
   }
 
   public start() {
-    const { executor, renderers, run } = this;
+    const { execute, executor, renderers, run } = this;
 
     const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
@@ -154,6 +175,7 @@ export class ExpressionsService {
     const getTypes = executor.getTypes.bind(executor);
 
     return {
+      execute,
       getFunction,
       getFunctions,
       getRenderer,
