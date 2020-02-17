@@ -7,16 +7,13 @@
 import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
+import {
+  formatAnomalyScore,
+  getFriendlyNameForPartitionId,
+  getSeverityCategoryForScore,
+  MLSeverityScoreCategories,
+} from '../../../../../../common/log_analysis';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
-
-const ML_SEVERITY_SCORES = {
-  warning: 3,
-  minor: 25,
-  major: 50,
-  critical: 75,
-};
-
-export type MLSeverityScoreCategories = keyof typeof ML_SEVERITY_SCORES;
 
 export const getLogEntryRatePartitionedSeries = (results: LogEntryRateResults) => {
   return results.histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
@@ -181,27 +178,4 @@ export const getTopAnomalyScoreAcrossAllPartitions = (results: LogEntryRateResul
     []
   );
   return Math.max(...allTopScores);
-};
-
-const getSeverityCategoryForScore = (score: number): MLSeverityScoreCategories | undefined => {
-  if (score >= ML_SEVERITY_SCORES.critical) {
-    return 'critical';
-  } else if (score >= ML_SEVERITY_SCORES.major) {
-    return 'major';
-  } else if (score >= ML_SEVERITY_SCORES.minor) {
-    return 'minor';
-  } else if (score >= ML_SEVERITY_SCORES.warning) {
-    return 'warning';
-  } else {
-    // Category is too low to include
-    return undefined;
-  }
-};
-
-export const formatAnomalyScore = (score: number) => {
-  return Math.round(score);
-};
-
-export const getFriendlyNameForPartitionId = (partitionId: string) => {
-  return partitionId !== '' ? partitionId : 'unknown';
 };

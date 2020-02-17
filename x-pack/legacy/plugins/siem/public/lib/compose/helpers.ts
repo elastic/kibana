@@ -5,18 +5,15 @@
  */
 
 import { HttpLink } from '@apollo/client';
-import chrome from 'ui/chrome';
 
 import { errorLink, reTryOneTimeOnErrorLink } from '../../containers/errors';
 
-export const getLinks = () => [
+export const getLinks = (basePath: string) => [
   errorLink,
   reTryOneTimeOnErrorLink,
   new HttpLink({
     credentials: 'same-origin',
-    headers: {
-      'kbn-xsrf': chrome.getXsrfToken(),
-    },
-    uri: `${chrome.getBasePath()}/api/siem/graphql`,
+    headers: { 'kbn-xsrf': 'true' },
+    uri: `${basePath}/api/siem/graphql`,
   }),
 ];

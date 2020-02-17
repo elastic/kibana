@@ -21,9 +21,24 @@ import { PromiseType } from 'utility-types';
 export { $Values, Required, Optional, Class } from 'utility-types';
 
 /**
- * Returns wrapped type of a promise.
+ * A type that may or may not be a `Promise`.
+ */
+export type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
+ */
+export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
+
+/**
+ * Returns wrapped type of a `Promise`.
  */
 export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
+
+/**
+ * Returns wrapped type of a promise, or returns type as is, if it is not a promise.
+ */
+export type UnwrapPromiseOrReturn<T> = T extends Promise<infer U> ? U : T;
 
 /**
  * Minimal interface for an object resembling an `Observable`.
@@ -38,11 +53,6 @@ export interface ObservableLike<T> {
 export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
   ? U
   : never;
-
-/**
- * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
- */
-export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
 
 /**
  * Ensures T is of type X.

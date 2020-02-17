@@ -28,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
@@ -49,6 +49,7 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
@@ -99,6 +100,7 @@ const timelineActionsType = [
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDescription.type,
+  updateEventType.type,
   updateKqlMode.type,
   updateProviders.type,
   updateSort.type,
@@ -248,6 +250,7 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eventType: null,
   filters: null,
   kqlMode: null,
   kqlQuery: null,
@@ -278,7 +281,7 @@ export const convertTimelineAsInput = (
         return set(
           key,
           filters != null
-            ? filters.map((myFilter: esFilters.Filter) => {
+            ? filters.map((myFilter: Filter) => {
                 const basicFilter = omit(['$state'], myFilter);
                 return {
                   ...basicFilter,
@@ -303,9 +306,7 @@ export const convertTimelineAsInput = (
                   },
                   ...(esFilters.isMatchAllFilter(basicFilter)
                     ? {
-                        match_all: convertToString(
-                          (basicFilter as esFilters.MatchAllFilter).match_all
-                        ),
+                        match_all: convertToString((basicFilter as MatchAllFilter).match_all),
                       }
                     : { match_all: null }),
                   ...(esFilters.isMissingFilter(basicFilter) && basicFilter.missing != null

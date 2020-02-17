@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
 import { SiemPageName } from '../../pages/home/types';
@@ -15,17 +15,20 @@ import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 
-jest.mock('../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
-
-jest.mock('@apollo/client', () => ({
-  useApolloClient: jest.fn(() => {}),
-}));
-
 let mockProps: UrlStateContainerPropTypes;
+
+jest.mock('../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      data: {
+        query: {
+          filterManager: {},
+          savedQueries: {},
+        },
+      },
+    },
+  }),
+}));
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
   afterEach(() => {
@@ -144,7 +147,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          '?timeline=(id:hello_timeline_id,isOpen:!t)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)',
         state: '',
       });
     });

@@ -18,3 +18,4 @@
  */
 
 export { withProcRunner } from './with_proc_runner';
+export { ProcRunner } from './proc_runner';

@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -41,13 +41,7 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
   type: hostsModel.HostsType;
 }
 
-export interface UncommonProcessesComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-}
-
-type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps & WithKibanaProps;
+type UncommonProcessesProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
   UncommonProcessesProps,
@@ -141,7 +135,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const UncommonProcessesQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(UncommonProcessesComponentQuery);

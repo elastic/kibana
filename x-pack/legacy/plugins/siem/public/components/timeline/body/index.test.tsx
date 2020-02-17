@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -66,7 +66,6 @@ describe('Body', () => {
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
-            range={'1 Day'}
             rowRenderers={rowRenderers}
             selectedEventIds={{}}
             sort={mockSort}
@@ -110,7 +109,6 @@ describe('Body', () => {
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
-            range={'1 Day'}
             rowRenderers={rowRenderers}
             selectedEventIds={{}}
             sort={mockSort}
@@ -154,7 +152,6 @@ describe('Body', () => {
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
-            range={'1 Day'}
             rowRenderers={rowRenderers}
             selectedEventIds={{}}
             sort={mockSort}
@@ -200,7 +197,6 @@ describe('Body', () => {
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
-            range={'1 Day'}
             rowRenderers={rowRenderers}
             selectedEventIds={{}}
             sort={mockSort}
@@ -293,7 +289,6 @@ describe('Body', () => {
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
-            range={'1 Day'}
             rowRenderers={rowRenderers}
             selectedEventIds={{}}
             sort={mockSort}
@@ -339,7 +334,6 @@ describe('Body', () => {
           onUnPinEvent={jest.fn()}
           onUpdateColumns={jest.fn()}
           pinnedEventIds={{}}
-          range={'1 Day'}
           rowRenderers={rowRenderers}
           selectedEventIds={{}}
           sort={mockSort}

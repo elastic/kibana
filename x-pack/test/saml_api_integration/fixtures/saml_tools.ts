@@ -6,12 +6,13 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 import url from 'url';
 import zlib from 'zlib';
 import { promisify } from 'util';
 import { parseString } from 'xml2js';
 import { SignedXml } from 'xml-crypto';
+import { KBN_KEY_PATH } from '@kbn/dev-utils';
 
 /**
  * @file Defines a set of tools that allow us to parse and generate various SAML XML messages.
@@ -24,7 +25,7 @@ const inflateRawAsync = promisify(zlib.inflateRaw);
 const deflateRawAsync = promisify(zlib.deflateRaw);
 const parseStringAsync = promisify(parseString);
 
-const signingKey = fs.readFileSync(require.resolve('../../../../test/dev_certs/server.key'));
+const signingKey = fs.readFileSync(KBN_KEY_PATH);
 const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
@@ -139,7 +140,7 @@ export async function getLogoutRequest({
   };
 
   const signer = crypto.createSign('RSA-SHA256');
-  signer.update(querystring.stringify(queryStringParameters));
+  signer.update(stringify(queryStringParameters, { sort: false }));
   queryStringParameters.Signature = signer.sign(signingKey.toString(), 'base64');
 
   return queryStringParameters;

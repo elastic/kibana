@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQueryComponent, OverviewHostData } from '../../../graphql/types';
@@ -26,10 +26,6 @@ export interface OverviewHostArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OverviewHostReducer {
-  isInspected: boolean;
-}
-
 export interface OverviewHostProps extends QueryTemplateProps {
   children: (args: OverviewHostArgs) => React.ReactElement;
   sourceId: string;
@@ -37,9 +33,10 @@ export interface OverviewHostProps extends QueryTemplateProps {
   startDate: number;
 }
 
-const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostReducer>(
+const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <GetOverviewHostQueryComponent
+    <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
+      query={overviewHostQuery}
       fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
@@ -63,7 +60,7 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostRe
           refetch,
         });
       }}
-    </GetOverviewHostQueryComponent>
+    </Query>
   )
 );
 
@@ -80,4 +77,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const OverviewHostQuery = connect(makeMapStateToProps)(OverviewHostComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const OverviewHostQuery = connector(OverviewHostComponentQuery);

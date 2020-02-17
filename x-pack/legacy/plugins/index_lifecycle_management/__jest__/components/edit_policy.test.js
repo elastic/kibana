@@ -7,21 +7,23 @@
 import React from 'react';
 import moment from 'moment-timezone';
 import { Provider } from 'react-redux';
-import { fetchedPolicies, fetchedNodes } from '../../public/store/actions';
-import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { EditPolicy } from '../../public/sections/edit_policy';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
+
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies, fetchedNodes } from '../../public/np_ready/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
+import { EditPolicy } from '../../public/np_ready/application/sections/edit_policy';
+import { init as initHttp } from '../../public/np_ready/application/services/http';
+import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
+import { init as initNotification } from '../../public/np_ready/application/services/notification';
 import {
   positiveNumbersAboveZeroErrorMessage,
-  numberRequiredMessage,
   positiveNumberRequiredMessage,
+  numberRequiredMessage,
   maximumAgeRequiredMessage,
   maximumSizeRequiredMessage,
   policyNameRequiredMessage,
@@ -31,7 +33,13 @@ import {
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
-} from '../../public/store/selectors/lifecycle';
+} from '../../public/np_ready/application/store/selectors/lifecycle';
+
+initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initUiMetric(() => () => {});
+initNotification({
+  addDanger: () => {},
+});
 
 jest.mock('ui/new_platform');
 
@@ -243,17 +251,18 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
+      setPhaseAfter(rendered, 'warm', '');
       save(rendered);
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
-    test('should show positive number required above zero error when trying to save warm phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -383,14 +392,14 @@ describe('edit policy', () => {
     });
   });
   describe('cold phase', () => {
-    test('should show positive number required error when trying to save cold phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -464,14 +473,14 @@ describe('edit policy', () => {
     });
   });
   describe('delete phase', () => {
-    test('should show positive number required error when trying to save delete phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', () => {
       const rendered = mountWithIntl(component);

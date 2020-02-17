@@ -156,6 +156,9 @@ __Usage:__
 const valueSchema = schema.boolean({ defaultValue: false });
 ```
 
+__Notes:__
+* The `schema.boolean()` also supports a string as input if it equals `'true'` or `'false'` (case-insensitive).
+
 #### `schema.literal()`
 
 Validates input data as a [string](https://www.typescriptlang.org/docs/handbook/advanced-types.html#string-literal-types), [numeric](https://www.typescriptlang.org/docs/handbook/advanced-types.html#numeric-literal-types) or boolean literal.
@@ -224,6 +227,9 @@ __Usage:__
 const valueSchema = schema.arrayOf(schema.number());
 ```
 
+__Notes:__
+* The `schema.arrayOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is an array.
+
 #### `schema.object()`
 
 Validates input data as an object with a predefined set of properties.
@@ -246,6 +252,7 @@ const valueSchema = schema.object({
 __Notes:__
 * Using `allowUnknowns` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
+* `schema.object()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 #### `schema.recordOf()`
 
@@ -264,6 +271,7 @@ const valueSchema = schema.recordOf(schema.string(), schema.number());
 
 __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
+* `schema.recordOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 #### `schema.mapOf()`
 
@@ -279,6 +287,10 @@ __Usage:__
 ```typescript
 const valueSchema = schema.mapOf(schema.string(), schema.number());
 ```
+
+__Notes:__
+* You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
+* `schema.mapOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 
 ### Advanced types
 
@@ -397,7 +409,7 @@ const valueSchema = schema.byteSize({ min: '3kb' });
 ```
 
 __Notes:__
-* The string value for `schema.byteSize()` and its options supports the following prefixes: `b`, `kb`, `mb`, `gb` and `tb`.
+* The string value for `schema.byteSize()` and its options supports the following optional suffixes: `b`, `kb`, `mb`, `gb` and `tb`. The default suffix is `b`.
 * The number value is treated as a number of bytes and hence should be a positive integer, e.g. `100` is equal to `'100b'`.
 * Currently you cannot specify zero bytes with a string format and should use number `0` instead.
 
@@ -417,7 +429,7 @@ const valueSchema = schema.duration({ defaultValue: '70ms' });
 ```
 
 __Notes:__
-* The string value for `schema.duration()` supports the following prefixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`.
+* The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
 * The number value is treated as a number of milliseconds and hence should be a positive integer, e.g. `100` is equal to `'100ms'`.
 
 #### `schema.conditional()`

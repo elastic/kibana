@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import { npStart } from 'ui/new_platform';
@@ -32,23 +31,22 @@ uiRoutes.when('/management/kibana/index_pattern', {
   controller: function($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');
-    const Private = $injector.get('Private');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
       const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
         $routeParams.type
       );
       const services = {
-        config: $injector.get('config'),
-        es: $injector.get('es'),
+        config: npStart.core.uiSettings,
+        es: npStart.plugins.data.search.__LEGACY.esClient,
         indexPatterns: npStart.plugins.data.indexPatterns,
-        $http: $injector.get('$http'),
-        savedObjectsClient: Private(SavedObjectsClientProvider),
+        $http: npStart.core.http,
+        savedObjectsClient: npStart.core.savedObjects.client,
         indexPatternCreationType,
-        confirmModalPromise: $injector.get('confirmModalPromise'),
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },
+        openConfirm: npStart.core.overlays.openConfirm,
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;

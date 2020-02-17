@@ -70,10 +70,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       name="new_filter_id"
       onChange={[Function]}
       value="test_filter_list"
@@ -96,7 +93,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     <EuiFlexItem
       grow={false}
     >
-      <InjectIntl(EditDescriptionPopover)
+      <EditDescriptionPopover
         canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}
@@ -183,10 +180,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
       isInvalid={true}
-      isLoading={false}
       name="new_filter_id"
       onChange={[Function]}
       value=""
@@ -215,7 +209,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     <EuiFlexItem
       grow={false}
     >
-      <InjectIntl(EditDescriptionPopover)
+      <EditDescriptionPopover
         canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
@@ -306,7 +300,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
     <EuiFlexItem
       grow={false}
     >
-      <InjectIntl(EditDescriptionPopover)
+      <EditDescriptionPopover
         canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
@@ -403,7 +397,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
     <EuiFlexItem
       grow={false}
     >
-      <InjectIntl(EditDescriptionPopover)
+      <EditDescriptionPopover
         canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}

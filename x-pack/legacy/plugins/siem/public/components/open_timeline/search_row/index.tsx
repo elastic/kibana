@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';

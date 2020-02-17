@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
+import { FixedDatePicker } from '../fixed_datepicker';
 
 const noop = () => undefined;
 
 interface LogTimeControlsProps {
   currentTime: number | null;
   startLiveStreaming: () => any;
-  stopLiveStreaming: () => any;
+  stopLiveStreaming: () => void;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
 }
@@ -56,7 +57,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
       return (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiDatePicker
+            <FixedDatePicker
               dateFormat="L LTS"
               onChange={this.handleChangeDate}
               popperPlacement="top-end"

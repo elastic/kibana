@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 export const METRICS_FEATURE = {
   id: 'infrastructure',
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-    defaultMessage: 'Infrastructure',
+    defaultMessage: 'Metrics',
   }),
-  icon: 'infraApp',
+  icon: 'metricsApp',
   navLinkId: 'infra:home',
   app: ['infra', 'kibana'],
   catalogue: ['infraops'],
@@ -40,7 +40,7 @@ export const LOGS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),
-  icon: 'loggingApp',
+  icon: 'logsApp',
   navLinkId: 'infra:logs',
   app: ['infra', 'kibana'],
   catalogue: ['infralogging'],

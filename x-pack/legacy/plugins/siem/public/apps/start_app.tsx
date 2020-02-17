@@ -37,7 +37,7 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
-  const AppPluginRoot = memo(() => {
+  const AppPluginRoot = memo(() => { // eslint-disable-line
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const theme = useMemo(
       () => ({
@@ -69,6 +69,8 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
   return <AppPluginRoot />;
 });
 
+StartApp.displayName = 'StartApp';
+
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
 export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core, plugins }) => (
@@ -83,3 +85,5 @@ export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core,
     <StartApp {...compose()} />
   </KibanaContextProvider>
 ));
+
+SiemApp.displayName = 'SiemApp';

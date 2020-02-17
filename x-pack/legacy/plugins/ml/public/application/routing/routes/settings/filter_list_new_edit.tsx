@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
+import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
@@ -54,32 +55,30 @@ const editBreadcrumbs = [
 
 export const newFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/new_filter_list',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} mode={MODE.NEW} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: newBreadcrumbs,
 };
 
 export const editFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/edit_filter_list/:filterId',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} mode={MODE.EDIT} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: editBreadcrumbs,
 };
 
-const PageWrapper: FC<NewFilterPageProps> = ({ location, config, mode }) => {
+const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
 
-  const { context } = useResolver(undefined, undefined, config, {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     checkMlNodesAvailable,
   });
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canCreateFilter = checkPermission('canCreateFilter');
   const canDeleteFilter = checkPermission('canDeleteFilter');

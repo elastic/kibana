@@ -8,13 +8,14 @@ import { EuiButtonEmpty, EuiDatePicker, EuiFormControlLayout } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
+import { Action } from 'typescript-fsa';
 
 interface WaffleTimeControlsProps {
   currentTime: number;
   isLiveStreaming?: boolean;
   onChangeTime?: (time: number) => void;
-  startLiveStreaming?: () => void;
-  stopLiveStreaming?: () => void;
+  startLiveStreaming?: (payload: void) => Action<void>;
+  stopLiveStreaming?: (payload: void) => Action<void>;
 }
 
 export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps> {

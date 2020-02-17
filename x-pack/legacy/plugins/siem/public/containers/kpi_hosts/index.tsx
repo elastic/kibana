@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQueryComponent, KpiHostsData } from '../../graphql/types';
@@ -25,15 +25,11 @@ export interface KpiHostsArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface KpiHostsReducer {
-  isInspected: boolean;
-}
-
 export interface KpiHostsProps extends QueryTemplateProps {
   children: (args: KpiHostsArgs) => React.ReactElement;
 }
 
-const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
+const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <GetKpiHostsQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
@@ -78,4 +74,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const KpiHostsQuery = connect(makeMapStateToProps)(KpiHostsComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const KpiHostsQuery = connector(KpiHostsComponentQuery);

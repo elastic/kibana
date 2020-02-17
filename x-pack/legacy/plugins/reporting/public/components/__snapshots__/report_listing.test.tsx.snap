@@ -45,6 +45,7 @@ Array [
       }
     }
     responsive={true}
+    tableLayout="fixed"
   >
     <div
       className="euiBasicTable euiBasicTable-loading"
@@ -83,16 +84,14 @@ Array [
         </EuiTableHeaderMobile>
         <EuiTable
           responsive={true}
+          tableLayout="fixed"
         >
           <table
             className="euiTable euiTable--responsive"
           >
             <EuiScreenReaderOnly>
               <caption
-                aria-live="polite"
-                aria-relevant="text"
                 className="euiScreenReaderOnly euiTableCaption"
-                role="status"
               >
                 <EuiDelayRender
                   delay={500}
@@ -288,16 +287,14 @@ Array [
       </EuiTableHeaderMobile>
       <EuiTable
         responsive={true}
+        tableLayout="fixed"
       >
         <table
           className="euiTable euiTable--responsive"
         >
           <EuiScreenReaderOnly>
             <caption
-              aria-live="polite"
-              aria-relevant="text"
               className="euiScreenReaderOnly euiTableCaption"
-              role="status"
             >
               <EuiDelayRender
                 delay={500}

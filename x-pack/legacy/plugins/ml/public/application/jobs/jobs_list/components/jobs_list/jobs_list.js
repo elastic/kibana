@@ -16,16 +16,16 @@ import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
 import { getJobIdUrl } from '../utils';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
-class JobsListUI extends Component {
+export class JobsList extends Component {
   constructor(props) {
     super(props);
 
@@ -99,7 +99,7 @@ class JobsListUI extends Component {
   }
 
   render() {
-    const { intl, loading, isManagementTable } = this.props;
+    const { loading, isManagementTable } = this.props;
     const selectionControls = {
       selectable: job => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
@@ -124,7 +124,16 @@ class JobsListUI extends Component {
     // be updated if we move to always using props for width.
     const columns = [
       {
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.showDetailsColumn.screenReaderDescription"
+                defaultMessage="This column contains clickable controls for showing more details on each job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         render: item => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
@@ -132,20 +141,14 @@ class JobsListUI extends Component {
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
-                ? intl.formatMessage(
-                    {
-                      id: 'xpack.ml.jobsList.collapseJobDetailsAriaLabel',
-                      defaultMessage: 'Hide details for {itemId}',
-                    },
-                    { itemId: item.id }
-                  )
-                : intl.formatMessage(
-                    {
-                      id: 'xpack.ml.jobsList.expandJobDetailsAriaLabel',
-                      defaultMessage: 'Show details for {itemId}',
-                    },
-                    { itemId: item.id }
-                  )
+                ? i18n.translate('xpack.ml.jobsList.collapseJobDetailsAriaLabel', {
+                    defaultMessage: 'Hide details for {itemId}',
+                    values: { itemId: item.id },
+                  })
+                : i18n.translate('xpack.ml.jobsList.expandJobDetailsAriaLabel', {
+                    defaultMessage: 'Show details for {itemId}',
+                    values: { itemId: item.id },
+                  })
             }
             data-row-id={item.id}
             data-test-subj="mlJobListRowDetailsToggle"
@@ -156,23 +159,31 @@ class JobsListUI extends Component {
       {
         field: 'id',
         'data-test-subj': 'mlJobListColumnId',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.idLabel',
+        name: i18n.translate('xpack.ml.jobsList.idLabel', {
           defaultMessage: 'ID',
         }),
         sortable: true,
         truncateText: false,
         width: '20%',
+        scope: 'row',
         render: isManagementTable ? id => this.getJobIdLink(id) : undefined,
       },
       {
         field: 'auditMessage',
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
+                defaultMessage="This column display icons when there are errors or warnings for the job in the past 24 hours"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         render: item => <JobIcon message={item} showTooltip={true} />,
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.descriptionLabel',
+        name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
           defaultMessage: 'Description',
         }),
         sortable: true,
@@ -185,8 +196,7 @@ class JobsListUI extends Component {
       {
         field: 'processed_record_count',
         'data-test-subj': 'mlJobListColumnRecordCount',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.processedRecordsLabel',
+        name: i18n.translate('xpack.ml.jobsList.processedRecordsLabel', {
           defaultMessage: 'Processed records',
         }),
         sortable: true,
@@ -198,8 +208,7 @@ class JobsListUI extends Component {
       {
         field: 'memory_status',
         'data-test-subj': 'mlJobListColumnMemoryStatus',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.memoryStatusLabel',
+        name: i18n.translate('xpack.ml.jobsList.memoryStatusLabel', {
           defaultMessage: 'Memory status',
         }),
         sortable: true,
@@ -209,8 +218,7 @@ class JobsListUI extends Component {
       {
         field: 'jobState',
         'data-test-subj': 'mlJobListColumnJobState',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobStateLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobStateLabel', {
           defaultMessage: 'Job state',
         }),
         sortable: true,
@@ -220,8 +228,7 @@ class JobsListUI extends Component {
       {
         field: 'datafeedState',
         'data-test-subj': 'mlJobListColumnDatafeedState',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.datafeedStateLabel',
+        name: i18n.translate('xpack.ml.jobsList.datafeedStateLabel', {
           defaultMessage: 'Datafeed state',
         }),
         sortable: true,
@@ -229,8 +236,7 @@ class JobsListUI extends Component {
         width: '8%',
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.actionsLabel',
+        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
         render: item => <ResultLinks jobs={[item]} />,
@@ -240,8 +246,7 @@ class JobsListUI extends Component {
     if (isManagementTable === true) {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.spacesLabel',
+        name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
           defaultMessage: 'Spaces',
         }),
         render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
@@ -253,8 +258,7 @@ class JobsListUI extends Component {
     } else {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.latestTimestampLabel',
+        name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
           defaultMessage: 'Latest timestamp',
         }),
         truncateText: false,
@@ -272,7 +276,16 @@ class JobsListUI extends Component {
         width: '15%',
       });
       columns.push({
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobActionsColumn.screenReaderDescription"
+                defaultMessage="This column contains extra actions in a menu that can be performed on each job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
@@ -313,12 +326,10 @@ class JobsListUI extends Component {
         loading={loading === true}
         noItemsMessage={
           loading
-            ? intl.formatMessage({
-                id: 'xpack.ml.jobsList.loadingJobsLabel',
+            ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
                 defaultMessage: 'Loading jobs…',
               })
-            : intl.formatMessage({
-                id: 'xpack.ml.jobsList.noJobsFoundLabel',
+            : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
                 defaultMessage: 'No jobs found',
               })
         }
@@ -340,7 +351,7 @@ class JobsListUI extends Component {
     );
   }
 }
-JobsListUI.propTypes = {
+JobsList.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
   isManagementTable: PropTypes.bool,
@@ -355,10 +366,8 @@ JobsListUI.propTypes = {
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
 };
-JobsListUI.defaultProps = {
+JobsList.defaultProps = {
   isManagementTable: false,
   isMlEnabledInSpace: true,
   loading: false,
 };
-
-export const JobsList = injectI18n(JobsListUI);

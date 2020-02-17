@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCallOut,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
@@ -26,7 +27,7 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getColumns = (kbnUrl, scope, setupMode) => {
+const getColumns = setupMode => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -67,11 +68,7 @@ const getColumns = (kbnUrl, scope, setupMode) => {
         return (
           <div>
             <EuiLink
-              onClick={() => {
-                scope.$evalAsync(() => {
-                  kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
-                });
-              }}
+              href={`#/kibana/instances/${kibana.kibana.uuid}`}
               data-test-subj={`kibanaLink-${name}`}
             >
               {name}
@@ -247,6 +244,14 @@ export class KibanaInstances extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.kibana.instances.heading"
+                defaultMessage="Kibana instances"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>
             <ClusterStatus stats={clusterStatus} />
           </EuiPanel>

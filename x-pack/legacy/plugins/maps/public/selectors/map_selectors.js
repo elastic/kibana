@@ -42,8 +42,14 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new Source(sourceDescriptor, inspectorAdapters);
 }
 
-export const getTooltipState = ({ map }) => {
-  return map.tooltipState;
+export const getOpenTooltips = ({ map }) => {
+  return map && map.openTooltips ? map.openTooltips : [];
+};
+
+export const getHasLockedTooltips = state => {
+  return getOpenTooltips(state).some(({ isLocked }) => {
+    return isLocked;
+  });
 };
 
 export const getMapReady = ({ map }) => map && map.ready;
@@ -148,6 +154,10 @@ export const getLayerList = createSelector(
       createLayerInstance(layerDescriptor, inspectorAdapters)
     );
   }
+);
+
+export const getHiddenLayerIds = createSelector(getLayerListRaw, layers =>
+  layers.filter(layer => !layer.visible).map(layer => layer.id)
 );
 
 export const getSelectedLayer = createSelector(

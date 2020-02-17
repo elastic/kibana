@@ -10,7 +10,6 @@ import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import {
   ClusterItemContainer,
   HealthStatusIndicator,
-  BytesUsage,
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
@@ -291,7 +290,7 @@ export function ElasticsearchPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
-                <BytesUsage
+                <BytesPercentageUsage
                   usedBytes={get(nodes, 'fs.available_in_bytes')}
                   maxBytes={get(nodes, 'fs.total_in_bytes')}
                 />

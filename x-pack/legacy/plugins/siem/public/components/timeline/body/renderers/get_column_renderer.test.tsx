@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
@@ -41,7 +40,7 @@ describe('get_column_renderer', () => {
     });
 
     const wrapper = shallow(<span>{column}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render event severity when dealing with data that is not suricata', () => {

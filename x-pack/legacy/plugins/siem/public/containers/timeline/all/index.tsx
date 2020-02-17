@@ -69,31 +69,37 @@ const getAllTimeline = memoizeOne(
     }))
 );
 
-export const AllTimelinesQuery = React.memo<OwnProps>(
-  ({ children, onlyUserFavorite, pageInfo, search, sort }) => {
-    const variables: GetAllTimeline.Variables = {
-      onlyUserFavorite,
-      pageInfo,
-      search,
-      sort,
-    };
-    return (
-      <GetAllTimelineComponent
-        fetchPolicy="network-only"
-        notifyOnNetworkStatusChange
-        variables={variables}
-      >
-        {({ data, loading }) => {
-          return children!({
-            loading,
-            totalCount: getOr(0, 'getAllTimeline.totalCount', data),
-            timelines: getAllTimeline(
-              JSON.stringify(variables),
-              getOr([], 'getAllTimeline.timeline', data)
-            ),
-          });
-        }}
-      </GetAllTimelineComponent>
-    );
-  }
-);
+const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
+  children,
+  onlyUserFavorite,
+  pageInfo,
+  search,
+  sort,
+}) => {
+  const variables: GetAllTimeline.Variables = {
+    onlyUserFavorite,
+    pageInfo,
+    search,
+    sort,
+  };
+  return (
+    <GetAllTimelineComponent
+      fetchPolicy="network-only"
+      notifyOnNetworkStatusChange
+      variables={variables}
+    >
+      {({ data, loading }) =>
+        children!({
+          loading,
+          totalCount: getOr(0, 'getAllTimeline.totalCount', data),
+          timelines: getAllTimeline(
+            JSON.stringify(variables),
+            getOr([], 'getAllTimeline.timeline', data)
+          ),
+        })
+      }
+    </GetAllTimelineComponent>
+  );
+};
+
+export const AllTimelinesQuery = React.memo(AllTimelinesQueryComponent);

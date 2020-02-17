@@ -5,17 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { QueryRequest } from '../../rules/types';
+import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { GetScopedClients } from '../../../../services';
 
-export const createReadRulesRoute: Hapi.ServerRoute = {
+export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -27,31 +28,63 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
       query: queryRulesSchema,
     },
   },
-  async handler(request: QueryRequest, headers) {
+  async handler(request: QueryRequest & LegacyRequest, headers) {
     const { id, rule_id: ruleId } = request.query;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
-    if (!alertsClient || !actionsClient) {
-      return headers.response().code(404);
-    }
     try {
+      const { alertsClient, savedObjectsClient } = await getClients(request);
+      if (!alertsClient) {
+        return headers.response().code(404);
+      }
+
       const rule = await readRules({
         alertsClient,
         id,
         ruleId,
       });
       if (rule != null) {
-        return transformOrError(rule);
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        });
+        const transformedOrError = transform(rule, ruleStatuses.saved_objects[0]);
+        if (transformedOrError == null) {
+          return headers
+            .response({
+              message: 'Internal error transforming rules',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformedOrError;
+        }
       } else {
-        return getIdError({ id, ruleId });
+        const error = getIdError({ id, ruleId });
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     } catch (err) {
-      return transformError(err);
+      const error = transformError(err);
+      return headers
+        .response({
+          message: error.message,
+          status_code: error.statusCode,
+        })
+        .code(error.statusCode);
     }
   },
-};
+});
 
-export const readRulesRoute = (server: ServerFacade) => {
-  server.route(createReadRulesRoute);
+export const readRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
+  route(createReadRulesRoute(getClients));
 };

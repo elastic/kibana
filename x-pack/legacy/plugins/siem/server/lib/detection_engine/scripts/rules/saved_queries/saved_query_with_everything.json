@@ -21,7 +21,6 @@
     }
   ],
   "enabled": false,
-  "immutable": true,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
@@ -41,7 +40,7 @@
   "from": "now-6m",
   "severity": "high",
   "type": "saved_query",
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -49,7 +48,7 @@
         "name": "impact",
         "reference": "https://attack.mitre.org/tactics/TA0040/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1499",
           "name": "endpoint denial of service",
@@ -64,7 +63,7 @@
         "name": "Some other name",
         "reference": "https://example.com"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "some-other-id",
           "name": "some other technique name",
@@ -78,5 +77,6 @@
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
   "saved_id": "test-saved-id",
-  "timeline_id": "test-timeline-id"
+  "timeline_id": "test-timeline-id",
+  "timeline_title": "test-timeline-title"
 }

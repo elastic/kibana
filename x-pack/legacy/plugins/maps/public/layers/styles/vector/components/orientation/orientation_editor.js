@@ -6,20 +6,16 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
-import { DynamicOrientationSelection } from './dynamic_orientation_selection';
-import { StaticOrientationSelection } from './static_orientation_selection';
+import { StylePropEditor } from '../style_prop_editor';
+import { DynamicOrientationForm } from './dynamic_orientation_form';
+import { StaticOrientationForm } from './static_orientation_form';
 
 export function OrientationEditor(props) {
-  return (
-    <StaticDynamicStyleRow
-      fields={props.fields}
-      styleProperty={props.styleProperty}
-      handlePropertyChange={props.handlePropertyChange}
-      DynamicSelector={DynamicOrientationSelection}
-      StaticSelector={StaticOrientationSelection}
-      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
-      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
-    />
+  const orientationForm = props.styleProperty.isDynamic() ? (
+    <DynamicOrientationForm {...props} />
+  ) : (
+    <StaticOrientationForm {...props} />
   );
+
+  return <StylePropEditor {...props}>{orientationForm}</StylePropEditor>;
 }

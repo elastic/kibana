@@ -30,6 +30,8 @@ import {
   EuiTitle,
   EuiCallOut,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { npStart } from 'ui/new_platform';
 const { SearchBar } = npStart.plugins.data.ui;
@@ -116,7 +118,13 @@ export class TestScript extends Component {
 
     if (previewData.error) {
       return (
-        <EuiCallOut title="There's an error in your script" color="danger" iconType="cross">
+        <EuiCallOut
+          title={i18n.translate('common.ui.fieldEditor.testScript.errorMessage', {
+            defaultMessage: `There's an error in your script`,
+          })}
+          color="danger"
+          iconType="cross"
+        >
           <EuiCodeBlock
             language="json"
             className="scriptPreviewCodeBlock"
@@ -131,7 +139,12 @@ export class TestScript extends Component {
     return (
       <Fragment>
         <EuiTitle size="xs">
-          <p>First 10 results</p>
+          <p>
+            <FormattedMessage
+              id="common.ui.fieldEditor.testScript.resultsLabel"
+              defaultMessage="First 10 results"
+            />
+          </p>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiCodeBlock
@@ -151,7 +164,8 @@ export class TestScript extends Component {
 
     this.props.indexPattern.fields
       .filter(field => {
-        return !field.name.startsWith('_');
+        const isMultiField = field.subType && field.subType.multi;
+        return !field.name.startsWith('_') && !isMultiField && !field.scripted;
       })
       .forEach(field => {
         if (fieldsByTypeMap.has(field.type)) {
@@ -180,9 +194,16 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow label="Additional fields" fullWidth>
+        <EuiFormRow
+          label={i18n.translate('common.ui.fieldEditor.testScript.fieldsLabel', {
+            defaultMessage: 'Additional fields',
+          })}
+          fullWidth
+        >
           <EuiComboBox
-            placeholder="Select..."
+            placeholder={i18n.translate('common.ui.fieldEditor.testScript.fieldsPlaceholder', {
+              defaultMessage: 'Select...',
+            })}
             options={fields}
             selectedOptions={this.state.additionalFields}
             onChange={this.onAdditionalFieldsChange}
@@ -205,7 +226,10 @@ export class TestScript extends Component {
                 isLoading={this.state.isLoading}
                 data-test-subj="runScriptButton"
               >
-                Run script
+                <FormattedMessage
+                  id="common.ui.fieldEditor.testScript.submitButtonLabel"
+                  defaultMessage="Run script"
+                />
               </EuiButton>
             }
           />
@@ -219,11 +243,19 @@ export class TestScript extends Component {
       <Fragment>
         <EuiSpacer />
         <EuiText>
-          <h3>Preview results</h3>
+          <h3>
+            <FormattedMessage
+              id="common.ui.fieldEditor.testScript.resultsTitle"
+              defaultMessage="Preview results"
+            />
+          </h3>
           <p>
-            Run your script to preview the first 10 results. You can also select some additional
-            fields to include in your results to gain more context or add a query to filter on
-            specific documents.
+            <FormattedMessage
+              id="common.ui.fieldEditor.testScript.instructions"
+              defaultMessage="Run your script to preview the first 10 results. You can also select some additional
+              fields to include in your results to gain more context or add a query to filter on
+              specific documents."
+            />
           </p>
         </EuiText>
         <EuiSpacer />

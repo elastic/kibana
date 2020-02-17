@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { get, uniq } from 'lodash';
+import { get } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
@@ -26,7 +26,7 @@ export async function getLogstashPipelineIds(
     index: logstashIndexPattern,
     size: 0,
     ignoreUnavailable: true,
-    filterPath: ['aggregations.nested_context.composite_data.buckets'],
+    filterPath: ['aggregations.nest.id.buckets'],
     body: {
       query: createQuery({
         start,
@@ -36,37 +36,28 @@ export async function getLogstashPipelineIds(
         filters,
       }),
       aggs: {
-        nested_context: {
+        nest: {
           nested: {
             path: 'logstash_stats.pipelines',
           },
           aggs: {
-            composite_data: {
-              composite: {
+            id: {
+              terms: {
+                field: 'logstash_stats.pipelines.id',
                 size,
-                sources: [
-                  {
-                    id: {
+              },
+              aggs: {
+                unnest: {
+                  reverse_nested: {},
+                  aggs: {
+                    nodes: {
                       terms: {
-                        field: 'logstash_stats.pipelines.id',
+                        field: 'logstash_stats.logstash.uuid',
+                        size,
                       },
                     },
                   },
-                  {
-                    hash: {
-                      terms: {
-                        field: 'logstash_stats.pipelines.hash',
-                      },
-                    },
-                  },
-                  {
-                    ephemeral_id: {
-                      terms: {
-                        field: 'logstash_stats.pipelines.ephemeral_id',
-                      },
-                    },
-                  },
-                ],
+                },
               },
             },
           },
@@ -77,8 +68,8 @@ export async function getLogstashPipelineIds(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  const data = get(response, 'aggregations.nested_context.composite_data.buckets', []).map(
-    bucket => bucket.key
-  );
-  return uniq(data, item => item.id);
+  return get(response, 'aggregations.nest.id.buckets', []).map(bucket => ({
+    id: bucket.key,
+    nodeIds: get(bucket, 'unnest.nodes.buckets', []).map(item => item.key),
+  }));
 }

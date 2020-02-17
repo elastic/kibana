@@ -13,6 +13,9 @@ export const awsS3: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModels.awsS3.displayName', {
     defaultMessage: 'S3 Buckets',
   }),
+  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.awsS3.singularDisplayName', {
+    defaultMessage: 'S3 Bucket',
+  }),
   requiredModule: 'aws',
   crosslinkSupport: {
     details: true,

@@ -7,7 +7,6 @@
 import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
 
-import { anomaliesSchema } from './anomalies';
 import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
@@ -20,6 +19,7 @@ import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
+import { toAnySchema } from './scalar_to_any';
 import { toBooleanSchema } from './scalar_to_boolean_array';
 import { toDateSchema } from './scalar_to_date_array';
 import { toNumberSchema } from './scalar_to_number_array';
@@ -29,14 +29,13 @@ import { timelineSchema } from './timeline';
 import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
-import { alertsSchema } from './alerts';
+import { matrixHistogramSchema } from './matrix_histogram';
 export const schemas = [
-  alertsSchema,
-  anomaliesSchema,
   authenticationsSchema,
   ecsSchema,
   eventsSchema,
   dateSchema,
+  toAnySchema,
   toNumberSchema,
   toDateSchema,
   toBooleanSchema,
@@ -44,6 +43,7 @@ export const schemas = [
   ...ipDetailsSchemas,
   kpiNetworkSchema,
   kpiHostsSchema,
+  matrixHistogramSchema,
   networkSchema,
   noteSchema,
   overviewSchema,

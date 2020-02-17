@@ -17,10 +17,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+      '^fixtures/(.*)': `${kibanaDirectory}/src/fixtures/$1`,
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
-      '^plugins/watcher/np_ready/application/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/np_ready/application/models/$1`,
       '^plugins/([^/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
       '^legacy/plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/legacy/plugins/xpack_main/public/$1`,
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
@@ -28,9 +28,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
+      '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
     },
     coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
-    coverageReporters: ['html'],
+    coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html'],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,

@@ -10,6 +10,13 @@ export const SHOWING = i18n.translate('xpack.siem.eventsViewer.showingLabel', {
   defaultMessage: 'Showing',
 });
 
+export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
+  'xpack.siem.eventsViewer.errorFetchingEventsData',
+  {
+    defaultMessage: 'Failed to query events data',
+  }
+);
+
 export const EVENTS = i18n.translate('xpack.siem.eventsViewer.eventsLabel', {
   defaultMessage: 'Events',
 });

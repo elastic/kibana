@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
@@ -54,7 +54,6 @@ export interface BodyProps {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
-  range: string;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -95,6 +94,7 @@ export const Body = React.memo<BodyProps>(
     toggleColumn,
     updateNote,
   }) => {
+    const containerElementRef = useRef<HTMLDivElement>(null);
     const timelineTypeContext = useTimelineTypeContext();
     const additionalActionWidth =
       timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
@@ -112,11 +112,11 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
           <EventsTable
             data-test-subj="events-table"
             // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            style={{ minWidth: columnWidths + 'px' }}
+            style={{ minWidth: `${columnWidths}px` }}
           >
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
@@ -138,6 +138,7 @@ export const Body = React.memo<BodyProps>(
             />
 
             <Events
+              containerElementRef={containerElementRef.current!}
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}

@@ -17,6 +17,9 @@ export const host: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModel.host.displayName', {
     defaultMessage: 'Hosts',
   }),
+  singularDisplayName: i18n.translate('xpack.infra.inventoryModels.host.singularDisplayName', {
+    defaultMessage: 'Host',
+  }),
   requiredModule: 'system',
   crosslinkSupport: {
     details: true,

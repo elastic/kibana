@@ -9,22 +9,33 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-export const Description: FC = memo(({ children }) => {
+interface Props {
+  isOptional: boolean;
+}
+export const Description: FC<Props> = memo(({ children, isOptional }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.title', {
     defaultMessage: 'Categorization field',
   });
   return (
     <EuiDescribedFormGroup
-      idAria="description"
       title={<h3>{title}</h3>}
       description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.description"
-          defaultMessage="Optional, for use if analyzing unstructured log data. Using text data types is recommended."
-        />
+        <>
+          {isOptional ? (
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldOptional.description"
+              defaultMessage="Optional, for use if analyzing unstructured log data. Using text data types is recommended."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.description"
+              defaultMessage="Specifies which field will be categorized. Using text data types is recommended. Categorization works best on machine written log messages, typically logging written by a developer for the purpose of system troubleshooting."
+            />
+          )}
+        </>
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow label={title}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

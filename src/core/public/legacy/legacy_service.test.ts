@@ -58,7 +58,7 @@ import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
 const applicationSetup = applicationServiceMock.createInternalSetupContract();
@@ -97,7 +97,8 @@ const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
 const uiSettingsStart = uiSettingsServiceMock.createStartContract();
-const savedObjectsStart = savedObjectsMock.createStartContract();
+const savedObjectsStart = savedObjectsServiceMock.createStartContract();
+const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
 const mockStorage = { getItem: jest.fn() } as any;
 
 const defaultStartDeps = {
@@ -112,6 +113,7 @@ const defaultStartDeps = {
     overlays: overlayStart,
     uiSettings: uiSettingsStart,
     savedObjects: savedObjectsStart,
+    fatalErrors: fatalErrorsStart,
   },
   lastSubUrlStorage: mockStorage,
   targetDomElement: document.createElement('div'),

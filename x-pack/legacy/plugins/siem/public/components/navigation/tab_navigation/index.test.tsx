@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { navTabs } from '../../../pages/home/home_navigations';
 import { SiemPageName } from '../../../pages/home/types';

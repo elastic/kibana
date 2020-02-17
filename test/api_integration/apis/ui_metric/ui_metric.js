@@ -25,15 +25,13 @@ export default function({ getService }) {
   const es = getService('legacyEs');
 
   const createStatsMetric = eventName => ({
-    key: ReportManager.createMetricKey({ appName: 'myApp', type: METRIC_TYPE.CLICK, eventName }),
     eventName,
     appName: 'myApp',
     type: METRIC_TYPE.CLICK,
-    stats: { sum: 1, avg: 1, min: 1, max: 1 },
+    count: 1,
   });
 
   const createUserAgentMetric = appName => ({
-    key: ReportManager.createMetricKey({ appName, type: METRIC_TYPE.USER_AGENT }),
     appName,
     type: METRIC_TYPE.USER_AGENT,
     userAgent:
@@ -42,12 +40,9 @@ export default function({ getService }) {
 
   describe('ui_metric API', () => {
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
+      const reportManager = new ReportManager();
       const uiStatsMetric = createStatsMetric('myEvent');
-      const report = {
-        uiStatsMetrics: {
-          [uiStatsMetric.key]: uiStatsMetric,
-        },
-      };
+      const { report } = reportManager.assignReports([uiStatsMetric]);
       await supertest
         .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
@@ -61,21 +56,18 @@ export default function({ getService }) {
     });
 
     it('supports multiple events', async () => {
+      const reportManager = new ReportManager();
       const userAgentMetric = createUserAgentMetric('kibana');
       const uiStatsMetric1 = createStatsMetric('myEvent');
       const hrTime = process.hrtime();
       const nano = hrTime[0] * 1000000000 + hrTime[1];
       const uniqueEventName = `myEvent${nano}`;
       const uiStatsMetric2 = createStatsMetric(uniqueEventName);
-      const report = {
-        userAgent: {
-          [userAgentMetric.key]: userAgentMetric,
-        },
-        uiStatsMetrics: {
-          [uiStatsMetric1.key]: uiStatsMetric1,
-          [uiStatsMetric2.key]: uiStatsMetric2,
-        },
-      };
+      const { report } = reportManager.assignReports([
+        userAgentMetric,
+        uiStatsMetric1,
+        uiStatsMetric2,
+      ]);
       await supertest
         .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')

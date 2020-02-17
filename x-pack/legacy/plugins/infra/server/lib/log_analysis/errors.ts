@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class NoLogRateResultsIndexError extends Error {
+export class NoLogAnalysisResultsIndexError extends Error {
   constructor(message?: string) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);

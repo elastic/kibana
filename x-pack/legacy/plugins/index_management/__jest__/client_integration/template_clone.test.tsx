@@ -8,8 +8,12 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
-import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './helpers/constants';
+import { getTemplate } from '../../test/fixtures';
+import {
+  TEMPLATE_NAME,
+  INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
+  MAPPINGS,
+} from './helpers/constants';
 
 const { setup } = pageHelpers.templateClone;
 
@@ -47,9 +51,14 @@ describe('<TemplateClone />', () => {
     server.restore();
   });
 
-  const templateToClone = fixtures.getTemplate({
+  const templateToClone = getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
+    mappings: {
+      ...MAPPINGS,
+      _meta: {},
+      _source: {},
+    },
   });
 
   beforeEach(async () => {
@@ -72,7 +81,7 @@ describe('<TemplateClone />', () => {
 
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions, component } = testBed;
+      const { actions } = testBed;
 
       await act(async () => {
         // Complete step 1 (logistics)
@@ -82,19 +91,13 @@ describe('<TemplateClone />', () => {
         });
 
         // Bypass step 2 (index settings)
-        actions.clickNextButton();
-        await nextTick();
-        component.update();
+        await actions.completeStepTwo();
 
         // Bypass step 3 (mappings)
-        actions.clickNextButton();
-        await nextTick();
-        component.update();
+        await actions.completeStepThree();
 
         // Bypass step 4 (aliases)
-        actions.clickNextButton();
-        await nextTick();
-        component.update();
+        await actions.completeStepFour();
       });
     });
 
@@ -108,13 +111,13 @@ describe('<TemplateClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      const expected = JSON.stringify({
+      const expected = {
         ...templateToClone,
         name: `${templateToClone.name}-copy`,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-      });
+      };
 
-      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 });

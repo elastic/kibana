@@ -22,7 +22,6 @@ export const createEventsResolvers = (
     Timeline: SourceResolvers['Timeline'];
     TimelineDetails: SourceResolvers['TimelineDetails'];
     LastEventTime: SourceResolvers['LastEventTime'];
-    EventsOverTime: SourceResolvers['EventsOverTime'];
   };
 } => ({
   Source: {
@@ -48,13 +47,6 @@ export const createEventsResolvers = (
         details: args.details,
       };
       return libs.events.getLastEventTimeData(req, options);
-    },
-    async EventsOverTime(source, args, { req }, info) {
-      const options = {
-        ...createOptions(source, args, info),
-        defaultIndex: args.defaultIndex,
-      };
-      return libs.events.getEventsOverTime(req, options);
     },
   },
 });

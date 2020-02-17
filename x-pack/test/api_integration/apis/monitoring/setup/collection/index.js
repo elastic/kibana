@@ -16,5 +16,6 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./detect_logstash_management'));
     loadTestFile(require.resolve('./detect_apm'));
     loadTestFile(require.resolve('./security'));
+    loadTestFile(require.resolve('./ccs'));
   });
 }

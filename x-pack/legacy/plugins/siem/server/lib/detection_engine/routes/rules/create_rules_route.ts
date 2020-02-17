@@ -5,20 +5,24 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-import Boom from 'boom';
 import uuid from 'uuid';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { createRules } from '../../rules/create_rules';
-import { RulesRequest } from '../../rules/types';
-import { createRulesSchema } from '../schemas/create_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { readRules } from '../../rules/read_rules';
-import { transformOrError } from './utils';
-import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
 
-export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { GetScopedClients } from '../../../../services';
+import { LegacyServices } from '../../../../types';
+import { createRules } from '../../rules/create_rules';
+import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { createRulesSchema } from '../schemas/create_rules_schema';
+import { readRules } from '../../rules/read_rules';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { transform } from './utils';
+import { getIndexExists } from '../../index/get_index_exists';
+import { getIndex, transformError } from '../utils';
+
+export const createCreateRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_RULES_URL,
@@ -33,17 +37,16 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: RulesRequest, headers) {
       const {
-        created_at: createdAt,
         description,
         enabled,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
+        timeline_title: timelineTitle,
         meta,
         filters,
         rule_id: ruleId,
@@ -54,56 +57,62 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         name,
         severity,
         tags,
-        threats,
+        threat,
         to,
         type,
-        updated_at: updatedAt,
         references,
       } = request.payload;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
-
-      if (!alertsClient || !actionsClient) {
-        return headers.response().code(404);
-      }
-
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, finalIndex);
+        const {
+          alertsClient,
+          actionsClient,
+          clusterClient,
+          savedObjectsClient,
+          spacesClient,
+        } = await getClients(request);
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
+        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
-          return new Boom(
-            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-            {
-              statusCode: 400,
-            }
-          );
+          return headers
+            .response({
+              message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+              status_code: 400,
+            })
+            .code(400);
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return new Boom(`rule_id: "${ruleId}" already exists`, { statusCode: 409 });
+            return headers
+              .response({
+                message: `rule_id: "${ruleId}" already exists`,
+                status_code: 409,
+              })
+              .code(409);
           }
         }
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
-          createdAt,
           description,
           enabled,
           falsePositives,
           from,
-          immutable,
+          immutable: false,
           query,
           language,
           outputIndex: finalIndex,
           savedId,
           timelineId,
+          timelineTitle,
           meta,
           filters,
-          ruleId: ruleId != null ? ruleId : uuid.v4(),
+          ruleId: ruleId ?? uuid.v4(),
           index,
           interval,
           maxSignals,
@@ -113,19 +122,48 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           tags,
           to,
           type,
-          threats,
-          updatedAt,
+          threat,
           references,
           version: 1,
         });
-        return transformOrError(createdRule);
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: `${createdRule.id}`,
+          searchFields: ['alertId'],
+        });
+        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
+        if (transformed == null) {
+          return headers
+            .response({
+              message: 'Internal error transforming rules',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformed;
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
 };
 
-export const createRulesRoute = (server: ServerFacade): void => {
-  server.route(createCreateRulesRoute(server));
+export const createRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createCreateRulesRoute(config, getClients));
 };

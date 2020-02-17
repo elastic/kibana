@@ -7,7 +7,13 @@
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+  ensureDatetimeIsWithinRange,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -38,6 +44,87 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send(getTestAlertData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '2m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                ...updatedData,
+                id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                consumer: 'bar',
+                createdBy: 'elastic',
+                enabled: true,
+                updatedBy: user.username,
+                apiKeyOwner: user.username,
+                muteAll: false,
+                mutedInstanceIds: [],
+                scheduledTaskId: createdAlert.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
+              });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+                Date.parse(response.body.createdAt)
+              );
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should still be able to update when AAD is broken', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          await supertest
+            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              attributes: {
+                name: 'bar',
+              },
+            })
+            .expect(200);
 
           const updatedData = {
             name: 'bcd',
@@ -405,11 +492,4 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     }
   });
-}
-
-function ensureDatetimeIsWithinRange(scheduledRunTime: number, expectedDiff: number) {
-  const buffer = 10000;
-  const diff = scheduledRunTime - Date.now();
-  expect(diff).to.be.greaterThan(expectedDiff - buffer);
-  expect(diff).to.be.lessThan(expectedDiff + buffer);
 }

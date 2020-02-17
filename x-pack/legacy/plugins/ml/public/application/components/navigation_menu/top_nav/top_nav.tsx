@@ -6,34 +6,59 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { TimeHistory } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
+import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
+import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
 
-import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { useUiContext } from '../../../contexts/ui/use_ui_context';
+import {
+  mlTimefilterRefresh$,
+  mlTimefilterTimeChange$,
+} from '../../../services/timefilter_refresh_service';
+import { useUrlState } from '../../../util/url_state';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface Duration {
   start: string;
   end: string;
 }
 
-function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
+function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
   return function(): Duration[] {
-    return timeHistory.get().map(({ from, to }: TimeRange) => {
-      return {
-        start: from,
-        end: to,
-      };
-    });
+    return (
+      timeHistory.get()?.map(({ from, to }: TimeRange) => {
+        return {
+          start: from,
+          end: to,
+        };
+      }) ?? []
+    );
   };
 }
 
-export const TopNav: FC = () => {
-  const { chrome, timefilter, timeHistory } = useUiContext();
-  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
+function updateLastRefresh(timeRange: OnRefreshProps) {
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
+}
 
-  const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
+export const TopNav: FC = () => {
+  const { services } = useMlKibana();
+  const config = services.uiSettings;
+  const { timefilter, history } = services.data.query.timefilter;
+
+  const [globalState, setGlobalState] = useUrlState('_g');
+  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
+
+  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
+    globalState?.refreshInterval ?? timefilter.getRefreshInterval()
+  );
+  useEffect(() => {
+    setGlobalState({ refreshInterval });
+    timefilter.setRefreshInterval(refreshInterval);
+  }, [refreshInterval?.pause, refreshInterval?.value]);
+
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
@@ -43,13 +68,22 @@ export const TopNav: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
+  const dateFormat = config.get('dateFormat');
 
   useEffect(() => {
     const subscriptions = new Subscription();
-    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
+    const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
+    if (refreshIntervalUpdate$ !== undefined) {
+      subscriptions.add(refreshIntervalUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const timeUpdate$ = timefilter.getTimeUpdate$();
+    if (timeUpdate$ !== undefined) {
+      subscriptions.add(timeUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const enabledUpdated$ = timefilter.getEnabledUpdated$();
+    if (enabledUpdated$ !== undefined) {
+      subscriptions.add(enabledUpdated$.subscribe(timefilterUpdateListener));
+    }
 
     return function cleanup() {
       subscriptions.unsubscribe();
@@ -74,23 +108,17 @@ export const TopNav: FC = () => {
     timefilter.setTime(newTime);
     setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges());
+    mlTimefilterTimeChange$.next({ lastRefresh: Date.now(), timeRange: { start, end } });
   }
 
   function updateInterval({
-    isPaused,
-    refreshInterval: interval,
+    isPaused: pause,
+    refreshInterval: value,
   }: {
     isPaused: boolean;
     refreshInterval: number;
   }) {
-    const newInterval = {
-      pause: isPaused,
-      value: interval,
-    };
-    // Update timefilter for controllers listening for changes
-    timefilter.setRefreshInterval(newInterval);
-    // Update state
-    setRefreshInterval(newInterval);
+    setRefreshInterval({ pause, value });
   }
 
   return (
@@ -104,7 +132,7 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={updateLastRefresh}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

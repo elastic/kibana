@@ -19,7 +19,7 @@ NOTE: Document results are limited to the `index.max_result_window` index settin
 Use <<maps-aggregations, aggregations>> to plot large data sets.
 
 *Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
-Set *Show as* to *grid rectangles* or *points*.
+Set *Show as* to *grid rectangles* or *clusters*.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].

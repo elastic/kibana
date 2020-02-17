@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiNetworkQueryComponent, KpiNetworkData } from '../../graphql/types';
@@ -25,15 +25,11 @@ export interface KpiNetworkArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface KpiNetworkReducer {
-  isInspected: boolean;
-}
-
 export interface KpiNetworkProps extends QueryTemplateProps {
   children: (args: KpiNetworkArgs) => React.ReactElement;
 }
 
-const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & KpiNetworkReducer>(
+const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
     <GetKpiNetworkQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
@@ -78,4 +74,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const KpiNetworkQuery = connect(makeMapStateToProps)(KpiNetworkComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const KpiNetworkQuery = connector(KpiNetworkComponentQuery);

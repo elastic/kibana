@@ -45,6 +45,10 @@ export class AbstractStyleProperty {
     return null;
   }
 
+  renderFieldMetaPopover() {
+    return null;
+  }
+
   getDisplayStyleName() {
     return getVectorStyleLabel(this.getStyleName());
   }

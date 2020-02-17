@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from '@apollo/client/testing';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -18,12 +17,6 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
-
-jest.mock('../../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
@@ -55,7 +48,7 @@ describe('Users Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(UsersTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(UsersTableComponent)')).toMatchSnapshot();
     });
   });
 

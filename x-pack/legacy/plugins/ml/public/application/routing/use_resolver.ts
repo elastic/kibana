@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { IUiSettingsClient } from 'src/core/public';
 import {
   getIndexPatternById,
   getIndexPatternsContract,
@@ -12,14 +13,14 @@ import {
 } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
-import { KibanaConfigTypeFix, KibanaContextValue } from '../contexts/kibana';
+import { MlContextValue } from '../contexts/ml';
 
 export const useResolver = (
   indexPatternId: string | undefined,
   savedSearchId: string | undefined,
-  config: KibanaConfigTypeFix,
+  config: IUiSettingsClient,
   resolvers: Resolvers
-): { context: KibanaContextValue; results: ResolverResults } => {
+): { context: MlContextValue; results: ResolverResults } => {
   const funcNames = Object.keys(resolvers); // Object.entries gets this wrong?!
   const funcs = Object.values(resolvers); // Object.entries gets this wrong?!
   const tempResults = funcNames.reduce((p, c) => {
@@ -60,8 +61,6 @@ export const useResolver = (
         }
       } catch (error) {
         // quietly fail. Let the resolvers handle the redirection if any fail to resolve
-        // eslint-disable-next-line no-console
-        console.error('ML page loading resolver', error);
       }
     })();
   }, []);

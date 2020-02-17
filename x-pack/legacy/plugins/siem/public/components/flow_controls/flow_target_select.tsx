@@ -5,8 +5,7 @@
  */
 
 import { EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import { ActionCreator } from 'typescript-fsa';
+import React from 'react';
 
 import { FlowDirection, FlowTarget } from '../../graphql/types';
 
@@ -45,47 +44,31 @@ interface OwnProps {
   selectedTarget: FlowTarget;
   displayTextOverride?: string[];
   selectedDirection?: FlowDirection;
-  updateFlowTargetAction: ActionCreator<{ flowTarget: FlowTarget }>;
+  updateFlowTargetAction: (flowTarget: FlowTarget) => void;
 }
-
-const onChangeTarget = (
-  flowTarget: FlowTarget,
-  updateFlowTargetSelectAction: ActionCreator<{ flowTarget: FlowTarget }>
-) => {
-  updateFlowTargetSelectAction({ flowTarget });
-};
 
 export type FlowTargetSelectProps = OwnProps;
 
-export const FlowTargetSelect = React.memo<FlowTargetSelectProps>(
-  ({
-    id,
-    isLoading = false,
-    selectedDirection,
-    selectedTarget,
-    displayTextOverride = [],
-    updateFlowTargetAction,
-  }) => {
-    const handleChange = useCallback(
-      (newFlowTarget: FlowTarget) => onChangeTarget(newFlowTarget, updateFlowTargetAction),
-      [updateFlowTargetAction]
-    );
-
-    return (
-      <EuiSuperSelect
-        options={
-          selectedDirection
-            ? toggleTargetOptions(id, displayTextOverride).filter(option =>
-                option.directions.includes(selectedDirection)
-              )
-            : toggleTargetOptions(id, displayTextOverride)
-        }
-        valueOfSelected={selectedTarget}
-        onChange={handleChange}
-        isLoading={isLoading}
-      />
-    );
-  }
+const FlowTargetSelectComponent: React.FC<FlowTargetSelectProps> = ({
+  id,
+  isLoading = false,
+  selectedDirection,
+  selectedTarget,
+  displayTextOverride = [],
+  updateFlowTargetAction,
+}) => (
+  <EuiSuperSelect
+    options={
+      selectedDirection
+        ? toggleTargetOptions(id, displayTextOverride).filter(option =>
+            option.directions.includes(selectedDirection)
+          )
+        : toggleTargetOptions(id, displayTextOverride)
+    }
+    valueOfSelected={selectedTarget}
+    onChange={updateFlowTargetAction}
+    isLoading={isLoading}
+  />
 );
 
-FlowTargetSelect.displayName = 'FlowTargetSelect';
+export const FlowTargetSelect = React.memo(FlowTargetSelectComponent);

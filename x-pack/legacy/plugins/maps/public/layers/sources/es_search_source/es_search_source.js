@@ -19,6 +19,7 @@ import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
+  CATEGORICAL_DATA_TYPES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -27,6 +28,31 @@ import { loadIndexSettings } from './load_index_settings';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
+
+function getField(indexPattern, fieldName) {
+  const field = indexPattern.fields.getByName(fieldName);
+  if (!field) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
+        values: { fieldName, indexPatternTitle: indexPattern.title },
+      })
+    );
+  }
+  return field;
+}
+
+function addFieldToDSL(dsl, field) {
+  return !field.scripted
+    ? { ...dsl, field: field.name }
+    : {
+        ...dsl,
+        script: {
+          source: field.script,
+          lang: field.lang,
+        },
+      };
+}
 
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
@@ -121,6 +147,27 @@ export class ESSearchSource extends AbstractESSource {
         return this.createField({ fieldName: field.name });
       });
     } catch (error) {
+      return [];
+    }
+  }
+
+  async getCategoricalFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+
+      const aggFields = [];
+      CATEGORICAL_DATA_TYPES.forEach(dataType => {
+        indexPattern.fields.getByType(dataType).forEach(field => {
+          if (field.aggregatable) {
+            aggFields.push(field);
+          }
+        });
+      });
+      return aggFields.map(field => {
+        return this.createField({ fieldName: field.name });
+      });
+    } catch (error) {
+      //error surfaces in the LayerTOC UI
       return [];
     }
   }
@@ -220,7 +267,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
-    const { topHitsSplitField, topHitsSize } = this._descriptor;
+    const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
     const indexPattern = await this.getIndexPattern();
     const geoField = await this._getGeoField();
@@ -257,20 +304,20 @@ export class ESSearchSource extends AbstractESSource {
       };
     }
 
+    const topHitsSplitField = getField(indexPattern, topHitsSplitFieldName);
+    const cardinalityAgg = { precision_threshold: 1 };
+    const termsAgg = {
+      size: DEFAULT_MAX_BUCKETS_LIMIT,
+      shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
+    };
+
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       totalEntities: {
-        cardinality: {
-          field: topHitsSplitField,
-          precision_threshold: 1,
-        },
+        cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
       },
       entitySplit: {
-        terms: {
-          field: topHitsSplitField,
-          size: DEFAULT_MAX_BUCKETS_LIMIT,
-          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
-        },
+        terms: addFieldToDSL(termsAgg, topHitsSplitField),
         aggs: {
           entityHits: {
             top_hits: topHits,

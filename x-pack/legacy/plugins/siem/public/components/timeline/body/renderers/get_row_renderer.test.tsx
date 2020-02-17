@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
@@ -44,7 +43,7 @@ describe('get_column_renderer', () => {
     });
 
     const wrapper = shallow(<span>{row}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render plain row data when it is a non suricata row', () => {

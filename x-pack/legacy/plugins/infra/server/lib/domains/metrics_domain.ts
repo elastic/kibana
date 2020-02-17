@@ -5,8 +5,8 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
+import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export class InfraMetricsDomain {
   private adapter: InfraMetricsAdapter;
@@ -19,7 +19,7 @@ export class InfraMetricsDomain {
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
-  ): Promise<InfraMetricData[]> {
+  ): Promise<NodeDetailsMetricData[]> {
     return await this.adapter.getMetrics(requestContext, options, rawRequest);
   }
 }

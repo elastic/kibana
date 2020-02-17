@@ -18,12 +18,10 @@
  */
 
 import { first, skip, toArray } from 'rxjs/operators';
-import { fromExpression } from '@kbn/interpreter/common';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
-import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression, parseExpression, IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = null as any;
 
@@ -38,7 +36,7 @@ jest.mock('./services', () => {
   return {
     getInterpreter: () => {
       return {
-        interpretAst: async (expression: ExpressionAST) => {
+        interpretAst: async (expression: ExpressionAstExpression) => {
           return { type: 'render', as: 'test' };
         },
       };
@@ -83,7 +81,7 @@ describe('ExpressionLoader', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString) as ExpressionAST;
+      const expressionAST = parseExpression(expressionString);
       const expressionLoader = new ExpressionLoader(element, expressionAST, {});
       expect(expressionLoader.getExpression()).toEqual(expressionString);
       expect(expressionLoader.getAst()).toEqual(expressionAST);

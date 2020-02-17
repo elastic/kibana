@@ -96,6 +96,7 @@ export function createPluginSetupContext<
   return {
     application: {
       register: app => deps.application.register(plugin.opaqueId, app),
+      registerAppUpdater: statusUpdater$ => deps.application.registerAppUpdater(statusUpdater$),
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
@@ -133,6 +134,7 @@ export function createPluginStartContext<
 ): CoreStart {
   return {
     application: {
+      currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
       navigateToApp: deps.application.navigateToApp,
       getUrlForApp: deps.application.getUrlForApp,
@@ -150,5 +152,6 @@ export function createPluginStartContext<
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    fatalErrors: deps.fatalErrors,
   };
 }

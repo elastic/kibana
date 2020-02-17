@@ -17,76 +17,73 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
-import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
-
-export interface LegacyAngularInjectedDependencies {
-  telemetryOptInProvider: any;
-  shouldShowTelemetryOptIn: boolean;
-}
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import {
+  Environment,
+  HomePublicPluginStart,
+  HomePublicPluginSetup,
+  FeatureCatalogueEntry,
+} from '../../../../../plugins/home/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
+  home: HomePublicPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  __LEGACY: {
-    trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
-    METRIC_TYPE: any;
-    metadata: {
-      app: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-    };
-    getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
-  kibana_legacy: KibanaLegacySetup;
+  usageCollection: UsageCollectionSetup;
+  kibanaLegacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
+  private environment: Environment | null = null;
+  private directories: readonly FeatureCatalogueEntry[] | null = null;
+  private telemetry?: TelemetryPluginStart;
 
-  setup(
-    core: CoreSetup,
-    {
-      kibana_legacy,
-      __LEGACY: { getAngularDependencies, ...legacyServices },
-    }: HomePluginSetupDependencies
-  ) {
-    kibana_legacy.registerLegacyApp({
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  setup(core: CoreSetup, { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies) {
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
-      mount: async ({ core: contextCore }, params) => {
-        const angularDependencies = await getAngularDependencies();
+      mount: async (params: AppMountParameters) => {
+        const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
+        const [coreStart] = await core.getStartServices();
         setServices({
-          ...legacyServices,
-          http: contextCore.http,
+          trackUiMetric,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          http: coreStart.http,
           toastNotifications: core.notifications.toasts,
-          banners: contextCore.overlays.banners,
+          banners: coreStart.overlays.banners,
           getInjected: core.injectedMetadata.getInjectedVar,
-          docLinks: contextCore.docLinks,
+          docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
-          chrome: contextCore.chrome,
+          chrome: coreStart.chrome,
+          telemetry: this.telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
-          ...angularDependencies,
+          environment: this.environment!,
+          config: kibanaLegacy.config,
+          homeConfig: home.config,
+          directories: this.directories!,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -94,9 +91,11 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data }: HomePluginStartDependencies) {
-    // TODO is this really the right way? I though the app context would give us those
+  start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
+    this.environment = home.environment.get();
+    this.directories = home.featureCatalogue.get();
     this.dataStart = data;
+    this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;
   }
 

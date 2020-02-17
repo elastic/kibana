@@ -8,7 +8,7 @@ import { TimelineModel } from './model';
 import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -88,6 +88,7 @@ describe('Epic Timeline', () => {
         deletedEventIds: [],
         description: '',
         eventIdToNoteIds: {},
+        eventType: 'all',
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -114,7 +115,7 @@ describe('Epic Timeline', () => {
               value: 'exists',
             },
             exists: { field: '@timestamp' },
-          } as esFilters.Filter,
+          } as Filter,
         ],
         isFavorite: false,
         isLive: false,
@@ -227,6 +228,7 @@ describe('Epic Timeline', () => {
           start: 1572469587644,
         },
         description: '',
+        eventType: 'all',
         filters: [
           {
             exists: null,

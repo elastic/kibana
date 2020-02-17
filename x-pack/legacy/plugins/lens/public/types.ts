@@ -11,8 +11,8 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
-import { DateRange } from '../common';
-import { Query, esFilters } from '../../../../../src/plugins/data/public';
+import { DateRange } from '../../../../plugins/lens/common';
+import { Query, Filter } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -31,7 +31,7 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -47,12 +47,14 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
+  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
+  registerVisualization: <T, P>(
+    visualization: Visualization<T, P> | Promise<Visualization<T, P>>
+  ) => void;
 }
 
 export interface EditorFrameStart {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
+  createInstance: (options: EditorFrameOptions) => Promise<EditorFrameInstance>;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -135,6 +137,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
@@ -176,7 +179,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 // The only way a visualization has to restrict the query building
@@ -237,7 +240,8 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationProps<T = unknown> {
+export interface VisualizationLayerConfigProps<T = unknown> {
+  layerId: string;
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
@@ -306,7 +310,7 @@ export interface FramePublicAPI {
 
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
@@ -325,6 +329,18 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
+  getLayerIds: (state: T) => string[];
+
+  clearLayer: (state: T, layerId: string) => T;
+
+  removeLayer?: (state: T, layerId: string) => T;
+
+  appendLayer?: (state: T, layerId: string) => T;
+
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
+
   getDescription: (
     state: T
   ) => {
@@ -339,7 +355,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  renderLayerConfigPanel: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

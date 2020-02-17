@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
   const find = getService('find');
@@ -38,11 +38,11 @@ export default function({ getService, getPageObjects }) {
         'Jan 1, 2017 @ 00:00:00.000',
         'Jan 1, 2017 @ 00:00:00.000'
       );
-      await PageObjects.visualize.clickVisEditorTab('controls');
-      await PageObjects.visualize.addInputControl();
+      await PageObjects.visEditor.clickVisEditorTab('controls');
+      await PageObjects.visEditor.addInputControl();
       await comboBox.set('indexPatternSelect-0', 'logstash- ');
       await comboBox.set('fieldSelect-0', FIELD_NAME);
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.clickGo();
     });
 
     it('should not have inspector enabled', async function() {
@@ -89,7 +89,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should add filter pill when submit button is clicked', async () => {
-        await PageObjects.visualize.inputControlSubmit();
+        await PageObjects.visEditor.inputControlSubmit();
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(true);
@@ -98,7 +98,7 @@ export default function({ getService, getPageObjects }) {
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
         await comboBox.set('listControlSelect0', 'osx');
-        await PageObjects.visualize.inputControlSubmit();
+        await PageObjects.visEditor.inputControlSubmit();
         await PageObjects.common.sleep(1000);
 
         const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
@@ -117,11 +117,11 @@ export default function({ getService, getPageObjects }) {
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
         await comboBox.set('listControlSelect0', 'ios');
-        await PageObjects.visualize.inputControlSubmit();
+        await PageObjects.visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
 
-        await PageObjects.visualize.inputControlClear();
+        await PageObjects.visEditor.inputControlClear();
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
 
@@ -130,7 +130,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
-        await PageObjects.visualize.inputControlSubmit();
+        await PageObjects.visEditor.inputControlSubmit();
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilter).to.equal(false);
       });
@@ -138,17 +138,17 @@ export default function({ getService, getPageObjects }) {
 
     describe('updateFiltersOnChange is true', () => {
       before(async () => {
-        await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickVisEditorTab('options');
+        await PageObjects.visEditor.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await PageObjects.visEditor.clickGo();
       });
 
       after(async () => {
-        await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.uncheckSwitch(
+        await PageObjects.visEditor.clickVisEditorTab('options');
+        await PageObjects.visEditor.uncheckSwitch(
           'inputControlEditorUpdateFiltersOnChangeCheckbox'
         );
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
       });
 
       it('should not display staging control buttons', async () => {
@@ -173,9 +173,9 @@ export default function({ getService, getPageObjects }) {
 
     describe('useTimeFilter', () => {
       it('should use global time filter when getting terms', async () => {
-        await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.checkCheckbox('inputControlEditorUseTimeFilterCheckbox');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickVisEditorTab('options');
+        await testSubjects.setCheckbox('inputControlEditorUseTimeFilterCheckbox', 'check');
+        await PageObjects.visEditor.clickGo();
 
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');

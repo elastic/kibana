@@ -12,12 +12,12 @@ export const transactionGroupsResponse = ({
   _shards: { total: 44, successful: 44, skipped: 0, failed: 0 },
   hits: { total: 131557, max_score: null, hits: [] },
   aggregations: {
-    transactions: {
+    transaction_groups: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
         {
-          key: 'POST /api/orders',
+          key: { transaction: 'POST /api/orders' },
           doc_count: 180,
           avg: { value: 255966.30555555556 },
           p95: { values: { '95.0': 320238.5 } },
@@ -137,7 +137,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api',
+          key: { transaction: 'GET /api' },
           doc_count: 21911,
           avg: { value: 48021.972616494 },
           p95: { values: { '95.0': 67138.18364917398 } },
@@ -257,7 +257,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/orders',
+          key: { transaction: 'GET /api/orders' },
           doc_count: 3247,
           avg: { value: 33265.03326147213 },
           p95: { values: { '95.0': 58827.489999999976 } },
@@ -373,7 +373,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /log-message',
+          key: { transaction: 'GET /log-message' },
           doc_count: 700,
           avg: { value: 32900.72714285714 },
           p95: { values: { '95.0': 40444 } },
@@ -489,7 +489,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/stats',
+          key: { transaction: 'GET /api/stats' },
           doc_count: 4639,
           avg: { value: 32554.36257814184 },
           p95: { values: { '95.0': 59356.73611111111 } },
@@ -610,7 +610,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /log-error',
+          key: { transaction: 'GET /log-error' },
           doc_count: 736,
           avg: { value: 32387.73641304348 },
           p95: { values: { '95.0': 40061.1 } },
@@ -726,7 +726,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/customers',
+          key: { transaction: 'GET /api/customers' },
           doc_count: 3366,
           avg: { value: 32159.926322043968 },
           p95: { values: { '95.0': 59845.85714285714 } },
@@ -847,7 +847,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/products/top',
+          key: { transaction: 'GET /api/products/top' },
           doc_count: 3694,
           avg: { value: 27516.89144558744 },
           p95: { values: { '95.0': 56064.679999999986 } },
@@ -969,7 +969,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'POST /api',
+          key: { transaction: 'POST /api' },
           doc_count: 147,
           avg: { value: 21331.714285714286 },
           p95: { values: { '95.0': 30938 } },
@@ -1087,7 +1087,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/products/:id/customers',
+          key: { transaction: 'GET /api/products/:id/customers' },
           doc_count: 2102,
           avg: { value: 17189.329210275926 },
           p95: { values: { '95.0': 39284.79999999999 } },
@@ -1209,7 +1209,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/types/:id',
+          key: { transaction: 'GET /api/types/:id' },
           doc_count: 1449,
           avg: { value: 12763.68806073154 },
           p95: { values: { '95.0': 30576.749999999996 } },
@@ -1325,7 +1325,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/products',
+          key: { transaction: 'GET /api/products' },
           doc_count: 3678,
           avg: { value: 12683.190864600327 },
           p95: { values: { '95.0': 35009.67999999999 } },
@@ -1441,7 +1441,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/types',
+          key: { transaction: 'GET /api/types' },
           doc_count: 2400,
           avg: { value: 11257.757916666667 },
           p95: { values: { '95.0': 35222.944444444445 } },
@@ -1557,7 +1557,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/orders/:id',
+          key: { transaction: 'GET /api/orders/:id' },
           doc_count: 1283,
           avg: { value: 10584.05144193297 },
           p95: { values: { '95.0': 26555.399999999998 } },
@@ -1671,7 +1671,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/products/:id',
+          key: { transaction: 'GET /api/products/:id' },
           doc_count: 1839,
           avg: { value: 10548.218597063622 },
           p95: { values: { '95.0': 28413.383333333328 } },
@@ -1787,7 +1787,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /api/customers/:id',
+          key: { transaction: 'GET /api/customers/:id' },
           doc_count: 1900,
           avg: { value: 9868.217894736843 },
           p95: { values: { '95.0': 27486.5 } },
@@ -1908,7 +1908,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'POST unknown route',
+          key: { transaction: 'POST unknown route' },
           doc_count: 20,
           avg: { value: 5192.9 },
           p95: { values: { '95.0': 13230.5 } },
@@ -2034,7 +2034,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /is-it-coffee-time',
+          key: { transaction: 'GET /is-it-coffee-time' },
           doc_count: 358,
           avg: { value: 4694.005586592179 },
           p95: { values: { '95.0': 11022.99999999992 } },
@@ -2151,7 +2151,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET /throw-error',
+          key: { transaction: 'GET /throw-error' },
           doc_count: 336,
           avg: { value: 4549.889880952381 },
           p95: { values: { '95.0': 7719.700000000001 } },
@@ -2268,7 +2268,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET *',
+          key: { transaction: 'GET *' },
           doc_count: 7115,
           avg: { value: 3504.5108924806746 },
           p95: { values: { '95.0': 11431.738095238095 } },
@@ -2391,7 +2391,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'OPTIONS unknown route',
+          key: { transaction: 'OPTIONS unknown route' },
           doc_count: 364,
           avg: { value: 2742.4615384615386 },
           p95: { values: { '95.0': 4370.000000000002 } },
@@ -2509,7 +2509,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET static file',
+          key: { transaction: 'GET static file' },
           doc_count: 62606,
           avg: { value: 2651.8784461553205 },
           p95: { values: { '95.0': 6140.579335038363 } },
@@ -2614,7 +2614,7 @@ export const transactionGroupsResponse = ({
           }
         },
         {
-          key: 'GET unknown route',
+          key: { transaction: 'GET unknown route' },
           doc_count: 7487,
           avg: { value: 1422.926672899693 },
           p95: { values: { '95.0': 2311.885238095238 } },

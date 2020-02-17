@@ -22,7 +22,6 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
@@ -39,7 +38,10 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -158,7 +160,7 @@ describe('RegionMapsVisualizationTests', function() {
 
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, {
+      vis = new visualizationsStart.Vis(indexPattern, {
         type: 'region_map',
       });
 

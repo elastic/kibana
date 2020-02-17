@@ -18,15 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+import { defaultFeedbackMessage } from './legacy_imports';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
 // @ts-ignore
 import { EditorController } from './editor_controller';
 // @ts-ignore
-import { PANEL_TYPES } from '../common/panel_types';
+import { PANEL_TYPES } from '../../../../plugins/vis_type_timeseries/common/panel_types';
 
 export const metricsVisDefinition = {
   name: 'metrics',

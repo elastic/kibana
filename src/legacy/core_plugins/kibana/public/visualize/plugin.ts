@@ -20,10 +20,11 @@
 import { i18n } from '@kbn/i18n';
 
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
-  LegacyCoreStart,
   Plugin,
+  PluginInitializerContext,
   SavedObjectsClientContract,
 } from 'kibana/public';
 
@@ -40,23 +41,12 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import {
-  defaultEditor,
-  VisEditorTypesRegistryProvider,
-  VisualizeEmbeddableFactory,
-  VISUALIZE_EMBEDDABLE_TYPE,
-} from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
-
-export interface LegacyAngularInjectedDependencies {
-  legacyChrome: any;
-  editorTypes: any;
-}
+import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
@@ -64,76 +54,70 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
+    legacyChrome: Chrome;
   };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    embeddables: IEmbeddableStart;
+    embeddable: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
     share: SharePluginStart;
     visualizations: VisualizationsStart;
   } | null = null;
 
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   public async setup(
     core: CoreSetup,
-    {
-      home,
-      kibana_legacy,
-      __LEGACY: { getAngularDependencies },
-      usageCollection,
-    }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'visualize',
       title: 'Visualize',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
 
         const {
           savedObjectsClient,
-          embeddables,
+          embeddable,
           navigation,
           visualizations,
           data,
           share,
         } = this.startDependencies;
 
-        const angularDependencies = await getAngularDependencies();
-        const savedVisualizations = createSavedVisLoader({
-          savedObjectsClient,
-          indexPatterns: data.indexPatterns,
-          chrome: contextCore.chrome,
-          overlays: contextCore.overlays,
-        });
         const deps: VisualizeKibanaServices = {
-          ...angularDependencies,
-          addBasePath: contextCore.http.basePath.prepend,
-          core: contextCore as LegacyCoreStart,
-          chrome: contextCore.chrome,
+          ...__LEGACY,
+          pluginInitializerContext: this.initializerContext,
+          addBasePath: coreStart.http.basePath.prepend,
+          core: coreStart,
+          chrome: coreStart.chrome,
           data,
-          embeddables,
+          embeddable,
           getBasePath: core.http.basePath.get,
           indexPatterns: data.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations,
+          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
           savedQueryService: data.query.savedQueries,
           share,
-          toastNotifications: contextCore.notifications.toasts,
-          uiSettings: contextCore.uiSettings,
-          visualizeCapabilities: contextCore.application.capabilities.visualize,
+          toastNotifications: coreStart.notifications.toasts,
+          uiSettings: coreStart.uiSettings,
+          config: kibanaLegacy.config,
+          visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations,
           usageCollection,
+          I18nContext: coreStart.i18n.Context,
         };
         setServices(deps);
 
@@ -154,24 +138,19 @@ export class VisualizePlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
-
-    VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(
-    { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
+    core: CoreStart,
+    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
-      embeddables,
+      embeddable,
       navigation,
-      savedObjectsClient,
+      savedObjectsClient: core.savedObjects.client,
       share,
       visualizations,
     };
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
-    embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

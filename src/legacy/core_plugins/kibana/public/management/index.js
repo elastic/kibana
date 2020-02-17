@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -28,11 +27,8 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { ManagementSidebarNav } from '../../../../../plugins/management/public';
 import { timefilter } from 'ui/timefilter';
 import {
   EuiPageContent,
@@ -42,6 +38,7 @@ import {
   EuiIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
@@ -62,7 +59,7 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent horizontalPosition="center">
+    <EuiPageContent horizontalPosition="center" data-test-subj="managementHome">
       <I18nContext>
         <div>
           <div className="eui-textCenter">
@@ -72,7 +69,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Kibana {version} management"
+                  defaultMessage="Welcome to Stack Management {version}"
                   values={{ version }}
                 />
               </h1>
@@ -91,7 +88,7 @@ export function updateLandingPage(version) {
             <p>
               <FormattedMessage
                 id="kbn.management.landing.text"
-                defaultMessage="A full list of tools can be found in the left menu"
+                defaultMessage="A complete list of apps is in the menu on the left."
               />
             </p>
           </EuiText>
@@ -102,7 +99,7 @@ export function updateLandingPage(version) {
   );
 }
 
-export function updateSidebar(items, id) {
+export function updateSidebar(legacySections, id) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
     return;
@@ -110,7 +107,12 @@ export function updateSidebar(items, id) {
 
   render(
     <I18nContext>
-      <SidebarNav sections={items} selectedId={id} className="mgtSideNav" />
+      <ManagementSidebarNav
+        getSections={npStart.plugins.management.sections.getSectionsEnabled}
+        legacySections={legacySections}
+        selectedId={id}
+        className="mgtSideNav"
+      />
     </I18nContext>,
     node
   );
@@ -161,21 +163,5 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
       $scope.sections = management.visibleItems;
       $scope.kbnVersion = kbnVersion;
     },
-  };
-});
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'management',
-    title: i18n.translate('kbn.management.managementLabel', {
-      defaultMessage: 'Management',
-    }),
-    description: i18n.translate('kbn.management.managementDescription', {
-      defaultMessage: 'Your center console for managing the Elastic Stack.',
-    }),
-    icon: 'managementApp',
-    path: '/app/kibana#/management',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
   };
 });

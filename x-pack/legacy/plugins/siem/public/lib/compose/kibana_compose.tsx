@@ -5,22 +5,19 @@
  */
 
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
-import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
 
-// import introspectionQueryResultData from '../../graphql/introspection.json';
+import { CoreStart } from '../../plugin';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
-export function compose(): AppFrontendLibs {
-  const graphQLOptions = {
+export function compose(core: CoreStart): AppFrontendLibs {
+  const basePath = core.http.basePath.get();
+
+  const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',
     cache: new InMemoryCache(),
-    link: ApolloLink.from(getLinks()),
-  };
-
-  const apolloClient = new ApolloClient(graphQLOptions);
+    link: ApolloLink.from(getLinks(basePath)),
+  });
 
   const libs: AppFrontendLibs = {
     apolloClient,

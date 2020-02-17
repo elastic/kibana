@@ -62,6 +62,7 @@ describe('ui/new_platform', () => {
       expect(mountMock).toHaveBeenCalledWith({
         element: elementMock[0],
         appBasePath: '/test/base/path/app/test',
+        onAppLeave: expect.any(Function),
       });
     });
 
@@ -82,6 +83,7 @@ describe('ui/new_platform', () => {
       expect(mountMock).toHaveBeenCalledWith(expect.any(Object), {
         element: elementMock[0],
         appBasePath: '/test/base/path/app/test',
+        onAppLeave: expect.any(Function),
       });
     });
 

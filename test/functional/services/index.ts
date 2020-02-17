@@ -49,7 +49,7 @@ import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
-import { VisualizeListingTableProvider } from './visualize_listing_table';
+import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 
 export const services = {
@@ -66,7 +66,7 @@ export const services = {
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,
-  visualizeListingTable: VisualizeListingTableProvider,
+  listingTable: ListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
   dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,

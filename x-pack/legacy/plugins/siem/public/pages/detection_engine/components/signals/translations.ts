@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
 });
 
 export const SIGNALS_TABLE_TITLE = i18n.translate('xpack.siem.detectionEngine.signals.tableTitle', {
-  defaultMessage: 'All signals',
+  defaultMessage: 'Signals',
 });
 
 export const SIGNALS_DOCUMENT_TYPE = i18n.translate(
@@ -50,6 +50,13 @@ export const SIGNALS_HEADERS_RULE = i18n.translate(
   'xpack.siem.eventsViewer.signals.defaultHeaders.ruleTitle',
   {
     defaultMessage: 'Rule',
+  }
+);
+
+export const SIGNALS_HEADERS_VERSION = i18n.translate(
+  'xpack.siem.eventsViewer.signals.defaultHeaders.versionTitle',
+  {
+    defaultMessage: 'Version',
   }
 );
 

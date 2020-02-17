@@ -10,7 +10,7 @@ import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impa
 import moment from 'moment';
 import rison from 'rison-node';
 
-import { timefilter } from 'ui/timefilter';
+import { getTimefilter } from '../util/dependency_cache';
 
 import { CHART_TYPE } from '../explorer/explorer_constants';
 
@@ -107,7 +107,7 @@ export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, rad
 }
 
 // this replicates Kibana's filterAxisLabels() behavior
-// which can be found in ui/vislib/lib/axis/axis_labels.js
+// which can be found in src/legacy/core_plugins/vis_type_vislib/public/vislib/lib/axis/axis_labels.js
 // axis labels which overflow the chart's boundaries will be removed
 export function filterAxisLabels(selection, chartWidth) {
   if (selection === undefined || selection.selectAll === undefined) {
@@ -180,6 +180,7 @@ export function getChartType(config) {
 export function getExploreSeriesLink(series) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
+  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
   const to = bounds.max.toISOString();

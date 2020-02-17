@@ -40,10 +40,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -53,7 +52,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Index Patterns disabled', () => {
+    // https://github.com/elastic/kibana/issues/57601
+    describe.skip('space with Index Patterns disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects

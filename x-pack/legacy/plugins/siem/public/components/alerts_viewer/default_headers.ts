@@ -19,6 +19,7 @@ export const alertsHeaders: ColumnHeader[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.module',
     width: DEFAULT_COLUMN_MIN_WIDTH,
+    linkField: 'rule.reference',
   },
   {
     columnHeaderType: defaultColumnHeaderType,

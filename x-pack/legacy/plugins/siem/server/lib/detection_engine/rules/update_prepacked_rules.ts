@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsClient } from '../../../../../actions';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../alerting';
-import { updateRules } from './update_rules';
-import { RuleAlertParamsRest } from '../types';
+import { patchRules } from './patch_rules';
+import { PrepackagedRules } from '../types';
 
 export const updatePrepackagedRules = async (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
-  rules: RuleAlertParamsRest[],
+  savedObjectsClient: SavedObjectsClientContract,
+  rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
   await rules.forEach(async rule => {
@@ -36,14 +38,14 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = rule;
 
     // Note: we do not pass down enabled as we do not want to suddenly disable
     // or enable rules on the user when they were not expecting it if a rule updates
-    return updateRules({
+    return patchRules({
       alertsClient,
       actionsClient,
       description,
@@ -55,6 +57,7 @@ export const updatePrepackagedRules = async (
       outputIndex,
       id: undefined, // We never have an id when updating from pre-packaged rules
       savedId,
+      savedObjectsClient,
       meta,
       filters,
       ruleId,
@@ -67,7 +70,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     });

@@ -13,7 +13,7 @@ import { gutterTimeline } from '../../lib/helpers';
 
 const offsetChrome = 49;
 
-const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
+const disableSticky = `screen and (max-width: ${euiLightVars.euiBreakpoints.s})`;
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`

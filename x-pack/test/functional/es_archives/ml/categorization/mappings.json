@@ -1,0 +1,873 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "categorization_functional_test",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "field1": {
+          "type": "text"
+        },
+        "field2": {
+          "type": "text"
+        },
+        "field3": {
+          "type": "text"
+        },
+        "field4": {
+          "type": "text"
+        },
+        "field5": {
+          "type": "text"
+        },
+        "field6": {
+          "type": "text"
+        },
+        "field7": {
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
+    "mappings": {
+      "_meta": {
+        "migrationMappingPropertyHashes": {
+          "action": "c0c235fba02ebd2a2412bcda79009b58",
+          "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
+          "alert": "e588043a01d3d43477e7cad7efa0f5d8",
+          "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
+          "apm-services-telemetry": "07ee1939fa4302c62ddc052ec03fed90",
+          "config": "87aca8fdb053154f11383fce3dbf3edf",
+          "dashboard": "d00f614b29a80360e1190193fd333bab",
+          "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
+          "index-pattern": "66eccb05066c5a89924f48a9e9736499",
+          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
+          "lens": "21c3ea0763beb1ecb0162529706b88c5",
+          "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
+          "map": "23d7aa4a720d4938ccde3983f87bd58d",
+          "maps-telemetry": "268da3a48066123fc5baf35abaa55014",
+          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+          "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
+          "namespace": "2f4316de49999235636386fe51dc06c1",
+          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
+          "references": "7997cf5a56cc02bdc9c93361bde732b0",
+          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
+          "search": "181661168bbadd1eff5902361e2a0d5c",
+          "server": "ec97f1c5da1a19609a60874e5af1100c",
+          "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
+          "telemetry": "358ffaa88ba34a97d55af0933a117de4",
+          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
+          "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
+          "type": "2f4316de49999235636386fe51dc06c1",
+          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
+          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+          "upgrade-assistant-reindex-operation": "a53a20fe086b72c9a86da3cc12dad8a6",
+          "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
+          "url": "c7f66a0df8b1b52f17c28c4adb111105",
+          "visualization": "52d7a13ad68a150c4525b292d23e12cc"
+        }
+      },
+      "dynamic": "strict",
+      "properties": {
+        "action": {
+          "properties": {
+            "actionTypeId": {
+              "type": "keyword"
+            },
+            "config": {
+              "enabled": false,
+              "type": "object"
+            },
+            "name": {
+              "type": "text"
+            },
+            "secrets": {
+              "type": "binary"
+            }
+          }
+        },
+        "action_task_params": {
+          "properties": {
+            "actionId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "params": {
+              "enabled": false,
+              "type": "object"
+            }
+          }
+        },
+        "alert": {
+          "properties": {
+            "actions": {
+              "properties": {
+                "actionRef": {
+                  "type": "keyword"
+                },
+                "actionTypeId": {
+                  "type": "keyword"
+                },
+                "group": {
+                  "type": "keyword"
+                },
+                "params": {
+                  "enabled": false,
+                  "type": "object"
+                }
+              },
+              "type": "nested"
+            },
+            "alertTypeId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "apiKeyOwner": {
+              "type": "keyword"
+            },
+            "consumer": {
+              "type": "keyword"
+            },
+            "createdAt": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "muteAll": {
+              "type": "boolean"
+            },
+            "mutedInstanceIds": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "text"
+            },
+            "params": {
+              "enabled": false,
+              "type": "object"
+            },
+            "schedule": {
+              "properties": {
+                "interval": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "scheduledTaskId": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "throttle": {
+              "type": "keyword"
+            },
+            "updatedBy": {
+              "type": "keyword"
+            }
+          }
+        },
+        "apm-indices": {
+          "properties": {
+            "apm_oss": {
+              "properties": {
+                "errorIndices": {
+                  "type": "keyword"
+                },
+                "metricsIndices": {
+                  "type": "keyword"
+                },
+                "onboardingIndices": {
+                  "type": "keyword"
+                },
+                "sourcemapIndices": {
+                  "type": "keyword"
+                },
+                "spanIndices": {
+                  "type": "keyword"
+                },
+                "transactionIndices": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "apm-services-telemetry": {
+          "properties": {
+            "has_any_services": {
+              "type": "boolean"
+            },
+            "services_per_agent": {
+              "properties": {
+                "dotnet": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "go": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "java": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "js-base": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "nodejs": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "python": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "ruby": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "rum-js": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "config": {
+          "dynamic": "true",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            },
+            "dateFormat:tz": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "defaultIndex": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "optionsJSON": {
+              "type": "text"
+            },
+            "panelsJSON": {
+              "type": "text"
+            },
+            "refreshInterval": {
+              "properties": {
+                "display": {
+                  "type": "keyword"
+                },
+                "pause": {
+                  "type": "boolean"
+                },
+                "section": {
+                  "type": "integer"
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            },
+            "timeFrom": {
+              "type": "keyword"
+            },
+            "timeRestore": {
+              "type": "boolean"
+            },
+            "timeTo": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "file-upload-telemetry": {
+          "properties": {
+            "filesUploadedTotalCount": {
+              "type": "long"
+            }
+          }
+        },
+        "index-pattern": {
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "typeMeta": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kql-telemetry": {
+          "properties": {
+            "optInCount": {
+              "type": "long"
+            },
+            "optOutCount": {
+              "type": "long"
+            }
+          }
+        },
+        "lens": {
+          "properties": {
+            "expression": {
+              "index": false,
+              "type": "keyword"
+            },
+            "state": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "visualizationType": {
+              "type": "keyword"
+            }
+          }
+        },
+        "lens-ui-telemetry": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "date": {
+              "type": "date"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "map": {
+          "properties": {
+            "bounds": {
+              "type": "geo_shape"
+            },
+            "description": {
+              "type": "text"
+            },
+            "layerListJSON": {
+              "type": "text"
+            },
+            "mapStateJSON": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "maps-telemetry": {
+          "properties": {
+            "attributesPerMap": {
+              "properties": {
+                "dataSourcesCount": {
+                  "properties": {
+                    "avg": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "emsVectorLayersCount": {
+                  "dynamic": "true",
+                  "type": "object"
+                },
+                "layerTypesCount": {
+                  "dynamic": "true",
+                  "type": "object"
+                },
+                "layersCount": {
+                  "properties": {
+                    "avg": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "indexPatternsWithGeoFieldCount": {
+              "type": "long"
+            },
+            "mapsTotalCount": {
+              "type": "long"
+            },
+            "settings": {
+              "properties": {
+                "showMapVisualizationTypes": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "timeCaptured": {
+              "type": "date"
+            }
+          }
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "index-pattern": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "space": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "ml-telemetry": {
+          "properties": {
+            "file_data_visualizer": {
+              "properties": {
+                "index_creation_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "query": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "filters": {
+              "enabled": false,
+              "type": "object"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              }
+            },
+            "timefilter": {
+              "enabled": false,
+              "type": "object"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "sample-data-telemetry": {
+          "properties": {
+            "installCount": {
+              "type": "long"
+            },
+            "unInstallCount": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "columns": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "sort": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "server": {
+          "properties": {
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
+            "imageUrl": {
+              "index": false,
+              "type": "text"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "telemetry": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "lastReported": {
+              "type": "date"
+            },
+            "lastVersionChecked": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "sendUsageFrom": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "userHasSeenNotice": {
+              "type": "boolean"
+            }
+          }
+        },
+        "timelion-sheet": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "timelion_chart_height": {
+              "type": "integer"
+            },
+            "timelion_columns": {
+              "type": "integer"
+            },
+            "timelion_interval": {
+              "type": "keyword"
+            },
+            "timelion_other_interval": {
+              "type": "keyword"
+            },
+            "timelion_rows": {
+              "type": "integer"
+            },
+            "timelion_sheet": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "tsvb-validation-telemetry": {
+          "properties": {
+            "failedRequests": {
+              "type": "long"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "ui-metric": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "upgrade-assistant-reindex-operation": {
+          "dynamic": "true",
+          "properties": {
+            "indexName": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "integer"
+            }
+          }
+        },
+        "upgrade-assistant-telemetry": {
+          "properties": {
+            "features": {
+              "properties": {
+                "deprecation_logging": {
+                  "properties": {
+                    "enabled": {
+                      "null_value": true,
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "ui_open": {
+              "properties": {
+                "cluster": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "indices": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "overview": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            },
+            "ui_reindex": {
+              "properties": {
+                "close": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "open": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "start": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "stop": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "url": {
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "url": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchRefName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

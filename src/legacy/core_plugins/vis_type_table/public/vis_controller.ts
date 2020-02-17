@@ -19,6 +19,7 @@
 
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
+import { isEqual } from 'lodash';
 
 import { Vis, VisParams } from '../../visualizations/public';
 import { npStart } from './legacy_imports';
@@ -73,8 +74,13 @@ export class TableVisualizationController {
           return;
         }
         this.$scope.vis = this.vis;
-        this.$scope.visState = this.vis.getState();
+        this.$scope.visState = { params: visParams };
         this.$scope.esResponse = esResponse;
+
+        if (!isEqual(this.$scope.visParams, visParams)) {
+          this.vis.emit('updateEditorStateParams', visParams);
+        }
+
         this.$scope.visParams = visParams;
         this.$scope.renderComplete = resolve;
         this.$scope.renderFailed = reject;

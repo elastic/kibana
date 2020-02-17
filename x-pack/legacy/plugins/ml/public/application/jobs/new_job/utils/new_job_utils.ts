@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IndexPattern,
-  esQuery,
-  Query,
-  esKuery,
-} from '../../../../../../../../../src/plugins/data/public';
-import { KibanaConfigTypeFix } from '../../../contexts/kibana';
+import { IUiSettingsClient } from 'src/core/public';
+import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
@@ -18,8 +14,8 @@ import { getQueryFromSavedSearch } from '../../../util/index_utils';
 // Provider for creating the items used for searching and job creation.
 
 export function createSearchItems(
-  kibanaConfig: KibanaConfigTypeFix,
-  indexPattern: IndexPattern,
+  kibanaConfig: IUiSettingsClient,
+  indexPattern: IIndexPattern,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs

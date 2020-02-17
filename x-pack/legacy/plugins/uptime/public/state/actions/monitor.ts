@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MonitorDetailsActionPayload } from './types';
+import { MonitorError } from '../../../common/runtime_types';
 import { MonitorLocations } from '../../../common/runtime_types';
 import { QueryParams } from './types';
 
@@ -17,12 +19,12 @@ export const FETCH_MONITOR_LOCATIONS_FAIL = 'FETCH_MONITOR_LOCATIONS_FAIL';
 
 export interface MonitorDetailsState {
   monitorId: string;
-  error: Error;
+  error: MonitorError;
 }
 
 interface GetMonitorDetailsAction {
   type: typeof FETCH_MONITOR_DETAILS;
-  payload: string;
+  payload: MonitorDetailsActionPayload;
 }
 
 interface GetMonitorDetailsSuccessAction {
@@ -54,10 +56,10 @@ interface GetMonitorLocationsFailAction {
   payload: any;
 }
 
-export function fetchMonitorDetails(monitorId: string): GetMonitorDetailsAction {
+export function fetchMonitorDetails(payload: MonitorDetailsActionPayload): GetMonitorDetailsAction {
   return {
     type: FETCH_MONITOR_DETAILS,
-    payload: monitorId,
+    payload,
   };
 }
 

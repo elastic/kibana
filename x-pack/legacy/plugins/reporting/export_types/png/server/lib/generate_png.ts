@@ -32,19 +32,17 @@ export function generatePngObservableFactory(
     const layout = new PreserveLayout(layoutParams.dimensions);
     const screenshots$ = screenshotsObservable({
       logger,
-      url,
+      urls: [url],
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      map(urlScreenshots => {
-        if (urlScreenshots.screenshots.length !== 1) {
-          throw new Error(
-            `Expected there to be 1 screenshot, but there are ${urlScreenshots.screenshots.length}`
-          );
+      map(([{ screenshots }]) => {
+        if (screenshots.length !== 1) {
+          throw new Error(`Expected there to be 1 screenshot, but there are ${screenshots.length}`);
         }
 
-        return urlScreenshots.screenshots[0].base64EncodedData;
+        return screenshots[0].base64EncodedData;
       })
     );
 

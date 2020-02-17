@@ -19,10 +19,10 @@ import { MonitorLocations } from '../../../common/runtime_types';
 type MonitorLocationsList = Map<string, MonitorLocations>;
 
 export interface MonitorState {
-  monitorDetailsList: MonitorDetailsState[];
-  monitorLocationsList: MonitorLocationsList;
   loading: boolean;
   errors: any[];
+  monitorDetailsList: MonitorDetailsState[];
+  monitorLocationsList: MonitorLocationsList;
 }
 
 const initialState: MonitorState = {

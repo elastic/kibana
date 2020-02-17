@@ -21,7 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from 'kibana/public';
-import { Vis, VisParams, SearchSource } from './legacy_imports';
+import { SearchSource } from './legacy_imports';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -30,7 +30,8 @@ import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
-import { FilterManager, esFilters } from '../../../../plugins/data/public';
+import { FilterManager, Filter } from '../../../../plugins/data/public';
+import { VisParams, Vis } from '../../visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
@@ -54,14 +55,12 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     }
 
     async render(visData: any, visParams: VisParams, status: any) {
-      if (status.params || (visParams.useTimeFilter && status.time)) {
-        this.visParams = visParams;
-        this.controls = [];
-        this.controls = await this.initControls();
-        const [{ i18n }] = await deps.core.getStartServices();
-        this.I18nContext = i18n.Context;
-        this.drawVis();
-      }
+      this.visParams = visParams;
+      this.controls = [];
+      this.controls = await this.initControls();
+      const [{ i18n }] = await deps.core.getStartServices();
+      this.I18nContext = i18n.Context;
+      this.drawVis();
     }
 
     destroy() {
@@ -154,7 +153,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
       const newFilters = stagedControls
         .map(control => control.getKbnFilter())
-        .filter((filter): filter is esFilters.Filter => {
+        .filter((filter): filter is Filter => {
           return filter !== null;
         });
 

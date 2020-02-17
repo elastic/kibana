@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { NoteResult } from '../../graphql/types';
 
 /** The users who added a timeline to favorites */
@@ -95,6 +92,8 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
+export type ActionTimelineToShow = 'duplicate' | 'delete' | 'selectable';
+
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
   deleteTimelines?: DeleteTimelines;
@@ -140,6 +139,8 @@ export interface OpenTimelineProps {
   title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
+  /** Hide action on timeline if needed it */
+  hideActions?: ActionTimelineToShow[];
 }
 
 export interface UpdateTimeline {
@@ -159,17 +160,3 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
 }: UpdateTimeline) => () => void;
-
-export interface OpenTimelineDispatchProps {
-  updateTimeline: DispatchUpdateTimeline;
-  createNewTimeline: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
-}
-
-export interface OpenTimelineReduxProps {
-  timeline: TimelineModel;
-}

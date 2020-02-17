@@ -16,7 +16,7 @@ describe('ccs_utils', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs('xpack.monitoring.ccs.enabled').returns(false);
+      get.withArgs('monitoring.ui.ccs.enabled').returns(false);
 
       // falsy string values should be ignored
       const allPattern = prefixIndexPattern(config, indexPattern, '*');
@@ -31,7 +31,7 @@ describe('ccs_utils', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
+      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
 
       // falsy string values should be ignored
       const undefinedPattern = prefixIndexPattern(config, indexPattern);
@@ -48,7 +48,7 @@ describe('ccs_utils', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
+      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
 
       const abcPattern = prefixIndexPattern(config, indexPattern, 'aBc');
       const underscorePattern = prefixIndexPattern(config, indexPattern, 'cluster_one');
@@ -64,7 +64,7 @@ describe('ccs_utils', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
+      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
 
       const pattern = prefixIndexPattern(config, indexPattern, '*');
 

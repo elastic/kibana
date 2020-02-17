@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { get } from 'lodash';
+import React from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
+import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { MonitorSummary } from '../../../../../common/graphql/types';
-import { AppState } from '../../../../state';
-import { fetchMonitorDetails } from '../../../../state/actions/monitor';
 import { MostRecentError } from './most_recent_error';
-import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
-import { MonitorListActionsPopover } from '../monitor_list_actions_popover';
+import { MonitorListActionsPopover } from '../../../connected';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -33,36 +28,16 @@ interface MonitorListDrawerProps {
    * Monitor details to be fetched from rest api using monitorId
    */
   monitorDetails: MonitorDetails;
-
-  /**
-   * Redux action to trigger , loading monitor details
-   */
-  loadMonitorDetails: typeof fetchMonitorDetails;
 }
 
 /**
  * The elements shown when the user expands the monitor list rows.
  */
 
-export function MonitorListDrawerComponent({
-  summary,
-  loadMonitorDetails,
-  monitorDetails,
-}: MonitorListDrawerProps) {
-  const monitorId = summary?.monitor_id;
-  useEffect(() => {
-    if (monitorId) {
-      loadMonitorDetails(monitorId);
-    }
-  }, [loadMonitorDetails, monitorId]);
+export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorListDrawerProps) {
+  const monitorUrl = summary?.state?.url?.full || '';
 
-  if (!summary || !summary.state.checks) {
-    return null;
-  }
-
-  const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
-
-  return (
+  return summary && summary.state.checks ? (
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
@@ -87,18 +62,5 @@ export function MonitorListDrawerComponent({
         />
       )}
     </ContainerDiv>
-  );
+  ) : null;
 }
-
-const mapStateToProps = (state: AppState, { summary }: any) => ({
-  monitorDetails: getMonitorDetails(state, summary),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (monitorId: string) => dispatch(fetchMonitorDetails(monitorId)),
-});
-
-export const MonitorListDrawer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MonitorListDrawerComponent);

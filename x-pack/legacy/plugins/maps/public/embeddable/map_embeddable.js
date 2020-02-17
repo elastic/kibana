@@ -14,7 +14,7 @@ import {
   Embeddable,
   APPLY_FILTER_TRIGGER,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { onlyDisabledFiltersChanged } from '../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
@@ -32,11 +32,12 @@ import {
   hideToolbarOverlay,
   hideLayerControl,
   hideViewControl,
+  setHiddenLayers,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
+import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddable extends Embeddable {
@@ -70,7 +71,7 @@ export class MapEmbeddable extends Embeddable {
     if (
       !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
       !_.isEqual(containerState.query, this._prevQuery) ||
-      !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
     ) {
       this._dispatchSetQuery(containerState);
     }
@@ -153,6 +154,9 @@ export class MapEmbeddable extends Embeddable {
     }
 
     this._store.dispatch(replaceLayerList(this._layerList));
+    if (this.input.hiddenLayers) {
+      this._store.dispatch(setHiddenLayers(this.input.hiddenLayers));
+    }
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
@@ -242,6 +246,14 @@ export class MapEmbeddable extends Embeddable {
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
         openTOCDetails,
+      });
+    }
+
+    const hiddenLayerIds = getHiddenLayerIds(this._store.getState());
+
+    if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
+      this.updateInput({
+        hiddenLayers: hiddenLayerIds,
       });
     }
   }

@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import uuid from 'uuid';
 
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
@@ -26,6 +26,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
+  ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -58,6 +59,7 @@ export const EventColumnView = React.memo<Props>(
     columnHeaders,
     columnRenderers,
     data,
+    ecsData,
     eventIdToNoteIds,
     expanded,
     getNotesByIds,
@@ -83,11 +85,11 @@ export const EventColumnView = React.memo<Props>(
       return (
         timelineTypeContext.timelineActions?.map(action => (
           <EventsTdContent key={action.id} textAlign="center">
-            {action.getAction({ eventId: id, data })}
+            {action.getAction({ eventId: id, ecsData })}
           </EventsTdContent>
         )) ?? []
       );
-    }, [data, timelineTypeContext.timelineActions]);
+    }, [ecsData, timelineTypeContext.timelineActions]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">
@@ -125,6 +127,7 @@ export const EventColumnView = React.memo<Props>(
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
+          ecsData={ecsData}
           onColumnResized={onColumnResized}
           timelineId={timelineId}
         />

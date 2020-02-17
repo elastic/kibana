@@ -6,7 +6,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -34,7 +33,7 @@ describe('unknown_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should return isInstance true with a made up column name', () => {

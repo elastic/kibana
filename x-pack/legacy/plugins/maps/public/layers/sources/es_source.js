@@ -6,6 +6,7 @@
 
 import { AbstractVectorSource } from './vector_source';
 import {
+  autocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
   SearchSource,
@@ -19,6 +20,7 @@ import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
+import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
 export class AbstractESSource extends AbstractVectorSource {
   static icon = 'logoElasticsearch';
@@ -117,7 +119,10 @@ export class AbstractESSource extends AbstractVectorSource {
     if (this.isFilterByMapBounds() && searchFilters.buffer) {
       //buffer can be empty
       const geoField = await this._getGeoField();
-      allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
+      const buffer = this.isGeoGridPrecisionAware()
+        ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
+        : searchFilters.buffer;
+      allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
     }
     if (isTimeAware) {
       allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
@@ -340,4 +345,25 @@ export class AbstractESSource extends AbstractVectorSource {
 
     return resp.aggregations;
   }
+
+  getValueSuggestions = async (fieldName, query) => {
+    if (!fieldName) {
+      return [];
+    }
+
+    try {
+      const indexPattern = await this.getIndexPattern();
+      const field = indexPattern.fields.getByName(fieldName);
+      return await autocompleteService.getValueSuggestions({
+        indexPattern,
+        field,
+        query,
+      });
+    } catch (error) {
+      console.warn(
+        `Unable to fetch suggestions for field: ${fieldName}, query: ${query}, error: ${error.message}`
+      );
+      return [];
+    }
+  };
 }

@@ -6,13 +6,13 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { get, noop } from 'lodash';
+import { noop } from 'lodash';
 import { exposeClient, hasMonitoringCluster } from '../instantiate_client';
 
 function getMockServerFromConnectionUrl(monitoringClusterUrl) {
   const server = {
-    xpack: {
-      monitoring: {
+    monitoring: {
+      ui: {
         elasticsearch: {
           hosts: monitoringClusterUrl ? [monitoringClusterUrl] : [],
           username: 'monitoring-user-internal-test',
@@ -26,15 +26,8 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
     },
   };
 
-  const config = {
-    get: path => {
-      return get(server, path);
-    },
-    set: noop,
-  };
-
   return {
-    config,
+    elasticsearchConfig: server.monitoring.ui.elasticsearch,
     elasticsearchPlugin: {
       getCluster: sinon
         .stub()
@@ -141,12 +134,12 @@ describe('Instantiate Client', () => {
   describe('hasMonitoringCluster', () => {
     it('returns true if monitoring is configured', () => {
       const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200'); // pass null for URL to create the client using prod config
-      expect(hasMonitoringCluster(server.config)).to.be(true);
+      expect(hasMonitoringCluster(server.elasticsearchConfig)).to.be(true);
     });
 
     it('returns false if monitoring is not configured', () => {
       const server = getMockServerFromConnectionUrl(null);
-      expect(hasMonitoringCluster(server.config)).to.be(false);
+      expect(hasMonitoringCluster(server.elasticsearchConfig)).to.be(false);
     });
   });
 });

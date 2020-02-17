@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';

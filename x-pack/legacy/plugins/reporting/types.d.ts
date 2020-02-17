@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
+import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
-import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
-import {
-  ElasticsearchPlugin,
-  CallCluster,
-} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
-import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
-
-export type ReportingPlugin = object; // For Plugin contract
+import { LevelLogger } from './server/lib/level_logger';
+import { ReportingCore } from './server/core';
+import { LegacySetup, ReportingStartDeps, ReportingSetup, ReportingStart } from './server/types';
 
 export type Job = EventEmitter & {
   id: string;
@@ -53,7 +50,7 @@ export interface NetworkPolicy {
   rules: NetworkPolicyRule[];
 }
 
-interface ListQuery {
+export interface ListQuery {
   page: string;
   size: string;
   ids?: string; // optional field forbids us from extending RequestQuery
@@ -64,38 +61,17 @@ interface GenerateQuery {
 interface GenerateExportTypePayload {
   jobParams: string;
 }
-interface DownloadParams {
-  docId: string;
-}
 
 /*
  * Legacy System
+ * TODO: move to server/types
  */
+
+export type ServerFacade = LegacySetup;
 
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
-export type ServerFacade = Legacy.Server & {
-  plugins: {
-    xpack_main?: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-};
-
-interface ReportingRequest {
-  query: ListQuery & GenerateQuery;
-  params: DownloadParams;
-  payload: GenerateExportTypePayload;
-  pre: {
-    management: {
-      jobTypes: any;
-    };
-    user: any;
-  };
-}
-
 export type EnqueueJobFn = <JobParamsType>(
-  parentLogger: LevelLogger,
   exportTypeId: string,
   jobParams: JobParamsType,
   user: string,
@@ -103,7 +79,27 @@ export type EnqueueJobFn = <JobParamsType>(
   request: RequestFacade
 ) => Promise<Job>;
 
-export type RequestFacade = ReportingRequest & Legacy.Request;
+export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
+export type ReportingRequestQuery = ListQuery | GenerateQuery;
+
+export interface ReportingRequestPre {
+  management: {
+    jobTypes: any;
+  };
+  user: any; // TODO import AuthenticatedUser from security/server
+}
+
+export interface RequestFacade {
+  getBasePath: Legacy.Request['getBasePath'];
+  getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
+  headers: Legacy.Request['headers'];
+  params: Legacy.Request['params'];
+  payload: JobParamPostPayload | GenerateExportTypePayload;
+  query: ReportingRequestQuery;
+  route: Legacy.Request['route'];
+  pre: ReportingRequestPre;
+  getRawRequest: () => Legacy.Request;
+}
 
 export type ResponseFacade = ResponseObject & {
   isBoom: boolean;
@@ -183,6 +179,15 @@ export interface CryptoFactory {
   decrypt: (headers?: string) => any;
 }
 
+export interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
+}
+
 export interface TimeRangeParams {
   timezone: string;
   min: Date | string | number;
@@ -201,18 +206,6 @@ export interface JobDocPayload<JobParamsType> {
   type: string | null;
 }
 
-export interface JobDocOutput {
-  content: string; // encoded content
-  contentType: string;
-}
-
-export interface JobDocExecuted<JobParamsType> {
-  jobtype: string;
-  output: JobDocOutputExecuted;
-  payload: JobDocPayload<JobParamsType>;
-  status: string; // completed, failed, etc
-}
-
 export interface JobSource<JobParamsType> {
   _id: string;
   _source: {
@@ -223,27 +216,11 @@ export interface JobSource<JobParamsType> {
   };
 }
 
-/*
- * A snake_cased field is the only significant difference in structure of
- * JobDocOutputExecuted vs JobDocOutput.
- *
- * JobDocOutput is the structure of the object returned by getDocumentPayload
- *
- * data in the _source fields of the
- * Reporting index.
- *
- * The ESQueueWorker internals have executed job objects returned with this
- * structure. See `_formatOutput` in reporting/server/lib/esqueue/worker.js
- */
-export interface JobDocOutputExecuted {
-  content_type: string; // vs `contentType` above
-  content: string | null; // defaultOutput is null
+export interface JobDocOutput {
+  content_type: string;
+  content: string | null;
   max_size_reached: boolean;
   size: number;
-}
-
-export interface ESQueue {
-  addJob: (type: string, payload: object, options: object) => Job;
 }
 
 export interface ESQueueWorker {
@@ -280,7 +257,7 @@ export type ImmediateExecuteFn<JobParamsType> = (
   jobId: null,
   job: JobDocPayload<JobParamsType>,
   request: RequestFacade
-) => Promise<JobDocOutputExecuted>;
+) => Promise<JobDocOutput>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -293,23 +270,29 @@ export interface ESQueueWorkerOptions {
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]
-) => void | Promise<JobDocOutputExecuted>;
+) => void | Promise<JobDocOutput>;
 
-export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
-  registerWorker: (
+export interface ESQueueInstance {
+  addJob: (type: string, payload: unknown, options: object) => Job;
+  registerWorker: <JobParamsType>(
     pluginId: string,
     workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
-export type ExecuteJobFactory<ExecuteJobFnType> = (
+export type CreateJobFactory<CreateJobFnType> = (
+  reporting: ReportingCore,
   server: ServerFacade,
-  opts: {
-    browserDriverFactory: HeadlessChromiumDriverFactory;
-  }
-) => ExecuteJobFnType;
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: LevelLogger
+) => CreateJobFnType;
+export type ExecuteJobFactory<ExecuteJobFnType> = (
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: LevelLogger
+) => Promise<ExecuteJobFnType>;
 
 export interface ExportTypeDefinition<
   JobParamsType,
@@ -327,11 +310,10 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-export { ExportTypesRegistry } from './server/lib/export_types_registry';
+export { CancellationToken } from './common/cancellation_token';
 export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
 export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-export { CancellationToken } from './common/cancellation_token';
-
+export { ExportTypesRegistry } from './server/lib/export_types_registry';
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };
 
@@ -340,4 +322,19 @@ export interface AbsoluteURLFactoryOptions {
   protocol: string;
   hostname: string;
   port: string | number;
+}
+
+export interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
 }

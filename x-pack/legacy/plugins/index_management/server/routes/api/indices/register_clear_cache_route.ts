@@ -3,26 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
-  indices: string[];
-}
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const payload = request.payload as ReqPayload;
-  const { indices = [] } = payload;
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  const params = {
-    expandWildcards: 'none',
-    format: 'json',
-    index: indices,
-  };
+export function registerClearCacheRoute({ router, license, lib }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/clear_cache'), validate: { body: bodySchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const payload = req.body as typeof bodySchema.type;
+      const { indices = [] } = payload;
 
-  await callWithRequest('indices.clearCache', params);
-  return h.response();
-};
+      const params = {
+        expandWildcards: 'none',
+        format: 'json',
+        index: indices,
+      };
 
-export function registerClearCacheRoute(router: Router) {
-  router.post('indices/clear_cache', handler);
+      try {
+        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.clearCache', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }

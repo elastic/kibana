@@ -6,12 +6,14 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -142,6 +144,16 @@ export const getColumns = (
   // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
   const columns: any[] = [
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.showDetailsColumn.screenReaderDescription"
+              defaultMessage="This column contains clickable controls for showing more details on each job"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
@@ -170,6 +182,7 @@ export const getColumns = (
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
+      scope: 'row',
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -178,6 +191,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
     },
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,

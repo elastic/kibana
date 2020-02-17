@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';

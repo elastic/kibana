@@ -17,7 +17,21 @@
  * under the License.
  */
 
-import { VisSavedObject } from '../legacy_imports';
+import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { LegacyCoreStart } from 'kibana/public';
+import { VisSavedObject, AppState, PersistedState } from '../legacy_imports';
+
+export interface EditorRenderProps {
+  appState: AppState;
+  core: LegacyCoreStart;
+  data: DataPublicPluginStart;
+  embeddable: IEmbeddableStart;
+  filters: Filter[];
+  uiState: PersistedState;
+  timeRange: TimeRange;
+  query?: Query;
+}
 
 export interface SavedVisualizations {
   urlFor: (id: string) => string;

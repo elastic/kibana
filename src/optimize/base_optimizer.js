@@ -19,6 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
+
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -26,10 +27,10 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
-import { DynamicDllPlugin } from './dynamic_dll_plugin';
 import WrapperPlugin from 'wrapper-webpack-plugin';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { defaults } from 'lodash';
+import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
 import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
 import { fromRoot } from '../core/server/utils';
@@ -38,6 +39,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
+const EMPTY_MODULE_PATH = require.resolve('./intentionally_empty_module.js');
 const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 const STATS_WARNINGS_FILTER = new RegExp(
   [
@@ -61,7 +63,6 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
-    this.newPlatformPluginInfo = opts.newPlatformPluginInfo;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
 
@@ -146,7 +147,7 @@ export default class BaseOptimizer {
       return 1;
     }
 
-    return Math.max(1, Math.min(cpus.length - 1, 7));
+    return Math.max(1, Math.min(cpus.length - 1, 3));
   }
 
   getThreadLoaderPoolConfig() {
@@ -246,7 +247,6 @@ export default class BaseOptimizer {
       cache: true,
       entry: {
         ...this.uiBundles.toWebpackEntries(),
-        ...this._getDiscoveredPluginEntryPoints(),
         light_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_light.less')],
         dark_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_dark.less')],
       },
@@ -255,17 +255,12 @@ export default class BaseOptimizer {
       profile: this.profile || false,
 
       output: {
+        futureEmitAssets: true, // TODO: remove on webpack 5
         path: this.uiBundles.getWorkingDir(),
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
         devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-
-        // When the entry point is loaded, assign it's exported `plugin`
-        // value to a key on the global `__kbnBundles__` object.
-        // NOTE: Only actually used by new platform plugins
-        library: ['__kbnBundles__', '[name]'],
-        libraryExport: 'plugin',
       },
 
       optimization: {
@@ -304,6 +299,11 @@ export default class BaseOptimizer {
 
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
+        }),
+
+        // ignore scss imports in new-platform code that finds its way into legacy bundles
+        new webpack.NormalModuleReplacementPlugin(/\.scss$/, resource => {
+          resource.request = EMPTY_MODULE_PATH;
         }),
 
         // replace imports for `uiExports/*` modules with a synthetic module
@@ -394,7 +394,10 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases(),
+        alias: {
+          ...this.uiBundles.getAliases(),
+          tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
+        },
       },
 
       performance: {
@@ -402,6 +405,10 @@ export default class BaseOptimizer {
         // are more tailored for the final bundles result
         // and not for the webpack compilations performance itself
         hints: false,
+      },
+
+      externals: {
+        ...UiSharedDeps.externals,
       },
     };
 
@@ -415,17 +422,6 @@ export default class BaseOptimizer {
           },
         }),
       ],
-    };
-
-    // We need to add react-addons (and a few other bits) for enzyme to work.
-    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-    const supportEnzymeConfig = {
-      externals: {
-        mocha: 'mocha',
-        'react/lib/ExecutionEnvironment': true,
-        'react/addons': true,
-        'react/lib/ReactContext': true,
-      },
     };
 
     const watchingConfig = {
@@ -464,7 +460,7 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: this.getThreadLoaderPoolConfig().workers,
+            parallel: false,
             sourceMap: false,
             cache: false,
             extractComments: false,
@@ -482,9 +478,7 @@ export default class BaseOptimizer {
         IS_CODE_COVERAGE ? coverageConfig : {},
         commonConfig,
         IS_KIBANA_DISTRIBUTABLE ? isDistributableConfig : {},
-        this.uiBundles.isDevMode()
-          ? webpackMerge(watchingConfig, supportEnzymeConfig)
-          : productionConfig
+        this.uiBundles.isDevMode() ? watchingConfig : productionConfig
       )
     );
   }
@@ -515,33 +509,19 @@ export default class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    const details = stats.toString(
-      defaults(
-        { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-        Stats.presetToOptions('minimal')
-      )
-    );
+    const details = stats.toString({
+      ...Stats.presetToOptions('minimal'),
+      colors: true,
+      warningsFilter: STATS_WARNINGS_FILTER,
+    });
 
     return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(
-        defaults({
-          warningsFilter: STATS_WARNINGS_FILTER,
-          ...Stats.presetToOptions('detailed'),
-          maxModules: 1000,
-        })
-      )
-    );
-  }
-
-  _getDiscoveredPluginEntryPoints() {
-    // New platform plugin entry points
-    return [...this.newPlatformPluginInfo.entries()].reduce(
-      (entryPoints, [pluginId, pluginInfo]) => {
-        entryPoints[`plugin/${pluginId}`] = pluginInfo.entryPointPath;
-        return entryPoints;
-      },
-      {}
+      stats.toJson({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
+      })
     );
   }
 

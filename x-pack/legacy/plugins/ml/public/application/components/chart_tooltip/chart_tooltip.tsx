@@ -9,12 +9,11 @@ import React, { useRef, FC } from 'react';
 import { TooltipValueFormatter } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 
-import { chartTooltip$, ChartTooltipValue } from './chart_tooltip_service';
+import { chartTooltip$, ChartTooltipState, ChartTooltipValue } from './chart_tooltip_service';
 
 type RefValue = HTMLElement | null;
 
-function useRefWithCallback() {
-  const chartTooltipState = useObservable(chartTooltip$);
+function useRefWithCallback(chartTooltipState?: ChartTooltipState) {
   const ref = useRef<RefValue>(null);
 
   return (node: RefValue) => {
@@ -37,8 +36,7 @@ function useRefWithCallback() {
       if (left + tooltipWidth > contentWidth) {
         // the tooltip is hanging off the side of the page,
         // so move it to the other side of the target
-        const markerWidthAdjustment = 25;
-        left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
+        left = left - (tooltipWidth + offset.x);
       }
 
       const top = targetPosition.top + offset.y - parentBounding.top;
@@ -67,7 +65,7 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
 
 export const ChartTooltip: FC = () => {
   const chartTooltipState = useObservable(chartTooltip$);
-  const chartTooltipElement = useRefWithCallback();
+  const chartTooltipElement = useRefWithCallback(chartTooltipState);
 
   if (chartTooltipState === undefined || !chartTooltipState.isTooltipVisible) {
     return <div className="mlChartTooltip mlChartTooltip--hidden" ref={chartTooltipElement} />;

@@ -35,7 +35,7 @@ export const MultiSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

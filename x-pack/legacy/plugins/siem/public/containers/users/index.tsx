@@ -6,18 +6,11 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import {
-  GetUsersQuery,
-  GetUsersQueryComponent,
-  FlowTarget,
-  PageInfoPaginated,
-  UsersEdges,
-  UsersSortField,
-} from '../../graphql/types';
+import { GetUsersQuery, FlowTarget, PageInfoPaginated, UsersEdges } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -45,14 +38,7 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
   type: networkModel.NetworkType;
 }
 
-export interface UsersComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-  sort: UsersSortField;
-}
-
-type UsersProps = OwnProps & UsersComponentReduxProps & WithKibanaProps;
+type UsersProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class UsersComponentQuery extends QueryTemplatePaginated<
   UsersProps,
@@ -153,7 +139,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const UsersQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(UsersComponentQuery);

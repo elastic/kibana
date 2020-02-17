@@ -8,7 +8,7 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { Summary } from './';
 import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
-import { ErrorCountSummaryItem } from './ErrorCountSummaryItem';
+import { ErrorCountSummaryItemBadge } from './ErrorCountSummaryItemBadge';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { HttpInfoSummaryItem } from './HttpInfoSummaryItem';
 import { TransactionResultSummaryItem } from './TransactionResultSummaryItem';
@@ -54,7 +54,7 @@ const TransactionSummary = ({
       parentType="trace"
     />,
     getTransactionResultSummaryItem(transaction),
-    errorCount ? <ErrorCountSummaryItem count={errorCount} /> : null,
+    errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,
     transaction.user_agent ? (
       <UserAgentSummaryItem {...transaction.user_agent} />
     ) : null

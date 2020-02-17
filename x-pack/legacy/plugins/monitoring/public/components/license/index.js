@@ -15,10 +15,11 @@ import {
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
 
 const licenseManagement = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
 
@@ -61,6 +62,11 @@ export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
   return (
     <EuiPage>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage id="xpack.monitoring.license.heading" defaultMessage="License" />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody>
         <LicenseStatus isExpired={isExpired} status={status} type={type} expiryDate={expiryDate} />
         <EuiSpacer />

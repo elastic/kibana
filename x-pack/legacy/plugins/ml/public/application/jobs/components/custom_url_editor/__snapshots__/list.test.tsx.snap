@@ -29,11 +29,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlLabelInput_0"
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           value="Show data"
         />
@@ -56,10 +53,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlInput_0"
           fullWidth={true}
-          isLoading={false}
           onFocus={[Function]}
           readOnly={true}
           value="kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:'airline:\\"$airline$\\"'))"
@@ -87,10 +82,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           placeholder="auto"
           value="auto"
@@ -187,11 +179,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlLabelInput_1"
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           value="Show dashboard"
         />
@@ -214,10 +203,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlInput_1"
           fullWidth={true}
-          isLoading={false}
           onFocus={[Function]}
           readOnly={true}
           value="kibana#/dashboard/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\\"$airline$\\"'))"
@@ -245,10 +232,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           placeholder="auto"
           value="1h"
@@ -345,11 +329,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlLabelInput_2"
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           value="Show airline"
         />
@@ -372,10 +353,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="mlJobEditCustomUrlInput_2"
           fullWidth={true}
-          isLoading={false}
           onFocus={[Function]}
           readOnly={true}
           value="http://airlinecodes.info/airline-code-$airline$"
@@ -403,10 +382,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
-          fullWidth={false}
           isInvalid={false}
-          isLoading={false}
           onChange={[Function]}
           placeholder="auto"
           value="auto"

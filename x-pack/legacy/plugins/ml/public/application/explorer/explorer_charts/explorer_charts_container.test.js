@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './explorer_chart_single_metric.test.mocks';
+import React from 'react';
+import { mount, shallow } from 'enzyme';
+
+import { I18nProvider } from '@kbn/i18n/react';
+
+import { chartLimits } from '../../util/chart_utils';
+
+import { getDefaultChartsData } from './explorer_charts_container_service';
+import { ExplorerChartsContainer } from './explorer_charts_container';
+
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
@@ -29,27 +38,6 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 
-// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    addBasePath: () => '/api/ml',
-    getBasePath: () => {
-      return '<basepath>';
-    },
-  }),
-  { virtual: true }
-);
-
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import React from 'react';
-
-import { chartLimits } from '../../util/chart_utils';
-import { getDefaultChartsData } from './explorer_charts_container_service';
-
-import { ExplorerChartsContainer } from './explorer_charts_container';
-
 describe('ExplorerChartsContainer', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -58,7 +46,11 @@ describe('ExplorerChartsContainer', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Minimal Initialization', () => {
-    const wrapper = shallowWithIntl(<ExplorerChartsContainer {...getDefaultChartsData()} />);
+    const wrapper = shallow(
+      <I18nProvider>
+        <ExplorerChartsContainer {...getDefaultChartsData()} />
+      </I18nProvider>
+    );
 
     expect(wrapper.html()).toBe(
       '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive"></div>'
@@ -78,7 +70,11 @@ describe('ExplorerChartsContainer', () => {
       chartsPerRow: 1,
       tooManyBuckets: false,
     };
-    const wrapper = mountWithIntl(<ExplorerChartsContainer {...props} />);
+    const wrapper = mount(
+      <I18nProvider>
+        <ExplorerChartsContainer {...props} />
+      </I18nProvider>
+    );
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.
@@ -101,7 +97,11 @@ describe('ExplorerChartsContainer', () => {
       chartsPerRow: 1,
       tooManyBuckets: false,
     };
-    const wrapper = mountWithIntl(<ExplorerChartsContainer {...props} />);
+    const wrapper = mount(
+      <I18nProvider>
+        <ExplorerChartsContainer {...props} />
+      </I18nProvider>
+    );
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.

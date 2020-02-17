@@ -10,12 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
 import { HostDetailsTabs } from './details_tabs';
-import { SetAbsoluteRangeDatePicker } from './types';
+import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-
-jest.mock('../../../lib/kibana');
+import { getHostDetailsPageFilters } from './helpers';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -33,6 +32,23 @@ describe('body', () => {
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
+    alerts: 'HostAlertsQueryTabBody',
+  };
+
+  const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
+
+  const filterQuery = JSON.stringify({
+    bool: {
+      must: [],
+      filter: [{ match_all: {} }, { match_phrase: { 'host.name': { query: 'host-1' } } }],
+      should: [],
+      must_not: [],
+    },
+  });
+
+  const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
+    events: { pageFilters: mockHostDetailsPageFilters },
+    alerts: { pageFilters: mockHostDetailsPageFilters },
   };
   const mount = useMountAppended();
 
@@ -51,7 +67,8 @@ describe('body', () => {
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}
               type={type}
-              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
+              pageFilters={mockHostDetailsPageFilters}
+              filterQuery={filterQuery}
             />
           </MemoryRouter>
         </TestProviders>
@@ -60,8 +77,7 @@ describe('body', () => {
       // match against everything but the functions to ensure they are there as expected
       expect(wrapper.find(componentName).props()).toMatchObject({
         endDate: 0,
-        filterQuery:
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}',
+        filterQuery,
         skip: false,
         startDate: 0,
         type: 'details',
@@ -85,6 +101,7 @@ describe('body', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
+        ...(componentProps[path] != null ? componentProps[path] : []),
       });
     })
   );

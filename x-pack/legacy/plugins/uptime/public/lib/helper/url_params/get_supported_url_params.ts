@@ -46,7 +46,7 @@ const {
  * require further development.
  */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | string[] | undefined;
+  [key: string]: string | string[] | undefined | null;
 }): UptimeUrlParams => {
   const filteredParams: { [key: string]: string | undefined } = {};
   Object.keys(params).forEach(key => {
@@ -84,7 +84,8 @@ export const getSupportedUrlParams = (params: {
     ),
     absoluteDateRangeEnd: parseAbsoluteDate(
       dateRangeEnd || DATE_RANGE_END,
-      ABSOLUTE_DATE_RANGE_END
+      ABSOLUTE_DATE_RANGE_END,
+      { roundUp: true }
     ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),

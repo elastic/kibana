@@ -35,17 +35,17 @@ export async function getPaginatedNodes(
   pagination,
   sort,
   queryText,
-  { clusterStats, shardStats }
+  { clusterStats, nodesShardCount }
 ) {
   const config = req.server.config();
-  const size = config.get('xpack.monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const nodes = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
   for (const node of nodes) {
     node.isOnline = !isUndefined(get(clusterState, ['nodes', node.uuid]));
-    node.shardCount = get(shardStats, `nodes[${node.uuid}].shardCount`, 0);
+    node.shardCount = get(nodesShardCount, `nodes[${node.uuid}].shardCount`, 0);
   }
 
   // `metricSet` defines a list of metrics that are sortable in the UI
@@ -63,7 +63,7 @@ export async function getPaginatedNodes(
   const groupBy = {
     field: `source_node.uuid`,
     include: nodes.map(node => node.uuid),
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
   };
   const metricSeriesData = await getMetrics(
     req,
