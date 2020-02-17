@@ -96,11 +96,15 @@ module.exports = function({ name, targetPath }) {
         message: 'Should a server API be generated?',
         default: true,
       },
-      // generateTranslations: {
-      //   type: 'confirm',
-      //   message: 'Should translation files be generated?',
-      //   default: true,
-      // },
+      generateTranslations: {
+        type: 'confirm',
+        when: answers => {
+          // only for 3rd party plugins
+          return !answers.customPath && answers.generateApp;
+        },
+        message: 'Should translation files be generated?',
+        default: true,
+      },
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
@@ -119,12 +123,13 @@ module.exports = function({ name, targetPath }) {
       'public/**/index.scss': 'generateScss',
       'public/**/*': 'generateApp',
       'server/**/*': 'generateApi',
-      // 'translations/**/*': 'generateTranslations',
-      // '.i18nrc.json': 'generateTranslations',
+      'translations/**/*': 'generateTranslations',
+      'i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',
+      'i18nrc.json': '.i18nrc.json',
     },
     data: answers =>
       Object.assign(

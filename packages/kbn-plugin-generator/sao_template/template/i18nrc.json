@@ -1,0 +1,11 @@
+{
+    "prefix": "<%= camelCase(name) %>",
+    "paths": {
+      "<%= camelCase(name) %>": "."
+    },
+    "translations": [
+      "translations/zh-CN.json",
+      "translations/ja-JP.json"
+    ]
+  }
+  
