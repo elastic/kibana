@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { addStackStats, getAllStats, handleAllStats } from '../get_all_stats';
+import { addStackStats, getAllStats, handleAllStats } from './get_all_stats';
+import { ESClusterStats } from './get_es_stats';
+import { KibanaStats } from './get_kibana_stats';
+import { ClustersHighLevelStats } from './get_high_level_stats';
 
-// FAILING: https://github.com/elastic/kibana/issues/51371
-describe.skip('get_all_stats', () => {
+describe('get_all_stats', () => {
   const size = 123;
   const start = 0;
   const end = 1;
@@ -100,9 +101,6 @@ describe.skip('get_all_stats', () => {
 
   describe('getAllStats', () => {
     it('returns clusters', async () => {
-      const clusterUuidsResponse = {
-        aggregations: { cluster_uuids: { buckets: [{ key: 'a' }] } },
-      };
       const esStatsResponse = {
         hits: {
           hits: [{ _id: 'a', _source: { cluster_uuid: 'a' } }],
@@ -177,15 +175,25 @@ describe.skip('get_all_stats', () => {
       callCluster
         .withArgs('search')
         .onCall(0)
-        .returns(Promise.resolve(clusterUuidsResponse))
-        .onCall(1)
         .returns(Promise.resolve(esStatsResponse))
-        .onCall(2)
+        .onCall(1)
         .returns(Promise.resolve(kibanaStatsResponse))
+        .onCall(2)
+        .returns(Promise.resolve(logstashStatsResponse))
         .onCall(3)
-        .returns(Promise.resolve(logstashStatsResponse));
+        .returns(Promise.resolve({})) // Beats stats
+        .onCall(4)
+        .returns(Promise.resolve({})); // Beats state
 
-      expect(await getAllStats({ callCluster, server, start, end })).to.eql(allClusters);
+      expect(
+        await getAllStats([{ clusterUuid: 'a' }], {
+          callCluster: callCluster as any,
+          usageCollection: {} as any,
+          server,
+          start,
+          end,
+        })
+      ).toStrictEqual(allClusters);
     });
 
     it('returns empty clusters', async () => {
@@ -195,21 +203,33 @@ describe.skip('get_all_stats', () => {
 
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
-      expect(await getAllStats({ callCluster, server, start, end })).to.eql([]);
+      expect(
+        await getAllStats([], {
+          callCluster: callCluster as any,
+          usageCollection: {} as any,
+          server,
+          start,
+          end,
+        })
+      ).toStrictEqual([]);
     });
   });
 
   describe('handleAllStats', () => {
     it('handles response', () => {
-      const clusters = handleAllStats(esClusters, { kibana: kibanaStats, logstash: logstashStats });
+      const clusters = handleAllStats(esClusters as ESClusterStats[], {
+        kibana: (kibanaStats as unknown) as KibanaStats,
+        logstash: (logstashStats as unknown) as ClustersHighLevelStats,
+        beats: {},
+      });
 
-      expect(clusters).to.eql(expectedClusters);
+      expect(clusters).toStrictEqual(expectedClusters);
     });
 
     it('handles no clusters response', () => {
-      const clusters = handleAllStats([], {});
+      const clusters = handleAllStats([], {} as any);
 
-      expect(clusters).to.have.length(0);
+      expect(clusters).toHaveLength(0);
     });
   });
 
@@ -230,9 +250,9 @@ describe.skip('get_all_stats', () => {
         },
       };
 
-      addStackStats(cluster, stats, 'xyz');
+      addStackStats(cluster as ESClusterStats, stats, 'xyz');
 
-      expect(cluster.stack_stats.xyz).to.be(stats.a);
+      expect((cluster as any).stack_stats.xyz).toStrictEqual(stats.a);
     });
   });
 });

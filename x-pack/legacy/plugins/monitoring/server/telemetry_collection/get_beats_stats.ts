@@ -5,6 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import { SearchResponse } from 'elasticsearch';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -33,6 +35,107 @@ const getBaseStats = () => ({
   },
 });
 
+export interface BeatsStats {
+  cluster_uuid: string;
+  beats_stats?: {
+    beat?: {
+      version?: string;
+      type?: string;
+      host?: string;
+    };
+    metrics?: {
+      libbeat?: {
+        output?: {
+          type?: string;
+        };
+        pipeline?: {
+          events?: {
+            published?: number;
+          };
+        };
+      };
+    };
+  };
+  beats_state?: {
+    beat?: {
+      type?: string;
+    };
+    state?: {
+      input?: {
+        names: string[];
+        count: number;
+      };
+      module?: {
+        names: string[];
+        count: number;
+      };
+      heartbeat?: HeartbeatBase;
+      functionbeat?: {
+        functions?: {
+          count?: number;
+        };
+      };
+      host?: {
+        architecture: string;
+        os: { platform: string };
+      };
+    };
+  };
+}
+
+interface HeartbeatBase {
+  monitors: number;
+  endpoints: number;
+  // I have to add the '| number' bit because otherwise TS complains about 'monitors' and 'endpoints' not being of type HeartbeatBase
+  [key: string]: HeartbeatBase | number | undefined;
+}
+
+export interface BeatsBaseStats {
+  // stats
+  versions: { [version: string]: number };
+  types: { [type: string]: number };
+  outputs: { [outputType: string]: number };
+  count: number;
+  eventsPublished: number;
+  hosts: number;
+  // state
+  input: {
+    count: number;
+    names: string[];
+  };
+  module: {
+    count: number;
+    names: string[];
+  };
+  architecture: {
+    count: number;
+    architectures: BeatsArchitecture[];
+  };
+  heartbeat?: HeartbeatBase;
+  functionbeat?: {
+    functions: {
+      count: number;
+    };
+  };
+}
+
+export interface BeatsProcessOptions {
+  clusters: { [clusterUuid: string]: BeatsBaseStats }; // the result object to be built up
+  clusterHostSets: { [clusterUuid: string]: Set<string> }; // passed to processResults for tracking state in the results generation
+  clusterInputSets: { [clusterUuid: string]: Set<string> }; // passed to processResults for tracking state in the results generation
+  clusterModuleSets: { [clusterUuid: string]: Set<string> }; // passed to processResults for tracking state in the results generation
+  clusterArchitectureMaps: {
+    // passed to processResults for tracking state in the results generation
+    [clusterUuid: string]: Map<string, BeatsArchitecture>;
+  };
+}
+
+export interface BeatsArchitecture {
+  name: string;
+  architecture: string;
+  count: number;
+}
+
 /*
  * Update a clusters object with processed beat stats
  * @param {Array} results - array of Beats docs from ES
@@ -41,12 +144,18 @@ const getBaseStats = () => ({
  * @param {Object} clusterModuleSets - the object keyed by cluster UUIDs to count the unique modules
  */
 export function processResults(
-  results = [],
-  { clusters, clusterHostSets, clusterInputSets, clusterModuleSets, clusterArchitectureMaps }
+  results: SearchResponse<BeatsStats>,
+  {
+    clusters,
+    clusterHostSets,
+    clusterInputSets,
+    clusterModuleSets,
+    clusterArchitectureMaps,
+  }: BeatsProcessOptions
 ) {
-  const currHits = get(results, 'hits.hits', []);
+  const currHits = results?.hits?.hits || [];
   currHits.forEach(hit => {
-    const clusterUuid = get(hit, '_source.cluster_uuid');
+    const clusterUuid = hit._source.cluster_uuid;
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getBaseStats();
       clusterHostSets[clusterUuid] = new Set();
@@ -57,30 +166,30 @@ export function processResults(
 
     const processBeatsStatsResults = () => {
       const { versions, types, outputs } = clusters[clusterUuid];
-      const thisVersion = get(hit, '_source.beats_stats.beat.version');
+      const thisVersion = hit._source.beats_stats?.beat?.version;
       if (thisVersion !== undefined) {
         const thisVersionAccum = versions[thisVersion] || 0;
         versions[thisVersion] = thisVersionAccum + 1;
       }
 
-      const thisType = get(hit, '_source.beats_stats.beat.type');
+      const thisType = hit._source.beats_stats?.beat?.type;
       if (thisType !== undefined) {
         const thisTypeAccum = types[thisType] || 0;
         types[thisType] = thisTypeAccum + 1;
       }
 
-      const thisOutput = get(hit, '_source.beats_stats.metrics.libbeat.output.type');
+      const thisOutput = hit._source.beats_stats?.metrics?.libbeat?.output?.type;
       if (thisOutput !== undefined) {
         const thisOutputAccum = outputs[thisOutput] || 0;
         outputs[thisOutput] = thisOutputAccum + 1;
       }
 
-      const thisEvents = get(hit, '_source.beats_stats.metrics.libbeat.pipeline.events.published');
+      const thisEvents = hit._source.beats_stats?.metrics?.libbeat?.pipeline?.events?.published;
       if (thisEvents !== undefined) {
         clusters[clusterUuid].eventsPublished += thisEvents;
       }
 
-      const thisHost = get(hit, '_source.beats_stats.beat.host');
+      const thisHost = hit._source.beats_stats?.beat?.host;
       if (thisHost !== undefined) {
         const hostsMap = clusterHostSets[clusterUuid];
         hostsMap.add(thisHost);
@@ -89,7 +198,7 @@ export function processResults(
     };
 
     const processBeatsStateResults = () => {
-      const stateInput = get(hit, '_source.beats_state.state.input');
+      const stateInput = hit._source.beats_state?.state?.input;
       if (stateInput !== undefined) {
         const inputSet = clusterInputSets[clusterUuid];
         stateInput.names.forEach(name => inputSet.add(name));
@@ -97,8 +206,8 @@ export function processResults(
         clusters[clusterUuid].input.count += stateInput.count;
       }
 
-      const stateModule = get(hit, '_source.beats_state.state.module');
-      const statsType = get(hit, '_source.beats_state.beat.type');
+      const stateModule = hit._source.beats_state?.state?.module;
+      const statsType = hit._source.beats_state?.beat?.type;
       if (stateModule !== undefined) {
         const moduleSet = clusterModuleSets[clusterUuid];
         stateModule.names.forEach(name => moduleSet.add(statsType + '.' + name));
@@ -106,7 +215,7 @@ export function processResults(
         clusters[clusterUuid].module.count += stateModule.count;
       }
 
-      const heartbeatState = get(hit, '_source.beats_state.state.heartbeat');
+      const heartbeatState = hit._source.beats_state?.state?.heartbeat;
       if (heartbeatState !== undefined) {
         if (!clusters[clusterUuid].hasOwnProperty('heartbeat')) {
           clusters[clusterUuid].heartbeat = {
@@ -114,7 +223,7 @@ export function processResults(
             endpoints: 0,
           };
         }
-        const clusterHb = clusters[clusterUuid].heartbeat;
+        const clusterHb = clusters[clusterUuid].heartbeat!;
 
         clusterHb.monitors += heartbeatState.monitors;
         clusterHb.endpoints += heartbeatState.endpoints;
@@ -133,12 +242,12 @@ export function processResults(
               endpoints: 0,
             };
           }
-          clusterHb[proto].monitors += val.monitors;
-          clusterHb[proto].endpoints += val.endpoints;
+          (clusterHb[proto] as HeartbeatBase).monitors += val.monitors;
+          (clusterHb[proto] as HeartbeatBase).endpoints += val.endpoints;
         }
       }
 
-      const functionbeatState = get(hit, '_source.beats_state.state.functionbeat');
+      const functionbeatState = hit._source.beats_state?.state?.functionbeat;
       if (functionbeatState !== undefined) {
         if (!clusters[clusterUuid].hasOwnProperty('functionbeat')) {
           clusters[clusterUuid].functionbeat = {
@@ -148,14 +257,11 @@ export function processResults(
           };
         }
 
-        clusters[clusterUuid].functionbeat.functions.count += get(
-          functionbeatState,
-          'functions.count',
-          0
-        );
+        clusters[clusterUuid].functionbeat!.functions.count +=
+          functionbeatState.functions?.count || 0;
       }
 
-      const stateHost = get(hit, '_source.beats_state.state.host');
+      const stateHost = hit._source.beats_state?.state?.host;
       if (stateHost !== undefined) {
         const hostMap = clusterArchitectureMaps[clusterUuid];
         const hostKey = `${stateHost.architecture}/${stateHost.os.platform}`;
@@ -198,14 +304,14 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  server,
-  callCluster,
-  clusterUuids,
-  start,
-  end,
-  { page = 0, ...options } = {},
-  type
-) {
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end'],
+  { page = 0, ...options }: { page?: number } & BeatsProcessOptions,
+  type: string
+): Promise<void> {
   const params = {
     index: INDEX_PATTERN_BEATS,
     ignoreUnavailable: true,
@@ -232,7 +338,7 @@ async function fetchBeatsByType(
           {
             bool: {
               must_not: { term: { [`${type}.beat.type`]: 'apm-server' } },
-              must: { term: { type: type } },
+              must: { term: { type } },
             },
           },
         ],
@@ -244,8 +350,8 @@ async function fetchBeatsByType(
     },
   };
 
-  const results = await callCluster('search', params);
-  const hitsLength = get(results, 'hits.hits.length', 0);
+  const results = await callCluster<SearchResponse<BeatsStats>>('search', params);
+  const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
     processResults(results, options);
@@ -265,20 +371,40 @@ async function fetchBeatsByType(
   return Promise.resolve();
 }
 
-export async function fetchBeatsStats(...args) {
-  return fetchBeatsByType(...args, 'beats_stats');
+export async function fetchBeatsStats(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end'],
+  options: { page?: number } & BeatsProcessOptions
+) {
+  return fetchBeatsByType(server, callCluster, clusterUuids, start, end, options, 'beats_stats');
 }
 
-export async function fetchBeatsStates(...args) {
-  return fetchBeatsByType(...args, 'beats_state');
+export async function fetchBeatsStates(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end'],
+  options: { page?: number } & BeatsProcessOptions
+) {
+  return fetchBeatsByType(server, callCluster, clusterUuids, start, end, options, 'beats_state');
 }
 
 /*
  * Call the function for fetching and summarizing beats stats
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
-export async function getBeatsStats(server, callCluster, clusterUuids, start, end) {
-  const options = {
+export async function getBeatsStats(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end']
+) {
+  const options: BeatsProcessOptions = {
     clusters: {}, // the result object to be built up
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation
     clusterInputSets: {}, // passed to processResults for tracking state in the results generation
