@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const contexts = {
-  GETNUMBEROFITEMS: 'GetNumberOfItems',
-  INJECTCSS: 'InjectCss',
-  WAITFORRENDER: 'WaitForRender',
-  GETTIMERANGE: 'GetTimeRange',
-  ELEMENTPOSITIONANDATTRIBUTES: 'ElementPositionAndAttributes',
-  CHECKFORTOASTMESSAGE: 'CheckForToastMessage',
-};
+export const GETNUMBEROFITEMS = 'GetNumberOfItems';
+export const INJECTCSS = 'InjectCss';
+export const WAITFORRENDER = 'WaitForRender';
+export const GETTIMERANGE = 'GetTimeRange';
+export const ELEMENTPOSITIONANDATTRIBUTES = 'ElementPositionAndAttributes';
+export const CHECKFORTOASTMESSAGE = 'CheckForToastMessage';
+export const WAITFORELEMENTSTOBEINDOM = 'WaitForElementsToBeInDOM';

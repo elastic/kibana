@@ -7,6 +7,7 @@
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
+import { WAITFORELEMENTSTOBEINDOM } from './constants';
 
 export const waitForElementsToBeInDOM = async (
   browser: HeadlessBrowser,
@@ -24,7 +25,7 @@ export const waitForElementsToBeInDOM = async (
       args: [layout.selectors.renderComplete],
       toEqual: itemsCount,
     },
-    { context: 'WaitForElementsToBeInDom' },
+    { context: WAITFORELEMENTSTOBEINDOM },
     logger
   );
 

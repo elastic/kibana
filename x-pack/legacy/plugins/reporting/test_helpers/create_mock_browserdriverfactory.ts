@@ -6,7 +6,7 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
-import { contexts } from '../export_types/common/lib/screenshots/constants';
+import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
