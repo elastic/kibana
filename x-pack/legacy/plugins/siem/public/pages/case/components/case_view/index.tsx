@@ -80,7 +80,6 @@ interface EditNodeComponentProps {
   isLoading: boolean;
   title: string | React.ReactNode;
   isEditTitle?: boolean;
-  iconType: string;
   onChange: (a: string) => void;
   onClick: (b: boolean) => void;
   onSubmit: () => void;
@@ -263,7 +262,6 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
       isLoading={isLoading}
       title={title}
       isEditTitle={isEditTitle}
-      iconType="pencil"
       onChange={newTitle => setTitle(newTitle)}
       onSubmit={() => onUpdateField('title', title)}
       onClick={isEdit => setIsEditTitle(isEdit)}
