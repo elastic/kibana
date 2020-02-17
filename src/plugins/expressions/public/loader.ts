@@ -20,11 +20,11 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
-import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
-import { getInspector } from './services';
+import { getInspector, getExpressionsService } from './services';
+import { ExecutionContract } from '../common/execution/execution_contract';
 
 type Data = any;
 
@@ -35,7 +35,7 @@ export class ExpressionLoader {
   events$: ExpressionRenderHandler['events$'];
   loading$: Observable<void>;
 
-  private dataHandler: ExpressionDataHandler | undefined;
+  private execution: ExecutionContract | undefined;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<boolean>;
@@ -93,26 +93,26 @@ export class ExpressionLoader {
     this.dataSubject.complete();
     this.loadingSubject.complete();
     this.renderHandler.destroy();
-    if (this.dataHandler) {
-      this.dataHandler.cancel();
+    if (this.execution) {
+      this.execution.cancel();
     }
   }
 
   cancel() {
-    if (this.dataHandler) {
-      this.dataHandler.cancel();
+    if (this.execution) {
+      this.execution.cancel();
     }
   }
 
   getExpression(): string | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.getExpression();
+    if (this.execution) {
+      return this.execution.getExpression();
     }
   }
 
   getAst(): ExpressionAstExpression | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.getAst();
+    if (this.execution) {
+      return this.execution.getAst();
     }
   }
 
@@ -130,9 +130,7 @@ export class ExpressionLoader {
   }
 
   inspect(): Adapters | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.inspect();
-    }
+    return this.execution ? (this.execution.inspect() as Adapters) : undefined;
   }
 
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
@@ -150,15 +148,19 @@ export class ExpressionLoader {
     expression: string | ExpressionAstExpression,
     params: IExpressionLoaderParams
   ): Promise<void> => {
-    if (this.dataHandler && this.dataHandler.isPending) {
-      this.dataHandler.cancel();
+    if (this.execution && this.execution.isPending) {
+      this.execution.cancel();
     }
     this.setParams(params);
-    this.dataHandler = new ExpressionDataHandler(expression, params);
-    if (!params.inspectorAdapters) params.inspectorAdapters = this.dataHandler.inspect();
-    const prevDataHandler = this.dataHandler;
+    this.execution = getExpressionsService().execute(expression, params.context, {
+      search: params.searchContext,
+      variables: params.variables || {},
+      inspectorAdapters: params.inspectorAdapters,
+    });
+    if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
+    const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
-    if (this.dataHandler !== prevDataHandler) {
+    if (this.execution !== prevDataHandler) {
       return;
     }
     this.dataSubject.next(data);
