@@ -80,7 +80,7 @@ export const getActions = () => {
             iconType="stop"
             onClick={() => stopAnalytics(item)}
             aria-label={buttonStopText}
-            data-test-sub="mlAnalyticsJobStopButton"
+            data-test-subj="mlAnalyticsJobStopButton"
           >
             {buttonStopText}
           </EuiButtonEmpty>

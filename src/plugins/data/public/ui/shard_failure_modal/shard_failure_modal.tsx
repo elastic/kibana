@@ -113,7 +113,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-        <EuiButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
+        <EuiButton onClick={() => onClose()} fill data-test-subj="closeShardFailureModal">
           <FormattedMessage
             id="data.search.searchSource.fetch.shardsFailedModal.close"
             defaultMessage="Close"
