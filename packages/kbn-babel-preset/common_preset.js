@@ -28,6 +28,10 @@ const plugins = [
   // See https://github.com/babel/proposals/issues/12 for progress
   require.resolve('@babel/plugin-proposal-class-properties'),
 
+  // Proposal is on stage 4 (https://github.com/tc39/proposal-export-ns-from)
+  // Need this since we are using TypeScript 3.8+
+  require.resolve('@babel/plugin-proposal-export-namespace-from'),
+
   // Optional Chaining proposal is stage 3 (https://github.com/tc39/proposal-optional-chaining)
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-proposal-optional-chaining'),

@@ -16,7 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as Public from './public';
-import * as Server from './server';
-
-export { Public, Server };
+export * as Public from './public';
+export * as Server from './server';
