@@ -41,23 +41,6 @@ async function gitInit(dir) {
   }
 }
 
-async function generateDefaultI18nMessages(dir) {
-  try {
-    await execa('node', [
-      'scripts/i18n_extract',
-      '--output-dir',
-      `${dir}/translations`,
-      '--include-config',
-      `${dir}/.i18nrc.json`,
-      `--path=${dir}`,
-    ]);
-    console.log(`Default translation messages generated in ${dir}`);
-  } catch (error) {
-    console.error(error);
-    throw new Error(`Failure to generate default translations ${dir}: ${error.all || error}`);
-  }
-}
-
 async function moveToCustomFolder(from, to) {
   try {
     await execa('mv', [from, to]);
@@ -178,10 +161,6 @@ module.exports = function({ name, targetPath }) {
       } else {
         // Init git only in the default path
         await gitInit(dir);
-
-        if (answers.generateTranslations) {
-          await generateDefaultI18nMessages(dir);
-        }
       }
 
       // Apply eslint to the generated plugin
