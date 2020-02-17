@@ -170,7 +170,7 @@
 /x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/legacy/plugins/index_management/  @elastic/es-ui
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
-/x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
+/x-pack/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
