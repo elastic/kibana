@@ -23,7 +23,7 @@ interface Props {
 
 export const WaffleRegionControls = (props: Props) => {
   const { region, options } = props;
-  const [isOpen, setIsOpen] = useState();
+  const [isOpen, setIsOpen] = useState<boolean>();
 
   const showPopover = useCallback(() => {
     setIsOpen(true);

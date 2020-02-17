@@ -24,7 +24,7 @@ interface Props {
 
 export const WaffleAccountsControls = (props: Props) => {
   const { accountId, options } = props;
-  const [isOpen, setIsOpen] = useState();
+  const [isOpen, setIsOpen] = useState<boolean>();
 
   const showPopover = useCallback(() => {
     setIsOpen(true);
