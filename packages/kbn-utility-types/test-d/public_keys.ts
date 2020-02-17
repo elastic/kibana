@@ -22,6 +22,7 @@ import { PublicKeys } from '../index';
 
 class Test {
   public str: string = '';
+  // @ts-ignore
   private num: number = 0;
 }
 
