@@ -26,6 +26,7 @@ import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Case } from '../case';
 import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
@@ -41,6 +42,11 @@ const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
+const Main = styled.main`
+  height: 100%;
+`;
+Main.displayName = 'Main';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
@@ -63,13 +69,10 @@ export const HomePage: React.FC = () => {
   });
 
   return (
-    <WrappedByAutoSizer
-      data-test-subj="wrapped-by-auto-sizer"
-      ref={measureRef as React.RefObject<HTMLDivElement>}
-    >
+    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
-      <main data-test-subj="pageContainer">
+      <Main data-test-subj="pageContainer">
         <WithSource sourceId="default">
           {({ browserFields, indexPattern, indicesExist }) => (
             <DragDropContextWrapper browserFields={browserFields}>
@@ -97,9 +100,7 @@ export const HomePage: React.FC = () => {
                 <Route path={`/:pageName(${SiemPageName.overview})`} render={() => <Overview />} />
                 <Route
                   path={`/:pageName(${SiemPageName.hosts})`}
-                  render={({ location, match }) => (
-                    <HostsContainer location={location} url={match.url} />
-                  )}
+                  render={({ match }) => <HostsContainer url={match.url} />}
                 />
                 <Route
                   path={`/:pageName(${SiemPageName.network})`}
@@ -130,12 +131,15 @@ export const HomePage: React.FC = () => {
                     <MlNetworkConditionalContainer location={location} url={match.url} />
                   )}
                 />
+                <Route path={`/:pageName(${SiemPageName.case})`}>
+                  <Case />
+                </Route>
                 <Route render={() => <NotFoundPage />} />
               </Switch>
             </DragDropContextWrapper>
           )}
         </WithSource>
-      </main>
+      </Main>
 
       <HelpMenu />
 

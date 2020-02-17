@@ -4,21 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
+import { formatAllCases, wrapError } from './utils';
+import { SavedObjectsFindOptionsSchema } from './schema';
+import { AllCases } from './types';
 
 export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases',
-      validate: false,
+      validate: {
+        query: schema.nullable(SavedObjectsFindOptionsSchema),
+      },
     },
     async (context, request, response) => {
       try {
-        const cases = await caseService.getAllCases({
-          client: context.core.savedObjects.client,
+        const args = request.query
+          ? {
+              client: context.core.savedObjects.client,
+              options: request.query,
+            }
+          : {
+              client: context.core.savedObjects.client,
+            };
+        const cases = await caseService.getAllCases(args);
+        const body: AllCases = formatAllCases(cases);
+        return response.ok({
+          body,
         });
-        return response.ok({ body: cases });
       } catch (error) {
         return response.customError(wrapError(error));
       }

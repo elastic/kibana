@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
@@ -29,7 +29,7 @@ export interface TimelineModel {
   eventType?: EventType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */

@@ -5,19 +5,19 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, mergeMap, toArray } from 'rxjs/operators';
-import { ServerFacade, CaptureConfig, HeadlessChromiumDriverFactory } from '../../../../types';
-import { ScreenshotResults, ScreenshotObservableOpts } from './types';
+import { concatMap, first, mergeMap, take, toArray } from 'rxjs/operators';
+import { CaptureConfig, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
+import { getElementPositionAndAttributes } from './get_element_position_data';
+import { getNumberOfItems } from './get_number_of_items';
+import { getScreenshots } from './get_screenshots';
+import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import { waitForRenderComplete } from './wait_for_render';
-import { getNumberOfItems } from './get_number_of_items';
-import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
-import { getTimeRange } from './get_time_range';
-import { getElementPositionAndAttributes } from './get_element_position_data';
-import { getScreenshots } from './get_screenshots';
 import { scanPage } from './scan_page';
 import { skipTelemetry } from './skip_telemetry';
+import { ScreenshotObservableOpts, ScreenshotResults } from './types';
+import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
+import { waitForRenderComplete } from './wait_for_render';
 
 export function screenshotsObservableFactory(
   server: ServerFacade,
@@ -37,12 +37,11 @@ export function screenshotsObservableFactory(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
     );
-
     return Rx.from(urls).pipe(
-      mergeMap(url => {
+      concatMap(url => {
         return create$.pipe(
           mergeMap(({ driver, exit$ }) => {
-            const screenshot$ = Rx.of(driver).pipe(
+            const screenshot$ = Rx.of(1).pipe(
               mergeMap(() => openUrl(driver, url, conditionalHeaders, logger)),
               mergeMap(() => skipTelemetry(driver, logger)),
               mergeMap(() => scanPage(driver, layout, logger)),
@@ -85,10 +84,11 @@ export function screenshotsObservableFactory(
             );
 
             return Rx.race(screenshot$, exit$);
-          })
+          }),
+          first()
         );
       }),
-      first(),
+      take(urls.length),
       toArray()
     );
   };

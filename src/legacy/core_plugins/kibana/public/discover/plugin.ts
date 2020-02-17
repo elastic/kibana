@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
-import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
@@ -36,6 +36,10 @@ import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_typ
 import { DocViewTable } from './np_ready/components/table/table';
 import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
+import {
+  VisualizationsStart,
+  VisualizationsSetup,
+} from '../../../visualizations/public/np_ready/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -47,19 +51,21 @@ export interface DiscoverSetup {
 }
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   embeddable: IEmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
 }
 export interface DiscoverStartPlugins {
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
+  visualizations: VisualizationsStart;
 }
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';

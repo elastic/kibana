@@ -6,6 +6,7 @@ your proposed changes at https://github.com/elastic/kibana.
 
 Also check out the https://discuss.elastic.co/c/apm[APM discussion forum].
 
+[[no-apm-data-found]]
 ==== No APM data found
 
 This section can help with any of the following:
@@ -69,3 +70,40 @@ or because something is happening to the request that the Agent doesn't understa
 To resolve this, you'll need to head over to the relevant {apm-agents-ref}[Agent documentation].
 Specifically, view the Agent's supported technologies page.
 You can also use the Agent's public API to manually set a name for the transaction.
+
+==== Fields are not searchable
+
+In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
+The recommended index template file for APM Server is installed by the APM Server packages.
+This template, by default, enables and disables indexing on certain fields.
+
+As an example, some agents store cookie values in `http.request.cookies`.
+Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,
+the values in `http.request.cookies` are not indexed and thus not searchable.
+
+*Ensure an index pattern exists*
+As a first step, you should ensure the correct index pattern exists.
+In Kibana, navigate to *Management > Kibana > Index Patterns*.
+In the pattern list, you should see an apm index pattern; The default is `apm-*`.
+If you don't, the index pattern doesn't exist. See <<no-apm-data-found>> for information on how to fix this problem.
+
+Selecting the `apm-*` index pattern shows a listing of every field defined in the pattern.
+
+*Ensure a field is searchable*
+There are two things you can do to if you'd like to ensure a field is searchable:
+
+1. Index your additional data as {apm-overview-ref}/metadata.html[labels] instead.
+These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
+
+2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
+adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
+
+[source,yml]
+----
+setup.template.enabled: true
+setup.template.overwrite: true
+setup.template.append_fields:
+  - name: http.request.cookies
+    type: object
+    dynamic: true
+----
