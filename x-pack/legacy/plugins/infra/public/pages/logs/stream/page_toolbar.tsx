@@ -13,7 +13,6 @@ import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogMinimapScaleControls } from '../../../components/logging/log_minimap_scale_controls';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
@@ -26,16 +25,9 @@ import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocomp
 export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
-  const {
-    availableIntervalSizes,
-    availableTextScales,
-    intervalSize,
-    setIntervalSize,
-    setTextScale,
-    setTextWrap,
-    textScale,
-    textWrap,
-  } = useContext(LogViewConfiguration.Context);
+  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
+    LogViewConfiguration.Context
+  );
   const {
     filterQueryDraft,
     isFilterQueryDraftValid,
@@ -106,11 +98,6 @@ export const LogsToolbar = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogCustomizationMenu>
-            <LogMinimapScaleControls
-              availableIntervalSizes={availableIntervalSizes}
-              setIntervalSize={setIntervalSize}
-              intervalSize={intervalSize}
-            />
             <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
             <LogTextScaleControls
               availableTextScales={availableTextScales}

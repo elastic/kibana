@@ -20,7 +20,6 @@ import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
-import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minimap';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../../containers/logs/with_stream_items';
@@ -31,7 +30,7 @@ import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { source, sourceId, version } = useContext(Source.Context);
-  const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
     flyoutVisible,
@@ -58,7 +57,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   } = useContext(LogPositionState.Context);
   return (
     <>
-      <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
@@ -130,7 +128,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                           height={height}
                           width={width}
                           highlightedInterval={isReloading ? null : visibleTimeInterval}
-                          intervalSize={intervalSize}
                           jumpToTarget={jumpToTargetPosition}
                           summaryBuckets={buckets}
                           summaryHighlightBuckets={

@@ -28,7 +28,6 @@ interface LogMinimapProps {
   height: number;
   highlightedInterval: Interval | null;
   jumpToTarget: (params: LogEntryTime) => any;
-  intervalSize: number;
   summaryBuckets: LogEntriesSummaryBucket[];
   summaryHighlightBuckets?: LogEntriesSummaryHighlightsBucket[];
   target: number | null;
