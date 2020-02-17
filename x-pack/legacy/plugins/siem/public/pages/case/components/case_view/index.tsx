@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiFieldText,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -63,6 +64,53 @@ interface CasesProps {
   initialData: Case;
   isLoading: boolean;
 }
+interface IconAction {
+  'aria-label': string;
+  iconType: string;
+  onChange: (a: string) => void;
+  onClick: (b: boolean) => void;
+  onSubmit: () => void;
+}
+
+interface EditNodeComponentProps {
+  iconAction: IconAction;
+  isLoading: boolean;
+  title: string | React.ReactNode;
+  isEditTitle?: boolean;
+}
+
+const EditNodeComponent = ({
+  iconAction,
+  isLoading,
+  title,
+  isEditTitle,
+}: EditNodeComponentProps) => {
+  return (
+    isEditTitle && (
+      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFieldText onChange={e => iconAction.onChange(e.target.value)} value={`${title}`} />
+        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onClick={iconAction.onSubmit}
+            >
+              {i18n.SUBMIT}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => iconAction.onClick(false)}>{i18n.CANCEL}</EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem />
+      </EuiFlexGroup>
+    )
+  );
+};
 
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
