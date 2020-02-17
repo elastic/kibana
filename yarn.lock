@@ -5022,12 +5022,20 @@
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.0.tgz#4b7daf2c51696cfc70b942c11690528229d1a1ce"
   integrity sha512-EIjmpvnHj+T4nMcKwHwxZKUfDmphIKJc2qnEMhSoOvr1lYEQpuRKRz8orWr//krYIIArS/KGGLfL2YGVUYXmIA==
 
-"@types/cpy@^7.1.3":
-  version "7.1.3"
-  resolved "https://registry.yarnpkg.com/@types/cpy/-/cpy-7.1.3.tgz#7a70133886a0feb94f0e9b018122a84b831157ba"
-  integrity sha512-G0KTGSAi3kwIx63zyI/Lekpftiy9jQ5JvQP8YTFzg3H9TMIz4PMv77kxmomu6m9ugc8Zrfn4THbmmNHL9psN0Q==
+"@types/cp-file@*":
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/@types/cp-file/-/cp-file-6.1.2.tgz#3c579201715ca6177d34f3e14f2b29861c470c4c"
+  integrity sha512-wvqCNhHt+GMfEglZ83cQ+8dEv5Oh8DwEq6IBBBL7+hWISR+82l/bSmssCo5zGHg7HpW6+kjZwDby9zGkCStN5w==
   dependencies:
-    cpy "*"
+    cp-file "*"
+
+"@types/cpy@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@types/cpy/-/cpy-5.1.0.tgz#ced20cbae8528031ae5478f1d0fe4bca2518eda7"
+  integrity sha512-NU7IrYOZx+K2YCo7muReOj6FIxEWdWXCN7hgRhQ+h2lgpeLy27si9ZzdDwWCW+Q1RP9B1lDTJ368FPFSOp1ZqA==
+  dependencies:
+    "@types/cp-file" "*"
+    "@types/glob" "*"
 
 "@types/cytoscape@^3.8.2":
   version "3.8.2"
@@ -11002,6 +11010,16 @@ cosmiconfig@^5.0.5:
     js-yaml "^3.9.0"
     parse-json "^4.0.0"
 
+cp-file@*, cp-file@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/cp-file/-/cp-file-7.0.0.tgz#b9454cfd07fe3b974ab9ea0e5f29655791a9b8cd"
+  integrity sha512-0Cbj7gyvFVApzpK/uhCtQ/9kE9UnYpxMzaq5nQQC/Dh4iaj5fxp7iEFIullrYwzj8nf0qnsI1Qsx34hAeAebvw==
+  dependencies:
+    graceful-fs "^4.1.2"
+    make-dir "^3.0.0"
+    nested-error-stacks "^2.0.0"
+    p-event "^4.1.0"
+
 cp-file@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/cp-file/-/cp-file-6.2.0.tgz#40d5ea4a1def2a9acdd07ba5c0b0246ef73dc10d"
@@ -11013,17 +11031,7 @@ cp-file@^6.2.0:
     pify "^4.0.1"
     safe-buffer "^5.0.1"
 
-cp-file@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/cp-file/-/cp-file-7.0.0.tgz#b9454cfd07fe3b974ab9ea0e5f29655791a9b8cd"
-  integrity sha512-0Cbj7gyvFVApzpK/uhCtQ/9kE9UnYpxMzaq5nQQC/Dh4iaj5fxp7iEFIullrYwzj8nf0qnsI1Qsx34hAeAebvw==
-  dependencies:
-    graceful-fs "^4.1.2"
-    make-dir "^3.0.0"
-    nested-error-stacks "^2.0.0"
-    p-event "^4.1.0"
-
-cpy@*, cpy@^8.0.0:
+cpy@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/cpy/-/cpy-8.0.0.tgz#8195db0db19a9ea6aa4f229784cbf3e3f53c3158"
   integrity sha512-iTjLUqtVr45e17GFAyxA0lqFinbGMblMCTtAqrPzT/IETNtDuyyhDDk8weEZ08MiCc6EcuyNq2KtGH5J2BIAoQ==
