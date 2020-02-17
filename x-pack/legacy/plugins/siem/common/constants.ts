@@ -44,7 +44,7 @@ export const IP_REPUTATION_LINKS_SETTING = 'siem:ipReputationLinks';
 /** The default value for `IP Reputation Links` */
 export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
-  { "name": "talosintelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
+  { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
 /**

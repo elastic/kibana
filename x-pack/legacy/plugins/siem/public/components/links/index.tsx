@@ -122,7 +122,7 @@ CertificateFingerprintLink.displayName = 'CertificateFingerprintLink';
 
 enum DefaultReputationLink {
   'virustotal.com' = 'virustotal.com',
-  'talosintelligence.com' = 'talosintelligence.com',
+  'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
 interface ReputationLinkSetting {
@@ -133,7 +133,7 @@ interface ReputationLinkSetting {
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (
     name === DefaultReputationLink['virustotal.com'] ||
-    name === DefaultReputationLink['talosintelligence.com']
+    name === DefaultReputationLink['talosIntelligence.com']
   );
 }
 
@@ -149,7 +149,7 @@ const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: st
   const defaultNameMapping: Record<DefaultReputationLink, string> = useMemo(
     () => ({
       [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
-      [DefaultReputationLink['talosintelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
+      [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
     }),
     []
   );
@@ -180,6 +180,19 @@ const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: st
 export const ReputationLink = React.memo(ReputationLinkComponent);
 
 ReputationLink.displayName = 'ReputationLink';
+
+export const VirusTotalLink = React.memo<{ children?: React.ReactNode; link: string }>(
+  ({ children, link }) => (
+    <EuiLink
+      href={`https://www.virustotal.com/#/search/${encodeURIComponent(link)}`}
+      target="_blank"
+    >
+      {children ? children : link}
+    </EuiLink>
+  )
+);
+
+VirusTotalLink.displayName = 'VirusTotalLink';
 
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (

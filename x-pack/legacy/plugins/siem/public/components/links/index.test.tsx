@@ -15,12 +15,26 @@ import {
   HostDetailsLink,
   IPDetailsLink,
   ReputationLink,
-  VirusTotalLink,
   WhoIsLink,
   CertificateFingerprintLink,
   Ja3FingerprintLink,
   PortOrServiceNameLink,
+  VirusTotalLink,
 } from '.';
+
+jest.mock('../../lib/kibana', () => {
+  return {
+    useUiSetting$: jest.fn().mockReturnValue([
+      [
+        { name: 'virustotal.com', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+        {
+          name: 'talosIntelligence.com',
+          url_template: 'https://www.talosintelligence.com/reputation_center/lookup?search={{ip}}',
+        },
+      ],
+    ]),
+  };
+});
 
 describe('Custom Links', () => {
   const hostName = 'Host Name';
@@ -103,27 +117,61 @@ describe('Custom Links', () => {
 
   describe('ReputationLink', () => {
     test('it renders link text', () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={'192.0.2.0'}>{'Example Link'}</ReputationLink>
-      );
-      expect(wrapper.text()).toEqual('Example Link');
+      const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(0)
+          .childAt(0)
+          .text()
+      ).toEqual('virustotal.com, ');
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(1)
+          .childAt(0)
+          .text()
+      ).toEqual('talosIntelligence.com');
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders correct href', () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={'192.0.2.0'}>{'Example Link'} </ReputationLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        'https://www.talosintelligence.com/reputation_center/lookup?search=192.0.2.0'
-      );
+      const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(0)
+          .childAt(0)
+          .prop('href')
+      ).toEqual('https://www.virustotal.com/gui/search/192.0.2.0');
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(1)
+          .childAt(0)
+          .prop('href')
+      ).toEqual('https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0');
     });
 
     test("it encodes <script>alert('XSS')</script>", () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</ReputationLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+      const wrapper = mountWithIntl(<ReputationLink domain={"<script>alert('XSS')</script>"} />);
+
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(0)
+          .childAt(0)
+          .prop('href')
+      ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(1)
+          .childAt(0)
+          .prop('href')
+      ).toEqual(
+        "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
   });

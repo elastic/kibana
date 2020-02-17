@@ -122,17 +122,9 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
 <DragDropContext
   onDragEnd={[MockFunction]}
 >
-  <VirusTotalLink
-    link="10.10.10.10"
-  >
-    virustotal.com
-  </VirusTotalLink>
-  , 
   <ReputationLink
     domain="10.10.10.10"
-  >
-    talosIntelligence.com
-  </ReputationLink>
+  />
 </DragDropContext>
 `;
 
