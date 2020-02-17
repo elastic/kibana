@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
 import {
   fetchElasticsearchStats,
   getElasticsearchStats,
   handleElasticsearchStats,
-} from '../get_es_stats';
+} from './get_es_stats';
 
 describe('get_es_stats', () => {
   const callWith = sinon.stub();
@@ -41,7 +40,9 @@ describe('get_es_stats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(await getElasticsearchStats(server, callWith, clusterUuids)).to.eql(expectedClusters);
+      expect(await getElasticsearchStats(server, callWith, clusterUuids)).toStrictEqual(
+        expectedClusters
+      );
     });
   });
 
@@ -49,28 +50,28 @@ describe('get_es_stats', () => {
     it('searches for clusters', async () => {
       callWith.returns(response);
 
-      expect(await fetchElasticsearchStats(server, callWith, clusterUuids)).to.be(response);
+      expect(await fetchElasticsearchStats(server, callWith, clusterUuids)).toStrictEqual(response);
     });
   });
 
   describe('handleElasticsearchStats', () => {
     // filterPath makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
-      const clusters = handleElasticsearchStats({});
+      const clusters = handleElasticsearchStats({} as any);
 
-      expect(clusters.length).to.be(0);
+      expect(clusters.length).toStrictEqual(0);
     });
 
     it('handles valid response', () => {
-      const clusters = handleElasticsearchStats(response);
+      const clusters = handleElasticsearchStats(response as any);
 
-      expect(clusters).to.eql(expectedClusters);
+      expect(clusters).toStrictEqual(expectedClusters);
     });
 
     it('handles no hits response', () => {
-      const clusters = handleElasticsearchStats({ hits: { hits: [] } });
+      const clusters = handleElasticsearchStats({ hits: { hits: [] } } as any);
 
-      expect(clusters.length).to.be(0);
+      expect(clusters.length).toStrictEqual(0);
     });
   });
 });

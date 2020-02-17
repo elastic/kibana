@@ -17,46 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-export function textFromRequest(request: any) {
-  let data = request.data;
-  if (typeof data !== 'string') {
-    data = data.join('\n');
-  }
-  return request.method + ' ' + request.url + '\n' + data;
-}
-
-export function jsonToString(data: any, indent: boolean) {
-  return JSON.stringify(data, null, indent ? 2 : 0);
-}
-
-export function formatRequestBodyDoc(data: string[], indent: boolean) {
-  let changed = false;
-  const formattedData = [];
-  for (let i = 0; i < data.length; i++) {
-    const curDoc = data[i];
-    try {
-      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
-      if (indent) {
-        newDoc = expandLiteralStrings(newDoc);
-      }
-      changed = changed || newDoc !== curDoc;
-      formattedData.push(newDoc);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-      formattedData.push(curDoc);
-    }
-  }
-
-  return {
-    changed,
-    data: formattedData,
-  };
-}
-
-export function collapseLiteralStrings(data: any) {
+export function collapseLiteralStrings(data: string) {
   const splitData = data.split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
     splitData[idx] = JSON.stringify(splitData[idx]);
@@ -107,44 +68,4 @@ export function expandLiteralStrings(data: string) {
       return string;
     }
   });
-}
-
-export function extractDeprecationMessages(warnings: string) {
-  // pattern for valid warning header
-  const re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
-  // split on any comma that is followed by an even number of quotes
-  return _.map(splitOnUnquotedCommaSpace(warnings), warning => {
-    const match = re.exec(warning);
-    // extract the actual warning if there was a match
-    return '#! Deprecation: ' + (match !== null ? unescape(match[1]) : warning);
-  });
-}
-
-export function unescape(s: string) {
-  return s.replace(/\\\\/g, '\\').replace(/\\"/g, '"');
-}
-
-export function splitOnUnquotedCommaSpace(s: string) {
-  let quoted = false;
-  const arr = [];
-  let buffer = '';
-  let i = 0;
-  while (i < s.length) {
-    let token = s.charAt(i++);
-    if (token === '\\' && i < s.length) {
-      token += s.charAt(i++);
-    } else if (token === ',' && i < s.length && s.charAt(i) === ' ') {
-      token += s.charAt(i++);
-    }
-    if (token === '"') {
-      quoted = !quoted;
-    } else if (!quoted && token === ', ') {
-      arr.push(buffer);
-      buffer = '';
-      continue;
-    }
-    buffer += token;
-  }
-  arr.push(buffer);
-  return arr;
 }

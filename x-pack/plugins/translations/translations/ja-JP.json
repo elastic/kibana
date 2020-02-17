@@ -3945,7 +3945,6 @@
     "xpack.apm.tracesTable.tracesPerMinuteColumnLabel": "1 分あたりのトレース",
     "xpack.apm.tracesTable.tracesPerMinuteUnitLabel": "1分あたりトランザクション数",
     "xpack.apm.transactionActionMenu.actionsButtonLabel": "アクション",
-    "xpack.apm.transactionActionMenu.actionsLabel": "アクション",
     "xpack.apm.transactionActionMenu.showContainerLogsLinkLabel": "コンテナーログを表示",
     "xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel": "コンテナーメトリックを表示",
     "xpack.apm.transactionActionMenu.showHostLogsLinkLabel": "ホストログを表示",
