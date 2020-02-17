@@ -6,17 +6,19 @@
 
 /* eslint-disable react/display-name */
 
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
-import { MatrixHistogramGqlQuery as mockQuery } from '../../containers/matrix_histogram/index.gql_query';
-
+import { useQuery } from '../../containers/matrix_histogram';
+import { HistogramType } from '../../graphql/types';
 jest.mock('../../lib/kibana');
 
-jest.mock('../loader', () => {
+jest.mock('./matrix_loader', () => {
   return {
-    Loader: () => <div className="loader" />,
+    MatrixLoader: () => {
+      return <div className="matrixLoader" />;
+    },
   };
 });
 
@@ -32,17 +34,31 @@ jest.mock('../charts/barchart', () => {
   };
 });
 
+jest.mock('../../containers/matrix_histogram', () => {
+  return {
+    useQuery: jest.fn(),
+  };
+});
+
+jest.mock('../../components/matrix_histogram/utils', () => {
+  return {
+    getBarchartConfigs: jest.fn(),
+    getCustomChartData: jest.fn().mockReturnValue(true),
+  };
+});
+
 describe('Matrix Histogram Component', () => {
+  let wrapper: ReactWrapper;
+
   const mockMatrixOverTimeHistogramProps = {
-    dataKey: 'mockDataKey',
     defaultIndex: ['defaultIndex'],
     defaultStackByOption: { text: 'text', value: 'value' },
     endDate: new Date('2019-07-18T20:00:00.000Z').valueOf(),
     errorMessage: 'error',
+    histogramType: HistogramType.alerts,
     id: 'mockId',
     isInspected: false,
     isPtrIncluded: false,
-    query: mockQuery,
     setQuery: jest.fn(),
     skip: false,
     sourceId: 'default',
@@ -52,36 +68,56 @@ describe('Matrix Histogram Component', () => {
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',
-    updateDateRange: jest.fn(),
+    dispatchSetAbsoluteRangeDatePicker: jest.fn(),
   };
-  describe('rendering', () => {
-    test('it renders EuiLoadingContent on initialLoad', () => {
-      const wrapper = shallow(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />);
 
-      expect(wrapper.find(`[data-test-subj="initialLoadingPanelMatrixOverTime"]`)).toBeTruthy();
+  beforeAll(() => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      inspect: false,
+      totalCount: null,
     });
-
-    test('it renders Loader while fetching data if visited before', () => {
-      const mockProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        data: [{ x: new Date('2019-09-16T02:20:00.000Z').valueOf(), y: 3787, g: 'config_change' }],
-        totalCount: 10,
-        loading: true,
-      };
-      const wrapper = shallow(<MatrixHistogram {...mockProps} />);
-      expect(wrapper.find('.loader')).toBeTruthy();
+    wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />);
+  });
+  describe('on initial load', () => {
+    test('it renders MatrixLoader', () => {
+      expect(wrapper.html()).toMatchSnapshot();
+      expect(wrapper.find('MatrixLoader').exists()).toBe(true);
     });
+  });
 
-    test('it renders BarChart if data available', () => {
-      const mockProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        data: [{ x: new Date('2019-09-16T02:20:00.000Z').valueOf(), y: 3787, g: 'config_change' }],
-        totalCount: 10,
+  describe('not initial load', () => {
+    beforeAll(() => {
+      (useQuery as jest.Mock).mockReturnValue({
+        data: [
+          { x: 1, y: 2, g: 'g1' },
+          { x: 2, y: 4, g: 'g1' },
+          { x: 3, y: 6, g: 'g1' },
+          { x: 1, y: 1, g: 'g2' },
+          { x: 2, y: 3, g: 'g2' },
+          { x: 3, y: 5, g: 'g2' },
+        ],
         loading: false,
-      };
-      const wrapper = shallow(<MatrixHistogram {...mockProps} />);
+        inspect: false,
+        totalCount: 1,
+      });
+      wrapper.setProps({ endDate: 100 });
+      wrapper.update();
+    });
+    test('it renders no MatrixLoader', () => {
+      expect(wrapper.html()).toMatchSnapshot();
+      expect(wrapper.find(`MatrixLoader`).exists()).toBe(false);
+    });
 
-      expect(wrapper.find(`.barchart`)).toBeTruthy();
+    test('it shows BarChart if data available', () => {
+      expect(wrapper.find(`.barchart`).exists()).toBe(true);
+    });
+  });
+
+  describe('select dropdown', () => {
+    test('should be hidden if only one option is provided', () => {
+      expect(wrapper.find('EuiSelect').exists()).toBe(false);
     });
   });
 });

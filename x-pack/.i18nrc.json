@@ -27,7 +27,7 @@
     "xpack.maps": "legacy/plugins/maps",
     "xpack.ml": "legacy/plugins/ml",
     "xpack.monitoring": "legacy/plugins/monitoring",
-    "xpack.remoteClusters": ["plugins/remote_clusters", "legacy/plugins/remote_clusters"],
+    "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
     "xpack.rollupJobs": "legacy/plugins/rollup",
     "xpack.searchProfiler": "plugins/searchprofiler",
