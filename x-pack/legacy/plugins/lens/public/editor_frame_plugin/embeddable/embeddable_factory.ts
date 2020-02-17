@@ -9,7 +9,12 @@ import { Chrome } from 'ui/chrome';
 
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  IndexPatternsContract,
+  IndexPattern,
+  TimefilterContract,
+} from '../../../../../../../src/plugins/data/public';
+
 import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
@@ -29,6 +34,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   private expressionRenderer: ExpressionRenderer;
 
   constructor(
+    private timefilter: TimefilterContract,
     chrome: Chrome,
     expressionRenderer: ExpressionRenderer,
     indexPatternService: IndexPatternsContract
@@ -88,6 +94,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     );
 
     return new Embeddable(
+      this.timefilter,
       this.expressionRenderer,
       {
         savedVis,

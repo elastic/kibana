@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
+import { Query, TimeRange, esFilters, TimefilterContract } from 'src/plugins/data/public';
 import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
@@ -44,6 +44,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
+  private autoRefreshFetchSubscription: Subscription;
 
   private currentContext: {
     timeRange?: TimeRange;
@@ -53,6 +54,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   } = {};
 
   constructor(
+    timefilter: TimefilterContract,
     expressionRenderer: ExpressionRenderer,
     { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
@@ -77,6 +79,10 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
+
+    this.autoRefreshFetchSubscription = timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.reload.bind(this));
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
@@ -126,6 +132,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   reload() {

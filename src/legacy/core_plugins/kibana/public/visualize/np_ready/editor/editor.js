@@ -432,14 +432,6 @@ function VisualizeAppController(
       })
     );
 
-    subscriptions.add(
-      subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
-        next: () => {
-          $scope.vis.forceReload();
-        },
-      })
-    );
-
     $scope.$on('$destroy', () => {
       if ($scope._handler) {
         $scope._handler.destroy();
