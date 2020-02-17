@@ -26,23 +26,6 @@ declare module '@elastic/eui' {
     onClick?: React.MouseEventHandler<Element>;
   }
 
-  type EuiSideNavProps = CommonProps & {
-    style?: any;
-    items: Array<{
-      id: string | number;
-      name: string;
-      items: Array<{
-        id: string;
-        name: string;
-        onClick?: () => void;
-      }>;
-    }>;
-    mobileTitle?: React.ReactNode;
-    toggleOpenOnMobile?: () => void;
-    isOpenOnMobile?: boolean;
-  };
-  export const EuiSideNav: React.FC<EuiSideNavProps>;
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
