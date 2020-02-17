@@ -73,7 +73,20 @@ export function useVisualizeAppState({ useHash, stateDefaults }: Arguments) {
           ...vis,
         },
       }),
-      removeSavedQuery: state => () => omit(state, 'savedQuery'),
+      removeSavedQuery: state => defaultQuery => {
+        const { savedQuery, ...rest } = state;
+
+        return {
+          ...rest,
+          query: defaultQuery,
+        };
+      },
+      unlinkSavedSearch: state => (query, filters) => ({
+        ...state,
+        query,
+        filters,
+        linked: false,
+      }),
       updateVisState: state => newVisState => ({ ...state, vis: toObject(newVisState) }),
     }
   );

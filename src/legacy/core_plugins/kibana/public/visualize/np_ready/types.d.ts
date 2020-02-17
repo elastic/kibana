@@ -31,6 +31,7 @@ export interface VisualizeAppState {
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
+  linked: boolean;
 }
 
 export interface VisualizeAppStateTransitions {
@@ -41,7 +42,10 @@ export interface VisualizeAppStateTransitions {
     value: VisualizeAppState[T]
   ) => VisualizeAppState;
   setVis: (state: VisualizeAppState) => (vis: Partial<PureVisState>) => VisualizeAppState;
-  removeSavedQuery: (state: VisualizeAppState) => () => VisualizeAppState;
+  removeSavedQuery: (state: VisualizeAppState) => (defaultQuery: Query) => VisualizeAppState;
+  unlinkSavedSearch: (
+    state: VisualizeAppState
+  ) => (query: Query, filters: Filter[]) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
 }
 

@@ -109,11 +109,10 @@ function VisualizeAppController(
   const { vis, searchSource } = savedVis;
 
   $scope.vis = vis;
-  $scope.linked = !!savedVis.savedSearchId;
 
-  const $appStatus = (this.appStatus = {
+  const $appStatus = {
     dirty: !savedVis.id,
-  });
+  };
 
   vis.on('dirtyStateChange', ({ isDirty }) => {
     vis.dirty = isDirty;
@@ -281,6 +280,7 @@ function VisualizeAppController(
     query: searchSource.getOwnField('query') || defaultQuery,
     filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState,
+    linked: !!savedVis.savedSearchId,
   };
 
   const useHash = config.get('state:storeInSessionStorage');
@@ -361,6 +361,7 @@ function VisualizeAppController(
     $scope.uiState = persistedState;
     $scope.savedVis = savedVis;
     $scope.query = initialState.query;
+    $scope.linked = initialState.linked;
     $scope.searchSource = searchSource;
     $scope.refreshInterval = timefilter.getRefreshInterval();
 
@@ -388,7 +389,7 @@ function VisualizeAppController(
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
-    const stateContainerSubscription = stateContainer.subscribe(state => {
+    const unsubscribeStateUpdates = stateContainer.subscribe(state => {
       const newQuery = migrateLegacyQuery(state.query);
       if (!_.isEqual(state.query, newQuery)) {
         stateContainer.transitions.set('query', newQuery);
@@ -396,12 +397,13 @@ function VisualizeAppController(
       persistOnChange(state);
 
       // if the browser history was changed manually we need to reflect changes in the editor
-      if (!_.isEqual(vis.getState(), stateContainer.getState().vis)) {
-        vis.setState(stateContainer.getState().vis);
+      if (!_.isEqual(vis.getState(), state.vis)) {
+        vis.setState(state.vis);
         vis.forceReload();
         vis.emit('updateEditor');
       }
 
+      $appStatus.dirty = true;
       $scope.fetch();
     });
 
@@ -435,8 +437,9 @@ function VisualizeAppController(
 
     // update the searchSource when query updates
     $scope.fetch = function() {
-      const { query, filters } = stateContainer.getState();
+      const { query, filters, linked } = stateContainer.getState();
       $scope.query = query;
+      $scope.linked = linked;
       savedVis.searchSource.setField('query', query);
       savedVis.searchSource.setField('filter', filters);
       $scope.$broadcast('render');
@@ -475,7 +478,7 @@ function VisualizeAppController(
       $scope.vis.off('apply', _applyVis);
 
       unsubscribePersisted();
-      stateContainerSubscription.unsubscribe();
+      unsubscribeStateUpdates();
       stopStateSync();
     });
 
@@ -515,8 +518,7 @@ function VisualizeAppController(
 
   $scope.onClearSavedQuery = () => {
     delete $scope.savedQuery;
-    stateContainer.transitions.removeSavedQuery();
-    stateContainer.transitions.set('query', defaultQuery);
+    stateContainer.transitions.removeSavedQuery(defaultQuery);
     filterManager.setFilters(filterManager.getGlobalFilters());
     $scope.fetch();
   };
@@ -568,6 +570,7 @@ function VisualizeAppController(
     });
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
+    $appStatus.dirty = false;
 
     return savedVis.save(saveOptions).then(
       function(id) {
@@ -649,7 +652,6 @@ function VisualizeAppController(
   $scope.unlink = function() {
     if (!$scope.linked) return;
 
-    $scope.linked = false;
     const searchSourceParent = searchSource.getParent();
     const searchSourceGrandparent = searchSourceParent.getParent();
 
@@ -660,8 +662,10 @@ function VisualizeAppController(
       _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter'))
     );
 
-    stateContainer.transitions.set('query', searchSourceParent.getField('query'));
-    stateContainer.transitions.set('filters', searchSourceParent.getField('filter'));
+    stateContainer.transitions.unlinkSavedSearch(
+      searchSourceParent.getField('query'),
+      searchSourceParent.getField('filter')
+    );
     searchSource.setField('index', searchSourceParent.getField('index'));
     searchSource.setParent(searchSourceGrandparent);
 
