@@ -30,6 +30,7 @@ export interface Props {
   onDelete: (textObject: TextObjectWithId) => void;
   canEdit: boolean;
   onEdit: (fileName: string) => void;
+  onFilter: () => void;
   disabled?: boolean;
 }
 
@@ -40,6 +41,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
   onDelete,
   canEdit,
   onEdit,
+  onFilter,
   disabled,
 }) => {
   const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
@@ -123,6 +125,20 @@ export const FileActionsBar: FunctionComponent<Props> = ({
           />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          disabled={disabled}
+          onClick={() => {
+            setShowPopover(false);
+            onFilter();
+          }}
+          color="ghost"
+          aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
+            defaultMessage: 'Toggle file filter',
+          })}
+          iconType="filter"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
           isOpen={showCreateFilePopover && !disabled}

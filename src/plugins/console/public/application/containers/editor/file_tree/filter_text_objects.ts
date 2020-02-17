@@ -17,7 +17,12 @@
  * under the License.
  */
 
-export { FileForm } from './forms';
-export { FileActionsBar } from './file_actions_bar';
-export { DeleteFileModal } from './delete_file_modal';
-export { FileSearchBar } from './file_search_bar';
+import { Store } from '../../../stores/editor';
+
+export const filterTextObjects = (searchTerm: string, textObjects: Store['textObjects']) =>
+  Object.values(textObjects).filter(textObject => {
+    if (textObject.name) {
+      return Boolean(textObject.name.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1);
+    }
+    return false;
+  });

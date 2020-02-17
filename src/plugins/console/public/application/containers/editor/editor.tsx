@@ -24,7 +24,7 @@ import { EuiProgress, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EditorContentSpinner, VerticalDrawer } from '../../components';
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
-import { FileTree } from './file_tree';
+import { FileTree } from './file_tree/file_tree';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 

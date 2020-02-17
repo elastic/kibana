@@ -21,18 +21,27 @@ import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useEditorReadContext, useEditorActionContext } from '../../contexts';
-import { useTextObjectsCRUD } from '../../hooks/text_objects';
-import { FileActionsBar, DeleteFileModal } from '../../components';
+import { useEditorReadContext, useEditorActionContext } from '../../../contexts';
+import { useTextObjectsCRUD } from '../../../hooks/text_objects';
+import { FileActionsBar, FileSearchBar, DeleteFileModal } from '../../../components';
+
+import { filterTextObjects } from './filter_text_objects';
 
 export const FileTree: FunctionComponent = () => {
+  const [searchFilter, setSearchFilter] = useState<string | null>(null);
   const [isFileActionInProgress, setIsFileActionInProgress] = useState(false);
   const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
+  const [showFileSearchBar, setShowFileSearchBar] = useState(false);
+
   const textObjectsCRUD = useTextObjectsCRUD();
   const { textObjects, currentTextObjectId } = useEditorReadContext();
   const dispatch = useEditorActionContext();
 
   const currentTextObject = textObjects[currentTextObjectId];
+
+  const filteredTextObjects = searchFilter
+    ? filterTextObjects(searchFilter, textObjects)
+    : Object.values(textObjects);
 
   return (
     <>
@@ -42,6 +51,7 @@ export const FileTree: FunctionComponent = () => {
         gutterSize="none"
         responsive={false}
       >
+        {/* File Actions Bar */}
         <EuiFlexItem grow={false}>
           <FileActionsBar
             disabled={isFileActionInProgress}
@@ -75,8 +85,22 @@ export const FileTree: FunctionComponent = () => {
                 })
                 .finally(() => setIsFileActionInProgress(false));
             }}
+            onFilter={() => setShowFileSearchBar(!showFileSearchBar)}
           />
         </EuiFlexItem>
+        {/* File Search Bar */}
+        {showFileSearchBar && (
+          <EuiFlexItem grow={false}>
+            <FileSearchBar
+              onChange={(searchTerm: string) => {
+                setSearchFilter(searchTerm);
+              }}
+              searchValue={searchFilter ?? ''}
+            />
+          </EuiFlexItem>
+        )}
+
+        {/* File Tree */}
         <EuiFlexItem>
           {isFileActionInProgress ? (
             <div className="conApp__fileTree__spinner">
@@ -86,7 +110,7 @@ export const FileTree: FunctionComponent = () => {
             <EuiTreeView
               aria-label="File tree view"
               display="compressed"
-              items={Object.values(textObjects)
+              items={filteredTextObjects
                 .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
                 .map(({ isScratchPad, name, id }, idx) => {
                   return {

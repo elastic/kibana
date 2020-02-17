@@ -2,7 +2,7 @@
 
 
   background-color: $euiColorLightestShade;
-  min-width: 200px;
+  min-width: $euiButtonMinWidth * 2.5;
 
   &__spinner {
     text-align: center;
