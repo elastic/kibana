@@ -107,7 +107,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription?: Subscription;
+  private autoRefreshFetchSubscription: Subscription;
 
   constructor(
     timefilter: TimefilterContract,
@@ -352,9 +352,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    if (this.autoRefreshFetchSubscription) {
-      this.autoRefreshFetchSubscription.unsubscribe();
-    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {

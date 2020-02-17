@@ -49,7 +49,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
-  private autoRefreshFetchSubscription?: Subscription;
+  private autoRefreshFetchSubscription: Subscription;
 
   private currentContext: {
     timeRange?: TimeRange;
@@ -137,9 +137,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.autoRefreshFetchSubscription) {
-      this.autoRefreshFetchSubscription.unsubscribe();
-    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   reload() {
