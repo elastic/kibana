@@ -44,10 +44,6 @@ exports.run = function run(argv) {
         # {dim Usage:} 
         node scripts/generate-plugin {bold [name]}
         Generate a fresh Kibana plugin in the plugins/ directory
-        
-        # {dim Core Kibana plugins:}
-        node scripts/generate-plugin {bold [name]} -i
-        To generate a core Kibana plugin inside the src/plugins/ directory, add the -i flag.
       `) + '\n'
     );
     process.exit(1);
