@@ -21,14 +21,13 @@ import {
   ChromeStart,
   DocLinksStart,
   HttpStart,
-  LegacyNavLink,
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
-  UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
+import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
@@ -38,22 +37,9 @@ import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  metadata: {
-    app: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
-    uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-  };
+  kibanaVersion: string;
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
-  telemetryOptInProvider: any;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
@@ -64,10 +50,10 @@ export interface HomeKibanaServices {
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
-  shouldShowTelemetryOptIn: boolean;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environment: Environment;
+  telemetry?: TelemetryPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;

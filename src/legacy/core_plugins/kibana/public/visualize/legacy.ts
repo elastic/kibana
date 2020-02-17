@@ -19,21 +19,19 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { legacyChrome, npSetup, npStart } from './legacy_imports';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
 
-(() => {
-  const instance = plugin({} as PluginInitializerContext);
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      legacyChrome,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    embeddables,
-    visualizations,
-  });
-})();
+const instance = plugin({
+  env: npSetup.plugins.kibanaLegacy.env,
+} as PluginInitializerContext);
+instance.setup(npSetup.core, {
+  ...npSetup.plugins,
+  __LEGACY: {
+    legacyChrome,
+  },
+});
+instance.start(npStart.core, {
+  ...npStart.plugins,
+  visualizations,
+});

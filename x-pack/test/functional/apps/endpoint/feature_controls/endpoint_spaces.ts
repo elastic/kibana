@@ -47,7 +47,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('endpointManagement');
+        await testSubjects.existOrFail('managementViewTitle');
       });
     });
 

@@ -80,11 +80,10 @@ export class IconSelect extends Component {
           fullWidth
           prepend={
             <SymbolIcon
+              key={value}
               className="mapIconSelectSymbol__inputButton"
               symbolId={value}
               fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-              stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-              strokeWidth={'1px'}
             />
           }
         />
@@ -100,10 +99,9 @@ export class IconSelect extends Component {
         label,
         prepend: (
           <SymbolIcon
+            key={value}
             symbolId={value}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-            stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-            strokeWidth={'1px'}
           />
         ),
       };

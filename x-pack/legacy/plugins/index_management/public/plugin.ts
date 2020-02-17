@@ -3,32 +3,90 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from '../../../../../src/core/public';
+import { i18n } from '@kbn/i18n';
 
-import { registerManagementSection } from './register_management_section';
-import { registerRoutes } from './register_routes';
-import { LegacyStart } from './legacy';
+import { CoreSetup } from '../../../../../src/core/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { UIM_APP_NAME } from '../common/constants';
 
-import { httpService } from './app/services/http';
-import { breadcrumbService } from './app/services/breadcrumbs';
-import { documentationService } from './app/services/documentation';
-import { notificationService } from './app/services/notification';
-import { uiMetricService } from './app/services/ui_metric';
+import { AppDependencies } from './application';
+import { httpService } from './application/services/http';
+import { breadcrumbService } from './application/services/breadcrumbs';
+import { documentationService } from './application/services/documentation';
+import { notificationService } from './application/services/notification';
+import { UiMetricService } from './application/services/ui_metric';
 
-export class IndexMgmtPlugin {
-  public start(core: CoreStart, plugins: {}, __LEGACY: LegacyStart) {
-    const { management, uiMetric } = __LEGACY;
-    const { http, chrome, docLinks, notifications } = core;
+import { setExtensionsService } from './application/store/selectors';
+import { setUiMetricService } from './application/services/api';
 
-    // Initialize services
-    httpService.init(http);
-    breadcrumbService.init(chrome, management.constants.BREADCRUMB);
-    documentationService.init(docLinks);
-    notificationService.init(notifications);
-    uiMetricService.init(uiMetric.createUiStatsReporter);
+import { IndexMgmtMetricsType } from './types';
+import { ExtensionsService, ExtensionsSetup } from './services';
 
-    // Register management section and Angular route
-    registerManagementSection(management.getSection('elasticsearch'));
-    registerRoutes(core);
+export interface IndexMgmtSetup {
+  extensionsService: ExtensionsSetup;
+}
+
+interface PluginsDependencies {
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
+}
+
+export class IndexMgmtUIPlugin {
+  private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
+  private extensionsService = new ExtensionsService();
+
+  constructor() {
+    // Temporary hack to provide the service instances in module files in order to avoid a big refactor
+    // For the selectors we should expose them through app dependencies and read them from there on each container component.
+    setExtensionsService(this.extensionsService);
+    setUiMetricService(this.uiMetricService);
   }
+
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
+    const { http, notifications, getStartServices } = coreSetup;
+    const { usageCollection, management } = plugins;
+
+    httpService.setup(http);
+    notificationService.setup(notifications);
+    this.uiMetricService.setup(usageCollection);
+
+    management.sections.getSection('elasticsearch')!.registerApp({
+      id: 'index_management',
+      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
+      order: 1,
+      mount: async ({ element, setBreadcrumbs }) => {
+        const [core] = await getStartServices();
+        const { docLinks, fatalErrors } = core;
+
+        breadcrumbService.setup(setBreadcrumbs);
+        documentationService.setup(docLinks);
+
+        const appDependencies: AppDependencies = {
+          core: {
+            fatalErrors,
+          },
+          plugins: {
+            usageCollection,
+          },
+          services: {
+            uiMetricService: this.uiMetricService,
+            extensionsService: this.extensionsService,
+            httpService,
+            notificationService,
+          },
+        };
+
+        const { renderApp } = await import('./application');
+        return renderApp(element, { core, dependencies: appDependencies });
+      },
+    });
+
+    return {
+      extensionsService: this.extensionsService.setup(),
+    };
+  }
+
+  public start() {}
+  public stop() {}
 }
