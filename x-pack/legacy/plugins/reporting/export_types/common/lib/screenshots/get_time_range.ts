@@ -7,6 +7,7 @@
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
+import { contexts } from './constants';
 import { TimeRange } from './types';
 
 export const getTimeRange = async (
@@ -34,7 +35,7 @@ export const getTimeRange = async (
       },
       args: [layout.selectors.timefilterDurationAttribute],
     },
-    { context: 'GetTimeRange' },
+    { context: contexts.GETTIMERANGE },
     logger
   );
 

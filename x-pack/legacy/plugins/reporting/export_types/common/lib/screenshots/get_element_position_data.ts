@@ -8,6 +8,7 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import { LayoutInstance } from '../../layouts/layout';
 import { AttributesMap, ElementsPositionAndAttribute } from './types';
 import { Logger } from '../../../../types';
+import { contexts } from './constants';
 
 export const getElementPositionAndAttributes = async (
   browser: HeadlessBrowser,
@@ -49,7 +50,7 @@ export const getElementPositionAndAttributes = async (
       },
       args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
     },
-    { context: 'ElementPositionAndAttributes' },
+    { context: contexts.ELEMENTPOSITIONANDATTRIBUTES },
     logger
   );
 

@@ -6,6 +6,7 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
+import { contexts } from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
@@ -52,27 +53,27 @@ mockWaitForSelector.mockImplementation((selectorArg: string) => {
 const mockBrowserEvaluate = jest.fn();
 mockBrowserEvaluate.mockImplementation(() => {
   const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
-  const { context } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
+  const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
 
-  if (context === 'GetNumberOfItems') {
+  if (mockCall === contexts.GETNUMBEROFITEMS) {
     return Promise.resolve(1);
   }
-  if (context === 'InjectCss') {
+  if (mockCall === contexts.INJECTCSS) {
     return Promise.resolve('injected css');
   }
-  if (context === 'WaitForRender') {
+  if (mockCall === contexts.WAITFORRENDER) {
     return Promise.resolve('waited render');
   }
-  if (context === 'GetTimeRange') {
+  if (mockCall === contexts.GETTIMERANGE) {
     return Promise.resolve('Default GetTimeRange Result');
   }
-  if (context === 'ElementPositionAndAttributes') {
+  if (mockCall === contexts.ELEMENTPOSITIONANDATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
-  if (context === 'CheckForToastMessage') {
+  if (mockCall === contexts.CHECKFORTOASTMESSAGE) {
     return Promise.resolve('Toast Message');
   }
-  throw new Error(context);
+  throw new Error(mockCall);
 });
 const mockScreenshot = jest.fn();
 mockScreenshot.mockImplementation((item: ElementsPositionAndAttribute) => {
