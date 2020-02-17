@@ -45,7 +45,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     const failureVersion = '8.0.0';
     expect(
       getTelemetryFailureDetails({
-        telemetrySavedObject: { reportFailureCount: null, reportFailureVersion: failureVersion },
+        telemetrySavedObject: {
+          reportFailureCount: null,
+          reportFailureVersion: failureVersion,
+        } as any,
       })
     ).toStrictEqual({ failureVersion, failureCount: 0 });
     expect(
@@ -70,7 +73,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     const failureCount = 0;
     expect(
       getTelemetryFailureDetails({
-        telemetrySavedObject: { reportFailureVersion: null, reportFailureCount: failureCount },
+        telemetrySavedObject: {
+          reportFailureVersion: null,
+          reportFailureCount: failureCount,
+        } as any,
       })
     ).toStrictEqual({ failureCount, failureVersion: undefined });
     expect(
