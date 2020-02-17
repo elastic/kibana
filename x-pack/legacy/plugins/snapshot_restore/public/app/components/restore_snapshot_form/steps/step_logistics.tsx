@@ -141,14 +141,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               if they are closed and have the same number of shards as the snapshot index."
           />
         }
-        idAria="stepLogisticsIndicesDescription"
         fullWidth
       >
-        <EuiFormRow
-          hasEmptyLabelSpace
-          fullWidth
-          describedByIds={['stepLogisticsIndicesDescription']}
-        >
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
               label={
@@ -361,14 +356,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             defaultMessage="Renames indices on restore."
           />
         }
-        idAria="stepLogisticsRenameIndicesDescription"
         fullWidth
       >
-        <EuiFormRow
-          hasEmptyLabelSpace
-          fullWidth
-          describedByIds={['stepLogisticsRenameIndicesDescription']}
-        >
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
               label={
@@ -481,14 +471,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             defaultMessage="Allows restore of indices that don’t have snapshots of all shards."
           />
         }
-        idAria="stepLogisticsPartialDescription"
         fullWidth
       >
-        <EuiFormRow
-          hasEmptyLabelSpace={true}
-          fullWidth
-          describedByIds={['stepLogisticsPartialDescription']}
-        >
+        <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
           <EuiSwitch
             label={
               <FormattedMessage
@@ -521,13 +506,11 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               templates with the same name. Also restores persistent settings."
           />
         }
-        idAria="stepLogisticsIncludeGlobalStateDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['stepLogisticsIncludeGlobalStateDescription']}
           helpText={
             snapshotIncludeGlobalState ? null : (
               <FormattedMessage
