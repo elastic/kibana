@@ -25,7 +25,7 @@ import { DescriptionMarkdown } from '../description_md_editor';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
-import { HeaderPage } from '../../../../components/header_page_new';
+import { HeaderPage } from '../../../../components/header_page';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
@@ -274,6 +274,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
             onClick: isEdit => setIsEditTitle(isEdit),
           }}
           isEditTitle={isEditTitle}
+          EditTitleNode={EditNodeComponent}
           title={title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
