@@ -95,7 +95,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   toggleColumn,
   utilityBar,
 }) => {
-  const { ref: measureRef, width = 0 } = useResizeObserver();
+  const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>({});
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const combinedQueries = combineQueries({
@@ -122,7 +122,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
       <>
-        <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
+        <WrappedByAutoSizer ref={measureRef}>
           <div data-test-subj="events-viewer-measured" style={{ height: '0px', width: '100%' }} />
         </WrappedByAutoSizer>
 

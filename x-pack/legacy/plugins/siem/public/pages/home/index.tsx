@@ -62,7 +62,7 @@ const calculateFlyoutHeight = ({
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
 export const HomePage: React.FC = () => {
-  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver();
+  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
   const flyoutHeight = calculateFlyoutHeight({
     globalHeaderSize: globalHeaderHeightPx,
     windowHeight,
