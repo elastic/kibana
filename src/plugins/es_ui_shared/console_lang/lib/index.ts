@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';

@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
+export { ScriptHighlightRules } from './script_highlight_rules';
+export { XJsonHighlightRules, addToRules as addXJsonToRules } from './x_json_highlight_rules';
