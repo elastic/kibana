@@ -25,7 +25,7 @@ import {
   createMockServer,
   mockSelectors,
 } from '../../../../test_helpers';
-import { ConditionalHeaders } from '../../../../types';
+import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
 import { screenshotsObservableFactory } from './observable';
 import { ElementsPositionAndAttribute } from './types';
 
@@ -38,6 +38,9 @@ const logger = new LevelLogger(mockLogger());
 const __LEGACY = createMockServer({ settings: { 'xpack.reporting.capture': { loadDelay: 13 } } });
 const mockLayout = createMockLayoutInstance(__LEGACY);
 
+/*
+ * Tests
+ */
 describe('Screenshot Observable Pipeline', () => {
   let mockBrowserDriverFactory: any;
 
@@ -118,36 +121,74 @@ describe('Screenshot Observable Pipeline', () => {
     `);
   });
 
-  it('fails if error toast message is found', async () => {
-    // mock implementations
-    const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
-      const { toastHeader } = mockSelectors;
-      if (selectorArg === toastHeader) {
-        return Promise.resolve(true);
-      }
-      // make the error toast message get found before anything else
-      return Rx.interval(100).toPromise();
+  describe('error handling', () => {
+    it('fails if error toast message is found', async () => {
+      // mock implementations
+      const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
+        const { toastHeader } = mockSelectors;
+        if (selectorArg === toastHeader) {
+          return Promise.resolve(true);
+        }
+        // make the error toast message get found before anything else
+        return Rx.interval(100).toPromise();
+      });
+
+      // mocks
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+        waitForSelector: mockWaitForSelector,
+      });
+
+      // test
+      const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
+      const getScreenshot = async () => {
+        return await getScreenshots$({
+          logger,
+          urls: [
+            '/welcome/home/start/index2.htm',
+            '/welcome/home/start/index.php3?page=./home.php3',
+          ],
+          conditionalHeaders: {} as ConditionalHeaders,
+          layout: mockLayout,
+          browserTimezone: 'UTC',
+        }).toPromise();
+      };
+
+      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(
+        `[Error: Encountered an unexpected message on the page: Toast Message]`
+      );
     });
 
-    // mocks
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
-      waitForSelector: mockWaitForSelector,
+    it('fails if exit$ fires a timeout or error signal', async () => {
+      // mocks
+      const mockGetCreatePage = (driver: HeadlessChromiumDriver) =>
+        jest
+          .fn()
+          .mockImplementation(() =>
+            Rx.of({ driver, exit$: Rx.throwError('Instant timeout has fired!') })
+          );
+
+      const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
+        return Rx.never().toPromise();
+      });
+
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+        getCreatePage: mockGetCreatePage,
+        waitForSelector: mockWaitForSelector,
+      });
+
+      // test
+      const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
+      const getScreenshot = async () => {
+        return await getScreenshots$({
+          logger,
+          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          conditionalHeaders: {} as ConditionalHeaders,
+          layout: mockLayout,
+          browserTimezone: 'UTC',
+        }).toPromise();
+      };
+
+      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
     });
-
-    // test
-    const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
-    const getScreenshot = async () => {
-      return await getScreenshots$({
-        logger,
-        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-        conditionalHeaders: {} as ConditionalHeaders,
-        layout: mockLayout,
-        browserTimezone: 'UTC',
-      }).toPromise();
-    };
-
-    await expect(getScreenshot()).rejects.toMatchInlineSnapshot(
-      `[Error: Encountered an unexpected message on the page: Toast Message]`
-    );
   });
 });
