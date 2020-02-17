@@ -67,44 +67,6 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
           <EuiSpacer
             size="s"
           />
-          <EuiTextColor
-            className="euiText--small"
-            color="subdued"
-          >
-            <FormattedMessage
-              defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-              id="kbn.home.dataManagementDisclaimerPrivacy"
-              values={Object {}}
-            />
-            <EuiLink
-              href="https://www.elastic.co/legal/privacy-statement"
-              rel="noopener"
-              target="_blank"
-            >
-              <FormattedMessage
-                defaultMessage="Privacy Statement."
-                id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                values={Object {}}
-              />
-            </EuiLink>
-            <FormattedMessage
-              defaultMessage=" To start collection, "
-              id="kbn.home.dataManagementEnableCollection"
-              values={Object {}}
-            />
-            <EuiLink
-              href="#/management/kibana/settings"
-            >
-              <FormattedMessage
-                defaultMessage="enable usage data here."
-                id="kbn.home.dataManagementEnableCollectionLink"
-                values={Object {}}
-              />
-            </EuiLink>
-          </EuiTextColor>
-          <EuiSpacer
-            size="xs"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -200,16 +162,16 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               />
             </EuiLink>
             <FormattedMessage
-              defaultMessage=" To start collection, "
-              id="kbn.home.dataManagementEnableCollection"
+              defaultMessage=" To stop collection, "
+              id="kbn.home.dataManagementDisableCollection"
               values={Object {}}
             />
             <EuiLink
               href="#/management/kibana/settings"
             >
               <FormattedMessage
-                defaultMessage="enable usage data here."
-                id="kbn.home.dataManagementEnableCollectionLink"
+                defaultMessage="disable usage data here."
+                id="kbn.home.dataManagementDisableCollectionLink"
                 values={Object {}}
               />
             </EuiLink>

@@ -47,7 +47,7 @@ export interface TestSuite {
     /* number of skipped tests as a string */
     skipped: string;
   };
-  testcase: TestCase[];
+  testcase?: TestCase[];
 }
 
 export interface TestCase {
@@ -89,7 +89,7 @@ export function* makeTestCaseIter(report: TestReport) {
   const testSuites = 'testsuites' in report ? report.testsuites.testsuite : [report.testsuite];
 
   for (const testSuite of testSuites) {
-    for (const testCase of testSuite.testcase) {
+    for (const testCase of testSuite.testcase || []) {
       yield testCase;
     }
   }
