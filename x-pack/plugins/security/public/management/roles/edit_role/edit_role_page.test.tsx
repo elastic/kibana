@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../features/public';
 // These modules should be moved into a common directory
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -28,6 +27,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
+import { Space } from '../../../../../spaces/public';
 
 const buildFeatures = () => {
   return [

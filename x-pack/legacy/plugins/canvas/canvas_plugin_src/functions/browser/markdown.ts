@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, Render, Style, ExpressionFunction } from 'src/plugins/expressions/common';
+import {
+  Datatable,
+  Render,
+  Style,
+  ExpressionFunctionDefinition,
+} from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { Handlebars } from '../../../common/lib/handlebars';
 import { getFunctionHelp } from '../../../i18n';
@@ -23,7 +28,12 @@ interface Return {
   openLinksInNewTab: boolean;
 }
 
-export function markdown(): ExpressionFunction<'markdown', Context, Arguments, Render<Return>> {
+export function markdown(): ExpressionFunctionDefinition<
+  'markdown',
+  Context,
+  Arguments,
+  Render<Return>
+> {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
   return {
@@ -31,9 +41,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
     aliases: [],
     type: 'render',
     help,
-    context: {
-      types: ['datatable', 'null'],
-    },
+    inputTypes: ['datatable', 'null'],
     args: {
       content: {
         aliases: ['_', 'expression'],
@@ -53,7 +61,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
         default: false,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const compileFunctions = args.content.map(str =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
@@ -61,7 +69,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
         columns: [],
         rows: [],
         type: null,
-        ...context,
+        ...input,
       };
 
       return {

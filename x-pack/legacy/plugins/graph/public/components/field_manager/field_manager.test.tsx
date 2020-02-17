@@ -70,14 +70,16 @@ describe('field_manager', () => {
     store.dispatch = dispatchSpy;
 
     instance = shallow(
+      // https://github.com/airbnb/enzyme/issues/2176#issuecomment-532361526
       <Provider store={store}>
-        <FieldManager pickerOpen={true} setPickerOpen={() => {}} />
+        <FieldManager pickerOpen={true} setPickerOpen={() => {}} store={store} />
       </Provider>
     );
 
     getInstance = () =>
       instance
         .find(FieldManager)
+        .dive()
         .dive()
         .dive();
   });

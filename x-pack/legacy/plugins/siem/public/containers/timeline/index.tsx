@@ -9,7 +9,7 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { compose } from 'redux';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -39,10 +39,6 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface TimelineQueryReduxProps {
-  isInspected: boolean;
-}
-
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   eventType?: EventType;
@@ -53,7 +49,8 @@ export interface OwnProps extends QueryTemplateProps {
   sortField: SortField;
   fields: string[];
 }
-type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & WithKibanaProps;
+
+type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -171,7 +168,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
+  connector,
   withKibana
 )(TimelineQueryComponent);

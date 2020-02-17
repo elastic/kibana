@@ -23,12 +23,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
 
-export const EditFilterListHeader = injectI18n(function({
+export const EditFilterListHeader = ({
   canCreateFilter,
   filterId,
   totalItemCount,
@@ -38,8 +39,7 @@ export const EditFilterListHeader = injectI18n(function({
   isNewFilterIdInvalid,
   updateNewFilterId,
   usedBy,
-  intl,
-}) {
+}) => {
   const title =
     filterId !== undefined ? (
       <FormattedMessage
@@ -61,12 +61,14 @@ export const EditFilterListHeader = injectI18n(function({
   let usedByElement;
 
   if (filterId === undefined) {
-    const msg = intl.formatMessage({
-      id: 'xpack.ml.settings.filterLists.editFilterHeader.allowedCharactersDescription',
-      defaultMessage:
-        'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;' +
-        ' must start and end with an alphanumeric character',
-    });
+    const msg = i18n.translate(
+      'xpack.ml.settings.filterLists.editFilterHeader.allowedCharactersDescription',
+      {
+        defaultMessage:
+          'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;' +
+          ' must start and end with an alphanumeric character',
+      }
+    );
     const helpText = isNewFilterIdInvalid === false ? msg : undefined;
     const error = isNewFilterIdInvalid === true ? [msg] : undefined;
 
@@ -193,9 +195,9 @@ export const EditFilterListHeader = injectI18n(function({
       {usedByElement}
     </React.Fragment>
   );
-});
+};
 
-EditFilterListHeader.WrappedComponent.propTypes = {
+EditFilterListHeader.propTypes = {
   canCreateFilter: PropTypes.bool.isRequired,
   filterId: PropTypes.string,
   newFilterId: PropTypes.string,

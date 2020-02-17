@@ -6,7 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import { getOr, set } from 'lodash/fp';
-import { ActionCreator } from 'typescript-fsa';
+import { Action } from 'typescript-fsa';
 
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
@@ -28,7 +28,7 @@ import {
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
-import { getDefaultFromValue, getDefaultToValue } from '../../utils/default_date_settings';
+import { getTimeRangeSettings } from '../../utils/default_date_settings';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -183,7 +183,13 @@ export interface QueryTimelineById<TCache> {
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+  updateIsLoading: ({
+    id,
+    isLoading,
+  }: {
+    id: string;
+    isLoading: boolean;
+  }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
 }
 
@@ -214,16 +220,17 @@ export const queryTimelineById = <TCache>({
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
+          const { from, to } = getTimeRangeSettings();
           updateTimeline({
             duplicate,
-            from: getOr(getDefaultFromValue(), 'dateRange.start', timeline),
+            from: getOr(from, 'dateRange.start', timeline),
             id: 'timeline-1',
             notes,
             timeline: {
               ...timeline,
               show: openTimeline,
             },
-            to: getOr(getDefaultToValue(), 'dateRange.end', timeline),
+            to: getOr(to, 'dateRange.end', timeline),
           })();
         }
       })

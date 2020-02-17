@@ -21,6 +21,7 @@ import {
   KibanaMigratorMock,
   migratorInstanceMock,
   clientProviderInstanceMock,
+  typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
@@ -106,6 +107,25 @@ describe('SavedObjectsService', () => {
           'B',
           wrapperB
         );
+      });
+    });
+
+    describe('registerType', () => {
+      it('registers the type to the internal typeRegistry', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const type = {
+          name: 'someType',
+          hidden: false,
+          namespaceAgnostic: false,
+          mappings: { properties: {} },
+        };
+        setup.registerType(type);
+
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
   });
