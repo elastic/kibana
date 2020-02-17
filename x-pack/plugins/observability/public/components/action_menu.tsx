@@ -46,10 +46,8 @@ export const SectionLinks: React.FC<{}> = props => (
 
 export const SectionSpacer: React.FC<{}> = () => <EuiSpacer size={'l'} />;
 
-export const Section = styled.div<{
-  marginBottom?: string;
-}>`
-  margin-bottom: ${props => props.marginBottom ?? 0};
+export const Section = styled.div`
+  margin-bottom: 24px;
   &:last-of-type {
     margin-bottom: 0;
   }

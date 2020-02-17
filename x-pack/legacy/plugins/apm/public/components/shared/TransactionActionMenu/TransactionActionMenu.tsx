@@ -20,7 +20,6 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { px, units } from '../../../style/variables';
 import { getSections } from './sections';
 
 interface Props {
@@ -64,7 +63,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
         return (
           <React.Fragment key={idx}>
             {section.map(item => (
-              <Section key={item.key} marginBottom={px(units.plus)}>
+              <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
                 {item.subtitle && (
                   <SectionSubtitle>{item.subtitle}</SectionSubtitle>
