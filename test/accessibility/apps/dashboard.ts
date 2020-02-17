@@ -20,27 +20,32 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
-      });
-      await PageObjects.common.navigateToApp('dashboard');
+      // await esArchiver.loadIfNeeded('logstash_functional');
+      // await kibanaServer.uiSettings.update({
+      //   defaultIndex: 'logstash-*',
+      // });
+      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.home.addSampleDataSet('flights');
     });
 
     it('dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
 
     it('create dashboard button', async () => {
-      await PageObjects.dashboard.clickCreateDashboardPrompt();
+      await PageObjects.dashboard.clickNewDashboard();
       await a11y.testAppSnapshot();
     });
 
@@ -49,8 +54,38 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Dashboard listing table', async () => {
+    it('Open Edit mode', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Open add panel', async () => {
+      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await a11y.testAppSnapshot();
+    });
+
+    it('add a visualization', async () => {
+      await testSubjects.click('savedObjectTitle[Flights]-Delay-Buckets');
+      await a11y.testAppSnapshot();
+    });
+
+    it('add a saved search', async () => {
+      await testSubjects.click('savedObjectTitle[Flights]-Flight-Log');
+      await a11y.testAppSnapshot();
+    });
+
+    // it('save the dashboard', async () => {
+    //   await PageObjects.dashboard.saveDashboard(dashboardName);
+    //   await a11y.testAppSnapshot();
+    // });
+
+    it.skip('Dashboard listing table', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      await a11y.testAppSnapshot();
+    });
+
+    it.skip('Open flight dashboard', async () => {
+      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
       await a11y.testAppSnapshot();
     });
   });
