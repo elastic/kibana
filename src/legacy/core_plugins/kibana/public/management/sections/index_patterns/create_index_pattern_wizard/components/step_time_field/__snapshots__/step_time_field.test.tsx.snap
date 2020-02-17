@@ -32,14 +32,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
-    timeFieldOptions={
-      Array [
-        Object {
-          "text": "",
-          "value": "",
-        },
-      ]
-    }
+    timeFieldOptions={Array []}
   />
   <EuiSpacer
     size="s"
@@ -180,14 +173,7 @@ exports[`StepTimeField should render advanced options 1`] = `
     isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
-    timeFieldOptions={
-      Array [
-        Object {
-          "text": "",
-          "value": "",
-        },
-      ]
-    }
+    timeFieldOptions={Array []}
   />
   <EuiSpacer
     size="s"
@@ -225,14 +211,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
     isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
-    timeFieldOptions={
-      Array [
-        Object {
-          "text": "",
-          "value": "",
-        },
-      ]
-    }
+    timeFieldOptions={Array []}
   />
   <EuiSpacer
     size="s"
@@ -270,14 +249,7 @@ exports[`StepTimeField should render any error message 1`] = `
     isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
-    timeFieldOptions={
-      Array [
-        Object {
-          "text": "",
-          "value": "",
-        },
-      ]
-    }
+    timeFieldOptions={Array []}
   />
   <EuiSpacer
     size="s"
@@ -333,14 +305,7 @@ exports[`StepTimeField should render normally 1`] = `
     isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
-    timeFieldOptions={
-      Array [
-        Object {
-          "text": "",
-          "value": "",
-        },
-      ]
-    }
+    timeFieldOptions={Array []}
   />
   <EuiSpacer
     size="s"
