@@ -6,22 +6,26 @@
 
 import { get, set, merge } from 'lodash';
 
+import { StatsGetter } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
-import { getElasticsearchStats } from './get_es_stats';
-import { getKibanaStats } from './get_kibana_stats';
+import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
+import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
 import { getHighLevelStats } from './get_high_level_stats';
 
+type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<infer R>
+  ? R
+  : T;
+
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
+ * Returns the array of clusters joined with the Kibana and Logstash instances.
  *
- * @param {Object} server The Kibana server instance used to call ES as the internal user
- * @param {function} callCluster The callWithRequest or callWithInternalUser handler
- * @param {Date} start The starting range to request data
- * @param {Date} end The ending range to request data
- * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-export async function getAllStats(clustersDetails, { server, callCluster, start, end }) {
+export const getAllStats: StatsGetter = async (
+  clustersDetails,
+  { server, callCluster, start, end }
+) => {
   const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
@@ -32,7 +36,7 @@ export async function getAllStats(clustersDetails, { server, callCluster, start,
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
-}
+};
 
 /**
  * Combine the statistics from the stack to create "cluster" stats that associate all products together based on the cluster
@@ -41,9 +45,21 @@ export async function getAllStats(clustersDetails, { server, callCluster, start,
  * @param {Array} clusters The Elasticsearch clusters
  * @param {Object} kibana The Kibana instances keyed by Cluster UUID
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
- * @return {Array} The clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
+ *
+ * Returns the clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
-export function handleAllStats(clusters, { kibana, logstash, beats }) {
+export function handleAllStats(
+  clusters: ESClusterStats[],
+  {
+    kibana,
+    logstash,
+    beats,
+  }: {
+    kibana: KibanaStats;
+    logstash: PromiseReturnType<typeof getHighLevelStats>;
+    beats: PromiseReturnType<typeof getBeatsStats>;
+  }
+) {
   return clusters.map(cluster => {
     // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
     addStackStats(cluster, kibana, KIBANA_SYSTEM_ID);
@@ -62,8 +78,12 @@ export function handleAllStats(clusters, { kibana, logstash, beats }) {
  * @param {Object} allProductStats Product stats, keyed by Cluster UUID
  * @param {String} product The product name being added (e.g., 'kibana' or 'logstash')
  */
-export function addStackStats(cluster, allProductStats, product) {
-  const productStats = get(allProductStats, cluster.cluster_uuid);
+export function addStackStats<T extends { [clusterUuid: string]: K }, K>(
+  cluster: ESClusterStats & { stack_stats?: { [product: string]: K } },
+  allProductStats: T,
+  product: string
+) {
+  const productStats = allProductStats[cluster.cluster_uuid];
 
   // Don't add it if they're not using (or configured to report stats) this product for this cluster
   if (productStats) {
@@ -75,12 +95,20 @@ export function addStackStats(cluster, allProductStats, product) {
   }
 }
 
-export function mergeXPackStats(cluster, allProductStats, path, product) {
+export function mergeXPackStats<T extends { [clusterUuid: string]: unknown }>(
+  cluster: ESClusterStats & { stack_stats?: { xpack?: { [product: string]: unknown } } },
+  allProductStats: T,
+  path: string,
+  product: string
+) {
   const productStats = get(allProductStats, cluster.cluster_uuid + '.' + path);
 
   if (productStats || productStats === 0) {
-    if (!get(cluster, 'stack_stats.xpack')) {
-      set(cluster, 'stack_stats.xpack', {});
+    if (!cluster.stack_stats) {
+      cluster.stack_stats = {};
+    }
+    if (!cluster.stack_stats.xpack) {
+      cluster.stack_stats.xpack = {};
     }
 
     const mergeStats = {};
