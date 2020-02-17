@@ -179,7 +179,7 @@ describe('Server logging configuration', function() {
           await watchFileUntil(
             logPath,
             /Reloaded logging configuration due to SIGHUP/,
-            10 * second
+            30 * second
           );
         },
         minute
@@ -253,7 +253,7 @@ describe('Server logging configuration', function() {
           await watchFileUntil(
             logPath,
             /Reloaded logging configuration due to SIGHUP/,
-            10 * second
+            30 * second
           );
         },
         minute
