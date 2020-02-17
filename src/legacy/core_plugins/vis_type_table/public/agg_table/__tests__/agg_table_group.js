@@ -23,10 +23,10 @@ import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from '../../../../visualizations/public';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
+import { start as visualizationsStart } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
@@ -35,10 +35,10 @@ describe('Table Vis - AggTableGroup Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new Vis(indexPattern, 'table');
+    const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
     tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
 
-    const vis2 = new Vis(indexPattern, {
+    const vis2 = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
