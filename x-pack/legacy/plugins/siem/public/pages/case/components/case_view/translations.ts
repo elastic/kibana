@@ -43,3 +43,11 @@ export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
 export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });
+
+export const SUBMIT = i18n.translate('xpack.siem.case.casePage.title.submit', {
+  defaultMessage: 'Submit',
+});
+
+export const CANCEL = i18n.translate('xpack.siem.case.casePage.title.cancel', {
+  defaultMessage: 'Cancel',
+});
