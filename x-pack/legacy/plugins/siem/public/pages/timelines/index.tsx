@@ -41,4 +41,3 @@ export const TimelinesPage = () => (
 TimelinesPage.displayName = 'TimelinesPage';
 
 export const Timelines = React.memo(TimelinesPage);
-Timelines.displayName = 'Timelines';

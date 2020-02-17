@@ -17,7 +17,7 @@ HttpLink.mockImplementation(() => mockHttpLink);
 
 describe('getLinks helper', () => {
   test('It should return links in correct order', () => {
-    const links = getLinks();
+    const links = getLinks('');
     expect(links[0]).toEqual(errorLink);
     expect(links[1]).toEqual(reTryOneTimeOnErrorLink);
     expect(links[2]).toEqual(mockHttpLink);

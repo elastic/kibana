@@ -118,10 +118,9 @@ export const HomePage: React.FC = () => (
                       <DetectionEngineContainer location={location} url={match.url} />
                     )}
                   />
-                  <Route
-                    path={`/:pageName(${SiemPageName.timelines})`}
-                    render={() => <Timelines />}
-                  />
+                  <Route path={`/:pageName(${SiemPageName.timelines})`}>
+                    <Timelines />
+                  </Route>
                   <Route path="/link-to" render={props => <LinkToPage {...props} />} />
                   <Route
                     path="/ml-hosts"
@@ -138,7 +137,9 @@ export const HomePage: React.FC = () => (
                   <Route path={`/:pageName(${SiemPageName.case})`}>
                     <Case />
                   </Route>
-                  <Route render={() => <NotFoundPage />} />
+                  <Route>
+                    <NotFoundPage />
+                  </Route>
                 </Switch>
               </DragDropContextWrapper>
             )}

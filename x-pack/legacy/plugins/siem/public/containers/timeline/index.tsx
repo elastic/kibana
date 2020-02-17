@@ -25,7 +25,6 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { EventType } from '../../store/timeline/model';
-import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
   events: TimelineItem[];

@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { useApolloClient } from '@apollo/client';
 
 import { Filters } from '../../../components/recent_timelines/filters';
 import { ENABLE_NEWS_FEED_SETTING, NEWS_FEED_URL_SETTING } from '../../../../common/constants';
@@ -26,7 +25,6 @@ export const Sidebar = React.memo<{
   filterBy: FilterMode;
   setFilterBy: (filterBy: FilterMode) => void;
 }>(({ filterBy, setFilterBy }) => {
-  const apolloClient = useApolloClient();
   const RecentTimelinesFilters = useMemo(
     () => <Filters filterBy={filterBy} setFilterBy={setFilterBy} />,
     [filterBy, setFilterBy]
@@ -36,7 +34,7 @@ export const Sidebar = React.memo<{
     <SidebarFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
         <SidebarHeader title={i18n.RECENT_TIMELINES}>{RecentTimelinesFilters}</SidebarHeader>
-        <StatefulRecentTimelines apolloClient={apolloClient!} filterBy={filterBy} />
+        <StatefulRecentTimelines filterBy={filterBy} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
