@@ -6,6 +6,7 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from 'hapi';
+import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { initInfraServer } from './infra_server';
@@ -29,11 +30,30 @@ import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export const config = {
   schema: schema.object({
-    enabled: schema.maybe(schema.boolean()),
     query: schema.object({
-      partitionSize: schema.maybe(schema.number()),
-      partitionFactor: schema.maybe(schema.number()),
+      partitionSize: schema.number({ defaultValue: 75 }),
+      partitionFactor: schema.number({ defaultValue: 1.2 }),
     }),
+    sources: schema.maybe(
+      schema.object({
+        default: schema.maybe(
+          schema.object({
+            logAlias: schema.maybe(schema.string()),
+            metricAlias: schema.maybe(schema.string()),
+            fields: schema.maybe(
+              schema.object({
+                timestamp: schema.maybe(schema.string()),
+                message: schema.maybe(schema.arrayOf(schema.string())),
+                tiebreaker: schema.maybe(schema.string()),
+                host: schema.maybe(schema.string()),
+                container: schema.maybe(schema.string()),
+                pod: schema.maybe(schema.string()),
+              })
+            ),
+          })
+        ),
+      })
+    ),
   }),
 };
 
@@ -54,30 +74,13 @@ export interface InfraPluginSetup {
   ) => void;
 }
 
-const DEFAULT_CONFIG: InfraConfig = {
-  enabled: true,
-  query: {
-    partitionSize: 75,
-    partitionFactor: 1.2,
-  },
-};
-
 export class InfraServerPlugin {
-  public config: InfraConfig = DEFAULT_CONFIG;
+  private config$: Observable<InfraConfig>;
+  public config = {} as InfraConfig;
   public libs: InfraBackendLibs | undefined;
 
   constructor(context: PluginInitializerContext) {
-    const config$ = context.config.create<InfraConfig>();
-    config$.subscribe(configValue => {
-      this.config = {
-        ...DEFAULT_CONFIG,
-        enabled: configValue.enabled,
-        query: {
-          ...DEFAULT_CONFIG.query,
-          ...configValue.query,
-        },
-      };
-    });
+    this.config$ = context.config.create<InfraConfig>();
   }
 
   getLibs() {
@@ -87,7 +90,13 @@ export class InfraServerPlugin {
     return this.libs;
   }
 
-  setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
+  async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
+    await new Promise(resolve => {
+      this.config$.subscribe(configValue => {
+        this.config = configValue;
+        resolve();
+      });
+    });
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
