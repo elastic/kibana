@@ -6,8 +6,9 @@
 
 export { useCore, CoreContext } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
-export { useDeps, DepsContext } from './use_deps';
+export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
 export { useLink } from './use_link';
-export { usePagination } from './use_pagination';
+export { usePagination, Pagination } from './use_pagination';
 export { useDebounce } from './use_debounce';
 export * from './use_request';
+export * from './use_input';

@@ -4,5 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { Loading } from '../../components';
+import { useRequest, useCore } from '../../hooks';
+import { AgentListPage } from './agent_list_page';
+import { SetupPage } from './setup_page';
+import { AgentDetailsPage } from './agent_details_page';
+import { NoAccessPage } from './error_pages/no_access';
+import { fleetSetupRouteService } from '../../services';
 
-export const FleetApp: React.FC = () => <div>hello world - fleet app</div>;
+export const FleetApp: React.FC = () => {
+  const core = useCore();
+
+  const setupRequest = useRequest({
+    method: 'get',
+    path: fleetSetupRouteService.getFleetSetupPath(),
+  });
+
+  if (setupRequest.isLoading) {
+    return <Loading />;
+  }
+
+  if (setupRequest.data.isInitialized === false) {
+    return (
+      <SetupPage
+        refresh={async () => {
+          await setupRequest.sendRequest();
+        }}
+      />
+    );
+  }
+  if (!core.application.capabilities.ingestManager.read) {
+    return <NoAccessPage />;
+  }
+
+  return (
+    <Router>
+      <Switch>
+        <Route path="/fleet" exact={true} render={() => <Redirect to="/fleet/agents" />} />
+        <Route path="/fleet/agents/:agentId">
+          <AgentDetailsPage />
+        </Route>
+        <Route path="/fleet/agents">
+          <AgentListPage />
+        </Route>
+      </Switch>
+    </Router>
+  );
+};

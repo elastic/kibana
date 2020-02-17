@@ -37,7 +37,6 @@ export default function({ getService }: FtrProviderContext) {
               uptime: ['all', 'read'],
               apm: ['all', 'read'],
               siem: ['all', 'read'],
-              fleet: ['all', 'read'],
               ingestManager: ['all', 'read'],
               endpoint: ['all', 'read'],
             },

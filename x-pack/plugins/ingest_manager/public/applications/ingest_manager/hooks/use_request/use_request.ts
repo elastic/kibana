@@ -7,12 +7,14 @@ import { HttpSetup } from 'kibana/public';
 import {
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
+  UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
+
+export type UseRequestConfig = _UseRequestConfig;
 
 export const setHttpClient = (client: HttpSetup) => {
   httpClient = client;

@@ -8,6 +8,9 @@ import {
   EPM_API_ROUTES,
   DATASOURCE_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
+  FLEET_SETUP_API_ROUTES,
+  AGENT_API_ROUTES,
+  ENROLLMENT_API_KEY_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -74,4 +77,25 @@ export const agentConfigRouteService = {
   getDeletePath: () => {
     return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
+};
+
+export const fleetSetupRouteService = {
+  getFleetSetupPath: () => FLEET_SETUP_API_ROUTES.INFO_PATTERN,
+  postFleetSetupPath: () => FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+};
+
+export const agentRouteService = {
+  getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+  getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
+  getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
+  getUnenrollPath: () => AGENT_API_ROUTES.UNENROLL_PATTERN,
+  getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
+};
+
+export const enrollmentAPIKeyRouteService = {
+  getListPath: () => ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
+  getCreatePath: () => ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
+  getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
+  getDeletePath: (keyId: string) =>
+    ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
 };

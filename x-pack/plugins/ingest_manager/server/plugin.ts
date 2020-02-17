@@ -17,7 +17,12 @@ import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { PLUGIN_ID } from './constants';
+import {
+  PLUGIN_ID,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+} from './constants';
 import { licenseService, configService, appContextService } from './services';
 import {
   registerEPMRoutes,
@@ -78,18 +83,26 @@ export class IngestManagerPlugin implements Plugin {
           all: {
             api: [PLUGIN_ID],
             savedObject: {
-              all: ['agents', 'events', 'enrollment_api_keys'],
+              all: [
+                AGENT_SAVED_OBJECT_TYPE,
+                AGENT_EVENT_SAVED_OBJECT_TYPE,
+                ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+              ],
               read: [],
             },
-            ui: ['show'],
+            ui: ['show', 'read', 'write'],
           },
           read: {
             api: [PLUGIN_ID],
             savedObject: {
               all: [],
-              read: ['agents', 'events', 'enrollment_api_keys'],
+              read: [
+                AGENT_SAVED_OBJECT_TYPE,
+                AGENT_EVENT_SAVED_OBJECT_TYPE,
+                ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+              ],
             },
-            ui: ['show'],
+            ui: ['show', 'read'],
           },
         },
       });

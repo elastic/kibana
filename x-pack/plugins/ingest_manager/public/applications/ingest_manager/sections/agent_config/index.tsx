@@ -6,10 +6,14 @@
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { AgentConfigListPage } from './list_page';
+import { AgentConfigDetailsPage } from './details_page';
 
 export const AgentConfigApp: React.FC = () => (
   <Router>
     <Switch>
+      <Route path="/configs/:configId">
+        <AgentConfigDetailsPage />
+      </Route>
       <Route path="/">
         <AgentConfigListPage />
       </Route>

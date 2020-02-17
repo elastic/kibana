@@ -15,3 +15,5 @@ export const EPM_PATH = '/epm';
 export const AGENT_CONFIG_PATH = '/configs';
 export const AGENT_CONFIG_DETAILS_PATH = '/configs/';
 export const FLEET_PATH = '/fleet';
+
+export const INDEX_NAME = '.kibana';
