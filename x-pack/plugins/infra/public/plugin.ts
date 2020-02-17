@@ -143,6 +143,10 @@ export class Plugin
           core.http
             .fetch(path, {
               ...options,
+              // Set headers to undefined due to this bug: https://github.com/apollographql/apollo-link/issues/249,
+              // Apollo will try to set a "content-type" header which will conflict with the "Content-Type" header that
+              // core.http.fetch correctly sets.
+              headers: undefined,
               asResponse: true,
             })
             .then(res => {
