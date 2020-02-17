@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiFieldText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -26,6 +27,7 @@ import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
+import { Title } from '../../../../components/header_page/title';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
@@ -51,6 +53,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
 `;
+
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade};
@@ -59,58 +62,54 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
+const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+  ${({ theme }) => css`
+    margin-left: ${theme.eui.euiSize};
+  `}
+`;
+
+StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
+
 interface CasesProps {
   caseId: string;
   initialData: Case;
   isLoading: boolean;
 }
-interface IconAction {
-  'aria-label': string;
+
+interface EditNodeComponentProps {
+  isLoading: boolean;
+  title: string | React.ReactNode;
+  isEditTitle?: boolean;
   iconType: string;
   onChange: (a: string) => void;
   onClick: (b: boolean) => void;
   onSubmit: () => void;
 }
 
-interface EditNodeComponentProps {
-  iconAction: IconAction;
-  isLoading: boolean;
-  title: string | React.ReactNode;
-  isEditTitle?: boolean;
-}
-
-const EditNodeComponent = ({
-  iconAction,
+const EditNodeComponent: React.FC<EditNodeComponentProps> = ({
+  onChange,
+  onClick,
+  onSubmit,
   isLoading,
   title,
-  isEditTitle,
-}: EditNodeComponentProps) => {
-  return (
-    isEditTitle && (
-      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFieldText onChange={e => iconAction.onChange(e.target.value)} value={`${title}`} />
-        </EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              onClick={iconAction.onSubmit}
-            >
-              {i18n.SUBMIT}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => iconAction.onClick(false)}>{i18n.CANCEL}</EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem />
-      </EuiFlexGroup>
-    )
-  );
-};
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>
+      <EuiFieldText onChange={e => onChange(e.target.value)} value={`${title}`} />
+    </EuiFlexItem>
+    <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+          {i18n.SUBMIT}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={() => onClick(false)}>{i18n.CANCEL}</EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexItem />
+  </EuiFlexGroup>
+);
 
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
@@ -258,6 +257,32 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
       ),
     },
   ];
+
+  const titleNode = isEditTitle ? (
+    <EditNodeComponent
+      isLoading={isLoading}
+      title={title}
+      isEditTitle={isEditTitle}
+      iconType="pencil"
+      onChange={newTitle => setTitle(newTitle)}
+      onSubmit={() => onUpdateField('title', title)}
+      onClick={isEdit => setIsEditTitle(isEdit)}
+    />
+  ) : (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <Title title={title} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <StyledEuiButtonIcon
+          aria-label={title}
+          iconType="pencil"
+          onClick={() => setIsEditTitle(true)}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <>
       <MyWrapper>
@@ -266,15 +291,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
             href: getCaseUrl(),
             text: i18n.BACK_TO_ALL,
           }}
-          iconAction={{
-            'aria-label': title,
-            iconType: 'pencil',
-            onChange: newTitle => setTitle(newTitle),
-            onSubmit: () => onUpdateField('title', title),
-            onClick: isEdit => setIsEditTitle(isEdit),
-          }}
-          isEditTitle={isEditTitle}
-          EditTitleNode={EditNodeComponent}
+          titleNode={titleNode}
           title={title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">

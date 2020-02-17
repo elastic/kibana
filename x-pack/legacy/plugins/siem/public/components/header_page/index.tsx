@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBetaBadge,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiTitle,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { DefaultDraggable } from '../draggables';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
+import { Title } from './title';
+import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 
 interface HeaderProps {
   border?: boolean;
@@ -64,41 +57,9 @@ const Badge = styled(EuiBadge)`
 `;
 Badge.displayName = 'Badge';
 
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: middle;
-`;
-
-StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
-
-const StyledEuiButtonIcon = styled(EuiButtonIcon)`
-  ${({ theme }) => css`
-    margin-left: ${theme.eui.euiSize};
-  `}
-`;
-StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
-
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
-}
-
-interface BadgeOptions {
-  beta?: boolean;
-  text: string;
-  tooltip?: string;
-}
-
-interface DraggableArguments {
-  field: string;
-  value: string;
-}
-
-interface IconAction {
-  'aria-label': string;
-  iconType: string;
-  onChange: (a: string) => void;
-  onClick: (b: boolean) => void;
-  onSubmit: () => void;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -108,10 +69,8 @@ export interface HeaderPageProps extends HeaderProps {
   draggableArguments?: DraggableArguments;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: string | React.ReactNode;
-  iconAction?: IconAction;
-  EditTitleNode?: React.ReactNode;
-  isEditTitle?: boolean;
+  title: TitleProp;
+  titleNode?: React.ReactElement;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
@@ -124,9 +83,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle,
   subtitle2,
   title,
-  isEditTitle,
-  EditTitleNode,
-  iconAction,
+  titleNode,
   ...rest
 }) => (
   <Header border={border} {...rest}>
@@ -139,51 +96,15 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             </LinkIcon>
           </LinkBack>
         )}
-        {EditTitleNode && isEditTitle && (
-          <EditTitleNode
-            isLoading={isLoading}
-            iconAction={iconAction}
+
+        {titleNode || (
+          <Title
+            draggableArguments={draggableArguments}
             title={title}
-            isEditTitle={isEditTitle}
+            badgeOptions={badgeOptions}
           />
         )}
-        {(!EditTitleNode || !isEditTitle) && (
-          <EuiTitle size="l">
-            <h1 data-test-subj="header-page-title">
-              {!draggableArguments ? (
-                title
-              ) : (
-                <DefaultDraggable
-                  data-test-subj="header-page-draggable"
-                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-                  field={draggableArguments.field}
-                  value={`${draggableArguments.value}`}
-                />
-              )}
-              {badgeOptions && (
-                <>
-                  {' '}
-                  {badgeOptions.beta ? (
-                    <StyledEuiBetaBadge
-                      label={badgeOptions.text}
-                      tooltipContent={badgeOptions.tooltip}
-                      tooltipPosition="bottom"
-                    />
-                  ) : (
-                    <Badge color="hollow">{badgeOptions.text}</Badge>
-                  )}
-                </>
-              )}
-              {EditTitleNode && iconAction && !isEditTitle && (
-                <StyledEuiButtonIcon
-                  aria-label={iconAction['aria-label']}
-                  iconType={iconAction.iconType}
-                  onClick={() => iconAction.onClick(true)}
-                />
-              )}
-            </h1>
-          </EuiTitle>
-        )}
+
         {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
         {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
         {border && isLoading && <EuiProgress size="xs" color="accent" />}
