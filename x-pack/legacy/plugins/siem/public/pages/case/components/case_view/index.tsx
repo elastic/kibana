@@ -261,7 +261,6 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
     <EditNodeComponent
       isLoading={isLoading}
       title={title}
-      isEditTitle={isEditTitle}
       onChange={newTitle => setTitle(newTitle)}
       onSubmit={() => onUpdateField('title', title)}
       onClick={isEdit => setIsEditTitle(isEdit)}
