@@ -76,11 +76,11 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     getFilters,
     setFilters,
     setAppState,
-  } = getState(
-    config.get('context:defaultSize'),
-    indexPattern.timeFieldName,
-    config.get('state:storeInSessionStorage')
-  );
+  } = getState({
+    defaultStepSize: config.get('context:defaultSize'),
+    timeFieldName: indexPattern.timeFieldName,
+    storeInSessionStorage: config.get('state:storeInSessionStorage'),
+  });
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
