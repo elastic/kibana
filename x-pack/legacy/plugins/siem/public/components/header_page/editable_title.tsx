@@ -5,15 +5,35 @@
  */
 
 import React from 'react';
+import styled, { css } from 'styled-components';
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
+
+import { Title } from './title';
+
+const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+  ${({ theme }) => css`
+    margin-left: ${theme.eui.euiSize};
+  `}
+`;
+
+StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
 
 interface Props {
   submitTitle: string;
   cancelTitle: string;
   isLoading: boolean;
+  onClickEditIcon: () => void;
   title: string | React.ReactNode;
-  isEditTitle?: boolean;
+  editMode: boolean;
+  editIcon?: string;
   onChange: (a: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
@@ -25,25 +45,43 @@ const EditableTitleComponent: React.FC<Props> = ({
   onSubmit,
   isLoading,
   title,
+  onClickEditIcon,
   submitTitle,
   cancelTitle,
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      <EuiFieldText onChange={e => onChange(e.target.value)} value={`${title}`} />
-    </EuiFlexItem>
-    <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+  editMode = false,
+  editIcon = 'pencil',
+}) => {
+  return editMode ? (
+    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-          {submitTitle}
-        </EuiButton>
+        <EuiFieldText onChange={e => onChange(e.target.value)} value={`${title}`} />
+      </EuiFlexItem>
+      <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+            {submitTitle}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel}>{cancelTitle}</EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem />
+    </EuiFlexGroup>
+  ) : (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <Title title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={onCancel}>{cancelTitle}</EuiButtonEmpty>
+        <StyledEuiButtonIcon
+          aria-label={title as string}
+          iconType={editIcon}
+          onClick={onClickEditIcon}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiFlexItem />
-  </EuiFlexGroup>
-);
+  );
+};
 
 export const EditableTitle = React.memo(EditableTitleComponent);

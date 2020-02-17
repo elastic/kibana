@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -26,7 +25,6 @@ import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
-import { Title } from '../../../../components/header_page/title';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
@@ -61,14 +59,6 @@ const BackgroundWrapper = styled.div`
     height: 100%;
   `}
 `;
-
-const StyledEuiButtonIcon = styled(EuiButtonIcon)`
-  ${({ theme }) => css`
-    margin-left: ${theme.eui.euiSize};
-  `}
-`;
-
-StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
 
 interface CasesProps {
   caseId: string;
@@ -223,29 +213,18 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
     },
   ];
 
-  const titleNode = isEditTitle ? (
+  const titleNode = (
     <EditableTitle
       isLoading={isLoading}
       title={title}
+      onClickEditIcon={() => setIsEditTitle(true)}
       onChange={newTitle => setTitle(newTitle)}
       onSubmit={() => onUpdateField('title', title)}
       onCancel={() => setIsEditTitle(false)}
       submitTitle={i18n.SUBMIT}
       cancelTitle={i18n.CANCEL}
+      editMode={isEditTitle}
     />
-  ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <Title title={title} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StyledEuiButtonIcon
-          aria-label={title}
-          iconType="pencil"
-          onClick={() => setIsEditTitle(true)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 
   return (
