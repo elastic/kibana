@@ -15,6 +15,7 @@ const COMMON_HEADERS = {
 const testDataList = [
   {
     testTitleSuffix: 'with 0 metrics, 0 influencers and no split field',
+    user: 'ml_poweruser',
     requestBody: {
       indexPattern: 'ecommerce',
       splitFieldName: '',
@@ -36,6 +37,7 @@ const testDataList = [
   },
   {
     testTitleSuffix: 'with 1 metrics and 1 influencers same as split field',
+    user: 'ml_poweruser',
     requestBody: {
       indexPattern: 'ecommerce',
       splitFieldName: 'geoip.city_name',
@@ -53,6 +55,7 @@ const testDataList = [
   },
   {
     testTitleSuffix: 'with 3 metrics, 3 influencers, split by city',
+    user: 'ml_poweruser',
     requestBody: {
       indexPattern: 'ecommerce',
       splitFieldName: 'geoip.city_name',
@@ -70,6 +73,7 @@ const testDataList = [
   },
   {
     testTitleSuffix: 'with 4 metrics, 4 influencers, split by customer_id',
+    user: 'ml_poweruser',
     requestBody: {
       indexPattern: 'ecommerce',
       splitFieldName: 'customer_id',
@@ -98,6 +102,7 @@ const testDataList = [
   {
     testTitleSuffix:
       'with 4 metrics, 4 influencers, split by customer_id and filtering by country code',
+    user: 'ml_poweruser',
     requestBody: {
       indexPattern: 'ecommerce',
       splitFieldName: 'customer_id',
@@ -136,9 +141,10 @@ const testDataList = [
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
+  const mlSecurity = getService('mlSecurity');
 
-  describe('calculate model memory limit', () => {
+  describe('calculate model memory limit', function() {
     before(async () => {
       await esArchiver.load('ml/ecommerce');
     });
@@ -151,6 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
         const { body } = await supertest
           .post('/api/ml/validate/calculate_model_memory_limit')
+          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

@@ -15,6 +15,7 @@ const COMMON_HEADERS = {
 const testDataList = [
   {
     testTitleSuffix: 'with 1 field, 1 agg, no split',
+    user: 'ml_poweruser',
     requestBody: {
       aggTypes: ['avg'],
       duration: { start: 1560297859000, end: 1562975136000 },
@@ -30,6 +31,7 @@ const testDataList = [
   },
   {
     testTitleSuffix: 'with 2 fields, 2 aggs, no split',
+    user: 'ml_poweruser',
     requestBody: {
       aggTypes: ['avg', 'sum'],
       duration: { start: 1560297859000, end: 1562975136000 },
@@ -45,6 +47,7 @@ const testDataList = [
   },
   {
     testTitleSuffix: 'with 1 field, 1 agg, 1 split with cardinality 46',
+    user: 'ml_poweruser',
     requestBody: {
       aggTypes: ['avg'],
       duration: { start: 1560297859000, end: 1562975136000 },
@@ -64,9 +67,10 @@ const testDataList = [
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
+  const mlSecurity = getService('mlSecurity');
 
-  describe('bucket span estimator', () => {
+  describe('bucket span estimator', function() {
     before(async () => {
       await esArchiver.load('ml/ecommerce');
     });
@@ -79,6 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
+          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

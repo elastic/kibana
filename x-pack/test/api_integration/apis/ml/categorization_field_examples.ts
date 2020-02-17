@@ -77,6 +77,7 @@ const defaultRequestBody = {
 const testDataList = [
   {
     title: 'valid with good number of tokens',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field1',
@@ -97,6 +98,7 @@ const testDataList = [
   },
   {
     title: 'invalid, too many tokens.',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field2',
@@ -123,6 +125,7 @@ const testDataList = [
   },
   {
     title: 'partially valid, more than 75% are null',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field3',
@@ -148,6 +151,7 @@ const testDataList = [
   },
   {
     title: 'partially valid, median length is over 400 characters',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field4',
@@ -173,6 +177,7 @@ const testDataList = [
   },
   {
     title: 'invalid, no values in any doc',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field5',
@@ -194,6 +199,7 @@ const testDataList = [
   },
   {
     title: 'invalid, mostly made up of stop words, so no matched tokens',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field6',
@@ -214,6 +220,7 @@ const testDataList = [
   },
   {
     title: 'valid, mostly made up of stop words, but analyser has no stop words. so it is ok.',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field6',
@@ -237,6 +244,7 @@ const testDataList = [
   },
   {
     title: 'partially valid, half the docs are stop words.',
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       field: 'field7',
@@ -257,6 +265,7 @@ const testDataList = [
   },
   {
     title: "endpoint error, index doesn't exist",
+    user: 'ml_poweruser',
     requestBody: {
       ...defaultRequestBody,
       indexPatternTitle: 'does_not_exist',
@@ -274,7 +283,8 @@ const testDataList = [
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
+  const mlSecurity = getService('mlSecurity');
 
   describe('Categorization example endpoint - ', function() {
     before(async () => {
@@ -289,6 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(testData.title, async () => {
         const { body } = await supertest
           .post('/api/ml/jobs/categorization_field_examples')
+          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

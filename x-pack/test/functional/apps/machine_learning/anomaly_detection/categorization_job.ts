@@ -79,6 +79,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/categorization');
       await ml.api.createCalendar('wizard-test-calendar');
+      await ml.securityUI.loginAs('ml_poweruser');
     });
 
     after(async () => {
