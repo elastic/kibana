@@ -128,7 +128,7 @@ export class UiActionsService {
     );
   };
 
-  private async executeSingleAction<A extends {} = {}>(action: Action<A>, actionContext: A) {
+  private async executeSingleAction<A>(action: Action<A>, actionContext: A) {
     const href = action.getHref && action.getHref(actionContext);
 
     if (href) {
@@ -171,6 +171,7 @@ export class UiActionsService {
   public readonly clear = () => {
     this.actions.clear();
     this.triggers.clear();
+    this.triggerToActions.clear();
   };
 
   /**
