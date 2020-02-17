@@ -7,5 +7,6 @@
 import { ManagementAction } from './managing';
 import { AlertAction } from './alerts';
 import { RoutingAction } from './routing';
+import { PolicyListAction } from './policy_list';
 
-export type AppAction = ManagementAction | AlertAction | RoutingAction;
+export type AppAction = ManagementAction | AlertAction | RoutingAction | PolicyListAction;
