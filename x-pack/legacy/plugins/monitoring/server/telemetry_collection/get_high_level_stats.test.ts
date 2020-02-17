@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
 import {
   fetchHighLevelStats,
   getHighLevelStats,
   handleHighLevelStatsResponse,
-} from '../get_high_level_stats';
+} from './get_high_level_stats';
 
 describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
@@ -244,9 +243,9 @@ describe('get_high_level_stats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(await getHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.eql(
-        expectedClusters
-      );
+      expect(
+        await getHighLevelStats(server, callWith, clusterUuids, start, end, product)
+      ).toStrictEqual(expectedClusters);
     });
   });
 
@@ -254,30 +253,30 @@ describe('get_high_level_stats', () => {
     it('searches for clusters', async () => {
       callWith.returns(Promise.resolve(response));
 
-      expect(await fetchHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.be(
-        response
-      );
+      expect(
+        await fetchHighLevelStats(server, callWith, clusterUuids, start, end, product)
+      ).toStrictEqual(response);
     });
   });
 
   describe('handleHighLevelStatsResponse', () => {
     // filterPath makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
-      const clusters = handleHighLevelStatsResponse({}, product);
+      const clusters = handleHighLevelStatsResponse({} as any, product);
 
-      expect(clusters).to.eql({});
+      expect(clusters).toStrictEqual({});
     });
 
     it('handles valid response', () => {
-      const clusters = handleHighLevelStatsResponse(response, product);
+      const clusters = handleHighLevelStatsResponse(response as any, product);
 
-      expect(clusters).to.eql(expectedClusters);
+      expect(clusters).toStrictEqual(expectedClusters);
     });
 
     it('handles no hits response', () => {
-      const clusters = handleHighLevelStatsResponse({ hits: { hits: [] } }, product);
+      const clusters = handleHighLevelStatsResponse({ hits: { hits: [] } } as any, product);
 
-      expect(clusters).to.eql({});
+      expect(clusters).toStrictEqual({});
     });
   });
 });

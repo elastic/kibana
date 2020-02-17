@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import { SearchResponse } from 'elasticsearch';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -13,10 +14,14 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
- * @return {Promise} Array of the Elasticsearch clusters.
  */
-export function getElasticsearchStats(server, callCluster, clusterUuids) {
-  return fetchElasticsearchStats(server, callCluster, clusterUuids).then(handleElasticsearchStats);
+export async function getElasticsearchStats(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[]
+) {
+  const response = await fetchElasticsearchStats(server, callCluster, clusterUuids);
+  return handleElasticsearchStats(response);
 }
 
 /**
@@ -25,9 +30,14 @@ export function getElasticsearchStats(server, callCluster, clusterUuids) {
  * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids Cluster UUIDs to limit the request against
- * @return {Promise} Response for the aggregations to fetch details for the product.
+ *
+ * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
+export function fetchElasticsearchStats(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[]
+) {
   const config = server.config();
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
@@ -67,13 +77,16 @@ export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
   return callCluster('search', params);
 }
 
+export interface ESClusterStats {
+  cluster_uuid: string;
+  type: 'cluster_stats';
+}
+
 /**
  * Extract the cluster stats for each cluster.
- *
- * @return {Array} The Elasticsearch clusters.
  */
-export function handleElasticsearchStats(response) {
-  const clusters = get(response, 'hits.hits', []);
+export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
+  const clusters = response.hits?.hits || [];
 
   return clusters.map(cluster => cluster._source);
 }
