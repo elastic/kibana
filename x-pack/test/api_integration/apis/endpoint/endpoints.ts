@@ -154,9 +154,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
-          [].concat(
-            ...body.endpoints.map((metadata: Record<string, any>) => metadata.host.os.variant)
-          )
+          body.endpoints.map((metadata: Record<string, any>) => metadata.host.os.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
         expect(body.endpoints.length).to.eql(2);
