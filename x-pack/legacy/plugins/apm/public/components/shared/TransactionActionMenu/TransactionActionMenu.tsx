@@ -61,7 +61,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       {sections.map((section, idx) => {
         const isLastSection = idx !== sections.length - 1;
         return (
-          <React.Fragment key={idx}>
+          <div key={idx}>
             {section.map(item => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
@@ -80,7 +80,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
               </Section>
             ))}
             {isLastSection && <ActionMenuDivider />}
-          </React.Fragment>
+          </div>
         );
       })}
     </ActionMenu>
