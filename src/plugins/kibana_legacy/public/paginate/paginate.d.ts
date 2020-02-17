@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export type PaginateDirectiveProvider = any;
-export type PaginateControlsDirectiveProvider = any;
+export function PaginateDirectiveProvider($parse: any, $compile: any): any;
+export function PaginateControlsDirectiveProvider(): any;
