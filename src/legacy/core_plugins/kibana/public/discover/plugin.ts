@@ -45,6 +45,10 @@ import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_typ
 import { DocViewTable } from './np_ready/components/table/table';
 import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
+import {
+  VisualizationsStart,
+  VisualizationsSetup,
+} from '../../../visualizations/public/np_ready/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 
 /**
@@ -61,6 +65,7 @@ export interface DiscoverSetupPlugins {
   embeddable: IEmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
@@ -71,6 +76,7 @@ export interface DiscoverStartPlugins {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
+  visualizations: VisualizationsStart;
 }
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';

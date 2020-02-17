@@ -5,7 +5,13 @@
  */
 
 // NP type imports
-import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  SavedObjectsClientContract,
+} from 'src/core/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -33,7 +39,8 @@ export class GraphPlugin implements Plugin {
     core.application.register({
       id: 'graph',
       title: 'Graph',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
         return renderApp({
           ...params,
@@ -46,13 +53,13 @@ export class GraphPlugin implements Plugin {
           canEditDrillDownUrls: graph.config.canEditDrillDownUrls,
           graphSavePolicy: graph.config.savePolicy,
           storage: new Storage(window.localStorage),
-          capabilities: contextCore.application.capabilities.graph,
-          coreStart: contextCore,
-          chrome: contextCore.chrome,
-          config: contextCore.uiSettings,
-          toastNotifications: contextCore.notifications.toasts,
+          capabilities: coreStart.application.capabilities.graph,
+          coreStart,
+          chrome: coreStart.chrome,
+          config: coreStart.uiSettings,
+          toastNotifications: coreStart.notifications.toasts,
           indexPatterns: this.npDataStart!.indexPatterns,
-          overlays: contextCore.overlays,
+          overlays: coreStart.overlays,
         });
       },
     });

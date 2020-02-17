@@ -21,10 +21,11 @@ import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
-  LegacyCoreStart,
   Plugin,
+  PluginInitializerContext,
   SavedObjectsClientContract,
 } from 'kibana/public';
 
@@ -52,7 +53,7 @@ import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/pu
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
@@ -68,7 +69,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    embeddables: IEmbeddableStart;
+    embeddable: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
     share: SharePluginStart;
@@ -76,6 +77,8 @@ export class VisualizePlugin implements Plugin {
   } | null = null;
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
+
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: CoreSetup,
@@ -107,7 +110,9 @@ export class VisualizePlugin implements Plugin {
       title: 'Visualize',
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:visualize',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
@@ -115,7 +120,7 @@ export class VisualizePlugin implements Plugin {
         appMounted();
         const {
           savedObjectsClient,
-          embeddables,
+          embeddable,
           navigation,
           visualizations,
           data: dataStart,
@@ -123,11 +128,12 @@ export class VisualizePlugin implements Plugin {
         } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
-          addBasePath: contextCore.http.basePath.prepend,
-          core: contextCore as LegacyCoreStart,
-          chrome: contextCore.chrome,
+          pluginInitializerContext: this.initializerContext,
+          addBasePath: coreStart.http.basePath.prepend,
+          core: coreStart,
+          chrome: coreStart.chrome,
           data: dataStart,
-          embeddables,
+          embeddable,
           getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
@@ -136,13 +142,13 @@ export class VisualizePlugin implements Plugin {
           savedVisualizations: visualizations.getSavedVisualizationsLoader(),
           savedQueryService: dataStart.query.savedQueries,
           share,
-          toastNotifications: contextCore.notifications.toasts,
-          uiSettings: contextCore.uiSettings,
+          toastNotifications: coreStart.notifications.toasts,
+          uiSettings: coreStart.uiSettings,
           config: kibanaLegacy.config,
-          visualizeCapabilities: contextCore.application.capabilities.visualize,
+          visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations,
           usageCollection,
-          I18nContext: contextCore.i18n.Context,
+          I18nContext: coreStart.i18n.Context,
           setActiveUrl,
         };
         setServices(deps);
@@ -172,11 +178,11 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
+    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
-      embeddables,
+      embeddable,
       navigation,
       savedObjectsClient: core.savedObjects.client,
       share,
