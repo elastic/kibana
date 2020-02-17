@@ -13,24 +13,24 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPortal,
-  EuiSpacer,
+  // EuiSpacer,
   EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { SettingsSection } from './SettingsSection';
-import { ServiceForm } from '../../../../../shared/ServiceForm';
+import React from 'react';
+// import { SettingsSection } from './SettingsSection';
+// import { ServiceForm } from '../../../../../shared/ServiceForm';
 
 interface Props {
   onClose: () => void;
 }
 
 export const CustomActionsFlyout = ({ onClose }: Props) => {
-  const [serviceName, setServiceName] = useState('');
-  const [environment, setEnvironment] = useState('');
-  const [label, setLabel] = useState('');
-  const [url, setURL] = useState('');
+  // const [serviceName, setServiceName] = useState('');
+  // const [environment, setEnvironment] = useState('');
+  // const [label, setLabel] = useState('');
+  // const [url, setURL] = useState('');
   return (
     <EuiPortal>
       <EuiFlyout ownFocus onClose={onClose} size="s">
@@ -58,23 +58,23 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
               )}
             </p>
           </EuiText>
-          <EuiSpacer size="l" />
+          {/* <EuiSpacer size="l" />
           <ServiceForm
             isReadOnly={false}
             serviceName={serviceName}
             onServiceNameChange={setServiceName}
             environment={environment}
             onEnvironmentChange={setEnvironment}
-          />
+          /> */}
 
-          <EuiSpacer size="l" />
+          {/* <EuiSpacer size="l" />
 
           <SettingsSection
             label={label}
             onLabelChange={setLabel}
             url={url}
             onURLChange={setURL}
-          />
+          /> */}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

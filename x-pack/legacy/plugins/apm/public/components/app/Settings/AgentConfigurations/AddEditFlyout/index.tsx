@@ -26,7 +26,7 @@ import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { transactionSampleRateRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_sample_rate_rt';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
-import { ServiceForm } from '../../../../shared/ServiceForm';
+import { ServiceSection } from './ServiceSection';
 import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
@@ -181,7 +181,7 @@ export function AddEditFlyout({
                 }
               }}
             >
-              <ServiceForm
+              <ServiceSection
                 isReadOnly={Boolean(selectedConfig)}
                 //
                 // environment

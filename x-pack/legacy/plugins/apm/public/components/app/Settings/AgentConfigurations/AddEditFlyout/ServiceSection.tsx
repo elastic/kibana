@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import {
   omitAllOption,
   getOptionLabel
-} from '../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { SelectWithPlaceholder } from '../SelectWithPlaceholder';
+} from '../../../../../../common/agent_configuration_constants';
+import { useFetcher } from '../../../../../hooks/useFetcher';
+import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 
 const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
-  'xpack.apm.settings.agentConf.flyOut.serviceForm.selectPlaceholder',
+  'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
   { defaultMessage: 'Select' }
 )} -`;
 
@@ -27,7 +27,7 @@ interface Props {
   onEnvironmentChange: (env: string) => void;
 }
 
-export function ServiceForm({
+export function ServiceSection({
   isReadOnly,
   serviceName,
   onServiceNameChange,
@@ -60,7 +60,7 @@ export function ServiceForm({
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
-    'xpack.apm.settings.agentConf.flyOut.serviceForm.alreadyConfiguredOption',
+    'xpack.apm.settings.agentConf.flyOut.serviceSection.alreadyConfiguredOption',
     { defaultMessage: 'already configured' }
   );
 
@@ -83,7 +83,7 @@ export function ServiceForm({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceForm.title',
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.title',
             { defaultMessage: 'Service' }
           )}
         </h3>
@@ -93,13 +93,13 @@ export function ServiceForm({
 
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceNameSelectLabel',
+          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectLabel',
           { defaultMessage: 'Name' }
         )}
         helpText={
           !isReadOnly &&
           i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceNameSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectHelpText',
             { defaultMessage: 'Choose the service you want to configure.' }
           )
         }
@@ -124,13 +124,13 @@ export function ServiceForm({
 
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceEnvironmentSelectLabel',
+          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectLabel',
           { defaultMessage: 'Environment' }
         )}
         helpText={
           !isReadOnly &&
           i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceEnvironmentSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectHelpText',
             {
               defaultMessage:
                 'Only a single environment per configuration is supported.'
