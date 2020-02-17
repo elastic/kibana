@@ -87,3 +87,13 @@ export type UnionToIntersection<U> = (U extends any
 : never) extends (k: infer I) => void
   ? I
   : never;
+
+/**
+ * Returns public keys of an object.
+ */
+export type PublicKeys<T> = keyof T;
+
+/**
+ * Returns an object with public keys only.
+ */
+export type PublicContract<T> = Pick<T, PublicKeys<T>>;
