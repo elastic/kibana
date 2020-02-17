@@ -21,11 +21,7 @@ import React, { CSSProperties, useCallback, useEffect, useRef, useState } from '
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-
-// Node v5 querystring for browser.
-// @ts-ignore
-import * as qs from 'querystring-browser';
-
+import { parse } from 'query-string';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
@@ -50,6 +46,10 @@ import { TextObject } from '../../../../../../common/text_object';
 
 export interface EditorProps {
   textObject: TextObject;
+}
+
+interface QueryParams {
+  load_from: string;
 }
 
 const abs: CSSProperties = {
@@ -99,7 +99,8 @@ function EditorUI({ textObject }: EditorProps) {
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
-      return qs.parse(queryString || '');
+
+      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {
@@ -139,6 +140,7 @@ function EditorUI({ textObject }: EditorProps) {
     window.addEventListener('hashchange', onHashChange);
 
     const initialQueryParams = readQueryParams();
+
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
