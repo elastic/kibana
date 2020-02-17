@@ -9,7 +9,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
+
+import { timefilter } from 'ui/timefilter';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -34,6 +36,11 @@ const PageWrapper: FC<PageProps> = ({ config }) => {
     checkGetJobsPrivilege,
     getMlNodeCount,
   });
+
+  useEffect(() => {
+    timefilter.disableTimeRangeSelector();
+    timefilter.disableAutoRefreshSelector();
+  }, []);
 
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');
