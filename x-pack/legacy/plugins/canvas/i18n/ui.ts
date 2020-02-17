@@ -644,7 +644,7 @@ export const ViewStrings = {
       }),
     getOpenLinksInNewTabHelp: () =>
       i18n.translate('xpack.canvas.uis.views.openLinksInNewTabHelpLabel', {
-        defaultMessage: 'Set toggle value to true to open all links in a new tab',
+        defaultMessage: 'Set links to open in new tab',
         values: {
           markdown: MARKDOWN,
         },
