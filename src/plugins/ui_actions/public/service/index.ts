@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { UiActionsApiPure } from '../types';
-import { Action } from '../actions';
-
-export const getTriggerActions: UiActionsApiPure['getTriggerActions'] = ({
-  api,
-  actions,
-}) => id => {
-  const trigger = api.getTrigger!(id);
-  return trigger.actionIds.map(actionId => actions.get(actionId)).filter(Boolean) as Action[];
-};
+export * from './ui_actions_service';
