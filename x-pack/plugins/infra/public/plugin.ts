@@ -17,6 +17,7 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { createHttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
+import { HttpFetchOptions } from 'src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { InfraFrontendLibs } from './lib/lib';
 import introspectionQueryResultData from './graphql/introspection.json';
@@ -28,7 +29,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import { LogsRouter, MetricsRouter } from './routers';
-import { HttpFetchOptions } from 'src/core/public';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -140,40 +140,39 @@ export class Plugin
         // core.http.fetch isn't 100% compatible with the Fetch API and will
         // throw Errors on 401s. This top level try / catch handles those scenarios.
         try {
-          core.http.fetch(
-            path,
-            {
+          core.http
+            .fetch(path, {
               ...options,
               asResponse: true,
-            }
-          ).then((res) => {
-            if (!res.response) {
-              return reject();
-            }
-            // core.http.fetch will parse the Response and set a body before handing it back. As such .text() / .json()
-            // will have already been called on the Response instance. However, Apollo will also want to call
-            // .text() / .json() on the instance, as it expects the raw Response instance, rather than core's wrapper.
-            // .text() / .json() can only be called once, and an Error will be thrown if those methods are accessed again.
-            // This hacks around that by setting up a new .text() method that will restringify the JSON response we already have.
-            // This does result in an extra stringify / parse cycle, which isn't ideal, but as we only have a few endpoints left using
-            // GraphQL this shouldn't create excessive overhead.
-            // Ref: https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http/src/httpLink.ts#L134
-            // and
-            // https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http-common/src/index.ts#L125
-            return resolve({
-              ...res.response,
-              text: () => {
-                return new Promise(async (resolveText, rejectText) => {
-                  if (res.body) {
-                    return resolveText(JSON.stringify(res.body));
-                  } else {
-                    return rejectText();
-                  }
-                })
+            })
+            .then(res => {
+              if (!res.response) {
+                return reject();
               }
+              // core.http.fetch will parse the Response and set a body before handing it back. As such .text() / .json()
+              // will have already been called on the Response instance. However, Apollo will also want to call
+              // .text() / .json() on the instance, as it expects the raw Response instance, rather than core's wrapper.
+              // .text() / .json() can only be called once, and an Error will be thrown if those methods are accessed again.
+              // This hacks around that by setting up a new .text() method that will restringify the JSON response we already have.
+              // This does result in an extra stringify / parse cycle, which isn't ideal, but as we only have a few endpoints left using
+              // GraphQL this shouldn't create excessive overhead.
+              // Ref: https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http/src/httpLink.ts#L134
+              // and
+              // https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http-common/src/index.ts#L125
+              return resolve({
+                ...res.response,
+                text: () => {
+                  return new Promise(async (resolveText, rejectText) => {
+                    if (res.body) {
+                      return resolveText(JSON.stringify(res.body));
+                    } else {
+                      return rejectText();
+                    }
+                  });
+                },
+              });
             });
-          });
-        } catch(error) {
+        } catch (error) {
           reject(error);
         }
       });
