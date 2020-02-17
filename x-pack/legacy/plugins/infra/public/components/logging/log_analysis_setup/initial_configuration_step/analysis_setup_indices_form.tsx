@@ -58,7 +58,6 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
 
   return (
     <EuiDescribedFormGroup
-      idAria="indices"
       title={
         <h3>
           <FormattedMessage
@@ -75,13 +74,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       }
     >
       <LoadingOverlayWrapper isLoading={isValidating}>
-        <EuiFormRow
-          describedByIds={['indices']}
-          fullWidth
-          isInvalid={!valid}
-          label={indicesSelectionLabel}
-          labelType="legend"
-        >
+        <EuiFormRow fullWidth isInvalid={!valid} label={indicesSelectionLabel} labelType="legend">
           <>{choices}</>
         </EuiFormRow>
       </LoadingOverlayWrapper>

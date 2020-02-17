@@ -2653,15 +2653,17 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.3.0.tgz#e21c6246624f694e2ae1c7c1f1a11b612faf260a"
-  integrity sha512-Rkj1rTtDa6iZMUF7pxYRojku1sLXzTU0FK1D9i0XE3H//exy3VyTV6qUlbdkiKXjO7emrgQqfzKDeXT+ZYztgg==
+"@elastic/eui@19.0.0":
+  version "19.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-19.0.0.tgz#cf7d644945c95997d442585cf614e853f173746e"
+  integrity sha512-8/USz56MYhu6bV4oecJct7tsdi0ktErOIFLobNmQIKdxDOni/KpttX6IHqxM7OuIWi1AEMXoIozw68+oyL/uKQ==
   dependencies:
     "@types/chroma-js" "^1.4.3"
+    "@types/enzyme" "^3.1.13"
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
+    "@types/react-virtualized" "^9.18.7"
     chroma-js "^2.0.4"
     classnames "^2.2.5"
     highlight.js "^9.12.0"
@@ -4692,6 +4694,11 @@
     "@svgr/plugin-svgo" "^4.2.0"
     loader-utils "^1.2.3"
 
+"@testim/chrome-version@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.0.7.tgz#0cd915785ec4190f08a3a6acc9b61fc38fb5f1a9"
+  integrity sha512-8UT/J+xqCYfn3fKtOznAibsHpiuDshCb0fwgWxRazTT19Igp9ovoXMPhXyLD6m3CKQGTMHgqoxaFfMWaL40Rnw==
+
 "@testing-library/dom@^6.3.0":
   version "6.10.1"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-6.10.1.tgz#da5bf5065d3f9e484aef4cc495f4e1a5bea6df2e"
@@ -5064,10 +5071,10 @@
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"
   integrity sha512-n/g9pqJEpE4fyUE8VvHNGtl7E2Wv8TCroNwfgAeJKRV4ghDENahtrAo1KMsFNIejBD2gDAlEUa4CM4oEEd8p9Q==
 
-"@types/enzyme@^3.9.0":
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.9.3.tgz#d1029c0edd353d7b00f3924803eb88216460beed"
-  integrity sha512-jDKoZiiMA3lGO3skSO7dfqEHNvmiTLLV+PHD9EBQVlJANJvpY6qq1zzjRI24ZOtG7F+CS7BVWDXKewRmN8PjHQ==
+"@types/enzyme@^3.1.13", "@types/enzyme@^3.9.0":
+  version "3.10.5"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
+  integrity sha512-R+phe509UuUYy9Tk0YlSbipRpfVtIzb/9BHn5pTEtjJTF5LXvUjrIQcZvNyANNEyFrd2YGs196PniNT1fgvOQA==
   dependencies:
     "@types/cheerio" "*"
     "@types/react" "*"
@@ -7780,6 +7787,13 @@ axios@^0.19.0:
     follow-redirects "1.5.10"
     is-buffer "^2.0.2"
 
+axios@^0.19.2:
+  version "0.19.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
+  integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
+  dependencies:
+    follow-redirects "1.5.10"
+
 axobject-query@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/axobject-query/-/axobject-query-2.0.2.tgz#ea187abe5b9002b377f925d8bf7d1c561adf38f9"
@@ -9728,15 +9742,16 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@79.0.0:
-  version "79.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-79.0.0.tgz#1660ac29924dfcd847911025593d6b6746aeea35"
-  integrity sha512-DO29C7ntJfzu6q1vuoWwCON8E9x5xzopt7Q41A7Dr7hBKcdNpGw1l9DTt9b+l1qviOWiJLGsD+jHw21ptEHubA==
+chromedriver@^80.0.1:
+  version "80.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-80.0.1.tgz#35c1642e2d864b9e8262f291003e455b0e422917"
+  integrity sha512-VfRtZUpBUIjeypS+xM40+VD9g4Drv7L2VibG/4+0zX3mMx4KayN6gfKETycPfO6JwQXTLSxEr58fRcrsa8r5xQ==
   dependencies:
-    del "^4.1.1"
+    "@testim/chrome-version" "^1.0.7"
+    axios "^0.19.2"
+    del "^5.1.0"
     extract-zip "^1.6.7"
-    mkdirp "^0.5.1"
-    request "^2.88.0"
+    mkdirp "^1.0.3"
     tcp-port-used "^1.0.1"
 
 ci-info@^1.0.0:
@@ -21476,6 +21491,11 @@ mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdi
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   dependencies:
     minimist "0.0.8"
+
+mkdirp@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.3.tgz#4cf2e30ad45959dddea53ad97d518b6c8205e1ea"
+  integrity sha512-6uCP4Qc0sWsgMLy1EOqqS/3rjDHOEnsStVr/4vtAIK2Y5i2kA7lFFejYrpIyiN9w0pYf4ckeCYT9f1r1P9KX5g==
 
 mocha-junit-reporter@^1.23.1:
   version "1.23.1"
