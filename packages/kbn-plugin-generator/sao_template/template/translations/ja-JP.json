@@ -76,5 +76,13 @@
         }
       }
     },
-    "messages": {}
+    "messages": {
+      "<%= camelCase(name) %>.buttonText": "Translate me to Japanese",
+      "<%= camelCase(name) %>.congratulationsTitle": "",
+      "<%= camelCase(name) %>.content": "",
+      "<%= camelCase(name) %>.dataUpdated": "",
+      "<%= camelCase(name) %>.greetingText": "",
+      "<%= camelCase(name) %>.helloWorldText": "",
+      "<%= camelCase(name) %>.timestampText": ""
+    }
 }
