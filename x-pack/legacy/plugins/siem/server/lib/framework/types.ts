@@ -17,6 +17,7 @@ import {
   SourceConfiguration,
   TimerangeInput,
   Maybe,
+  HistogramType,
 } from '../../graphql/types';
 
 export * from '../../utils/typed_resolvers';
@@ -117,7 +118,8 @@ export interface RequestBasicOptions {
 }
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField?: Maybe<string>;
+  stackByField: Maybe<string>;
+  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

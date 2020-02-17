@@ -104,9 +104,7 @@ export const HomePage: React.FC = () => (
                   />
                   <Route
                     path={`/:pageName(${SiemPageName.hosts})`}
-                    render={({ location, match }) => (
-                      <HostsContainer location={location} url={match.url} />
-                    )}
+                    render={({ match }) => <HostsContainer url={match.url} />}
                   />
                   <Route
                     path={`/:pageName(${SiemPageName.network})`}
