@@ -17,10 +17,10 @@
  * under the License.
  */
 import { reducer, initialValue } from './editor';
-import { TextObject } from '../../../common/text_object/text_object';
+import { TextObjectWithId } from '../../../common/text_object/text_object';
 
 describe('Editor Store', () => {
-  const testTextObjects: TextObject[] = [
+  const testTextObjects: TextObjectWithId[] = [
     { id: '1', text: 'test1', createdAt: 1, updatedAt: 2 },
     { id: '2', text: 'test2', createdAt: 1, updatedAt: 2 },
     { id: '3', text: 'test3', createdAt: 1, updatedAt: 2 },
