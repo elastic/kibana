@@ -21,17 +21,17 @@ import { TextObjectWithId } from '../../../common/text_object/text_object';
 
 describe('Editor Store', () => {
   const testTextObjects: TextObjectWithId[] = [
-    { id: '1', text: 'test1', createdAt: 1, updatedAt: 2 },
+    { id: '1', text: 'test1', createdAt: 1, updatedAt: 2, isScratchPad: true },
     { id: '2', text: 'test2', createdAt: 1, updatedAt: 2 },
     { id: '3', text: 'test3', createdAt: 1, updatedAt: 2 },
     { id: '4', text: 'test4', createdAt: 1, updatedAt: 2 },
   ];
 
   const hashedTestTextObjects = {
-    '1': { id: '1', text: 'test1', createdAt: 1, updatedAt: 2 },
-    '2': { id: '2', text: 'test2', createdAt: 1, updatedAt: 2 },
-    '3': { id: '3', text: 'test3', createdAt: 1, updatedAt: 2 },
-    '4': { id: '4', text: 'test4', createdAt: 1, updatedAt: 2 },
+    '1': testTextObjects[0],
+    '2': testTextObjects[1],
+    '3': testTextObjects[2],
+    '4': testTextObjects[3],
   };
 
   describe('Text Objects', () => {
@@ -65,6 +65,26 @@ describe('Editor Store', () => {
           payload: { id: '1', whoIs: 'this' } as any,
         })
       ).toThrow('Cannot assign');
+    });
+
+    it('deletes and defaults back to existing file', () => {
+      const s1 = reducer(initialValue, {
+        type: 'textObject.upsertMany',
+        payload: testTextObjects,
+      });
+
+      const s2 = reducer(s1, {
+        type: 'textObject.setCurrent',
+        payload: '3',
+      });
+
+      const s3 = reducer(s2, {
+        type: 'textObject.delete',
+        payload: '3',
+      });
+
+      expect(s3.textObjects['3']).toBeUndefined();
+      expect(s3.currentTextObjectId).toBe('1');
     });
   });
 });

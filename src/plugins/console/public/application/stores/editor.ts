@@ -97,6 +97,12 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
     }
 
     if (action.type === 'textObject.delete') {
+      if (state.currentTextObjectId === action.payload) {
+        const scratchPad = Object.values(state.textObjects).find(
+          textObject => textObject.isScratchPad
+        )!;
+        draft.currentTextObjectId = scratchPad.id;
+      }
       delete draft.textObjects[action.payload];
     }
 

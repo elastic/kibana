@@ -19,107 +19,92 @@
 
 import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTreeView,
-  EuiText,
-  EuiButtonIcon,
-  EuiIcon,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon } from '@elastic/eui';
 
 import { useEditorReadContext, useEditorActionContext } from '../../contexts';
-import { useTextObjectsCRUD } from '../../hooks';
-import { FileForm } from '../../components';
+import { useTextObjectsCRUD } from '../../hooks/text_objects';
+import { FileActionsBar, DeleteFileModal } from '../../components';
 
 export const FileTree: FunctionComponent = () => {
-  const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
-  const [isCreatingOrUpdatingFile, setIsCreatingOrUpdatingFile] = useState(false);
+  const [isFileActionInProgress, setIsFileActionInProgress] = useState(false);
+  const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
+  const textObjectsCRUD = useTextObjectsCRUD();
   const { textObjects, currentTextObjectId } = useEditorReadContext();
   const dispatch = useEditorActionContext();
-  const { create: createTextObject } = useTextObjectsCRUD();
+
+  const currentTextObject = textObjects[currentTextObjectId];
 
   return (
-    <EuiFlexGroup
-      className="conApp__fileTree"
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          gutterSize="none"
-          className="conApp__fileTree__actionBar"
-        >
-          <EuiFlexItem>
-            <EuiText size="s">Actions</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              isOpen={showCreateFilePopover}
-              closePopover={() => setShowCreateFilePopover(false)}
-              button={
-                <EuiButtonIcon
-                  onClick={() => setShowCreateFilePopover(true)}
-                  color="ghost"
-                  aria-label="create a new file"
-                  iconType="plusInCircle"
-                />
-              }
-            >
-              <FileForm
-                isSubmitting={isCreatingOrUpdatingFile}
-                onSubmit={(fileName: string) => {
-                  setIsCreatingOrUpdatingFile(true);
-                  createTextObject({
-                    textObject: {
-                      text: '',
-                      updatedAt: Date.now(),
-                      createdAt: Date.now(),
-                      name: fileName,
-                    },
-                  })
-                    .then(() => {
-                      setShowCreateFilePopover(false);
-                    })
-                    .finally(() => setIsCreatingOrUpdatingFile(false));
-                }}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTreeView
-          aria-label="File tree view"
-          display="compressed"
-          items={Object.values(textObjects)
-            .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
-            .map(({ isScratchPad, name, id }, idx) => {
-              return {
-                id,
-                className: classNames({
-                  conApp__fileTree__scratchPadEntry: isScratchPad,
-                  conApp__fileTree__entry: true,
-                  'conApp__fileTree__entry--selected': id === currentTextObjectId,
-                }),
-                label: isScratchPad ? 'Scratch Pad' : name ?? `Untitled ${idx + 1}`,
-                icon: isScratchPad ? <EuiIcon size="s" type="pencil" /> : undefined,
-                useEmptyIcon: !isScratchPad,
-                callback: () => {
-                  dispatch({
-                    type: 'textObject.setCurrent',
-                    payload: id,
-                  });
-                  return '';
-                },
-              };
-            })}
+    <>
+      <EuiFlexGroup
+        className="conApp__fileTree"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <FileActionsBar
+            canDelete={!currentTextObject.isScratchPad}
+            currentTextObject={currentTextObject}
+            onEdit={() => {}}
+            onDelete={() => setShowDeleteFileModal(true)}
+            onCreate={fileName => {
+              setIsFileActionInProgress(true);
+              textObjectsCRUD
+                .create({
+                  textObject: {
+                    text: '',
+                    updatedAt: Date.now(),
+                    createdAt: Date.now(),
+                    name: fileName,
+                  },
+                })
+                .finally(() => setIsFileActionInProgress(false));
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTreeView
+            aria-label="File tree view"
+            display="compressed"
+            items={Object.values(textObjects)
+              .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
+              .map(({ isScratchPad, name, id }, idx) => {
+                return {
+                  id,
+                  className: classNames({
+                    conApp__fileTree__scratchPadEntry: isScratchPad,
+                    conApp__fileTree__entry: true,
+                    'conApp__fileTree__entry--selected': id === currentTextObjectId,
+                  }),
+                  label: isScratchPad ? 'Scratch Pad' : name ?? `Untitled`,
+                  icon: isScratchPad ? <EuiIcon size="s" type="pencil" /> : undefined,
+                  useEmptyIcon: !isScratchPad,
+                  callback: () => {
+                    dispatch({
+                      type: 'textObject.setCurrent',
+                      payload: id,
+                    });
+                    return '';
+                  },
+                };
+              })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {showDeleteFileModal && (
+        <DeleteFileModal
+          fileName={currentTextObject.name || 'Untitled'}
+          onClose={() => setShowDeleteFileModal(false)}
+          onDeleteConfirmation={() => {
+            setIsFileActionInProgress(true);
+            setShowDeleteFileModal(false);
+            textObjectsCRUD.delete(currentTextObject).finally(() => {
+              setIsFileActionInProgress(false);
+            });
+          }}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </>
   );
 };

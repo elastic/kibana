@@ -25,6 +25,7 @@ import {
   textObjectProps,
   throwIfUnknown,
   textObjectSchema,
+  TextObjectWithId,
 } from '../../../../common/text_object';
 import { idObjectProps } from '../../../../common/id_object';
 
@@ -92,7 +93,10 @@ export const useTextObjectsCRUD = () => {
     ),
 
     delete: useCallback(
-      async (id: string) => {
+      async ({ isScratchPad, id }: TextObjectWithId) => {
+        if (isScratchPad) {
+          throw new Error('Can not delete scratch pad!');
+        }
         await objectStorageClient.text.delete(id);
         dispatch({
           payload: id,
