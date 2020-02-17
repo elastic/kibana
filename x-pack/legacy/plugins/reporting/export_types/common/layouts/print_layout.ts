@@ -75,7 +75,7 @@ export class PrintLayout extends Layout {
       args: [this.selectors.screenshot, elementSize.height, elementSize.width],
     };
 
-    await browser.evaluate(evalOptions);
+    await browser.evaluate(evalOptions, { context: 'PositionElements' }, logger);
   }
 
   public getPdfImageSize() {
