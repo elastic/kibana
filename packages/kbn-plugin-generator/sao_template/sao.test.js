@@ -23,6 +23,7 @@ const template = {
   fromPath: __dirname,
   configOptions: {
     name: 'Some fancy plugin',
+    targetPath: '',
   },
 };
 
