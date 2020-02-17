@@ -15,7 +15,6 @@ export const ScaledFloatTypeRequiredParameters = () => {
     <FormRow
       title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
       description={PARAMETERS_DEFINITION.scaling_factor.description}
-      idAria="mappingsEditorScalingFactorParameter"
     >
       <UseField path="scaling_factor" config={getFieldConfig('scaling_factor')} component={Field} />
     </FormRow>
