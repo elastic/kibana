@@ -333,6 +333,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
             "graphic": "#e7664c",
           },
         },
+        "euiPaletteColorBlindKeys": "'euiColorVis0', 'euiColorVis1', 'euiColorVis2', 'euiColorVis3', 'euiColorVis4', 'euiColorVis5', 'euiColorVis6', 'euiColorVis7', 'euiColorVis8', 'euiColorVis9'",
         "euiPanelPaddingModifiers": Object {
           "paddingLarge": "24px",
           "paddingMedium": "16px",
@@ -437,6 +438,54 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiTextScale": "2.25 1.75 1.25 1.125 1 0.875 0.75",
         "euiTitleColor": "#dfe5ef",
         "euiToastWidth": "320px",
+        "euiTokenGrayColor": "#535966",
+        "euiTokenTypeKeys": "'euiColorVis0', 'euiColorVis1', 'euiColorVis2', 'euiColorVis3', 'euiColorVis4', 'euiColorVis5', 'euiColorVis6', 'euiColorVis7', 'euiColorVis8', 'euiColorVis9', 'gray'",
+        "euiTokenTypes": Object {
+          "euiColorVis0": Object {
+            "behindText": "#6dccb1",
+            "graphic": "#54b399",
+          },
+          "euiColorVis1": Object {
+            "behindText": "#79aad9",
+            "graphic": "#6092c0",
+          },
+          "euiColorVis2": Object {
+            "behindText": "#ee789d",
+            "graphic": "#d36086",
+          },
+          "euiColorVis3": Object {
+            "behindText": "#a987d1",
+            "graphic": "#9170b8",
+          },
+          "euiColorVis4": Object {
+            "behindText": "#e4a6c7",
+            "graphic": "#ca8eae",
+          },
+          "euiColorVis5": Object {
+            "behindText": "#f1d86f",
+            "graphic": "#d6bf57",
+          },
+          "euiColorVis6": Object {
+            "behindText": "#d2c0a0",
+            "graphic": "#b9a888",
+          },
+          "euiColorVis7": Object {
+            "behindText": "#f5a35c",
+            "graphic": "#da8b45",
+          },
+          "euiColorVis8": Object {
+            "behindText": "#c47c6c",
+            "graphic": "#aa6556",
+          },
+          "euiColorVis9": Object {
+            "behindText": "#ff7e62",
+            "graphic": "#e7664c",
+          },
+          "gray": Object {
+            "behindText": "#535966",
+            "graphic": "#535966",
+          },
+        },
         "euiTooltipAnimations": Object {
           "bottom": "euiToolTipLeft",
           "left": "euiToolTipBottom",
@@ -547,20 +596,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           "primary": "#1ba9f5",
           "success": "#7de2d1",
           "warning": "#ffce7a",
-        },
-        "tokenTypes": Object {
-          "tokenTint01": "#1ba9f5",
-          "tokenTint02": "#f990c0",
-          "tokenTint03": "#9170b8",
-          "tokenTint04": "#da8b45",
-          "tokenTint05": "#6092c0",
-          "tokenTint06": "#e6c220",
-          "tokenTint07": "#54b399",
-          "tokenTint08": "#920000",
-          "tokenTint09": "#ff00ff",
-          "tokenTint10": "#26ab00",
-          "tokenTint11": "#4c1604",
-          "tokenTint12": "#666666",
         },
       },
     }

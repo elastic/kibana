@@ -121,14 +121,9 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             }}
           />
         }
-        idAria="stepSettingsIndexSettingsDescription"
         fullWidth
       >
-        <EuiFormRow
-          hasEmptyLabelSpace
-          fullWidth
-          describedByIds={['stepSettingsIndexSettingsDescription']}
-        >
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
               label={
@@ -162,7 +157,6 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                     />
                   }
                   fullWidth
-                  describedByIds={['stepSettingsIndexSettingsDescription']}
                   isInvalid={Boolean(errors.indexSettings)}
                   error={errors.indexSettings}
                   helpText={
@@ -235,14 +229,9 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             }}
           />
         }
-        idAria="stepSettingsIgnoreIndexSettingsDescription"
         fullWidth
       >
-        <EuiFormRow
-          hasEmptyLabelSpace
-          fullWidth
-          describedByIds={['stepSettingsIgnoreIndexSettingsDescription']}
-        >
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
               label={
