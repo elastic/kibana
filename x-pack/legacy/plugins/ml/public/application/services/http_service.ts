@@ -18,7 +18,6 @@ export interface HttpOptions {
 
 function getResultHeaders(headers: HeadersInit): HeadersInit {
   return {
-    asSystemRequest: false,
     'Content-Type': 'application/json',
     'kbn-version': getXSRF(),
     ...headers,
