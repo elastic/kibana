@@ -13,7 +13,6 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "legacy/plugins/file_upload",
-    "xpack.fleet": "legacy/plugins/fleet",
     "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
     "xpack.grokDebugger": "legacy/plugins/grokdebugger",
     "xpack.idxMgmt": "legacy/plugins/index_management",
