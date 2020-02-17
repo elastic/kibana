@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiInMemoryTableProps,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -357,7 +358,7 @@ export class APIKeysGridPage extends Component<Props, State> {
   private getColumnConfig = () => {
     const { isAdmin } = this.state;
 
-    let config = [
+    let config: Array<EuiBasicTableColumn<any>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
@@ -393,7 +394,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Created',
         }),
         sortable: true,
-        // @ts-ignore
         render: (creationDateMs: number) => moment(creationDateMs).format(DATE_FORMAT),
       },
       {
@@ -402,7 +402,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Expires',
         }),
         sortable: true,
-        // @ts-ignore
         render: (expirationDateMs: number) => {
           if (expirationDateMs === undefined) {
             return (
