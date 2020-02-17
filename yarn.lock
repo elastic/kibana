@@ -5022,18 +5022,12 @@
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.0.tgz#4b7daf2c51696cfc70b942c11690528229d1a1ce"
   integrity sha512-EIjmpvnHj+T4nMcKwHwxZKUfDmphIKJc2qnEMhSoOvr1lYEQpuRKRz8orWr//krYIIArS/KGGLfL2YGVUYXmIA==
 
-"@types/cp-file@*":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@types/cp-file/-/cp-file-4.2.0.tgz#2b12186b50dad407b11021284627bdf4adb87a87"
-  integrity sha512-nkd9c0L2aWfsDFrkpxfGJ5bCKeiAv6lccbH9vxKeWYw9YuyqskjtRTrBEBAiea9R08OSiboQ4ssmwAVJMHmHHA==
-
-"@types/cpy@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@types/cpy/-/cpy-5.1.0.tgz#ced20cbae8528031ae5478f1d0fe4bca2518eda7"
-  integrity sha512-NU7IrYOZx+K2YCo7muReOj6FIxEWdWXCN7hgRhQ+h2lgpeLy27si9ZzdDwWCW+Q1RP9B1lDTJ368FPFSOp1ZqA==
+"@types/cpy@^7.1.3":
+  version "7.1.3"
+  resolved "https://registry.yarnpkg.com/@types/cpy/-/cpy-7.1.3.tgz#7a70133886a0feb94f0e9b018122a84b831157ba"
+  integrity sha512-G0KTGSAi3kwIx63zyI/Lekpftiy9jQ5JvQP8YTFzg3H9TMIz4PMv77kxmomu6m9ugc8Zrfn4THbmmNHL9psN0Q==
   dependencies:
-    "@types/cp-file" "*"
-    "@types/glob" "*"
+    cpy "*"
 
 "@types/cytoscape@^3.8.2":
   version "3.8.2"
@@ -11029,7 +11023,7 @@ cp-file@^7.0.0:
     nested-error-stacks "^2.0.0"
     p-event "^4.1.0"
 
-cpy@^8.0.0:
+cpy@*, cpy@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/cpy/-/cpy-8.0.0.tgz#8195db0db19a9ea6aa4f229784cbf3e3f53c3158"
   integrity sha512-iTjLUqtVr45e17GFAyxA0lqFinbGMblMCTtAqrPzT/IETNtDuyyhDDk8weEZ08MiCc6EcuyNq2KtGH5J2BIAoQ==

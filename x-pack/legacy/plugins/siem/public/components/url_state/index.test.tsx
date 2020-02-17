@@ -197,7 +197,9 @@ describe('UrlStateContainer', () => {
           detailName,
         }).relativeTimeSearch.undefinedQuery;
         const wrapper = mount(
-          <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+          <MockedProvider>
+            <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+          </MockedProvider>
         );
 
         wrapper.setProps({
