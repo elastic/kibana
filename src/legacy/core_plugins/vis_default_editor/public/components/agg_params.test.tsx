@@ -70,6 +70,23 @@ jest.mock('./agg_select', () => ({
 jest.mock('./agg_param', () => ({
   DefaultEditorAggParam: () => null,
 }));
+jest.mock('../../../../../plugins/kibana_react/public', () => ({
+  useKibana: () => ({
+    services: {
+      dataShim: {
+        search: {
+          aggs: {
+            types: {},
+            aggTypeFieldFilters: {
+              filter: () => [],
+            },
+          },
+        },
+      },
+    },
+  }),
+  withKibana: (x: any) => x,
+}));
 
 describe('DefaultEditorAggParams component', () => {
   let setAggParamValue: jest.Mock;
