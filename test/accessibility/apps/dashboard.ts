@@ -60,7 +60,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Open add panel', async () => {
-      await dashboardAddPanel.ensureAddPanelIsShowing();
+      await dashboardAddPanel.clickOpenAddPanel();
       await a11y.testAppSnapshot();
     });
 
@@ -70,21 +70,88 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('add a saved search', async () => {
-      await testSubjects.click('savedObjectTitle[Flights]-Flight-Log');
+      await dashboardAddPanel.addSavedSearch('[Flights] Flight Log');
       await a11y.testAppSnapshot();
     });
 
-    // it('save the dashboard', async () => {
-    //   await PageObjects.dashboard.saveDashboard(dashboardName);
-    //   await a11y.testAppSnapshot();
-    // });
+    it('save the dashboard', async () => {
+      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await a11y.testAppSnapshot();
+    });
 
-    it.skip('Dashboard listing table', async () => {
+    it('Open Edit mode', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await a11y.testAppSnapshot();
+    });
+
+    it('open options menu', async () => {
+      await PageObjects.dashboard.openOptions();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Should be able to hide panel titles', async () => {
+      await testSubjects.click('dashboardPanelTitlesCheckbox');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Should be able display panels without margins', async () => {
+      await testSubjects.click('dashboardMarginsCheckbox');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Open add panel', async () => {
+      await dashboardAddPanel.clickOpenAddPanel();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Add one more saved object to cancel it', async () => {
+      await testSubjects.click('savedObjectTitle[Flights]-Average-Ticket-Price');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Close add panel', async () => {
+      await dashboardAddPanel.closeAddPanel();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Exit out of edit mode', async () => {
+      await PageObjects.dashboard.clickCancelOutOfEditMode(dashboardName);
+      await a11y.testAppSnapshot();
+    });
+
+    it('Discard changes', async () => {
+      await PageObjects.common.clickConfirmOnModal();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Test full screen', async () => {
+      await PageObjects.dashboard.clickFullScreenMode();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Exit out of full screen mode', async () => {
+      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
+      await logoButton.moveMouseTo();
+      await PageObjects.dashboard.clickExitFullScreenTextButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Make a clone of the dashboard', async () => {
+      await PageObjects.dashboard.clickClone();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Confirm clone with *copy* appended', async () => {
+      await PageObjects.dashboard.confirmClone();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dashboard listing table', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await a11y.testAppSnapshot();
     });
 
-    it.skip('Open flight dashboard', async () => {
+    it('Open flight dashboard', async () => {
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
       await a11y.testAppSnapshot();
     });
