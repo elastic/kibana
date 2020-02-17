@@ -18,9 +18,9 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { forOwn, isFunction, memoize } from 'lodash';
+import { forOwn, isFunction, memoize, identity } from 'lodash';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../common';
+import { ES_FIELD_TYPES, IFieldFormat, KBN_FIELD_TYPES } from '../../common';
 
 import {
   FieldFormatsGetConfigFn,
@@ -32,12 +32,17 @@ import {
 } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
+import { SerializedFieldFormat } from '../../../expressions/common/types';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, IFieldFormatType> = new Map();
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
+  // overriden on the public contract
+  public deserialize: (mapping: SerializedFieldFormat) => IFieldFormat = () => {
+    return new (FieldFormat.from(identity))();
+  };
 
   init(
     getConfig: FieldFormatsGetConfigFn,

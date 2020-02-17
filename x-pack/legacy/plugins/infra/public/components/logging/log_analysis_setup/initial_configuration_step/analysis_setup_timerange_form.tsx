@@ -59,7 +59,6 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   }, [endTime]);
   return (
     <EuiDescribedFormGroup
-      idAria="timeRange"
       title={
         <h3>
           <FormattedMessage
@@ -75,13 +74,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow
-        describedByIds={['timeRange']}
-        error={false}
-        fullWidth
-        isInvalid={false}
-        label={startTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={startTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
@@ -98,13 +91,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow
-        describedByIds={['timeRange']}
-        error={false}
-        fullWidth
-        isInvalid={false}
-        label={endTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={endTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
