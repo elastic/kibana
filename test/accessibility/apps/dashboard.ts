@@ -27,9 +27,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const listingTable = getService('listingTable');
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
+    const deletedDashboardName = 'Dashboard Listing A11y Copy';
     before(async () => {
       // await esArchiver.loadIfNeeded('logstash_functional');
       // await kibanaServer.uiSettings.update({
@@ -148,6 +150,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Dashboard listing table', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Delete the original', async () => {
+      await listingTable.searchForItemWithName(dashboardName);
+      await listingTable.checkListingSelectAllCheckbox();
+      await listingTable.clickDeleteSelected();
+      await a11y.testAppSnapshot();
+      await PageObjects.common.clickConfirmOnModal();
       await a11y.testAppSnapshot();
     });
 
