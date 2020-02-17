@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { XJsonMode } from './x_json_mode';

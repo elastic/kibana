@@ -17,32 +17,24 @@
  * under the License.
  */
 
-const ace = require('brace');
-import 'brace/mode/json';
-import { addXJsonToRules } from '../../../../../../es_ui_shared/console_lang';
+import ace from 'brace';
+
+import { XJsonHighlightRules } from '../index';
 
 const oop = ace.acequire('ace/lib/oop');
-const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;
+const { Mode: JSONMode } = ace.acequire('ace/mode/json');
+const { Tokenizer: AceTokenizer } = ace.acequire('ace/tokenizer');
+const { MatchingBraceOutdent } = ace.acequire('ace/mode/matching_brace_outdent');
+const { CstyleBehaviour } = ace.acequire('ace/mode/behaviour/cstyle');
+const { FoldMode: CStyleFoldMode } = ace.acequire('ace/mode/folding/cstyle');
 
-export function OutputJsonHighlightRules() {
-  this.$rules = {};
-
-  addXJsonToRules(this, 'start');
-
-  this.$rules.start.unshift(
-    {
-      token: 'warning',
-      regex: '#!.*$',
-    },
-    {
-      token: 'comment',
-      regex: '#.*$',
-    }
-  );
-
-  if (this.constructor === OutputJsonHighlightRules) {
-    this.normalizeRules();
-  }
+export function XJsonMode(this: any) {
+  const ruleset: any = new XJsonHighlightRules();
+  ruleset.normalizeRules();
+  this.$tokenizer = new AceTokenizer(ruleset.getRules());
+  this.$outdent = new MatchingBraceOutdent();
+  this.$behaviour = new CstyleBehaviour();
+  this.foldingRules = new CStyleFoldMode();
 }
 
-oop.inherits(OutputJsonHighlightRules, JsonHighlightRules);
+oop.inherits(XJsonMode, JSONMode);
