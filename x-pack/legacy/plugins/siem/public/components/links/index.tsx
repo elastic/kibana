@@ -5,7 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -15,6 +15,9 @@ import {
   getCreateCaseUrl,
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
+import { useUiSetting$ } from '../../lib/kibana';
+import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
+import * as i18n from '../page/network/ip_overview/translations';
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
@@ -117,33 +120,66 @@ export const CertificateFingerprintLink = React.memo<{
 
 CertificateFingerprintLink.displayName = 'CertificateFingerprintLink';
 
-export const ReputationLink = React.memo<{ children?: React.ReactNode; domain: string }>(
-  ({ children, domain }) => (
-    <EuiLink
-      href={`https://www.talosintelligence.com/reputation_center/lookup?search=${encodeURIComponent(
-        domain
-      )}`}
-      target="_blank"
-    >
-      {children ? children : domain}
-    </EuiLink>
-  )
-);
+enum DefaultReputationLink {
+  'virustotal.com' = 'virustotal.com',
+  'talosintelligence.com' = 'talosintelligence.com',
+}
+
+interface ReputationLinkSetting {
+  name: string;
+  url_template: string;
+}
+
+function isDefaultReputationLink(name: string): name is DefaultReputationLink {
+  return (
+    name === DefaultReputationLink['virustotal.com'] ||
+    name === DefaultReputationLink['talosintelligence.com']
+  );
+}
+
+const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: string }> = ({
+  domain,
+}) => {
+  const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
+    IP_REPUTATION_LINKS_SETTING
+  );
+  const [ipReputationLinks, setIpReputationLinks] = useState<ReputationLinkSetting[]>(
+    ipReputationLinksSetting
+  );
+  const defaultNameMapping: Record<DefaultReputationLink, string> = useMemo(
+    () => ({
+      [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
+      [DefaultReputationLink['talosintelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
+    }),
+    []
+  );
+
+  useEffect(() => {
+    setIpReputationLinks(
+      ipReputationLinks?.map(({ name, url_template }: { name: string; url_template: string }) => {
+        return {
+          name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
+          url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
+        };
+      })
+    );
+  }, [domain]);
+
+  return (
+    <>
+      {ipReputationLinks?.map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+        <EuiLink href={urlTemplate} target="_blank" key={urlTemplate}>
+          {name ?? domain}
+          {id !== Math.max(0, ipReputationLinks?.length - 1) && ', '}
+        </EuiLink>
+      ))}
+    </>
+  );
+};
+
+export const ReputationLink = React.memo(ReputationLinkComponent);
 
 ReputationLink.displayName = 'ReputationLink';
-
-export const VirusTotalLink = React.memo<{ children?: React.ReactNode; link: string }>(
-  ({ children, link }) => (
-    <EuiLink
-      href={`https://www.virustotal.com/#/search/${encodeURIComponent(link)}`}
-      target="_blank"
-    >
-      {children ? children : link}
-    </EuiLink>
-  )
-);
-
-VirusTotalLink.displayName = 'VirusTotalLink';
 
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (

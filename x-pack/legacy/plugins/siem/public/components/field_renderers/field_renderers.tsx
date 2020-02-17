@@ -15,7 +15,7 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
+import { HostDetailsLink, ReputationLink, WhoIsLink } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
 
@@ -132,11 +132,7 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.
 export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 
 export const reputationRenderer = (ip: string): React.ReactElement => (
-  <>
-    <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
-    {', '}
-    <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
-  </>
+  <ReputationLink domain={ip} />
 );
 
 interface DefaultFieldRendererProps {
