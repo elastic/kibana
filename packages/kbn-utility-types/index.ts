@@ -69,3 +69,8 @@ export type RecursiveReadonly<T> = T extends (...args: any) => any
   : T extends object
   ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
   : T;
+
+/**
+ * Returns types or array or object values.
+ */
+export type Values<T> = T extends any[] ? T[number] : T extends object ? T[keyof T] : never;
