@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IncompatibleActionError } from './incompatible_action_error';
+export { Trigger } from './trigger';

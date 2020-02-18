@@ -142,6 +142,25 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
+
+      it('endpoints api should return page based on host.os.variant filter.', async () => {
+        const variantValue = 'Windows Pro';
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `host.os.variant.keyword:${variantValue}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(2);
+        const resultOsVariantValue: Set<string> = new Set(
+          body.endpoints.map((metadata: Record<string, any>) => metadata.host.os.variant)
+        );
+        expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
+        expect(body.endpoints.length).to.eql(2);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
     });
   });
 }
