@@ -88,7 +88,7 @@ export const testRunner = obj => {
   ['mocha', 'jest', 'functional']
     .forEach(x => {
       if (coveragePath.includes(x)) {
-        coverageType = x.toLowerCase();
+        coverageType = x.toUpperCase();
         return;
       }
     });
