@@ -10,5 +10,6 @@
   ],
   "optionalPlugins": [
     "usageCollection"
-  ]
+  ],
+  "configPath": ["xpack", "index_management"]
 }

@@ -7,8 +7,13 @@
 import { PluginInitializerContext } from 'src/core/server';
 
 import { IndexMgmtServerPlugin } from './plugin';
+import { configSchema } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+
+export const config = {
+  schema: configSchema,
+};
 
 /** @public */
 export { Dependencies } from './types';
