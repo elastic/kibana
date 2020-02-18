@@ -1,5 +1,6 @@
 import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
+import { left, right } from './utils/either';
 
 export default function CoverageItem({item, currentJobNumber, testRunnerTypes}) {
 
@@ -34,9 +35,14 @@ function anchor(item) {
 function title(item) {
   const dropPrefix = () => ['gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/', ''];
   const dropPostfix = () => [/(\d.*)\/\d.*$/, '$1'];
-  return item
-    .replace(...dropPrefix())
-    .replace(...dropPostfix());
+  const maybeReplace = item.includes('gs://kibana-ci-artifacts') ? right(item) : left(item);
+  return maybeReplace
+    .fold(
+      () => item,
+      () => item
+        .replace(...dropPrefix())
+        .replace(...dropPostfix())
+    );
 }
 
 function href(x) {

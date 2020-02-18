@@ -13310,6 +13310,10 @@ video {
           justify-content: center;
 }
 
+.App-current {
+  border: 4mm ridge rgba(9, 77, 255, 0.6)
+}
+
 @media (min-width: 640px) {
   .sm\:sr-only {
     position: absolute;

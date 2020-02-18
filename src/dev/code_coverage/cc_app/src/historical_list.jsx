@@ -33,19 +33,20 @@ const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
 
 export default function HistoricalList({testRunnerTypes, historicalItems, currentJobNumber }) {
   const renderWithRunners = renderItem(testRunnerTypes);
+  const renderRunnersWithItem = (item, index) =>
+    renderWithRunners(currentJobNumber)(item, index);
+
+  // TODO-TRE: Fixup the hardcoded gs url below!!
   return (
     <div className="font-bold text-xl mb-2 flex-horizontal-center">
-      {/*Current Job -*/}
-      {/*<a*/}
-      {/*  className="App-link"*/}
-      {/*  href={href(currentJobNumber)}*/}
-      {/*  target="_blank"*/}
-      {/*  rel="noopener noreferrer"*/}
-      {/*>*/}
-      {/*  {currentJobNumber}*/}
-      {/*</a>*/}
       <ul>
-        {historicalItems.reverse().map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
+        <li className="App-current">
+          {['gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/330/2020-02-18T20-55-49Z/']
+              .map(renderRunnersWithItem)}
+        </li>
+        {historicalItems
+          .reverse()
+          .map(renderRunnersWithItem)}
       </ul>
     </div>
      );

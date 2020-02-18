@@ -7,7 +7,7 @@ export const Right = x =>
   });
 
 Right.of = function of(x) {
-  return new Right(x);
+  return Right(x);
 };
 
 export function right(x) {
@@ -23,7 +23,7 @@ export const Left = x =>
   });
 
 Left.of = function of(x) {
-  return new Left(x);
+  return Left(x);
 };
 
 export function left(x) {
