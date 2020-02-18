@@ -347,13 +347,16 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   getValueSuggestions = async (fieldName, query) => {
-    if (!fieldName) {
+    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
+    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
+    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
+    if (!realFieldName) {
       return [];
     }
 
     try {
       const indexPattern = await this.getIndexPattern();
-      const field = indexPattern.fields.getByName(fieldName);
+      const field = indexPattern.fields.getByName(realFieldName);
       return await autocompleteService.getValueSuggestions({
         indexPattern,
         field,
