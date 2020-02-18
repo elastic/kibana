@@ -42,8 +42,9 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  valueClickTrigger,
+  EmbeddableVisTrigger,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
@@ -302,14 +303,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
-        const context: EmbeddableVisTriggerContext = {
+        const triggerId = event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+        const params: EmbeddableVisTriggerContext = {
           embeddable: this,
           timeFieldName: this.vis.indexPattern.timeFieldName,
           data: event.data,
         };
-
-        npStart.plugins.uiActions.executeTriggerActions(eventName, context);
+        npStart.plugins.uiActions.getTrigger<EmbeddableVisTrigger>(triggerId).exec(params);
       })
     );
 

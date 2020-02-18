@@ -59,7 +59,7 @@ export class UiActionsService {
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = <T = any>(id: string): TriggerContract<T> => {
+  public readonly getTrigger = <T extends Trigger<any, any>>(id: string): TriggerContract<T> => {
     const trigger = this.triggers.get(id);
 
     if (!trigger) {
