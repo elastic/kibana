@@ -20,9 +20,15 @@
 import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
+import { ExecutionContract } from '../execution/execution_contract';
 
 export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
 export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
+
+export interface ExpressionServiceParams {
+  executor?: Executor;
+  renderers?: ExpressionRendererRegistry;
+}
 
 /**
  * `ExpressionsService` class is used for multiple purposes:
@@ -44,8 +50,16 @@ export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
 export class ExpressionsService {
-  public readonly executor = Executor.createWithDefaults();
-  public readonly renderers = new ExpressionRendererRegistry();
+  public readonly executor: Executor;
+  public readonly renderers: ExpressionRendererRegistry;
+
+  constructor({
+    executor = Executor.createWithDefaults(),
+    renderers = new ExpressionRendererRegistry(),
+  }: ExpressionServiceParams = {}) {
+    this.executor = executor;
+    this.renderers = renderers;
+  }
 
   /**
    * Register an expression function, which will be possible to execute as
@@ -117,8 +131,45 @@ export class ExpressionsService {
     context?: ExtraContext
   ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
 
+  /**
+   * Create a new instance of `ExpressionsService`. The new instance inherits
+   * all state of the original `ExpressionsService`, including all expression
+   * types, expression functions and context. Also, all new types and functions
+   * registered in the original services AFTER the forking event will be
+   * available in the forked instance. However, all new types and functions
+   * registered in the forked instances will NOT be available to the original
+   * service.
+   */
+  public readonly fork = (): ExpressionsService => {
+    const executor = this.executor.fork();
+    const renderers = this.renderers;
+    const fork = new ExpressionsService({ executor, renderers });
+
+    return fork;
+  };
+
+  /**
+   * Starts expression execution and immediately returns `ExecutionContract`
+   * instance that tracks the progress of the execution and can be used to
+   * interact with the execution.
+   */
+  public readonly execute = <
+    Input = unknown,
+    Output = unknown,
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+  >(
+    ast: string | ExpressionAstExpression,
+    // This any is for legacy reasons.
+    input: Input = { type: 'null' } as any,
+    context?: ExtraContext
+  ): ExecutionContract<ExtraContext, Input, Output> => {
+    const execution = this.executor.createExecution<ExtraContext, Input, Output>(ast, context);
+    execution.start(input);
+    return execution.contract;
+  };
+
   public setup() {
-    const { executor, renderers, registerFunction, run } = this;
+    const { executor, renderers, registerFunction, run, fork } = this;
 
     const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
@@ -130,6 +181,7 @@ export class ExpressionsService {
     const registerType = executor.registerType.bind(executor);
 
     return {
+      fork,
       getFunction,
       getFunctions,
       getRenderer,
@@ -144,7 +196,7 @@ export class ExpressionsService {
   }
 
   public start() {
-    const { executor, renderers, run } = this;
+    const { execute, executor, renderers, run } = this;
 
     const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
@@ -154,6 +206,7 @@ export class ExpressionsService {
     const getTypes = executor.getTypes.bind(executor);
 
     return {
+      execute,
       getFunction,
       getFunctions,
       getRenderer,
