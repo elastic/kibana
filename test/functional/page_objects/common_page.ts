@@ -195,6 +195,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async navigateToUrlWithBrowserHistory(
       appName: string,
       subUrl?: string,
+      search?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
@@ -206,6 +207,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const appConfig = {
         // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
         pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
+        search,
       };
 
       await this.navigate({
