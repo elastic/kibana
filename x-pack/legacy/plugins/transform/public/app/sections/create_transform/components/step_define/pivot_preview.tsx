@@ -38,13 +38,6 @@ import {
 import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
-// EuiDataGrid needs a fixed width on the parent element to provide a horizontal scrollbar.
-// Because the overall transform wizard doesn't have a fixed width, we need to calculate it
-// based of the overall width of the root element and substract all paddings and margins
-// from elements between the root and the EuiDataGrid component.
-const defaultPanelWidth = 500;
-const panelPadding = 410 + 48 + 16 + 32 + 24 + 12 + 32;
-
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
@@ -112,25 +105,6 @@ interface PivotPreviewProps {
 }
 
 export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
-  const [panelWidth, setPanelWidth] = useState(defaultPanelWidth);
-
-  const resizeHandler = () => {
-    const docWidth = document.documentElement.clientWidth;
-    const sideBarWidth = (document.getElementById('management-sidenav')?.clientWidth || 192) + 24;
-    // TODO This doesn't consider when the document width doesn't change but the nav does yet ...
-    const navWidth = document.getElementById('navDrawerMenu')?.clientWidth || 48;
-    const nextPanelWidth = docWidth - panelPadding - sideBarWidth - navWidth;
-    setPanelWidth(nextPanelWidth);
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', resizeHandler);
-    resizeHandler();
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, []);
-
   const indexPattern = useCurrentIndexPattern();
 
   const {
@@ -253,7 +227,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
   }
 
   return (
-    <EuiPanel data-test-subj="transformPivotPreview loaded" style={{ width: `${panelWidth}px` }}>
+    <EuiPanel data-test-subj="transformPivotPreview loaded">
       <PreviewTitle previewRequest={previewRequest} />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (

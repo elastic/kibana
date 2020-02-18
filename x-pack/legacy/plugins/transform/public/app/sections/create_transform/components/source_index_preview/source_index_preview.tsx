@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,13 +30,6 @@ import { EsFieldName, PivotQuery } from '../../../../common';
 import { getSourceIndexDevConsoleStatement } from './common';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
-// EuiDataGrid needs a fixed width on the parent element to provide a horizontal scrollbar.
-// Because the overall transform wizard doesn't have a fixed width, we need to calculate it
-// based of the overall width of the root element and substract all paddings and margins
-// from elements between the root and the EuiDataGrid component.
-const defaultPanelWidth = 500;
-const panelPadding = 410 + 48 + 16 + 32 + 24 + 12 + 32;
-
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
 }
@@ -56,25 +49,6 @@ interface Props {
 }
 
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
-  const [panelWidth, setPanelWidth] = useState(defaultPanelWidth);
-
-  const resizeHandler = () => {
-    const docWidth = document.documentElement.clientWidth;
-    const sideBarWidth = (document.getElementById('management-sidenav')?.clientWidth || 192) + 24;
-    // TODO This doesn't consider when the document width doesn't change but the nav does yet ...
-    const navWidth = document.getElementById('navDrawerMenu')?.clientWidth || 48;
-    const nextPanelWidth = docWidth - panelPadding - sideBarWidth - navWidth;
-    setPanelWidth(nextPanelWidth);
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', resizeHandler);
-    resizeHandler();
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, []);
-
   const indexPattern = useCurrentIndexPattern();
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
@@ -211,10 +185,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   });
 
   return (
-    <EuiPanel
-      data-test-subj="transformSourceIndexPreview loaded"
-      style={{ width: `${panelWidth}px` }}
-    >
+    <EuiPanel data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />

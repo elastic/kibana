@@ -829,7 +829,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         </div>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
         <SourceIndexPreview query={pivotQuery} />
         <EuiSpacer size="m" />
         <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
