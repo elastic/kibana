@@ -101,6 +101,7 @@ export interface EndpointMetadata {
   agent: {
     version: string;
     id: string;
+    name: string;
   };
   host: {
     id: string;
@@ -111,6 +112,7 @@ export interface EndpointMetadata {
       name: string;
       full: string;
       version: string;
+      variant: string;
     };
   };
 }
@@ -118,4 +120,4 @@ export interface EndpointMetadata {
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'managementPage';
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';

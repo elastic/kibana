@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './components/json_editor';
+export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
 export {
   SendRequestConfig,
