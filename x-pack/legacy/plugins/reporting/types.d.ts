@@ -311,8 +311,9 @@ export interface ExportTypeDefinition<
 }
 
 export { CancellationToken } from './common/cancellation_token';
-export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
-export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
+
+export { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from './server/browsers';
+
 export { ExportTypesRegistry } from './server/lib/export_types_registry';
 
 export { LevelLogger as Logger };
