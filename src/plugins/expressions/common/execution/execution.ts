@@ -207,13 +207,17 @@ export class Execution<
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
+        const timeStart: number = this.params.debug ? Date.now() : 0;
         const output = await this.invokeFunction(fnDef, input, resolvedArgs);
 
         if (this.params.debug) {
-          (link as any).debug = {
+          const timeEnd: number = Date.now();
+          (link as ExpressionAstFunction).debug = {
+            success: true,
             input,
             args: resolvedArgs,
             output,
+            duration: timeEnd - timeStart,
           };
         }
 
