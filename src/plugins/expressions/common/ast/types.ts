@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ExpressionValue } from '../expression_types';
+
 export type ExpressionAstNode =
   | ExpressionAstExpression
   | ExpressionAstFunction
@@ -31,6 +33,18 @@ export interface ExpressionAstFunction {
   type: 'function';
   function: string;
   arguments: Record<string, ExpressionAstArgument[]>;
+
+  /**
+   * Debug information added to each function when expression is executed in *debug mode*.
+   */
+  debug?: ExpressionAstFunctionDebug;
+}
+
+export interface ExpressionAstFunctionDebug {
+  input?: ExpressionValue;
+  output?: ExpressionValue;
+  duration?: number;
+  args?: any;
 }
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

@@ -31,6 +31,15 @@ import { ExpressionAstExpression, ExpressionAstNode } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 
+export interface ExpressionExecOptions {
+  /**
+   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
+   * outputs as well as all resolved arguments and time it took to execute each
+   * function are saved and are available for introspection.
+   */
+  debug?: boolean;
+}
+
 export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor<any>) {}
 
@@ -145,10 +154,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return this.state.selectors.getContext();
   }
 
-  public async interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown> {
+  public async interpret<T>(
+    ast: ExpressionAstNode,
+    input: T,
+    options?: ExpressionExecOptions
+  ): Promise<unknown> {
     switch (getType(ast)) {
       case 'expression':
-        return await this.interpretExpression(ast as ExpressionAstExpression, input);
+        return await this.interpretExpression(ast as ExpressionAstExpression, input, options);
       case 'string':
       case 'number':
       case 'null':
@@ -161,9 +174,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public async interpretExpression<T>(
     ast: string | ExpressionAstExpression,
-    input: T
+    input: T,
+    options?: ExpressionExecOptions
   ): Promise<unknown> {
-    const execution = this.createExecution(ast);
+    const execution = this.createExecution(ast, undefined, options);
     execution.start(input);
     return await execution.result;
   }
@@ -192,7 +206,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     Output = unknown
   >(
     ast: string | ExpressionAstExpression,
-    context: ExtraContext = {} as ExtraContext
+    context: ExtraContext = {} as ExtraContext,
+    { debug }: ExpressionExecOptions = {} as ExpressionExecOptions
   ): Execution<Context & ExtraContext, Input, Output> {
     const params: ExecutionParams<Context & ExtraContext> = {
       executor: this,
@@ -200,6 +215,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
         ...this.context,
         ...context,
       } as Context & ExtraContext,
+      debug,
     };
 
     if (typeof ast === 'string') params.expression = ast;

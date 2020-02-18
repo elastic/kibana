@@ -44,6 +44,13 @@ export interface ExecutionParams<
   ast?: ExpressionAstExpression;
   expression?: string;
   context?: ExtraContext;
+
+  /**
+   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
+   * outputs as well as all resolved arguments and time it took to execute each
+   * function are saved and are available for introspection.
+   */
+  debug?: boolean;
 }
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
@@ -197,11 +204,18 @@ export class Execution<
       }
 
       try {
-        // Resolve arguments before passing to function
-        // resolveArgs returns an object because the arguments themselves might
-        // actually have a 'then' function which would be treated as a promise
+        // `resolveArgs` returns an object because the arguments themselves might
+        // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
         const output = await this.invokeFunction(fnDef, input, resolvedArgs);
+
+        if (this.params.debug) {
+          (link as any).debug = {
+            input,
+            output,
+          };
+        }
+
         if (getType(output) === 'error') return output;
         input = output;
       } catch (e) {
@@ -327,7 +341,9 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput);
+          const output = await this.params.executor.interpret(item, subInput, {
+            debug: this.params.debug,
+          });
           if (isExpressionValueError(output)) throw output.error;
           const casted = this.cast(output, argDefs[argName as any].types);
           return casted;
