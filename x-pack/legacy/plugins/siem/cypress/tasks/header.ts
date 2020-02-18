@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_TIMEOUT } from '../tasks/login';
-import { REFRESH_BUTTON, KQL_INPUT } from '../screens/header';
+import { KQL_INPUT, REFRESH_BUTTON } from '../screens/header';
 
 export const navigateFromHeaderTo = (page: string) => {
   cy.get(page).click({ force: true });
@@ -22,4 +22,8 @@ export const refreshPage = () => {
     .click({ force: true })
     .invoke('text', { timeout: DEFAULT_TIMEOUT })
     .should('not.equal', 'Updating');
+};
+
+export const kqlSearch = (search: string) => {
+  cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type(search);
 };
