@@ -25,7 +25,8 @@ import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
-import { findTestSubject } from '@elastic/eui';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field } from './field';
 
 jest.mock('ui/notify', () => ({
