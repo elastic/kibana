@@ -7,7 +7,7 @@
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
-import { GETNUMBEROFITEMS } from './constants';
+import { CONTEXT_GETNUMBEROFITEMS } from './constants';
 
 export const getNumberOfItems = async (
   browser: HeadlessBrowser,
@@ -33,7 +33,7 @@ export const getNumberOfItems = async (
       },
       args: [layout.selectors.renderComplete, layout.selectors.itemsCountAttribute],
     },
-    { context: GETNUMBEROFITEMS },
+    { context: CONTEXT_GETNUMBEROFITEMS },
     logger
   );
 

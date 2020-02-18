@@ -8,7 +8,7 @@ import { CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
-import { WAITFORRENDER } from './constants';
+import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
@@ -62,7 +62,7 @@ export const waitForRenderComplete = async (
         },
         args: [layout.selectors.renderComplete, captureConfig.loadDelay],
       },
-      { context: WAITFORRENDER },
+      { context: CONTEXT_WAITFORRENDER },
       logger
     )
     .then(() => {

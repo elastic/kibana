@@ -9,7 +9,7 @@ import { promisify } from 'util';
 import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { Layout } from '../../layouts/layout';
-import { INJECTCSS } from './constants';
+import { CONTEXT_INJECTCSS } from './constants';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
@@ -32,7 +32,7 @@ export const injectCustomCss = async (
       },
       args: [buffer.toString()],
     },
-    { context: INJECTCSS },
+    { context: CONTEXT_INJECTCSS },
     logger
   );
 };

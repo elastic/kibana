@@ -9,7 +9,7 @@ import { ElementHandle } from 'puppeteer';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
-import { CHECKFORTOASTMESSAGE } from './constants';
+import { CONTEXT_CHECKFORTOASTMESSAGE } from './constants';
 
 export const checkForToastMessage = async (
   browser: HeadlessBrowser,
@@ -29,7 +29,7 @@ export const checkForToastMessage = async (
           },
           args: [layout.selectors.toastHeader],
         },
-        { context: CHECKFORTOASTMESSAGE },
+        { context: CONTEXT_CHECKFORTOASTMESSAGE },
         logger
       );
 

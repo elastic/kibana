@@ -55,22 +55,22 @@ mockBrowserEvaluate.mockImplementation(() => {
   const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
   const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
 
-  if (mockCall === contexts.GETNUMBEROFITEMS) {
+  if (mockCall === contexts.CONTEXT_GETNUMBEROFITEMS) {
     return Promise.resolve(1);
   }
-  if (mockCall === contexts.INJECTCSS) {
+  if (mockCall === contexts.CONTEXT_INJECTCSS) {
     return Promise.resolve('injected css');
   }
-  if (mockCall === contexts.WAITFORRENDER) {
+  if (mockCall === contexts.CONTEXT_WAITFORRENDER) {
     return Promise.resolve('waited render');
   }
-  if (mockCall === contexts.GETTIMERANGE) {
+  if (mockCall === contexts.CONTEXT_GETTIMERANGE) {
     return Promise.resolve('Default GetTimeRange Result');
   }
-  if (mockCall === contexts.ELEMENTPOSITIONANDATTRIBUTES) {
+  if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
-  if (mockCall === contexts.CHECKFORTOASTMESSAGE) {
+  if (mockCall === contexts.CONTEXT_CHECKFORTOASTMESSAGE) {
     return Promise.resolve('Toast Message');
   }
   throw new Error(mockCall);
