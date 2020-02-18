@@ -29,10 +29,11 @@ import {
   setSavedObjects,
   setUsageCollector,
   setFilterManager,
+  setExpressions,
 } from './services';
 import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
-import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
@@ -73,6 +74,7 @@ export interface VisualizationsSetupDeps {
 
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -118,7 +120,10 @@ export class VisualizationsPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: VisualizationsStartDeps): VisualizationsStart {
+  public start(
+    core: CoreStart,
+    { data, expressions }: VisualizationsStartDeps
+  ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
@@ -127,6 +132,7 @@ export class VisualizationsPlugin
     setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
     setFilterManager(data.query.filterManager);
+    setExpressions(expressions);
 
     this.savedVisualizationDependencies = {
       savedObjectsClient: core.savedObjects.client,

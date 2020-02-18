@@ -25,7 +25,7 @@ import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
-import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { IExpressionLoaderParams, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -47,6 +47,7 @@ import {
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
+import { getExpressions } from '../np_ready/public/services';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -90,7 +91,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
-type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
+type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
