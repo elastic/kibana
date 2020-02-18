@@ -44,6 +44,9 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
+    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
+      return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
+    });
   });
 
   const setup = () => {
@@ -56,7 +59,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
     // TODO: remove when Vis is converted to typescript. Only importing Vis as type
     // @ts-ignore
-    vis = new Vis(stubIndexPattern, {
+    vis = new visualizationsStart.Vis(stubIndexPattern, {
       type: 'metric',
       aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
     });

@@ -35,12 +35,13 @@ export class Plugin {
       savedObjects,
       overlays,
     } = core;
-    const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
+    const { data, management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
-    const AppDependencies = {
+    const appDependencies = {
       core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects, overlays },
       plugins: {
+        data,
         management: { sections: management.sections },
         savedSearches: coreSavedSearches,
       },
@@ -113,7 +114,7 @@ export class Plugin {
           unmountReactApp();
           const elem = document.getElementById(REACT_ROOT_ID);
           if (elem) {
-            renderReact(elem, AppDependencies);
+            renderReact(elem, appDependencies);
           }
         });
       },
