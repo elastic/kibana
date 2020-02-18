@@ -25,7 +25,7 @@ export interface KibanaServer extends Server {
 
 export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
   const { features, usageCollection } = plugins;
-  const libs = compose(server);
+  const libs = compose(server, plugins);
   KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
 
   features.registerFeature({
