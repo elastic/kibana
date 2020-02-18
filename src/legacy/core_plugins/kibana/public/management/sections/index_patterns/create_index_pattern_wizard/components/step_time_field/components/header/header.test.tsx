@@ -17,12 +17,14 @@
  * under the License.
  */
 
-export interface MatchedIndex {
-  name: string;
-  tags: Tag[];
-}
+import React from 'react';
+import { Header } from '../header';
+import { shallow } from 'enzyme';
 
-export interface Tag {
-  name: string;
-  key: string;
-}
+describe('Header', () => {
+  it('should render normally', () => {
+    const component = shallow(<Header indexPattern="ki*" indexPatternName="ki*" />);
+
+    expect(component).toMatchSnapshot();
+  });
+});
