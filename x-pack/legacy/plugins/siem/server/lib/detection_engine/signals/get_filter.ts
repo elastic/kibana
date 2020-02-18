@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
@@ -14,6 +15,17 @@ import {
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
 import { PartialFilter, RuleAlertParams } from '../types';
+
+// File is from the location of:
+// https://cinsscore.com/list/ci-badguys.txt
+// and is just an example of how to interpolate and use large volumes of ip ranges as a list
+const badFolksIp = fs.readFileSync(`${__dirname}/ip-list.txt`, 'utf8');
+const badFolksIpAsArray = badFolksIp.split('\n').filter(item => item.trim() !== '');
+console.log('A TON of ips loaded into memory really hacky:', badFolksIp);
+console.log('---');
+console.log(badFolksIp);
+console.log(JSON.stringify(badFolksIpAsArray, null, 2));
+console.log('---');
 
 export const getQueryFilter = (
   query: string,
@@ -38,7 +50,51 @@ export const getQueryFilter = (
     f => f && !esFilters.isFilterDisabled(f)
   );
 
-  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
+  const builtQuery = esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
+  console.log('--- BEFORE CHANGING ---');
+  console.log(JSON.stringify(builtQuery, null, 2));
+  const filterChanged = builtQuery.bool.filter.map(item => {
+    console.log('item is:', item);
+    if (item.bool.should != null) {
+      const newShould = [];
+      item.bool.should.map(childObj => {
+        console.log('found child of:', childObj);
+        if (childObj.match_phrase != null) {
+          const entries = Object.entries(childObj.match_phrase);
+          entries.forEach(([key, value]) => {
+            if (value.startsWith('$') && value.endsWith('$')) {
+              console.log('found a variable of:', value);
+              badFolksIpAsArray.forEach(arrayElement => {
+                newShould.push({
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [key]: arrayElement,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                });
+              });
+            }
+          });
+          console.log('found key/value pair of:', entries);
+        }
+        // console.log('The new should is:', newShould);
+        item.bool.should = newShould;
+      });
+    }
+    return item;
+  });
+  // let's just find any filters with cash money $variable$ and use lists
+  console.log('--- AFTER CHANGING ---');
+  console.log(JSON.stringify(builtQuery, null, 2));
+  console.log('---');
+  // let's just find any filters with cash money $variable$ and use lists
+
+  return builtQuery;
 };
 
 interface GetFilterArgs {

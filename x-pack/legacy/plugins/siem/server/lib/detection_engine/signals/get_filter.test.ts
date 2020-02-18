@@ -48,6 +48,28 @@ describe('get_filter', () => {
   });
 
   describe('getQueryFilter', () => {
+    test('ad-hoc template support', () => {
+      const esQuery = getQueryFilter(
+        'response:200 and not (extension:"php" or extension:"css")',
+        'kuery',
+        [],
+        ['auditbeat-*']
+      );
+      console.log(JSON.stringify(esQuery, null, 2));
+      // expect(esQuery).toEqual({});
+    });
+
+    test('ad-hoc template support part two', () => {
+      const esQuery = getQueryFilter(
+        'response:200 and not (extension:"php" or extension:"css")',
+        'kuery',
+        [],
+        ['auditbeat-*']
+      );
+      console.log(JSON.stringify(esQuery, null, 2));
+      // expect(esQuery).toEqual({});
+    });
+
     test('it should work with an empty filter as kuery', () => {
       const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*']);
       expect(esQuery).toEqual({
