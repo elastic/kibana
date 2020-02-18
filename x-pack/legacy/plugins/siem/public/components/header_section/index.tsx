@@ -4,86 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
-import React from 'react';
-import styled, { css } from 'styled-components';
-import areEqual from 'fast-deep-equal/react';
+import isEqual from 'lodash/fp/isEqual';
+import deepEqual from 'fast-deep-equal';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import { InspectButton } from '../inspect';
-import { Subtitle } from '../subtitle';
+import { useKibana } from '../../lib/kibana';
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { makeMapStateToProps } from '../url_state/helpers';
+import { setBreadcrumbs } from './breadcrumbs';
+import { TabNavigation } from './tab_navigation';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-interface HeaderProps {
-  border?: boolean;
-}
+export const SiemNavigationComponent: React.FC<SiemNavigationComponentProps &
+  SiemNavigationProps &
+  RouteSpyState> = ({
+  detailName,
+  display,
+  navTabs,
+  pageName,
+  pathName,
+  search,
+  tabName,
+  urlState,
+  flowTarget,
+  state,
+}) => {
+  const { chrome } = useKibana().services;
 
-const Header = styled.header.attrs(() => ({
-  className: 'siemHeaderSection',
-}))<HeaderProps>`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
-  user-select: text;
+  useEffect(() => {
+    if (pathName) {
+      setBreadcrumbs(
+        {
+          query: urlState.query,
+          detailName,
+          filters: urlState.filters,
+          navTabs,
+          pageName,
+          pathName,
+          savedQuery: urlState.savedQuery,
+          search,
+          tabName,
+          flowTarget,
+          timerange: urlState.timerange,
+          timeline: urlState.timeline,
+          state,
+        },
+        chrome
+      );
+    }
+  }, [chrome, pathName, search, navTabs, urlState, state]);
 
-  ${({ border }) =>
-    border &&
-    css`
-      border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-      padding-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
-    `}
-`;
-Header.displayName = 'Header';
+  return (
+    <TabNavigation
+      query={urlState.query}
+      display={display}
+      filters={urlState.filters}
+      navTabs={navTabs}
+      pageName={pageName}
+      pathName={pathName}
+      savedQuery={urlState.savedQuery}
+      tabName={tabName}
+      timeline={urlState.timeline}
+      timerange={urlState.timerange}
+    />
+  );
+};
 
-export interface HeaderSectionProps extends HeaderProps {
-  children?: React.ReactNode;
-  id?: string;
-  split?: boolean;
-  subtitle?: string | React.ReactNode;
-  title: string | React.ReactNode;
-  tooltip?: string;
-}
-
-const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
-  border,
-  children,
-  id,
-  split,
-  subtitle,
-  title,
-  tooltip,
-}) => (
-  <Header border={border}>
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2 data-test-subj="header-section-title">
-                {title}
-                {tooltip && (
-                  <>
-                    {' '}
-                    <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                  </>
-                )}
-              </h2>
-            </EuiTitle>
-
-            {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
-          </EuiFlexItem>
-
-          {id && (
-            <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} inspectIndex={0} title={title} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {children && (
-        <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
-          {children}
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
+export const SiemNavigationRedux = compose<
+  React.ComponentClass<SiemNavigationProps & RouteSpyState>
+>(connect(makeMapStateToProps))(
+  React.memo(
+    SiemNavigationComponent,
+    (prevProps, nextProps) =>
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.urlState, nextProps.urlState) &&
+      deepEqual(prevProps.state, nextProps.state)
+  )
 );
 
-export const HeaderSection = React.memo(HeaderSectionComponent, areEqual);
+const SiemNavigationContainer: React.FC<SiemNavigationProps> = props => {
+  const [routeProps] = useRouteSpy();
+  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
+    ...routeProps,
+    ...props,
+  };
+
+  return <SiemNavigationRedux {...stateNavReduxProps} />;
+};
+
+export const SiemNavigation = SiemNavigationContainer;

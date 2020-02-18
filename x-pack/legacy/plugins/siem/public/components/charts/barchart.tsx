@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
@@ -57,9 +57,10 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
-  const dataSeries = useMemo(
-    () =>
-      data.map(series => {
+  return chartConfigs.width && chartConfigs.height ? (
+    <Chart>
+      <Settings {...settings} />
+      {data.map(series => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries
@@ -77,15 +78,7 @@ export const BarChartBaseComponent = ({
             customSeriesColors={series.color ? [series.color] : undefined}
           />
         ) : null;
-      }),
-    [data]
-  );
-
-  return chartConfigs.width && chartConfigs.height ? (
-    <Chart>
-      <Settings {...settings} />
-
-      {dataSeries}
+      })}
 
       <Axis
         id={xAxisId}
@@ -95,13 +88,8 @@ export const BarChartBaseComponent = ({
         tickFormat={xTickFormatter}
       />
 
-      <Axis
-        id={yAxisId}
-        position={Position.Left}
-        tickSize={tickSize}
-        tickFormat={yTickFormatter}
-      />
-    </MemoChart>
+      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+    </Chart>
   ) : null;
 };
 

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import areEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -91,7 +91,9 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
       </DragDropContext>
     );
   },
-  areEqual
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.children, nextProps.children) &&
+    deepEqual(prevProps.dataProviders === nextProps.dataProviders) // prevent re-renders when data providers are added or removed, but all other props are the same
 );
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
