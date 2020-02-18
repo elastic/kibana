@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectsPublicPlugin } from './plugin';
+import { Plugin } from 'src/core/public';
 
-export { OnSaveProps, SavedObjectSaveModal, SaveResult, showSaveModal } from './save_modal';
-export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
-export { SavedObjectLoader, createSavedObjectClass } from './saved_object';
-export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
-
-export const plugin = () => new SavedObjectsPublicPlugin();
+export class SavedObjectsPublicPlugin implements Plugin {
+  public setup() {}
+  public start() {}
+}
