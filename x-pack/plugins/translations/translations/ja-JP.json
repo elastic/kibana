@@ -77,7 +77,6 @@
   },
   "messages": {
     "common.ui.aggResponse.allDocsTitle": "すべてのドキュメント",
-    "common.ui.aggTypes.rangesFormatMessage": "{gte} {from} と {lt} {to}",
     "common.ui.directives.paginate.size.allDropDownOptionLabel": "すべて",
     "common.ui.dualRangeControl.mustSetBothErrorMessage": "下と上の値の両方を設定する必要があります",
     "common.ui.dualRangeControl.outsideOfRangeErrorMessage": "値は {min} と {max} の間でなければなりません",
@@ -3946,7 +3945,6 @@
     "xpack.apm.tracesTable.tracesPerMinuteColumnLabel": "1 分あたりのトレース",
     "xpack.apm.tracesTable.tracesPerMinuteUnitLabel": "1分あたりトランザクション数",
     "xpack.apm.transactionActionMenu.actionsButtonLabel": "アクション",
-    "xpack.apm.transactionActionMenu.actionsLabel": "アクション",
     "xpack.apm.transactionActionMenu.showContainerLogsLinkLabel": "コンテナーログを表示",
     "xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel": "コンテナーメトリックを表示",
     "xpack.apm.transactionActionMenu.showHostLogsLinkLabel": "ホストログを表示",
