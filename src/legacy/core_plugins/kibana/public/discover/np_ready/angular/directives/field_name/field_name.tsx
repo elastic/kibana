@@ -47,12 +47,6 @@ export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIcon
   const name = field ? String(field.name) : String(fieldName);
   const displayName = useShortDots ? shortenDottedString(name) : name;
 
-  // const className = classNames({
-  //   'dscField--noResults': field ? !field.rowCount && !field.scripted : false,
-  //   // this is currently not styled, should display an icon
-  //   scripted: field ? field.scripted : false,
-  // });
-
   const noResults = field ? !field.rowCount && !field.scripted : false;
 
   const className = classNames('dscFieldName', {
@@ -65,7 +59,7 @@ export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIcon
         <FieldIcon
           type={type}
           label={typeName}
-          scripted={field && field.scripted}
+          scripted={field ? field.scripted : false}
           {...fieldIconProps}
         />
       </EuiFlexItem>
