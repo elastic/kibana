@@ -15,7 +15,7 @@ import {
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
 
-// TODO
+// TODO NP
 import { AggConfigs, Schemas } from 'ui/agg_types';
 
 const TERMS_AGG_NAME = 'join';

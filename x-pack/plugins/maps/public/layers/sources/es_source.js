@@ -18,7 +18,7 @@ import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
-// TODO
+// TODO NP
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import { AggConfigs } from 'ui/agg_types';

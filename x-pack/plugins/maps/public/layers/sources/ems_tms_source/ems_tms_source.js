@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
 
-// TODO
+// TODO NP
 import chrome from 'ui/chrome';
 
 export class EMSTMSSource extends AbstractTMSSource {
@@ -155,7 +155,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     }
 
     const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
-    const emsTileLayerId = chrome.getInjected('emsTileLayerId');
+    const emsTileLayerId = getInjectedVarFunc()('emsTileLayerId');
     return isDarkMode ? emsTileLayerId.dark : emsTileLayerId.bright;
   }
 }

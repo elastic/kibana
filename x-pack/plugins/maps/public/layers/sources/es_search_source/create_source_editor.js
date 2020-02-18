@@ -22,7 +22,7 @@ import {
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { isNestedField} from '../../../../../../../src/plugins/data/common/index_patterns/fields';
 
-// TODO
+// TODO NP
 import { kfetch } from 'ui/kfetch';
 import { npStart } from 'ui/new_platform';
 

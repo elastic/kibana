@@ -33,7 +33,7 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 
-// TODO
+// TODO NP
 import { AggConfigs, Schemas } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 

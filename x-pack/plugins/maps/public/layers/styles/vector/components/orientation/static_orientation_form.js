@@ -6,8 +6,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-// TODO
 import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticOrientationForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {

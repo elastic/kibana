@@ -20,7 +20,7 @@ import {
   getAggregatableGeoFields,
 } from '../../../index_pattern_util';
 
-// TODO
+// TOD NPO
 import { npStart } from 'ui/new_platform';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
 

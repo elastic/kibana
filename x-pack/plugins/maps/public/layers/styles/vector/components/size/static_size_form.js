@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-// TODO
+// TODO NP
 import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticSizeForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
-// TODO
+// TODO NP
 import { ValidatedDualRange } from 'ui/validated_range';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {

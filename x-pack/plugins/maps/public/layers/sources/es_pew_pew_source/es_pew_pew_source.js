@@ -25,7 +25,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { isNestedField } from '../../../../../../../src/plugins/data/public';
 
-// TODO
+// TODO NP
 import { AggConfigs, Schemas } from 'ui/agg_types';
 
 const MAX_GEOTILE_LEVEL = 29;

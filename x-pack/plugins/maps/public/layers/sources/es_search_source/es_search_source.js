@@ -27,7 +27,7 @@ import { loadIndexSettings } from './load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 
-// TODO
+// TODO NP
 import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 

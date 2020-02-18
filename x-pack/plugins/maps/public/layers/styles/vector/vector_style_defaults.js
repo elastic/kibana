@@ -13,7 +13,7 @@ import {
   DEFAULT_LINE_COLORS,
 } from '../color_utils';
 
-// TODO
+// TODO NP
 import chrome from 'ui/chrome';
 
 export const MIN_SIZE = 1;

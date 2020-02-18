@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { loadIndexSettings } from './load_index_settings';
 import { isNestedField} from '../../../../../../../src/plugins/data/common/index_patterns/fields';
 
-// TODO
+// TODO NP
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { ValidatedRange } from '../../../components/validated_range';

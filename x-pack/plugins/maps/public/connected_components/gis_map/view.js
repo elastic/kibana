@@ -18,7 +18,7 @@ import { isNestedField } from '../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 
-// TODO
+// TODO NP
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';

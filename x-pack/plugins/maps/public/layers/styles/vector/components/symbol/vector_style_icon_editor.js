@@ -11,7 +11,7 @@ import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
-// TODO
+// TODO NP
 import chrome from 'ui/chrome';
 
 export function VectorStyleIconEditor(props) {
