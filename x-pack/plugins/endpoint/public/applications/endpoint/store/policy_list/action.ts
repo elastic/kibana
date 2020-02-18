@@ -16,12 +16,4 @@ interface ServerReturnedPolicyListData {
   };
 }
 
-interface UserPaginatedPolicyListTable {
-  type: 'userPaginatedPolicyListTable';
-  payload: {
-    pageSize: number;
-    pageIndex: number;
-  };
-}
-
-export type PolicyListAction = ServerReturnedPolicyListData | UserPaginatedPolicyListTable;
+export type PolicyListAction = ServerReturnedPolicyListData;
