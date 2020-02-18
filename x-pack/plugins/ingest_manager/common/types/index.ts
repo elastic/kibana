@@ -3,10 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TypeOf } from '@kbn/config-schema';
 
 export * from './models';
 export * from './rest_spec';
-import { config } from '../constants';
 
-export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+export interface IngestManagerConfigType {
+  enabled: boolean;
+  epm: {
+    enabled: boolean;
+    registryUrl: string;
+  };
+  fleet: {
+    enabled: boolean;
+    defaultOutputHost: string;
+  };
+}
