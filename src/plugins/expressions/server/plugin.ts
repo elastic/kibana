@@ -24,7 +24,7 @@ import {
   createLegacyServerInterpreterApi,
   createLegacyServerEndpoints,
 } from './legacy';
-import { ExpressionsService, kibanaContextFunction } from '../common';
+import { ExpressionsService } from '../common';
 
 // eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
