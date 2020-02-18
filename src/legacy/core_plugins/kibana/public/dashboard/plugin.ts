@@ -77,6 +77,18 @@ export class DashboardPlugin implements Plugin {
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
+  public addCurrentConfig = config => {
+    if (!this.currentConfig) {
+      this.currentConfig = {};
+    }
+    const { id, type, vis } = config;
+    this.currentConfig[id] = vis;
+  };
+  public getCurrentConfig = id => {
+    return this.currentConfig[id];
+  };
+  private currentConfig: {};
+
   public setup(core: CoreSetup, { home, kibanaLegacy, data }: DashboardPluginSetupDependencies) {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
       data.query
@@ -114,6 +126,8 @@ export class DashboardPlugin implements Plugin {
           share,
           data: dataStart,
           dashboardConfig,
+          getCurrentConfig,
+          addCurrentConfig,
         } = this.startDependencies;
         const savedDashboards = createSavedDashboardLoader({
           savedObjectsClient,
@@ -139,6 +153,8 @@ export class DashboardPlugin implements Plugin {
           embeddable,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
+          addCurrentConfig,
+          getCurrentConfig,
         };
         const { renderApp } = await import('./np_ready/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
@@ -170,6 +186,11 @@ export class DashboardPlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
+
+    return {
+      addCurrentConfig: this.addCurrentConfig,
+      getCurrentConfig: this.getCurrentConfig,
+    };
   }
 
   start(
@@ -180,6 +201,8 @@ export class DashboardPlugin implements Plugin {
       data,
       share,
       kibanaLegacy: { dashboardConfig },
+      addCurrentConfig,
+      getCurrentConfig,
     }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
@@ -189,6 +212,8 @@ export class DashboardPlugin implements Plugin {
       navigation,
       share,
       dashboardConfig,
+      addCurrentConfig: this.addCurrentConfig,
+      getCurrentConfig: this.getCurrentConfig,
     };
   }
 

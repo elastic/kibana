@@ -120,6 +120,7 @@ export class DashboardAppController {
     },
     history,
     kbnUrlStateStorage,
+    getCurrentConfig,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -288,80 +289,80 @@ export class DashboardAppController {
     const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
+    const createDashboardContainer = (container: DashboardContainer | ErrorEmbeddable) => {
+      if (!isErrorEmbeddable(container)) {
+        dashboardContainer = container;
+
+        dashboardContainer.renderEmpty = () => {
+          const shouldShowEditHelp = getShouldShowEditHelp();
+          const shouldShowViewHelp = getShouldShowViewHelp();
+          const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
+          const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
+          return isEmptyState ? (
+            <DashboardEmptyScreen
+              {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
+            />
+          ) : null;
+        };
+
+        updateIndexPatterns(dashboardContainer);
+
+        outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
+          updateIndexPatterns(dashboardContainer);
+        });
+
+        inputSubscription = dashboardContainer.getInput$().subscribe(() => {
+          let dirty = false;
+
+          if (
+            !esFilters.compareFilters(
+              container.getInput().filters,
+              queryFilter.getFilters(),
+              esFilters.COMPARE_ALL_OPTIONS
+            )
+          ) {
+            // Add filters modifies the object passed to it, hence the clone deep.
+            queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+
+            dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
+            dirty = true;
+          }
+          dashboardStateManager.handleDashboardContainerChanges(container);
+          $scope.$evalAsync(() => {
+            if (dirty) {
+              updateState();
+            }
+          });
+        });
+
+        dashboardStateManager.registerChangeListener(() => {
+          // we aren't checking dirty state because there are changes the container needs to know about
+          // that won't make the dashboard "dirty" - like a view mode change.
+          refreshDashboardContainer();
+        });
+
+        // This code needs to be replaced with a better mechanism for adding new embeddables of
+        // any type from the add panel. Likely this will happen via creating a visualization "inline",
+        // without navigating away from the UX.
+        if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
+          const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
+          const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
+          const embeddable = getCurrentConfig(id);
+          container.addSavedObjectEmbeddableFromConfig('visualization', embeddable);
+          removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
+          removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
+        }
+      }
+
+      if (dashboardDom) {
+        container.render(dashboardDom);
+      }
+    };
     dashboardFactory
       .create(getDashboardInput())
-      .then((container: DashboardContainer | ErrorEmbeddable) => {
-        if (!isErrorEmbeddable(container)) {
-          dashboardContainer = container;
-
-          dashboardContainer.renderEmpty = () => {
-            const shouldShowEditHelp = getShouldShowEditHelp();
-            const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
-            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
-            return isEmptyState ? (
-              <DashboardEmptyScreen
-                {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
-              />
-            ) : null;
-          };
-
-          updateIndexPatterns(dashboardContainer);
-
-          outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
-            updateIndexPatterns(dashboardContainer);
-          });
-
-          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
-            let dirty = false;
-
-            // This has to be first because handleDashboardContainerChanges causes
-            // appState.save which will cause refreshDashboardContainer to be called.
-
-            if (
-              !esFilters.compareFilters(
-                container.getInput().filters,
-                queryFilter.getFilters(),
-                esFilters.COMPARE_ALL_OPTIONS
-              )
-            ) {
-              // Add filters modifies the object passed to it, hence the clone deep.
-              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
-
-              dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
-              dirty = true;
-            }
-
-            dashboardStateManager.handleDashboardContainerChanges(container);
-            $scope.$evalAsync(() => {
-              if (dirty) {
-                updateState();
-              }
-            });
-          });
-
-          dashboardStateManager.registerChangeListener(() => {
-            // we aren't checking dirty state because there are changes the container needs to know about
-            // that won't make the dashboard "dirty" - like a view mode change.
-            refreshDashboardContainer();
-          });
-
-          // This code needs to be replaced with a better mechanism for adding new embeddables of
-          // any type from the add panel. Likely this will happen via creating a visualization "inline",
-          // without navigating away from the UX.
-          if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
-            const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
-            const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-            container.addSavedObjectEmbeddable(type, id);
-            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
-            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
-          }
-        }
-
-        if (dashboardDom) {
-          container.render(dashboardDom);
-        }
-      });
+      .then((container: DashboardContainer | ErrorEmbeddable) =>
+        createDashboardContainer(container)
+      );
 
     // Part of the exposed plugin API - do not remove without careful consideration.
     this.appStatus = {

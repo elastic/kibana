@@ -21,10 +21,12 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from './legacy_imports';
 import { plugin } from './index';
 
+const instance = plugin({
+  env: npSetup.plugins.kibanaLegacy.env,
+} as PluginInitializerContext);
+
+export const setup = instance.setup(npSetup.core, npSetup.plugins);
+
 (async () => {
-  const instance = plugin({
-    env: npSetup.plugins.kibanaLegacy.env,
-  } as PluginInitializerContext);
-  instance.setup(npSetup.core, npSetup.plugins);
   instance.start(npStart.core, npStart.plugins);
 })();

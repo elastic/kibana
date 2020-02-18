@@ -125,6 +125,7 @@ export class VisualizePlugin implements Plugin {
           visualizations,
           data: dataStart,
           share,
+          dashboardSetup,
         } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
@@ -150,6 +151,7 @@ export class VisualizePlugin implements Plugin {
           usageCollection,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
+          dashboardSetup,
         };
         setServices(deps);
 
@@ -178,7 +180,7 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
+    { embeddable, navigation, data, share, visualizations, dashboardSetup }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
@@ -187,6 +189,7 @@ export class VisualizePlugin implements Plugin {
       savedObjectsClient: core.savedObjects.client,
       share,
       visualizations,
+      dashboardSetup,
     };
   }
 

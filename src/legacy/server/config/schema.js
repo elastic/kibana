@@ -191,7 +191,7 @@ export default () =>
         then: Joi.boolean().valid(false),
         otherwise: Joi.alternatives()
           .try(Joi.string().required(), Joi.boolean())
-          .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
+          .default(!!process.env.CODE_COVERAGE ? 'true' : '#inline-source-map'),
       }),
       workers: Joi.number().min(1),
       profile: Joi.boolean().default(false),

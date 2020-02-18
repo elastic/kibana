@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from 'kibana/public';
+import { Vis } from '../np_ready/public';
 import {
   Container,
   EmbeddableFactory,
@@ -39,6 +40,8 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
 import { showNewVisModal } from '../np_ready/public/wizard';
 import { TimefilterContract } from '../../../../../plugins/data/public';
+import { isEqual } from 'lodash';
+import { SearchSource } from '../../../../../plugins/data/public/search/search_source';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -102,7 +105,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = this.getSavedVisualizationsLoader();
-
+    debugger;
     try {
       const visId = savedObject.id as string;
 
@@ -142,10 +145,62 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = this.getSavedVisualizationsLoader();
-
+    debugger;
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      return this.createFromObject(savedObject, input, parent);
+      const config = {
+        vis: savedObject.vis,
+        indexPattern: getIndexPattern(savedObject),
+        title: savedObject.title,
+        searchSource: savedObject.searchSource,
+        visState: savedObject.visState,
+      };
+      return this.createFromConfig(config, input, parent);
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return new ErrorEmbeddable(e, input, parent);
+    }
+  }
+
+  public async createFromConfig(
+    config: Record<string, any>,
+    input: Partial<VisualizeInput> & { id: string },
+    parent?: Container
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {;
+    try {
+      const indexPattern = await getIndexPattern(config);
+      const indexPatterns = indexPattern ? [indexPattern] : [];
+
+
+      const vis = new Vis(indexPattern, {
+        type: config.vis.type.name,
+        aggs: config.vis.aggs,
+        params: config.vis.params,
+        filters: config.vis.filters,
+      });
+      const searchSource = new SearchSource();
+      searchSource.fields = config.searchSource.fields;
+      searchSource.id = config.searchSource.id;
+      const savedObject = {
+        indexPattern,
+        ...config,
+        vis,
+        searchSource,
+      };
+      debugger;
+    //  console.log(isEqual(savedObject, realSavedObject));
+      return new VisualizeEmbeddable(
+        {
+          savedVisualization: savedObject,
+          indexPatterns,
+          editUrl: '',
+          editable: this.isEditable(),
+          appState: input.appState,
+          uiState: input.uiState,
+        },
+        input,
+        parent
+      );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);

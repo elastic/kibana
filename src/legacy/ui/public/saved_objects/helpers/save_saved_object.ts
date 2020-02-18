@@ -116,6 +116,7 @@ export async function saveSavedObject(
     }
     savedObject.isSaving = false;
     savedObject.lastSavedTitle = savedObject.title;
+    console.dir(savedObject);
     return savedObject.id;
   } catch (err) {
     savedObject.isSaving = false;

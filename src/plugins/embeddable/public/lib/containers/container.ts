@@ -109,6 +109,16 @@ export abstract class Container<
     return this.createAndSaveEmbeddable(type, panelState);
   }
 
+  public async addSavedObjectEmbeddableFromConfig<
+    TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
+    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
+  >(type: string, config: Record<string, any>): Promise<TEmbeddable | ErrorEmbeddable> {
+    const factory = this.getFactory(type) as EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>;
+    const panelState = this.createNewPanelState(factory);
+    panelState.explicitInput.config = config;
+    return this.createAndSaveEmbeddable(type, panelState);
+  }
+
   public removeEmbeddable(embeddableId: string) {
     // Just a shortcut for removing the panel from input state, all internal state will get cleaned up naturally
     // by the listener.
@@ -176,6 +186,7 @@ export abstract class Container<
 
     return new Promise((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+        console.dir(this.output.embeddableLoaded[id]);
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
           resolve(this.children[id] as TEmbeddable);
@@ -195,16 +206,15 @@ export abstract class Container<
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
+    partial: Partial<TEmbeddableInput> = {},
+    config?: Record<string, any>
   ): PanelState<TEmbeddableInput> {
     const embeddableId = partial.id || uuid.v4();
-
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,
       factory,
       partial
     );
-
     return {
       type: factory.type,
       explicitInput: {
@@ -229,7 +239,7 @@ export abstract class Container<
    * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
    * will override inherited input.
    */
-  protected abstract getInheritedInput(id: string): TChildInput;
+  protected abstract getInheritedInput(id: string | null): TChildInput;
 
   private async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
@@ -242,7 +252,6 @@ export abstract class Container<
       },
       isEmptyState: false,
     } as Partial<TContainerInput>);
-
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
   }
 
@@ -252,7 +261,7 @@ export abstract class Container<
       TEmbeddableInput
     >
   >(
-    id: string,
+    id: string | null,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): Partial<TEmbeddableInput> {
@@ -304,10 +313,17 @@ export abstract class Container<
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
-
-      embeddable = panel.savedObjectId
-        ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
-        : await factory.create(inputForChild, this);
+      if (panel.explicitInput.config) {
+        embeddable = await factory.createFromConfig(
+          panel.explicitInput.config,
+          inputForChild,
+          this
+        );
+      } else {
+        embeddable = panel.savedObjectId
+          ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
+          : await factory.create(inputForChild, this);
+      }
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }
@@ -323,7 +339,6 @@ export abstract class Container<
         embeddable.destroy();
         return;
       }
-
       if (embeddable.getOutput().savedObjectId) {
         this.updateInput({
           panels: {

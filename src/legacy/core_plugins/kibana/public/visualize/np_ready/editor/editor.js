@@ -27,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { migrateAppState } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
-
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
@@ -97,8 +96,8 @@ function VisualizeAppController(
     uiSettings,
     I18nContext,
     setActiveUrl,
+    dashboardSetup,
   } = getServices();
-
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -112,6 +111,7 @@ function VisualizeAppController(
   const { vis, searchSource } = savedVis;
 
   $scope.vis = vis;
+  $scope.dashboard = dashboardSetup;
 
   const $appStatus = (this.appStatus = {
     dirty: !savedVis.id,
@@ -557,7 +557,6 @@ function VisualizeAppController(
       function(id) {
         $scope.$evalAsync(() => {
           stateMonitor.setInitialState($state.toJSON());
-
           if (id) {
             toastNotifications.addSuccess({
               title: i18n.translate(
@@ -579,6 +578,8 @@ function VisualizeAppController(
                 appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
               });
               // Manually insert a new url so the back button will open the saved visualization.
+              $scope.dashboard
+                .addCurrentConfig({id: savedVis.id,  type: 'visualization', vis: savedVis});
               $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
               setActiveUrl(savedVisualizationParsedUrl.appPath);
 
