@@ -19,19 +19,30 @@
 
 import { PluginInitializerContext } from '../../../core/public';
 import { UiActionsPlugin } from './plugin';
+import { UiActionsService } from './service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
 export { UiActionsSetup, UiActionsStart } from './plugin';
-export {
-  Action,
-  Trigger,
-  UiActionsApi,
-  GetActionsCompatibleWithTrigger,
-  ExecuteTriggerActions,
-} from './types';
-export { createAction } from './actions';
+export { UiActionsServiceParams, UiActionsService } from './service';
+export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { IncompatibleActionError } from './triggers';
+export { Trigger } from './triggers';
+
+/**
+ * @deprecated
+ *
+ * Use `UiActionsStart['getTriggerCompatibleActions']` or
+ * `UiActionsService['getTriggerCompatibleActions']` instead.
+ */
+export type GetActionsCompatibleWithTrigger = UiActionsService['getTriggerCompatibleActions'];
+
+/**
+ * @deprecated
+ *
+ * Use `UiActionsStart['executeTriggerActions']` or
+ * `UiActionsService['executeTriggerActions']` instead.
+ */
+export type ExecuteTriggerActions = UiActionsService['executeTriggerActions'];
