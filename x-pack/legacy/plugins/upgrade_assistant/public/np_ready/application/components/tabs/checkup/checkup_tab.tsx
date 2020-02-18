@@ -68,7 +68,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
       setSelectedTabIndex,
       showBackupWarning = false,
     } = this.props;
-    const { currentFilter, search, currentGroupBy } = this.state;
+    const { currentFilter, currentGroupBy } = this.state;
 
     return (
       <Fragment>
@@ -143,7 +143,6 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
                   loadData={refreshCheckupData}
                   currentFilter={currentFilter}
                   onFilterChange={this.changeFilter}
-                  search={search}
                   onSearchChange={this.changeSearch}
                   availableGroupByOptions={this.availableGroupByOptions()}
                   currentGroupBy={currentGroupBy}

@@ -39,7 +39,6 @@ export const NameConfigurationPanel = ({
     </EuiTitle>
     <EuiSpacer size="m" />
     <EuiDescribedFormGroup
-      idAria="name"
       title={
         <h4>
           <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
@@ -53,7 +52,6 @@ export const NameConfigurationPanel = ({
       }
     >
       <EuiFormRow
-        describedByIds={['name']}
         error={nameFieldProps.error}
         fullWidth
         isInvalid={nameFieldProps.isInvalid}
