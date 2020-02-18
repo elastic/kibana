@@ -17,45 +17,39 @@
  * under the License.
  */
 
+import { Trigger, TriggerContextParams } from './trigger';
+import { TriggerInternal } from './trigger_internal';
+
 /**
- * This is a convenience interface used to register a *trigger*.
- *
- * `Trigger` specifies a named anchor to which `Action` can be attached. When
- * `Trigger` is being *called* it creates a `Context` object and passes it to
- * the `execute` method of an `Action`.
- *
- * More than one action can be attached to a single trigger, in which case when
- * trigger is *called* it first displays a context menu for user to pick a
- * single action to execute.
+ * This is a public representation of a trigger that is provided to other plugins.
  */
-export interface Trigger<
-  Context extends object = object,
-  CreateContextParams extends object = object
-> {
+export class TriggerContract<T extends Trigger<any, any>> {
   /**
    * Unique name of the trigger as identified in `ui_actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
    */
-  id: string;
+  public readonly id: string;
 
   /**
    * User friendly name of the trigger.
    */
-  title?: string;
+  public readonly title?: string;
 
   /**
    * A longer user friendly description of the trigger.
    */
-  description?: string;
+  public readonly description?: string;
+
+  constructor(private readonly internal: TriggerInternal<T>) {
+    this.id = this.internal.trigger.id;
+    this.title = this.internal.trigger.title;
+    this.description = this.internal.trigger.description;
+  }
 
   /**
-   * Method called to create trigger `Context`, which is passed to `Action`.
-   * If omitted, an identity function is used.
+   * Use this method to execute action attached to this trigger.
    */
-  createContext?: (params: CreateContextParams) => Context;
+  public readonly exec = async (params: TriggerContextParams<T>) => {
+    await this.internal.execute(params);
+  };
 }
-
-export type TriggerContext<T> = T extends Trigger<infer Context, any> ? Context : never;
-export type TriggerContextParams<T> = T extends Trigger<any, infer ContextParams>
-  ? ContextParams
-  : never;

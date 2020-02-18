@@ -68,7 +68,7 @@ describe('UiActionsService', () => {
 
       const trigger = service.getTrigger('bar');
 
-      expect(trigger).toEqual({
+      expect(trigger).toMatchObject({
         description: 'foo',
         id: 'bar',
         title: 'baz',
@@ -97,6 +97,8 @@ describe('UiActionsService', () => {
       });
     });
   });
+
+  // describe('.createTriggerContext', () => {});
 
   describe('.getTriggerActions()', () => {
     const action1: Action = {
@@ -345,8 +347,9 @@ describe('UiActionsService', () => {
         id: 'bar',
         title: 'baz',
       });
+      const triggerContract = service.getTrigger('bar');
 
-      expect(triggers.get('bar')).toEqual({
+      expect(triggerContract).toMatchObject({
         description: 'foo',
         id: 'bar',
         title: 'baz',
