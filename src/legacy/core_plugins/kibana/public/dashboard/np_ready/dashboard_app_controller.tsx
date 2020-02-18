@@ -120,6 +120,7 @@ export class DashboardAppController {
     },
     history,
     kbnUrlStateStorage,
+    dashboardEmbeddableContainer,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -291,6 +292,11 @@ export class DashboardAppController {
     dashboardFactory
       .create(getDashboardInput())
       .then((container: DashboardContainer | ErrorEmbeddable) => {
+        if (container.type === DASHBOARD_CONTAINER_TYPE) {
+          dashboardEmbeddableContainer.setCurrentDashboard(container);
+        } else {
+          dashboardEmbeddableContainer.setCurrentDashboard(undefined);
+        }
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
 
@@ -910,9 +916,12 @@ export class DashboardAppController {
       if (outputSubscription) {
         outputSubscription.unsubscribe();
       }
-      if (dashboardContainer) {
-        dashboardContainer.destroy();
-      }
+      // Temp hack - there is an issue with destroying, you'll get an error if you call `updateInput` on a
+      // destroyed embeddable. Maybe we need to instead call this "unmount" or something to differentiate
+      // cleaning up the rendering from destroying, when an embeddable may be in memory but not on screen.
+      // if (dashboardContainer) {
+      //   dashboardContainer.destroy();
+      // }
     });
   }
 }

@@ -26,5 +26,8 @@ import { plugin } from './index';
     env: npSetup.plugins.kibanaLegacy.env,
   } as PluginInitializerContext);
   instance.setup(npSetup.core, npSetup.plugins);
-  instance.start(npStart.core, npStart.plugins);
+  instance.start(npStart.core, {
+    ...npStart.plugins,
+    dashboardEmbeddableContainer: npStart.plugins.dashboard_embeddable_container,
+  });
 })();

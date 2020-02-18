@@ -29,6 +29,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
+import { DashboardStart } from '../../../../../plugins/dashboard_embeddable_container/public';
 import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
@@ -57,6 +58,7 @@ export interface VisualizePluginStartDependencies {
   navigation: NavigationStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
+  dashboardEmbeddableContainer: DashboardStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -74,6 +76,7 @@ export class VisualizePlugin implements Plugin {
     savedObjectsClient: SavedObjectsClientContract;
     share: SharePluginStart;
     visualizations: VisualizationsStart;
+    dashboardEmbeddableContainer: DashboardStart;
   } | null = null;
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -125,6 +128,7 @@ export class VisualizePlugin implements Plugin {
           visualizations,
           data: dataStart,
           share,
+          dashboardEmbeddableContainer,
         } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
@@ -150,6 +154,7 @@ export class VisualizePlugin implements Plugin {
           usageCollection,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
+          dashboardEmbeddableContainer,
         };
         setServices(deps);
 
@@ -178,7 +183,14 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
+    {
+      embeddable,
+      navigation,
+      data,
+      share,
+      visualizations,
+      dashboardEmbeddableContainer,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
@@ -187,6 +199,7 @@ export class VisualizePlugin implements Plugin {
       savedObjectsClient: core.savedObjects.client,
       share,
       visualizations,
+      dashboardEmbeddableContainer,
     };
   }
 

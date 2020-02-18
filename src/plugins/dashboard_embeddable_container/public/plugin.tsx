@@ -31,6 +31,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
+import { DashboardContainer } from './embeddable';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
@@ -44,10 +45,16 @@ interface StartDependencies {
 }
 
 export type Setup = void;
-export type Start = void;
+
+export interface DashboardStart {
+  getCurrentDashboard: () => DashboardContainer | undefined;
+  setCurrentDashboard: (dashboard: DashboardContainer | undefined) => void;
+}
 
 export class DashboardEmbeddableContainerPublicPlugin
-  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
+  private currentDashboard: DashboardContainer | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
@@ -56,7 +63,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): Start {
+  public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
@@ -95,6 +102,11 @@ export class DashboardEmbeddableContainerPublicPlugin
     });
 
     embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    return {
+      getCurrentDashboard: () => this.currentDashboard,
+      setCurrentDashboard: dashboard => (this.currentDashboard = dashboard),
+    };
   }
 
   public stop() {}

@@ -152,12 +152,33 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     }
   }
 
-  public async create() {
-    // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
-    // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    showNewVisModal({
-      editorParams: ['addToDashboard'],
-    });
-    return undefined;
+  // These changes don't actually get called because I ran into issues serializing `savedVis` but
+  // we might be able to reuse this embeddable type by doing something like this. If not, you could
+  // create a new embeddable type.
+  public async create(input: Partial<VisualizeInput>) {
+    if (!input) {
+      // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
+      // to allow for in place creation of visualizations without having to navigate away to a new URL.
+      showNewVisModal({
+        editorParams: ['addToDashboard'],
+      });
+      return undefined;
+    } else {
+      const indexPattern = await getIndexPattern(input.savedVis);
+      const indexPatterns = indexPattern ? [indexPattern] : [];
+      return new VisualizeEmbeddable(
+        this.timefilter,
+        {
+          savedVisualization: input.savedVis,
+          indexPatterns,
+          editUrl: '',
+          editable: this.isEditable(),
+          appState: input.appState,
+          uiState: input.uiState,
+        },
+        input,
+        parent
+      );
+    }
   }
 }

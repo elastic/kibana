@@ -29,4 +29,5 @@ instance.setup(npSetup.core, npSetup.plugins);
 instance.start(npStart.core, {
   ...npStart.plugins,
   visualizations,
+  dashboardEmbeddableContainer: npStart.plugins.dashboard_embeddable_container,
 });

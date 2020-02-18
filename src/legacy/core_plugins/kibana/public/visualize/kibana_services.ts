@@ -27,6 +27,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
+import { DashboardStart } from '../../../../../plugins/dashboard_embeddable_container/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
@@ -60,6 +61,7 @@ export interface VisualizeKibanaServices {
   usageCollection?: UsageCollectionSetup;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
+  dashboardEmbeddableContainer: DashboardStart;
 }
 
 let services: VisualizeKibanaServices | null = null;

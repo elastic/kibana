@@ -47,6 +47,7 @@ import {
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 import { getQueryStateContainer } from '../../../../../plugins/data/public';
+import { DashboardStart } from '../../../../../plugins/dashboard_embeddable_container/public';
 
 export interface DashboardPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -54,6 +55,7 @@ export interface DashboardPluginStartDependencies {
   navigation: NavigationStart;
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  dashboardEmbeddableContainer: DashboardStart;
 }
 
 export interface DashboardPluginSetupDependencies {
@@ -69,6 +71,7 @@ export class DashboardPlugin implements Plugin {
     embeddable: IEmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
+    dashboardEmbeddableContainer: DashboardStart;
     dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   } | null = null;
 
@@ -114,6 +117,7 @@ export class DashboardPlugin implements Plugin {
           share,
           data: dataStart,
           dashboardConfig,
+          dashboardEmbeddableContainer,
         } = this.startDependencies;
         const savedDashboards = createSavedDashboardLoader({
           savedObjectsClient,
@@ -139,6 +143,7 @@ export class DashboardPlugin implements Plugin {
           embeddable,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
+          dashboardEmbeddableContainer,
         };
         const { renderApp } = await import('./np_ready/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
@@ -178,6 +183,7 @@ export class DashboardPlugin implements Plugin {
       embeddable,
       navigation,
       data,
+      dashboardEmbeddableContainer,
       share,
       kibanaLegacy: { dashboardConfig },
     }: DashboardPluginStartDependencies
@@ -189,6 +195,7 @@ export class DashboardPlugin implements Plugin {
       navigation,
       share,
       dashboardConfig,
+      dashboardEmbeddableContainer,
     };
   }
 

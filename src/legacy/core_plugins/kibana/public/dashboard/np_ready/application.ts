@@ -28,6 +28,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
 } from 'kibana/public';
+import { DashboardStart } from '../../../../../../plugins/dashboard_embeddable_container/public';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
@@ -65,6 +66,7 @@ export interface RenderDeps {
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
+  dashboardEmbeddableContainer: DashboardStart;
 }
 
 let angularModuleInstance: IModule | null = null;
