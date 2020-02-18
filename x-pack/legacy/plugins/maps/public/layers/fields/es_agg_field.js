@@ -80,4 +80,8 @@ export class ESAggMetricField extends AbstractField {
   async getOrdinalFieldMetaRequest(config) {
     return this._esDocField.getOrdinalFieldMetaRequest(config);
   }
+
+  async getCategoricalFieldMetaRequest() {
+    return this._esDocField.getCategoricalFieldMetaRequest();
+  }
 }
