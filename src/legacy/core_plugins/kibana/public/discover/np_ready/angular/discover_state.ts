@@ -108,10 +108,8 @@ export function getState({
     flush: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     replaceUrlState: async () => {
-      // make sure url ('_a') matches initial state
-      if (!_.isEqual(initialAppState, appStateFromUrl)) {
-        await stateStorage.set('_a', initialAppState, { replace: true });
-      }
+      await stateStorage.set('_a', appStateContainer.getState(), { replace: true });
+      await stateStorage.set('_g', globalStateContainer.getState(), { replace: true });
     },
   };
 }
@@ -147,7 +145,6 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
  * helper function to extract filters of the given state
  * returns a state object without filters and an array of filters
  */
-
 export function splitState(state: AppState | GlobalState = {}) {
   const { filters = [], ...statePartial } = state;
   return { filters, state: statePartial };

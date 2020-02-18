@@ -128,9 +128,8 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const { appStateContainer, replaceUrlState } = getState({});
+              const { appStateContainer } = getState({});
               const { index } = appStateContainer.getState();
-              replaceUrlState();
               const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
               return Promise.props({
                 list: indexPatternList,
@@ -195,13 +194,14 @@ function discoverController(
   const {
     appStateContainer,
     globalStateContainer,
-    start,
-    stop,
+    start: startStateSync,
+    stop: stopStateSync,
     syncAppState,
     syncGlobalState,
     getAppFilters,
     getGlobalFilters,
     resetInitialAppState,
+    replaceUrlState,
     isAppStateDirty,
   } = getState({
     defaultAppState: getStateDefaults(),
@@ -213,7 +213,7 @@ function discoverController(
 
   filterManager.setFilters(cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
 
-  appStateContainer.subscribe(newState => {
+  const appStateUnsubscribe = appStateContainer.subscribe(newState => {
     const { filters: newStateFilters, state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState($scope.state);
 
@@ -226,7 +226,7 @@ function discoverController(
     }
   });
 
-  globalStateContainer.subscribe(newState => {
+  const globalStateUnsubscribe = globalStateContainer.subscribe(newState => {
     const { filters: newStateFilters } = splitState(newState);
 
     const { time, refreshInterval } = newState;
@@ -268,17 +268,18 @@ function discoverController(
         if (!isEqualFilters(appFiltersState, appFilters)) {
           syncAppState({
             filters: appFilters.map(filter => {
-              delete filter.meta.value;
+              if (typeof filter.meta.value === 'function') {
+                delete filter.meta.value;
+              }
               return filter;
             }),
           });
         }
+        $scope.state.filters = appFilters;
         $scope.updateDataSource();
       },
     })
   );
-
-  start();
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),
@@ -313,7 +314,9 @@ function discoverController(
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
-    stop();
+    appStateUnsubscribe();
+    globalStateUnsubscribe();
+    stopStateSync();
   });
 
   const getTopNavLinks = () => {
@@ -630,8 +633,8 @@ function discoverController(
     );
   };
 
-  const init = _.once(function() {
-    $scope.updateDataSource().then(function() {
+  const init = _.once(() => {
+    $scope.updateDataSource().then(async () => {
       const searchBarChanges = merge(
         timefilter.getAutoRefreshFetch$(),
         timefilter.getFetch$(),
@@ -747,7 +750,8 @@ function discoverController(
       }
 
       init.complete = true;
-      //$state.replace();
+      await replaceUrlState();
+      startStateSync();
 
       if (shouldSearchOnPageLoad()) {
         $fetchObservable.next();
@@ -780,7 +784,7 @@ function discoverController(
             kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
           } else {
             // Update defaults so that "reload saved query" functions correctly
-            $state.setDefaults(getStateDefaults());
+            syncAppState(getStateDefaults());
             docTitle.change(savedSearch.lastSavedTitle);
           }
         }
