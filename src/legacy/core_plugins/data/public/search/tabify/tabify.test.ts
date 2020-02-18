@@ -17,27 +17,29 @@
  * under the License.
  */
 
-import fixtures from 'fixtures/fake_hierarchical_data';
-import { cloneDeep } from 'lodash';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 import { tabifyAggResponse } from './tabify';
-import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
+import { IAggConfig, IAggConfigs, AggGroupNames, Schemas, AggConfigs } from '../aggs';
+
+// @ts-ignore
+import fixtures from '../../../../../../fixtures/fake_hierarchical_data';
 
 jest.mock('ui/new_platform');
 
 describe('tabifyAggResponse Integration', () => {
-  const createAggConfigs = (aggs = []) => {
+  const createAggConfigs = (aggs: IAggConfig[] = []) => {
     const field = {
       name: '@timestamp',
     };
 
-    const indexPattern = {
+    const indexPattern = ({
       id: '1234',
       title: 'logstash-*',
       fields: {
         getByName: () => field,
         filter: () => [field],
       },
-    };
+    } as unknown) as IndexPattern;
 
     return new AggConfigs(
       indexPattern,
@@ -52,6 +54,8 @@ describe('tabifyAggResponse Integration', () => {
       ]).all
     );
   };
+
+  const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;
 
   test('transforms a simple response properly', () => {
     const aggConfigs = createAggConfigs();
@@ -71,19 +75,19 @@ describe('tabifyAggResponse Integration', () => {
   });
 
   describe('transforms a complex response', () => {
-    let avg;
-    let ext;
-    let src;
-    let os;
-    let esResp;
-    let aggConfigs;
+    let avg: IAggConfig;
+    let ext: IAggConfig;
+    let src: IAggConfig;
+    let os: IAggConfig;
+    let esResp: typeof fixtures.threeTermBuckets;
+    let aggConfigs: IAggConfigs;
 
     beforeEach(() => {
       aggConfigs = createAggConfigs([
-        { type: 'avg', schema: 'metric', params: { field: '@timestamp' } },
-        { type: 'terms', schema: 'split', params: { field: '@timestamp' } },
-        { type: 'terms', schema: 'segment', params: { field: '@timestamp' } },
-        { type: 'terms', schema: 'segment', params: { field: '@timestamp' } },
+        mockAggConfig({ type: 'avg', schema: 'metric', params: { field: '@timestamp' } }),
+        mockAggConfig({ type: 'terms', schema: 'split', params: { field: '@timestamp' } }),
+        mockAggConfig({ type: 'terms', schema: 'segment', params: { field: '@timestamp' } }),
+        mockAggConfig({ type: 'terms', schema: 'segment', params: { field: '@timestamp' } }),
       ]);
 
       avg = aggConfigs.aggs[0];
@@ -91,25 +95,27 @@ describe('tabifyAggResponse Integration', () => {
       src = aggConfigs.aggs[2];
       os = aggConfigs.aggs[3];
 
-      esResp = cloneDeep(fixtures.threeTermBuckets);
-      // remove the buckets for css              in MX
+      esResp = fixtures.threeTermBuckets;
       esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
     });
 
     // check that the columns of a table are formed properly
-    function expectColumns(table, aggs) {
+    function expectColumns(table: ReturnType<typeof tabifyAggResponse>, aggs: IAggConfig[]) {
       expect(table.columns).toHaveLength(aggs.length);
 
-      aggs.forEach(function(agg, i) {
+      aggs.forEach((agg, i) => {
         expect(table.columns[i]).toHaveProperty('aggConfig', agg);
       });
     }
 
     // check that a row has expected values
-    function expectRow(row, asserts) {
+    function expectRow(
+      row: Record<string, string>,
+      asserts: Array<(val: string | number) => void>
+    ) {
       expect(typeof row).toBe('object');
 
-      asserts.forEach(function(assert, i) {
+      asserts.forEach((assert, i: number) => {
         if (row[`col-${i}`]) {
           assert(row[`col-${i}`]);
         }
@@ -117,23 +123,23 @@ describe('tabifyAggResponse Integration', () => {
     }
 
     // check for two character country code
-    function expectCountry(val) {
+    function expectCountry(val: string | number) {
       expect(typeof val).toBe('string');
       expect(val).toHaveLength(2);
     }
 
     // check for an OS term
-    function expectExtension(val) {
+    function expectExtension(val: string | number) {
       expect(val).toMatch(/^(js|png|html|css|jpg)$/);
     }
 
     // check for an OS term
-    function expectOS(val) {
+    function expectOS(val: string | number) {
       expect(val).toMatch(/^(win|mac|linux)$/);
     }
 
     // check for something like an average bytes result
-    function expectAvgBytes(val) {
+    function expectAvgBytes(val: string | number) {
       expect(typeof val).toBe('number');
       expect(val === 0 || val > 1000).toBeDefined();
     }

@@ -51,7 +51,7 @@ describe('get columns', () => {
     );
   };
 
-  it('should inject a count metric if no aggs exist', () => {
+  test('should inject a count metric if no aggs exist', () => {
     const columns = tabifyGetColumns(createAggConfigs().aggs, true);
 
     expect(columns).toHaveLength(1);
@@ -59,7 +59,7 @@ describe('get columns', () => {
     expect(columns[0].aggConfig.type).toHaveProperty('name', 'count');
   });
 
-  it('should inject a count metric if only buckets exist', () => {
+  test('should inject a count metric if only buckets exist', () => {
     const columns = tabifyGetColumns(
       createAggConfigs([
         {
@@ -76,7 +76,7 @@ describe('get columns', () => {
     expect(columns[1].aggConfig.type).toHaveProperty('name', 'count');
   });
 
-  it('should inject the metric after each bucket if the vis is hierarchical', () => {
+  test('should inject the metric after each bucket if the vis is hierarchical', () => {
     const columns = tabifyGetColumns(
       createAggConfigs([
         {
@@ -111,7 +111,7 @@ describe('get columns', () => {
     });
   });
 
-  it('should inject the multiple metrics after each bucket if the vis is hierarchical', () => {
+  test('should inject the multiple metrics after each bucket if the vis is hierarchical', () => {
     const columns = tabifyGetColumns(
       createAggConfigs([
         {
@@ -163,7 +163,7 @@ describe('get columns', () => {
     }
   });
 
-  it('should put all metrics at the end of the columns if the vis is not hierarchical', () => {
+  test('should put all metrics at the end of the columns if the vis is not hierarchical', () => {
     const columns = tabifyGetColumns(
       createAggConfigs([
         {

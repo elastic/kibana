@@ -18,10 +18,14 @@
  */
 
 import { IAggConfigs } from '../aggs/agg_configs';
+import { AggColumn } from './get_columns';
 import { TabbedResponseWriterOptions } from './types';
 
 export function tabifyAggResponse(
   aggs: IAggConfigs,
   esResponse: unknown,
   respOpts?: Partial<TabbedResponseWriterOptions>
-): Record<string, string>;
+): {
+  columns: AggColumn[];
+  rows: Array<Record<string, any>>;
+};

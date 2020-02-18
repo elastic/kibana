@@ -19,11 +19,11 @@
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
-import { AggConfig } from '../aggs/agg_config';
+import { IAggConfig } from '../aggs';
 import { TimeRange } from './types';
 import { AggResponseBucket } from '../types';
 
-type AggParams = AggConfig['params'] & {
+type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;
   ranges: TimeRange[];
 };
@@ -35,7 +35,7 @@ export class TabifyBuckets {
   _keys: any[] = [];
 
   constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRange) {
-    if (aggResp.buckets) {
+    if (aggResp && aggResp.buckets) {
       this.buckets = aggResp.buckets;
     } else if (aggResp) {
       // Some Bucket Aggs only return a single bucket (like filter).

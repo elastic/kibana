@@ -19,8 +19,8 @@
 
 export { aggTypes } from './agg_types';
 export { AggType } from './agg_type';
-export { AggConfig } from './agg_config';
-export { AggConfigs } from './agg_configs';
+export { AggConfig, IAggConfig } from './agg_config';
+export { AggConfigs, IAggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
 export { MetricAggType } from './metrics/metric_agg_type';
 export { AggTypeFilters } from './filter';
