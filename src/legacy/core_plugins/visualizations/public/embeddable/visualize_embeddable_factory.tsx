@@ -146,14 +146,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     const savedVisualizations = this.getSavedVisualizationsLoader();
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const config = {
-        vis: savedObject.vis,
-        indexPattern: getIndexPattern(savedObject),
-        title: savedObject.title,
-        searchSource: savedObject.searchSource,
-        visState: savedObject.visState,
-      };
-      return this.createFromConfig(config, input, parent);
+      return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
