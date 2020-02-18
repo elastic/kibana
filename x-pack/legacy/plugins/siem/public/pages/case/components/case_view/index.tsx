@@ -213,14 +213,19 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
     },
   ];
 
+  const onCancel = useCallback(() => setIsEditTitle(false), []);
+  const onSubmit = useCallback(() => onUpdateField('title', title), []);
+  const onTitleChange = useCallback(newTitle => setTitle(newTitle), [title]);
+  const onClickEditIcon = useCallback(() => setIsEditTitle(true), []);
+
   const titleNode = (
     <EditableTitle
       isLoading={isLoading}
       title={title}
-      onClickEditIcon={() => setIsEditTitle(true)}
-      onChange={newTitle => setTitle(newTitle)}
-      onSubmit={() => onUpdateField('title', title)}
-      onCancel={() => setIsEditTitle(false)}
+      onClickEditIcon={onClickEditIcon}
+      onChange={onTitleChange}
+      onSubmit={onSubmit}
+      onCancel={onCancel}
       submitTitle={i18n.SUBMIT}
       cancelTitle={i18n.CANCEL}
       editMode={isEditTitle}
