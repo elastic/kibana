@@ -88,6 +88,10 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
+    if (!this.props.useCustomColorMap) {
+      return null;
+    }
+
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
       return (
         <Fragment>
