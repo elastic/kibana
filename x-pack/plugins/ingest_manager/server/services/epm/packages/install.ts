@@ -5,8 +5,8 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { AssetReference, Installation, KibanaAssetType } from '../../../../common/types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AssetReference, Installation, KibanaAssetType } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';

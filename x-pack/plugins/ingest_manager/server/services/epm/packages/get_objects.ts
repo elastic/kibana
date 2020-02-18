@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server/';
-import { AssetType } from '../../../../common/types';
+import { AssetType } from '../../../types';
 import * as Registry from '../registry';
 
 type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;

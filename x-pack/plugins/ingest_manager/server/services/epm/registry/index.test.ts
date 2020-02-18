@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetParts } from '../../../../common/types';
+import { AssetParts } from '../../../types';
 import { pathParts } from './index';
 
 const testPaths = [

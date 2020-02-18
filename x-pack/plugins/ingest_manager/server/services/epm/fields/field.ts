@@ -5,7 +5,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { RegistryPackage } from '../../../../common/types';
+import { RegistryPackage } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39

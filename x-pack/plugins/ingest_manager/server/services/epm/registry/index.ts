@@ -14,7 +14,7 @@ import {
   KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
-} from '../../../../common/types';
+} from '../../../types';
 import { configService } from '../../';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';

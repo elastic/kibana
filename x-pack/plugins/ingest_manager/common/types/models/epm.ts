@@ -16,7 +16,14 @@ export enum InstallationStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
 }
+export enum InstallStatus {
+  installed = 'installed',
+  notInstalled = 'not_installed',
+  installing = 'installing',
+  uninstalling = 'uninstalling',
+}
 
+export type DetailViewPanelName = 'overview' | 'data-sources';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -146,9 +153,14 @@ interface PackageAdditions {
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 
-export type PackageListItem = Installable<RegistrySearchResult & PackageAdditions>;
+export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
-export type PackageInfo = Installable<RegistryPackage & PackageAdditions>;
+export type PackageInfo = Installable<
+  // remove the properties we'll be altering/replacing from the base type
+  Omit<RegistryPackage, keyof PackageAdditions> &
+    // now add our replacement definitions
+    PackageAdditions
+>;
 
 export interface Installation extends SavedObjectAttributes {
   installed: AssetReference[];

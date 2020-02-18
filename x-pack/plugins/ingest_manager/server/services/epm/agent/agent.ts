@@ -5,7 +5,7 @@
  */
 
 import Handlebars from 'handlebars';
-import { VarsEntry } from '../../../../common/types';
+import { VarsEntry } from '../../../types';
 
 /**
  * This takes a dataset object as input and merges it with the input template.

@@ -5,5 +5,20 @@
  */
 
 import React from 'react';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 
-export const EPMApp: React.FC = () => <div>hello world - epm app</div>;
+import { Home } from './screens/home';
+import { Detail } from './screens/detail';
+
+export const EPMApp: React.FC = () => (
+  <Router>
+    <Switch>
+      <Route path="/epm/detail/:pkgkey/:panel?">
+        <Detail />
+      </Route>
+      <Route path="/epm/">
+        <Home />
+      </Route>
+    </Switch>
+  </Router>
+);

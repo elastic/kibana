@@ -7,12 +7,11 @@
 import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AssetType,
-  // ElasticsearchAssetType,
   Installable,
   Installation,
   InstallationStatus,
   KibanaAssetType,
-} from '../../../../common/types';
+} from '../../../types';
 
 export {
   getCategories,

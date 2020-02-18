@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../../common/types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../cluster_access';
 import { getInstallation, savedObjectTypes } from './index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
