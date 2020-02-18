@@ -55,8 +55,8 @@ describe('get_filter', () => {
         [],
         ['auditbeat-*']
       );
+      // This is only here to test some output filters of different KQL queries
       console.log(JSON.stringify(esQuery, null, 2));
-      // expect(esQuery).toEqual({});
     });
 
     test('ad-hoc template support part two', () => {
@@ -66,8 +66,8 @@ describe('get_filter', () => {
         [],
         ['auditbeat-*']
       );
+      // This is only here to test some output filters of different KQL queries
       console.log(JSON.stringify(esQuery, null, 2));
-      // expect(esQuery).toEqual({});
     });
 
     test('it should work with an empty filter as kuery', () => {
