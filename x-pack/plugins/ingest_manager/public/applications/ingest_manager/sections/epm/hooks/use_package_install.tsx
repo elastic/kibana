@@ -7,9 +7,9 @@
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { NotificationsStart } from 'src/core/public';
+import { toMountPoint } from 'src/plugins/kibana_react/public';
 import { useLinks } from '.';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { PackageInfo } from '../../../../../../common/types';
+import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
 import { InstallStatus } from '../types';
 
