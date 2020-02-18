@@ -8,7 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart } from '../../../../../src/core/public';
 
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';

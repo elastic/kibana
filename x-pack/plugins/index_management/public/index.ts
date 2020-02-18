@@ -7,10 +7,10 @@ import './index.scss';
 import { IndexMgmtUIPlugin, IndexMgmtSetup } from './plugin';
 
 /** @public */
-export { IndexMgmtSetup };
-
 export const plugin = () => {
   return new IndexMgmtUIPlugin();
 };
+
+export { IndexMgmtSetup };
 
 export { getIndexListUri } from './application/services/navigation';
