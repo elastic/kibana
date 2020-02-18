@@ -27,7 +27,6 @@ import {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
-  kibanaContextFunction,
   ExecutionContext,
 } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
