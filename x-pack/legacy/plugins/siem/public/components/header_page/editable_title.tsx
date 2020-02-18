@@ -16,6 +16,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
+import * as i18n from './translations';
+
 import { Title } from './title';
 
 const StyledEuiButtonIcon = styled(EuiButtonIcon)`
@@ -60,10 +62,11 @@ const EditableTitleComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
             {submitTitle}
+            {i18n.SUBMIT}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel}>{cancelTitle}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem />
