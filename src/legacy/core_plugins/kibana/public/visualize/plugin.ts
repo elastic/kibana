@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -28,12 +29,19 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
-import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  getQueryStateContainer,
+} from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import {
+  KibanaLegacySetup,
+  AngularRenderedAppUpdater,
+} from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
 import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
@@ -42,7 +50,6 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -53,12 +60,10 @@ export interface VisualizePluginStartDependencies {
 }
 
 export interface VisualizePluginSetupDependencies {
-  __LEGACY: {
-    legacyChrome: Chrome;
-  };
   home: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
+  data: DataPublicPluginSetup;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -70,46 +75,72 @@ export class VisualizePlugin implements Plugin {
     share: SharePluginStart;
     visualizations: VisualizationsStart;
   } | null = null;
+  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private stopUrlTracking: (() => void) | undefined = undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: CoreSetup,
-    { home, kibanaLegacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, usageCollection, data }: VisualizePluginSetupDependencies
   ) {
+    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
+      data.query
+    );
+    const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/kibana'),
+      defaultSubUrl: '#/visualize',
+      storageKey: 'lastUrl:visualize',
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          kbnUrlKey: '_g',
+          stateUpdate$: querySyncStateContainer.state$,
+        },
+      ],
+    });
+    this.stopUrlTracking = () => {
+      stopQuerySyncStateContainer();
+      stopUrlTracker();
+    };
+
     kibanaLegacy.registerLegacyApp({
       id: 'visualize',
       title: 'Visualize',
+      updater$: this.appStateUpdater.asObservable(),
+      navLinkId: 'kibana:visualize',
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
 
+        appMounted();
         const {
           savedObjectsClient,
           embeddable,
           navigation,
           visualizations,
-          data,
+          data: dataStart,
           share,
         } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
-          ...__LEGACY,
           pluginInitializerContext: this.initializerContext,
           addBasePath: coreStart.http.basePath.prepend,
           core: coreStart,
           chrome: coreStart.chrome,
-          data,
+          data: dataStart,
           embeddable,
           getBasePath: core.http.basePath.get,
-          indexPatterns: data.indexPatterns,
+          indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
           savedVisualizations: visualizations.getSavedVisualizationsLoader(),
-          savedQueryService: data.query.savedQueries,
+          savedQueryService: dataStart.query.savedQueries,
           share,
           toastNotifications: coreStart.notifications.toasts,
           uiSettings: coreStart.uiSettings,
@@ -118,11 +149,16 @@ export class VisualizePlugin implements Plugin {
           visualizations,
           usageCollection,
           I18nContext: coreStart.i18n.Context,
+          setActiveUrl,
         };
         setServices(deps);
 
         const { renderApp } = await import('./np_ready/application');
-        return renderApp(params.element, params.appBasePath, deps);
+        const unmount = renderApp(params.element, params.appBasePath, deps);
+        return () => {
+          unmount();
+          appUnMounted();
+        };
       },
     });
 
@@ -152,5 +188,11 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
+  }
+
+  stop() {
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
   }
 }
