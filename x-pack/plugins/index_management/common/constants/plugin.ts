@@ -9,7 +9,7 @@ import { LicenseType } from '../../../licensing/common/types';
 const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN = {
-  id: 'indexManagement',
+  id: 'index_management',
   minimumLicenseType: basicLicense,
   getI18nName: (i18n: any): string =>
     i18n.translate('xpack.idxMgmt.appTitle', {

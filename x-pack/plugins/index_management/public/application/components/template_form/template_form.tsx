@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useRef } from 'react';
+import React, { Fragment, useState, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -70,19 +70,25 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   const CurrentStepComponent = stepComponentMap[currentStep];
   const isStepValid = validation[currentStep].isValid;
 
-  const setStepDataGetter = (stepDataGetter: DataGetterFunc) => {
-    stepsDataGetters.current[currentStep] = stepDataGetter;
-  };
+  const setStepDataGetter = useCallback(
+    (stepDataGetter: DataGetterFunc) => {
+      stepsDataGetters.current[currentStep] = stepDataGetter;
+    },
+    [currentStep]
+  );
 
-  const onStepValidityChange = (isValid: boolean | undefined) => {
-    setValidation(prev => ({
-      ...prev,
-      [currentStep]: {
-        isValid,
-        errors: {},
-      },
-    }));
-  };
+  const onStepValidityChange = useCallback(
+    (isValid: boolean | undefined) => {
+      setValidation(prev => ({
+        ...prev,
+        [currentStep]: {
+          isValid,
+          errors: {},
+        },
+      }));
+    },
+    [currentStep]
+  );
 
   const validateAndGetDataFromCurrentStep = async () => {
     const validateAndGetData = stepsDataGetters.current[currentStep];

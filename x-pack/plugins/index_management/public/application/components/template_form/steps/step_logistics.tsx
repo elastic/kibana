@@ -77,7 +77,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
 
   useEffect(() => {
     setDataGetter(form.submit);
-  }, [form, setDataGetter]);
+  }, [form.submit, setDataGetter]);
 
   const { name, indexPatterns, order, version } = fieldsMeta;
 

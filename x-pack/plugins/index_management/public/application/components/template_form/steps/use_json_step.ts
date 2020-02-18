@@ -42,7 +42,7 @@ export const useJsonStep = ({
       setError(null);
     }
     return isValid;
-  }, [content, setError]);
+  }, [content]);
 
   const dataGetter = useCallback(() => {
     const isValid = validateContent();
