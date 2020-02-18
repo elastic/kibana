@@ -16,5 +16,6 @@ export function getAlertType(): AlertTypeModel {
     iconClass: 'bell',
     alertParamsExpression: ExampleExpression,
     validate: validateExampleAlertType,
+    defaultActionGroup: 'test',
   };
 }
