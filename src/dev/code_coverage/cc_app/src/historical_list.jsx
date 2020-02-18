@@ -34,16 +34,16 @@ const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
 export default function HistoricalList({testRunnerTypes, historicalItems, currentJobNumber }) {
   const renderWithRunners = renderItem(testRunnerTypes);
   return (
-    <div className="font-bold text-xl mb-2">
-      Current Job -
-      <a
-        className="App-link"
-        href={href(currentJobNumber)}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {currentJobNumber}
-      </a>
+    <div className="font-bold text-xl mb-2 flex-horizontal-center">
+      {/*Current Job -*/}
+      {/*<a*/}
+      {/*  className="App-link"*/}
+      {/*  href={href(currentJobNumber)}*/}
+      {/*  target="_blank"*/}
+      {/*  rel="noopener noreferrer"*/}
+      {/*>*/}
+      {/*  {currentJobNumber}*/}
+      {/*</a>*/}
       <ul>
         {historicalItems.reverse().map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
       </ul>

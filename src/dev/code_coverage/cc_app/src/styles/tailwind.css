@@ -13303,6 +13303,13 @@ video {
   }
 }
 
+.flex-horizontal-center {
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: center;
+          justify-content: center;
+}
+
 @media (min-width: 640px) {
   .sm\:sr-only {
     position: absolute;
