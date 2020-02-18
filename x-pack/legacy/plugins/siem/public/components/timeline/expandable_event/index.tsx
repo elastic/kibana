@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
-import { ColumnHeader } from '../body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
@@ -30,14 +30,14 @@ ExpandableDetails.displayName = 'ExpandableDetails';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   id: string;
   event: DetailItem[];
   forceExpand?: boolean;
   hideExpandButton?: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const ExpandableEvent = React.memo<Props>(
