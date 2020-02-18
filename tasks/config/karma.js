@@ -176,11 +176,11 @@ module.exports = function(grunt) {
    *  (&shard_num=Y), are added to the testing bundle url and read by the
    *  test_harness/setup_test_sharding[1] module. This allows us to use a
    *  different number of shards in different scenarios (ie. running
-   *  `yarn test:browser` runs the tests in a single shard, effectively
+   *  `yarn test:karma` runs the tests in a single shard, effectively
    *  disabling sharding)
    *
    *  These same parameters can also be defined in the URL/query string of the
-   *  karma debug page (started when you run `yarn test:dev`).
+   *  karma debug page (started when you run `yarn test:karma:debug`).
    *
    *  ## debugging
    *

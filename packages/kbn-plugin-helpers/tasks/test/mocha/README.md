@@ -20,14 +20,14 @@ Server tests are written just like browser tests, they are just executed differe
 running the tests
 =================
 
-Running the server tests is simple, just execute `yarn test:server` in your terminal
+Running the server tests is simple, just execute `yarn test:mocha` in your terminal
 and all of the tests in your server will be run.
 
 By default, the runner will look for tests in `server/**/__tests__/**/*.js`. If you'd prefer to
-use a different collection of globs and files, you can specify them after the `yarn test:server`
+use a different collection of globs and files, you can specify them after the `yarn test:mocha`
 task, like so:
 
-`yarn test:server 'plugins/myplugins/server/__tests__/**/*.js'`
+`yarn test:mocha 'plugins/myplugins/server/__tests__/**/*.js'`
 
 NOTE: quoting the glob pattern is not required, but helps to avoid issues with globbing expansion
 in your shell.

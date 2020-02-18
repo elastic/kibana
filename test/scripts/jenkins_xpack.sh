@@ -4,7 +4,7 @@ source test/scripts/jenkins_test_setup.sh
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:browser
+checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:karma
 echo ""
 echo ""
 
