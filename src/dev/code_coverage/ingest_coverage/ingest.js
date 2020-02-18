@@ -44,11 +44,16 @@ export const ingest = log => async body => {
 ${pretty(body)}
 `);
   } catch (e) {
+    const red = color('red');
     const err = `
-### ES HOST (redacted): \n\t${color(redacted)}
-### INDEX: \n\t${color(index)}
+### ES HOST (redacted): \n\t${red(redacted)}
+### INDEX: \n\t${red(index)}
 ### Partial orig err stack: \n\t${partial(e.stack)}
-### BODY:\n${pretty(body)}
+### Item BODY:\n${pretty(body)}
+### Orig Err:\n${pretty(e.body.error)}
+
+### Troubleshooting Hint:
+${red('Perhaps the coverage data was not merged properly?\n')}
 `;
 
     throw createFailError(err);
@@ -68,8 +73,10 @@ function redact(x) {
     return x;
   }
 }
-function color(x) {
-  return chalk.red.bgWhiteBright(x);
+function color(whichColor) {
+  return function colorInner(x) {
+    return chalk[whichColor].bgWhiteBright(x);
+  }
 }
 function pretty(x) {
   return JSON.stringify(x, null, 2);
