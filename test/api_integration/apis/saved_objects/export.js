@@ -192,12 +192,9 @@ export default function({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, dashboard, index-pattern, query, search, url, visualization]]]',
-                validation: {
-                  source: 'payload',
-                  keys: ['type.0'],
-                },
+                  '[request body.type]: types that failed validation:\n' +
+                  '- [request body.type.0]: expected value of type [string] but got [Array]\n' +
+                  '- [request body.type.1.0]: wigwags is not exportable',
               });
             });
         });
@@ -215,8 +212,7 @@ export default function({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"value" must be an object',
-                validation: { source: 'payload', keys: ['value'] },
+                message: '[request body]: expected a plain object value, but found [null] instead.',
               });
             });
         });
@@ -421,8 +417,7 @@ export default function({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"value" contains a conflict between exclusive peers [type, objects]',
-                validation: { source: 'payload', keys: ['value'] },
+                message: `Can't specify both "types" and "objects" properties when exporting`,
               });
             });
         });

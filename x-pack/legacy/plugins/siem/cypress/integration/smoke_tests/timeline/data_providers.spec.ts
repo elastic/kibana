@@ -13,7 +13,8 @@ import {
 } from '../../../tasks/hosts/all_hosts';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
-import { openTimeline, createNewTimeline } from '../../../tasks/timeline/main';
+import { createNewTimeline } from '../../../tasks/timeline/main';
+import { openTimeline } from '../../../tasks/siem_main';
 import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DATA_PROVIDERS,

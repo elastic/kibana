@@ -85,7 +85,7 @@ export class Collector<T = unknown, U = T> {
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: this.type,
-      payload: result,
+      payload: (result as unknown) as U,
     };
   }
 }

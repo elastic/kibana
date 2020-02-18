@@ -12,7 +12,7 @@ import {
   AlertStates,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from './types';
-import { AlertServices } from '../../../../../alerting/server/types';
+import { AlertServices } from '../../../../alerting/server/types';
 
 const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',

@@ -7,13 +7,8 @@
 import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-  Logger,
-} from '../../../../types';
+import { ReportingCore } from '../../../../server';
+import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -27,12 +22,13 @@ import {
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingCore,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+  parentLogger: Logger
 ) {
+  const browserDriverFactory = await reporting.getBrowserDriverFactory();
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
@@ -43,7 +39,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ server, job, conditionalHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ reporting, server, job, conditionalHeaders })),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ server, job });
 
