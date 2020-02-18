@@ -77,8 +77,6 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
   const {
     services: { triggers_actions_ui: triggers },
   } = kibana;
-  console.log('kibana', kibana);
-  console.log('services', kibana.services);
   const {
     services: {
       data: { fieldFormats },

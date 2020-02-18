@@ -39,7 +39,7 @@ export const getKibanaFrameworkAdapter = (
     i18n,
   } = core;
   const { triggers_actions_ui } = plugins;
-  const getAlertyType = (): AlertTypeModel => ({
+  const getAlertType = (): AlertTypeModel => ({
     id: 'xpack.uptime.alerts.downMonitor',
     name: 'Uptime Monitor Status',
     iconClass: 'alert',
@@ -49,7 +49,7 @@ export const getKibanaFrameworkAdapter = (
     validate: (alertParams: any): ValidationResult => ({ errors: {} }),
     defaultActionMessage: 'Monitor [{{ctx.metadata.name}}] is down',
   });
-  triggers_actions_ui.alertTypeRegistry.register(getAlertyType());
+  triggers_actions_ui.alertTypeRegistry.register(getAlertType());
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
@@ -96,9 +96,6 @@ export const getKibanaFrameworkAdapter = (
   return {
     // TODO: these parameters satisfy the interface but are no longer needed
     render: async (element: any) => {
-      console.log('the thing', props);
-      console.log('element from the other thing', element);
-      // const node = await document.getElementById('react-uptime-root');
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
       }

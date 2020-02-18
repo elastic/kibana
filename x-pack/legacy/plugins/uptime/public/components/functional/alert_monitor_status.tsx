@@ -6,19 +6,16 @@
 
 import React, { useState } from 'react';
 import {
-  EuiComboBox,
   EuiExpression,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  Option,
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import { KueryBar } from '../connected';
-
 
 interface AlertMonitorStatusProps {
   autocomplete: any;
@@ -67,19 +64,12 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   );
 };
 
-// WHEN ANY PING MATCHING [kql]
-// IS [status] MORE THAN [numtimes] times
-// WITHIN [timerange]
-// IN [location option]
-
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (
   props: AlertMonitorStatusProps
 ) => {
-  console.log('props', props);
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [locations, setLocations] = useState<Option[]>(
     props.locations.map(l => ({
       disabled: allLabels,
@@ -92,29 +82,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (
   setAlertParams(
     'locations',
     locations.filter(l => l.checked === 'on').map(l => l.label)
-  );
-  console.log(
-    `state:\nnumTimes: ${numTimes}\nnumMins: ${numMins}\nlocations: ${JSON.stringify(
-      locations,
-      null,
-      2
-    )}`
-  );
-  console.log(
-    'the value',
-
-    locations.length === 0 || allLabels
-      ? 'all locations'
-      : locations
-          .filter(l => l.checked === 'on')
-          .map(l => l.label)
-          .sort()
-          .reduce((acc, cur) => {
-            if (acc === '') {
-              return cur;
-            }
-            return acc + `, ${cur}`;
-          }, '')
   );
   return (
     <>

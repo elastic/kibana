@@ -53,7 +53,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     });
 
     if (monitors.length) {
-      // @ts-ignore TODO: fix this
       const alertInstance = options.services.alertInstanceFactory(server);
       alertInstance.replaceState({
         monitors,

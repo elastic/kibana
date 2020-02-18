@@ -5,12 +5,10 @@
  */
 
 import chrome from 'ui/chrome';
-import { npStart, npSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { Plugin } from './plugin';
 import 'uiExports/embeddableFactories';
 
-console.log('npstart', npStart);
-console.log('npsetup', npSetup);
 const plugin = new Plugin(
   { opaqueId: Symbol('uptime'), env: {} as any, config: { get: () => ({} as any) } },
   chrome
