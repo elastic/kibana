@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { EventsTable } from '../events_table';
@@ -68,6 +69,8 @@ export const CalendarForm = ({
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
+  isGlobalCalendar,
+  onGlobalCalendarChange,
 }) => {
   const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
@@ -81,7 +84,9 @@ export const CalendarForm = ({
 
   return (
     <EuiForm>
-      {!isEdit && (
+      {isEdit === true ? (
+        <EditHeader calendarId={calendarId} description={description} />
+      ) : (
         <Fragment>
           <EuiTitle>
             <h1>
@@ -128,7 +133,28 @@ export const CalendarForm = ({
           </EuiFormRow>
         </Fragment>
       )}
-      {isEdit && <EditHeader calendarId={calendarId} description={description} />}
+
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.allJobsTitle"
+            defaultMessage="Apply to all jobs"
+          />
+        }
+      >
+        <EuiSwitch
+          name="switch"
+          label={
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+              defaultMessage="Apply calendar to all jobs"
+            />
+          }
+          checked={isGlobalCalendar}
+          onChange={onGlobalCalendarChange}
+        />
+      </EuiFormRow>
+
       <EuiFormRow
         label={
           <FormattedMessage
@@ -141,7 +167,7 @@ export const CalendarForm = ({
           options={jobIds}
           selectedOptions={selectedJobOptions}
           onChange={onJobSelection}
-          isDisabled={saving === true || canCreateCalendar === false}
+          isDisabled={saving === true || canCreateCalendar === false || isGlobalCalendar === true}
         />
       </EuiFormRow>
 
@@ -158,7 +184,7 @@ export const CalendarForm = ({
           options={groupIds}
           selectedOptions={selectedGroupOptions}
           onChange={onGroupSelection}
-          isDisabled={saving === true || canCreateCalendar === false}
+          isDisabled={saving === true || canCreateCalendar === false || isGlobalCalendar === true}
         />
       </EuiFormRow>
 
@@ -240,4 +266,6 @@ CalendarForm.propTypes = {
   selectedGroupOptions: PropTypes.array.isRequired,
   selectedJobOptions: PropTypes.array.isRequired,
   showNewEventModal: PropTypes.func.isRequired,
+  isGlobalCalendar: PropTypes.bool.isRequired,
+  onGlobalCalendarChange: PropTypes.func.isRequired,
 };
