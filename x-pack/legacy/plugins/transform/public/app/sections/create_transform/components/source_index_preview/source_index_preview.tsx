@@ -16,7 +16,6 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiProgress,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,7 +24,12 @@ import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
-import { EsFieldName, PivotQuery } from '../../../../common';
+import {
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
+  EsFieldName,
+  PivotQuery,
+} from '../../../../common';
 
 import { getSourceIndexDevConsoleStatement } from './common';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
@@ -139,7 +143,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview error">
+      <div data-test-subj="transformSourceIndexPreview error">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
@@ -152,13 +156,13 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
             {errorMessage}
           </EuiCodeBlock>
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
   if (status === SOURCE_INDEX_STATUS.LOADED && data.length === 0) {
     return (
-      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview empty">
+      <div data-test-subj="transformSourceIndexPreview empty">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate(
@@ -176,7 +180,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
             })}
           </p>
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
@@ -185,52 +189,38 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   });
 
   return (
-    <EuiPanel data-test-subj="transformSourceIndexPreview loaded">
+    <div data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                beforeMessage={euiCopyText}
-                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
-              >
-                {(copy: () => void) => (
-                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiCopy
+            beforeMessage={euiCopyText}
+            textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+          >
+            {(copy: () => void) => (
+              <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+            )}
+          </EuiCopy>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== SOURCE_INDEX_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
+      <div className="transform__progress">
+        {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+        {status !== SOURCE_INDEX_STATUS.LOADING && (
+          <EuiProgress size="xs" color="accent" max={1} value={0} />
+        )}
+      </div>
       {dataGridColumns.length > 0 && data.length > 0 && (
         <EuiDataGrid
           aria-label="Source index preview"
           columns={dataGridColumns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={{
-            border: 'all',
-            fontSize: 's',
-            cellPadding: 's',
-            stripes: true,
-            rowHover: 'highlight',
-            header: 'shade',
-          }}
+          gridStyle={euiDataGridStyle}
           rowCount={rowCount}
           renderCellValue={renderCellValue}
           sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={{
-            showColumnSelector: true,
-            showStyleSelector: false,
-            showSortSelector: true,
-            showFullScreenSelector: true,
-          }}
+          toolbarVisibility={euiDataGridToolbarSettings}
           pagination={{
             ...pagination,
             pageSizeOptions: [5, 10, 25],
@@ -239,6 +229,6 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
           }}
         />
       )}
-    </EuiPanel>
+    </div>
   );
 });

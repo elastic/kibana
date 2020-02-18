@@ -5,6 +5,7 @@
  */
 
 export { AggName, isAggName } from './aggregations';
+export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
 export {
   getDefaultSelectableFields,
   getFlattenedFields,

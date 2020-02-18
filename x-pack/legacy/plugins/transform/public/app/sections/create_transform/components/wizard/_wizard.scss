@@ -1,7 +1,20 @@
+.transform__progress progress[value]::-webkit-progress-bar {
+  background-color: $euiColorGhost;
+}
+
 .transform__steps {
   .euiStep__content {
     padding-right: 0px;
   }
+}
+
+.transform__stepDefineForm {
+  align-items: flex-start;
+}
+
+.transform__stepDefineFormLeftColumn {
+  min-width: 420px;
+  border-right: 1px solid $euiColorLightShade;
 }
 
 /*
@@ -12,5 +25,5 @@ future versions to blend in more with the overall design of the Kibana managemen
 The management section's navigation width is 192px + 24px right margin
 */
 .mgtPage__body--transformWizard {
-  max-width: calc(100% - 192px - 24px);
+  max-width: calc(100% - 216px);
 }

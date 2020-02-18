@@ -16,7 +16,6 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiProgress,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,6 +26,8 @@ import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
 import {
+  euiDataGridStyle,
+  euiDataGridToolbarSettings,
   EsFieldName,
   PreviewRequestBody,
   PivotAggsConfigDict,
@@ -174,7 +175,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false} data-test-subj="transformPivotPreview error">
+      <div data-test-subj="transformPivotPreview error">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
@@ -185,7 +186,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
         >
           <ErrorMessage message={errorMessage} />
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
@@ -208,7 +209,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
       );
     }
     return (
-      <EuiPanel grow={false} data-test-subj="transformPivotPreview empty">
+      <div data-test-subj="transformPivotPreview empty">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
@@ -218,7 +219,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
         >
           <p>{noDataMessage}</p>
         </EuiCallOut>
-      </EuiPanel>
+      </div>
     );
   }
 
@@ -227,35 +228,25 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
   }
 
   return (
-    <EuiPanel data-test-subj="transformPivotPreview loaded">
+    <div data-test-subj="transformPivotPreview loaded">
       <PreviewTitle previewRequest={previewRequest} />
-      {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== PIVOT_PREVIEW_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
+      <div className="transform__progress">
+        {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+        {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+          <EuiProgress size="xs" color="accent" max={1} value={0} />
+        )}
+      </div>
       {dataGridColumns.length > 0 && data.length > 0 && (
         <EuiDataGrid
           aria-label="Source index preview"
           columns={dataGridColumns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={{
-            border: 'all',
-            fontSize: 's',
-            cellPadding: 's',
-            stripes: true,
-            rowHover: 'highlight',
-            header: 'shade',
-          }}
+          gridStyle={euiDataGridStyle}
           inMemory={{ level: 'sorting' }}
           rowCount={data.length}
           renderCellValue={renderCellValue}
           sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={{
-            showColumnSelector: true,
-            showStyleSelector: false,
-            showSortSelector: true,
-            showFullScreenSelector: true,
-          }}
+          toolbarVisibility={euiDataGridToolbarSettings}
           pagination={{
             ...pagination,
             pageSizeOptions: [5, 10, 25],
@@ -264,6 +255,6 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
           }}
         />
       )}
-    </EuiPanel>
+    </div>
   );
 });
