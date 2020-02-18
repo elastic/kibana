@@ -14,8 +14,8 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
+import { useTimefilter } from '../../contexts/kibana';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
-import { useMlKibana } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -36,8 +36,7 @@ export const jobListRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
-  const { services } = useMlKibana();
-  const { timefilter } = services.data.query.timefilter;
+  const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
   const [globalState, setGlobalState] = useUrlState('_g');
 
@@ -48,9 +47,6 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   const blockRefresh = refreshValue === 0 || refreshPause === true;
 
   useEffect(() => {
-    timefilter.disableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-
     // If the refreshInterval defaults to 0s/pause=true, set it to 30s/pause=false,
     // otherwise pass on the globalState's settings to the date picker.
     const refreshInterval =

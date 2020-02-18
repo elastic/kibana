@@ -49,12 +49,14 @@ const createStartContract = (): VisualizationsStart => ({
   },
   getSavedVisualizationsLoader: jest.fn(),
   showNewVisModal: jest.fn(),
+  Vis: jest.fn(),
 });
 
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
   const setup = plugin.setup(coreMock.createSetup(), {
+    data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),

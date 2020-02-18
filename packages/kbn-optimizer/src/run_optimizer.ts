@@ -32,6 +32,7 @@ import {
   runWorkers,
   OptimizerInitializedEvent,
   createOptimizerReducer,
+  handleOptimizerCompletion,
 } from './optimizer';
 
 export type OptimizerUpdate = Update<OptimizerEvent, OptimizerState>;
@@ -77,6 +78,7 @@ export function runOptimizer(config: OptimizerConfig) {
         },
         createOptimizerReducer(config)
       );
-    })
+    }),
+    handleOptimizerCompletion(config)
   );
 }

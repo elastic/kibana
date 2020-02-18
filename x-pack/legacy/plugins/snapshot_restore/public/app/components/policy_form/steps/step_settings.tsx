@@ -147,10 +147,9 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             defaultMessage="Indices to back up."
           />
         }
-        idAria="indicesDescription"
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth describedByIds={['indicesDescription']}>
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             {isManagedPolicy ? (
               <EuiToolTip
@@ -352,14 +351,9 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           defaultMessage="Ignores indices that are unavailable when taking the snapshot. Otherwise, the entire snapshot will fail."
         />
       }
-      idAria="policyIgnoreUnavailableDescription"
       fullWidth
     >
-      <EuiFormRow
-        hasEmptyLabelSpace
-        describedByIds={['policyIgnoreUnavailableDescription']}
-        fullWidth
-      >
+      <EuiFormRow hasEmptyLabelSpace fullWidth>
         <EuiSwitch
           data-test-subj="ignoreUnavailableIndicesToggle"
           label={
@@ -397,10 +391,9 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           defaultMessage="Allows snapshots of indices with primary shards that are unavailable. Otherwise, the entire snapshot will fail."
         />
       }
-      idAria="policyPartialDescription"
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace describedByIds={['policyPartialDescription']} fullWidth>
+      <EuiFormRow hasEmptyLabelSpace fullWidth>
         <EuiSwitch
           data-test-subj="partialIndicesToggle"
           label={
@@ -438,14 +431,9 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           defaultMessage="Stores the global state of the cluster as part of the snapshot."
         />
       }
-      idAria="policyIncludeGlobalStateDescription"
       fullWidth
     >
-      <EuiFormRow
-        hasEmptyLabelSpace
-        describedByIds={['policyIncludeGlobalStateDescription']}
-        fullWidth
-      >
+      <EuiFormRow hasEmptyLabelSpace fullWidth>
         <EuiSwitch
           data-test-subj="globalStateToggle"
           label={

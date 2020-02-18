@@ -6,16 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-const analyzerSchema = {
-  tokenizer: schema.string(),
-  filter: schema.arrayOf(
-    schema.object({
-      type: schema.string(),
-      stopwords: schema.arrayOf(schema.maybe(schema.string())),
-    })
-  ),
-};
-
 export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
   query: schema.any(),
@@ -24,7 +14,7 @@ export const categorizationFieldExamplesSchema = {
   timeField: schema.maybe(schema.string()),
   start: schema.number(),
   end: schema.number(),
-  analyzer: schema.object(analyzerSchema),
+  analyzer: schema.any(),
 };
 
 export const chartSchema = {
