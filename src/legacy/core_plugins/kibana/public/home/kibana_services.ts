@@ -32,13 +32,13 @@ import {
   Environment,
   HomePublicPluginSetup,
   FeatureCatalogueEntry,
+  TutorialStart,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
   kibanaVersion: string;
-  getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
@@ -54,6 +54,7 @@ export interface HomeKibanaServices {
   addBasePath: (url: string) => string;
   environment: Environment;
   telemetry?: TelemetryPluginStart;
+  tutorialVariables: TutorialStart['get'];
 }
 
 let services: HomeKibanaServices | null = null;
