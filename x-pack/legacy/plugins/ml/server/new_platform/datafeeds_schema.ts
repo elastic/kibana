@@ -21,7 +21,7 @@ export const datafeedConfigSchema = schema.object({
   frequency: schema.maybe(schema.string()),
   indices: schema.arrayOf(schema.string()),
   indexes: schema.maybe(schema.arrayOf(schema.string())),
-  job_id: schema.string(),
+  job_id: schema.maybe(schema.string()),
   query: schema.maybe(schema.any()),
   max_empty_searches: schema.maybe(schema.number()),
   query_delay: schema.maybe(schema.string()),
