@@ -49,7 +49,7 @@ export class TabbedAggResponseWriter {
 
   constructor(
     aggs: IAggConfigs,
-    { metricsAtAllLevels = false, partialRows = false }: TabbedResponseWriterOptions
+    { metricsAtAllLevels = false, partialRows = false }: Partial<TabbedResponseWriterOptions>
   ) {
     this.partialRows = partialRows;
 

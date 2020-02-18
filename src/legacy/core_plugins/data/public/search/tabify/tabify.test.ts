@@ -90,10 +90,7 @@ describe('tabifyAggResponse Integration', () => {
         mockAggConfig({ type: 'terms', schema: 'segment', params: { field: '@timestamp' } }),
       ]);
 
-      avg = aggConfigs.aggs[0];
-      ext = aggConfigs.aggs[1];
-      src = aggConfigs.aggs[2];
-      os = aggConfigs.aggs[3];
+      [avg, ext, src, os] = aggConfigs.aggs;
 
       esResp = fixtures.threeTermBuckets;
       esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];

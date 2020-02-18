@@ -18,9 +18,10 @@
  */
 
 import { TabifyBuckets } from './buckets';
+import { AggGroupNames } from '../aggs';
 
 describe('Buckets wrapper', () => {
-  function check(aggResp: any, count: number, keys: string[]) {
+  const check = (aggResp: any, count: number, keys: string[]) => {
     test('reads the length', () => {
       const buckets = new TabifyBuckets(aggResp);
       expect(buckets).toHaveLength(count);
@@ -39,11 +40,11 @@ describe('Buckets wrapper', () => {
       expect(keysSent).toHaveLength(count);
       expect(keysSent).toEqual(keys);
     });
-  }
+  };
 
   describe('with object style buckets', () => {
     let aggResp: any = {
-      buckets: {
+      [AggGroupNames.Buckets]: {
         '0-100': {},
         '100-200': {},
         '200-300': {},
@@ -57,7 +58,7 @@ describe('Buckets wrapper', () => {
 
     test('should accept filters agg queries with strings', () => {
       aggResp = {
-        buckets: {
+        [AggGroupNames.Buckets]: {
           'response:200': {},
           'response:404': {},
         },
@@ -87,7 +88,7 @@ describe('Buckets wrapper', () => {
 
     test('should accept filters agg queries with query_string queries', () => {
       aggResp = {
-        buckets: {
+        [AggGroupNames.Buckets]: {
           'response:200': {},
           'response:404': {},
         },
@@ -117,7 +118,7 @@ describe('Buckets wrapper', () => {
 
     test('should accept filters agg queries with query dsl queries', () => {
       aggResp = {
-        buckets: {
+        [AggGroupNames.Buckets]: {
           '{match_all: {}}': {},
         },
       };
@@ -143,7 +144,7 @@ describe('Buckets wrapper', () => {
 
   describe('with array style buckets', () => {
     const aggResp = {
-      buckets: [
+      [AggGroupNames.Buckets]: [
         { key: '0-100', value: {} },
         { key: '100-200', value: {} },
         { key: '200-300', value: {} },
@@ -170,7 +171,7 @@ describe('Buckets wrapper', () => {
 
   describe('drop_partial option', () => {
     const aggResp = {
-      buckets: [
+      [AggGroupNames.Buckets]: [
         { key: 0, value: {} },
         { key: 100, value: {} },
         { key: 200, value: {} },

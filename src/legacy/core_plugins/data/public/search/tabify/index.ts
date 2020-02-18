@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { TabbedResponseWriterOptions } from './types';
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';
+
+export { TabbedResponseWriterOptions } from './types';
