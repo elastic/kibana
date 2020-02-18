@@ -12,7 +12,6 @@ import { TimelineDetailsQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-// import { SkeletonRow } from '../../../skeleton_row';
 import {
   OnColumnResized,
   OnPinEvent,

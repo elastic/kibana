@@ -127,7 +127,7 @@ export const Body = React.memo<BodyProps>(
       const measure = useCallback(() => {
         if (ref && ref.current) {
           rowHeights[index] = ref.current.getBoundingClientRect().height;
-          listRef.current.resetAfterIndex(index);
+          listRef.current && listRef.current.resetAfterIndex(index);
         }
       }, [ref]);
 
@@ -198,7 +198,7 @@ export const Body = React.memo<BodyProps>(
           itemSize={getItemSize}
           innerElementType={innerElementType}
           width="100%"
-          overscanCount={5}
+          overscanCount={0}
         >
           {Row}
         </VariableSizeList>

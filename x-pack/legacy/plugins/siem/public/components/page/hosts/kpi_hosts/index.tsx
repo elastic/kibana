@@ -64,9 +64,9 @@ export const KpiHostsComponentBase = ({
     </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
-      {/* {statItemsProps.map((mappedStatItemProps, idx) => {
+      {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
-      })} */}
+      })}
     </EuiFlexGroup>
   );
 };
