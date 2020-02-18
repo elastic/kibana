@@ -166,12 +166,12 @@ const ReputationLinkComponent: React.FC<{ itemsToShow?: number; domain: string }
           };
         })
     );
-  }, [domain]);
+  }, [domain, itemsToShow, setIpReputationLinks, defaultNameMapping]);
 
   return (
     <>
       {ipReputationLinks?.map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-        <EuiLink href={urlTemplate} target="_blank" key={urlTemplate}>
+        <EuiLink href={urlTemplate} target="_blank" key={`reputationLink-${id}`}>
           {name ?? domain}
           {id !== Math.max(0, ipReputationLinks?.length - 1) && ', '}
         </EuiLink>
