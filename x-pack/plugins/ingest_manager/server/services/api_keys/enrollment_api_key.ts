@@ -50,7 +50,7 @@ export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, 
 export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContract, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(soClient, id);
 
-  await invalidateAPIKey(enrollmentApiKey.api_key_id);
+  await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
 
   await soClient.delete(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id);
 }
@@ -91,7 +91,7 @@ export async function generateEnrollmentAPIKey(
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  const key = await createAPIKey(name, {});
+  const key = await createAPIKey(soClient, name, {});
 
   if (!key) {
     throw new Error('Unable to create an enrollment api key');

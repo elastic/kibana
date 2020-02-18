@@ -9,6 +9,7 @@ export enum OutputType {
 }
 
 export interface NewOutput {
+  is_default: boolean;
   name: string;
   type: OutputType;
   hosts?: string[];

@@ -30,6 +30,5 @@ export {
   // Defaults
   DEFAULT_AGENT_CONFIG_ID,
   DEFAULT_AGENT_CONFIG,
-  DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
 } from '../../common';

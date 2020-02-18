@@ -5,7 +5,7 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { NewOutput, Output } from '../types';
-import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
@@ -15,17 +15,12 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     adminUser: { username: string; password: string }
   ) {
-    let defaultOutput;
+    const outputs = await soClient.find({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      filter: 'outputs.attributes.is_default:true',
+    });
 
-    try {
-      defaultOutput = await this.get(soClient, DEFAULT_OUTPUT_ID);
-    } catch (err) {
-      if (!err.isBoom || err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    if (!defaultOutput) {
+    if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: [appContextService.getConfig()!.fleet.elasticsearch.host],
@@ -34,16 +29,28 @@ class OutputService {
         admin_password: adminUser.password,
       } as NewOutput;
 
-      await this.create(soClient, newDefaultOutput, {
-        id: DEFAULT_OUTPUT_ID,
-      });
+      await this.create(soClient, newDefaultOutput);
     }
   }
 
-  public async getAdminUser() {
+  public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      filter: 'outputs.attributes.is_default:true',
+    });
+
+    if (!outputs.saved_objects.length) {
+      throw new Error('No default output');
+    }
+
+    return outputs.saved_objects[0].id;
+  }
+
+  public async getAdminUser(soClient: SavedObjectsClientContract) {
+    const defaultOutputId = await this.getDefaultOutputId(soClient);
     const so = await appContextService
       .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, DEFAULT_OUTPUT_ID);
+      ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
 
     return {
       username: so!.attributes.admin_username,

@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, FakeRequest } from 'kibana/server';
+import { KibanaRequest, FakeRequest, SavedObjectsClientContract } from 'kibana/server';
 import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
 
-export async function createAPIKey(name: string, roleDescriptors: any) {
-  const adminUser = await outputService.getAdminUser();
+export async function createAPIKey(
+  soClient: SavedObjectsClientContract,
+  name: string,
+  roleDescriptors: any
+) {
+  const adminUser = await outputService.getAdminUser(soClient);
   const request: FakeRequest = {
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
@@ -39,8 +43,8 @@ export async function authenticate(callCluster: CallESAsCurrentUser) {
   }
 }
 
-export async function invalidateAPIKey(id: string) {
-  const adminUser = await outputService.getAdminUser();
+export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id: string) {
+  const adminUser = await outputService.getAdminUser(soClient);
   const request: FakeRequest = {
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
