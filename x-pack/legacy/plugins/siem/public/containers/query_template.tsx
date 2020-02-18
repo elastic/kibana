@@ -42,14 +42,14 @@ export class QueryTemplate<
 
   private refetch!: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>;
 
-  private executeBeforeFetchMore!: () => void;
+  private executeBeforeFetchMore!: ({ id }: { id?: string }) => void;
 
-  private executeBeforeRefetch!: () => void;
+  private executeBeforeRefetch!: ({ id }: { id?: string }) => void;
 
-  public setExecuteBeforeFetchMore = (val: () => void) => {
+  public setExecuteBeforeFetchMore = (val: ({ id }: { id?: string }) => void) => {
     this.executeBeforeFetchMore = val;
   };
-  public setExecuteBeforeRefetch = (val: () => void) => {
+  public setExecuteBeforeRefetch = (val: ({ id }: { id?: string }) => void) => {
     this.executeBeforeRefetch = val;
   };
 
@@ -70,12 +70,12 @@ export class QueryTemplate<
   };
 
   public wrappedLoadMore = (newCursor: string, tiebreaker?: string) => {
-    this.executeBeforeFetchMore();
+    this.executeBeforeFetchMore({ id: this.props.id });
     return this.fetchMore(this.fetchMoreOptions(newCursor, tiebreaker));
   };
 
   public wrappedRefetch = (variables?: TVariables) => {
-    this.executeBeforeRefetch();
+    this.executeBeforeRefetch({ id: this.props.id });
     return this.refetch(variables);
   };
 }

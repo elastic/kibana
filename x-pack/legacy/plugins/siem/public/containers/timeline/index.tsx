@@ -41,6 +41,10 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
+export interface CustomReduxProps {
+  clearSignalsState: ({ id }: { id?: string }) => void;
+}
+
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   eventType?: EventType;
@@ -52,7 +56,7 @@ export interface OwnProps extends QueryTemplateProps {
   fields: string[];
 }
 
-type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps;
+type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -70,8 +74,7 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
-      clearEventsDeleted,
-      clearEventsLoading,
+      clearSignalsState,
       eventType = 'raw',
       id,
       indexPattern,
@@ -101,12 +104,7 @@ class TimelineQueryComponent extends QueryTemplate<
       defaultIndex,
       inspect: isInspected,
     };
-    const clearSignalsState = () => {
-      if (id === SIGNALS_PAGE_TIMELINE_ID) {
-        clearEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID });
-        clearEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID });
-      }
-    };
+
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
         query={timelineQuery}
@@ -183,11 +181,12 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
-  clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
+  clearSignalsState: ({ id }: { id?: string }) => {
+    if (id != null && id === SIGNALS_PAGE_TIMELINE_ID) {
+      dispatch(timelineActions.clearEventsLoading({ id }));
+      dispatch(timelineActions.clearEventsDeleted({ id }));
+    }
+  },
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
