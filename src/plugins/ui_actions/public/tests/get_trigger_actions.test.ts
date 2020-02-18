@@ -18,7 +18,7 @@
  */
 
 import { Action } from '../actions';
-import { uiActionsTestPlugin } from '../tests/test_plugin';
+import { uiActionsPluginMock } from '../mocks';
 
 const action1: Action = {
   id: 'action1',
@@ -32,11 +32,10 @@ const action2: Action = {
 } as any;
 
 test('returns actions set on trigger', () => {
-  const { setup, doStart } = uiActionsTestPlugin();
+  const { setup, doStart } = uiActionsPluginMock.createPlugin();
   setup.registerAction(action1);
   setup.registerAction(action2);
   setup.registerTrigger({
-    actionIds: [],
     description: 'foo',
     id: 'trigger',
     title: 'baz',

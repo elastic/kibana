@@ -66,7 +66,6 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     execute: jest.fn(),
-    ExpressionDataHandler: jest.fn(),
     ExpressionLoader: jest.fn(),
     ExpressionRenderHandler: jest.fn(),
     getFunction: jest.fn(),
