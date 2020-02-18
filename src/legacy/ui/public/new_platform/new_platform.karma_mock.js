@@ -104,8 +104,8 @@ export const npSetup = {
         getProvider: sinon.fake(),
       },
       query: {
-        app$: mockObservable,
-        global$: mockObservable,
+        app$: mockObservable(),
+        global$: mockObservable(),
         filterManager: {
           getFetches$: sinon.fake(),
           getFilters: sinon.fake(),
