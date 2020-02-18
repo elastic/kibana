@@ -45,7 +45,7 @@ import { VisualizeKibanaServices } from '../kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (
+export const renderApp = (
   element: HTMLElement,
   appBasePath: string,
   deps: VisualizeKibanaServices
@@ -58,7 +58,6 @@ export const renderApp = async (
       { core: deps.core, env: deps.pluginInitializerContext.env },
       true
     );
-    // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);
