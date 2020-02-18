@@ -6,7 +6,6 @@
 
 import React from 'react';
 import styled, { css } from 'styled-components';
-import areEqual from 'fast-deep-equal/react';
 
 const Wrapper = styled.div`
   ${({ theme }) => css`
@@ -58,16 +57,14 @@ export interface SubtitleProps {
   items: string | React.ReactNode | Array<string | React.ReactNode>;
 }
 
-export const Subtitle = React.memo<SubtitleProps>(
-  ({ items }) => (
-    <Wrapper className="siemSubtitle">
-      {Array.isArray(items) ? (
-        items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
-      ) : (
-        <SubtitleItem>{items}</SubtitleItem>
-      )}
-    </Wrapper>
-  ),
-  areEqual
-);
+export const Subtitle = React.memo<SubtitleProps>(({ items }) => (
+  <Wrapper className="siemSubtitle">
+    {Array.isArray(items) ? (
+      items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
+    ) : (
+      <SubtitleItem>{items}</SubtitleItem>
+    )}
+  </Wrapper>
+));
+
 Subtitle.displayName = 'Subtitle';

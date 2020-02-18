@@ -7,7 +7,7 @@
 import { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
 import React from 'react';
-import areEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { inputsModel } from '../../store';
 import { SetQuery } from '../../pages/hosts/navigation/types';
@@ -34,7 +34,7 @@ export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React
     public shouldComponentUpdate({ refetch: nextRefetch, ...nextProps }: OwnProps) {
       const { refetch: prevRefetch, ...prevProps } = this.props;
 
-      return !areEqual(prevProps, nextProps);
+      return !deepEqual(prevProps, nextProps);
     }
 
     public componentWillUnmount() {

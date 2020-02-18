@@ -15,7 +15,6 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiProgress } from '@elastic/eui';
-
 import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
 import { HistogramData } from './types';
@@ -85,5 +84,4 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     );
   }
 );
-
 SignalsHistogram.displayName = 'SignalsHistogram';

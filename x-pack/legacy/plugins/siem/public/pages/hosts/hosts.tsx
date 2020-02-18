@@ -8,8 +8,8 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { useParams } from 'react-router-dom';
 
+import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';

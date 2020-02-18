@@ -12,8 +12,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { FilterManager, IIndexPattern, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import areEqual from 'react-fast-compare';
-import fastDeepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -261,10 +260,10 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     );
   },
   (prevProps, nextProps) => {
-    if (fastDeepEqual(prevProps.indexPattern, nextProps.indexPattern)) {
+    if (deepEqual(prevProps.indexPattern, nextProps.indexPattern)) {
       return true;
     }
-    return areEqual(prevProps, nextProps);
+    return deepEqual(prevProps, nextProps);
   }
 );
 

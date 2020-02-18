@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import areEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
@@ -142,7 +142,27 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       />
     );
   },
-  areEqual
+  (prevProps, nextProps) => {
+    return (
+      prevProps.eventType === nextProps.eventType &&
+      prevProps.from === nextProps.from &&
+      prevProps.fromStr === nextProps.fromStr &&
+      prevProps.to === nextProps.to &&
+      prevProps.toStr === nextProps.toStr &&
+      prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
+      prevProps.refreshInterval === nextProps.refreshInterval &&
+      prevProps.timelineId === nextProps.timelineId &&
+      deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
+      deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
+      deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+      deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
+      deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
+      deepEqual(prevProps.timelineId, nextProps.timelineId)
+    );
+  }
 );
 StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 
