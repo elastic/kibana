@@ -14,15 +14,13 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-import { TransformListRow } from '../../../../common';
-
 import { CLIENT_BASE_PATH, SECTION_SLUG } from '../../../../constants';
 
 interface CloneActionProps {
-  item: TransformListRow;
+  itemId: string;
 }
 
-export const CloneAction: FC<CloneActionProps> = ({ item }) => {
+export const CloneAction: FC<CloneActionProps> = ({ itemId }) => {
   const history = useHistory();
 
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
@@ -32,7 +30,7 @@ export const CloneAction: FC<CloneActionProps> = ({ item }) => {
   });
 
   function clickHandler() {
-    history.push(`${CLIENT_BASE_PATH}/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}`);
+    history.push(`${CLIENT_BASE_PATH}/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
   const cloneButton = (

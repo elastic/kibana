@@ -24,7 +24,7 @@ export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
     },
     {
       render: (item: TransformListRow) => {
-        return <CloneAction item={item} />;
+        return <CloneAction itemId={item.id} />;
       },
     },
     {
