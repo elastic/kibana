@@ -95,10 +95,6 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       }
     },
 
-    getUsers(): typeof USER {
-      return USER;
-    },
-
     getPasswordForUser(user: USER): string {
       const userConfig = users.find(u => u.name === user);
       if (userConfig === undefined) {

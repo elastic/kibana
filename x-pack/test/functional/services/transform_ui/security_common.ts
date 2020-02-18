@@ -101,10 +101,6 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       }
     },
 
-    getUsers(): typeof USER {
-      return USER;
-    },
-
     getPasswordForUser(user: USER): string {
       const userConfig = users.find(u => u.name === user);
       if (userConfig === undefined) {
