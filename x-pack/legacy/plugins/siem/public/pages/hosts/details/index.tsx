@@ -6,9 +6,8 @@
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
@@ -39,14 +38,14 @@ import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsComponentProps, HostDetailsProps } from './types';
+import { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
-const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
+const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
     filters,
     from,
@@ -61,7 +60,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     hostDetailsPagePath,
   }) => {
     useEffect(() => {
-      setHostDetailsTablesActivePageToZero(null);
+      setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const kibana = useKibana();
@@ -218,9 +217,13 @@ export const makeMapStateToProps = () => {
   });
 };
 
-export const HostDetails = compose<React.ComponentClass<HostDetailsProps>>(
-  connect(makeMapStateToProps, {
-    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-    setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-  })
-)(HostDetailsComponent);
+const mapDispatchToProps = {
+  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const HostDetails = connector(HostDetailsComponent);
