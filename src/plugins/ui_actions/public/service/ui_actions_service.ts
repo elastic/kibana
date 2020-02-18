@@ -47,7 +47,7 @@ export class UiActionsService {
     this.triggerToActions = triggerToActions;
   }
 
-  public readonly registerTrigger = (trigger: Trigger) => {
+  public readonly registerTrigger = <T extends Trigger<any, any>>(trigger: T) => {
     if (this.triggers.has(trigger.id)) {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }

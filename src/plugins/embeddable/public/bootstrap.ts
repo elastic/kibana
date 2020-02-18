@@ -17,55 +17,28 @@
  * under the License.
  */
 
-import { UiActionsSetup, Trigger } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
+  contextMenuTrigger,
   createFilterAction,
-  PANEL_BADGE_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  panelBadgeTrigger,
+  selectRangeTrigger,
+  valueClickTrigger,
 } from './lib';
 
 /**
  * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
- *
- * @param api
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
-  const triggerContext: Trigger = {
-    id: CONTEXT_MENU_TRIGGER,
-    title: 'Context menu',
-    description: 'Triggered on top-right corner context-menu select.',
-  };
-  const triggerFilter: Trigger = {
-    id: APPLY_FILTER_TRIGGER,
-    title: 'Filter click',
-    description: 'Triggered when user applies filter to an embeddable.',
-  };
-  const triggerBadge: Trigger = {
-    id: PANEL_BADGE_TRIGGER,
-    title: 'Panel badges',
-    description: 'Actions appear in title bar when an embeddable loads in a panel',
-  };
-  const selectRangeTrigger: Trigger = {
-    id: SELECT_RANGE_TRIGGER,
-    title: 'Select range',
-    description: 'Applies a range filter',
-  };
-  const valueClickTrigger: Trigger = {
-    id: VALUE_CLICK_TRIGGER,
-    title: 'Value clicked',
-    description: 'Value was clicked',
-  };
-  const actionApplyFilter = createFilterAction();
-
-  uiActions.registerTrigger(triggerContext);
-  uiActions.registerTrigger(triggerFilter);
-  uiActions.registerAction(actionApplyFilter);
-  uiActions.registerTrigger(triggerBadge);
+  uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(applyFilterTrigger);
+  uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(selectRangeTrigger);
   uiActions.registerTrigger(valueClickTrigger);
-  // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
+
+  const actionApplyFilter = createFilterAction();
+
+  uiActions.registerAction(actionApplyFilter);
 };
