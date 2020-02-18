@@ -78,6 +78,11 @@
     "DeleteFilter",
     "GetFiltersStats",
     "Indices",
-    "FieldCaps"
+    "FieldCaps",
+    "JobValidation",
+    "EstimateBucketSpan",
+    "CalculateModelMemoryLimit",
+    "ValidateCardinality",
+    "ValidateJob"
   ]
 }
