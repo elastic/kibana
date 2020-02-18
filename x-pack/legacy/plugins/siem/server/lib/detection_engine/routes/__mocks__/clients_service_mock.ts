@@ -8,7 +8,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
+import { alertsClientMock } from '../../../../../../../../plugins/alerting/server/mocks';
 import { ActionsClient } from '../../../../../../../../plugins/actions/server';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
 import { GetScopedClients } from '../../../../services';

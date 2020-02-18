@@ -8,9 +8,9 @@ import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
+import useResizeObserver from 'use-resize-observer';
 
 import { useTimeZone } from '../../lib/kibana';
-import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
   chartDefaultSettings,
@@ -99,40 +99,25 @@ export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-export const BarChartComponent = ({
-  barChart,
-  configs,
-}: {
+interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}) => {
+}
+
+export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, configs }) => {
+  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+  const chartHeight = getChartHeight(customHeight, height);
+  const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(barChart) ? (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <BarChartBaseComponent
-            height={getChartHeight(customHeight, height)}
-            width={getChartWidth(customWidth, width)}
-            data={barChart}
-            configs={configs}
-          />
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
+    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+      <BarChartBase height={chartHeight} width={chartHeight} data={barChart} configs={configs} />
+    </WrappedByAutoSizer>
   ) : (
-    <ChartPlaceHolder
-      height={getChartHeight(customHeight)}
-      width={getChartWidth(customWidth)}
-      data={barChart}
-    />
+    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
   );
 };
 
-BarChartComponent.displayName = 'BarChartComponent';
-
 export const BarChart = React.memo(BarChartComponent);
-
-BarChart.displayName = 'BarChart';
