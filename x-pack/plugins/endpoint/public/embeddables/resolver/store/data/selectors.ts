@@ -57,11 +57,17 @@ const isometricTransformMatrix: Matrix3 = [
 /**
  * The distance in pixels (at scale 1) between nodes. Change this to space out nodes more
  */
-export const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
+const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
 
-export function graphableProcesses(state: DataState) {
-  return state.results.filter(isGraphableProcess);
-}
+/**
+ * Process events that will be graphed.
+ */
+export const graphableProcesses = createSelector(
+  ({ results }: DataState) => results,
+  function(results: DataState['results']) {
+    return results.filter(isGraphableProcess);
+  }
+);
 
 /**
  * In laying out the graph, we precalculate the 'width' of each subtree. The 'width' of the subtree is determined by its

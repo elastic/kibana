@@ -17,12 +17,12 @@ import {
 } from '../../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
-import { useKibanaContext } from '../../../../../../../contexts/kibana';
+import { useMlContext } from '../../../../../../../contexts/ml';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const kibanaContext = useKibanaContext();
-  const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
+  const mlContext = useMlContext();
+  const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
   const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);

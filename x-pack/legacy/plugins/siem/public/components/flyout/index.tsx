@@ -7,9 +7,8 @@
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -46,30 +45,7 @@ interface OwnProps {
   usersViewing: string[];
 }
 
-interface DispatchProps {
-  showTimeline: ActionCreator<{ id: string; show: boolean }>;
-  applyDeltaToWidth?: ({
-    id,
-    delta,
-    bodyClientWidthPixels,
-    maxWidthPercent,
-    minWidthPixels,
-  }: {
-    id: string;
-    delta: number;
-    bodyClientWidthPixels: number;
-    maxWidthPercent: number;
-    minWidthPixels: number;
-  }) => void;
-}
-
-interface StateReduxProps {
-  dataProviders?: DataProvider[];
-  show: boolean;
-  width: number;
-}
-
-type Props = OwnProps & DispatchProps & StateReduxProps;
+type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
   ({
@@ -121,9 +97,9 @@ FlyoutComponent.displayName = 'FlyoutComponent';
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
-  const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
-  const show = getOr('false', `${timelineId}.show`, timelineById);
-  const width = getOr(DEFAULT_TIMELINE_WIDTH, `${timelineId}.width`, timelineById);
+  const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById) as DataProvider[];
+  const show = getOr(false, `${timelineId}.show`, timelineById) as boolean;
+  const width = getOr(DEFAULT_TIMELINE_WIDTH, `${timelineId}.width`, timelineById) as number;
 
   return { dataProviders, show, width };
 };
@@ -132,6 +108,10 @@ const mapDispatchToProps = {
   showTimeline: timelineActions.showTimeline,
 };
 
-export const Flyout = connect(mapStateToProps, mapDispatchToProps)(FlyoutComponent);
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type ProsFromRedux = ConnectedProps<typeof connector>;
+
+export const Flyout = connector(FlyoutComponent);
 
 Flyout.displayName = 'Flyout';

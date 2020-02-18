@@ -17,6 +17,42 @@
  * under the License.
  */
 
-import * as fieldFormats from './static';
+import { FieldFormatsRegistry } from './field_formats_registry';
+type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
-export { fieldFormats };
+export { FieldFormatsRegistry, IFieldFormatsRegistry };
+export { FieldFormat } from './field_format';
+export { baseFormatters } from './constants/base_formatters';
+export {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from './converters';
+
+export { getHighlightRequest, serializeFieldFormat } from './utils';
+
+export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
+export { FIELD_FORMAT_IDS } from './types';
+export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+
+export {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  FieldFormatConfig,
+  FieldFormatId,
+  // Used in data plugin only
+  IFieldFormatType,
+  IFieldFormat,
+} from './types';

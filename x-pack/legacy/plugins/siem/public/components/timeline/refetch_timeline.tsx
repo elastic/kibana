@@ -5,33 +5,21 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { inputsModel } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-
-interface TimelineRefetchDispatch {
-  setTimelineQuery: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch | inputsModel.RefetchKql | null;
-  }>;
-}
 
 export interface TimelineRefetchProps {
   id: string;
   inputId: InputsModelId;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch | null;
+  refetch: inputsModel.Refetch;
 }
 
-type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
+type OwnProps = TimelineRefetchProps & PropsFromRedux;
 
 const TimelineRefetchComponent: React.FC<OwnProps> = ({
   id,
@@ -52,6 +40,8 @@ const mapDispatchToProps = {
   setTimelineQuery: inputsActions.setQuery,
 };
 
-export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
-  connect(null, mapDispatchToProps)
-)(React.memo(TimelineRefetchComponent));
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const TimelineRefetch = connector(React.memo(TimelineRefetchComponent));

@@ -20,22 +20,16 @@
 export { npSetup, npStart } from 'ui/new_platform';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
-
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
 export { PaginateDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
 export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
-// @ts-ignore
-export { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
-
-// @ts-ignore
-export { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-export { configureAppAngularModule } from 'ui/legacy_compat';
-
 export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export {
+  configureAppAngularModule,
+  KbnAccessibleClickProvider,
+  PrivateProvider,
+  watchMultiDecorator,
+} from '../../../../plugins/kibana_legacy/public';

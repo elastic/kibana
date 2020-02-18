@@ -6,8 +6,7 @@
 
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal/es6/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 
@@ -39,23 +38,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopCountriesTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkTopTablesSortField;
-}
-
-interface NetworkTopCountriesTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkTopCountriesTableProps = OwnProps &
-  NetworkTopCountriesTableReduxProps &
-  NetworkTopCountriesTableDispatchProps;
+type NetworkTopCountriesTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -201,12 +184,8 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkTopCountriesTable = connect<
-  NetworkTopCountriesTableReduxProps,
-  NetworkTopCountriesTableDispatchProps,
-  OwnProps,
-  State
->(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(NetworkTopCountriesTableComponent);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkTopCountriesTable = connector(NetworkTopCountriesTableComponent);

@@ -5,16 +5,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/actions';
-import {
-  Direction,
-  NetworkHttpEdges,
-  NetworkHttpFields,
-  NetworkHttpSortField,
-} from '../../../../graphql/types';
+import { Direction, NetworkHttpEdges, NetworkHttpFields } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
@@ -33,21 +27,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkHttpTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkHttpSortField;
-}
-
-interface NetworkHttpTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkHttpTableProps = OwnProps & NetworkHttpTableReduxProps & NetworkHttpTableDispatchProps;
+type NetworkHttpTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -60,93 +40,91 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
-  ({
-    activePage,
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    sort,
-    totalCount,
-    type,
-    updateNetworkTable,
-  }) => {
-    const tableType =
-      type === networkModel.NetworkType.page
-        ? networkModel.NetworkTableType.http
-        : networkModel.IpDetailsTableType.http;
+const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
+  activePage,
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  limit,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  sort,
+  totalCount,
+  type,
+  updateNetworkTable,
+}) => {
+  const tableType =
+    type === networkModel.NetworkType.page
+      ? networkModel.NetworkTableType.http
+      : networkModel.IpDetailsTableType.http;
 
-    const updateLimitPagination = useCallback(
-      newLimit =>
+  const updateLimitPagination = useCallback(
+    newLimit =>
+      updateNetworkTable({
+        networkType: type,
+        tableType,
+        updates: { limit: newLimit },
+      }),
+    [type, updateNetworkTable, tableType]
+  );
+
+  const updateActivePage = useCallback(
+    newPage =>
+      updateNetworkTable({
+        networkType: type,
+        tableType,
+        updates: { activePage: newPage },
+      }),
+    [type, updateNetworkTable, tableType]
+  );
+
+  const onChange = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
         updateNetworkTable({
           networkType: type,
           tableType,
-          updates: { limit: newLimit },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
-
-    const updateActivePage = useCallback(
-      newPage =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { activePage: newPage },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
-
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: {
-              sort: {
-                direction: criteria.sort.direction as Direction,
-              },
+          updates: {
+            sort: {
+              direction: criteria.sort.direction as Direction,
             },
-          });
-        }
-      },
-      [tableType, sort.direction, type, updateNetworkTable]
-    );
+          },
+        });
+      }
+    },
+    [tableType, sort.direction, type, updateNetworkTable]
+  );
 
-    const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
+  const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
 
-    const columns = useMemo(() => getNetworkHttpColumns(tableType), [tableType]);
+  const columns = useMemo(() => getNetworkHttpColumns(tableType), [tableType]);
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={columns}
-        dataTestSubj={`table-${tableType}`}
-        headerCount={totalCount}
-        headerTitle={i18n.HTTP_REQUESTS}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        itemsPerRow={rowItems}
-        isInspect={isInspect}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        onChange={onChange}
-        pageOfItems={data}
-        showMorePagesIndicator={showMorePagesIndicator}
-        sorting={sorting}
-        totalCount={fakeTotalCount}
-        updateActivePage={updateActivePage}
-        updateLimitPagination={updateLimitPagination}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={columns}
+      dataTestSubj={`table-${tableType}`}
+      headerCount={totalCount}
+      headerTitle={i18n.HTTP_REQUESTS}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      itemsPerRow={rowItems}
+      isInspect={isInspect}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      onChange={onChange}
+      pageOfItems={data}
+      showMorePagesIndicator={showMorePagesIndicator}
+      sorting={sorting}
+      totalCount={fakeTotalCount}
+      updateActivePage={updateActivePage}
+      updateLimitPagination={updateLimitPagination}
+    />
+  );
+};
 
 NetworkHttpTableComponent.displayName = 'NetworkHttpTableComponent';
 
@@ -160,12 +138,8 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkHttpTable = connect<
-  NetworkHttpTableReduxProps,
-  NetworkHttpTableDispatchProps,
-  OwnProps,
-  State
->(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(NetworkHttpTableComponent);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkHttpTable = connector(React.memo(NetworkHttpTableComponent));

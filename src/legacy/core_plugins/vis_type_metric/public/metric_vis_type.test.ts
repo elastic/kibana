@@ -19,6 +19,9 @@
 
 import $ from 'jquery';
 
+// TODO This is an integration test and thus requires a running platform. When moving to the new platform,
+// this test has to be migrated to the newly created integration test environment.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
@@ -41,6 +44,9 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
+    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
+      return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
+    });
   });
 
   const setup = () => {
@@ -53,7 +59,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
     // TODO: remove when Vis is converted to typescript. Only importing Vis as type
     // @ts-ignore
-    vis = new Vis(stubIndexPattern, {
+    vis = new visualizationsStart.Vis(stubIndexPattern, {
       type: 'metric',
       aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
     });

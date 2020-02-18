@@ -13,8 +13,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { getSpaceColor } from '../../../../../../../../../legacy/plugins/spaces/public/space_avatar';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
 import {
   FeaturesPrivileges,
   Role,

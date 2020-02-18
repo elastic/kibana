@@ -5,8 +5,7 @@
  */
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal/es6/react';
 
 import { networkActions } from '../../../../store/actions';
@@ -36,23 +35,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopNFlowTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkTopTablesSortField;
-}
-
-interface NetworkTopNFlowTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.NetworkTableType | networkModel.IpDetailsTableType;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkTopNFlowTableProps = OwnProps &
-  NetworkTopNFlowTableReduxProps &
-  NetworkTopNFlowTableDispatchProps;
+type NetworkTopNFlowTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -184,12 +167,8 @@ const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
 };
 
-export const NetworkTopNFlowTable = connect<
-  NetworkTopNFlowTableReduxProps,
-  NetworkTopNFlowTableDispatchProps,
-  OwnProps,
-  State
->(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(React.memo(NetworkTopNFlowTableComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkTopNFlowTable = connector(React.memo(NetworkTopNFlowTableComponent));

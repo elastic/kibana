@@ -18,10 +18,10 @@
  */
 import {
   Plugin,
-  FieldFormatsStart,
-  FieldFormatsSetup,
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
   IndexPatternsContract,
-  fieldFormats,
+  IFieldFormatsRegistry,
 } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -35,7 +35,7 @@ const autocompleteMock: any = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
+const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,
@@ -49,6 +49,7 @@ const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
+  deserialize: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
@@ -56,7 +57,7 @@ const createSetupContract = (): Setup => {
   const setupContract = {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
     __LEGACY: {
       esClient: {
@@ -84,7 +85,7 @@ const createStartContract = (): Start => {
         },
       },
     },
-    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),

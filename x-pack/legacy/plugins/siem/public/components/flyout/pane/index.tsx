@@ -6,9 +6,8 @@
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 import { Resizable, ResizeCallback } from 're-resizable';
 import { throttle } from 'lodash/fp';
 
@@ -30,17 +29,7 @@ interface OwnProps {
   width: number;
 }
 
-interface DispatchProps {
-  applyDeltaToWidth: ActionCreator<{
-    id: string;
-    delta: number;
-    bodyClientWidthPixels: number;
-    maxWidthPercent: number;
-    minWidthPixels: number;
-  }>;
-}
-
-type Props = OwnProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
   .timeline-flyout {
@@ -186,6 +175,11 @@ const FlyoutPaneComponent: React.FC<Props> = ({
 const mapDispatchToProps = {
   applyDeltaToWidth: timelineActions.applyDeltaToWidth,
 };
-export const Pane = connect(null, mapDispatchToProps)(React.memo(FlyoutPaneComponent));
+
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const Pane = connector(React.memo(FlyoutPaneComponent));
 
 Pane.displayName = 'Pane';
