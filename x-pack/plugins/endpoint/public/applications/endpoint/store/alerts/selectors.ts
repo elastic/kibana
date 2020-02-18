@@ -28,15 +28,23 @@ export const alertListPagination = (state: AlertListState) => {
  * Returns a boolean based on whether or not the user is on the alerts page
  */
 export const isOnAlertPage = (state: AlertListState): boolean => {
-  return state.location ? state.location.pathname.endsWith('/alerts') : false;
+  return state.location ? state.location.pathname === '/alerts' : false;
 };
 
 /**
  * Returns the query object received from parsing the URL query params
  */
 export const paginationDataFromUrl = (state: AlertListState): qs.ParsedUrlQuery => {
-  // Removes the `?` from the beginning of query string if it exists
-  return state.location ? qs.parse(state.location.search.slice(1)) : {};
+  if (state.location) {
+    // Removes the `?` from the beginning of query string if it exists
+    const query = qs.parse(state.location.search.slice(1));
+    return {
+      ...(query.page_size ? { page_size: query.page_size } : {}),
+      ...(query.page_index ? { page_index: query.page_index } : {}),
+    };
+  } else {
+    return {};
+  }
 };
 
 /**

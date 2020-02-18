@@ -71,7 +71,7 @@ export const AlertIndex = memo(() => {
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
   const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
   const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
-  const json = useAlertListSelector(selectors.alertListData);
+  const alertListData = useAlertListSelector(selectors.alertListData);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
@@ -91,7 +91,7 @@ export const AlertIndex = memo(() => {
         return null;
       }
 
-      const row = json[rowIndex % pageSize];
+      const row = alertListData[rowIndex % pageSize];
 
       if (columnId === 'alert_type') {
         return i18n.translate(
@@ -117,13 +117,13 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [json, pageSize, total]);
+  }, [alertListData, pageSize, total]);
 
   const pagination = useMemo(() => {
     return {
       pageIndex,
       pageSize,
-      pageSizeOptions: [10, 50, 100],
+      pageSizeOptions: [10, 20, 50],
       onChangeItemsPerPage,
       onChangePage,
     };
