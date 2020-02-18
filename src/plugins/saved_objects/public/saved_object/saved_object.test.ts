@@ -393,7 +393,7 @@ describe('Saved Object', () => {
   });
 
   describe('applyESResp', () => {
-    it.skip('throws error if not found', () => {
+    it('throws error if not found', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const response = { _source: {} };
         try {
@@ -405,7 +405,7 @@ describe('Saved Object', () => {
       });
     });
 
-    it.skip('throws error invalid JSON is detected', async () => {
+    it('throws error invalid JSON is detected', async () => {
       const savedObject = await createInitializedSavedObject({
         type: 'dashboard',
         searchSource: true,
@@ -709,7 +709,7 @@ describe('Saved Object', () => {
     });
 
     describe('type', () => {
-      it('that is not specified throws an error', done => {
+      it.skip('that is not specified throws an error', done => {
         const config = {};
 
         const savedObject = new SavedObjectClass(config);
@@ -718,7 +718,7 @@ describe('Saved Object', () => {
         });
       });
 
-      it.skip('that is invalid invalid throws an error', () => {
+      it('that is invalid invalid throws an error', () => {
         const config = { type: 'notypeexists' };
 
         const savedObject = new SavedObjectClass(config);
