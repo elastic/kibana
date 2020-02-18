@@ -22,15 +22,8 @@ exports[`is rendered 1`] = `
         data-test-subj="exitFullScreenModeText"
       >
         Exit full screen
-        <svg
-          aria-hidden="true"
-          class="euiIcon euiIcon--small euiIcon-isLoading"
-          focusable="false"
-          height="16"
-          role="img"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          data-euiicon-type="arrowLeft"
         />
       </span>
     </button>

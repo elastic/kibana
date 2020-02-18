@@ -352,25 +352,10 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="menuRight"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="menuRight"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -471,25 +456,10 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="recentlyViewedApp"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="recentlyViewedApp"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -848,25 +818,10 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="logoObservability"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="logoObservability"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -937,25 +892,10 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="logoSecurity"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="logoSecurity"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -1157,25 +1097,10 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                     className="euiListGroupItem__icon"
                                     type="managementApp"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="managementApp"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -1497,25 +1422,10 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                     className="euiListGroupItem__icon"
                                     type="menuRight"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="menuRight"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -1616,25 +1526,10 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                     className="euiListGroupItem__icon"
                                     type="recentlyViewedApp"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="recentlyViewedApp"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -2648,25 +2543,10 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                     className="euiListGroupItem__icon"
                                     type="menuRight"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="menuRight"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -2767,25 +2647,10 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                     className="euiListGroupItem__icon"
                                     type="recentlyViewedApp"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="recentlyViewedApp"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -4137,25 +4002,10 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                     className="euiListGroupItem__icon"
                                     type="menuRight"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="menuRight"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
@@ -4256,25 +4106,10 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                     className="euiListGroupItem__icon"
                                     type="recentlyViewedApp"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      className="euiListGroupItem__icon"
+                                      data-euiicon-type="recentlyViewedApp"
+                                    />
                                   </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"

@@ -164,15 +164,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                 class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                 type="button"
               >
-                <svg
+                <div
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="cross"
                 />
               </button>
               <div
@@ -222,15 +217,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <span
                                   class="euiFormControlLayoutCustomIcon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="euiFormControlLayoutCustomIcon__icon"
+                                    data-euiicon-type="search"
                                   />
                                 </span>
                               </div>
@@ -242,15 +232,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   class="euiFormControlLayoutClearButton"
                                   type="button"
                                 >
-                                  <svg
-                                    aria-hidden="true"
-                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                  <div
+                                    class="euiFormControlLayoutClearButton__icon"
+                                    data-euiicon-type="cross"
                                   />
                                 </button>
                               </div>
@@ -292,15 +276,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                       tabindex="0"
                                     >
-                                      <svg
+                                      <div
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                        focusable="false"
-                                        height="16"
-                                        role="img"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="euiBetaBadge__icon"
+                                        data-euiicon-type="popout"
                                       />
                                     </span>
                                   </span>
@@ -308,15 +287,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -344,15 +318,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -381,15 +350,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -514,15 +478,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                         type="button"
                       >
-                        <svg
+                        <div
                           aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
+                          class="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
                         />
                       </button>
                       <div
@@ -572,15 +531,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         <span
                                           class="euiFormControlLayoutCustomIcon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="euiFormControlLayoutCustomIcon__icon"
+                                            data-euiicon-type="search"
                                           />
                                         </span>
                                       </div>
@@ -592,15 +546,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           class="euiFormControlLayoutClearButton"
                                           type="button"
                                         >
-                                          <svg
-                                            aria-hidden="true"
-                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                          <div
+                                            class="euiFormControlLayoutClearButton__icon"
+                                            data-euiicon-type="cross"
                                           />
                                         </button>
                                       </div>
@@ -642,15 +590,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                               tabindex="0"
                                             >
-                                              <svg
+                                              <div
                                                 aria-hidden="true"
-                                                class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                focusable="false"
-                                                height="16"
-                                                role="img"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="euiBetaBadge__icon"
+                                                data-euiicon-type="popout"
                                               />
                                             </span>
                                           </span>
@@ -658,15 +601,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -694,15 +632,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -731,15 +664,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -804,15 +732,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                           type="button"
                         >
-                          <svg
+                          <div
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                            class="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
                           />
                         </button>
                         <div
@@ -862,15 +785,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           <span
                                             class="euiFormControlLayoutCustomIcon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              class="euiFormControlLayoutCustomIcon__icon"
+                                              data-euiicon-type="search"
                                             />
                                           </span>
                                         </div>
@@ -882,15 +800,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiFormControlLayoutClearButton"
                                             type="button"
                                           >
-                                            <svg
-                                              aria-hidden="true"
-                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                            <div
+                                              class="euiFormControlLayoutClearButton__icon"
+                                              data-euiicon-type="cross"
                                             />
                                           </button>
                                         </div>
@@ -932,15 +844,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                                 tabindex="0"
                                               >
-                                                <svg
+                                                <div
                                                   aria-hidden="true"
-                                                  class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                  focusable="false"
-                                                  height="16"
-                                                  role="img"
-                                                  viewBox="0 0 16 16"
-                                                  width="16"
-                                                  xmlns="http://www.w3.org/2000/svg"
+                                                  class="euiBetaBadge__icon"
+                                                  data-euiicon-type="popout"
                                                 />
                                               </span>
                                             </span>
@@ -948,15 +855,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -984,15 +886,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -1021,15 +918,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -1107,25 +999,12 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         size="m"
                         type="cross"
                       >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
+                          size="m"
+                        />
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -1256,25 +1135,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         type="search"
                                                       >
-                                                        <EuiIconEmpty
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                          focusable="false"
-                                                          role="img"
-                                                          style={null}
-                                                        >
-                                                          <svg
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            height={16}
-                                                            role="img"
-                                                            style={null}
-                                                            viewBox="0 0 16 16"
-                                                            width={16}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                          />
-                                                        </EuiIconEmpty>
+                                                        <div
+                                                          aria-hidden="true"
+                                                          className="euiFormControlLayoutCustomIcon__icon"
+                                                          data-euiicon-type="search"
+                                                        />
                                                       </EuiIcon>
                                                     </span>
                                                   </EuiFormControlLayoutCustomIcon>
@@ -1299,25 +1164,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                           className="euiFormControlLayoutClearButton__icon"
                                                           type="cross"
                                                         >
-                                                          <EuiIconEmpty
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                                            focusable="false"
-                                                            role="img"
-                                                            style={null}
-                                                          >
-                                                            <svg
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                                              focusable="false"
-                                                              height={16}
-                                                              role="img"
-                                                              style={null}
-                                                              viewBox="0 0 16 16"
-                                                              width={16}
-                                                              xmlns="http://www.w3.org/2000/svg"
-                                                            />
-                                                          </EuiIconEmpty>
+                                                          <div
+                                                            className="euiFormControlLayoutClearButton__icon"
+                                                            data-euiicon-type="cross"
+                                                          />
                                                         </EuiIcon>
                                                       </button>
                                                     </EuiI18n>
@@ -1437,25 +1287,12 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                             size="m"
                                                             type="popout"
                                                           >
-                                                            <EuiIconEmpty
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                              focusable="false"
-                                                              role="img"
-                                                              style={null}
-                                                            >
-                                                              <svg
-                                                                aria-hidden={true}
-                                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                                focusable="false"
-                                                                height={16}
-                                                                role="img"
-                                                                style={null}
-                                                                viewBox="0 0 16 16"
-                                                                width={16}
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                              />
-                                                            </EuiIconEmpty>
+                                                            <div
+                                                              aria-hidden="true"
+                                                              className="euiBetaBadge__icon"
+                                                              data-euiicon-type="popout"
+                                                              size="m"
+                                                            />
                                                           </EuiIcon>
                                                         </span>
                                                       </span>
@@ -1472,25 +1309,12 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
@@ -1554,25 +1378,12 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
@@ -1636,25 +1447,12 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
@@ -1923,15 +1721,10 @@ exports[`NewVisModal should render as expected 1`] = `
                 class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                 type="button"
               >
-                <svg
+                <div
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="cross"
                 />
               </button>
               <div
@@ -1981,15 +1774,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <span
                                   class="euiFormControlLayoutCustomIcon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="euiFormControlLayoutCustomIcon__icon"
+                                    data-euiicon-type="search"
                                   />
                                 </span>
                               </div>
@@ -2022,15 +1810,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -2065,15 +1848,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                       class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                       tabindex="0"
                                     >
-                                      <svg
+                                      <div
                                         aria-hidden="true"
-                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                        focusable="false"
-                                        height="16"
-                                        role="img"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="euiBetaBadge__icon"
+                                        data-euiicon-type="popout"
                                       />
                                     </span>
                                   </span>
@@ -2081,15 +1859,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -2117,15 +1890,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <div
                                   class="euiKeyPadMenuItem__icon"
                                 >
-                                  <svg
+                                  <div
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                    focusable="false"
-                                    height="16"
-                                    role="img"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    color="secondary"
+                                    data-euiicon-type="empty"
                                   />
                                 </div>
                                 <p
@@ -2250,15 +2018,10 @@ exports[`NewVisModal should render as expected 1`] = `
                         class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                         type="button"
                       >
-                        <svg
+                        <div
                           aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          height="16"
-                          role="img"
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
+                          class="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
                         />
                       </button>
                       <div
@@ -2308,15 +2071,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                         <span
                                           class="euiFormControlLayoutCustomIcon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="euiFormControlLayoutCustomIcon__icon"
+                                            data-euiicon-type="search"
                                           />
                                         </span>
                                       </div>
@@ -2349,15 +2107,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -2392,15 +2145,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                               class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                               tabindex="0"
                                             >
-                                              <svg
+                                              <div
                                                 aria-hidden="true"
-                                                class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                focusable="false"
-                                                height="16"
-                                                role="img"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="euiBetaBadge__icon"
+                                                data-euiicon-type="popout"
                                               />
                                             </span>
                                           </span>
@@ -2408,15 +2156,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -2444,15 +2187,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                         <div
                                           class="euiKeyPadMenuItem__icon"
                                         >
-                                          <svg
+                                          <div
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                            focusable="false"
-                                            height="16"
-                                            role="img"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                            color="secondary"
+                                            data-euiicon-type="empty"
                                           />
                                         </div>
                                         <p
@@ -2517,15 +2255,10 @@ exports[`NewVisModal should render as expected 1`] = `
                           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                           type="button"
                         >
-                          <svg
+                          <div
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                            class="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
                           />
                         </button>
                         <div
@@ -2575,15 +2308,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                           <span
                                             class="euiFormControlLayoutCustomIcon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              class="euiFormControlLayoutCustomIcon__icon"
+                                              data-euiicon-type="search"
                                             />
                                           </span>
                                         </div>
@@ -2616,15 +2344,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -2659,15 +2382,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
                                                 tabindex="0"
                                               >
-                                                <svg
+                                                <div
                                                   aria-hidden="true"
-                                                  class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                  focusable="false"
-                                                  height="16"
-                                                  role="img"
-                                                  viewBox="0 0 16 16"
-                                                  width="16"
-                                                  xmlns="http://www.w3.org/2000/svg"
+                                                  class="euiBetaBadge__icon"
+                                                  data-euiicon-type="popout"
                                                 />
                                               </span>
                                             </span>
@@ -2675,15 +2393,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -2711,15 +2424,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                           <div
                                             class="euiKeyPadMenuItem__icon"
                                           >
-                                            <svg
+                                            <div
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                              focusable="false"
-                                              height="16"
-                                              role="img"
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                              color="secondary"
+                                              data-euiicon-type="empty"
                                             />
                                           </div>
                                           <p
@@ -2797,25 +2505,12 @@ exports[`NewVisModal should render as expected 1`] = `
                         size="m"
                         type="cross"
                       >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
+                          size="m"
+                        />
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -2936,25 +2631,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         type="search"
                                                       >
-                                                        <EuiIconEmpty
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                          focusable="false"
-                                                          role="img"
-                                                          style={null}
-                                                        >
-                                                          <svg
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            height={16}
-                                                            role="img"
-                                                            style={null}
-                                                            viewBox="0 0 16 16"
-                                                            width={16}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                          />
-                                                        </EuiIconEmpty>
+                                                        <div
+                                                          aria-hidden="true"
+                                                          className="euiFormControlLayoutCustomIcon__icon"
+                                                          data-euiicon-type="search"
+                                                        />
                                                       </EuiIcon>
                                                     </span>
                                                   </EuiFormControlLayoutCustomIcon>
@@ -3036,25 +2717,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
@@ -3143,25 +2811,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                                             size="m"
                                                             type="popout"
                                                           >
-                                                            <EuiIconEmpty
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                              focusable="false"
-                                                              role="img"
-                                                              style={null}
-                                                            >
-                                                              <svg
-                                                                aria-hidden={true}
-                                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
-                                                                focusable="false"
-                                                                height={16}
-                                                                role="img"
-                                                                style={null}
-                                                                viewBox="0 0 16 16"
-                                                                width={16}
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                              />
-                                                            </EuiIconEmpty>
+                                                            <div
+                                                              aria-hidden="true"
+                                                              className="euiBetaBadge__icon"
+                                                              data-euiicon-type="popout"
+                                                              size="m"
+                                                            />
                                                           </EuiIcon>
                                                         </span>
                                                       </span>
@@ -3178,25 +2833,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
@@ -3260,25 +2902,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
+                                                      <div
+                                                        aria-hidden="true"
+                                                        color="secondary"
+                                                        data-euiicon-type="empty"
+                                                        size="l"
+                                                      />
                                                     </EuiIcon>
                                                   </VisTypeIcon>
                                                 </div>
