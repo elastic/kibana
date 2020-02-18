@@ -16,6 +16,7 @@ export interface NewAgentConfig {
   name: string;
   namespace: string;
   description?: string;
+  is_default?: boolean;
 }
 
 export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {

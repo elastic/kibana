@@ -68,6 +68,7 @@ export const savedObjectMappings = {
     properties: {
       id: { type: 'keyword' },
       name: { type: 'text' },
+      is_default: { type: 'boolean' },
       namespace: { type: 'keyword' },
       description: { type: 'text' },
       status: { type: 'keyword' },
@@ -94,6 +95,7 @@ export const savedObjectMappings = {
     properties: {
       name: { type: 'keyword' },
       type: { type: 'keyword' },
+      is_default: { type: 'boolean' },
       hosts: { type: 'keyword' },
       ca_sha256: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554

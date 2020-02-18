@@ -32,6 +32,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     name: '',
     description: '',
     namespace: '',
+    is_default: undefined,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const validation = agentConfigFormValidation(agentConfig);

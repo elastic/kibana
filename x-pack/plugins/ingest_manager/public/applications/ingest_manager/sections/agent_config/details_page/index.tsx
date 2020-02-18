@@ -33,7 +33,6 @@ import { Loading } from '../../../components';
 import { ConnectedLink } from '../../fleet/components';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentConfigDeleteProvider } from '../components';
-import { DEFAULT_AGENT_CONFIG_ID } from '../../../constants';
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
@@ -202,7 +201,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                                 setRedirectToAgentConfigsList(true);
                               });
                             }}
-                            disabled={configId === DEFAULT_AGENT_CONFIG_ID}
+                            disabled={agentConfig.is_default}
                           >
                             <FormattedMessage
                               id="xpack.ingestManager.configDetails.deleteConfigButtonLabel"

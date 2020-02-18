@@ -9,6 +9,7 @@ import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
+import { agentConfigService } from '../agent_config';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -87,7 +88,8 @@ export async function generateEnrollmentAPIKey(
   }
 ) {
   const id = uuid.v4();
-  const { name: providedKeyName, configId = 'default' } = data;
+  const { name: providedKeyName } = data;
+  const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
