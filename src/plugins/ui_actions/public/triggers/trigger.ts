@@ -52,3 +52,5 @@ export interface Trigger<
    */
   createContext?: (params: CreateContextParams) => Context;
 }
+
+export type TriggerContext<T> = T extends Trigger<infer Context, any> ? Context : never;
