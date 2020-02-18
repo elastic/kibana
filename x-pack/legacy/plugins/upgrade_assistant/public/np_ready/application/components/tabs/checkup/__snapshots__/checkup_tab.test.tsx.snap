@@ -57,7 +57,7 @@ exports[`CheckupTab render with deprecations 1`] = `
   <EuiSpacer />
   <EuiPageContent>
     <EuiPageContentBody>
-      <InjectIntl(CheckupControlsUI)
+      <CheckupControls
         allDeprecations={
           Array [
             Object {
@@ -170,7 +170,6 @@ exports[`CheckupTab render with deprecations 1`] = `
         onFilterChange={[Function]}
         onGroupByChange={[Function]}
         onSearchChange={[Function]}
-        search=""
       />
       <EuiSpacer />
       <GroupedDeprecations

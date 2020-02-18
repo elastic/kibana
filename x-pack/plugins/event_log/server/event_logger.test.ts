@@ -56,8 +56,6 @@ describe('EventLogger', () => {
       kibana: {
         server_uuid: '424-24-2424',
       },
-      error: {},
-      user: {},
     });
 
     const $timeStamp = event!['@timestamp']!;
