@@ -31,6 +31,8 @@ export function convertToLines(esResponse) {
       Object.keys(rest).forEach(key => {
         if (_.has(rest[key], 'value')) {
           rest[key] = rest[key].value;
+        } else if (_.has(rest[key], 'buckets')) {
+          rest[key] = _.get(rest[key], 'buckets[0].key');
         }
       });
 

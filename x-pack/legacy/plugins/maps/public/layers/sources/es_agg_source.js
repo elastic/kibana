@@ -101,14 +101,14 @@ export class AbstractESAggSource extends AbstractESSource {
     return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
   }
 
-  getValueAggsDsl() {
+  getValueAggsDsl(indexPattern) {
     const valueAggsDsl = {};
     this.getMetricFields()
       .filter(esAggMetric => {
         return esAggMetric.getAggType() !== AGG_TYPE.COUNT;
       })
       .forEach(esAggMetric => {
-        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl();
+        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
       });
     return valueAggsDsl;
   }

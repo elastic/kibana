@@ -8,6 +8,7 @@ import { AbstractField } from './field';
 import { AGG_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
+import { getField, addFieldToDSL } from '../util/es_agg_utils';
 
 export class ESAggMetricField extends AbstractField {
   static type = 'ES_AGG';
@@ -76,16 +77,12 @@ export class ESAggMetricField extends AbstractField {
     return metricAggConfig;
   }
 
-  getValueAggDsl() {
+  getValueAggDsl(indexPattern) {
+    const field = getField(indexPattern, this.getESDocFieldName());
     const aggType = this.getAggType();
-    const aggBody = {
-      field: this.getESDocFieldName(),
-    };
-    if (aggType === AGG_TYPE.TERMS) {
-      aggBody.size = 1;
-    }
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1 } : {};
     return {
-      [aggType]: aggBody,
+      [aggType]: addFieldToDSL(aggBody, field),
     };
   }
 

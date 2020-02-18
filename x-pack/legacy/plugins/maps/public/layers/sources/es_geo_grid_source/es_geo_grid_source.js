@@ -162,6 +162,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+    const indexPattern = await this.getIndexPattern();
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       gridSplit: {
@@ -175,7 +176,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
               field: this._descriptor.geoField,
             },
           },
-          ...this.getValueAggsDsl(),
+          ...this.getValueAggsDsl(indexPattern),
         },
       },
     });
