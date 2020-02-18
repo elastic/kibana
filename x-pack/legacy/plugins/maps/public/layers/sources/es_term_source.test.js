@@ -44,7 +44,7 @@ describe('getMetricFields', () => {
 
     expect(metrics[0].getAggType()).toEqual('count');
     expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(await metrics[0].getLabel()).toEqual('count of myIndex:myTermField');
+    expect(await metrics[0].getLabel()).toEqual('Count of myIndex');
   });
 
   it('should remove incomplete metric configurations', async () => {
@@ -65,7 +65,7 @@ describe('getMetricFields', () => {
 
     expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(await metrics[1].getLabel()).toEqual('count of myIndex:myTermField');
+    expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
   });
 });
 
