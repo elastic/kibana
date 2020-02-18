@@ -17,43 +17,30 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
-import { UiActionsApi, ActionRegistry, TriggerRegistry } from './types';
-import { createApi } from './api';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { UiActionsService } from './service';
 
-export interface UiActionsSetup {
-  attachAction: UiActionsApi['attachAction'];
-  detachAction: UiActionsApi['detachAction'];
-  registerAction: UiActionsApi['registerAction'];
-  registerTrigger: UiActionsApi['registerTrigger'];
-}
+export type UiActionsSetup = Pick<
+  UiActionsService,
+  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
+>;
 
-export type UiActionsStart = UiActionsApi;
+export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
-  private readonly triggers: TriggerRegistry = new Map();
-  private readonly actions: ActionRegistry = new Map();
-  private api!: UiActionsApi;
+  private readonly service = new UiActionsService();
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.api = createApi({ triggers: this.triggers, actions: this.actions }).api;
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): UiActionsSetup {
-    return {
-      registerTrigger: this.api.registerTrigger,
-      registerAction: this.api.registerAction,
-      attachAction: this.api.attachAction,
-      detachAction: this.api.detachAction,
-    };
+    return this.service;
   }
 
   public start(core: CoreStart): UiActionsStart {
-    return this.api;
+    return this.service;
   }
 
   public stop() {
-    this.actions.clear();
-    this.triggers.clear();
+    this.service.clear();
   }
 }
