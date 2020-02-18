@@ -37,13 +37,12 @@ export const registerFindRoute = (router: IRouter) => {
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
           sort_field: schema.maybe(schema.string()),
-          /* // TODO: need https://github.com/elastic/kibana/pull/55932 to be resolved
           has_reference: schema.maybe(
             schema.object({
               type: schema.string(),
               id: schema.string(),
             })
-          ),*/
+          ),
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
         }),
@@ -60,7 +59,7 @@ export const registerFindRoute = (router: IRouter) => {
         searchFields:
           typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
         sortField: query.sort_field,
-        // hasReference: query.has_reference,
+        hasReference: query.has_reference,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
       });

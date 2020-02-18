@@ -18,6 +18,8 @@
  */
 
 import supertest from 'supertest';
+import querystring from 'querystring';
+
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
@@ -124,6 +126,37 @@ describe('GET /api/saved_objects/_find', () => {
 
     const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
+  });
+
+  it('accepts the optional query parameter has_reference', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasReference).toBe(undefined);
+  });
+
+  it('accepts the query parameter has_reference', async () => {
+    const references = querystring.escape(
+      JSON.stringify({
+        id: '1',
+        type: 'reference',
+      })
+    );
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasReference).toEqual({
+      id: '1',
+      type: 'reference',
+    });
   });
 
   it('accepts the query parameter search_fields', async () => {
