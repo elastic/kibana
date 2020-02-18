@@ -53,6 +53,36 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   query: 'user.name: root or user.name: admin',
 });
 
+export const getSignalStatus = () => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setSignalStatus = ({
+  signalIds,
+  status,
+}: {
+  signalIds: string[];
+  status: 'open' | 'closed';
+}) => ({
+  signal_ids: signalIds,
+  status,
+});
+
+export const getSignalStatusEmptyResponse = () => ({
+  timed_out: false,
+  total: 0,
+  updated: 0,
+  deleted: 0,
+  batches: 0,
+  version_conflicts: 0,
+  noops: 0,
+  retries: { bulk: 0, search: 0 },
+  throttled_millis: 0,
+  requests_per_second: -1,
+  throttled_until_millis: 0,
+  failures: [],
+});
+
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */

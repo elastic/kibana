@@ -11,7 +11,7 @@
   "devDependencies": {
     "@elastic/charts": "^17.0.2",
     "abort-controller": "^3.0.0",
-    "@elastic/eui": "18.3.0",
+    "@elastic/eui": "19.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@yarnpkg/lockfile": "^1.1.0",

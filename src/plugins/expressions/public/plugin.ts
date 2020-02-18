@@ -38,10 +38,10 @@ import {
   setInterpreter,
   setRenderersRegistry,
   setNotifications,
+  setExpressionsService,
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
@@ -93,8 +93,6 @@ export interface ExpressionsSetup extends ExpressionsServiceSetup {
 }
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  execute: typeof execute;
-  ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
@@ -130,6 +128,7 @@ export class ExpressionsPublicPlugin
     const { executor, renderers } = expressions;
 
     setRenderersRegistry(renderers);
+    setExpressionsService(this.expressions);
 
     const expressionsSetup = expressions.setup();
 
@@ -192,8 +191,6 @@ export class ExpressionsPublicPlugin
 
     return {
       ...expressionsStart,
-      execute,
-      ExpressionDataHandler,
       ExpressionLoader,
       ExpressionRenderHandler,
       loader,
