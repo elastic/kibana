@@ -73,9 +73,11 @@ export interface ExpressionAstFunctionDebug {
   rawError?: any | Error;
 
   /**
-   * Time in milliseconds it took to execute the function.
+   * Time in milliseconds it took to execute the function. Duration can be
+   * `undefined` if error happened during argument resolution, because function
+   * timing starts after the arguments have been resolved.
    */
-  duration: number;
+  duration: number | undefined;
 }
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

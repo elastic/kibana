@@ -23,7 +23,7 @@ import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
-import { isExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
   ExpressionAstFunction,
@@ -32,7 +32,7 @@ import {
   parseExpression,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType } from '../expression_types';
+import { getType, ExpressionValue } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
@@ -203,11 +203,15 @@ export class Execution<
         return createError({ message: `Function ${fnName} could not be found.` });
       }
 
+      let args: Record<string, ExpressionValue> = {};
+      let timeStart: number | undefined;
+
       try {
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
-        const timeStart: number = this.params.debug ? Date.now() : 0;
+        args = resolvedArgs;
+        timeStart = this.params.debug ? Date.now() : 0;
         const output = await this.invokeFunction(fnDef, input, resolvedArgs);
 
         if (this.params.debug) {
@@ -223,9 +227,23 @@ export class Execution<
 
         if (getType(output) === 'error') return output;
         input = output;
-      } catch (e) {
-        e.message = `[${fnName}] > ${e.message}`;
-        return createError(e);
+      } catch (rawError) {
+        const timeEnd: number = this.params.debug ? Date.now() : 0;
+        rawError.message = `[${fnName}] > ${rawError.message}`;
+        const error = createError(rawError) as ExpressionValueError;
+
+        if (this.params.debug) {
+          (link as ExpressionAstFunction).debug = {
+            success: false,
+            input,
+            args,
+            error,
+            rawError,
+            duration: timeStart ? timeEnd - timeStart : undefined,
+          };
+        }
+
+        return error;
       }
     }
 

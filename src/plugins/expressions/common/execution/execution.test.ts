@@ -564,5 +564,76 @@ describe('Execution', () => {
         expect(chain[1].debug!.output).toBe(5);
       });
     });
+
+    describe('when expression throws', () => {
+      const executor = createUnitTestExecutor();
+      executor.registerFunction({
+        name: 'throws',
+        args: {},
+        help: '',
+        fn: () => {
+          throw new Error('foo');
+        },
+      });
+
+      test('stores debug information up until the function that throws', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node1 = execution.state.get().ast.chain[0];
+        const node2 = execution.state.get().ast.chain[1];
+        const node3 = execution.state.get().ast.chain[2];
+
+        expect(typeof node1.debug).toBe('object');
+        expect(typeof node2.debug).toBe('object');
+        expect(typeof node3.debug).toBe('undefined');
+      });
+
+      test('stores error thrown in debug information', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node2 = execution.state.get().ast.chain[1];
+
+        expect(node2.debug?.error).toMatchObject({
+          type: 'error',
+          error: {
+            message: '[throws] > foo',
+          },
+        });
+        expect(node2.debug?.rawError).toBeInstanceOf(Error);
+      });
+
+      test('sets .debug object to expected shape', async () => {
+        const execution = new Execution({
+          executor,
+          ast: parseExpression('add val=1 | throws | add val=3'),
+          debug: true,
+        });
+        execution.start(0);
+        await execution.result;
+
+        const node2 = execution.state.get().ast.chain[1];
+
+        expect(node2.debug).toMatchObject({
+          success: false,
+          input: expect.any(Object),
+          args: expect.any(Object),
+          error: expect.any(Object),
+          rawError: expect.any(Error),
+          duration: expect.any(Number),
+        });
+      });
+    });
   });
 });
