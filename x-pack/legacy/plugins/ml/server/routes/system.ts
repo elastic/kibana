@@ -16,6 +16,9 @@ import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 
+/**
+ * System routes
+ */
 export function systemRoutes({
   router,
   xpackMainPlugin,
@@ -42,6 +45,13 @@ export function systemRoutes({
     return { count };
   }
 
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/_has_privileges Check privileges
+   * @apiName HasPrivileges
+   * @apiDescription Checks if the user has required privileges
+   */
   router.post(
     {
       path: '/api/ml/_has_privileges',
@@ -91,6 +101,13 @@ export function systemRoutes({
     })
   );
 
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/ml_capabilities Check ML capabilities
+   * @apiName MlCapabilities
+   * @apiDescription Checks ML capabilities
+   */
   router.get(
     {
       path: '/api/ml/ml_capabilities',
@@ -124,6 +141,13 @@ export function systemRoutes({
     })
   );
 
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/ml_node_count Get the amount of ML nodes
+   * @apiName MlNodeCount
+   * @apiDescription Returns the amount of ML nodes.
+   */
   router.get(
     {
       path: '/api/ml/ml_node_count',
@@ -168,6 +192,13 @@ export function systemRoutes({
     })
   );
 
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/info Get ML info
+   * @apiName MlInfo
+   * @apiDescription Returns defaults and limits used by machine learning.
+   */
   router.get(
     {
       path: '/api/ml/info',
@@ -186,6 +217,14 @@ export function systemRoutes({
     })
   );
 
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @apiDeprecated
+   *
+   * @api {post} /api/ml/es_search ES Search wrapper
+   * @apiName MlEsSearch
+   */
   router.post(
     {
       path: '/api/ml/es_search',
