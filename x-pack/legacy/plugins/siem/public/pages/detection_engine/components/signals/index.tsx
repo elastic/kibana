@@ -18,7 +18,8 @@ import { combineQueries } from '../../../../components/timeline/helpers';
 import { useKibana } from '../../../../lib/kibana';
 import { inputsSelectors, State, inputsModel } from '../../../../store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
+import { TimelineModel } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useApolloClient } from '../../../../utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
