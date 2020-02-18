@@ -625,7 +625,6 @@ export class VectorStyle extends AbstractStyle {
         field,
         this._getFieldMeta,
         this._getFieldFormatter,
-        this._source,
         isSymbolizedAsIcon
       );
     } else {
@@ -645,8 +644,7 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -678,8 +676,7 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.LABEL_TEXT,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
@@ -698,8 +695,7 @@ export class VectorStyle extends AbstractStyle {
         VECTOR_STYLES.ICON,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter,
-        this._source
+        this._getFieldFormatter
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
