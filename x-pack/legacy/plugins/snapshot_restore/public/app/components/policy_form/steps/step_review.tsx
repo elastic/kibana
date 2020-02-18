@@ -40,13 +40,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   };
 
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = indices
-    ? typeof indices === 'string'
-      ? indices.split(',')
-      : indices
-    : undefined;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
+  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
 
   const serializedPolicy = serializePolicy(policy);
   const { retention: serializedRetention } = serializedPolicy;
@@ -164,19 +158,18 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {displayIndices ? (
+              {indices ? (
                 <EuiText>
                   <ul>
-                    {(isShowingFullIndicesList
-                      ? displayIndices
-                      : [...displayIndices].splice(0, 10)
-                    ).map(index => (
-                      <li key={index}>
-                        <EuiTitle size="xs">
-                          <span>{index}</span>
-                        </EuiTitle>
-                      </li>
-                    ))}
+                    {(isShowingFullIndicesList ? indices : [...indices].splice(0, 10)).map(
+                      index => (
+                        <li key={index}>
+                          <EuiTitle size="xs">
+                            <span>{index}</span>
+                          </EuiTitle>
+                        </li>
+                      )
+                    )}
                     {hiddenIndicesCount ? (
                       <li key="hiddenIndicesCount">
                         <EuiTitle size="xs">

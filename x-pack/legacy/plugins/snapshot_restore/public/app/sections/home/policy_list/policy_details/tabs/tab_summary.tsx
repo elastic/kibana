@@ -58,14 +58,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
 
   // Only show 10 indices initially
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = typeof indices === 'string' ? indices.split(',') : indices;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
+  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
   const shortIndicesList =
-    displayIndices && displayIndices.length ? (
+    indices && indices.length ? (
       <EuiText size="m">
         <ul>
-          {[...displayIndices].splice(0, 10).map((index: string) => (
+          {[...indices].splice(0, 10).map((index: string) => (
             <li key={index}>
               <EuiTitle size="xs">
                 <span>{index}</span>
@@ -95,10 +93,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       />
     );
   const fullIndicesList =
-    displayIndices && displayIndices.length && displayIndices.length > 10 ? (
+    indices && indices.length && indices.length > 10 ? (
       <EuiText size="m">
         <ul>
-          {displayIndices.map((index: string) => (
+          {indices.map((index: string) => (
             <li key={index}>
               <EuiTitle size="xs">
                 <span>{index}</span>

@@ -95,14 +95,6 @@ export const validatePolicy = (
     );
   }
 
-  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
-    validation.errors.indices.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
-        defaultMessage: 'At least one index pattern is required.',
-      })
-    );
-  }
-
   if (config && Array.isArray(config.indices) && config.indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
