@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSuperSelect, EuiSpacer, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiSelect, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
@@ -29,9 +29,6 @@ export class ColorMapSelect extends Component {
   }
 
   _renderColorMapToggle() {
-    if (!this.props.showColorMapTypeToggle) {
-      return null;
-    }
     const options = [
       {
         value: COLOR_MAP_TYPE.ORDINAL,
@@ -91,10 +88,6 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    if (!this.props.useCustomColorMap) {
-      return null;
-    }
-
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
       return (
         <Fragment>
@@ -120,7 +113,7 @@ export class ColorMapSelect extends Component {
     );
   }
 
-  render() {
+  _renderColorMapSelections() {
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
@@ -138,20 +131,43 @@ export class ColorMapSelect extends Component {
         : '';
     }
 
+    let toggle;
+    if (this.props.showColorMapTypeToggle) {
+      toggle = <EuiFlexItem>{this._renderColorMapToggle()}</EuiFlexItem>;
+    } else {
+      toggle = <Fragment />;
+    }
+
     return (
       <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem>{this._renderColorMapToggle()}</EuiFlexItem>
+        {toggle}
+        <EuiFlexItem>
+          <EuiSuperSelect
+            options={colorMapOptionsWithCustom}
+            onChange={this._onColorMapSelect}
+            valueOfSelected={valueOfSelected}
+            hasDividers={true}
+          />
+        </EuiFlexItem>
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        <EuiFlexGroup gutterSize={'none'} direction={'column'}>
           <EuiFlexItem>
-            <EuiSuperSelect
-              options={colorMapOptionsWithCustom}
-              onChange={this._onColorMapSelect}
-              valueOfSelected={valueOfSelected}
-              hasDividers={true}
-            />
+            <EuiFlexGroup gutterSize={'xs'} justifyContent="spaceBetween">
+              {this._renderColorMapSelections()}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize={'xs'}>
+              <EuiFlexItem>{this._renderColorStopsInput()}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {this._renderColorStopsInput()}
       </Fragment>
     );
   }
