@@ -34,7 +34,8 @@ function urlDecodeCursor(value: string): PaginationCursor {
   const data = Buffer.from(value, 'base64').toString('utf8');
   const { timestamp, eventID } = JSON.parse(data);
   // take some extra care to only grab the things we want
-  return { timestamp, eventID };
+  // convert the timestamp string to date object
+  return { timestamp: new Date(timestamp), eventID };
 }
 
 export function getPaginationParams(limit: number, after?: string): PaginationParams {
