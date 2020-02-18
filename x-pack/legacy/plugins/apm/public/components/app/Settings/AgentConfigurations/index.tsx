@@ -18,7 +18,7 @@ import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AgentConfigurationList } from './AgentConfigurationList';
-import { useTrackPageview } from '../../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
 import { AddEditFlyout } from './AddEditFlyout';
 
 export type Config = AgentConfigurationListAPIResponse[0];

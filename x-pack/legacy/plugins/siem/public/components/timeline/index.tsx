@@ -6,21 +6,15 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { WithSource } from '../../containers/source';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { EventType, KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
-
-import { ColumnHeader } from './body/column_headers/column_header';
-import { DataProvider, QueryOperator } from './data_providers/data_provider';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { Sort } from './body/sort';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -38,103 +32,7 @@ export interface OwnProps {
   flyoutHeight: number;
 }
 
-interface StateReduxProps {
-  activePage?: number;
-  columns: ColumnHeader[];
-  dataProviders?: DataProvider[];
-  eventType: EventType;
-  end: number;
-  filters: esFilters.Filter[];
-  isLive: boolean;
-  itemsPerPage?: number;
-  itemsPerPageOptions?: number[];
-  kqlMode: KqlMode;
-  kqlQueryExpression: string;
-  pageCount?: number;
-  sort?: Sort;
-  start: number;
-  show?: boolean;
-  showCallOutUnauthorizedMsg: boolean;
-}
-
-interface DispatchProps {
-  createTimeline?: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
-  addProvider?: ActionCreator<{
-    id: string;
-    provider: DataProvider;
-  }>;
-  onDataProviderEdited?: ActionCreator<{
-    andProviderId?: string;
-    excluded: boolean;
-    field: string;
-    id: string;
-    operator: QueryOperator;
-    providerId: string;
-    value: string | number;
-  }>;
-  updateColumns?: ActionCreator<{
-    id: string;
-    category: string;
-    columns: ColumnHeader[];
-  }>;
-  updateProviders?: ActionCreator<{
-    id: string;
-    providers: DataProvider[];
-  }>;
-  removeColumn?: ActionCreator<{
-    id: string;
-    columnId: string;
-  }>;
-  removeProvider?: ActionCreator<{
-    id: string;
-    providerId: string;
-    andProviderId?: string;
-  }>;
-  updateDataProviderEnabled?: ActionCreator<{
-    id: string;
-    providerId: string;
-    enabled: boolean;
-    andProviderId?: string;
-  }>;
-  updateDataProviderExcluded?: ActionCreator<{
-    id: string;
-    excluded: boolean;
-    providerId: string;
-    andProviderId?: string;
-  }>;
-  updateDataProviderKqlQuery?: ActionCreator<{
-    id: string;
-    kqlQuery: string;
-    providerId: string;
-  }>;
-  updateItemsPerPage?: ActionCreator<{
-    id: string;
-    itemsPerPage: number;
-  }>;
-  updateItemsPerPageOptions?: ActionCreator<{
-    id: string;
-    itemsPerPageOptions: number[];
-  }>;
-  updatePageIndex?: ActionCreator<{
-    id: string;
-    activePage: number;
-  }>;
-  updateHighlightedDropAndProviderId?: ActionCreator<{
-    id: string;
-    providerId: string;
-  }>;
-  upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
-    id: string;
-    index: number;
-  }>;
-}
-
-type Props = OwnProps & StateReduxProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -169,7 +67,12 @@ const StatefulTimelineComponent = React.memo<Props>(
     const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
     const indexToAdd = useMemo<string[]>(() => {
-      if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
+      if (
+        eventType &&
+        signalIndexExists &&
+        signalIndexName != null &&
+        ['signal', 'all'].includes(eventType)
+      ) {
         return [signalIndexName];
       }
       return [];
@@ -233,7 +136,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     const toggleColumn = useCallback(
-      (column: ColumnHeader) => {
+      (column: ColumnHeaderOptions) => {
         const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
         if (!exists && upsertColumn != null) {
@@ -300,7 +203,6 @@ const StatefulTimelineComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.activePage === nextProps.activePage &&
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
       prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
@@ -310,7 +212,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-      prevProps.pageCount === nextProps.pageCount &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
@@ -344,7 +245,7 @@ const makeMapStateToProps = () => {
       show,
       sort,
     } = timeline;
-    const kqlQueryExpression = getKqlQueryTimeline(state, id);
+    const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
 
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
@@ -369,7 +270,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
@@ -384,4 +285,10 @@ export const StatefulTimeline = connect(makeMapStateToProps, {
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
   upsertColumn: timelineActions.upsertColumn,
-})(StatefulTimelineComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulTimeline = connector(StatefulTimelineComponent);

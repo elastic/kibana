@@ -4,92 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { drag, drop } from '../../lib/drag_n_drop/helpers';
-import { populateTimeline } from '../../lib/fields_browser/helpers';
-import { createNewTimeline, toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
-import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
+import { HOSTS_PAGE } from '../../../urls/navigation';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
+import {
+  createNewTimeline,
+  populateTimeline,
+  expandFirstTimelineEventDetails,
+  uncheckTimestampToggleField,
+  checkIdToggleField,
+  dragAndDropIdToggleFieldToTimeline,
+} from '../../../tasks/timeline/main';
+import { openTimeline } from '../../../tasks/siem_main';
+import {
+  TIMESTAMP_TOGGLE_FIELD,
+  ID_TOGGLE_FIELD,
+  TIMESTAMP_HEADER_FIELD,
+  ID_HEADER_FIELD,
+} from '../../../screens/timeline/main';
 
 describe('toggle column in timeline', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
   });
 
+  beforeEach(() => {
+    openTimeline();
+    populateTimeline();
+  });
+
   afterEach(() => {
     createNewTimeline();
   });
 
-  const timestampField = '@timestamp';
-  const idField = '_id';
-
   it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
-    populateTimeline();
-
-    toggleFirstTimelineEventDetails();
-
-    cy.get(`[data-test-subj="toggle-field-${timestampField}"]`).should('be.checked');
+    expandFirstTimelineEventDetails();
+    cy.get(TIMESTAMP_TOGGLE_FIELD).should('be.checked');
   });
 
   it('displays an Unchecked Toggle field checkbox for `_id`, because it is NOT a default timeline column', () => {
-    populateTimeline();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).should(
-      'not.be.checked'
-    );
+    cy.get(ID_TOGGLE_FIELD).should('not.be.checked');
   });
 
   it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
-    populateTimeline();
+    expandFirstTimelineEventDetails();
+    uncheckTimestampToggleField();
 
-    toggleFirstTimelineEventDetails();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${timestampField}"]`).should(
-      'exist'
-    );
-
-    cy.get(
-      `[data-test-subj="timeline"] [data-test-subj="toggle-field-${timestampField}"]`
-    ).uncheck({ force: true });
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${timestampField}"]`).should(
-      'not.exist'
-    );
+    cy.get(TIMESTAMP_HEADER_FIELD).should('not.exist');
   });
 
   it('adds the _id field to the timeline when the user checks the field', () => {
-    populateTimeline();
+    expandFirstTimelineEventDetails();
+    checkIdToggleField();
 
-    toggleFirstTimelineEventDetails();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should(
-      'not.exist'
-    );
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).check({
-      force: true,
-    });
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
+    cy.get(ID_HEADER_FIELD).should('exist');
   });
 
   it('adds the _id field to the timeline via drag and drop', () => {
-    populateTimeline();
+    expandFirstTimelineEventDetails();
+    dragAndDropIdToggleFieldToTimeline();
 
-    toggleFirstTimelineEventDetails();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should(
-      'not.exist'
-    );
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-name-${idField}"]`).then(field =>
-      drag(field)
-    );
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
-      drop(headersDropArea)
-    );
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`, {
+    cy.get(ID_HEADER_FIELD, {
       timeout: DEFAULT_TIMEOUT,
     }).should('exist');
   });

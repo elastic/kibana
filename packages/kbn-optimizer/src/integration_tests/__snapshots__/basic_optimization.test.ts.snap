@@ -1,0 +1,557 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`builds expected bundles, saves bundle counts to metadata: OptimizerConfig 1`] = `
+OptimizerConfig {
+  "bundles": Array [
+    Bundle {
+      "cache": BundleCache {
+        "path": <absolute path>/plugins/bar/target/public/.kbn-optimizer-cache,
+        "state": undefined,
+      },
+      "contextDir": <absolute path>/plugins/bar,
+      "entry": "./public/index",
+      "id": "bar",
+      "outputDir": <absolute path>/plugins/bar/target/public,
+      "sourceRoot": <absolute path>,
+      "type": "plugin",
+    },
+    Bundle {
+      "cache": BundleCache {
+        "path": <absolute path>/plugins/foo/target/public/.kbn-optimizer-cache,
+        "state": undefined,
+      },
+      "contextDir": <absolute path>/plugins/foo,
+      "entry": "./public/index",
+      "id": "foo",
+      "outputDir": <absolute path>/plugins/foo/target/public,
+      "sourceRoot": <absolute path>,
+      "type": "plugin",
+    },
+  ],
+  "cache": true,
+  "dist": false,
+  "inspectWorkers": false,
+  "maxWorkerCount": 1,
+  "plugins": Array [
+    Object {
+      "directory": <absolute path>/plugins/bar,
+      "id": "bar",
+      "isUiPlugin": true,
+    },
+    Object {
+      "directory": <absolute path>/plugins/baz,
+      "id": "baz",
+      "isUiPlugin": false,
+    },
+    Object {
+      "directory": <absolute path>/plugins/foo,
+      "id": "foo",
+      "isUiPlugin": true,
+    },
+  ],
+  "profileWebpack": false,
+  "repoRoot": <absolute path>,
+  "watch": false,
+}
+`;
+
+exports[`builds expected bundles, saves bundle counts to metadata: bar bundle 1`] = `
+"var __kbnBundles__ = typeof __kbnBundles__ === \\"object\\" ? __kbnBundles__ : {}; __kbnBundles__[\\"plugin/bar\\"] =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = \\"__REPLACE_WITH_PUBLIC_PATH__\\";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = \\"./public/index.ts\\");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ \\"../foo/public/ext.ts\\":
+/*!****************************!*\\\\
+  !*** ../foo/public/ext.ts ***!
+  \\\\****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.ext = void 0;
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the \\"License\\"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * \\"AS IS\\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+const ext = 'TRUE';
+exports.ext = ext;
+
+/***/ }),
+
+/***/ \\"../foo/public/index.ts\\":
+/*!******************************!*\\\\
+  !*** ../foo/public/index.ts ***!
+  \\\\******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+
+var _lib = __webpack_require__(/*! ./lib */ \\"../foo/public/lib.ts\\");
+
+Object.keys(_lib).forEach(function (key) {
+  if (key === \\"default\\" || key === \\"__esModule\\") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _lib[key];
+    }
+  });
+});
+
+var _ext = __webpack_require__(/*! ./ext */ \\"../foo/public/ext.ts\\");
+
+Object.keys(_ext).forEach(function (key) {
+  if (key === \\"default\\" || key === \\"__esModule\\") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _ext[key];
+    }
+  });
+});
+
+/***/ }),
+
+/***/ \\"../foo/public/lib.ts\\":
+/*!****************************!*\\\\
+  !*** ../foo/public/lib.ts ***!
+  \\\\****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.fooLibFn = fooLibFn;
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the \\"License\\"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * \\"AS IS\\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+function fooLibFn() {
+  return 'foo';
+}
+
+/***/ }),
+
+/***/ \\"./public/index.ts\\":
+/*!*************************!*\\\\
+  !*** ./public/index.ts ***!
+  \\\\*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+var _exportNames = {
+  fooLibFn: true
+};
+Object.defineProperty(exports, \\"fooLibFn\\", {
+  enumerable: true,
+  get: function () {
+    return _index.fooLibFn;
+  }
+});
+
+var _index = __webpack_require__(/*! ../../foo/public/index */ \\"../foo/public/index.ts\\");
+
+var _lib = __webpack_require__(/*! ./lib */ \\"./public/lib.ts\\");
+
+Object.keys(_lib).forEach(function (key) {
+  if (key === \\"default\\" || key === \\"__esModule\\") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _lib[key];
+    }
+  });
+});
+
+/***/ }),
+
+/***/ \\"./public/lib.ts\\":
+/*!***********************!*\\\\
+  !*** ./public/lib.ts ***!
+  \\\\***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.barLibFn = barLibFn;
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the \\"License\\"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * \\"AS IS\\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+function barLibFn() {
+  return 'bar';
+}
+
+/***/ })
+
+/******/ })[\\"plugin\\"];
+//# sourceMappingURL=bar.plugin.js.map"
+`;
+
+exports[`builds expected bundles, saves bundle counts to metadata: foo bundle 1`] = `
+"var __kbnBundles__ = typeof __kbnBundles__ === \\"object\\" ? __kbnBundles__ : {}; __kbnBundles__[\\"plugin/foo\\"] =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = \\"__REPLACE_WITH_PUBLIC_PATH__\\";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = \\"./public/index.ts\\");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ \\"./public/ext.ts\\":
+/*!***********************!*\\\\
+  !*** ./public/ext.ts ***!
+  \\\\***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.ext = void 0;
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the \\"License\\"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * \\"AS IS\\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+const ext = 'TRUE';
+exports.ext = ext;
+
+/***/ }),
+
+/***/ \\"./public/index.ts\\":
+/*!*************************!*\\\\
+  !*** ./public/index.ts ***!
+  \\\\*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+
+var _lib = __webpack_require__(/*! ./lib */ \\"./public/lib.ts\\");
+
+Object.keys(_lib).forEach(function (key) {
+  if (key === \\"default\\" || key === \\"__esModule\\") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _lib[key];
+    }
+  });
+});
+
+var _ext = __webpack_require__(/*! ./ext */ \\"./public/ext.ts\\");
+
+Object.keys(_ext).forEach(function (key) {
+  if (key === \\"default\\" || key === \\"__esModule\\") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _ext[key];
+    }
+  });
+});
+
+/***/ }),
+
+/***/ \\"./public/lib.ts\\":
+/*!***********************!*\\\\
+  !*** ./public/lib.ts ***!
+  \\\\***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+\\"use strict\\";
+
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.fooLibFn = fooLibFn;
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the \\"License\\"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * \\"AS IS\\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+function fooLibFn() {
+  return 'foo';
+}
+
+/***/ })
+
+/******/ })[\\"plugin\\"];
+//# sourceMappingURL=foo.plugin.js.map"
+`;

@@ -4,77 +4,149 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import React from 'react';
-import { EuiDataGrid } from '@elastic/eui';
-import { useSelector } from 'react-redux';
-import * as selectors from '../../store/selectors';
-import { usePageId } from '../use_page_id';
+import { EuiDataGrid, EuiDataGridColumn, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import * as selectors from '../../store/alerts/selectors';
+import { useAlertListSelector } from './hooks/use_alerts_selector';
 
 export const AlertIndex = memo(() => {
-  usePageId('alertsPage');
+  const history = useHistory();
 
-  const columns: Array<{ id: string }> = useMemo(() => {
+  const columns: EuiDataGridColumn[] = useMemo(() => {
     return [
-      { id: 'alert_type' },
-      { id: 'event_type' },
-      { id: 'os' },
-      { id: 'ip_address' },
-      { id: 'host_name' },
-      { id: 'timestamp' },
-      { id: 'archived' },
-      { id: 'malware_score' },
+      {
+        id: 'alert_type',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.alertType', {
+          defaultMessage: 'Alert Type',
+        }),
+      },
+      {
+        id: 'event_type',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.eventType', {
+          defaultMessage: 'Event Type',
+        }),
+      },
+      {
+        id: 'os',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.os', {
+          defaultMessage: 'OS',
+        }),
+      },
+      {
+        id: 'ip_address',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.ipAddress', {
+          defaultMessage: 'IP Address',
+        }),
+      },
+      {
+        id: 'host_name',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.hostName', {
+          defaultMessage: 'Host Name',
+        }),
+      },
+      {
+        id: 'timestamp',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.timestamp', {
+          defaultMessage: 'Timestamp',
+        }),
+      },
+      {
+        id: 'archived',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.archived', {
+          defaultMessage: 'Archived',
+        }),
+      },
+      {
+        id: 'malware_score',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.malwareScore', {
+          defaultMessage: 'Malware Score',
+        }),
+      },
     ];
   }, []);
 
-  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+  const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
+  const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
+  const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
+  const alertListData = useAlertListSelector(selectors.alertListData);
 
-  const json = useSelector(selectors.alertListData);
+  const onChangeItemsPerPage = useCallback(
+    newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
+    [history, urlFromNewPageSizeParam]
+  );
+
+  const onChangePage = useCallback(
+    newPageIndex => history.push(urlFromNewPageIndexParam(newPageIndex)),
+    [history, urlFromNewPageIndexParam]
+  );
+
+  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      if (rowIndex > json.length) {
+      if (rowIndex > total) {
         return null;
       }
 
-      const row = json[rowIndex];
+      const row = alertListData[rowIndex % pageSize];
 
       if (columnId === 'alert_type') {
-        return row.value.source.endgame.metadata.key;
+        return i18n.translate(
+          'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
+          {
+            defaultMessage: 'Malicious File',
+          }
+        );
       } else if (columnId === 'event_type') {
-        return row.value.source.endgame.data.file_operation;
+        return row.event.action;
       } else if (columnId === 'os') {
-        return row.value.source.host.os.name;
+        return row.host.os.name;
       } else if (columnId === 'ip_address') {
-        return row.value.source.host.ip;
+        return row.host.ip;
       } else if (columnId === 'host_name') {
-        return row.value.source.host.hostname;
+        return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        return row.value.source.endgame.timestamp_utc;
+        return row['@timestamp'];
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
-        return row.value.source.endgame.data.malware_classification.score;
+        return row.file_classification.malware_classification.score;
       }
       return null;
     };
-  }, [json]);
+  }, [alertListData, pageSize, total]);
+
+  const pagination = useMemo(() => {
+    return {
+      pageIndex,
+      pageSize,
+      pageSizeOptions: [10, 20, 50],
+      onChangeItemsPerPage,
+      onChangePage,
+    };
+  }, [onChangeItemsPerPage, onChangePage, pageIndex, pageSize]);
 
   return (
-    <EuiDataGrid
-      aria-label="Alert List"
-      rowCount={json.length}
-      // Required. Sets up three columns, the last of which has a custom schema we later define down below.
-      // The second column B won't allow clicking in to see the content in a popup.
-      // The first column defines an starting width of 150px and prevents the user from resizing it
-      columns={columns}
-      // This allows you to initially hide columns. Users can still turn them on.
-      columnVisibility={{
-        visibleColumns,
-        setVisibleColumns,
-      }}
-      // Often used in combination with useEffect() to dynamically change the render.
-      renderCellValue={renderCellValue}
-    />
+    <EuiPage data-test-subj="alertListPage">
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiDataGrid
+            aria-label="Alert List"
+            rowCount={total}
+            columns={columns}
+            columnVisibility={{
+              visibleColumns,
+              setVisibleColumns,
+            }}
+            renderCellValue={renderCellValue}
+            pagination={pagination}
+            data-test-subj="alertListGrid"
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 });

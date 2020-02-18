@@ -5,7 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { wrapIntoCustomErrorResponse } from '../../errors';
+import { canUserChangePassword } from '../../../common/model';
+import { getErrorStatusCode, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
@@ -13,7 +14,6 @@ export function defineChangeUserPasswordRoutes({
   authc,
   router,
   clusterClient,
-  config,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -27,54 +27,65 @@ export function defineChangeUserPasswordRoutes({
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const username = request.params.username;
-      const { password, newPassword } = request.body;
-      const isCurrentUser = username === (await authc.getCurrentUser(request))!.username;
+      const { username } = request.params;
+      const { password: currentPassword, newPassword } = request.body;
 
-      // We should prefer `token` over `basic` if possible.
-      const providerToLoginWith = config.authc.providers.includes('token') ? 'token' : 'basic';
+      const currentUser = authc.getCurrentUser(request);
+      const isUserChangingOwnPassword =
+        currentUser && currentUser.username === username && canUserChangePassword(currentUser);
+      const currentSession = isUserChangingOwnPassword ? await authc.getSessionInfo(request) : null;
 
-      // If user tries to change own password, let's check if old password is valid first by trying
-      // to login.
-      if (isCurrentUser) {
-        try {
-          const authenticationResult = await authc.login(request, {
-            provider: providerToLoginWith,
-            value: { username, password },
-            // We shouldn't alter authentication state just yet.
-            stateless: true,
-          });
-
-          if (!authenticationResult.succeeded()) {
-            return response.forbidden({ body: authenticationResult.error });
-          }
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
-        }
-      }
+      // If user is changing their own password they should provide a proof of knowledge their
+      // current password via sending it in `Authorization: Basic base64(username:current password)`
+      // HTTP header no matter how they logged in to Kibana.
+      const scopedClusterClient = clusterClient.asScoped(
+        isUserChangingOwnPassword
+          ? {
+              headers: {
+                ...request.headers,
+                authorization: `Basic ${Buffer.from(`${username}:${currentPassword}`).toString(
+                  'base64'
+                )}`,
+              },
+            }
+          : request
+      );
 
       try {
-        await clusterClient.asScoped(request).callAsCurrentUser('shield.changePassword', {
+        await scopedClusterClient.callAsCurrentUser('shield.changePassword', {
           username,
           body: { password: newPassword },
         });
+      } catch (error) {
+        // This may happen only if user's credentials are rejected meaning that current password
+        // isn't correct.
+        if (isUserChangingOwnPassword && getErrorStatusCode(error) === 401) {
+          return response.forbidden({ body: error });
+        }
 
-        // Now we authenticate user with the new password again updating current session if any.
-        if (isCurrentUser) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+
+      // If user previously had an active session and changed their own password we should re-login
+      // user with the new password and update session. We check this since it's possible to update
+      // password even if user is authenticated via HTTP headers and hence doesn't have an active
+      // session and in such cases we shouldn't create a new one.
+      if (isUserChangingOwnPassword && currentSession) {
+        try {
           const authenticationResult = await authc.login(request, {
-            provider: providerToLoginWith,
+            provider: currentUser!.authentication_provider,
             value: { username, password: newPassword },
           });
 
           if (!authenticationResult.succeeded()) {
             return response.unauthorized({ body: authenticationResult.error });
           }
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
         }
-
-        return response.noContent();
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
       }
+
+      return response.noContent();
     })
   );
 }

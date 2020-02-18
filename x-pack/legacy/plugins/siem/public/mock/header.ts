@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ColumnHeader } from '../components/timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../store/timeline/model';
 import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../components/timeline/body/helpers';
+} from '../components/timeline/body/constants';
 
-export const defaultHeaders: ColumnHeader[] = [
+export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     category: 'base',
     columnHeaderType: defaultColumnHeaderType,

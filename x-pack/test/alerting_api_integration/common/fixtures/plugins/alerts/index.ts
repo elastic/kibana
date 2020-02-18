@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
+import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
@@ -202,7 +202,10 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: ['default', 'other'],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -246,6 +249,32 @@ export default function(kibana: any) {
           return {
             globalStateValue: true,
             groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+          };
+        },
+      };
+      // Alert types
+      const cumulativeFiringAlertType: AlertType = {
+        id: 'test.cumulative-firing',
+        name: 'Test: Cumulative Firing',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const { services, state } = alertExecutorOptions;
+          const group = 'default';
+
+          const runCount = (state.runCount || 0) + 1;
+
+          times(runCount, index => {
+            services
+              .alertInstanceFactory(`instance-${index}`)
+              .replaceState({ instanceStateValue: true })
+              .scheduleActions(group);
+          });
+
+          return {
+            runCount,
           };
         },
       };
@@ -360,15 +389,16 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.setup.registerType(neverFiringAlertType);
-      server.plugins.alerting.setup.registerType(failingAlertType);
-      server.plugins.alerting.setup.registerType(validationAlertType);
-      server.plugins.alerting.setup.registerType(authorizationAlertType);
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(failingAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
     },
   });
 }
