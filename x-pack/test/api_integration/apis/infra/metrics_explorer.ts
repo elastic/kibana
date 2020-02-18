@@ -9,6 +9,8 @@ import { first } from 'lodash';
 import moment from 'moment';
 import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { metricsExplorerResponseRT } from '../../../../plugins/infra/common/http_api/metrics_explorer';
+import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 
 const { min, max } = DATES['7.0.0'].hosts;
 
@@ -47,13 +49,10 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = first(body.series) as Record<string, any>;
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'ALL');
-        expect(firstSeries).to.have.property('columns');
-        expect(firstSeries).to.have.property('rows');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
@@ -91,13 +90,10 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = first(body.series) as Record<string, any>;
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'ALL');
-        expect(firstSeries).to.have.property('columns');
-        expect(firstSeries).to.have.property('rows');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
@@ -125,13 +121,10 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
-        const firstSeries = first(body.series) as Record<string, any>;
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'ALL');
-        expect(firstSeries).to.have.property('columns');
-        expect(firstSeries).to.have.property('rows');
         expect(firstSeries.columns).to.eql([]);
         expect(firstSeries.rows).to.have.length(0);
       });
@@ -160,13 +153,10 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(3);
-        const firstSeries = first(body.series) as Record<string, any>;
+        const firstSeries = first(body.series);
         expect(firstSeries).to.have.property('id', 'system.diskio');
-        expect(firstSeries).to.have.property('columns');
-        expect(firstSeries).to.have.property('rows');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
@@ -178,7 +168,6 @@ export default function({ getService }: FtrProviderContext) {
           metric_0: 24,
           timestamp: 1547571300000,
         });
-        expect(body).to.have.property('pageInfo');
         expect(body.pageInfo).to.eql({
           afterKey: 'system.fsstat',
           total: 12,
@@ -211,12 +200,10 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
         expect(body.series[0]!).to.have.property('rows');
         expect(body.series[0]!.rows).length(0);
-        expect(body).to.have.property('pageInfo');
         expect(body.pageInfo).to.eql({
           afterKey: null,
           total: 0,
@@ -247,10 +234,8 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send(postBody)
           .expect(200);
-        const body = response.body;
-        expect(body).to.have.property('series');
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(0);
-        expect(body).to.have.property('pageInfo');
         expect(body.pageInfo).to.eql({
           afterKey: null,
           total: 0,

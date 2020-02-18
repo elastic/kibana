@@ -5,8 +5,7 @@
  */
 
 import { JsonObject } from '../../../common/typed_json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InfraSourceConfiguration } from '../../../public/graphql/types';
+import { InfraSourceConfiguration } from '../../../common/graphql/types';
 import { SnapshotRequest } from '../../../common/http_api/snapshot_api';
 
 export interface InfraSnapshotRequestOptions
