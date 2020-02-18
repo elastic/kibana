@@ -21,7 +21,8 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, timelineDefaults, TimelineModel, EventType } from '../../../store/timeline/model';
+import { KqlMode, TimelineModel, EventType } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 
