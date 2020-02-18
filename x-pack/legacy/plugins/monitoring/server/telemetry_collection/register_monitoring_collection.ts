@@ -5,7 +5,6 @@
  */
 
 import { telemetryCollectionManager } from '../../../../../../src/legacy/core_plugins/telemetry/server';
-// @ts-ignore
 import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 

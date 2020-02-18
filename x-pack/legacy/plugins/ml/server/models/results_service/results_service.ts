@@ -30,7 +30,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(client: RequestHandlerContext | (() => any)) {
+export function resultsServiceProvider(client: RequestHandlerContext | ((...args: any[]) => any)) {
   const callAsCurrentUser =
     typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
@@ -298,7 +298,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   // Obtains the latest bucket result timestamp by job ID.
   // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
   // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
-  async function getLatestBucketTimestampByJob(jobIds = []) {
+  async function getLatestBucketTimestampByJob(jobIds: string[] = []) {
     const filter: object[] = [
       {
         term: {

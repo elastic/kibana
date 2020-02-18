@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
+import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
@@ -54,32 +55,30 @@ const editBreadcrumbs = [
 
 export const newCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/new_calendar',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} deps={deps} mode={MODE.NEW} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: newBreadcrumbs,
 };
 
 export const editCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/edit_calendar/:calendarId',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} deps={deps} mode={MODE.EDIT} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: editBreadcrumbs,
 };
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, config, mode }) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
 
-  const { context } = useResolver(undefined, undefined, config, {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     checkMlNodesAvailable,
   });
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canCreateCalendar = checkPermission('canCreateCalendar');
   const canDeleteCalendar = checkPermission('canDeleteCalendar');

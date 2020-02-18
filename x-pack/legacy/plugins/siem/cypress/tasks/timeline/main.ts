@@ -7,19 +7,16 @@
 import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
 
 import {
-  TIMELINE_TOGGLE_BUTTON,
   SEARCH_OR_FILTER_CONTAINER,
   TIMELINE_FIELDS_BUTTON,
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
+  CREATE_NEW_TIMELINE,
+  CLOSE_TIMELINE_BTN,
 } from '../../screens/timeline/main';
 
 export const hostExistsQuery = 'host.name: *';
-
-export const openTimeline = () => {
-  cy.get(TIMELINE_TOGGLE_BUTTON, { timeout: DEFAULT_TIMEOUT }).click();
-};
 
 export const populateTimeline = () => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${hostExistsQuery} {enter}`);
@@ -43,4 +40,10 @@ export const openTimelineSettings = () => {
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON, { timeout: DEFAULT_TIMEOUT }).should('not.be.disabled');
   cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+};
+
+export const createNewTimeline = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
