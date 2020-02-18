@@ -17,23 +17,6 @@ import {
 export const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
-  static METRIC_SCHEMA_CONFIG = {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      AGG_TYPE.AVG,
-      AGG_TYPE.COUNT,
-      AGG_TYPE.MAX,
-      AGG_TYPE.MIN,
-      AGG_TYPE.SUM,
-      AGG_TYPE.UNIQUE_COUNT,
-    ],
-    defaults: [{ schema: 'metric', type: AGG_TYPE.COUNT }],
-  };
-
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = this._descriptor.metrics
