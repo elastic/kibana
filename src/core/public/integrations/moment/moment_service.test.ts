@@ -47,6 +47,30 @@ describe('MomentService', () => {
     expect(momentMock.updateLocale).toHaveBeenCalledWith('default-locale', { week: { dow: 0 } });
   });
 
+  it('uses the default timezone when a zone is not defined', async () => {
+    const tz$ = new BehaviorSubject('tz4');
+    const dow$ = new BehaviorSubject('dow1');
+
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(tz$).mockReturnValueOnce(dow$);
+
+    service.start({ uiSettings });
+    await flushPromises();
+    expect(momentMock.tz.setDefault).not.toHaveBeenCalledWith('tz4');
+  });
+
+  it('sets timezone when a zone is defined', async () => {
+    const tz$ = new BehaviorSubject('tz3');
+    const dow$ = new BehaviorSubject('dow1');
+
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(tz$).mockReturnValueOnce(dow$);
+
+    service.start({ uiSettings });
+    await flushPromises();
+    expect(momentMock.tz.setDefault).toHaveBeenCalledWith('tz3');
+  });
+
   test('updates moment config', async () => {
     const tz$ = new BehaviorSubject('tz1');
     const dow$ = new BehaviorSubject('dow1');

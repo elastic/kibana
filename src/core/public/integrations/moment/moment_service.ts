@@ -35,7 +35,15 @@ export class MomentService implements CoreService {
   public async setup() {}
 
   public async start({ uiSettings }: StartDeps) {
-    const setDefaultTimezone = (tz: string) => moment.tz.setDefault(tz);
+    const setDefaultTimezone = (tz: string) => {
+      const timezones = moment.tz.names();
+      const hasTimezone = timezones.includes(tz);
+      if (hasTimezone) {
+        moment.tz.setDefault(tz);
+      } else {
+        moment.tz.setDefault();
+      }
+    };
     const setStartDayOfWeek = (day: string) => {
       const dow = moment.weekdays().indexOf(day);
       moment.updateLocale(moment.locale(), { week: { dow } } as any);
