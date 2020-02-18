@@ -32,7 +32,7 @@ export class TabifyBuckets {
   length: number;
   objectMode: boolean;
   buckets: any;
-  _keys: string[] = [];
+  _keys: any[] = [];
 
   constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRange) {
     if (aggResp.buckets) {
@@ -61,7 +61,7 @@ export class TabifyBuckets {
     }
   }
 
-  forEach(fn: (bucket: any, key: string) => void) {
+  forEach(fn: (bucket: any, key: any) => void) {
     const buckets = this.buckets;
 
     if (this.objectMode) {
@@ -70,7 +70,7 @@ export class TabifyBuckets {
       });
     } else {
       buckets.forEach((bucket: AggResponseBucket) => {
-        fn(bucket, bucket.key.toString());
+        fn(bucket, bucket.key);
       });
     }
   }
