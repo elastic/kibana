@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SavedSearchQuery } from '../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../contexts/ml';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
@@ -92,6 +92,7 @@ export class DataLoader {
   }
 
   displayError(err: any) {
+    const toastNotifications = getToastNotifications();
     if (err.statusCode === 500) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {

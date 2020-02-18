@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IndexMgmtPlugin } from './plugin';
 
-export function plugin() {
-  return new IndexMgmtPlugin();
-}
+import { PluginInitializerContext } from 'src/core/server';
+import { IndexMgmtServerPlugin } from './plugin';
+
+export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+
+export { Dependencies } from './types';

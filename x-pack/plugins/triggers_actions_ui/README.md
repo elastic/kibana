@@ -77,8 +77,157 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 ```
+
 alertParamsExpression form represented as an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
+
+```
+interface IndexThresholdProps {
+  alertParams: IndexThresholdAlertParams;
+  setAlertParams: (property: string, value: any) => void;
+  setAlertProperty: (key: string, value: any) => void;
+  errors: { [key: string]: string[] };
+  alertsContext: AlertsContextValue;
+}
+```
+
+|Property|Description|
+|---|---|
+|alertParams|Set of Alert params relevant for the index threshold alert type.|
+|setAlertParams|Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value.|
+|setAlertProperty|Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.|
+|errors|Alert level errors tracking object.|
+|alertsContext|Alert context, which is used to pass down common objects like http client.|
+
+
+Alert reducer is defined on the AlertAdd functional component level and passed down to the subcomponents to provide a new state of Alert object:
+
+```
+const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+
+...
+
+const setAlertProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  };
+
+  const setAlertParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  };
+
+  const setScheduleProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
+  };
+
+  const setActionParamsProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
+  };
+
+  const setActionProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
+  };
+
+```
+
+'x-pack/plugins/triggers_actions_ui/public/application/sections/alert_add/alert_reducer.ts' define the methods for changing different type of alert properties:
+```
+export const alertReducer = (state: any, action: AlertReducerAction) => {
+  const { command, payload } = action;
+  const { alert } = state;
+
+  switch (command.type) {
+    // create a new alert state with a new alert value
+    case 'setAlert': {
+    ....
+    //  create a new alert state with set new value to one alert property by key
+    case 'setProperty': {
+    ....
+    // create a new alert state with set new value to any subproperty for a 'schedule' alert property
+    case 'setScheduleProperty': {
+    ....
+    // create a new alert state with set new value to action subproperty by index from the array of alert actions
+    case 'setAlertActionParams': {   //
+    ....
+    // create a new alert state with set new value to any subproperty for a 'params' alert property
+    case 'setAlertParams': {
+      const { key, value } = payload;
+      if (isEqual(alert.params[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            params: {
+              ...alert.params,
+              [key]: value,
+            },
+          },
+        };
+      }
+    }
+    // create a new alert state with add or remove action from alert actions array
+    case 'setAlertActionProperty': {
+    ....
+    }
+  }
+
+```
+
+
+```
+export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
+  alertParams,
+  setAlertParams,
+  setAlertProperty,
+  errors,
+  alertsContext,
+}) => {
+
+  ....
+
+  // expression validation
+  const hasExpressionErrors = !!Object.keys(errors).find(
+    errorKey =>
+      expressionFieldsWithValidation.includes(errorKey) &&
+      errors[errorKey].length >= 1 &&
+      (alertParams as { [key: string]: any })[errorKey] !== undefined
+  );
+
+  ....
+
+  // loading indeces and set default expression values
+  useEffect(() => {
+    getIndexPatterns();
+  }, []);
+
+  useEffect(() => {
+    setDefaultExpressionValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  ....
+
+  return (
+    <Fragment>
+      {hasExpressionErrors ? (
+        <Fragment>
+          <EuiSpacer />
+          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiSpacer />
+        </Fragment>
+      ) : null}
+      <EuiSpacer size="l" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Select Index to query:"
+          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+        />
+  ....
+      </Fragment>
+  );
+};
+```
 
 Index Threshold Alert form with validation:
 ![Index Threshold Alert validation](https://i.imgur.com/TV8c7hL.png)

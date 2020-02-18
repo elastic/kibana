@@ -6,6 +6,18 @@
 
 import { schema } from '@kbn/config-schema';
 
+const customRulesSchema = schema.maybe(
+  schema.arrayOf(
+    schema.maybe(
+      schema.object({
+        actions: schema.arrayOf(schema.string()),
+        conditions: schema.arrayOf(schema.any()),
+        scope: schema.maybe(schema.any()),
+      })
+    )
+  )
+);
+
 const detectorSchema = schema.object({
   identifier: schema.maybe(schema.string()),
   function: schema.string(),
@@ -14,6 +26,7 @@ const detectorSchema = schema.object({
   over_field_name: schema.maybe(schema.string()),
   partition_field_name: schema.maybe(schema.string()),
   detector_description: schema.maybe(schema.string()),
+  custom_rules: customRulesSchema,
 });
 
 const customUrlSchema = {
@@ -34,15 +47,8 @@ export const anomalyDetectionUpdateJobSchema = {
       schema.maybe(
         schema.object({
           detector_index: schema.number(),
-          custom_rules: schema.arrayOf(
-            schema.maybe(
-              schema.object({
-                actions: schema.arrayOf(schema.string()),
-                conditions: schema.arrayOf(schema.any()),
-                scope: schema.maybe(schema.any()),
-              })
-            )
-          ),
+          description: schema.maybe(schema.string()),
+          custom_rules: customRulesSchema,
         })
       )
     )

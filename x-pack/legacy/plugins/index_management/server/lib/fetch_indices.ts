@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { IndexDataEnricher } from '../services';
+import { Index, CallAsCurrentUser } from '../types';
 import { fetchAliases } from './fetch_aliases';
-import { getIndexManagementDataEnrichers } from '../index_management_data';
+
 interface Hit {
   health: string;
   status: string;
@@ -27,22 +29,7 @@ interface Params {
   index?: string[];
 }
 
-const enrichResponse = async (response: any, callWithRequest: any) => {
-  let enrichedResponse = response;
-  const dataEnrichers = getIndexManagementDataEnrichers();
-  for (let i = 0; i < dataEnrichers.length; i++) {
-    const dataEnricher = dataEnrichers[i];
-    try {
-      const dataEnricherResponse = await dataEnricher(enrichedResponse, callWithRequest);
-      enrichedResponse = dataEnricherResponse;
-    } catch (e) {
-      // silently swallow enricher response errors
-    }
-  }
-  return enrichedResponse;
-};
-
-function formatHits(hits: Hit[], aliases: Aliases) {
+function formatHits(hits: Hit[], aliases: Aliases): Index[] {
   return hits.map((hit: Hit) => {
     return {
       health: hit.health,
@@ -59,7 +46,7 @@ function formatHits(hits: Hit[], aliases: Aliases) {
   });
 }
 
-async function fetchIndicesCall(callWithRequest: any, indexNames?: string[]) {
+async function fetchIndicesCall(callAsCurrentUser: CallAsCurrentUser, indexNames?: string[]) {
   const params: Params = {
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
@@ -69,13 +56,17 @@ async function fetchIndicesCall(callWithRequest: any, indexNames?: string[]) {
     params.index = indexNames;
   }
 
-  return await callWithRequest('cat.indices', params);
+  return await callAsCurrentUser('cat.indices', params);
 }
 
-export const fetchIndices = async (callWithRequest: any, indexNames?: string[]) => {
-  const aliases = await fetchAliases(callWithRequest);
-  const hits = await fetchIndicesCall(callWithRequest, indexNames);
-  let response = formatHits(hits, aliases);
-  response = await enrichResponse(response, callWithRequest);
-  return response;
+export const fetchIndices = async (
+  callAsCurrentUser: CallAsCurrentUser,
+  indexDataEnricher: IndexDataEnricher,
+  indexNames?: string[]
+) => {
+  const aliases = await fetchAliases(callAsCurrentUser);
+  const hits = await fetchIndicesCall(callAsCurrentUser, indexNames);
+  const indices = formatHits(hits, aliases);
+
+  return await indexDataEnricher.enrichIndices(indices, callAsCurrentUser);
 };
