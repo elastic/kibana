@@ -791,7 +791,7 @@ describe('utils', () => {
     test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
       const error = getIdBulkError({ id: '123', ruleId: undefined });
       const expected: BulkError = {
-        rule_id: '123',
+        id: '123',
         error: { message: 'id: "123" not found', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -800,7 +800,7 @@ describe('utils', () => {
     test('outputs message about id not being found if only id is defined and ruleId is null', () => {
       const error = getIdBulkError({ id: '123', ruleId: null });
       const expected: BulkError = {
-        rule_id: '123',
+        id: '123',
         error: { message: 'id: "123" not found', status_code: 404 },
       };
       expect(error).toEqual(expected);
