@@ -9,6 +9,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type TransformSecurityCommon = ProvidedType<typeof TransformSecurityCommonProvider>;
 
+export enum USER {
+  TRANSFORM_POWERUSER = 'transform_poweruser',
+  TRANSFORM_VIEWER = 'transform_viewer',
+}
+
 export function TransformSecurityCommonProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
 
@@ -96,12 +101,16 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       }
     },
 
-    getPasswordForUser(username: string): string {
-      const user = users.find(u => u.name === username);
-      if (user === undefined) {
-        throw new Error(`Can't log in user ${username} - not defined`);
+    getUsers(): typeof USER {
+      return USER;
+    },
+
+    getPasswordForUser(user: USER): string {
+      const userConfig = users.find(u => u.name === user);
+      if (userConfig === undefined) {
+        throw new Error(`Can't log in user ${user} - not defined`);
       }
-      return user.password;
+      return userConfig.password;
     },
   };
 }

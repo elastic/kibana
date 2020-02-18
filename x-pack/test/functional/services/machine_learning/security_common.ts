@@ -9,6 +9,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlSecurityCommon = ProvidedType<typeof MachineLearningSecurityCommonProvider>;
 
+export enum USER {
+  ML_POWERUSER = 'ml_poweruser',
+  ML_VIEWER = 'ml_viewer',
+}
+
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
 
@@ -90,12 +95,16 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       }
     },
 
-    getPasswordForUser(username: string): string {
-      const user = users.find(u => u.name === username);
-      if (user === undefined) {
-        throw new Error(`Can't log in user ${username} - not defined`);
+    getUsers(): typeof USER {
+      return USER;
+    },
+
+    getPasswordForUser(user: USER): string {
+      const userConfig = users.find(u => u.name === user);
+      if (userConfig === undefined) {
+        throw new Error(`Can't log in user ${user} - not defined`);
       }
-      return user.password;
+      return userConfig.password;
     },
   };
 }

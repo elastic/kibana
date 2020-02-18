@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
-      await transform.securityUI.loginAs('transform_poweruser');
+      await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {

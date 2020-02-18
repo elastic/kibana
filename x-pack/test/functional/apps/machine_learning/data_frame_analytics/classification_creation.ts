@@ -15,7 +15,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/bm_classification');
-      await ml.securityUI.loginAs('ml_poweruser');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

@@ -12,63 +12,65 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-const testDataList = [
-  {
-    testTitleSuffix: 'with 1 field, 1 agg, no split',
-    user: 'ml_poweruser',
-    requestBody: {
-      aggTypes: ['avg'],
-      duration: { start: 1560297859000, end: 1562975136000 },
-      fields: ['taxless_total_price'],
-      index: 'ecommerce',
-      query: { bool: { must: [{ match_all: {} }] } },
-      timeField: 'order_date',
-    },
-    expected: {
-      responseCode: 200,
-      responseBody: { name: '15m', ms: 900000 },
-    },
-  },
-  {
-    testTitleSuffix: 'with 2 fields, 2 aggs, no split',
-    user: 'ml_poweruser',
-    requestBody: {
-      aggTypes: ['avg', 'sum'],
-      duration: { start: 1560297859000, end: 1562975136000 },
-      fields: ['products.base_price', 'products.base_unit_price'],
-      index: 'ecommerce',
-      query: { bool: { must: [{ match_all: {} }] } },
-      timeField: 'order_date',
-    },
-    expected: {
-      responseCode: 200,
-      responseBody: { name: '30m', ms: 1800000 },
-    },
-  },
-  {
-    testTitleSuffix: 'with 1 field, 1 agg, 1 split with cardinality 46',
-    user: 'ml_poweruser',
-    requestBody: {
-      aggTypes: ['avg'],
-      duration: { start: 1560297859000, end: 1562975136000 },
-      fields: ['taxless_total_price'],
-      index: 'ecommerce',
-      query: { bool: { must: [{ match_all: {} }] } },
-      splitField: 'customer_first_name.keyword',
-      timeField: 'order_date',
-    },
-    expected: {
-      responseCode: 200,
-      responseBody: { name: '3h', ms: 10800000 },
-    },
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const mlSecurity = getService('mlSecurity');
+
+  const { ML_POWERUSER } = mlSecurity.getUsers();
+
+  const testDataList = [
+    {
+      testTitleSuffix: 'with 1 field, 1 agg, no split',
+      user: ML_POWERUSER,
+      requestBody: {
+        aggTypes: ['avg'],
+        duration: { start: 1560297859000, end: 1562975136000 },
+        fields: ['taxless_total_price'],
+        index: 'ecommerce',
+        query: { bool: { must: [{ match_all: {} }] } },
+        timeField: 'order_date',
+      },
+      expected: {
+        responseCode: 200,
+        responseBody: { name: '15m', ms: 900000 },
+      },
+    },
+    {
+      testTitleSuffix: 'with 2 fields, 2 aggs, no split',
+      user: ML_POWERUSER,
+      requestBody: {
+        aggTypes: ['avg', 'sum'],
+        duration: { start: 1560297859000, end: 1562975136000 },
+        fields: ['products.base_price', 'products.base_unit_price'],
+        index: 'ecommerce',
+        query: { bool: { must: [{ match_all: {} }] } },
+        timeField: 'order_date',
+      },
+      expected: {
+        responseCode: 200,
+        responseBody: { name: '30m', ms: 1800000 },
+      },
+    },
+    {
+      testTitleSuffix: 'with 1 field, 1 agg, 1 split with cardinality 46',
+      user: ML_POWERUSER,
+      requestBody: {
+        aggTypes: ['avg'],
+        duration: { start: 1560297859000, end: 1562975136000 },
+        fields: ['taxless_total_price'],
+        index: 'ecommerce',
+        query: { bool: { must: [{ match_all: {} }] } },
+        splitField: 'customer_first_name.keyword',
+        timeField: 'order_date',
+      },
+      expected: {
+        responseCode: 200,
+        responseBody: { name: '3h', ms: 10800000 },
+      },
+    },
+  ];
 
   describe('bucket span estimator', function() {
     before(async () => {

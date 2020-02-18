@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformSecurityCommon } from './security_common';
+import { TransformSecurityCommon, USER } from './security_common';
 
 export function TransformSecurityUIProvider(
   { getPageObjects }: FtrProviderContext,
@@ -14,14 +14,22 @@ export function TransformSecurityUIProvider(
   const PageObjects = getPageObjects(['security']);
 
   return {
-    async loginAs(username: string) {
-      const password = transformSecurityCommon.getPasswordForUser(username);
+    async loginAs(user: USER) {
+      const password = transformSecurityCommon.getPasswordForUser(user);
 
       await PageObjects.security.forceLogout();
 
-      await PageObjects.security.login(username, password, {
+      await PageObjects.security.login(user, password, {
         expectSuccess: true,
       });
+    },
+
+    async loginAsTransformPowerUser() {
+      await this.loginAs(USER.TRANSFORM_POWERUSER);
+    },
+
+    async loginAsTransformViewer() {
+      await this.loginAs(USER.TRANSFORM_VIEWER);
     },
   };
 }

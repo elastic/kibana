@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/farequote');
       await ml.api.createCalendar('wizard-test-calendar');
-      await ml.securityUI.loginAs('ml_poweruser');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlSecurityCommon } from './security_common';
+import { MlSecurityCommon, USER } from './security_common';
 
 export function MachineLearningSecurityUIProvider(
   { getPageObjects }: FtrProviderContext,
@@ -14,14 +14,22 @@ export function MachineLearningSecurityUIProvider(
   const PageObjects = getPageObjects(['security']);
 
   return {
-    async loginAs(username: string) {
-      const password = mlSecurityCommon.getPasswordForUser(username);
+    async loginAs(user: USER) {
+      const password = mlSecurityCommon.getPasswordForUser(user);
 
       await PageObjects.security.forceLogout();
 
-      await PageObjects.security.login(username, password, {
+      await PageObjects.security.login(user, password, {
         expectSuccess: true,
       });
+    },
+
+    async loginAsMlPowerUser() {
+      await this.loginAs(USER.ML_POWERUSER);
+    },
+
+    async loginAsMlViewer() {
+      await this.loginAs(USER.ML_VIEWER);
     },
   };
 }
