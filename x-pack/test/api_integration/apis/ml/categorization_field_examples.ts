@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { USER } from '../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -80,12 +81,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const mlSecurity = getService('mlSecurity');
 
-  const { ML_POWERUSER } = mlSecurity.getUsers();
-
   const testDataList = [
     {
       title: 'valid with good number of tokens',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field1',
@@ -106,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'invalid, too many tokens.',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field2',
@@ -133,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'partially valid, more than 75% are null',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field3',
@@ -159,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'partially valid, median length is over 400 characters',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field4',
@@ -185,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'invalid, no values in any doc',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field5',
@@ -207,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'invalid, mostly made up of stop words, so no matched tokens',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field6',
@@ -228,7 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'valid, mostly made up of stop words, but analyser has no stop words. so it is ok.',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field6',
@@ -252,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: 'partially valid, half the docs are stop words.',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         field: 'field7',
@@ -273,7 +272,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       title: "endpoint error, index doesn't exist",
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         ...defaultRequestBody,
         indexPatternTitle: 'does_not_exist',

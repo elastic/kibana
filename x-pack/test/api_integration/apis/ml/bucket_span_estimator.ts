@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { USER } from '../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -18,12 +19,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const mlSecurity = getService('mlSecurity');
 
-  const { ML_POWERUSER } = mlSecurity.getUsers();
-
   const testDataList = [
     {
       testTitleSuffix: 'with 1 field, 1 agg, no split',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
         duration: { start: 1560297859000, end: 1562975136000 },
@@ -39,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'with 2 fields, 2 aggs, no split',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg', 'sum'],
         duration: { start: 1560297859000, end: 1562975136000 },
@@ -55,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'with 1 field, 1 agg, 1 split with cardinality 46',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
         duration: { start: 1560297859000, end: 1562975136000 },

@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { USER } from '../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -18,12 +19,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const mlSecurity = getService('mlSecurity');
 
-  const { ML_POWERUSER } = mlSecurity.getUsers();
-
   const testDataList = [
     {
       testTitleSuffix: 'with 0 metrics, 0 influencers and no split field',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
         splitFieldName: '',
@@ -45,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'with 1 metrics and 1 influencers same as split field',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
         splitFieldName: 'geoip.city_name',
@@ -63,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'with 3 metrics, 3 influencers, split by city',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
         splitFieldName: 'geoip.city_name',
@@ -81,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'with 4 metrics, 4 influencers, split by customer_id',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
         splitFieldName: 'customer_id',
@@ -110,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'with 4 metrics, 4 influencers, split by customer_id and filtering by country code',
-      user: ML_POWERUSER,
+      user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
         splitFieldName: 'customer_id',
