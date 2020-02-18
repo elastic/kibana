@@ -22,11 +22,9 @@ import {
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
 } from '../../../screens/timeline/fields_browser';
 
-import {
-  openTimeline,
-  populateTimeline,
-  openTimelineFieldsBrowser,
-} from '../../../tasks/timeline/main';
+import { populateTimeline, openTimelineFieldsBrowser } from '../../../tasks/timeline/main';
+
+import { openTimeline } from '../../../tasks/siem_main';
 
 import {
   clearFieldsBrowser,
