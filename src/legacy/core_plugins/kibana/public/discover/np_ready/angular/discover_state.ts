@@ -108,8 +108,13 @@ export function getState({
     flush: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     replaceUrlState: async () => {
-      await stateStorage.set('_a', appStateContainer.getState(), { replace: true });
-      await stateStorage.set('_g', globalStateContainer.getState(), { replace: true });
+      if (appStateContainer.getState()) {
+        await stateStorage.set('_a', appStateContainer.getState(), { replace: true });
+      }
+
+      if (globalStateContainer.getState()) {
+        await stateStorage.set('_g', globalStateContainer.getState(), { replace: true });
+      }
     },
   };
 }

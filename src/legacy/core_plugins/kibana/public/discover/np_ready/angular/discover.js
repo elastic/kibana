@@ -743,8 +743,8 @@ function discoverController(
       }
 
       init.complete = true;
+
       await replaceUrlState();
-      startStateSync();
 
       if (shouldSearchOnPageLoad()) {
         $fetchObservable.next();
@@ -1129,4 +1129,5 @@ function discoverController(
   addHelpMenuToAppChrome(chrome);
 
   init();
+  startStateSync();
 }
