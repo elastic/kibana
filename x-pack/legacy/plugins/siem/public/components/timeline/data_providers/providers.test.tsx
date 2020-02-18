@@ -86,7 +86,7 @@ describe('Providers', () => {
         </TestProviders>
       );
       wrapper
-        .find('[data-test-subj="providerBadge"] svg')
+        .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
         .first()
         .simulate('click');
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
@@ -115,7 +115,7 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="providerBadge"] svg')
+        .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
         .first()
         .simulate('click');
 
@@ -412,7 +412,7 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
-        .find('svg')
+        .find('[data-euiicon-type]')
         .first()
         .simulate('click');
 
@@ -449,7 +449,7 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
-        .find('svg')
+        .find('[data-euiicon-type]')
         .first()
         .simulate('click');
 

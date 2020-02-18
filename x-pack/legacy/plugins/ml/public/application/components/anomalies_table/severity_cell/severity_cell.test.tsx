@@ -16,8 +16,8 @@ describe('SeverityCell', () => {
     };
     const { container } = render(<SeverityCell {...props} />);
     expect(container.textContent).toBe('75');
-    const svgEl = container.getElementsByTagName('svg').item(0);
-    expect(svgEl && svgEl.style.fill).toBe('#fe5050');
+    const svgEl = container.querySelectorAll('[data-euiicon-type]')[0];
+    expect(svgEl && svgEl.getAttribute('color')).toBe('#fe5050');
   });
 
   test('should render a multi-bucket marker with low severity score', () => {

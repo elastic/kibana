@@ -170,7 +170,7 @@ describe('EventFieldsBrowser', () => {
           .find('.euiTableRow')
           .find('.euiTableRowCell')
           .at(1)
-          .find('svg')
+          .find('[data-euiicon-type]')
           .exists()
       ).toEqual(true);
     });
