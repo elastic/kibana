@@ -36,7 +36,10 @@ import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
-import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import {
   createSavedVisLoader,
@@ -65,6 +68,7 @@ export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
   embeddable: IEmbeddableSetup;
   usageCollection: UsageCollectionSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -95,7 +99,7 @@ export class VisualizationsPlugin
 
   public setup(
     core: CoreSetup,
-    { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
+    { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
@@ -103,7 +107,10 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory(this.getSavedVisualizationsLoader);
+    const embeddableFactory = new VisualizeEmbeddableFactory(
+      data.query.timefilter.timefilter,
+      this.getSavedVisualizationsLoader
+    );
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {

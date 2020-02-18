@@ -12,10 +12,10 @@ import {
 } from '../../../screens/inspect';
 import {
   executeTimelineKQL,
-  openTimeline,
   openTimelineSettings,
   openTimelineInspectButton,
 } from '../../../tasks/timeline/main';
+import { openTimeline } from '../../../tasks/siem_main';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
 import { closesModal, openStatsAndTables } from '../../../tasks/inspect';
 
