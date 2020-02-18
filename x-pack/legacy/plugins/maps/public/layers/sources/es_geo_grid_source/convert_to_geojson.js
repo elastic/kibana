@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
+import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 export function convertToGeoJson(esResponse, renderAs) {
   const features = [];
@@ -14,25 +15,15 @@ export function convertToGeoJson(esResponse, renderAs) {
   const gridBuckets = _.get(esResponse, 'aggregations.gridSplit.buckets', []);
   for (let i = 0; i < gridBuckets.length; i++) {
     const gridBucket = gridBuckets[i];
-    const { key, gridCentroid, doc_count, ...rest } = gridBucket; // eslint-disable-line camelcase
-    const properties = { doc_count }; // eslint-disable-line camelcase
-    Object.keys(rest).forEach(key => {
-      if (_.has(rest[key], 'value')) {
-        properties[key] = rest[key].value;
-      } else if (_.has(rest[key], 'buckets')) {
-        properties[key] = _.get(rest[key], 'buckets[0].key');
-      }
-    });
-
     features.push({
       type: 'Feature',
       geometry: rowToGeometry({
-        gridKey: key,
-        gridCentroid,
+        gridKey: gridBucket.key,
+        gridCentroid: gridBucket.gridCentroid,
         renderAs,
       }),
-      id: key,
-      properties,
+      id: gridBucket.key,
+      properties: extractPropertiesFromBucket(gridBucket, ['key', 'gridCentroid']),
     });
   }
 

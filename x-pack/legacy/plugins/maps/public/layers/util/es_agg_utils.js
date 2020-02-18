@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 export function getField(indexPattern, fieldName) {
   const field = indexPattern.fields.getByName(fieldName);
@@ -28,4 +29,22 @@ export function addFieldToDSL(dsl, field) {
           lang: field.lang,
         },
       };
+}
+
+export function extractPropertiesFromBucket(bucket, ignoreKeys) {
+  const properties = {};
+  Object.keys(bucket).forEach(key => {
+    if (ignoreKeys.includes(key)) {
+      return;
+    }
+
+    if (_.has(bucket[key], 'value')) {
+      properties[key] = bucket[key].value;
+    } else if (_.has(bucket[key], 'buckets')) {
+      properties[key] = _.get(bucket[key], 'buckets[0].key');
+    } else {
+      properties[key] = bucket[key];
+    }
+  });
+  return properties;
 }
