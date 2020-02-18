@@ -127,7 +127,6 @@ export const AGG_TYPE = {
   UNIQUE_COUNT: 'cardinality',
 };
 
-export const COUNT_AGG_TYPE = AGG_TYPE.COUNT;
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });
