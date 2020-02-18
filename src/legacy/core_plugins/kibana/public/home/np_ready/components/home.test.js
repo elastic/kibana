@@ -131,7 +131,7 @@ describe('home', () => {
     test('should not render directory entry when showOnHomePage is false', async () => {
       const directoryEntry = {
         id: 'stack-management',
-        title: 'Stack Management',
+        title: 'Management',
         description: 'Your center console for managing the Elastic Stack.',
         icon: 'managementApp',
         path: 'management_landing_page',
