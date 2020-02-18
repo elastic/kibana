@@ -53,7 +53,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <T extends TStrategyTypes>(name: T): TSearchStrategyProvider<T> => {
     const strategyProvider = this.searchStrategies[name];
-    if (!strategyProvider) throw new Error('Search strategy not found');
+    if (!strategyProvider) throw new Error(`Search strategy ${name} not found`);
     return strategyProvider;
   };
 
