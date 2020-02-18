@@ -8,7 +8,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
-import { ColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { maxDelay } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -29,7 +29,7 @@ interface Props {
   actionsColumnWidth: number;
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   containerElementRef: HTMLDivElement;
   data: TimelineItem[];
@@ -47,7 +47,7 @@ interface Props {
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 

@@ -14,7 +14,7 @@ import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeader, KqlMode } from '../../store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
@@ -49,7 +49,7 @@ const StyledEuiPanel = styled(EuiPanel)`
 
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
   end: number;
@@ -67,7 +67,7 @@ interface Props {
   start: number;
   sort: Sort;
   timelineTypeContext: TimelineTypeContextProps;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 

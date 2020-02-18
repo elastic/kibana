@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
 import { ToStringArray } from '../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
@@ -63,11 +63,11 @@ export const getColumns = ({
   toggleColumn,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }) => [
   {
     field: 'field',

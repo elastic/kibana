@@ -17,7 +17,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeader, KqlMode, TimelineModel, EventType } from './model';
+import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById, TimelineState } from './types';
 import { TimelineNonEcsData } from '../../graphql/types';
 
@@ -129,7 +129,7 @@ export const addTimelineToStore = ({
 });
 
 interface AddNewTimelineParams {
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   dateRange?: {
     start: number;
@@ -353,7 +353,7 @@ const addProviderToTimeline = (
 };
 
 interface AddTimelineColumnParams {
-  column: ColumnHeader;
+  column: ColumnHeaderOptions;
   id: string;
   index: number;
   timelineById: TimelineById;
@@ -566,7 +566,7 @@ export const updateKqlFilterQueryDraft = ({
 
 interface UpdateTimelineColumnsParams {
   id: string;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   timelineById: TimelineById;
 }
 

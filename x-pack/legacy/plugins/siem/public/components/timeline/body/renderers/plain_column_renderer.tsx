@@ -8,7 +8,7 @@ import { head } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { ColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { getEmptyTagValue } from '../../../empty_value';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
@@ -32,7 +32,7 @@ export const plainColumnRenderer: ColumnRenderer = {
   }: {
     columnName: string;
     eventId: string;
-    field: ColumnHeader;
+    field: ColumnHeaderOptions;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;

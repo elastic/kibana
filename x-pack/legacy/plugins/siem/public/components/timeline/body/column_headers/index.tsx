@@ -10,7 +10,7 @@ import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';
-import { ColumnHeader as IColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { DRAG_TYPE_FIELD, droppableTimelineColumnsPrefix } from '../../../drag_and_drop/helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
@@ -37,7 +37,7 @@ import { ColumnHeader } from './column_header';
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
-  columnHeaders: IColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onColumnRemoved: OnColumnRemoved;
@@ -50,7 +50,7 @@ interface Props {
   showSelectAllCheckbox: boolean;
   sort: Sort;
   timelineId: string;
-  toggleColumn: (column: IColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** Renders the timeline header columns */

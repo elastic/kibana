@@ -20,7 +20,7 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 export type ColumnId = string;
 
 /** The specification of a column header */
-export interface ColumnHeader {
+export interface ColumnHeaderOptions {
   aggregatable?: boolean;
   category?: string;
   columnHeaderType: ColumnHeaderType;
@@ -37,7 +37,7 @@ export interface ColumnHeader {
 
 export interface TimelineModel {
   /** The columns displayed in the timeline */
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** Events to not be rendered **/

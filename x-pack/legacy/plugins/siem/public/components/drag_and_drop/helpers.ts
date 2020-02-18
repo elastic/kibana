@@ -11,7 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -124,7 +124,7 @@ interface AddProviderToTimelineParams {
 
 interface AddFieldToTimelineColumnsParams {
   upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
+    column: ColumnHeaderOptions;
     id: string;
     index: number;
   }>;

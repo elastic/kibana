@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ColumnHeader } from '../../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { getIconFromType } from '../../../../event_details/helpers';
 import * as i18n from '../translations';
 
@@ -35,7 +35,7 @@ const ToolTipTableValue = styled.span`
 `;
 ToolTipTableValue.displayName = 'ToolTipTableValue';
 
-export const HeaderToolTipContent = React.memo<{ header: ColumnHeader }>(({ header }) => (
+export const HeaderToolTipContent = React.memo<{ header: ColumnHeaderOptions }>(({ header }) => (
   <>
     {!isEmpty(header.category) && (
       <P>

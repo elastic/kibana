@@ -14,7 +14,7 @@ import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { appSelectors, State, timelineSelectors } from '../../../store';
 import { timelineActions, appActions } from '../../../store/actions';
-import { ColumnHeader, TimelineModel } from '../../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
@@ -42,12 +42,12 @@ interface OwnProps {
   isEventViewer?: boolean;
   height: number;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
 
-export const emptyColumnHeaders: ColumnHeader[] = [];
+export const emptyColumnHeaders: ColumnHeaderOptions[] = [];
 
 const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
   ({
@@ -214,9 +214,9 @@ StatefulBodyComponent.displayName = 'StatefulBodyComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
-    headers: ColumnHeader[],
+    headers: ColumnHeaderOptions[],
     browserFields: BrowserFields
-  ) => ColumnHeader[] = memoizeOne(getColumnHeaders);
+  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();

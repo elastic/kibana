@@ -7,7 +7,7 @@
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 
-import { ColumnHeader } from '../../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
@@ -16,7 +16,7 @@ import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
 
 interface Props {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;

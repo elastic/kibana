@@ -9,7 +9,7 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
@@ -21,7 +21,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
 const timestampFieldId = '@timestamp';
-const columnHeaders: ColumnHeader[] = [
+const columnHeaders: ColumnHeaderOptions[] = [
   {
     category: 'base',
     columnHeaderType: defaultColumnHeaderType,

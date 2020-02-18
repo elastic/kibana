@@ -15,7 +15,7 @@ import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timel
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
-import { ColumnHeader, TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   createTimeline as dispatchCreateNewTimeline,
@@ -335,7 +335,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     show,
   }: {
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
   updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>

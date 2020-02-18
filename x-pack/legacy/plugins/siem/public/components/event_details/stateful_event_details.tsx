@@ -8,19 +8,19 @@ import React, { useCallback, useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 
 import { EventDetails, View } from './event_details';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   data: DetailItem[];
   id: string;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const StatefulEventDetails = React.memo<Props>(

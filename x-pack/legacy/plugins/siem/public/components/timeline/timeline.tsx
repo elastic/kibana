@@ -13,7 +13,7 @@ import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeader, KqlMode, EventType } from '../../store/timeline/model';
+import { ColumnHeaderOptions, KqlMode, EventType } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
@@ -56,7 +56,7 @@ export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   end: number;
   eventType?: EventType;
@@ -83,7 +83,7 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** The parent Timeline component */

@@ -13,7 +13,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDraggableFieldId, getDroppableId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
@@ -68,10 +68,10 @@ export const getFieldItems = ({
   browserFields: BrowserFields;
   category: Partial<BrowserField>;
   categoryId: string;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   highlight?: string;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   onUpdateColumns: OnUpdateColumns;
 }): FieldItem[] =>
   uniqBy('name', [

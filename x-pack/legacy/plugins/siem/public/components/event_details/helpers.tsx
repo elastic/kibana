@@ -7,7 +7,7 @@
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -49,7 +49,7 @@ export const getColumnHeaderFromBrowserField = ({
 }: {
   browserField: Partial<BrowserField>;
   width?: number;
-}): ColumnHeader => ({
+}): ColumnHeaderOptions => ({
   category: browserField.category,
   columnHeaderType: 'not-filtered',
   description: browserField.description != null ? browserField.description : undefined,
@@ -71,7 +71,7 @@ export const getColumnsWithTimestamp = ({
 }: {
   browserFields: BrowserFields;
   category: string;
-}): ColumnHeader[] => {
+}): ColumnHeaderOptions[] => {
   const emptyFields: Record<string, Partial<BrowserField>> = {};
   const timestamp = get('base.fields.@timestamp', browserFields);
   const categoryFields: Array<Partial<BrowserField>> = [

@@ -40,7 +40,7 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { ColumnHeader } from './model';
+import { ColumnHeaderOptions } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
@@ -101,7 +101,11 @@ const timelineByIdMock: TimelineById = {
   },
 };
 
-const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
+const columnsMock: ColumnHeaderOptions[] = [
+  defaultHeaders[0],
+  defaultHeaders[1],
+  defaultHeaders[2],
+];
 
 describe('Timeline', () => {
   describe('#add saved object Timeline to store ', () => {
@@ -183,8 +187,8 @@ describe('Timeline', () => {
 
   describe('#upsertTimelineColumn', () => {
     let timelineById: TimelineById = {};
-    let columns: ColumnHeader[] = [];
-    let columnToAdd: ColumnHeader;
+    let columns: ColumnHeaderOptions[] = [];
+    let columnToAdd: ColumnHeaderOptions;
 
     beforeEach(() => {
       timelineById = cloneDeep(timelineByIdMock);

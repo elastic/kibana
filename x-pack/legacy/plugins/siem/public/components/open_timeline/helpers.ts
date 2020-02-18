@@ -19,7 +19,7 @@ import {
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
 
-import { ColumnHeader, TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   defaultColumnHeaderType,
@@ -81,7 +81,7 @@ export const defaultTimelineToTimelineModel = (
     columns:
       timeline.columns != null
         ? timeline.columns.map(col => {
-            const timelineCols: ColumnHeader = {
+            const timelineCols: ColumnHeaderOptions = {
               ...col,
               columnHeaderType: defaultColumnHeaderType,
               id: col.id != null ? col.id : 'unknown',

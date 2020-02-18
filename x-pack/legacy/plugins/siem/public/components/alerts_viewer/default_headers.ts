@@ -9,10 +9,10 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
-import { ColumnHeader, SubsetTimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
 
-export const alertsHeaders: ColumnHeader[] = [
+export const alertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

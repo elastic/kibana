@@ -17,7 +17,7 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../../../../components/timeline/body/constants';
-import { ColumnHeader, SubsetTimelineModel } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../../store/timeline/model';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 import { FILTER_OPEN } from './signals_filter_group';
@@ -85,7 +85,7 @@ export const buildSignalsRuleIdFilter = (ruleId: string): Filter[] => [
   },
 ];
 
-export const signalsHeaders: ColumnHeader[] = [
+export const signalsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { ColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyValue } from '../../../empty_value';
@@ -33,7 +33,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
   }: {
     columnName: string;
     eventId: string;
-    field: ColumnHeader;
+    field: ColumnHeaderOptions;
     timelineId: string;
     truncate?: boolean;
   }) => (

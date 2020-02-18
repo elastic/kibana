@@ -9,7 +9,7 @@ import uuid from 'uuid';
 
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
-import { ColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { OnPinEvent, OnColumnResized, OnUnPinEvent, OnRowSelected } from '../../events';
@@ -23,7 +23,7 @@ interface Props {
   actionsColumnWidth: number;
   addNoteToEvent: AddNoteToEvent;
   onPinEvent: OnPinEvent;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;

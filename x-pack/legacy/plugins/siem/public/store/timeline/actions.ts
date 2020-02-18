@@ -14,7 +14,7 @@ import {
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { EventType, KqlMode, TimelineModel, ColumnHeader } from './model';
+import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
@@ -27,9 +27,11 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const upsertColumn = actionCreator<{ column: ColumnHeader; id: string; index: number }>(
-  'UPSERT_COLUMN'
-);
+export const upsertColumn = actionCreator<{
+  column: ColumnHeaderOptions;
+  id: string;
+  index: number;
+}>('UPSERT_COLUMN');
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
@@ -55,7 +57,7 @@ export const createTimeline = actionCreator<{
     end: number;
   };
   filters?: Filter[];
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
@@ -109,7 +111,7 @@ export const updateIsLoading = actionCreator<{
 
 export const updateColumns = actionCreator<{
   id: string;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
 }>('UPDATE_COLUMNS');
 
 export const updateDataProviderEnabled = actionCreator<{

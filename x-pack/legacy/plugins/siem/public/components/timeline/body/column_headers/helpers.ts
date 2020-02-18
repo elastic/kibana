@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 
 import { BrowserFields } from '../../../../containers/source';
-import { ColumnHeader } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -18,9 +18,9 @@ import {
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
-  headers: ColumnHeader[],
+  headers: ColumnHeaderOptions[],
   browserFields: BrowserFields
-): ColumnHeader[] => {
+): ColumnHeaderOptions[] => {
   return headers.map(header => {
     const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
 

@@ -8,7 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnHeader } from '../../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { TruncatableText } from '../../../../truncatable_text';
 import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
@@ -19,7 +19,7 @@ import { getSortDirection } from './helpers';
 
 interface HeaderContentProps {
   children: React.ReactNode;
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   isResizing: boolean;
   onClick: () => void;
   sort: Sort;
