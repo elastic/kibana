@@ -123,6 +123,37 @@ describe('import_rules_route', () => {
       expect(statusCode).toEqual(200);
     });
 
+    test('returns 400 when a thrown error is caught', async () => {
+      const mockFn = jest.fn();
+      const mockThrowError = (): Error => {
+        throw new Error();
+      };
+      clients.clusterClient.callAsCurrentUser.mockResolvedValue(
+        mockFn.mockImplementation(mockThrowError)
+      );
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
+      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
+      const parsed: ImportSuccessError = JSON.parse(payload);
+
+      expect(parsed).toEqual({
+        errors: [
+          {
+            error: {
+              message: "Cannot read property 'total' of undefined",
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
+        success_count: 0,
+      });
+      expect(statusCode).toEqual(200);
+    });
+
     test('returns 400 if file extension type is not .ndjson', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
