@@ -22,10 +22,10 @@ import { join } from 'path';
 
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getDataPath } from '../core/server/path';
+import { getConfigDirectory } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
 
-const path = join(getDataPath(), 'kibana.keystore');
+const path = join(getConfigDirectory(), 'kibana.keystore');
 const keystore = new Keystore(path);
 
 import { createCli } from './create';
