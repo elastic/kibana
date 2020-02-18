@@ -7,12 +7,7 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import {
-  COUNT_PROP_LABEL,
-  DEFAULT_MAX_BUCKETS_LIMIT,
-  FIELD_ORIGIN,
-  AGG_TYPE,
-} from '../../../common/constants';
+import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, AGG_TYPE } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
 import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../util/es_agg_utils';
@@ -80,8 +75,20 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   formatMetricLabel(type, fieldName) {
-    const metricLabel = type !== AGG_TYPE.COUNT ? `${type} ${fieldName}` : COUNT_PROP_LABEL;
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
+    switch (type) {
+      case AGG_TYPE.COUNT:
+        return i18n.translate('xpack.maps.source.esJoin.countLabel', {
+          defaultMessage: `Count of {indexPatternTitle}`,
+          values: { indexPatternTitle: this._descriptor.indexPatternTitle },
+        });
+      case AGG_TYPE.TERMS:
+        return i18n.translate('xpack.maps.source.esJoin.topTermLabel', {
+          defaultMessage: `Top {fieldName}`,
+          values: { fieldName },
+        });
+      default:
+        return `${type} ${fieldName}`;
+    }
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
