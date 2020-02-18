@@ -10,11 +10,12 @@ import { HashRouter } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
 
-import { setDependencyCache } from '../shared_imports';
-
 import { API_BASE_PATH } from '../../common/constants';
-import { AuthorizationProvider } from './lib/authorization';
+
+import { setDependencyCache } from '../shared_imports';
 import { AppDependencies } from '../shim';
+
+import { AuthorizationProvider } from './lib/authorization';
 
 const legacyBasePath = {
   prepend: chrome.addBasePath,
