@@ -92,6 +92,32 @@ exports[`CalendarForm Renders calendar form 1`] = `
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
+        defaultMessage="Apply to all jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.allJobsTitle"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiSwitch
+      label={
+        <FormattedMessage
+          defaultMessage="Apply calendar to all jobs"
+          id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+          values={Object {}}
+        />
+      }
+      name="switch"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
         defaultMessage="Jobs"
         id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
         values={Object {}}
