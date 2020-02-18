@@ -2,15 +2,33 @@
 
 This document outlines best practices and patterns for testing Kibana Plugins.
 
-- [Strategy](#strategy)
-- [Core Integrations](#core-integrations)
-  - [Core Mocks](#core-mocks)
+- [Testing Kibana Plugins](#testing-kibana-plugins)
+  - [Strategy](#strategy)
+  - [New concerns in the Kibana Platform](#new-concerns-in-the-kibana-platform)
+  - [Core Integrations](#core-integrations)
+    - [Core Mocks](#core-mocks)
+      - [Example](#example)
   - [Strategies for specific Core APIs](#strategies-for-specific-core-apis)
-      - [HTTP Routes](#http-routes)
-      - [SavedObjects](#savedobjects)
-      - [Elasticsearch](#elasticsearch)
-- [Plugin Integrations](#plugin-integrations)
-- [Plugin Contracts](#plugin-contracts)
+    - [HTTP Routes](#http-routes)
+        - [Preconditions](#preconditions)
+      - [Unit testing](#unit-testing)
+          - [Example](#example-1)
+      - [Integration tests](#integration-tests)
+        - [Functional Test Runner](#functional-test-runner)
+          - [Example](#example-2)
+        - [TestUtils](#testutils)
+          - [Example](#example-3)
+    - [Applications](#applications)
+      - [Example](#example-4)
+    - [SavedObjects](#savedobjects)
+      - [Unit Tests](#unit-tests)
+      - [Integration Tests](#integration-tests-1)
+    - [Elasticsearch](#elasticsearch)
+  - [Plugin integrations](#plugin-integrations)
+    - [Preconditions](#preconditions-1)
+    - [Testing dependencies usages](#testing-dependencies-usages)
+    - [Testing components consuming the dependencies](#testing-components-consuming-the-dependencies)
+    - [Testing optional plugin dependencies](#testing-optional-plugin-dependencies)
 
 ## Strategy
 
@@ -540,11 +558,232 @@ describe('renderApp', () => {
 });
 ```
 
-#### SavedObjects
+### SavedObjects
 
-_How to test SO operations_
+#### Unit Tests
 
-#### Elasticsearch
+To unit test code that uses the Saved Objects client mock the client methods
+and make assertions against the behaviour you would expect to see.
+
+Since the Saved Objects client makes network requests to an external
+Elasticsearch cluster, it's important to include failure scenarios in your
+test cases.
+
+When writing a view with which a user might interact, it's important to ensure
+your code can recover from exceptions and provide a way for the user to
+proceed. This behaviour should be tested as well.
+
+Below is an example of a Jest Unit test suite that mocks the server-side Saved
+Objects client:
+
+```typescript
+// src/plugins/myplugin/server/lib/short_url_lookup.ts
+import crypto from 'crypto';
+import { SavedObjectsClientContract } from 'kibana/server';
+
+export const shortUrlLookup = {
+  generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
+    const id = crypto
+      .createHash('md5')
+      .update(url)
+      .digest('hex');
+
+    return savedObjectsClient
+      .create(
+        'url',
+        {
+          url,
+          accessCount: 0,
+          createDate: new Date().valueOf(),
+          accessDate: new Date().valueOf(),
+        },
+        { id }
+      )
+      .then(doc => doc.id)
+      .catch(err => {
+        if (savedObjectsClient.errors.isConflictError(err)) {
+          return id;
+        } else {
+          throw err;
+        }
+      });
+  },
+};
+
+```
+
+```typescript
+// src/plugins/myplugin/server/lib/short_url_lookup.test.ts
+import { shortUrlLookup } from './short_url_lookup';
+import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+
+describe('shortUrlLookup', () => {
+  const ID = 'bf00ad16941fc51420f91a93428b27a0';
+  const TYPE = 'url';
+  const URL = 'http://elastic.co';
+
+  const mockSavedObjectsClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('generateUrlId', () => {
+    it('provides correct arguments to savedObjectsClient', async () => {
+      const ATTRIBUTES = {
+        url: URL,
+        accessCount: 0,
+        createDate: new Date().valueOf(),
+        accessDate: new Date().valueOf(),
+      };
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: ID,
+        type: TYPE,
+        references: [],
+        attributes: ATTRIBUTES,
+      });
+      await shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient);
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      const [type, attributes, options] = mockSavedObjectsClient.create.mock.calls[0];
+      expect(type).toBe(TYPE);
+      expect(attributes).toStrictEqual(ATTRIBUTES);
+      expect(options).toStrictEqual({ id: ID });
+    });
+
+    it('ignores version conflict and returns id', async () => {
+      mockSavedObjectsClient.create.mockRejectedValueOnce(
+        mockSavedObjectsClient.errors.decorateConflictError(new Error())
+      );
+      const id = await shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient);
+      expect(id).toEqual(ID);
+    });
+
+    it('rejects with passed through savedObjectsClient errors', () => {
+      const error = new Error('oops');
+      mockSavedObjectsClient.create.mockRejectedValueOnce(error);
+      return expect(shortUrlLookup.generateUrlId(URL, mockSavedObjectsClient)).rejects.toBe(error);
+    });
+  });
+});
+```
+
+The following is an example of a public saved object unit test. The biggest
+difference with the server-side test is the slightly different Saved Objects
+client API which returns `SimpleSavedObject` instances which needs to be
+reflected in the mock.
+
+```typescript
+// src/plugins/myplugin/public/saved_query_service.ts
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SimpleSavedObject,
+} from 'src/core/public';
+
+export type SavedQueryAttributes = SavedObjectAttributes & {
+  title: string;
+  description: 'bar';
+  query: {
+    language: 'kuery';
+    query: 'response:200';
+  };
+};
+
+export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientContract) => {
+  const saveQuery = async (
+    attributes: SavedQueryAttributes
+  ): Promise<SimpleSavedObject<SavedQueryAttributes>> => {
+    try {
+      return await savedObjectsClient.create<SavedQueryAttributes>('query', attributes, {
+        id: attributes.title as string,
+      });
+    } catch (err) {
+      throw new Error('Unable to create saved query, please try again.');
+    }
+  };
+
+  return {
+    saveQuery,
+  };
+};
+```
+
+```typescript
+// src/plugins/myplugin/public/saved_query_service.test.ts
+import { createSavedQueryService, SavedQueryAttributes } from './saved_query_service';
+import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+
+describe('saved query service', () => {
+  const savedQueryAttributes: SavedQueryAttributes = {
+    title: 'foo',
+    description: 'bar',
+    query: {
+      language: 'kuery',
+      query: 'response:200',
+    },
+  };
+
+  const mockSavedObjectsClient = savedObjectsServiceMock.createStartContract()
+    .client as jest.Mocked<SavedObjectsClientContract>;
+
+  const savedQueryService = createSavedQueryService(mockSavedObjectsClient);
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('saveQuery', function() {
+    it('should create a saved object for the given attributes', async () => {
+      // The public Saved Objects client returns instances of
+      // SimpleSavedObject, so we create an instance to return from our mock.
+      const mockReturnValue = new SimpleSavedObject(mockSavedObjectsClient, {
+        type: 'query',
+        id: 'foo',
+        attributes: savedQueryAttributes,
+        references: [],
+      });
+      mockSavedObjectsClient.create.mockResolvedValue(mockReturnValue);
+
+      const response = await savedQueryService.saveQuery(savedQueryAttributes);
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
+        id: 'foo',
+      });
+      expect(response).toBe(mockReturnValue);
+    });
+
+    it('should reject with an error when saved objects client errors', async done => {
+      mockSavedObjectsClient.create.mockRejectedValue(new Error('timeout'));
+
+      try {
+        await savedQueryService.saveQuery(savedQueryAttributes);
+      } catch (err) {
+        expect(err).toMatchInlineSnapshot(
+          `[Error: Unable to create saved query, please try again.]`
+        );
+        done();
+      }
+    });
+  });
+});
+```
+
+#### Integration Tests
+To get the highest confidence in how your code behaves when using the Saved
+Objects client, you should write at least a few integration tests which loads
+data into and queries a real Elasticsearch database.
+
+To do that we'll write a Jest integration test using `TestUtils` to start
+Kibana and esArchiver to load fixture data into Elasticsearch.
+
+1. Create the fixtures data you need in Elasticsearch
+2. Create a fixtures archive with `node scripts/es_archiver save <name> [index patterns...]`
+3. Load the fixtures in your test using esArchiver `esArchiver.load('name')`;
+
+_todo: fully worked out example_
+
+### Elasticsearch
 
 _How to test ES clients_
 
@@ -842,7 +1081,3 @@ describe('Plugin', () => {
   });
 });
 ```
-
-## Plugin Contracts
-
-_How to test your plugin's exposed API_

@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
-import { Query, esFilters } from 'src/plugins/data/public';
 
 import { useKibana } from '../../lib/kibana';
-import { UrlInputsModel } from '../../store/inputs/model';
 import { useApolloClient } from '../../utils/apollo_context';
-
 import { CONSTANTS, UrlStateType } from './constants';
 import {
-  replaceQueryStringInLocation,
   getQueryStringFromLocation,
-  replaceStateKeyInQueryString,
   getParamFromQueryString,
-  decodeRisonUrlState,
   getUrlType,
   getTitle,
+  replaceStateInLocation,
+  updateUrlStateString,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -30,8 +25,8 @@ import {
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
-  Timeline,
 } from './types';
+import { SiemPageName } from '../../pages/home/types';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -58,87 +53,90 @@ export const useUrlStateHooks = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const apolloClient = useApolloClient();
   const { filterManager, savedQueries } = useKibana().services.data.query;
-  const prevProps = usePrevious({ pathName, urlState });
+  const prevProps = usePrevious({ pathName, pageName, urlState });
 
-  const replaceStateInLocation = (
-    urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string,
-    urlStateKey: string,
-    latestLocation: Location = {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    }
-  ) => {
-    const newLocation = replaceQueryStringInLocation(
-      {
-        hash: '',
-        pathname: pathName,
-        search,
-        state: '',
-      },
-      replaceStateKeyInQueryString(
-        urlStateKey,
-        urlStateToReplace
-      )(getQueryStringFromLocation(latestLocation))
-    );
-    if (history) {
-      history.replace(newLocation);
-    }
-    return newLocation;
-  };
-
-  const handleInitialize = (initLocation: Location, type: UrlStateType) => {
-    let myLocation: Location = initLocation;
+  const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
+    let mySearch = search;
     let urlStateToUpdate: UrlStateToRedux[] = [];
     URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
-        getQueryStringFromLocation(initLocation),
+        getQueryStringFromLocation(mySearch),
         urlKey
       );
       if (newUrlStateString) {
-        const queryState: Query | Timeline | esFilters.Filter[] = decodeRisonUrlState(
-          newUrlStateString
-        );
-
-        if (
-          urlKey === CONSTANTS.appQuery &&
-          queryState != null &&
-          (queryState as Query).query === ''
-        ) {
-          myLocation = replaceStateInLocation('', urlKey, myLocation);
-        } else if (urlKey === CONSTANTS.filters && isEmpty(queryState)) {
-          myLocation = replaceStateInLocation('', urlKey, myLocation);
-        } else if (
-          urlKey === CONSTANTS.timeline &&
-          queryState != null &&
-          (queryState as Timeline).id === ''
-        ) {
-          myLocation = replaceStateInLocation('', urlKey, myLocation);
-        }
-        if (isInitializing) {
-          urlStateToUpdate = [...urlStateToUpdate, { urlKey, newUrlStateString }];
+        mySearch = updateUrlStateString({
+          history,
+          isInitializing,
+          newUrlStateString,
+          pathName,
+          search: mySearch,
+          updateTimerange: (needUpdate ?? false) || isInitializing,
+          urlKey,
+        });
+        if (isInitializing || needUpdate) {
+          const updatedUrlStateString =
+            getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
+            newUrlStateString;
+          if (isInitializing || !isEqual(updatedUrlStateString, newUrlStateString)) {
+            urlStateToUpdate = [
+              ...urlStateToUpdate,
+              {
+                urlKey,
+                newUrlStateString: updatedUrlStateString,
+              },
+            ];
+          }
         }
       } else if (
         urlKey === CONSTANTS.appQuery &&
         urlState[urlKey] != null &&
-        (urlState[urlKey] as Query).query === ''
+        urlState[urlKey]?.query === ''
       ) {
-        myLocation = replaceStateInLocation('', urlKey, myLocation);
+        mySearch = replaceStateInLocation({
+          history,
+          pathName,
+          search: mySearch,
+          urlStateToReplace: '',
+          urlStateKey: urlKey,
+        });
       } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-        myLocation = replaceStateInLocation('', urlKey, myLocation);
+        mySearch = replaceStateInLocation({
+          history,
+          pathName,
+          search: mySearch,
+          urlStateToReplace: '',
+          urlStateKey: urlKey,
+        });
       } else if (
         urlKey === CONSTANTS.timeline &&
         urlState[urlKey] != null &&
-        (urlState[urlKey] as Timeline).id === ''
+        urlState[urlKey].id === ''
       ) {
-        myLocation = replaceStateInLocation('', urlKey, myLocation);
+        mySearch = replaceStateInLocation({
+          history,
+          pathName,
+          search: mySearch,
+          urlStateToReplace: '',
+          urlStateKey: urlKey,
+        });
       } else {
-        myLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, myLocation);
+        mySearch = replaceStateInLocation({
+          history,
+          pathName,
+          search: mySearch,
+          urlStateToReplace: urlState[urlKey] || '',
+          urlStateKey: urlKey,
+        });
       }
     });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
-      myLocation = replaceStateInLocation('', urlKey, myLocation);
+      mySearch = replaceStateInLocation({
+        history,
+        pathName,
+        search: mySearch,
+        urlStateToReplace: '',
+        urlStateKey: urlKey,
+      });
     });
 
     setInitialStateFromUrl({
@@ -156,41 +154,58 @@ export const useUrlStateHooks = ({
 
   useEffect(() => {
     const type: UrlStateType = getUrlType(pageName);
-    const location: Location = {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    };
-
     if (isInitializing && pageName != null && pageName !== '') {
-      handleInitialize(location, type);
+      handleInitialize(type);
       setIsInitializing(false);
     } else if (!isEqual(urlState, prevProps.urlState) && !isInitializing) {
-      let newLocation: Location = location;
+      let mySearch = search;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (
           urlKey === CONSTANTS.appQuery &&
           urlState[urlKey] != null &&
-          (urlState[urlKey] as Query).query === ''
+          urlState[urlKey]?.query === ''
         ) {
-          newLocation = replaceStateInLocation('', urlKey, newLocation);
+          mySearch = replaceStateInLocation({
+            history,
+            pathName,
+            search: mySearch,
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
         } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-          newLocation = replaceStateInLocation('', urlKey, newLocation);
+          mySearch = replaceStateInLocation({
+            history,
+            pathName,
+            search: mySearch,
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
         } else if (
           urlKey === CONSTANTS.timeline &&
           urlState[urlKey] != null &&
-          (urlState[urlKey] as Timeline).id === ''
+          urlState[urlKey].id === ''
         ) {
-          newLocation = replaceStateInLocation('', urlKey, newLocation);
+          mySearch = replaceStateInLocation({
+            history,
+            pathName,
+            search: mySearch,
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
         } else {
-          newLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, newLocation);
+          mySearch = replaceStateInLocation({
+            history,
+            pathName,
+            search: mySearch,
+            urlStateToReplace: urlState[urlKey] || '',
+            urlStateKey: urlKey,
+          });
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(location, type);
+      handleInitialize(type, pageName === SiemPageName.detections);
     }
-  });
+  }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;

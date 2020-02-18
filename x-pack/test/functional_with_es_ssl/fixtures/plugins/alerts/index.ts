@@ -22,7 +22,7 @@ function createNoopAlertType(setupContract: any) {
   const noopAlertType: AlertType = {
     id: 'test.noop',
     name: 'Test: Noop',
-    actionGroups: ['default'],
+    actionGroups: [{ id: 'default', name: 'Default' }],
     async executor() {},
   };
   setupContract.registerType(noopAlertType);
@@ -33,16 +33,20 @@ function createAlwaysFiringAlertType(setupContract: any) {
   const alwaysFiringAlertType: any = {
     id: 'test.always-firing',
     name: 'Always Firing',
-    actionGroups: ['default', 'other'],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'other', name: 'Other' },
+    ],
     async executor(alertExecutorOptions: any) {
-      const { services, state } = alertExecutorOptions;
+      const { services, state, params } = alertExecutorOptions;
 
-      services
-        .alertInstanceFactory('1')
-        .replaceState({ instanceStateValue: true })
-        .scheduleActions('default', {
-          instanceContextValue: true,
-        });
+      (params.instances || []).forEach((instance: { id: string; state: any }) => {
+        services
+          .alertInstanceFactory(instance.id)
+          .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
+          .scheduleActions('default');
+      });
+
       return {
         globalStateValue: true,
         groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,

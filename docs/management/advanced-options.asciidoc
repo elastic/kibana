@@ -8,6 +8,7 @@ for displayed decimal values.
 . Go to *Management > {kib} > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
+. Click *Save changes*.
 
 
 [float]
@@ -34,7 +35,7 @@ removes it from {kib} permanently.
 
 [float]
 [[kibana-general-settings]]
-=== General settings
+==== General
 
 [horizontal]
 `csv:quoteValues`:: Set this property to `true` to quote exported values.
@@ -69,6 +70,9 @@ into the document when displaying it.
 `metrics:max_buckets`:: The maximum numbers of buckets that a single
 data source can return. This might arise when the user selects a
 short interval (for example, 1s) for a long time period (1 year).
+`pageNavigation`:: The style of navigation menu for Kibana.
+Choices are Individual, the legacy style where every plugin is represented in the nav,
+and Grouped, a new format that bundles related plugins together in nested navigation.
 `query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character
 in a query clause. Only applies when experimental query features are
 enabled in the query bar. To disallow leading wildcards in Lucene queries,
@@ -106,7 +110,7 @@ cluster alert notifications from Monitoring.
 
 [float]
 [[kibana-accessibility-settings]]
-=== Accessibility settings
+==== Accessibility
 
 [horizontal]
 `accessibility:disableAnimations`:: Turns off all unnecessary animations in the
@@ -114,14 +118,14 @@ cluster alert notifications from Monitoring.
 
 [float]
 [[kibana-dashboard-settings]]
-=== Dashboard settings
+==== Dashboard
 
 [horizontal]
 `xpackDashboardMode:roles`:: The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]
-=== Discover settings
+==== Discover
 
 [horizontal]
 `context:defaultSize`:: The number of surrounding entries to display in the context view. The default value is 5.
@@ -147,7 +151,7 @@ working on big documents.
 
 [float]
 [[kibana-notification-settings]]
-=== Notifications settings
+==== Notifications
 
 [horizontal]
 `notifications:banner`:: A custom banner intended for temporary notices to all users.
@@ -166,7 +170,7 @@ displays. The default value is 10000. Set this field to `Infinity` to disable wa
 
 [float]
 [[kibana-reporting-settings]]
-=== Reporting settings
+==== Reporting
 
 [horizontal]
 `xpackReporting:customPdfLogo`:: A custom image to use in the footer of the PDF.
@@ -174,7 +178,7 @@ displays. The default value is 10000. Set this field to `Infinity` to disable wa
 
 [float]
 [[kibana-rollups-settings]]
-=== Rollup settings
+==== Rollup
 
 [horizontal]
 `rollups:enableIndexPatterns`:: Enables the creation of index patterns that
@@ -184,7 +188,7 @@ Refresh the page to apply the changes.
 
 [float]
 [[kibana-search-settings]]
-=== Search settings
+==== Search
 
 [horizontal]
 `courier:batchSearches`:: **Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
@@ -212,19 +216,21 @@ might increase the search time. This setting is off by default. Users must opt-i
 
 [float]
 [[kibana-siem-settings]]
-=== SIEM settings
+==== SIEM
 
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
-`siem:enableNewsFeed`:: Enables the News feed
-`siem:newsFeedUrl`:: News feed content will be retrieved from this URL
+`siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
+page.
+`siem:newsFeedUrl`:: The URL from which the security news feed content is
+retrieved.
 `siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
 `siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
 [float]
 [[kibana-timelion-settings]]
-=== Timelion settings
+==== Timelion
 
 [horizontal]
 `timelion:default_columns`:: The default number of columns to use on a Timelion sheet.
@@ -247,7 +253,7 @@ this is the number of buckets to try to represent.
 
 [float]
 [[kibana-visualization-settings]]
-=== Visualization settings
+==== Visualization
 
 [horizontal]
 `visualization:colorMapping`:: Maps values to specified colors in visualizations.
@@ -268,7 +274,7 @@ If disabled, only visualizations that are considered production-ready are availa
 
 [float]
 [[kibana-telemetry-settings]]
-=== Usage data settings
+==== Usage data
 
 Helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.

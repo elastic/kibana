@@ -24,11 +24,6 @@
  * directly where they are needed.
  */
 
-import chrome from 'ui/chrome';
-
-export const legacyChrome = chrome;
-export { Chrome } from 'ui/chrome';
-
 // @ts-ignore
 export { AppState, AppStateProvider } from 'ui/state_management/app_state';
 export { State } from 'ui/state_management/state';
@@ -39,32 +34,25 @@ export { StateManagementConfigProvider } from 'ui/state_management/config_provid
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
 
-export { npSetup, npStart } from 'ui/new_platform';
-export { IPrivate } from 'ui/private';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
-
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
-export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-
 export { wrapInI18nContext } from 'ui/i18n';
-
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { VisType } from '../../../visualizations/public';
+export {
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+  IPrivate,
+  migrateLegacyQuery,
+  PrivateProvider,
+  PromiseServiceCreator,
+} from '../../../../../plugins/kibana_legacy/public';

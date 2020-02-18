@@ -29,6 +29,8 @@ import {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/new_job';
 
+declare const basePath: () => string;
+
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
 // TypeScript and rely on the methods typed in here.

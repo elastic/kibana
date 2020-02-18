@@ -36,6 +36,8 @@ describe('getHistogramAriaLabelData', () => {
       latestMax: 4,
       latestUpCount: 1,
       latestTimestamp: 1581022204000,
+      totalDown: 10,
+      totalUp: 3,
     });
   });
 });

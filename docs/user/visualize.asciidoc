@@ -53,9 +53,9 @@ data sets.
 
 * *<<for-dashboard,Dashboard tools>>*
 [horizontal]
-<<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
+Controls:: Adds interactive inputs to a Dashboard.
 
-<<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
+Markdown widget:: Display free-form information or instructions.
 
 * *For developers*
 [horizontal]
