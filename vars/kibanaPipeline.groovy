@@ -216,8 +216,7 @@ def uploadCoverageStaticSite_PROD(timestamp) {
     'target/kibana-coverage/mocha-combined'
   ]
 
-  def uploadPrefix = "elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
-
+  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
   ARTIFACT_PATTERNS.each { pattern ->
     withVaultSecret(secret: 'secret/gce/elastic-bekitzur/service-account/kibana', secret_field: 'value', variable_name: 'GCE_ACCOUNT') {
       sh """
