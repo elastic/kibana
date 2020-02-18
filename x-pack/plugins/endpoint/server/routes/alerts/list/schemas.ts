@@ -76,6 +76,7 @@ export const alertListReqSchema = schema.object(
 
     // rison-encoded string
     date_range: schema.string({
+      // TODO: make this configurable... how to handle encoded default?
       // defaultValue: config.alertResultListDefaultDateRange,
       defaultValue: encode({ from: 'now-2y', to: 'now' }),
       validate(value) {

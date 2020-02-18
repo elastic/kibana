@@ -6,6 +6,7 @@
 import { encode, decode, RisonValue } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
+import { Direction } from '../../../../../../legacy/plugins/siem/public/graphql/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Filter, TimeRange, esQuery, esKuery } from '../../../../../../../src/plugins/data/server';
 import {
@@ -22,6 +23,7 @@ import {
   AlertListRequestQueryInternal,
   AlertListRequest,
   AlertListESRequestBody,
+  AlertListSort,
 } from './types';
 
 export const getRequestData = async (
@@ -33,7 +35,7 @@ export const getRequestData = async (
     // Defaults not enforced by schema
     pageSize: request.query.page_size || config.alertResultListDefaultPageSize,
     sort: request.query.sort || config.alertResultListDefaultSort,
-    order: request.query.order || config.alertResultListDefaultOrder,
+    order: request.query.order || (config.alertResultListDefaultOrder as Direction),
 
     // Filtering
     query: request.query.query,
@@ -54,7 +56,7 @@ export const getRequestData = async (
     if (reqData.pageIndex === undefined) {
       reqData.pageIndex = config.alertResultListDefaultFirstPageIndex;
     }
-    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
+    reqData.fromIndex = reqData.pageIndex! * reqData.pageSize;
   }
 
   return reqData;
@@ -62,7 +64,6 @@ export const getRequestData = async (
 
 export function buildQuery(reqData: AlertListRequestQueryInternal): JsonObject {
   const queries: JsonObject[] = [];
-  let dateRangeFilter: JsonObject = {};
 
   if (reqData.filters.length > 0) {
     const filtersQuery = esQuery.buildQueryFromFilters(reqData.filters, undefined);
@@ -74,7 +75,7 @@ export function buildQuery(reqData: AlertListRequestQueryInternal): JsonObject {
   }
 
   if (reqData.dateRange) {
-    dateRangeFilter = {
+    const dateRangeFilter: JsonObject = {
       range: {
         ['@timestamp']: {
           gte: reqData.dateRange.from,
@@ -102,6 +103,36 @@ export function buildQuery(reqData: AlertListRequestQueryInternal): JsonObject {
   };
 }
 
+export function buildSort(reqData: AlertListRequestQueryInternal): AlertListSort {
+  const sort: AlertListSort = [
+    // User-defined primary sort, with default to `@timestamp`
+    {
+      [reqData.sort]: {
+        order: reqData.order,
+      },
+    },
+    // Secondary sort for tie-breaking
+    {
+      'event.id': {
+        order: reqData.order,
+      },
+    },
+  ];
+
+  if (reqData.searchBefore) {
+    // Reverse sort order for search_before functionality
+    if (reqData.order === Direction.asc) {
+      sort[0][reqData.sort].order = Direction.desc;
+      sort[1]['event.id'].order = Direction.desc;
+    } else {
+      sort[0][reqData.sort].order = Direction.asc;
+      sort[1]['event.id'].order = Direction.asc;
+    }
+  }
+
+  return sort;
+}
+
 export const buildAlertListESQuery = async (
   reqData: AlertListRequestQueryInternal
 ): Promise<JsonObject> => {
@@ -117,21 +148,16 @@ export const buildAlertListESQuery = async (
   const reqBody: AlertListESRequestBody = {
     track_total_hits: totalHitsMin,
     query: buildQuery(reqData),
-    sort: [
-      // User-defined primary sort, with default to `@timestamp`
-      {
-        [reqData.sort]: {
-          order: reqData.order as 'asc' | 'desc',
-        },
-      },
-      // Secondary sort for tie-breaking
-      {
-        'event.id': {
-          order: reqData.order as 'asc' | 'desc',
-        },
-      },
-    ],
+    sort: buildSort(reqData),
   };
+
+  if (reqData.searchAfter) {
+    reqBody.search_after = reqData.searchAfter;
+  }
+
+  if (reqData.searchBefore) {
+    reqBody.search_after = reqData.searchBefore;
+  }
 
   const reqWrapper: AlertListRequest = {
     size: reqData.pageSize,
@@ -141,24 +167,6 @@ export const buildAlertListESQuery = async (
 
   if (reqData.fromIndex) {
     reqWrapper.from = reqData.fromIndex;
-  }
-
-  if (reqData.searchAfter) {
-    reqWrapper.body.search_after = reqData.searchAfter;
-  }
-
-  if (reqData.searchBefore) {
-    // Reverse sort order for search_before functionality
-    const order: string = reqWrapper.body.sort[0][reqData.sort].order as string;
-    if (order === 'asc') {
-      reqWrapper.body.sort[0][reqData.sort].order = 'desc';
-      reqWrapper.body.sort[1]['event.id'].order = 'desc';
-    } else {
-      reqWrapper.body.sort[0][reqData.sort].order = 'asc';
-      reqWrapper.body.sort[1]['event.id'].order = 'asc';
-    }
-
-    reqWrapper.body.search_after = reqData.searchBefore;
   }
 
   return (reqWrapper as unknown) as JsonObject;

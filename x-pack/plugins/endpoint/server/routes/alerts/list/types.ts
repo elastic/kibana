@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Direction } from '../../../../../../legacy/plugins/siem/public/graphql/types';
 import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
@@ -18,7 +19,7 @@ export interface AlertListRequestQuery {
   filters?: string;
   date_range: string;
   sort?: string;
-  order?: string;
+  order?: Direction;
   after?: [any, any];
   before?: [any, any];
 }
@@ -41,7 +42,7 @@ export interface AlertListRequestQueryInternal {
   filters: Filter[];
   dateRange?: TimeRange;
   sort: string;
-  order: string;
+  order: Direction;
   searchAfter?: [any, any];
   searchBefore?: [any, any];
   next?: string | null | undefined;
@@ -53,9 +54,14 @@ export interface AlertListRequestQueryInternal {
  */
 export interface AlertListSortParam {
   [key: string]: {
-    order: 'asc' | 'desc';
+    order: Direction;
   };
 }
+
+/**
+ * Sort array for alert list.
+ */
+export type AlertListSort = [AlertListSortParam, AlertListSortParam];
 
 /**
  * Request body for alerts.
@@ -63,7 +69,7 @@ export interface AlertListSortParam {
 export interface AlertListESRequestBody {
   track_total_hits: number;
   query: JsonObject;
-  sort: [AlertListSortParam, AlertListSortParam];
+  sort: AlertListSort;
   search_after?: [any, any];
 }
 

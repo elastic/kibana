@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { AlertData, AlertDataWrapper } from '../../../../common/types';
+import { AlertData, AlertDataWrapper, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from './types';
 
@@ -27,11 +26,11 @@ export const alertDetailsHandlerWrapper = function(
 
       const alertId = req.params.id;
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
-        index: 'my-index',
+        index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
-      })) as SearchResponse<unknown>;
+      })) as AlertDataWrapper;
 
-      return res.ok({ body: mapHit((response as unknown) as AlertDataWrapper) });
+      return res.ok({ body: mapHit(response) });
     } catch (err) {
       return res.internalError({ body: err });
     }
