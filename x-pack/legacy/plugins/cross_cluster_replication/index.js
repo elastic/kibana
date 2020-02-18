@@ -52,10 +52,10 @@ export function crossClusterReplication(kibana) {
 
       if (
         server.config().get('xpack.ccr.ui.enabled') &&
-        server.plugins.index_management &&
-        server.plugins.index_management.addIndexManagementDataEnricher
+        server.plugins.indexManagement &&
+        server.plugins.indexManagement.indexDataEnricher
       ) {
-        server.plugins.index_management.addIndexManagementDataEnricher(ccrDataEnricher);
+        server.plugins.indexManagement.indexDataEnricher.add(ccrDataEnricher);
       }
     },
   });

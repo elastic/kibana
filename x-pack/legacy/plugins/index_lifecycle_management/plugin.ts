@@ -45,10 +45,10 @@ export class Plugin {
 
     if (
       server.config().get('xpack.ilm.ui.enabled') &&
-      serverPlugins.index_management &&
-      serverPlugins.index_management.addIndexManagementDataEnricher
+      serverPlugins.indexManagement &&
+      serverPlugins.indexManagement.indexDataEnricher
     ) {
-      serverPlugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
+      serverPlugins.indexManagement.indexDataEnricher(indexLifecycleDataEnricher);
     }
   }
 }

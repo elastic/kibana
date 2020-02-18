@@ -77,10 +77,10 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
     }
 
     if (
-      serverShim.plugins.index_management &&
-      serverShim.plugins.index_management.indexDataEnricher
+      serverShim.plugins.indexManagement &&
+      serverShim.plugins.indexManagement.indexDataEnricher
     ) {
-      serverShim.plugins.index_management.indexDataEnricher.add(rollupDataEnricher);
+      serverShim.plugins.indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
 
     if (metrics) {

@@ -12,7 +12,7 @@ export interface ServerShim {
   plugins: {
     xpack_main: XPackMainPlugin;
     rollup: any;
-    index_management: IndexMgmtSetup;
+    indexManagement: IndexMgmtSetup;
   };
 }
 
