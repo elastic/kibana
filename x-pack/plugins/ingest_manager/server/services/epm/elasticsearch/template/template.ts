@@ -5,7 +5,7 @@
  */
 
 import { Field } from '../../fields/field';
-import { Dataset } from '../../../../../common/types';
+import { Dataset } from '../../../../types';
 import { getDatasetAssetBaseName } from '../index';
 
 export interface Template {

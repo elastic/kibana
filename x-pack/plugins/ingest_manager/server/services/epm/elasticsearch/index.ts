@@ -5,7 +5,7 @@
  */
 
 // Default label to be used as the use case
-import { Dataset } from '../../../../common/types';
+import { Dataset } from '../../../types';
 
 const DEFAULT_LABEL = 'default';
 

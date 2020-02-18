@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset } from '../../../../common/types';
+import { Dataset } from '../../../types';
 import { getDatasetAssetBaseName } from './index';
 
 test('getBaseName', () => {

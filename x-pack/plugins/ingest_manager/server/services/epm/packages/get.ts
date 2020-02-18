@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../../common/types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { Installation, InstallationStatus, PackageInfo } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 

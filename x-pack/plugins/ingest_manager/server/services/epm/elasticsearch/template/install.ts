@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AssetReference,
-  Dataset,
-  RegistryPackage,
-  IngestAssetType,
-} from '../../../../../common/types';
+import { AssetReference, Dataset, RegistryPackage, IngestAssetType } from '../../../../types';
 import { CallESAsCurrentUser } from '../../cluster_access';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/ingest_pipelines';

@@ -9,7 +9,7 @@ import {
   Dataset,
   ElasticsearchAssetType,
   IngestAssetType,
-} from '../../../../../common/types';
+} from '../../../../types';
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';
 
