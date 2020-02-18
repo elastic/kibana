@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export interface SnapshotConfig {
-  indices?: string | string[];
+  indices?: string[];
   ignoreUnavailable?: boolean;
   includeGlobalState?: boolean;
   partial?: boolean;

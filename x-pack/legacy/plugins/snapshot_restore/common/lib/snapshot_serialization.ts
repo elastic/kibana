@@ -109,7 +109,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
   } = snapshotConfigEs;
 
   const snapshotConfig: SnapshotConfig = {
-    indices,
+    indices: typeof indices === 'string' ? indices.split(',') : indices,
     ignoreUnavailable,
     includeGlobalState,
     partial,

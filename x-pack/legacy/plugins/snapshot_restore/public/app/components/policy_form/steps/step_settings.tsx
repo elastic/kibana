@@ -54,9 +54,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         label: index,
         checked:
           isAllIndices ||
-          // If indices is a string, we default to custom input mode, so we mark individual indices
-          // as selected if user goes back to list mode
-          typeof config.indices === 'string' ||
+          // Mark individual indices as selected in list mode
           (Array.isArray(config.indices) && config.indices.includes(index))
             ? 'on'
             : undefined,
@@ -64,41 +62,28 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     )
   );
 
-  // if the length is the same, we can assume the user only defined indices (not index patterns)
-  // and we show the `list` view.
-
-  const selectedIndices = indices.filter(index => {
-    return (
-      typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) && config.indices.includes(index))
-    );
+  // Policy indices (config.indices) can contain existing indices, index patterns, aliases or non-existing indices
+  // This returns the policy indices that exist in a user's system
+  const policyIndicesInAllIndices = indices.filter(index => {
+    return Array.isArray(config.indices) && config.indices.includes(index);
   });
 
-  const showListView = useState<boolean>(
-    typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) && selectedIndices.length === config.indices.length)
-  );
+  const policyIndicesLength = Array.isArray(config.indices) && config.indices.length;
+  // If the length is different, we can assume the policy indices contains index patterns, aliases or non-existing indices
+  const policyIndicesHasCustomPattern =
+    policyIndicesInAllIndices.length !== 0 &&
+    policyIndicesInAllIndices.length !== policyIndicesLength;
 
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select
   // them instead, so we'll default to showing them the index pattern input.
-
+  // We'll also check if the policy indices contains something other than existing indices (applies to edit mode)
   const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
-    typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) && config.indices.length > 100) ||
-      !showListView[0]
-      ? 'custom'
-      : 'list'
+    policyIndicesLength > 100 || policyIndicesHasCustomPattern ? 'custom' : 'list'
   );
 
   // State for custom patterns
-  const [indexPatterns, setIndexPatterns] = useState<string[]>(
-    typeof config.indices === 'string'
-      ? config.indices.split(',')
-      : Array.isArray(config.indices)
-      ? config.indices
-      : []
-  );
+  const [indexPatterns, setIndexPatterns] = useState<string[]>(config.indices ?? []);
 
   const renderIndicesField = () => {
     const indicesSwitch = (
@@ -120,9 +105,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           } else {
             updatePolicyConfig({
               indices:
-                selectIndicesMode === 'custom'
-                  ? indexPatterns.join(',')
-                  : [...(indicesSelection || [])],
+                selectIndicesMode === 'custom' ? [...indexPatterns] : [...(indicesSelection || [])],
             });
           }
         }}
@@ -186,7 +169,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                           <EuiLink
                             onClick={() => {
                               setSelectIndicesMode('custom');
-                              updatePolicyConfig({ indices: indexPatterns.join(',') });
+                              updatePolicyConfig({ indices: indexPatterns });
                             }}
                           >
                             <FormattedMessage
@@ -304,7 +287,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                           defaultMessage: 'Enter index patterns, i.e. logstash-*',
                         }
                       )}
-                      selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
+                      selectedOptions={indexPatterns.map((pattern: string) => ({ label: pattern }))}
                       onCreateOption={(pattern: string) => {
                         if (!pattern.trim().length) {
                           return;
@@ -312,14 +295,14 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                         const newPatterns = [...indexPatterns, pattern];
                         setIndexPatterns(newPatterns);
                         updatePolicyConfig({
-                          indices: newPatterns.join(','),
+                          indices: newPatterns,
                         });
                       }}
                       onChange={(patterns: Array<{ label: string }>) => {
                         const newPatterns = patterns.map(({ label }) => label);
                         setIndexPatterns(newPatterns);
                         updatePolicyConfig({
-                          indices: newPatterns.join(','),
+                          indices: newPatterns,
                         });
                       }}
                     />
