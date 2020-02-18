@@ -10,7 +10,7 @@ export function infra(kibana: any) {
   return new kibana.Plugin({
     id: 'infra',
     configPrefix: 'xpack.infra',
-    require: ['kibana', 'elasticsearch', 'alerting'],
+    require: ['kibana', 'elasticsearch'],
     uiExports: {
       mappings: savedObjectMappings,
     },

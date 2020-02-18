@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/types';
+import { MetricsExplorerAggregation } from '../../../../common/http_api/metrics_explorer';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 

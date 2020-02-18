@@ -5,14 +5,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Server } from 'hapi';
 import {
   MetricThresholdAlertTypeParams,
   Comparator,
   AlertStates,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from './types';
-import { AlertServices } from '../../../../alerting/server/types';
+import { AlertServices, PluginSetupContract } from '../../../../../alerting/server';
 
 const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
@@ -90,15 +89,14 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
-export async function registerMetricThresholdAlertType(server: Server) {
-  const { alerting } = server.plugins;
-  if (!alerting) {
+export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
+  if (!alertingPlugin) {
     throw new Error(
       'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'
     );
   }
 
-  alerting.setup.registerType({
+  alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric Alert - Threshold',
     validate: {
