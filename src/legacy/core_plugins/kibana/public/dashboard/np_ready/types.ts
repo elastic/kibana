@@ -106,7 +106,6 @@ export interface DashboardAppState {
   filters: Filter[];
   viewMode: ViewMode;
   savedQuery?: string;
-  visualizations?: string;
 }
 
 export type DashboardAppStateDefaults = DashboardAppState & {

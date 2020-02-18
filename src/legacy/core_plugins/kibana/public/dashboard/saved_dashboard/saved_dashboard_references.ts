@@ -66,7 +66,6 @@ export function injectReferences(
     return;
   }
   const panels = JSON.parse(savedObject.panelsJSON);
-  const visualizationsJSON = savedObject.visualizationsJSON;
   // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
     return;
@@ -80,10 +79,6 @@ export function injectReferences(
       // Throw an error since "panelRefName" means the reference exists within
       // "references" and in this scenario we have bad data.
       throw new Error(`Could not find reference "${panel.panelRefName}"`);
-    }
-    if (visualizationsJSON) {
-      const visualizations = JSON.parse(visualizationsJSON);
-
     }
     panel.id = reference.id;
     panel.type = reference.type;

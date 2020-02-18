@@ -130,7 +130,7 @@ function findChangedProp(actual: any, expected: any) {
  */
 function defaultMapping(): IndexMapping {
   return {
-    dynamic: 'true',
+    dynamic: 'strict',
     properties: {
       config: {
         dynamic: 'true',

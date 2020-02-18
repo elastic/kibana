@@ -34,7 +34,6 @@ export function updateSavedDashboard(
   savedDashboard.timeRestore = appState.timeRestore;
   savedDashboard.panelsJSON = toJson(appState.panels);
   savedDashboard.optionsJSON = toJson(appState.options);
-  savedDashboard.visualizationsJSON = toJson(appState.visualizations);
 
   savedDashboard.timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
