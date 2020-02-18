@@ -104,7 +104,7 @@ export function systemRoutes({
   /**
    * @apiGroup SystemRoutes
    *
-   * @api {post} /api/ml/ml_capabilities Check ML capabilities
+   * @api {get} /api/ml/ml_capabilities Check ML capabilities
    * @apiName MlCapabilities
    * @apiDescription Checks ML capabilities
    */
@@ -144,7 +144,7 @@ export function systemRoutes({
   /**
    * @apiGroup SystemRoutes
    *
-   * @api {post} /api/ml/ml_node_count Get the amount of ML nodes
+   * @api {get} /api/ml/ml_node_count Get the amount of ML nodes
    * @apiName MlNodeCount
    * @apiDescription Returns the amount of ML nodes.
    */
@@ -195,7 +195,7 @@ export function systemRoutes({
   /**
    * @apiGroup SystemRoutes
    *
-   * @api {post} /api/ml/info Get ML info
+   * @api {get} /api/ml/info Get ML info
    * @apiName MlInfo
    * @apiDescription Returns defaults and limits used by machine learning.
    */
@@ -233,7 +233,7 @@ export function systemRoutes({
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         return response.ok({
-          body: await context.ml!.mlClient.callAsCurrentUser('search'),
+          body: await context.ml!.mlClient.callAsCurrentUser('search', request.body),
         });
       } catch (error) {
         return response.customError(wrapError(error));
