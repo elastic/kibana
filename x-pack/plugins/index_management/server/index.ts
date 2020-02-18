@@ -19,3 +19,4 @@ export const config = {
 export { Dependencies } from './types';
 export { IndexMgmtSetup } from './plugin';
 export { Index } from './types';
+export { IndexManagementConfig } from './config';

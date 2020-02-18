@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 
 import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
+import { IndexManagementConfig } from './config';
 import { isEsError } from './lib/is_es_error';
 
 export interface IndexMgmtSetup {
   indexDataEnricher: {
     add: IndexDataEnricher['add'];
+  };
+  /** @deprecated */
+  __legacy: {
+    config$: Observable<IndexManagementConfig>;
   };
 }
 
@@ -24,8 +30,8 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
   private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
 
-  constructor({ logger }: PluginInitializerContext) {
-    this.logger = logger.get();
+  constructor(private initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
     this.apiRoutes = new ApiRoutes();
     this.license = new License();
     this.indexDataEnricher = new IndexDataEnricher();
@@ -60,6 +66,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
     return {
       indexDataEnricher: {
         add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
+      },
+      __legacy: {
+        config$: this.initContext.config.create<IndexManagementConfig>(),
       },
     };
   }
