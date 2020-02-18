@@ -84,6 +84,9 @@
     "MlCapabilities",
     "MlNodeCount",
     "MlInfo",
-    "MlEsSearch"
+    "MlEsSearch",
+    "JobAuditMessages",
+    "GetJobAuditMessages",
+    "GetAllJobAuditMessages"
   ]
 }
