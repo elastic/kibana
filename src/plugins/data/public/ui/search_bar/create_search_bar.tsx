@@ -21,7 +21,7 @@ import React, { useState, useEffect } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, esFilters, Query, TimeRange, SavedQuery } from '../..';
+import { DataPublicPluginStart, Filter, Query, TimeRange, SavedQuery } from '../..';
 import { QueryStart } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -43,7 +43,7 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
 
 // Respond to user changing the filters
 const defaultFiltersUpdated = (queryService: QueryStart) => {
-  return (filters: esFilters.Filter[]) => {
+  return (filters: Filter[]) => {
     queryService.filterManager.setFilters(filters);
   };
 };
@@ -132,6 +132,10 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       filterManager: data.query.filterManager,
     });
     const { timeRange, refreshInterval } = useTimefilter({
+      dateRangeFrom: props.dateRangeFrom,
+      dateRangeTo: props.dateRangeTo,
+      refreshInterval: props.refreshInterval,
+      isRefreshPaused: props.isRefreshPaused,
       timefilter: data.query.timefilter.timefilter,
     });
 

@@ -19,6 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
@@ -27,15 +28,9 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
+import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
 import {
-  ConfirmationButtonTypes,
-  migrateLegacyQuery,
-  SavedObjectSaveOpts,
-  subscribeWithScope,
-} from '../legacy_imports';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
+  esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -63,7 +58,7 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../../../embeddable_api/public/np_ready/public';
-import { ConfirmModalFn, NavAction, SavedDashboardPanel } from './types';
+import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -82,14 +77,14 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
-  confirmModal: ConfirmModalFn;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
@@ -101,18 +96,18 @@ export class DashboardAppController {
   };
 
   constructor({
+    pluginInitializerContext,
     $scope,
     $route,
     $routeParams,
     dashboardConfig,
     localStorage,
     indexPatterns,
-    confirmModal,
     savedQueryService,
-    embeddables,
+    embeddable,
     share,
     dashboardCapabilities,
-    npDataStart: { query: queryService },
+    data: { query: queryService },
     core: {
       notifications,
       overlays,
@@ -147,7 +142,7 @@ export class DashboardAppController {
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kibanaVersion: pluginInitializerContext.env.packageInfo.version,
       kbnUrlStateStorage,
       history,
     });
@@ -192,9 +187,9 @@ export class DashboardAppController {
 
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach(id => {
-        const embeddable = container.getChild(id);
-        if (isErrorEmbeddable(embeddable)) return;
-        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
@@ -290,7 +285,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddables.getEmbeddableFactory(
+    const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -324,10 +319,10 @@ export class DashboardAppController {
             // appState.save which will cause refreshDashboardContainer to be called.
 
             if (
-              !compareFilters(
+              !esFilters.compareFilters(
                 container.getInput().filters,
                 queryFilter.getFilters(),
-                COMPARE_ALL_OPTIONS
+                esFilters.COMPARE_ALL_OPTIONS
               )
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
@@ -427,7 +422,11 @@ export class DashboardAppController {
 
       // Filters shouldn't  be compared using regular isEqual
       if (
-        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+        !esFilters.compareFilters(
+          containerInput.filters,
+          appStateDashboardInput.filters,
+          esFilters.COMPARE_ALL_OPTIONS
+        )
       ) {
         differences.filters = appStateDashboardInput.filters;
       }
@@ -634,27 +633,31 @@ export class DashboardAppController {
         }
       }
 
-      confirmModal(
-        i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-          defaultMessage: `Once you discard your changes, there's no getting them back.`,
-        }),
-        {
-          onConfirm: revertChangesAndExitEditMode,
-          onCancel: _.noop,
-          confirmButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
-            { defaultMessage: 'Discard changes' }
-          ),
-          cancelButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
-            { defaultMessage: 'Continue editing' }
-          ),
-          defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-          title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-            defaultMessage: 'Discard changes to dashboard?',
+      overlays
+        .openConfirm(
+          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+            defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
-        }
-      );
+          {
+            confirmButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
+            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+              defaultMessage: 'Discard changes to dashboard?',
+            }),
+          }
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            revertChangesAndExitEditMode();
+          }
+        });
     };
 
     /**
@@ -816,8 +819,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: embeddables.getEmbeddableFactories,
-          getFactory: embeddables.getEmbeddableFactory,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
           notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
@@ -827,7 +830,7 @@ export class DashboardAppController {
 
     navActions[TopNavIds.VISUALIZE] = async () => {
       const type = 'visualization';
-      const factory = embeddables.getEmbeddableFactory(type);
+      const factory = embeddable.getEmbeddableFactory(type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(type);
       }

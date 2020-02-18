@@ -22,7 +22,7 @@ export function jobsProvider(callWithRequest) {
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callWithRequest);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(callWithRequest);
-  const calMngr = new CalendarManager(true, callWithRequest);
+  const calMngr = new CalendarManager(callWithRequest);
 
   async function forceDeleteJob(jobId) {
     return callWithRequest('ml.deleteJob', { jobId, force: true });

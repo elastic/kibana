@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Request } from 'src/legacy/server/kbn_server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import {
   Field,
   Aggregation,
@@ -40,22 +40,27 @@ export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
   callWithRequest: any,
-  request: Request
+  savedObjectsClient: SavedObjectsClientContract
 ) {
-  return new FieldsService(indexPattern, isRollup, callWithRequest, request);
+  return new FieldsService(indexPattern, isRollup, callWithRequest, savedObjectsClient);
 }
 
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
   private _callWithRequest: any;
-  private _request: Request;
+  private _savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(indexPattern: string, isRollup: boolean, callWithRequest: any, request: Request) {
+  constructor(
+    indexPattern: string,
+    isRollup: boolean,
+    callWithRequest: any,
+    savedObjectsClient: any
+  ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._callWithRequest = callWithRequest;
-    this._request = request;
+    this._savedObjectsClient = savedObjectsClient;
   }
 
   private async loadFieldCaps(): Promise<any> {
@@ -104,7 +109,7 @@ class FieldsService {
       const rollupService = await rollupServiceProvider(
         this._indexPattern,
         this._callWithRequest,
-        this._request
+        this._savedObjectsClient
       );
       const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
 

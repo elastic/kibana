@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { App, AppBase, PluginInitializerContext, AppUpdatableFields } from 'kibana/public';
+import {
+  App,
+  AppBase,
+  PluginInitializerContext,
+  AppUpdatableFields,
+  CoreStart,
+} from 'kibana/public';
 import { Observable } from 'rxjs';
 import { ConfigSchema } from '../config';
+import { getDashboardConfig } from './dashboard_config';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -100,11 +107,21 @@ export class KibanaLegacyPlugin {
         this.forwards.push({ legacyAppId, newAppId, ...options });
       },
 
+      /**
+       * @deprecated
+       * The `defaultAppId` config key is temporarily exposed to be used in the legacy platform.
+       * As this setting is going away, no new code should depend on it.
+       */
       config: this.initializerContext.config.get(),
+      /**
+       * @deprecated
+       * Temporarily exposing the NP env to simulate initializer contexts in the LP.
+       */
+      env: this.initializerContext.env,
     };
   }
 
-  public start() {
+  public start({ application }: CoreStart) {
     return {
       /**
        * @deprecated
@@ -117,6 +134,7 @@ export class KibanaLegacyPlugin {
        */
       getForwards: () => this.forwards,
       config: this.initializerContext.config.get(),
+      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
     };
   }
 }

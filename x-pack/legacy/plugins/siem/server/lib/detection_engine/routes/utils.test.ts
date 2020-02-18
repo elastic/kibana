@@ -11,58 +11,78 @@ import {
   transformBulkError,
   BulkError,
   createSuccessObject,
+  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
 } from './utils';
+import { createMockConfig } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
-    test('returns boom if it is a boom object', () => {
-      const boom = new Boom('');
+    test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
+      const boom = new Boom('some boom message');
       const transformed = transformError(boom);
-      expect(transformed).toBe(boom);
+      expect(transformed).toEqual({
+        message: 'An internal server error occurred',
+        statusCode: 500,
+      });
     });
 
-    test('returns a boom if it is some non boom object that has a statusCode', () => {
+    test('returns transformed output if it is some non boom object that has a statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(true);
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 403,
+      });
     });
 
-    test('returns a boom with the message set', () => {
+    test('returns a transformed message with the message set and statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(transformed.message).toBe('some message');
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 403,
+      });
     });
 
-    test('does not return a boom if it is some non boom object but it does not have a status Code.', () => {
+    test('transforms best it can if it is some non boom object but it does not have a status Code.', () => {
       const error: Error = {
         name: 'some name',
         message: 'some message',
       };
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(false);
+      expect(transformed).toEqual({
+        message: 'some message',
+        statusCode: 500,
+      });
     });
 
-    test('it detects a TypeError and returns a Boom', () => {
+    test('it detects a TypeError and returns a status code of 400 from that particular error type', () => {
       const error: TypeError = new TypeError('I have a type error');
       const transformed = transformError(error);
-      expect(Boom.isBoom(transformed)).toBe(true);
+      expect(transformed).toEqual({
+        message: 'I have a type error',
+        statusCode: 400,
+      });
     });
 
     test('it detects a TypeError and returns a Boom status of 400', () => {
       const error: TypeError = new TypeError('I have a type error');
-      const transformed = transformError(error) as Boom;
-      expect(transformed.output.statusCode).toBe(400);
+      const transformed = transformError(error);
+      expect(transformed).toEqual({
+        message: 'I have a type error',
+        statusCode: 400,
+      });
     });
   });
 
@@ -272,6 +292,24 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('getIndex', () => {
+    let mockConfig = createMockConfig();
+
+    beforeEach(() => {
+      mockConfig = () => ({
+        get: jest.fn(() => 'mockSignalsIndex'),
+        has: jest.fn(),
+      });
+    });
+
+    it('appends the space id to the configured index', () => {
+      const getSpaceId = jest.fn(() => 'myspace');
+      const index = getIndex(getSpaceId, mockConfig);
+
+      expect(index).toEqual('mockSignalsIndex-myspace');
     });
   });
 });

@@ -7,7 +7,7 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
-export { NewCaseFormatted, NewCommentFormatted } from './routes/api/types';
+export { CaseAttributes, CommentAttributes } from './routes/api/types';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

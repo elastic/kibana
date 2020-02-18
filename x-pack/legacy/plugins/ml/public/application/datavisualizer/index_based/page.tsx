@@ -8,8 +8,6 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +27,7 @@ import {
   esQuery,
   esKuery,
 } from '../../../../../../../../src/plugins/data/public';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -37,8 +36,9 @@ import { checkPermission } from '../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
+import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
+import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
@@ -97,12 +97,15 @@ function getDefaultPageState(): DataVisualizerPageState {
 }
 
 export const Page: FC = () => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = kibanaContext;
+  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const timefilter = useTimefilter({
+    timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
+    autoRefreshSelector: true,
+  });
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
-
   const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -119,18 +122,8 @@ export const Page: FC = () => {
   }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  useEffect(() => {
-    loadOverallStats();
-  }, [lastRefresh]);
 
   useEffect(() => {
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      timefilter.enableTimeRangeSelector();
-    } else {
-      timefilter.disableTimeRangeSelector();
-    }
-
-    timefilter.enableAutoRefreshSelector();
     timeBasedIndexCheck(currentIndexPattern, true);
   }, []);
 
@@ -159,9 +152,15 @@ export const Page: FC = () => {
     mlNodesAvailable() &&
     currentIndexPattern.timeFieldName !== undefined;
 
-  const [searchString, setSearchString] = useState(defaults.searchString);
-  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState(defaults.searchQueryLanguage);
+  const {
+    searchQuery: initSearchQuery,
+    searchString: initSearchString,
+    queryLanguage: initQueryLanguage,
+  } = extractSearchData(currentSavedSearch);
+
+  const [searchString, setSearchString] = useState(initSearchString);
+  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
+  const [searchQueryLanguage] = useState(initQueryLanguage);
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -209,29 +208,8 @@ export const Page: FC = () => {
   });
 
   useEffect(() => {
-    // Check for a saved search being passed in.
-    if (currentSavedSearch !== null) {
-      const { query } = getQueryFromSavedSearch(currentSavedSearch);
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
-      const qryString = query.query;
-      let qry;
-      if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
-      }
-
-      setSearchQuery(qry);
-      setSearchString(qryString);
-      setSearchQueryLanguage(queryLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
     loadOverallStats();
-  }, [searchQuery, samplerShardSize]);
+  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
@@ -253,6 +231,37 @@ export const Page: FC = () => {
   useEffect(() => {
     createNonMetricCards();
   }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
+
+  /**
+   * Extract query data from the saved search object.
+   */
+  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
+    if (!savedSearch) {
+      return {
+        searchQuery: defaults.searchQuery,
+        searchString: defaults.searchString,
+        queryLanguage: defaults.searchQueryLanguage,
+      };
+    }
+
+    const { query } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+    const qryString = query.query;
+    let qry;
+    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(qryString);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    } else {
+      qry = esQuery.luceneStringToDsl(qryString);
+      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+    }
+
+    return {
+      searchQuery: qry,
+      searchString: qryString,
+      queryLanguage,
+    };
+  }
 
   async function loadOverallStats() {
     const tf = timefilter as any;
