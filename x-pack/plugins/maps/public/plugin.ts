@@ -43,6 +43,7 @@ export class MapsPlugin
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     initKibanaServices(core, plugins);
     setInspector(plugins.inspector);
+    setUiSettings(core.uiSettings);
     setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
     setTimeFilter(plugins.data.query.timefilter);
     // core.application.register({

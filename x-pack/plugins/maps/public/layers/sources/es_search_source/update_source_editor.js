@@ -24,11 +24,9 @@ import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadIndexSettings } from './load_index_settings';
 import { isNestedField} from '../../../../../../../src/plugins/data/common/index_patterns/fields';
-
-// TODO NP
+import { ValidatedRange } from '../../../components/validated_range';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
-import { ValidatedRange } from '../../../components/validated_range';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {

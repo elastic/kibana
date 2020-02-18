@@ -15,9 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
-
-// TODO NP
-import chrome from 'ui/chrome';
+import { getInjectedVarFunc, getUiSettings } from "../../../kibana_services";
 
 export class EMSTMSSource extends AbstractTMSSource {
   static type = EMS_TMS;
@@ -154,7 +152,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       return this._descriptor.id;
     }
 
-    const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
+    const isDarkMode = getUiSettings().get('theme:darkMode', false);
     const emsTileLayerId = getInjectedVarFunc()('emsTileLayerId');
     return isDarkMode ? emsTileLayerId.dark : emsTileLayerId.bright;
   }

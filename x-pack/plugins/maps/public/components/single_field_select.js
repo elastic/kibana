@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiComboBox, EuiHighlight } from '@elastic/eui';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(fields) {
   if (!fields) {

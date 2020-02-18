@@ -26,6 +26,10 @@ let timeFilter;
 export const setTimeFilter = queryTimeFilter => (timeFilter = queryTimeFilter);
 export const getTimeFilter = () => timeFilter;
 
+let uiSettings;
+export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
+export const getUiSettings = () => uiSettings;
+
 export const initKibanaServices = ({ injectedMetadata }, { data }) => {
   indexPatternService = data.indexPatterns;
   timeFilter = data.query.timefilter;
