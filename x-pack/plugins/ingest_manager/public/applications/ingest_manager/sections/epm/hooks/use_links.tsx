@@ -7,7 +7,7 @@ import { generatePath } from 'react-router-dom';
 import { useCore } from '../../../hooks/use_core';
 import { PLUGIN_ID } from '../../../constants';
 import { epmRouteService } from '../../../services';
-import { DetailViewPanelName } from '../types';
+import { DetailViewPanelName } from '../../../types';
 import { BASE_PATH, EPM_PATH, EPM_DETAIL_VIEW_PATH } from '../../../constants';
 
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)

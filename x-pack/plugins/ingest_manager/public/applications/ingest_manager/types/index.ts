@@ -53,6 +53,8 @@ export {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
+  DetailViewPanelName,
+  InstallStatus,
 } from '../../../../common';
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

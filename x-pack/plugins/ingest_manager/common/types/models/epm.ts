@@ -16,7 +16,14 @@ export enum InstallationStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
 }
+export enum InstallStatus {
+  installed = 'installed',
+  notInstalled = 'not_installed',
+  installing = 'installing',
+  uninstalling = 'uninstalling',
+}
 
+export type DetailViewPanelName = 'overview' | 'data-sources';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 

@@ -11,7 +11,7 @@ import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
-import { InstallStatus } from '../types';
+import { InstallStatus } from '../../../types';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
