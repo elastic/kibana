@@ -27,7 +27,7 @@ export function systemRoutes({
 }: RouteInitialization) {
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
-    const resp = await context.core.elasticsearch.adminClient.callAsInternalUser('nodes.info', {
+    const resp = await context.ml!.mlClient.callAsInternalUser('nodes.info', {
       filterPath,
     });
 
@@ -176,7 +176,7 @@ export function systemRoutes({
           const body = { cluster: requiredPrivileges };
           const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
 
-          if (requiredPrivileges.every(p => !!resp.cluster[p])) {
+          if (resp.has_all_requested) {
             return response.ok({
               body: await getNodeCount(context),
             });
