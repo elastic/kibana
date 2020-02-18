@@ -16,12 +16,14 @@ import {
 } from 'kibana/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
-  NewCaseFormatted,
-  NewCommentFormatted,
+  CaseAttributes,
+  CommentAttributes,
+  SavedObjectsFindOptionsType,
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
+import { readTags } from './tags/read_tags';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
@@ -30,15 +32,19 @@ interface ClientArgs {
 interface GetCaseArgs extends ClientArgs {
   caseId: string;
 }
+
+interface GetCasesArgs extends ClientArgs {
+  options?: SavedObjectsFindOptionsType;
+}
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
 }
 interface PostCaseArgs extends ClientArgs {
-  attributes: NewCaseFormatted;
+  attributes: CaseAttributes;
 }
 
 interface PostCommentArgs extends ClientArgs {
-  attributes: NewCommentFormatted;
+  attributes: CommentAttributes;
   references: SavedObjectReference[];
 }
 interface UpdateCaseArgs extends ClientArgs {
@@ -61,15 +67,16 @@ interface CaseServiceDeps {
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
-  getAllCases(args: ClientArgs): Promise<SavedObjectsFindResponse>;
-  getAllCaseComments(args: GetCaseArgs): Promise<SavedObjectsFindResponse>;
-  getCase(args: GetCaseArgs): Promise<SavedObject>;
-  getComment(args: GetCommentArgs): Promise<SavedObject>;
+  getAllCases(args: GetCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>>;
+  getAllCaseComments(args: GetCaseArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getCase(args: GetCaseArgs): Promise<SavedObject<CaseAttributes>>;
+  getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
+  getTags(args: ClientArgs): Promise<string[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
-  postNewCase(args: PostCaseArgs): Promise<SavedObject>;
-  postNewComment(args: PostCommentArgs): Promise<SavedObject>;
-  updateCase(args: UpdateCaseArgs): Promise<SavedObjectsUpdateResponse>;
-  updateComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse>;
+  postNewCase(args: PostCaseArgs): Promise<SavedObject<CaseAttributes>>;
+  postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
+  updateCase(args: UpdateCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>>;
+  updateComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse<CommentAttributes>>;
 }
 
 export class CaseService {
@@ -111,10 +118,10 @@ export class CaseService {
         throw error;
       }
     },
-    getAllCases: async ({ client }: ClientArgs) => {
+    getAllCases: async ({ client, options }: GetCasesArgs) => {
       try {
         this.log.debug(`Attempting to GET all cases`);
-        return await client.find({ type: CASE_SAVED_OBJECT });
+        return await client.find({ ...options, type: CASE_SAVED_OBJECT });
       } catch (error) {
         this.log.debug(`Error on GET cases: ${error}`);
         throw error;
@@ -129,6 +136,15 @@ export class CaseService {
         });
       } catch (error) {
         this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
+        throw error;
+      }
+    },
+    getTags: async ({ client }: ClientArgs) => {
+      try {
+        this.log.debug(`Attempting to GET all cases`);
+        return await readTags({ client });
+      } catch (error) {
+        this.log.debug(`Error on GET cases: ${error}`);
         throw error;
       }
     },
