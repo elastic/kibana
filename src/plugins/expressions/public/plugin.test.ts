@@ -65,6 +65,15 @@ describe('ExpressionsPublicPlugin', () => {
           }
         `);
       });
+
+      test('"kibana" function return value of type "kibana_context"', async () => {
+        const { doStart } = await expressionsPluginMock.createPlugin();
+        const start = await doStart();
+        const execution = start.execute('kibana');
+        const result = await execution.getData();
+
+        expect((result as any).type).toBe('kibana_context');
+      });
     });
   });
 });
