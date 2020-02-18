@@ -23,7 +23,7 @@ import { TimefilterSetup } from '../timefilter';
 import { COMPARE_ALL_OPTIONS, compareFilters, FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
-import { FilterStateStore } from '../../../common/es_query/filters';
+import { isFilterPinned } from '../../../common/es_query/filters';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
@@ -53,8 +53,8 @@ export function createQueryStateObservable({
         currentChange.filters = true;
 
         const { filters } = state.get();
-        const globalOld = filters?.filter(f => f?.$state?.store === FilterStateStore.GLOBAL_STATE);
-        const appOld = filters?.filter(f => f?.$state?.store === FilterStateStore.APP_STATE);
+        const globalOld = filters?.filter(f => isFilterPinned(f));
+        const appOld = filters?.filter(f => !isFilterPinned(f));
         const globalNew = filterManager.getGlobalFilters();
         const appNew = filterManager.getAppFilters();
 

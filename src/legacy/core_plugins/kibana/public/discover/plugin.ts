@@ -18,12 +18,16 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  esFilters,
+} from '../../../../../plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
@@ -112,7 +116,11 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
           stateUpdate$: plugins.data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            )
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
           ),
         },
       ],

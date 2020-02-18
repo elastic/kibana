@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -30,7 +30,11 @@ import {
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './np_ready/application';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  esFilters,
+} from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -90,7 +94,11 @@ export class DashboardPlugin implements Plugin {
           stateUpdate$: data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            )
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
           ),
         },
       ],

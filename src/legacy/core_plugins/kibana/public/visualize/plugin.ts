@@ -19,7 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -31,7 +31,11 @@ import {
 } from 'kibana/public';
 
 import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  esFilters,
+} from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -93,7 +97,11 @@ export class VisualizePlugin implements Plugin {
           stateUpdate$: data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            )
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
           ),
         },
       ],
