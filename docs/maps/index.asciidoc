@@ -42,7 +42,7 @@ image::maps/images/embed_in_dashboard.jpeg[]
 You can customize each layer to highlight meaningful dimensions in your data. For example, you can use dark colors to symbolize areas with more web log traffic, and lighter colors to symbolize areas with less traffic.
 
 [float]
-=== Focus the data you want to display with searches
+=== Focus in on just the data you want
 Use the search bar for real-time search for all of your Elasticsearch layers. Draw a polygon on the map or use the shape from features to create spatial filters to narrow search results to documents that either intersect with, are within, or do not intersect with the specified geometry. Filter individual layers to compares facets.
 
 
