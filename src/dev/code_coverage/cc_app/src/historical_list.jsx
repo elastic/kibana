@@ -18,17 +18,17 @@
  */
 
 import React from "react";
-import HistoricalItem from './historical_item';
+import CoverageItem from './coverage_item';
 
 const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
   return (
-      <HistoricalItem
+      <CoverageItem
         item={x}
         key={i}
         currentJobNumber={currentJobNumber}
         testRunnerTypes={testRunnerTypes}
       />
-);
+  );
 };
 
 export default function HistoricalList({testRunnerTypes, historicalItems, currentJobNumber }) {
