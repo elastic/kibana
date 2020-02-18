@@ -7,6 +7,7 @@
 import { Reducer } from 'redux';
 import { PolicyListState } from '../../types';
 import { AppAction } from '../action';
+import { isOnPolicyListPage } from './selectors';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -15,6 +16,7 @@ const initialPolicyListState = (): PolicyListState => {
     pageIndex: 0,
     pageSize: 10,
     total: 0,
+    isOnPage: false,
   };
 };
 
@@ -30,17 +32,15 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  if (
-    action.type === 'userPaginatedPolicyListTable' ||
-    (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
-  ) {
+  if (action.type === 'userChangedUrl' && action.payload.pathname === '/policy') {
     return {
       ...state,
       isLoading: true,
+      isOnPage: true,
     };
   }
 
-  if (action.type === 'userNavigatedFromPage' && action.payload === 'policyListPage') {
+  if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
     return initialPolicyListState();
   }
 

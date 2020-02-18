@@ -26,9 +26,8 @@ import {
   FormattedNumber,
   FormattedRelative,
 } from '@kbn/i18n/react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { usePageId } from '../use_page_id';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   selectIsLoading,
   selectPageIndex,
@@ -37,7 +36,6 @@ import {
   selectTotal,
 } from '../../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
-import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { TruncateText } from '../../components/truncate_text';
 
@@ -85,9 +83,9 @@ const renderFormattedNumber = (value: number, _item: PolicyData) => (
 );
 
 export const PolicyList = React.memo(() => {
-  usePageId('policyListPage');
+  const history = useHistory();
+  const location = useLocation();
 
-  const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
   const pageIndex = usePolicyListSelector(selectPageIndex);
   const pageSize = usePolicyListSelector(selectPageSize);
@@ -106,15 +104,9 @@ export const PolicyList = React.memo(() => {
 
   const handleTableChange = useCallback(
     ({ page: { index, size } }: TableChangeCallbackArguments) => {
-      dispatch({
-        type: 'userPaginatedPolicyListTable',
-        payload: {
-          pageIndex: index,
-          pageSize: size,
-        },
-      });
+      history.push(`${location.pathname}?page_index=${index}&page_size=${size}`);
     },
-    [dispatch]
+    [history, location.pathname]
   );
 
   const columns: Array<EuiTableFieldDataColumnType<PolicyData>> = useMemo(

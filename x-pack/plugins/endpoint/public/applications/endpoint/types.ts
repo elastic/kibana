@@ -55,6 +55,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** is user on the Policy List page (route) */
+  isOnPage: boolean;
 }
 
 export interface GlobalState {
