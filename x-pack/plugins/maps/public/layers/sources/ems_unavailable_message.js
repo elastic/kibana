@@ -5,12 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-// TODO
-import chrome from 'ui/chrome';
+import { getInjectedVarFunc } from '../../kibana_services';
 
 export function getEmsUnavailableMessage() {
-  const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+  const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
   if (isEmsEnabled) {
     return i18n.translate('xpack.maps.source.ems.noAccessDescription', {
       defaultMessage:

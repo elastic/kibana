@@ -10,20 +10,19 @@ import {
   EMS_TILES_CATALOGUE_PATH,
   EMS_GLYPHS_PATH,
 } from '../common/constants';
-import chrome from 'ui/chrome';
+import { getInjectedVarFunc, getLicenseId } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { getLicenseId } from '../../../../plugins/maps/public/kibana_services';
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 export function getKibanaRegionList() {
-  return chrome.getInjected('regionmapLayers');
+  return getInjectedVarFunc()('regionmapLayers');
 }
 
 export function getKibanaTileMap() {
-  return chrome.getInjected('tilemap');
+  return getInjectedVarFunc()('tilemap');
 }
 
 function relativeToAbsolute(url) {
@@ -40,26 +39,26 @@ let emsClient = null;
 let latestLicenseId = null;
 export function getEMSClient() {
   if (!emsClient) {
-    const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+    const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
     if (isEmsEnabled) {
-      const proxyElasticMapsServiceInMaps = chrome.getInjected(
+      const proxyElasticMapsServiceInMaps = getInjectedVarFunc()(
         'proxyElasticMapsServiceInMaps',
         false
       );
       const proxyPath = '';
       const tileApiUrl = proxyElasticMapsServiceInMaps
         ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`)
-        : chrome.getInjected('emsTileApiUrl');
+        : getInjectedVarFunc()('emsTileApiUrl');
       const fileApiUrl = proxyElasticMapsServiceInMaps
         ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`)
-        : chrome.getInjected('emsFileApiUrl');
+        : getInjectedVarFunc()('emsFileApiUrl');
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
-        kbnVersion: chrome.getInjected('kbnPkgVersion'),
+        kbnVersion: getInjectedVarFunc()('kbnPkgVersion'),
         tileApiUrl,
         fileApiUrl,
-        landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
+        landingPageUrl: getInjectedVarFunc()('emsLandingPageUrl'),
         fetchFunction: fetchFunction, //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
         proxyPath,
       });
@@ -85,13 +84,13 @@ export function getEMSClient() {
 }
 
 export function getGlyphUrl() {
-  if (!chrome.getInjected('isEmsEnabled', true)) {
+  if (!getInjectedVarFunc()('isEmsEnabled', true)) {
     return '';
   }
-  return chrome.getInjected('proxyElasticMapsServiceInMaps', false)
+  return getInjectedVarFunc()('proxyElasticMapsServiceInMaps', false)
     ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
         `/{fontstack}/{range}`
-    : chrome.getInjected('emsFontLibraryUrl', true);
+    : getInjectedVarFunc()('emsFontLibraryUrl', true);
 }
 
 export function isRetina() {

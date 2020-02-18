@@ -10,8 +10,6 @@ import { CreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
-
-// TODO
 import { getKibanaTileMap } from '../../../meta';
 
 export class KibanaTilemapSource extends AbstractTMSSource {

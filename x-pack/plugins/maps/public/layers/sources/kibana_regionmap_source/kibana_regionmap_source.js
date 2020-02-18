@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
-
-// TODO
 import { getKibanaRegionList } from '../../../meta';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {

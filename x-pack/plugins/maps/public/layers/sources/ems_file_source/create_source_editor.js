@@ -6,8 +6,6 @@
 
 import React from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-
-// TODO
 import { getEMSClient } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
