@@ -1,7 +1,7 @@
 import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
 
-export default function HistoricalItem({item, currentJobNumber, testRunnerTypes}) {
+export default function CoverageItem({item, currentJobNumber, testRunnerTypes}) {
 
   return (
     <>
