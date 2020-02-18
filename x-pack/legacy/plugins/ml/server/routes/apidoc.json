@@ -57,7 +57,7 @@
     "DeleteJobs",
     "CloseJobs",
     "JobsSummary",
-    "JobsWithTimerange",
+    "JobsWithTimeRange",
     "CreateFullJobsList",
     "GetAllGroups",
     "UpdateGroups",
@@ -69,6 +69,15 @@
     "GetAllJobAndGroupIds",
     "GetLookBackProgress",
     "ValidateCategoryExamples",
-    "TopCategories"
+    "TopCategories",
+    "Filters",
+    "GetFilters",
+    "GetFilterById",
+    "CreateFilter",
+    "UpdateFilter",
+    "DeleteFilter",
+    "GetFiltersStats",
+    "Indices",
+    "FieldCaps"
   ]
 }
