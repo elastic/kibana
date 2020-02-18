@@ -12,9 +12,9 @@ import {
   InfraNodeType,
   InfraTimerangeInput,
   InfraSnapshotGroupbyInput,
-} from '../../../../legacy/plugins/infra/server/graphql/types';
+} from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SnapshotNodeResponse } from '../../../../legacy/plugins/infra/common/http_api/snapshot_api';
+import { SnapshotNodeResponse } from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
 
 interface SnapshotRequest {

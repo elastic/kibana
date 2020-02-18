@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AbortSignal } from 'abort-controller';
+import { AbortSignal } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import { abortableRequestHandler } from './abortable_request_handler';
 
 describe('abortableRequestHandler', () => {
