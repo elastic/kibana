@@ -53,8 +53,8 @@ export const getRequestData = async (
     // simple pagination
     if (reqData.pageIndex === undefined) {
       reqData.pageIndex = config.alertResultListDefaultFirstPageIndex;
-      reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
     }
+    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
   }
 
   return reqData;
