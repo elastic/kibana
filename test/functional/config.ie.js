@@ -35,7 +35,6 @@ export default async function({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
         'state:storeInSessionStorage': true,
         'notifications:lifetime:info': 10000,
       },
@@ -43,7 +42,7 @@ export default async function({ readConfigFile }) {
 
     kbnTestServer: {
       ...defaultConfig.get('kbnTestServer'),
-      serverArgs: [...defaultConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [...defaultConfig.get('kbnTestServer.serverArgs'), '--telemetry.optIn=false'],
     },
   };
 }

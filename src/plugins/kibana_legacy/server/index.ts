@@ -28,9 +28,11 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibanaLegacy.defaultAppId', true),
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', true),
   ],
 };
+
+export { kbnBaseUrl } from '../common/kbn_base_url';
 
 class Plugin {
   public setup(core: CoreSetup) {}

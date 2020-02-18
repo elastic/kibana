@@ -36,7 +36,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
 import { findByTitle, getRoutes } from '../utils';
-import { indexPatterns } from '../';
+import { IndexPatternMissingIndices } from '../lib';
 import { Field, FieldList, IFieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
@@ -578,7 +578,7 @@ export class IndexPattern implements IIndexPattern {
         // so do not rethrow the error here
         const { toasts } = getNotifications();
 
-        if (err instanceof indexPatterns.IndexPatternMissingIndices) {
+        if (err instanceof IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
 
           return [];

@@ -31,7 +31,7 @@ import { GetEmbeddableFactory } from '../../../../types';
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -51,7 +51,7 @@ beforeEach(async () => {
     () => null
   );
 
-  const derivedFilter: esFilters.Filter = {
+  const derivedFilter: Filter = {
     $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },

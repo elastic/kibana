@@ -118,7 +118,12 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'testActionGroup',
+          name: 'Test Action Group',
+        },
+      ],
       executor: jest.fn(),
     });
     const result = registry.list();

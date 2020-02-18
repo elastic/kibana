@@ -24,7 +24,7 @@ import util from 'util';
 import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
-import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
+import { ProcRunner, ToolingLog } from '@kbn/dev-utils';
 import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
@@ -92,27 +92,30 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     describe('with es instance', () => {
-      const log = new ToolingLog();
+      const log = new ToolingLog({
+        level: 'verbose',
+        writeTo: process.stdout,
+      });
+      const pr = new ProcRunner(log);
 
       const es = createLegacyEsTestCluster({ license: 'basic', log });
       beforeAll(es.start);
       afterAll(es.stop);
+      afterAll(() => pr.teardown());
 
       it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
-        await withProcRunner(log, async proc => {
-          await proc.run('kibana', {
-            cmd: 'yarn',
-            args: [
-              'start',
-              '--optimize.enabled=false',
-              '--logging.json=false',
-              '--migrations.skip=true',
-            ],
-            cwd: generatedPath,
-            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
-          });
-          await proc.stop('kibana');
+        await pr.run('kibana', {
+          cmd: 'yarn',
+          args: [
+            'start',
+            '--optimize.enabled=false',
+            '--logging.json=false',
+            '--migrations.skip=true',
+          ],
+          cwd: generatedPath,
+          wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
         });
+        await pr.stop('kibana');
       });
     });
 

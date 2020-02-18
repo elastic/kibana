@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
+import { API_LIST_URL } from '../../common/constants';
 
-const API_BASE_URL = '/api/reporting/jobs';
+const { core } = npStart;
 
 export interface JobQueueEntry {
   _id: string;
@@ -52,40 +53,33 @@ export interface JobInfo {
 }
 
 class JobQueueClient {
-  public list = (page = 0, jobIds?: string[]): Promise<JobQueueEntry[]> => {
+  public list = (page = 0, jobIds: string[] = []): Promise<JobQueueEntry[]> => {
     const query = { page } as any;
-    if (jobIds && jobIds.length > 0) {
+    if (jobIds.length > 0) {
       // Only getting the first 10, to prevent URL overflows
       query.ids = jobIds.slice(0, 10).join(',');
     }
-    return kfetch({
-      method: 'GET',
-      pathname: `${API_BASE_URL}/list`,
+
+    return core.http.get(`${API_LIST_URL}/list`, {
       query,
       asSystemRequest: true,
     });
   };
 
   public total(): Promise<number> {
-    return kfetch({
-      method: 'GET',
-      pathname: `${API_BASE_URL}/count`,
+    return core.http.get(`${API_LIST_URL}/count`, {
       asSystemRequest: true,
     });
   }
 
   public getContent(jobId: string): Promise<JobContent> {
-    return kfetch({
-      method: 'GET',
-      pathname: `${API_BASE_URL}/output/${jobId}`,
+    return core.http.get(`${API_LIST_URL}/output/${jobId}`, {
       asSystemRequest: true,
     });
   }
 
   public getInfo(jobId: string): Promise<JobInfo> {
-    return kfetch({
-      method: 'GET',
-      pathname: `${API_BASE_URL}/info/${jobId}`,
+    return core.http.get(`${API_LIST_URL}/info/${jobId}`, {
       asSystemRequest: true,
     });
   }

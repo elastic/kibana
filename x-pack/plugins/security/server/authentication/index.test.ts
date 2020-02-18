@@ -47,7 +47,7 @@ describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
     config: ConfigType;
     loggers: LoggerFactory;
-    getLegacyAPI(): Pick<LegacyAPI, 'serverConfig' | 'isSystemAPIRequest'>;
+    getLegacyAPI(): Pick<LegacyAPI, 'serverConfig'>;
     http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
     license: jest.Mocked<SecurityLicense>;
