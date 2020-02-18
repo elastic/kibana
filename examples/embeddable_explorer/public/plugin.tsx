@@ -18,12 +18,12 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { UiActionsApi } from '../../../src/plugins/ui_actions/public';
+import { UiActionsService } from '../../../src/plugins/ui_actions/public';
 import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
 interface StartDeps {
-  uiActions: UiActionsApi;
+  uiActions: UiActionsService;
   embeddable: IEmbeddableStart;
   inspector: InspectorStart;
 }
