@@ -9,9 +9,9 @@ import React from 'react';
 
 import { Direction } from '../../../../../graphql/types';
 import { TestProviders } from '../../../../../mock';
+import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { Sort } from '../../sort';
 import { CloseButton } from '../actions';
-import { ColumnHeaderType } from '../column_header';
 import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';

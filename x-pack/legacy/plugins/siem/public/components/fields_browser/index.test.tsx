@@ -10,11 +10,11 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 // Suppress warnings about "react-beautiful-dnd" until we migrate to @testing-library/react
 /* eslint-disable no-console */
@@ -35,7 +35,7 @@ const removeColumnMock = (jest.fn() as unknown) as ActionCreator<{
 }>;
 
 const upsertColumnMock = (jest.fn() as unknown) as ActionCreator<{
-  column: ColumnHeader;
+  column: ColumnHeaderOptions;
   id: string;
   index: number;
 }>;
