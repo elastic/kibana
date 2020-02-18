@@ -180,7 +180,14 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    { embeddable, navigation, data, share, visualizations, dashboardSetup }: VisualizePluginStartDependencies
+    {
+      embeddable,
+      navigation,
+      data,
+      share,
+      visualizations,
+      dashboardSetup,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,

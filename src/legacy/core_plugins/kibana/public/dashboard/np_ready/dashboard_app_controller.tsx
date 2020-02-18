@@ -347,8 +347,13 @@ export class DashboardAppController {
         if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
           const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
           const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-          const embeddable = getCurrentConfig(id);
-          container.addSavedObjectEmbeddableFromConfig('visualization', embeddable);
+          if (type === 'visualization') {
+            const embeddableConfig = getCurrentConfig(id);
+            container.addSavedObjectEmbeddableFromConfig('visualization', embeddableConfig);
+            // TODO: delete config once it has been fetched
+          } else {
+            container.addSavedObjectEmbeddable(type, id);
+          }
           removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
           removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
         }

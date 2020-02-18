@@ -186,7 +186,6 @@ export abstract class Container<
 
     return new Promise((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-        console.dir(this.output.embeddableLoaded[id]);
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
           resolve(this.children[id] as TEmbeddable);

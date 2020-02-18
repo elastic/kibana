@@ -30,7 +30,6 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
-import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -42,13 +41,13 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
   subscribeWithScope,
   absoluteToParsedUrl,
-  KibanaParsedUrl,
   migrateLegacyQuery,
   stateMonitorFactory,
   DashboardConstants,
 } from '../../legacy_imports';
 
 import { getServices } from '../../kibana_services';
+import uuid from 'uuid';
 
 export function initEditorDirective(app, deps) {
   app.directive('visualizeApp', function() {
@@ -552,7 +551,25 @@ function VisualizeAppController(
     $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
-
+    if ($scope.isAddToDashMode()) {
+      const id = uuid.v4();
+      $scope.dashboard.addCurrentConfig({ id, type: 'visualization', vis: savedVis });
+      return new Promise(resolve => {
+        resolve(id);
+      }).then(function(id) {
+        $scope.$evalAsync(() => {
+          const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
+          const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, getBasePath());
+          dashboardParsedUrl.addQueryParameter(
+            DashboardConstants.ADD_EMBEDDABLE_TYPE,
+            VISUALIZE_EMBEDDABLE_TYPE
+          );
+          dashboardParsedUrl.addQueryParameter(DashboardConstants.ADD_EMBEDDABLE_ID, id);
+          kbnUrl.change(dashboardParsedUrl.appPath);
+        });
+        return { id };
+      });
+    }
     return savedVis.save(saveOptions).then(
       function(id) {
         $scope.$evalAsync(() => {
@@ -571,33 +588,7 @@ function VisualizeAppController(
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
-            if ($scope.isAddToDashMode()) {
-              const savedVisualizationParsedUrl = new KibanaParsedUrl({
-                basePath: getBasePath(),
-                appId: kbnBaseUrl.slice('/app/'.length),
-                appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
-              });
-              // Manually insert a new url so the back button will open the saved visualization.
-              $scope.dashboard
-                .addCurrentConfig({id: savedVis.id,  type: 'visualization', vis: savedVis});
-              $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-              setActiveUrl(savedVisualizationParsedUrl.appPath);
-
-              const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardParsedUrl = absoluteToParsedUrl(
-                lastDashboardAbsoluteUrl,
-                getBasePath()
-              );
-              dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.ADD_EMBEDDABLE_TYPE,
-                VISUALIZE_EMBEDDABLE_TYPE
-              );
-              dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.ADD_EMBEDDABLE_ID,
-                savedVis.id
-              );
-              kbnUrl.change(dashboardParsedUrl.appPath);
-            } else if (savedVis.id === $route.current.params.id) {
+            if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
               savedVis.vis.title = savedVis.title;

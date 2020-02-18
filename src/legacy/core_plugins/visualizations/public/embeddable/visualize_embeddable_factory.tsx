@@ -40,7 +40,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
 import { showNewVisModal } from '../np_ready/public/wizard';
 import { TimefilterContract } from '../../../../../plugins/data/public';
-import { isEqual } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SearchSource } from '../../../../../plugins/data/public/search/search_source';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -105,7 +105,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = this.getSavedVisualizationsLoader();
-    debugger;
     try {
       const visId = savedObject.id as string;
 
@@ -145,7 +144,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = this.getSavedVisualizationsLoader();
-    debugger;
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
       const config = {
@@ -166,18 +164,18 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     config: Record<string, any>,
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {;
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     try {
       const indexPattern = await getIndexPattern(config);
       const indexPatterns = indexPattern ? [indexPattern] : [];
-
-
+      const { type, aggs, params, filters } = config.vis;
       const vis = new Vis(indexPattern, {
-        type: config.vis.type.name,
-        aggs: config.vis.aggs,
-        params: config.vis.params,
-        filters: config.vis.filters,
+        type: type.name,
+        aggs,
+        params,
+        filters,
       });
+
       const searchSource = new SearchSource();
       searchSource.fields = config.searchSource.fields;
       searchSource.id = config.searchSource.id;
@@ -187,8 +185,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         vis,
         searchSource,
       };
-      debugger;
-    //  console.log(isEqual(savedObject, realSavedObject));
       return new VisualizeEmbeddable(
         {
           savedVisualization: savedObject,
