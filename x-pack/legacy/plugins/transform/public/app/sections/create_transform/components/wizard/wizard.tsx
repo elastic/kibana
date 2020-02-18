@@ -10,29 +10,24 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { Dictionary } from '../../../../../../common/types/common';
-
 import { useKibanaContext } from '../../../../lib/kibana';
 
-import {
-  getCreateRequestBody,
-  PivotAggsConfig,
-  PivotAggsConfigDict,
-  PivotGroupByConfig,
-  PivotGroupByConfigDict,
-  TransformPivotConfig,
-  PIVOT_SUPPORTED_AGGS,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
+import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
 
 import {
+  applyTransformConfigToDefineState,
+  getDefaultStepDefineState,
   StepDefineExposedState,
   StepDefineForm,
   StepDefineSummary,
-  getDefaultStepDefineState,
 } from '../step_define';
 import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
-import { getDefaultStepDetailsState, StepDetailsForm, StepDetailsSummary } from '../step_details';
+import {
+  applyTransformConfigToDetailsState,
+  getDefaultStepDetailsState,
+  StepDetailsForm,
+  StepDetailsSummary,
+} from '../step_details';
 import { WizardNav } from '../wizard_nav';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
@@ -90,44 +85,17 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
     // The DEFINE state
-    const originalStepDefineState = getDefaultStepDefineState(kibanaContext);
-    if (originalTransformConfig !== undefined) {
-      originalStepDefineState.aggList = Object.keys(
-        originalTransformConfig.pivot.aggregations
-      ).reduce((aggList, aggName) => {
-        const aggConfig = originalTransformConfig.pivot.aggregations[aggName] as Dictionary<any>;
-        const agg = Object.keys(aggConfig)[0];
-        aggList[aggName] = {
-          agg: agg as PIVOT_SUPPORTED_AGGS,
-          aggName,
-          dropDownName: aggName,
-          ...aggConfig[agg],
-        } as PivotAggsConfig;
-        return aggList;
-      }, {} as PivotAggsConfigDict);
-
-      originalStepDefineState.groupByList = Object.keys(
-        originalTransformConfig.pivot.group_by
-      ).reduce((groupByList, groupByName) => {
-        const groupByConfig = originalTransformConfig.pivot.group_by[groupByName] as Dictionary<
-          any
-        >;
-        const groupBy = Object.keys(groupByConfig)[0];
-        groupByList[groupByName] = {
-          agg: groupBy as PIVOT_SUPPORTED_GROUP_BY_AGGS,
-          aggName: groupByName,
-          dropDownName: groupByName,
-          ...groupByConfig[groupBy],
-        } as PivotGroupByConfig;
-        return groupByList;
-      }, {} as PivotGroupByConfigDict);
-
-      originalStepDefineState.valid = true;
-    }
-    const [stepDefineState, setStepDefineState] = useState(originalStepDefineState);
+    const [stepDefineState, setStepDefineState] = useState(
+      applyTransformConfigToDefineState(
+        getDefaultStepDefineState(kibanaContext),
+        originalTransformConfig
+      )
+    );
 
     // The DETAILS state
-    const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());
+    const [stepDetailsState, setStepDetailsState] = useState(
+      applyTransformConfigToDetailsState(getDefaultStepDetailsState(), originalTransformConfig)
+    );
 
     const stepDetails =
       currentStep === WIZARD_STEPS.DETAILS ? (
