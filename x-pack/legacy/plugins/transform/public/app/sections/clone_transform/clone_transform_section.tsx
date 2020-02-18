@@ -43,10 +43,26 @@ import { Wizard } from '../create_transform/components/wizard';
 const indexPatterns = npStart.plugins.data.indexPatterns;
 const savedObjectsClient = npStart.core.savedObjects.client;
 
-interface GetTransformsResponse {
+interface GetTransformsResponseOk {
   count: number;
   transforms: TransformPivotConfig[];
 }
+
+interface GetTransformsResponseError {
+  error: {
+    msg: string;
+    path: string;
+    query: any;
+    statusCode: number;
+    response: string;
+  };
+}
+
+function isGetTransformsResponseError(arg: any): arg is GetTransformsResponseError {
+  return arg.error !== undefined;
+}
+
+type GetTransformsResponse = GetTransformsResponseOk | GetTransformsResponseError;
 
 type Props = RouteComponentProps<{ transformId: string }>;
 export const CloneTransformSection: FC<Props> = ({ match }) => {
@@ -68,6 +84,12 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   const fetchTransformConfig = async () => {
     try {
       const transformConfigs: GetTransformsResponse = await api.getTransforms(transformId);
+      if (isGetTransformsResponseError(transformConfigs)) {
+        setTransformConfig(undefined);
+        setErrorMessage(transformConfigs.error.msg);
+        setIsInitialized(true);
+        return;
+      }
 
       await loadIndexPatterns(savedObjectsClient, indexPatterns);
       const indexPatternTitle = Array.isArray(transformConfigs.transforms[0].source.index)
@@ -90,7 +112,11 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
       setIsInitialized(true);
     } catch (e) {
       setTransformConfig(undefined);
-      setErrorMessage(e);
+      if (e.message !== undefined) {
+        setErrorMessage(e.message);
+      } else {
+        setErrorMessage(JSON.stringify(e, null, 2));
+      }
       setIsInitialized(true);
     }
   };
@@ -101,73 +127,68 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (savedObjectId === undefined || isInitialized === false) {
-    return null;
-  }
-
-  if (typeof errorMessage !== 'undefined') {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
-          defaultMessage: 'An error occurred getting the transform configuration.',
-        })}
-        color="danger"
-        iconType="alert"
-      >
-        <pre>{JSON.stringify(errorMessage)}</pre>
-      </EuiCallOut>
-    );
-  }
-
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <KibanaProvider savedObjectId={savedObjectId}>
-        <EuiPageContent data-test-subj="transformPageCloneTransform">
-          <EuiTitle size="l">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={true}>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.transform.transformsWizard.cloneTransformTitle"
-                    defaultMessage="Clone transform"
-                  />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
-                      defaultMessage: `Beta`,
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.transform.transformsWizard.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
-                  />
-                </h1>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  href={documentationLinksService.getTransformsDocUrl()}
-                  target="_blank"
-                  iconType="help"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.transform.transformsWizard.transformDocsLinkText"
-                    defaultMessage="Transform docs"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-          <EuiPageContentBody>
-            <EuiSpacer size="l" />
-            <RenderOnlyWithInitializedKibanaContext>
-              {transformConfig !== undefined && <Wizard transformConfig={transformConfig} />}
-            </RenderOnlyWithInitializedKibanaContext>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </KibanaProvider>
+      <EuiPageContent data-test-subj="transformPageCloneTransform">
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1>
+                <FormattedMessage
+                  id="xpack.transform.transformsWizard.cloneTransformTitle"
+                  defaultMessage="Clone transform"
+                />
+                <span>&nbsp;</span>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
+                    defaultMessage: `Beta`,
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.transform.transformsWizard.betaBadgeTooltipContent',
+                    {
+                      defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
+                    }
+                  )}
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={documentationLinksService.getTransformsDocUrl()}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.transform.transformsWizard.transformDocsLinkText"
+                  defaultMessage="Transform docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiPageContentBody>
+          <EuiSpacer size="l" />
+          {typeof errorMessage !== 'undefined' && (
+            <EuiCallOut
+              title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
+                defaultMessage: 'An error occurred getting the transform configuration.',
+              })}
+              color="danger"
+              iconType="alert"
+            >
+              <pre>{JSON.stringify(errorMessage)}</pre>
+            </EuiCallOut>
+          )}
+          {savedObjectId !== undefined && isInitialized === true && transformConfig !== undefined && (
+            <KibanaProvider savedObjectId={savedObjectId}>
+              <RenderOnlyWithInitializedKibanaContext>
+                <Wizard cloneConfig={transformConfig} />
+              </RenderOnlyWithInitializedKibanaContext>
+            </KibanaProvider>
+          )}
+        </EuiPageContentBody>
+      </EuiPageContent>
     </PrivilegesWrapper>
   );
 };
