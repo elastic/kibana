@@ -88,9 +88,11 @@ export function QueryActionsProvider(Promise) {
 
   const fetchSurroundingRows = (type, state) => {
     const {
-      queryParameters: { indexPatternId, filters, sort, tieBreakerField },
+      queryParameters: { indexPatternId, sort, tieBreakerField },
       rows: { anchor },
     } = state;
+    const filters = getServices().filterManager.getFilters();
+
     const count =
       type === 'successors'
         ? state.queryParameters.successorCount
