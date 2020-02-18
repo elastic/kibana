@@ -11,9 +11,10 @@ export const startDatafeedSchema = schema.object({
   end: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
   timeout: schema.maybe(schema.any()),
 });
-// TODO: consolidate with datafeedConfigSchema in job validation PR
+
 export const datafeedConfigSchema = schema.object({
-  feed_id: schema.string(),
+  datafeed_id: schema.maybe(schema.string()),
+  feed_id: schema.maybe(schema.string()),
   aggregations: schema.maybe(schema.any()),
   aggs: schema.maybe(schema.any()),
   chunking_config: schema.maybe(schema.any()),

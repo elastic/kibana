@@ -39,14 +39,14 @@ export const validateJobSchema = schema.object({
 });
 
 const datafeedConfigSchema = schema.object({
-  datafeed_id: schema.string(),
+  datafeed_id: schema.maybe(schema.string()),
   aggregations: schema.maybe(schema.any()),
   aggs: schema.maybe(schema.any()),
   chunking_config: schema.maybe(schema.any()),
   frequency: schema.maybe(schema.string()),
   indices: schema.arrayOf(schema.string()),
   indexes: schema.maybe(schema.arrayOf(schema.string())),
-  job_id: schema.string(),
+  job_id: schema.maybe(schema.string()),
   query: schema.any(),
   query_delay: schema.maybe(schema.string()),
   script_fields: schema.maybe(schema.any()),
