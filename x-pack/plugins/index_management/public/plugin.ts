@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { UIM_APP_NAME } from '../common/constants';
+import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
 import { AppDependencies } from './application';
 import { httpService } from './application/services/http';
@@ -52,7 +52,7 @@ export class IndexMgmtUIPlugin {
     this.uiMetricService.setup(usageCollection);
 
     management.sections.getSection('elasticsearch')!.registerApp({
-      id: 'index_management',
+      id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 1,
       mount: async ({ element, setBreadcrumbs }) => {
