@@ -5,6 +5,7 @@
  */
 
 import { Direction } from '../../graphql/types';
+export { Direction };
 interface FormData {
   isNew?: boolean;
 }
