@@ -6,7 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import { getOr, set } from 'lodash/fp';
-import { ActionCreator } from 'typescript-fsa';
+import { Action } from 'typescript-fsa';
 
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
@@ -183,7 +183,13 @@ export interface QueryTimelineById<TCache> {
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+  updateIsLoading: ({
+    id,
+    isLoading,
+  }: {
+    id: string;
+    isLoading: boolean;
+  }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
 }
 
