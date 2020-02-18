@@ -69,7 +69,6 @@ interface CasesProps {
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
-  const [isEditTitle, setIsEditTitle] = useState(false);
   const [isEditTags, setIsEditTags] = useState(false);
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
   const [description, setDescription] = useState(data.description);
@@ -85,7 +84,6 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               updateKey: 'title',
               updateValue,
             });
-            setIsEditTitle(false);
           }
           break;
         case 'description':
@@ -213,24 +211,15 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
     },
   ];
 
-  const onCancel = useCallback(() => setIsEditTitle(false), []);
-  const onSubmit = useCallback(() => onUpdateField('title', title), []);
-  const onTitleChange = useCallback(newTitle => setTitle(newTitle), [title]);
-  const onClickEditIcon = useCallback(() => setIsEditTitle(true), []);
-
-  const titleNode = (
-    <EditableTitle
-      isLoading={isLoading}
-      title={title}
-      onClickEditIcon={onClickEditIcon}
-      onChange={onTitleChange}
-      onSubmit={onSubmit}
-      onCancel={onCancel}
-      submitTitle={i18n.SUBMIT}
-      cancelTitle={i18n.CANCEL}
-      editMode={isEditTitle}
-    />
+  const onSubmit = useCallback(
+    newTitle => {
+      onUpdateField('title', newTitle);
+      setTitle(newTitle);
+    },
+    [title]
   );
+
+  const titleNode = <EditableTitle isLoading={isLoading} title={title} onSubmit={onSubmit} />;
 
   return (
     <>

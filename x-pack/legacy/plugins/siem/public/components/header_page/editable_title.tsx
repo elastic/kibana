@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -29,39 +29,36 @@ const StyledEuiButtonIcon = styled(EuiButtonIcon)`
 StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
 
 interface Props {
-  submitTitle: string;
-  cancelTitle: string;
   isLoading: boolean;
-  onClickEditIcon: () => void;
   title: string | React.ReactNode;
-  editMode: boolean;
-  editIcon?: string;
-  onChange: (a: string) => void;
-  onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({
-  onChange,
-  onCancel,
-  onSubmit,
-  isLoading,
-  title,
-  onClickEditIcon,
-  submitTitle,
-  cancelTitle,
-  editMode = false,
-  editIcon = 'pencil',
-}) => {
+const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [changedTitle, onTitleChange] = useState(title);
+
+  const onCancel = () => setEditMode(false);
+  const onClickEditIcon = () => setEditMode(true);
+
+  const onClickSubmit = (newTitle: string): void => {
+    onSubmit(newTitle);
+    setEditMode(false);
+  };
+
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiFieldText onChange={e => onChange(e.target.value)} value={`${title}`} />
+        <EuiFieldText onChange={e => onTitleChange(e.target.value)} value={`${changedTitle}`} />
       </EuiFlexItem>
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-            {submitTitle}
+          <EuiButton
+            fill
+            isDisabled={isLoading}
+            isLoading={isLoading}
+            onClick={() => onClickSubmit(changedTitle as string)}
+          >
             {i18n.SUBMIT}
           </EuiButton>
         </EuiFlexItem>
@@ -79,7 +76,7 @@ const EditableTitleComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <StyledEuiButtonIcon
           aria-label={title as string}
-          iconType={editIcon}
+          iconType="pencil"
           onClick={onClickEditIcon}
         />
       </EuiFlexItem>
