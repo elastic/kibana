@@ -92,8 +92,11 @@ function EditorUI({ initialTextValue }: EditorProps) {
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
-    const textareaElement = editorRef.current!.querySelector('textarea')!;
-    textareaElement.setAttribute('id', inputId);
+    const textareaElement = editorRef.current!.querySelector('textarea');
+
+    if (textareaElement) {
+      textareaElement.setAttribute('id', inputId);
+    }
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
