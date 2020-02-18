@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import useResizeObserver from 'use-resize-observer';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
@@ -24,6 +25,10 @@ jest.mock('../../../components/search_bar', () => ({
 jest.mock('../../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
+
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer');
+mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('body', () => {
   const scenariosMap = {

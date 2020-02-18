@@ -16,7 +16,8 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
-import { AutoSizer } from '../auto_sizer';
+import useResizeObserver from 'use-resize-observer';
+
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
 import {
@@ -124,35 +125,24 @@ export const AreaChartBase = React.memo(AreaChartBaseComponent);
 
 AreaChartBase.displayName = 'AreaChartBase';
 
-export const AreaChartComponent = ({
-  areaChart,
-  configs,
-}: {
+interface AreaChartComponentProps {
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}) => {
+}
+
+export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChart, configs }) => {
+  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+  const chartHeight = getChartHeight(customHeight, height);
+  const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(areaChart) ? (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <AreaChartBase
-            data={areaChart}
-            height={getChartHeight(customHeight, height)}
-            width={getChartWidth(customWidth, width)}
-            configs={configs}
-          />
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
+    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+      <AreaChartBase data={areaChart} height={chartHeight} width={chartWidth} configs={configs} />
+    </WrappedByAutoSizer>
   ) : (
-    <ChartPlaceHolder
-      height={getChartHeight(customHeight)}
-      width={getChartWidth(customWidth)}
-      data={areaChart}
-    />
+    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
   );
 };
 
