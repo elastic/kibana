@@ -82,7 +82,6 @@ export const getQueryFilter = (
           });
           console.log('found key/value pair of:', entries);
         }
-        // console.log('The new should is:', newShould);
         item.bool.should = newShould;
       });
     }
