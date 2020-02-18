@@ -22,12 +22,12 @@
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution } from '../execution/execution';
+import { Execution, ExecutionParams } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
-import { ExpressionAstExpression, ExpressionAstNode, parseExpression } from '../ast';
+import { ExpressionAstExpression, ExpressionAstNode } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 
@@ -186,19 +186,27 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return (await execution.result) as Output;
   }
 
-  public createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+  public createExecution<
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
+    Input = unknown,
+    Output = unknown
+  >(
     ast: string | ExpressionAstExpression,
     context: ExtraContext = {} as ExtraContext
-  ): Execution<Context & ExtraContext> {
-    if (typeof ast === 'string') ast = parseExpression(ast);
-    const execution = new Execution<Context & ExtraContext>({
-      ast,
+  ): Execution<Context & ExtraContext, Input, Output> {
+    const params: ExecutionParams<Context & ExtraContext> = {
       executor: this,
       context: {
         ...this.context,
         ...context,
       } as Context & ExtraContext,
-    });
+    };
+
+    if (typeof ast === 'string') params.expression = ast;
+    else params.ast = ast;
+
+    const execution = new Execution<Context & ExtraContext, Input, Output>(params);
+
     return execution;
   }
 }
