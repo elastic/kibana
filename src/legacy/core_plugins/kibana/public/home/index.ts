@@ -17,17 +17,13 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { HomePlugin } from './plugin';
 
-(async () => {
-  const instance = new HomePlugin();
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-    },
-  });
+const instance = new HomePlugin({
+  env: npSetup.plugins.kibanaLegacy.env,
+} as PluginInitializerContext);
+instance.setup(npSetup.core, npSetup.plugins);
 
-  instance.start(npStart.core, npStart.plugins);
-})();
+instance.start(npStart.core, npStart.plugins);

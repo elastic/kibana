@@ -30,7 +30,7 @@ import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
-  embeddables,
+  embeddable,
   savedObj,
   uiState,
   timeRange,
@@ -56,7 +56,7 @@ function DefaultEditor({
       }
 
       if (!visHandler.current) {
-        const embeddableFactory = embeddables.getEmbeddableFactory(
+        const embeddableFactory = embeddable.getEmbeddableFactory(
           'visualization'
         ) as VisualizeEmbeddableFactory;
         setFactory(embeddableFactory);
@@ -82,7 +82,7 @@ function DefaultEditor({
     }
 
     visualize();
-  }, [uiState, savedObj, timeRange, filters, appState, query, factory, embeddables]);
+  }, [uiState, savedObj, timeRange, filters, appState, query, factory, embeddable]);
 
   useEffect(() => {
     return () => {

@@ -52,9 +52,6 @@ const HostsTabs = memo<HostsTabsProps>(
           to: fromTo.to,
         });
       },
-      updateDateRange: (min: number, max: number) => {
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-      },
     };
 
     return (

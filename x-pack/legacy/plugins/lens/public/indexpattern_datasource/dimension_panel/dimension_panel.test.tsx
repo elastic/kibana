@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
+import { EuiComboBox, EuiSideNav, EuiSideNavItemType, EuiPopover } from '@elastic/eui';
 import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionPanel,
@@ -303,11 +303,12 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const options = (wrapper.find(EuiSideNav).prop('items')[0].items as unknown) as Array<{
+    interface ItemType {
       name: string;
-      className: string;
       'data-test-subj': string;
-    }>;
+    }
+    const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
+    const options = (items[0].items as unknown) as ItemType[];
 
     expect(options.find(({ name }) => name === 'Minimum')!['data-test-subj']).not.toContain(
       'Incompatible'
@@ -883,12 +884,20 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    expect(
-      wrapper
-        .find(EuiSideNav)
-        .prop('items')[0]
-        .items.map(({ name }) => name)
-    ).toEqual(['Unique count', 'Average', 'Count', 'Maximum', 'Minimum', 'Sum']);
+    interface ItemType {
+      name: React.ReactNode;
+    }
+    const items: Array<EuiSideNavItemType<ItemType>> = wrapper.find(EuiSideNav).prop('items');
+    const options = (items[0].items as unknown) as ItemType[];
+
+    expect(options.map(({ name }: { name: React.ReactNode }) => name)).toEqual([
+      'Unique count',
+      'Average',
+      'Count',
+      'Maximum',
+      'Minimum',
+      'Sum',
+    ]);
   });
 
   it('should add a column on selection of a field', () => {
