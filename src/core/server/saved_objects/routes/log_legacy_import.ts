@@ -17,35 +17,18 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
+import { IRouter } from '../../http';
+import { Logger } from '../../logging';
 
-const defaultConfig = {
-  'kibana.index': '.kibana',
-  'savedObjects.maxImportExportSize': 10000,
-  'savedObjects.maxImportPayloadBytes': 52428800,
-};
-
-export function createMockServer(config: { [key: string]: any } = defaultConfig) {
-  const server = new Hapi.Server({
-    port: 0,
-    routes: {
-      validate: {
-        failAction: defaultValidationErrorHandler,
-      },
+export const registerLogLegacyImportRoute = (router: IRouter, logger: Logger) => {
+  router.post(
+    {
+      path: '/_log_legacy_import',
+      validate: false,
     },
-  });
-  server.config = () => {
-    return {
-      get(key: string) {
-        return config[key];
-      },
-      has(key: string) {
-        return config.hasOwnProperty(key);
-      },
-    };
-  };
-
-  return server;
-}
+    async (context, req, res) => {
+      logger.warn('Importing saved objects from a .json file has been deprecated');
+      return res.ok({ body: { success: true } });
+    }
+  );
+};
