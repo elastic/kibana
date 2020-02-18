@@ -15,7 +15,7 @@ export interface NewCase extends FormData {
   title: string;
 }
 
-export interface Case {
+export interface CaseSnake {
   case_id: string;
   created_at: string;
   created_by: ElasticUser;
@@ -24,6 +24,17 @@ export interface Case {
   tags: string[];
   title: string;
   updated_at: string;
+}
+
+export interface Case {
+  caseId: string;
+  createdAt: string;
+  createdBy: ElasticUser;
+  description: string;
+  state: string;
+  tags: string[];
+  title: string;
+  updatedAt: string;
 }
 
 export interface QueryParams {
@@ -38,16 +49,24 @@ export interface FilterOptions {
   tags: string[];
 }
 
-export interface AllCases {
-  cases: Case[];
+export interface AllCasesSnake {
+  cases: CaseSnake[];
   page: number;
   per_page: number;
   total: number;
 }
+
+export interface AllCases {
+  cases: Case[];
+  page: number;
+  perPage: number;
+  total: number;
+}
+
 export enum SortFieldCase {
-  createdAt = 'created_at',
+  createdAt = 'createdAt',
   state = 'state',
-  updatedAt = 'updated_at',
+  updatedAt = 'updatedAt',
 }
 
 export interface ElasticUser {

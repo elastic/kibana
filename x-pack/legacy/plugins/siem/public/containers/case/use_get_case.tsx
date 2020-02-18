@@ -50,16 +50,16 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   }
 };
 const initialData: Case = {
-  case_id: '',
-  created_at: '',
-  created_by: {
+  caseId: '',
+  createdAt: '',
+  createdBy: {
     username: '',
   },
   description: '',
   state: '',
   tags: [],
   title: '',
-  updated_at: '',
+  updatedAt: '',
 };
 
 export const useGetCase = (caseId: string): [CaseState] => {

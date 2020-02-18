@@ -162,14 +162,14 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
   ];
   const userActions = [
     {
-      avatarName: data.created_by.username,
+      avatarName: data.createdBy.username,
       title: (
         <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <p>
-              <strong>{`${data.created_by.username}`}</strong>
+              <strong>{`${data.createdBy.username}`}</strong>
               {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-              <FormattedRelativePreferenceDate value={data.created_at} />
+              <FormattedRelativePreferenceDate value={data.createdAt} />
               {/* STEPH FIX come back and add label `on` */}
             </p>
           </EuiFlexItem>
@@ -241,7 +241,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate value={data.created_at} />
+                      <FormattedRelativePreferenceDate value={data.createdAt} />
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -272,7 +272,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               <UserActionTree userActions={userActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              <UserList headline={i18n.REPORTER} users={[data.created_by]} />
+              <UserList headline={i18n.REPORTER} users={[data.createdBy]} />
               <TagList
                 tags={tags}
                 iconAction={{

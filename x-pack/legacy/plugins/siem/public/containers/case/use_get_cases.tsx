@@ -83,7 +83,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 
 const initialData: AllCases = {
   page: 0,
-  per_page: 0,
+  perPage: 0,
   total: 0,
   cases: [],
 };

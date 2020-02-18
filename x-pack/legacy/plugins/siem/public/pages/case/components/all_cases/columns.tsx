@@ -20,8 +20,8 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     name: i18n.CASE_TITLE,
     render: (theCase: Case) => {
-      if (theCase.case_id != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.case_id}>{theCase.title}</CaseDetailsLink>;
+      if (theCase.caseId != null && theCase.title != null) {
+        return <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>;
       }
       return getEmptyTagValue();
     },
@@ -46,10 +46,10 @@ export const getCasesColumns = (): CasesColumns[] => [
     truncateText: true,
   },
   {
-    field: 'created_at',
+    field: 'createdAt',
     name: i18n.CREATED_AT,
     sortable: true,
-    render: (createdAt: Case['created_at']) => {
+    render: (createdAt: Case['createdAt']) => {
       if (createdAt != null) {
         return <FormattedRelativePreferenceDate value={createdAt} />;
       }
@@ -57,15 +57,15 @@ export const getCasesColumns = (): CasesColumns[] => [
     },
   },
   {
-    field: 'created_by.username',
+    field: 'createdBy.username',
     name: i18n.REPORTER,
-    render: (createdBy: Case['created_by']['username']) => renderStringField(createdBy),
+    render: (createdBy: Case['createdBy']['username']) => renderStringField(createdBy),
   },
   {
-    field: 'updated_at',
+    field: 'updatedAt',
     name: i18n.LAST_UPDATED,
     sortable: true,
-    render: (updatedAt: Case['updated_at']) => {
+    render: (updatedAt: Case['updatedAt']) => {
       if (updatedAt != null) {
         return <FormattedRelativePreferenceDate value={updatedAt} />;
       }

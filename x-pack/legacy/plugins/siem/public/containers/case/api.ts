@@ -5,12 +5,13 @@
  */
 
 import { KibanaServices } from '../../lib/kibana';
-import { AllCases, FetchCasesProps, Case, NewCase, SortFieldCase } from './types';
+import { FetchCasesProps, Case, NewCase, SortFieldCase, AllCases } from './types';
 import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
+import { convertCaseToCamel, convertAllCasesToCamel, convertUpdateCaseToCamel } from './utils';
 
-export const getCase = async (caseId: string, includeComments: boolean) => {
+export const getCase = async (caseId: string, includeComments: boolean): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'GET',
     asResponse: true,
@@ -19,7 +20,7 @@ export const getCase = async (caseId: string, includeComments: boolean) => {
     },
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertCaseToCamel(response.body!);
 };
 
 export const getCases = async ({
@@ -46,7 +47,7 @@ export const getCases = async ({
     asResponse: true,
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertAllCasesToCamel(response.body!);
 };
 
 export const createCase = async (newCase: NewCase): Promise<Case> => {
@@ -56,7 +57,7 @@ export const createCase = async (newCase: NewCase): Promise<Case> => {
     body: JSON.stringify(newCase),
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertCaseToCamel(response.body!);
 };
 
 export const updateCaseProperty = async (
@@ -69,5 +70,5 @@ export const updateCaseProperty = async (
     body: JSON.stringify(updatedCase),
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertUpdateCaseToCamel(response.body!);
 };

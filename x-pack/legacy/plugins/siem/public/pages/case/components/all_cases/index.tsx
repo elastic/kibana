@@ -44,23 +44,9 @@ export const AllCases = React.memo(() => {
     ({ page, sort }: EuiBasicTableOnChange) => {
       let newQueryParams = queryParams;
       if (sort) {
-        let newSort;
-        switch (sort.field) {
-          case 'state':
-            newSort = SortFieldCase.state;
-            break;
-          case 'created_at':
-            newSort = SortFieldCase.createdAt;
-            break;
-          case 'updated_at':
-            newSort = SortFieldCase.updatedAt;
-            break;
-          default:
-            newSort = SortFieldCase.createdAt;
-        }
         newQueryParams = {
           ...newQueryParams,
-          sortField: newSort,
+          sortField: sort.field as SortFieldCase,
           sortOrder: sort.direction as Direction,
         };
       }
