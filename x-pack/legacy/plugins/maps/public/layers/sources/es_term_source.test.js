@@ -69,80 +69,9 @@ describe('getMetricFields', () => {
   });
 });
 
-describe('_makeAggConfigs', () => {
-  describe('no metrics', () => {
-    let aggConfigs;
-    beforeAll(() => {
-      const source = new ESTermSource({
-        indexPatternTitle: indexPatternTitle,
-        term: termFieldName,
-      });
-      aggConfigs = source._makeAggConfigs();
-    });
-
-    it('should make default "count" metric agg config', () => {
-      expect(aggConfigs.length).toBe(2);
-      expect(aggConfigs[0]).toEqual({
-        id: '__kbnjoin__count_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'count',
-        schema: 'metric',
-        params: {},
-      });
-    });
-
-    it('should make "terms" buckets agg config', () => {
-      expect(aggConfigs.length).toBe(2);
-      expect(aggConfigs[1]).toEqual({
-        id: 'join',
-        enabled: true,
-        type: 'terms',
-        schema: 'segment',
-        params: {
-          field: termFieldName,
-          size: 10000,
-        },
-      });
-    });
-  });
-
-  describe('metrics', () => {
-    let aggConfigs;
-    beforeAll(() => {
-      const source = new ESTermSource({
-        indexPatternTitle: indexPatternTitle,
-        term: 'myTermField',
-        metrics: metricExamples,
-      });
-      aggConfigs = source._makeAggConfigs();
-    });
-
-    it('should ignore invalid metrics configs', () => {
-      expect(aggConfigs.length).toBe(3);
-    });
-
-    it('should make agg config for each valid metric', () => {
-      expect(aggConfigs[0]).toEqual({
-        id: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'sum',
-        schema: 'metric',
-        params: {
-          field: sumFieldName,
-        },
-      });
-      expect(aggConfigs[1]).toEqual({
-        id: '__kbnjoin__count_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'count',
-        schema: 'metric',
-        params: {},
-      });
-    });
-  });
-});
-
 describe('extractPropertiesMap', () => {
+  const minPropName =
+    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
   const responseWithNumberTypes = {
     aggregations: {
       join: {
@@ -150,14 +79,14 @@ describe('extractPropertiesMap', () => {
           {
             key: 109,
             doc_count: 1130,
-            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+            [minPropName]: {
               value: 36,
             },
           },
           {
             key: 62,
             doc_count: 448,
-            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+            [minPropName]: {
               value: 0,
             },
           },
@@ -166,11 +95,10 @@ describe('extractPropertiesMap', () => {
     },
   };
   const countPropName = '__kbnjoin__count_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
-  const minPropName =
-    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
+
   let propertiesMap;
   beforeAll(() => {
-    propertiesMap = extractPropertiesMap(responseWithNumberTypes, [minPropName], countPropName);
+    propertiesMap = extractPropertiesMap(responseWithNumberTypes, countPropName);
   });
 
   it('should create key for each join term', () => {

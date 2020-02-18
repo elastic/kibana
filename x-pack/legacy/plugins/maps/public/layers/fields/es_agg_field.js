@@ -63,20 +63,6 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-  makeMetricAggConfig() {
-    const metricAggConfig = {
-      id: this.getName(),
-      enabled: true,
-      type: this.getAggType(),
-      schema: 'metric',
-      params: {},
-    };
-    if (this.getAggType() !== AGG_TYPE.COUNT) {
-      metricAggConfig.params = { field: this.getESDocFieldName() };
-    }
-    return metricAggConfig;
-  }
-
   getValueAggDsl(indexPattern) {
     const field = getField(indexPattern, this.getESDocFieldName());
     const aggType = this.getAggType();
