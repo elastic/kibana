@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
 
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
-
-export interface Prerequisites {
-  getSavedObjectsClient: {
-    assign: string;
-    method: (req: Hapi.Request) => SavedObjectsClientContract;
-  };
-}
-
-export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
+export const registerDeleteRoute = (router: IRouter) => {
+  router.delete(
+    {
+      path: '/{type}/{id}',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { type, id } = req.params;
+      const result = await context.core.savedObjects.client.delete(type, id);
+      return res.ok({ body: result });
+    })
+  );
+};

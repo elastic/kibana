@@ -17,4 +17,27 @@
  * under the License.
  */
 
-export { createSavedObjectsStreamFromNdJson } from './create_saved_objects_stream_from_ndjson';
+import { Readable } from 'stream';
+import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
+import {
+  createSplitStream,
+  createMapStream,
+  createFilterStream,
+} from '../../../../legacy/utils/streams';
+
+export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
+  return ndJsonStream
+    .pipe(createSplitStream('\n'))
+    .pipe(
+      createMapStream((str: string) => {
+        if (str && str.trim() !== '') {
+          return JSON.parse(str);
+        }
+      })
+    )
+    .pipe(
+      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
+        obj => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
+      )
+    );
+}
