@@ -17,7 +17,7 @@ export const KIBANA_MONITORING_LOGGING_TAG = 'kibana-monitoring';
  * The Monitoring API version is the expected API format that we export and expect to import.
  * @type {string}
  */
-export const MONITORING_SYSTEM_API_VERSION = '6';
+export const MONITORING_SYSTEM_API_VERSION = '7';
 /**
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}

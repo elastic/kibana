@@ -20,7 +20,7 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import * as utils from '../../../../../lib/utils/utils';
+import { expandLiteralStrings } from '../../../../../../../es_ui_shared/console_lang/lib';
 import {
   useEditorReadContext,
   useRequestReadContext,
@@ -70,7 +70,7 @@ function EditorOutputUI() {
       editor.update(
         data
           .map(d => d.response.value as string)
-          .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
+          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : a => a)
           .join('\n')
       );
     } else if (error) {

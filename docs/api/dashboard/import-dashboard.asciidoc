@@ -16,7 +16,7 @@ experimental[] Import dashboards and corresponding saved objects.
 
 `force`::
   (Optional, boolean) Overwrite any existing objects on ID conflict.
-  
+
 `exclude`::
   (Optional, array) Saved object types that you want to exclude from the import.
 
@@ -28,14 +28,14 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 [[dashboard-api-import-response-body]]
 ==== Response body
 
-`objects`:: 
-  (array) A top level property that includes the saved objects. 
+`objects`::
+  (array) A top level property that includes the saved objects.
 
 [[dashboard-api-import-codes]]
 ==== Response code
 
 `200`::
-  Indicates a successful call, even if there are errors importing individual saved objects. If there ar errors, the error information is returned in the response body on an object-by-object basis.
+  Indicates a successful call, even if there are errors importing individual saved objects. If there are errors, the error information is returned in the response body on an object-by-object basis.
 
 [[dashboard-api-import-example]]
 ==== Example

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../../../plugins/alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { ReadRuleParams, isAlertType } from './types';

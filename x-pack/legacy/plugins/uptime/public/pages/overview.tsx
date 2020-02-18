@@ -15,7 +15,7 @@ import {
 } from '../components/functional';
 import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { useTrackPageview } from '../../../infra/public';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
