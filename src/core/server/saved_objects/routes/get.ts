@@ -16,23 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Readable } from 'stream';
-import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
-import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
-export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
-  return ndJsonStream
-    .pipe(createSplitStream('\n'))
-    .pipe(
-      createMapStream((str: string) => {
-        if (str && str.trim() !== '') {
-          return JSON.parse(str);
-        }
-      })
-    )
-    .pipe(
-      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
-        obj => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
-      )
-    );
-}
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
+
+export const registerGetRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: '/{type}/{id}',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { type, id } = req.params;
+      const savedObject = await context.core.savedObjects.client.get(type, id);
+      return res.ok({ body: savedObject });
+    })
+  );
+};

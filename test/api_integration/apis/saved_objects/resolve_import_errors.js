@@ -85,8 +85,7 @@ export default function({ getService }) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: 'child "file" fails because ["file" is required]',
-              validation: { source: 'payload', keys: ['file'] },
+              message: '[request body.file]: expected value of type [Stream] but got [undefined]',
             });
           });
       });

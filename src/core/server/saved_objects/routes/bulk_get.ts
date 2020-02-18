@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
 
-export const createLogLegacyImportRoute = () => ({
-  path: '/api/saved_objects/_log_legacy_import',
-  method: 'POST',
-  options: {
-    handler(request: Hapi.Request) {
-      request.server.log(
-        ['warning'],
-        'Importing saved objects from a .json file has been deprecated'
-      );
-      return { success: true };
+export const registerBulkGetRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: '/_bulk_get',
+      validate: {
+        body: schema.arrayOf(
+          schema.object({
+            type: schema.string(),
+            id: schema.string(),
+            fields: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
+      },
     },
-  },
-});
+    router.handleLegacyErrors(async (context, req, res) => {
+      const result = await context.core.savedObjects.client.bulkGet(req.body);
+      return res.ok({ body: result });
+    })
+  );
+};
