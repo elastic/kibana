@@ -55,7 +55,6 @@ export default async function({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
         pageNavigation: 'individual',
       },
     },
