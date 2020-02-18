@@ -13,8 +13,6 @@ import { npStart } from 'ui/new_platform';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/plugins/data/public';
-//export { KBN_FIELD_TYPES } from '../../../../../src/plugins/data/common';
-export const KBN_FIELD_TYPES = {};
 export const indexPatternService = npStart.plugins.data.indexPatterns;
 export const autocompleteService = npStart.plugins.data.autocomplete;
 
