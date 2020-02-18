@@ -7,7 +7,6 @@
 import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
 
 import {
-  TIMELINE_TOGGLE_BUTTON,
   SEARCH_OR_FILTER_CONTAINER,
   TIMELINE_FIELDS_BUTTON,
   SERVER_SIDE_EVENT_COUNT,
@@ -18,10 +17,6 @@ import {
 } from '../../screens/timeline/main';
 
 export const hostExistsQuery = 'host.name: *';
-
-export const openTimeline = () => {
-  cy.get(TIMELINE_TOGGLE_BUTTON, { timeout: DEFAULT_TIMEOUT }).click();
-};
 
 export const populateTimeline = () => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${hostExistsQuery} {enter}`);

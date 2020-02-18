@@ -56,15 +56,12 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
   public setup(core: CoreSetup<{ uiActions: UiActionsStart }>, deps: SetupDeps) {
     deps.uiActions.registerTrigger({
       id: COUNTRY_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerTrigger({
       id: PHONE_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerTrigger({
       id: USER_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerAction(lookUpWeatherAction);
     deps.uiActions.registerAction(viewInMapsAction);
