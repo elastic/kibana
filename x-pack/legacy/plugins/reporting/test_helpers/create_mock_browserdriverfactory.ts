@@ -62,10 +62,10 @@ mockBrowserEvaluate.mockImplementation(() => {
     return Promise.resolve(1);
   }
   if (mockCall === contexts.CONTEXT_INJECTCSS) {
-    return Promise.resolve('injected css');
+    return Promise.resolve();
   }
   if (mockCall === contexts.CONTEXT_WAITFORRENDER) {
-    return Promise.resolve('waited render');
+    return Promise.resolve();
   }
   if (mockCall === contexts.CONTEXT_GETTIMERANGE) {
     return Promise.resolve('Default GetTimeRange Result');
