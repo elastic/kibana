@@ -177,3 +177,9 @@
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+
+# Endpoint
+/x-pack/plugins/endpoint/ @elastic/endpoint-data-visibility-team @elastic/endpoint-management @elastic/endpoint-response
+/x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-data-visibility-team @elastic/endpoint-management @elastic/endpoint-response
+/x-pack/test/functional/apps/endpoint/ @elastic/endpoint-data-visibility-team @elastic/endpoint-management @elastic/endpoint-response
+/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-data-visibility-team @elastic/endpoint-management @elastic/endpoint-response
