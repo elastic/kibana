@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
-import areEqual from 'fast-deep-equal/react';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../../store/hosts/model';
@@ -35,63 +34,62 @@ const getHostDetailsTabPath = (pagePath: string) =>
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const HostsContainer = React.memo<Props>(
-  ({ url }) => (
-    <GlobalTime>
-      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-        <Switch>
-          <Route
-            strict
-            exact
-            path={getHostsTabPath(hostsPagePath)}
-            render={() => (
-              <Hosts
-                hostsPagePath={hostsPagePath}
-                from={from}
-                to={to}
-                setQuery={setQuery}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-              />
-            )}
-          />
-          <Route
-            strict
-            path={getHostDetailsTabPath(hostsPagePath)}
-            render={props => (
-              <HostDetails
-                hostDetailsPagePath={hostDetailsPagePath}
-                detailName={props.match.params.detailName}
-                from={from}
-                to={to}
-                setQuery={setQuery}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-              />
-            )}
-          />
-          <Route
-            path={hostDetailsPagePath}
-            render={({
-              match: {
-                params: { detailName },
-              },
-              location: { search = '' },
-            }) => (
-              <Redirect to={`${url}/${detailName}/${HostsTableType.authentications}${search}`} />
-            )}
-          />
-          <Route
-            path={`${hostsPagePath}/`}
-            render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
-            )}
-          />
-        </Switch>
-      )}
-    </GlobalTime>
-  ),
-  areEqual
-);
+export const HostsContainer = React.memo<Props>(({ url }) => (
+  <GlobalTime>
+    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+      <Switch>
+        <Route
+          strict
+          exact
+          path={getHostsTabPath(hostsPagePath)}
+          render={() => (
+            <Hosts
+              hostsPagePath={hostsPagePath}
+              from={from}
+              to={to}
+              setQuery={setQuery}
+              isInitializing={isInitializing}
+              deleteQuery={deleteQuery}
+            />
+          )}
+        />
+        <Route
+          strict
+          path={getHostDetailsTabPath(hostsPagePath)}
+          render={({
+            match: {
+              params: { detailName },
+            },
+          }) => (
+            <HostDetails
+              hostDetailsPagePath={hostDetailsPagePath}
+              detailName={detailName}
+              from={from}
+              to={to}
+              setQuery={setQuery}
+              isInitializing={isInitializing}
+              deleteQuery={deleteQuery}
+            />
+          )}
+        />
+        <Route
+          path={hostDetailsPagePath}
+          render={({
+            match: {
+              params: { detailName },
+            },
+            location: { search = '' },
+          }) => <Redirect to={`${url}/${detailName}/${HostsTableType.authentications}${search}`} />}
+        />
+        <Route
+          path={`${hostsPagePath}/`}
+          render={({ location: { search = '' } }) => (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
+          )}
+        />
+      </Switch>
+    )}
+  </GlobalTime>
+));
 
 HostsContainer.displayName = 'HostsContainer';

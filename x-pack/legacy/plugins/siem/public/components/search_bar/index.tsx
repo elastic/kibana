@@ -6,17 +6,16 @@
 
 import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { FilterManager, IIndexPattern, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import areEqual from 'react-fast-compare';
 import fastDeepEqual from 'fast-deep-equal/react';
 
 import { OnTimeChangeProps } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
@@ -35,34 +34,7 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
-import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
-
-export const siemFilterManager = npStart.plugins.data.query.filterManager;
-export const savedQueryService = npStart.plugins.data.query.savedQueries;
-const { SearchBar } = npStart.plugins.data.ui;
-
-interface SiemSearchBarRedux {
-  end: number;
-  fromStr: string;
-  isLoading: boolean;
-  queries: inputsModel.GlobalGraphqlQuery[];
-  filterQuery: Query;
-  savedQuery?: SavedQuery;
-  start: number;
-  toStr: string;
-}
-
-interface SiemSearchBarDispatch {
-  updateSearch: DispatchUpdateSearch;
-  setSavedQuery: ({
-    id,
-    savedQuery,
-  }: {
-    id: InputsModelId;
-    savedQuery: SavedQuery | undefined;
-  }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) => void;
-}
+import { useKibana } from '../../lib/kibana';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
@@ -77,7 +49,7 @@ const SearchBarContainer = styled.div`
   }
 `;
 
-const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSearchBarDispatch>(
+const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     end,
     filterQuery,
@@ -95,7 +67,12 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     updateSearch,
     dataTestSubj,
   }) => {
-    const { timefilter } = npStart.plugins.data.query.timefilter;
+    const { data } = useKibana().services;
+    const {
+      timefilter: { timefilter },
+      filterManager,
+    } = data.query;
+
     if (fromStr != null && toStr != null) {
       timefilter.setTime({ from: fromStr, to: toStr });
     } else if (start != null && end != null) {
@@ -116,6 +93,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           isInvalid: false,
           isQuickSelection,
           updateTime: false,
+          filterManager,
         };
         let isStateUpdated = false;
 
@@ -163,12 +141,13 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
             isInvalid: false,
             isQuickSelection: true,
             updateTime: true,
+            filterManager,
           });
         } else {
           queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [id, queries]
+      [id, queries, filterManager]
     );
 
     const onSaved = useCallback(
@@ -193,6 +172,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           isInvalid: false,
           isQuickSelection,
           updateTime: false,
+          filterManager,
         };
 
         if (savedQueryUpdated.attributes.timefilter) {
@@ -229,21 +209,22 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           },
           resetSavedQuery: true,
           savedQuery: undefined,
+          filterManager,
         });
       }
-    }, [id, end, fromStr, start, toStr, savedQuery]);
+    }, [id, end, filterManager, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
 
       subscriptions.add(
-        siemFilterManager.getUpdates$().subscribe({
+        filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
               setSearchBarFilter({
                 id,
-                filters: siemFilterManager.getFilters(),
+                filters: filterManager.getFilters(),
               });
             }
           },
@@ -258,7 +239,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
-        <SearchBar
+        <data.ui.SearchBar
           appName="siem"
           isLoading={isLoading}
           indexPatterns={indexPatterns}
@@ -317,21 +298,14 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
+  filterManager: FilterManager;
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
   timelineId?: string;
   updateTime: boolean;
 }
-
-type DispatchUpdateSearch = ({
-  end,
-  id,
-  isQuickSelection,
-  start,
-  timelineId,
-}: UpdateReduxSearchBar) => void;
 
 export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   end,
@@ -343,6 +317,7 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   savedQuery,
   start,
   timelineId,
+  filterManager,
   updateTime = false,
 }: UpdateReduxSearchBar): void => {
   if (updateTime) {
@@ -387,7 +362,7 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
     );
   }
   if (filters != null) {
-    siemFilterManager.setFilters(filters);
+    filterManager.setFilters(filters);
   }
   if (savedQuery != null || resetSavedQuery) {
     dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
@@ -401,8 +376,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) =>
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const SiemSearchBar = connector(SearchBarComponent);

@@ -21,10 +21,9 @@ import { PluginInitializerContext } from 'kibana/public';
 import { VisualizePlugin } from './plugin';
 
 export * from './np_ready/visualize_constants';
-export { showNewVisModal } from './np_ready/wizard';
 export { VisualizeConstants, createVisualizeEditUrl } from './np_ready/visualize_constants';
 
 // Core will be looking for this when loading our plugin in the new platform
 export const plugin = (context: PluginInitializerContext) => {
-  return new VisualizePlugin();
+  return new VisualizePlugin(context);
 };

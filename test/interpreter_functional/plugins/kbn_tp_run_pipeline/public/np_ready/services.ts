@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../../../src/plugins/kibana_utils/public/core';
+import { createGetterSetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { ExpressionsStart } from './types';
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');

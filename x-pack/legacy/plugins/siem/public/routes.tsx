@@ -12,14 +12,6 @@ import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
 
-/* Uncomment only during debugging */
-const whyDidYouRender = require('@welldone-software/why-did-you-render'); // eslint-disable-line
-whyDidYouRender(React, {
-  exclude: [/^ColumnHeadersComponent/, /^Connect/],
-  trackAllPureComponents: true,
-  trackHooks: false,
-});
-
 interface RouterProps {
   history: History;
 }

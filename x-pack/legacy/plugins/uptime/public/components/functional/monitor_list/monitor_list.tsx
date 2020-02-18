@@ -28,19 +28,17 @@ import {
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
-import { MonitorListDrawer } from './monitor_list_drawer';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from './monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
+import { MonitorListDrawer } from '../../connected';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
 }
 
 interface MonitorListProps {
-  absoluteStartDate: number;
-  absoluteEndDate: number;
   dangerColor: string;
   hasActiveFilters: boolean;
   successColor: string;
@@ -56,16 +54,7 @@ const TruncatedEuiLink = styled(EuiLink)`
 `;
 
 export const MonitorListComponent = (props: Props) => {
-  const {
-    absoluteStartDate,
-    absoluteEndDate,
-    dangerColor,
-    data,
-    errors,
-    hasActiveFilters,
-    linkParameters,
-    loading,
-  } = props;
+  const { dangerColor, data, errors, hasActiveFilters, linkParameters, loading } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = data?.monitorStates?.summaries ?? [];
@@ -132,12 +121,7 @@ export const MonitorListComponent = (props: Props) => {
         show: false,
       },
       render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-        <MonitorBarSeries
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          dangerColor={dangerColor}
-          histogramSeries={histogramSeries}
-        />
+        <MonitorBarSeries dangerColor={dangerColor} histogramSeries={histogramSeries} />
       ),
     },
     {

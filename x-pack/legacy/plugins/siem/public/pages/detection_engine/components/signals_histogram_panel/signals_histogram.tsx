@@ -15,7 +15,6 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiProgress } from '@elastic/eui';
-import areEqual from 'fast-deep-equal/react';
 
 import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
@@ -32,11 +31,6 @@ interface HistogramSignalsProps {
   data: HistogramData[];
   updateDateRange: (min: number, max: number) => void;
 }
-
-const MemoChart = React.memo(Chart, areEqual);
-const MemoSettings = React.memo(Settings, areEqual);
-const MemoAxis = React.memo(Axis, areEqual);
-const MemoHistogramBarSeries = React.memo(HistogramBarSeries, areEqual);
 
 export const SignalsHistogram = React.memo<HistogramSignalsProps>(
   ({
@@ -61,23 +55,23 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
           />
         )}
 
-        <MemoChart size={['100%', chartHeight]}>
-          <MemoSettings
+        <Chart size={['100%', chartHeight]}>
+          <Settings
             legendPosition={legendPosition}
             onBrushEnd={updateDateRange}
             showLegend
             theme={theme}
           />
 
-          <MemoAxis
+          <Axis
             id={getAxisId('signalsHistogramAxisX')}
             position="bottom"
             tickFormat={histogramDateTimeFormatter([from, to])}
           />
 
-          <MemoAxis id={getAxisId('signalsHistogramAxisY')} position="left" />
+          <Axis id={getAxisId('signalsHistogramAxisY')} position="left" />
 
-          <MemoHistogramBarSeries
+          <HistogramBarSeries
             id={getSpecId('signalsHistogram')}
             xScaleType="time"
             yScaleType="linear"
@@ -86,10 +80,10 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
             splitSeriesAccessors={['g']}
             data={data}
           />
-        </MemoChart>
+        </Chart>
       </>
     );
-  },
-  areEqual
+  }
 );
+
 SignalsHistogram.displayName = 'SignalsHistogram';

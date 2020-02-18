@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import areEqual from 'fast-deep-equal/react';
+import useResizeObserver from 'use-resize-observer';
 
-import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { HeaderGlobal } from '../../components/header_global';
@@ -27,6 +26,7 @@ import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Case } from '../case';
 import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
@@ -43,6 +43,11 @@ const WrappedByAutoSizer = styled.div`
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
+const Main = styled.main`
+  height: 100%;
+`;
+Main.displayName = 'Main';
+
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
@@ -56,7 +61,8 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-const HomePageComponent = ({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => {
+export const HomePageComponent: React.FC = () => {
+  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
   const flyoutHeight = calculateFlyoutHeight({
     globalHeaderSize: globalHeaderHeightPx,
     windowHeight,
@@ -66,7 +72,7 @@ const HomePageComponent = ({ measureRef, windowMeasurement: { height: windowHeig
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
-      <main data-test-subj="pageContainer">
+      <Main data-test-subj="pageContainer">
         <WithSource sourceId="default">
           {({ browserFields, indexPattern, indicesExist }) => (
             <DragDropContextWrapper browserFields={browserFields}>
@@ -98,24 +104,37 @@ const HomePageComponent = ({ measureRef, windowMeasurement: { height: windowHeig
                   path={`/:pageName(${SiemPageName.hosts})`}
                   render={({ match }) => <HostsContainer url={match.url} />}
                 />
-                <Route path={`/:pageName(${SiemPageName.network})`}>
-                  <NetworkContainer />
-                </Route>
-                <Route path={`/:pageName(${SiemPageName.detections})`}>
-                  <DetectionEngineContainer />
-                </Route>
+                <Route
+                  path={`/:pageName(${SiemPageName.network})`}
+                  render={({ location, match }) => (
+                    <NetworkContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route
+                  path={`/:pageName(${SiemPageName.detections})`}
+                  render={({ location, match }) => (
+                    <DetectionEngineContainer location={location} url={match.url} />
+                  )}
+                />
                 <Route path={`/:pageName(${SiemPageName.timelines})`}>
                   <Timelines />
                 </Route>
-                {/* <Route path="/link-to">
-                      <LinkToPage />
-                    </Route>
-                    <Route path="/ml-hosts">
-                      <MlHostConditionalContainer />
-                    </Route>
-                    <Route path="/ml-network">
-                      <MlNetworkConditionalContainer />
-                    </Route> */}
+                <Route path="/link-to" render={props => <LinkToPage {...props} />} />
+                <Route
+                  path="/ml-hosts"
+                  render={({ location, match }) => (
+                    <MlHostConditionalContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route
+                  path="/ml-network"
+                  render={({ location, match }) => (
+                    <MlNetworkConditionalContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route path={`/:pageName(${SiemPageName.case})`}>
+                  <Case />
+                </Route>
                 <Route>
                   <NotFoundPage />
                 </Route>
@@ -123,7 +142,7 @@ const HomePageComponent = ({ measureRef, windowMeasurement: { height: windowHeig
             </DragDropContextWrapper>
           )}
         </WithSource>
-      </main>
+      </Main>
 
       <HelpMenu />
 
@@ -132,13 +151,4 @@ const HomePageComponent = ({ measureRef, windowMeasurement: { height: windowHeig
   );
 };
 
-export const HomePage = React.memo(
-  () => (
-    <AutoSizer detectAnyWindowResize={true} content>
-      {HomePageComponent}
-    </AutoSizer>
-  ),
-  areEqual
-);
-
-HomePage.displayName = 'HomePage';
+export const HomePage = React.memo(HomePageComponent);

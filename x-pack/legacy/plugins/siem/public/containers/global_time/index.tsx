@@ -5,22 +5,16 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 
 interface SetQuery {
   id: string;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch | inputsModel.RefetchKql;
-}
-
-interface GlobalQuery extends SetQuery {
-  inputId: InputsModelId;
 }
 
 export interface GlobalTimeArgs {
@@ -31,21 +25,11 @@ export interface GlobalTimeArgs {
   isInitializing: boolean;
 }
 
-interface GlobalTimeDispatch {
-  setGlobalQuery: ActionCreator<GlobalQuery>;
-  deleteAllQuery: ActionCreator<{ id: InputsModelId }>;
-  deleteOneQuery: ActionCreator<{ inputId: InputsModelId; id: string }>;
-}
-
-interface GlobalTimeReduxState {
-  from: number;
-  to: number;
-}
 interface OwnProps {
   children: (args: GlobalTimeArgs) => React.ReactNode;
 }
 
-type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
+type GlobalTimeProps = OwnProps & PropsFromRedux;
 
 export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
   children,
@@ -104,7 +88,8 @@ const mapDispatchToProps = {
   setGlobalQuery: inputsActions.setQuery,
 };
 
-export const GlobalTime = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(React.memo(GlobalTimeComponent));
+export const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const GlobalTime = connector(React.memo(GlobalTimeComponent));

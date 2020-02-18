@@ -8,10 +8,9 @@ import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import areEqual from 'fast-deep-equal/react';
+import useResizeObserver from 'use-resize-observer';
 
-import { useTimeZone } from '../../hooks';
-import { AutoSizer } from '../auto_sizer';
+import { useTimeZone } from '../../lib/kibana';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
   chartDefaultSettings,
@@ -35,11 +34,6 @@ const checkIfAnyValidSeriesExist = (
   Array.isArray(data) &&
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
-
-const MemoSettings = React.memo(Settings, areEqual);
-const MemoBarSeries = React.memo(BarSeries, areEqual);
-const MemoChart = React.memo(Chart, areEqual);
-const MemoAxis = React.memo(Axis, areEqual);
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
@@ -68,7 +62,7 @@ export const BarChartBaseComponent = ({
       data.map(series => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
-          <MemoBarSeries
+          <BarSeries
             id={barSeriesKey}
             key={barSeriesKey}
             name={series.key}
@@ -88,12 +82,12 @@ export const BarChartBaseComponent = ({
   );
 
   return chartConfigs.width && chartConfigs.height ? (
-    <MemoChart>
-      <MemoSettings {...settings} />
+    <Chart>
+      <Settings {...settings} />
 
       {dataSeries}
 
-      <MemoAxis
+      <Axis
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
@@ -101,7 +95,7 @@ export const BarChartBaseComponent = ({
         tickFormat={xTickFormatter}
       />
 
-      <MemoAxis
+      <Axis
         id={yAxisId}
         position={Position.Left}
         tickSize={tickSize}
@@ -113,50 +107,29 @@ export const BarChartBaseComponent = ({
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChartBase = React.memo(BarChartBaseComponent, areEqual);
+export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-export const BarChartComponent = ({
-  barChart,
-  configs,
-}: {
+interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}) => {
+}
+
+export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, configs }) => {
+  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
-  const chartPlaceholderHeight = getChartHeight(customHeight);
-  const chartPlaceholderWidth = getChartWidth(customWidth);
+  const chartHeight = getChartHeight(customHeight, height);
+  const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(barChart) ? (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => {
-        const chartHeight = getChartHeight(customHeight, height);
-        const chartWidth = getChartWidth(customWidth, width);
-        return (
-          <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
-            <BarChartBaseComponent
-              height={chartHeight}
-              width={chartWidth}
-              data={barChart}
-              configs={configs}
-            />
-          </WrappedByAutoSizer>
-        );
-      }}
-    </AutoSizer>
+    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+      <BarChartBase height={chartHeight} width={chartHeight} data={barChart} configs={configs} />
+    </WrappedByAutoSizer>
   ) : (
-    <ChartPlaceHolder
-      height={chartPlaceholderHeight}
-      width={chartPlaceholderWidth}
-      data={barChart}
-    />
+    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
   );
 };
 
-BarChartComponent.displayName = 'BarChartComponent';
-
-export const BarChart = React.memo(BarChartComponent, areEqual);
-
-BarChart.displayName = 'BarChart';
+export const BarChart = React.memo(BarChartComponent);

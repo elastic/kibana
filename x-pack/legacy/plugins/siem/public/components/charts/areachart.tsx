@@ -16,11 +16,10 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
-import areEqual from 'fast-deep-equal/react';
+import useResizeObserver from 'use-resize-observer';
 
-import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
-import { useTimeZone } from '../../hooks';
+import { useTimeZone } from '../../lib/kibana';
 import {
   chartDefaultSettings,
   ChartSeriesConfigs,
@@ -62,9 +61,6 @@ const checkIfAnyValidSeriesExist = (
 ): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
-const MemoSettings = React.memo(Settings, areEqual);
-const MemoAreaSeries = React.memo(AreaSeries, areEqual);
-
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = ({
   data,
@@ -89,11 +85,11 @@ export const AreaChartBaseComponent = ({
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <MemoSettings {...settings} />
+        <Settings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
-            <MemoAreaSeries
+            <AreaSeries
               id={seriesKey}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
@@ -125,44 +121,33 @@ export const AreaChartBaseComponent = ({
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChartBase = React.memo(AreaChartBaseComponent, areEqual);
+export const AreaChartBase = React.memo(AreaChartBaseComponent);
 
 AreaChartBase.displayName = 'AreaChartBase';
 
-export const AreaChartComponent = ({
-  areaChart,
-  configs,
-}: {
+interface AreaChartComponentProps {
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}) => {
+}
+
+export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChart, configs }) => {
+  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+  const chartHeight = getChartHeight(customHeight, height);
+  const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(areaChart) ? (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <AreaChartBase
-            data={areaChart}
-            height={getChartHeight(customHeight, height)}
-            width={getChartWidth(customWidth, width)}
-            configs={configs}
-          />
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
+    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+      <AreaChartBase data={areaChart} height={chartHeight} width={chartWidth} configs={configs} />
+    </WrappedByAutoSizer>
   ) : (
-    <ChartPlaceHolder
-      height={getChartHeight(customHeight)}
-      width={getChartWidth(customWidth)}
-      data={areaChart}
-    />
+    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
   );
 };
 
 AreaChartComponent.displayName = 'AreaChartComponent';
 
-export const AreaChart = React.memo(AreaChartComponent, areEqual);
+export const AreaChart = React.memo(AreaChartComponent);
 
 AreaChart.displayName = 'AreaChart';

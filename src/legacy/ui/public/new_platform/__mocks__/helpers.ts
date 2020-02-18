@@ -27,7 +27,9 @@ import { inspectorPluginMock } from '../../../../../plugins/inspector/public/moc
 import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
 import { managementPluginMock } from '../../../../../plugins/management/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../plugins/usage_collection/public/mocks';
+import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
 import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
+import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
@@ -40,6 +42,8 @@ export const pluginsMock = {
     expressions: expressionsPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    advancedSettings: advancedSettingsMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
@@ -50,6 +54,8 @@ export const pluginsMock = {
     expressions: expressionsPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
     management: managementPluginMock.createStartContract(),
+    advancedSettings: advancedSettingsMock.createStartContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
   }),
 };
 
