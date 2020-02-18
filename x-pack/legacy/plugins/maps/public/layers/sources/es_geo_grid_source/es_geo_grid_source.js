@@ -10,8 +10,6 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
-import { AggConfigs, Schemas } from 'ui/agg_types';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -36,18 +34,6 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 
 const MAX_GEOTILE_LEVEL = 29;
-
-const aggSchemas = new Schemas([
-  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
-  {
-    group: 'buckets',
-    name: 'segment',
-    title: 'Geo Grid',
-    aggFilter: 'geotile_grid',
-    min: 1,
-    max: 1,
-  },
-]);
 
 export class ESGeoGridSource extends AbstractESAggSource {
   static type = ES_GEO_GRID;
@@ -176,14 +162,24 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this.getIndexPattern();
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    const aggConfigs = new AggConfigs(
-      indexPattern,
-      this._makeAggConfigs(searchFilters.geogridPrecision),
-      aggSchemas.all
-    );
-    searchSource.setField('aggs', aggConfigs.toDsl());
+    searchSource.setField('aggs', {
+      gridSplit: {
+        geotile_grid: {
+          field: this._descriptor.geoField,
+          precision: searchFilters.geogridPrecision,
+        },
+        aggs: {
+          gridCentroid: {
+            geo_centroid: {
+              field: this._descriptor.geoField,
+            },
+          },
+          ...this.getValueAggsDsl(),
+        },
+      },
+    });
+
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
       requestName: layerName,
@@ -194,12 +190,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       }),
     });
 
-    const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
-    const { featureCollection } = convertToGeoJson({
-      table: tabifiedResp,
-      renderAs: this._descriptor.requestType,
-    });
-
+    const { featureCollection } = convertToGeoJson(esResponse, this._descriptor.requestType);
     return {
       data: featureCollection,
       meta: {
@@ -210,24 +201,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   isFilterByMapBounds() {
     return true;
-  }
-
-  _makeAggConfigs(precision) {
-    const metricAggConfigs = this.createMetricAggConfigs();
-    return [
-      ...metricAggConfigs,
-      {
-        id: 'grid',
-        enabled: true,
-        type: 'geotile_grid',
-        schema: 'segment',
-        params: {
-          field: this._descriptor.geoField,
-          useGeocentroid: true,
-          precision: precision,
-        },
-      },
-    ];
   }
 
   _createHeatmapLayerDescriptor(options) {

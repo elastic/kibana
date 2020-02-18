@@ -5,7 +5,7 @@
  */
 
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
@@ -34,12 +34,11 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return this.getAggType() === COUNT_AGG_TYPE ? true : !!this._esDocField;
+    return this.getAggType() === AGG_TYPE.COUNT ? true : !!this._esDocField;
   }
 
   async getDataType() {
-    // aggregations only provide numerical data
-    return 'number';
+    return this.getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
   getESDocFieldName() {
@@ -47,9 +46,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getRequestDescription() {
-    return this.getAggType() !== COUNT_AGG_TYPE
+    return this.getAggType() !== AGG_TYPE.COUNT
       ? `${this.getAggType()} ${this.getESDocFieldName()}`
-      : COUNT_AGG_TYPE;
+      : AGG_TYPE.COUNT;
   }
 
   async createTooltipProperty(value) {
@@ -71,10 +70,23 @@ export class ESAggMetricField extends AbstractField {
       schema: 'metric',
       params: {},
     };
-    if (this.getAggType() !== COUNT_AGG_TYPE) {
+    if (this.getAggType() !== AGG_TYPE.COUNT) {
       metricAggConfig.params = { field: this.getESDocFieldName() };
     }
     return metricAggConfig;
+  }
+
+  getValueAggDsl() {
+    const aggType = this.getAggType();
+    const aggBody = {
+      field: this.getESDocFieldName(),
+    };
+    if (aggType === AGG_TYPE.TERMS) {
+      aggBody.size = 1;
+    }
+    return {
+      [aggType]: aggBody,
+    };
   }
 
   supportsFieldMeta() {

@@ -18,7 +18,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, AGG_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
@@ -270,7 +270,7 @@ export class AbstractESSource extends AbstractVectorSource {
     // Do not use field formatters for counting metrics
     if (
       metricField &&
-      (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)
+      (metricField.type === AGG_TYPE.COUNT || metricField.type === AGG_TYPE.UNIQUE_COUNT)
     ) {
       return null;
     }

@@ -8,8 +8,7 @@ import { AbstractESSource } from './es_source';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
 import {
-  METRIC_TYPE,
-  COUNT_AGG_TYPE,
+  AGG_TYPE,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
@@ -25,14 +24,14 @@ export class AbstractESAggSource extends AbstractESSource {
     min: 1,
     max: Infinity,
     aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT,
+      AGG_TYPE.AVG,
+      AGG_TYPE.COUNT,
+      AGG_TYPE.MAX,
+      AGG_TYPE.MIN,
+      AGG_TYPE.SUM,
+      AGG_TYPE.UNIQUE_COUNT,
     ],
-    defaults: [{ schema: 'metric', type: METRIC_TYPE.COUNT }],
+    defaults: [{ schema: 'metric', type: AGG_TYPE.COUNT }],
   };
 
   constructor(descriptor, inspectorAdapters) {
@@ -81,7 +80,7 @@ export class AbstractESAggSource extends AbstractESSource {
     if (metrics.length === 0) {
       metrics.push(
         new ESAggMetricField({
-          aggType: COUNT_AGG_TYPE,
+          aggType: AGG_TYPE.COUNT,
           source: this,
           origin: this.getOriginForField(),
         })
@@ -91,15 +90,27 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   formatMetricKey(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
+    return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }
 
   formatMetricLabel(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
+    return aggType !== AGG_TYPE.COUNT ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
   }
 
   createMetricAggConfigs() {
     return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+  }
+
+  getValueAggsDsl() {
+    const valueAggsDsl = {};
+    this.getMetricFields()
+      .filter(esAggMetric => {
+        return esAggMetric.getAggType() !== AGG_TYPE.COUNT;
+      })
+      .forEach(esAggMetric => {
+        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl();
+      });
+    return valueAggsDsl;
   }
 
   async getNumberFields() {

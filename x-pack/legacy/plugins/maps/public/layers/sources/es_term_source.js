@@ -12,7 +12,7 @@ import {
   COUNT_PROP_LABEL,
   DEFAULT_MAX_BUCKETS_LIMIT,
   FIELD_ORIGIN,
-  METRIC_TYPE,
+  AGG_TYPE,
 } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
@@ -90,14 +90,14 @@ export class ESTermSource extends AbstractESAggSource {
 
   formatMetricKey(aggType, fieldName) {
     const metricKey =
-      aggType !== METRIC_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
+      aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
     return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
       this._descriptor.indexPatternTitle
     }.${this._termField.getName()}`;
   }
 
   formatMetricLabel(type, fieldName) {
-    const metricLabel = type !== METRIC_TYPE.COUNT ? `${type} ${fieldName}` : COUNT_PROP_LABEL;
+    const metricLabel = type !== AGG_TYPE.COUNT ? `${type} ${fieldName}` : COUNT_PROP_LABEL;
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 
@@ -122,13 +122,13 @@ export class ESTermSource extends AbstractESAggSource {
 
     const metricPropertyNames = configStates
       .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== METRIC_TYPE.COUNT;
+        return configState.schema === 'metric' && configState.type !== AGG_TYPE.COUNT;
       })
       .map(configState => {
         return configState.id;
       });
     const countConfigState = configStates.find(configState => {
-      return configState.type === METRIC_TYPE.COUNT;
+      return configState.type === AGG_TYPE.COUNT;
     });
     const countPropertyName = _.get(countConfigState, 'id');
     return {
