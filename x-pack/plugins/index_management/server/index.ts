@@ -5,12 +5,12 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
+
 import { IndexMgmtServerPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
 
+/** @public */
 export { Dependencies } from './types';
-
-/* @public */
 export { IndexMgmtSetup } from './plugin';
 export { Index } from './types';

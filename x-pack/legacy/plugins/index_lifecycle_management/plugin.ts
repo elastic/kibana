@@ -48,7 +48,7 @@ export class Plugin {
       serverPlugins.indexManagement &&
       serverPlugins.indexManagement.indexDataEnricher
     ) {
-      serverPlugins.indexManagement.indexDataEnricher(indexLifecycleDataEnricher);
+      serverPlugins.indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
     }
   }
 }
