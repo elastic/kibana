@@ -11,3 +11,4 @@ export const CONTEXT_GETTIMERANGE = 'GetTimeRange';
 export const CONTEXT_ELEMENTATTRIBUTES = 'ElementPositionAndAttributes';
 export const CONTEXT_CHECKFORTOASTMESSAGE = 'CheckForToastMessage';
 export const CONTEXT_WAITFORELEMENTSTOBEINDOM = 'WaitForElementsToBeInDOM';
+export const CONTEXT_SKIPTELEMETRY = 'SkipTelemetry';

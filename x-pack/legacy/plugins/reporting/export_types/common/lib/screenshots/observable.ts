@@ -17,6 +17,7 @@ import { scanPage } from './scan_page';
 import { ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
 import { waitForRenderComplete } from './wait_for_render';
+import { skipTelemetry } from './skip_telemetry';
 
 export function screenshotsObservableFactory(
   server: ServerFacade,
@@ -42,6 +43,7 @@ export function screenshotsObservableFactory(
           mergeMap(({ driver, exit$ }) => {
             const screenshot$ = Rx.of(1).pipe(
               mergeMap(() => openUrl(driver, url, conditionalHeaders, logger)),
+              mergeMap(() => skipTelemetry(driver, logger)),
               mergeMap(() => scanPage(driver, layout, logger)),
               mergeMap(() => getNumberOfItems(driver, layout, logger)),
               mergeMap(async itemsCount => {
