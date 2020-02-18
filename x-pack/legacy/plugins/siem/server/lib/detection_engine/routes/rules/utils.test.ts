@@ -1257,9 +1257,8 @@ describe('utils', () => {
       const rule2 = getSimpleRule('rule-1');
       const ndJsonStream = new Readable({
         read() {
-          this.push(`${JSON.stringify(rule)}`);
-          this.push('\n');
-          this.push(`${JSON.stringify(rule2)}`);
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
           this.push(null);
         },
       });
@@ -1286,9 +1285,8 @@ describe('utils', () => {
       const rule2 = getSimpleRule('rule-1');
       const ndJsonStream = new Readable({
         read() {
-          this.push(`${JSON.stringify(rule)}`);
-          this.push('\n');
-          this.push(`${JSON.stringify(rule2)}`);
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
           this.push(null);
         },
       });
@@ -1303,8 +1301,9 @@ describe('utils', () => {
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules without a rule-id is passed in', async () => {
-      const multipartPayload =
-        '{"name":"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
+      const simpleRule = getSimpleRule();
+      delete simpleRule.rule_id;
+      const multipartPayload = `${JSON.stringify(simpleRule)}\n`;
       const ndJsonStream = new Readable({
         read() {
           this.push(multipartPayload);

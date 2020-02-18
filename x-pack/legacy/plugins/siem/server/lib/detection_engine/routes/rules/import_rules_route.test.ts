@@ -6,7 +6,12 @@
 
 import { omit } from 'lodash/fp';
 
-import { getSimpleRuleAsMultipartContent } from '../../../../../../../../test/detection_engine_api_integration/security_and_spaces/tests/utils';
+import {
+  getSimpleRuleAsMultipartContent,
+  TEST_BOUNDARY,
+  UNPARSABLE_LINE,
+  getSimpleRule,
+} from '../__mocks__/utils';
 import { ImportSuccessError } from '../utils';
 import {
   getImportRulesRequest,
@@ -19,6 +24,7 @@ import {
 } from '../__mocks__/request_responses';
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 
 describe('import_rules_route', () => {
   let server = createMockServer();
@@ -31,11 +37,32 @@ describe('import_rules_route', () => {
 
     server = createMockServer();
     config = createMockConfig();
+    config = () => ({
+      get: jest.fn(value => {
+        switch (value) {
+          case 'savedObjects.maxImportPayloadBytes': {
+            return 10000;
+          }
+          case 'savedObjects.maxImportExportSize': {
+            return 10000;
+          }
+          case 'xpack.siem.signalsIndex': {
+            return DEFAULT_SIGNALS_INDEX;
+          }
+          default: {
+            const dummyMock = jest.fn();
+            return dummyMock();
+          }
+        }
+      }),
+      has: jest.fn(),
+    });
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
 
     getClients.mockResolvedValue(clients);
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
+    clients.spacesClient.getSpaceId.mockReturnValue('default');
 
     importRulesRoute(server.route, config, getClients);
   });
@@ -84,7 +111,7 @@ describe('import_rules_route', () => {
           {
             error: {
               message:
-                'To create a rule, the index must exist first. Index undefined-undefined does not exist',
+                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
               status_code: 409,
             },
             rule_id: 'rule-1',
@@ -131,12 +158,12 @@ describe('import_rules_route', () => {
 
     test('returns reported conflict if error parsing rule', async () => {
       const multipartPayload =
-        '--frank_is_awesome\r\n' +
+        `--${TEST_BOUNDARY}\r\n` +
         `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
         'Content-Type: application/octet-stream\r\n' +
         '\r\n' +
-        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\r\n' +
-        '--frank_is_awesome--\r\n';
+        `${UNPARSABLE_LINE}\r\n` +
+        `--${TEST_BOUNDARY}--\r\n`;
 
       clients.alertsClient.find.mockResolvedValue(getFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
@@ -250,13 +277,13 @@ describe('import_rules_route', () => {
 
     test('returns 200 with reported conflict if error parsing rule', async () => {
       const multipartPayload =
-        '--frank_is_awesome\r\n' +
+        `--${TEST_BOUNDARY}\r\n` +
         `Content-Disposition: form-data; name="file"; filename="rules.ndjson"\r\n` +
         'Content-Type: application/octet-stream\r\n' +
         '\r\n' +
-        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\r\n' +
-        '{"name":"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-2","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\r\n' +
-        '--frank_is_awesome--\r\n';
+        `${UNPARSABLE_LINE}\r\n` +
+        `${JSON.stringify(getSimpleRule('rule-2'))}\r\n` +
+        `--${TEST_BOUNDARY}--\r\n`;
 
       clients.alertsClient.find.mockResolvedValue(getFindResult());
 

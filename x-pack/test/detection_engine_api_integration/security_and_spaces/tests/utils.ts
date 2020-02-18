@@ -198,32 +198,6 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
 };
 
 /**
- * Given an array of rule_id strings this will return a ndjson buffer which is useful
- * for testing uploads.
- * @param ruleIds Array of strings of rule_ids
- * @param isNdjson Boolean to determine file extension
- */
-export const getSimpleRuleAsMultipartContent = (ruleIds: string[], isNdjson = true): Buffer => {
-  const arrayOfRules = ruleIds.map(ruleId => {
-    const simpleRule = getSimpleRule(ruleId);
-    return JSON.stringify(simpleRule);
-  });
-  const stringOfRules = arrayOfRules.join('\r\n');
-
-  const resultingPayload =
-    '--frank_is_awesome\r\n' +
-    `Content-Disposition: form-data; name="file"; filename="rules.${
-      isNdjson ? 'ndjson' : 'json'
-    }\r\n` +
-    'Content-Type: application/octet-stream\r\n' +
-    '\r\n' +
-    `${stringOfRules}\r\n` +
-    '--frank_is_awesome--\r\n';
-
-  return Buffer.from(resultingPayload);
-};
-
-/**
  * Given a rule this will convert it to an ndjson buffer which is useful for
  * testing upload features.
  * @param rule The rule to convert to ndjson
