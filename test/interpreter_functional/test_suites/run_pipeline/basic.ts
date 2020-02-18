@@ -22,7 +22,7 @@ import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 // this file showcases how to use testing utilities defined in helpers.ts together with the kbn_tp_run_pipeline
-// test plugin to write autmated tests for interprete
+// test plugin to write automated tests for interpreter
 export default function({
   getService,
   updateBaselines,

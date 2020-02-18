@@ -30,14 +30,14 @@ import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
-import { SavedObjectsConfigType } from '../../saved_objects_config';
+import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectsConfigType;
+  savedObjectsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
@@ -51,7 +51,7 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
  */
 export class KibanaMigrator {
   private readonly callCluster: CallCluster;
-  private readonly savedObjectsConfig: SavedObjectsConfigType;
+  private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
