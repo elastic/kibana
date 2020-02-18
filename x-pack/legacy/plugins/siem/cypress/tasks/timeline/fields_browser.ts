@@ -29,10 +29,6 @@ export const filterFieldsBrowser = (fieldName: string) => {
       cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT })
         .type(fieldName)
         .should('not.have.class', 'euiFieldSearch-isLoading');
-
-      cy.get(FIELDS_BROWSER_FIELDS_COUNT, { timeout: DEFAULT_TIMEOUT })
-        .invoke('text')
-        .should('not.equal', initialFieldsCount);
     });
 };
 
