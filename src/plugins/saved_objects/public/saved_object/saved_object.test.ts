@@ -265,7 +265,7 @@ describe('Saved Object', () => {
         );
       });
 
-      it.skip('when index exists in searchSourceJSON', () => {
+      it('when index exists in searchSourceJSON', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
@@ -306,7 +306,7 @@ describe('Saved Object', () => {
         );
       });
 
-      it.skip('when index in searchSourceJSON is not found', () => {
+      it('when index in searchSourceJSON is not found', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
@@ -393,7 +393,7 @@ describe('Saved Object', () => {
   });
 
   describe('applyESResp', () => {
-    it('throws error if not found', () => {
+    it.skip('throws error if not found', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const response = { _source: {} };
         try {
@@ -405,7 +405,7 @@ describe('Saved Object', () => {
       });
     });
 
-    it('throws error invalid JSON is detected', async () => {
+    it.skip('throws error invalid JSON is detected', async () => {
       const savedObject = await createInitializedSavedObject({
         type: 'dashboard',
         searchSource: true,
@@ -718,7 +718,7 @@ describe('Saved Object', () => {
         });
       });
 
-      it('that is invalid invalid throws an error', () => {
+      it.skip('that is invalid invalid throws an error', () => {
         const config = { type: 'notypeexists' };
 
         const savedObject = new SavedObjectClass(config);
