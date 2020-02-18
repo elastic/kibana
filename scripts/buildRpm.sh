@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 LogRhythm, Inc
+# Copyright 2020 LogRhythm, Inc
 # Licensed under the LogRhythm Global End User License Agreement,
 # which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -21,5 +21,5 @@ sudo rm -rf ~/rpmbuild
 rpmdev-setuptree
 cp packaging/$PACKAGE.spec ~/rpmbuild/SPECS
 rm -f $PACKAGE-$VERSION.tar.gz
-tar czf ~/rpmbuild/SOURCES/$PACKAGE-$VERSION.tar.gz -C $PWD .
+tar cf ~/rpmbuild/SOURCES/$PACKAGE-$VERSION.tar -C $PWD .
 rpmbuild -v -bb --define="version ${VERSION}" --define="kibana_version ${GIT_BRANCH}" --target=x86_64 ~/rpmbuild/SPECS/$PACKAGE.spec

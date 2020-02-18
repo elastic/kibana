@@ -1,4 +1,13 @@
 /*
+ * THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL SOURCE
+ * This comment only applies to modifications applied after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
+ *
+ * Copyright 2020 LogRhythm, Inc
+ * Licensed under the LogRhythm Global End User License Agreement,
+ * which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -21,6 +30,10 @@ import Url from 'url';
 
 import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
+
+import 'jquery';
+import 'tether';
+import 'bootstrap';
 
 import {
   // TODO: add type annotations
@@ -50,11 +63,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-
-import { HeaderBadge } from './header_badge';
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
+import LogRhythmNavbar from '../../../../../netmon/components/navbar';
 
 import {
   ChromeBadge,
@@ -285,29 +294,8 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const {
-      application,
-      badge$,
-      basePath,
-      breadcrumbs$,
-      helpExtension$,
-      intl,
-      isLocked,
-      kibanaDocLink,
-      kibanaVersion,
-      onIsLockedUpdate,
-      legacyMode,
-      isCloudEnabled,
-    } = this.props;
-    const {
-      appTitle,
-      currentAppId,
-      isVisible,
-      navControlsLeft,
-      navControlsRight,
-      navLinks,
-      recentlyAccessed,
-    } = this.state;
+    const { application, basePath, intl, isLocked, onIsLockedUpdate, legacyMode } = this.props;
+    const { currentAppId, isVisible, navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
       return null;
@@ -379,7 +367,9 @@ class HeaderUI extends Component<Props, State> {
 
     return (
       <header>
-        <EuiHeader>
+        <LogRhythmNavbar />
+
+        {/* <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
               <EuiHeaderSectionItem border="right">{this.renderMenuTrigger()}</EuiHeaderSectionItem>
@@ -403,7 +393,7 @@ class HeaderUI extends Component<Props, State> {
 
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
-        </EuiHeader>
+        </EuiHeader> */}
 
         <EuiNavDrawer
           ref={this.navDrawerRef}

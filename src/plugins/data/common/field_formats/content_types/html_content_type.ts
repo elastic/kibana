@@ -1,4 +1,13 @@
 /*
+ * THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL SOURCE
+ * This comment only applies to modifications applied after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
+ *
+ * Copyright 2020 LogRhythm, Inc
+ * Licensed under the LogRhythm Global End User License Agreement,
+ * which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,6 +28,7 @@
 import { escape, isFunction } from 'lodash';
 import { IFieldFormat, HtmlContextTypeConvert } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
+import { shouldBindFormat } from '../../../../../netmon/field_formats/should_bind_format';
 
 export const HTML_CONTEXT_TYPE = 'html';
 
@@ -63,6 +73,9 @@ export const setup = (
   };
 
   const wrap: HtmlContextTypeConvert = (value, field, hit, meta) => {
+    if (!!field && shouldBindFormat(field.name)) {
+      return `<span>${recurse(value, field, hit, meta)}</span>`;
+    }
     return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
   };
 

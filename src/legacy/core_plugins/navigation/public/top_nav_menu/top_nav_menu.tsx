@@ -1,4 +1,13 @@
 /*
+ * THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL SOURCE
+ * This comment only applies to modifications applied after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
+ *
+ * Copyright 2020 LogRhythm, Inc
+ * Licensed under the LogRhythm Global End User License Agreement,
+ * which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -65,6 +74,9 @@ export function TopNavMenu(props: TopNavMenuProps) {
   function renderLayout() {
     return (
       <span className="kbnTopNavMenu__wrapper">
+        <h1 className="kuiLocalBreadcrumb" style={{ fontSize: '18px', padding: '12px 0 0 8px' }}>
+          {props.screenTitle}
+        </h1>
         <EuiFlexGroup
           data-test-subj="top-nav"
           justifyContent="flexStart"

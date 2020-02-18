@@ -1,4 +1,4 @@
-# Copyright 2019 LogRhythm, Inc
+# Copyright 2020 LogRhythm, Inc
 # Licensed under the LogRhythm Global End User License Agreement,
 # which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -19,7 +19,7 @@ UTIL = Utility()
 logging, rotating_handler = UTIL.get_logging()
 logger = logging.getLogger()
 
-resources = '/usr/local/kibana-7.2.0-linux-x64/resources'
+resources = '/usr/local/kibana-7.5.2-linux-x64/resources'
 
 def check_elasticsearch_health():
     try:
@@ -77,14 +77,14 @@ def load_assets(path_to_files):
 def setup_config():
     # setup the default query type to be Lucene (not KQL)
     try:
-        url = 'http://localhost:9200/.kibana/_update/config:7.2.0'
+        url = 'http://localhost:9200/.kibana/_update/config:7.5.2'
         session = requests.Session()
         retries = Retry(total=5, backoff_factor=0.3, status_forcelist=[500, 503])
         session.mount('https://', HTTPAdapter(max_retries=retries))
         session.mount('http://', HTTPAdapter(max_retries=retries))
         headers = {
             'Content-type': 'application/json',
-            'kbn-version': '7.2.0'
+            'kbn-version': '7.5.2'
         }
         data = json.dumps({
             'doc': {
