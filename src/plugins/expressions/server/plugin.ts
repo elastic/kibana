@@ -24,6 +24,7 @@ import {
   createLegacyServerInterpreterApi,
   createLegacyServerEndpoints,
 } from './legacy';
+import { ExpressionsService } from '../common';
 
 // eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
@@ -50,6 +51,8 @@ export class ExpressionsServerPlugin
       ExpressionsServerSetupDependencies,
       ExpressionsServerStartDependencies
     > {
+  readonly expressions: ExpressionsService = new ExpressionsService();
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -57,6 +60,12 @@ export class ExpressionsServerPlugin
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
     const logger = this.initializerContext.logger.get();
+    const { expressions } = this;
+    const { executor } = expressions;
+
+    executor.extendContext({
+      environment: 'server',
+    });
 
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);
