@@ -5,7 +5,9 @@
  */
 
 import qs from 'querystring';
-import { AlertListState } from '../../types';
+import { createSelector } from 'reselect';
+import { Immutable } from '../../../../../common/types';
+import { AlertListState, AlertIndexQueryParams } from '../../types';
 
 /**
  * Returns the Alert Data array from state
@@ -32,20 +34,41 @@ export const isOnAlertPage = (state: AlertListState): boolean => {
 };
 
 /**
- * Returns the query object received from parsing the URL query params
+ * Returns the query object received from parsing the URL query params.
+ * The query value passed when requesting alert list data from the server.
+ * Also used to get new client side URLs.
  */
-export const paginationDataFromUrl = (state: AlertListState): qs.ParsedUrlQuery => {
-  if (state.location) {
-    // Removes the `?` from the beginning of query string if it exists
-    const query = qs.parse(state.location.search.slice(1));
-    return {
-      ...(query.page_size ? { page_size: query.page_size } : {}),
-      ...(query.page_index ? { page_index: query.page_index } : {}),
-    };
-  } else {
-    return {};
+// TODO rename to alertIndexQueryParams
+export const paginationDataFromUrl: (
+  state: AlertListState
+) => Immutable<AlertIndexQueryParams> = createSelector(
+  (state: AlertListState) => state.location,
+  (location: AlertListState['location']) => {
+    const data: AlertIndexQueryParams = {};
+    if (location) {
+      // Removes the `?` from the beginning of query string if it exists
+      const query = qs.parse(location.search.slice(1));
+      if (typeof query.page_size === 'string') {
+        data.page_size = query.page_size;
+      } else if (Array.isArray(query.page_size)) {
+        data.page_size = query.page_size[query.page_size.length - 1];
+      }
+
+      if (typeof query.page_index === 'string') {
+        data.page_index = query.page_index;
+      } else if (Array.isArray(query.page_index)) {
+        data.page_index = query.page_index[query.page_index.length - 1];
+      }
+
+      if (typeof query.selected_alert === 'string') {
+        data.selected_alert = query.selected_alert;
+      } else if (Array.isArray(query.selected_alert)) {
+        data.selected_alert = query.selected_alert[query.selected_alert.length - 1];
+      }
+    }
+    return data;
   }
-};
+);
 
 /**
  * Returns a function that takes in a new page size and returns a new query param string
@@ -54,7 +77,7 @@ export const urlFromNewPageSizeParam: (
   state: AlertListState
 ) => (newPageSize: number) => string = state => {
   return newPageSize => {
-    const urlPaginationData = paginationDataFromUrl(state);
+    const urlPaginationData: AlertIndexQueryParams = { ...paginationDataFromUrl(state) };
     urlPaginationData.page_size = newPageSize.toString();
 
     // Only set the url back to page zero if the user has changed the page index already
@@ -72,8 +95,39 @@ export const urlFromNewPageIndexParam: (
   state: AlertListState
 ) => (newPageIndex: number) => string = state => {
   return newPageIndex => {
-    const urlPaginationData = paginationDataFromUrl(state);
+    const urlPaginationData: AlertIndexQueryParams = { ...paginationDataFromUrl(state) };
     urlPaginationData.page_index = newPageIndex.toString();
     return '?' + qs.stringify(urlPaginationData);
   };
 };
+
+/**
+ * Returns a url like the current one, but with a new alert id.
+ */
+export const urlWithSelectedAlert: (
+  state: AlertListState
+) => (alertID: string) => string = state => {
+  return (alertID: string) => {
+    const urlPaginationData = { ...paginationDataFromUrl(state) };
+    urlPaginationData.selected_alert = alertID;
+    return '?' + qs.stringify(urlPaginationData);
+  };
+};
+
+/**
+ * Returns a url like the current one, but with no alert id
+ */
+export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
+  paginationDataFromUrl,
+  urlPaginationData => {
+    // TODO, different pattern for calculating URL w/ and w/o qs values
+    const newUrlPaginationData = { ...urlPaginationData };
+    delete newUrlPaginationData.selected_alert;
+    return '?' + qs.stringify(newUrlPaginationData);
+  }
+);
+
+export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
+  paginationDataFromUrl,
+  ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
+);

@@ -6,7 +6,19 @@
 
 import { memo, useState, useMemo, useCallback } from 'react';
 import React from 'react';
-import { EuiDataGrid, EuiDataGridColumn, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiDataGrid,
+  EuiDataGridColumn,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import * as selectors from '../../store/alerts/selectors';
@@ -15,7 +27,7 @@ import { useAlertListSelector } from './hooks/use_alerts_selector';
 export const AlertIndex = memo(() => {
   const history = useHistory();
 
-  const columns: EuiDataGridColumn[] = useMemo(() => {
+  const columns = useMemo((): EuiDataGridColumn[] => {
     return [
       {
         id: 'alert_type',
@@ -68,10 +80,14 @@ export const AlertIndex = memo(() => {
     ];
   }, []);
 
+  // TODO consider structuredSelector
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
   const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
+  const urlWithSelectedAlert = useAlertListSelector(selectors.urlWithSelectedAlert);
+  const urlWithoutSelectedAlert = useAlertListSelector(selectors.urlWithoutSelectedAlert);
   const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
   const alertListData = useAlertListSelector(selectors.alertListData);
+  const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
@@ -84,6 +100,30 @@ export const AlertIndex = memo(() => {
   );
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+  const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  const handleAlertClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (event.target instanceof HTMLElement) {
+        const alertId: string | undefined = event.target.dataset.alertId;
+        if (alertId !== undefined) {
+          history.push(urlWithSelectedAlert(alertId));
+        }
+      }
+    },
+    [history, urlWithSelectedAlert]
+  );
+
+  const handleFlyoutClose = useCallback(() => {
+    history.push(urlWithoutSelectedAlert);
+  }, [history, urlWithoutSelectedAlert]);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
@@ -94,11 +134,16 @@ export const AlertIndex = memo(() => {
       const row = alertListData[rowIndex % pageSize];
 
       if (columnId === 'alert_type') {
-        return i18n.translate(
-          'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
-          {
-            defaultMessage: 'Malicious File',
-          }
+        return (
+          <EuiLink data-alert-id={'TODO'} onClick={handleAlertClick}>
+            {/* TODO populate data-alert-id with something real */}
+            {i18n.translate(
+              'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
+              {
+                defaultMessage: 'Malicious File',
+              }
+            )}
+          </EuiLink>
         );
       } else if (columnId === 'event_type') {
         return row.event.action;
@@ -109,7 +154,21 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'host_name') {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        return row['@timestamp'];
+        const date = new Date(row['@timestamp']);
+        if (isFinite(date.getTime())) {
+          return formatter.format(date);
+        } else {
+          return (
+            <EuiBadge color="warning">
+              {i18n.translate(
+                'xpack.endpoint.application.endpoint.alerts.alertDate.timestampInvalidLabel',
+                {
+                  defaultMessage: 'invalid',
+                }
+              )}
+            </EuiBadge>
+          );
+        }
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
@@ -117,7 +176,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, pageSize, total]);
+  }, [alertListData, formatter, handleAlertClick, pageSize, total]);
 
   const pagination = useMemo(() => {
     return {
@@ -130,23 +189,40 @@ export const AlertIndex = memo(() => {
   }, [onChangeItemsPerPage, onChangePage, pageIndex, pageSize]);
 
   return (
-    <EuiPage data-test-subj="alertListPage">
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiDataGrid
-            aria-label="Alert List"
-            rowCount={total}
-            columns={columns}
-            columnVisibility={{
-              visibleColumns,
-              setVisibleColumns,
-            }}
-            renderCellValue={renderCellValue}
-            pagination={pagination}
-            data-test-subj="alertListGrid"
-          />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <>
+      {/*
+          TODO, rethink this. we may already have this in state. we still need `hasSelectedAlert`, to know to show this flyout. we should also have `selectedAlert`, which will eventually be loaded from server. */}
+      {hasSelectedAlert && (
+        <EuiFlyout size="l" onClose={handleFlyoutClose}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>
+                alert detailz
+                {/* TODO, make an issue to add logic to get selected alert. it might already be in state! */}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>hey!</EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+      <EuiPage data-test-subj="alertListPage">
+        <EuiPageBody>
+          <EuiPageContent>
+            <EuiDataGrid
+              aria-label="Alert List"
+              rowCount={total}
+              columns={columns}
+              columnVisibility={{
+                visibleColumns,
+                setVisibleColumns,
+              }}
+              renderCellValue={renderCellValue}
+              pagination={pagination}
+              data-test-subj="alertListGrid"
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 });

@@ -15,10 +15,42 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreSta
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
+      const response: AlertResultList = {
+        total: 1,
+        request_page_size: 1,
+        request_page_index: 0,
+        result_from_index: 0,
+        alerts: [
+          {
+            '@timestamp': new Date().toString(),
+            agent: { id: '', version: '' },
+            event: {
+              action: '',
+            },
+            file_classification: {
+              malware_classification: {
+                score: 1,
+              },
+            },
+            host: {
+              hostname: '',
+              ip: '',
+              os: {
+                name: '',
+              },
+            },
+            thread: {},
+          },
+        ],
+      };
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+      /*
+       * TODO dont commit this file
       const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
         query: paginationDataFromUrl(state) as HttpFetchQuery,
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+      */
     }
   };
 };

@@ -85,3 +85,10 @@ export type AlertListData = AlertResultList;
 export type AlertListState = Immutable<AlertResultList> & {
   readonly location?: Immutable<EndpointAppLocation>;
 };
+
+export interface AlertIndexQueryParams {
+  page_size?: string;
+  page_index?: string;
+  // TODO, reference alert event id type directly
+  selected_alert?: string;
+}
