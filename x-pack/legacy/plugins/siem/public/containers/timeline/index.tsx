@@ -9,9 +9,8 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
-import { ActionCreator } from 'typescript-fsa';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -42,16 +41,6 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface TimelineQueryReduxProps {
-  isInspected: boolean;
-}
-
-interface DispatchProps {
-  clearEventsDeleted?: ActionCreator<{ id: string }>;
-  clearEventsLoading?: ActionCreator<{ id: string }>;
-  clearSelected?: ActionCreator<{ id: string }>;
-}
-
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   eventType?: EventType;
@@ -62,7 +51,8 @@ export interface OwnProps extends QueryTemplateProps {
   sortField: SortField;
   fields: string[];
 }
-type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & DispatchProps & WithKibanaProps;
+
+type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -200,7 +190,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(timelineActions.clearEventsDeleted({ id })),
 });
 
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, mapDispatchToProps),
+  connector,
   withKibana
 )(TimelineQueryComponent);

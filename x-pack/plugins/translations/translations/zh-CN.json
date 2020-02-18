@@ -77,7 +77,6 @@
   },
   "messages": {
     "common.ui.aggResponse.allDocsTitle": "所有文档",
-    "common.ui.aggTypes.rangesFormatMessage": "{gte} {from} 且 {lt} {to}",
     "common.ui.directives.paginate.size.allDropDownOptionLabel": "全部",
     "common.ui.dualRangeControl.mustSetBothErrorMessage": "下限值和上限值都须设置",
     "common.ui.dualRangeControl.outsideOfRangeErrorMessage": "值必须是在 {min} 到 {max} 的范围内",
@@ -3946,7 +3945,6 @@
     "xpack.apm.tracesTable.tracesPerMinuteColumnLabel": "每分钟追溯次数",
     "xpack.apm.tracesTable.tracesPerMinuteUnitLabel": "tpm",
     "xpack.apm.transactionActionMenu.actionsButtonLabel": "操作",
-    "xpack.apm.transactionActionMenu.actionsLabel": "操作",
     "xpack.apm.transactionActionMenu.showContainerLogsLinkLabel": "显示容器日志",
     "xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel": "显示容器指标",
     "xpack.apm.transactionActionMenu.showHostLogsLinkLabel": "显示主机日志",
