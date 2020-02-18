@@ -26,10 +26,10 @@ import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const templateHtml = `
-  <dl class="source truncate-by-height">
+  <dl class="dscFormatSource">
     <% defPairs.forEach(function (def) { %>
-      <dt><%- def[0] %>:</dt>
-      <dd><%= def[1] %></dd>
+      <dt class="dscFormatSource__title"><%- def[0] %>:</dt>
+      <dd class="dscFormatSource__description"><%= def[1] %></dd>
       <%= ' ' %>
     <% }); %>
   </dl>`;

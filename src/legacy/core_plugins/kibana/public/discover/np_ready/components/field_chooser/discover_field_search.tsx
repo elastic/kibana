@@ -255,7 +255,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            compressed
             fullWidth
             onChange={event => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}

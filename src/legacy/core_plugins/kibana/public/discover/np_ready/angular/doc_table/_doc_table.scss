@@ -26,7 +26,6 @@ doc-table {
 }
 
 .kbnDocTable {
-  @include dscDocSourceStyle;
   font-size: $euiFontSizeXS;
 
   th {

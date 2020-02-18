@@ -10,8 +10,3 @@
 .dscTable__flyoutHeader {
   white-space: nowrap;
 }
-
-.euiDataGridRowCell__popover,
-.euiDataGridRowCell__truncate {
-  @include dscDocSourceStyle();
-}

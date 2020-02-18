@@ -20,7 +20,6 @@
 import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonToggle,
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -157,7 +156,7 @@ export function DiscoverGrid({
       // Discover always injects a Time column as the first item (unless advance settings turned it off)
       // Have to guard against this to allow users to request the same column again later
       if (columnName === indexPattern.timeFieldName && i === 0) {
-        return { id: timeString, schema: 'datetime' };
+        return { id: timeString, schema: 'datetime', initialWidth: 172 };
       }
 
       const column: EuiDataGridColumn = {
@@ -188,7 +187,13 @@ export function DiscoverGrid({
     }
   );
 
-  dataGridColumns.unshift({ id: actionColumnId, isExpandable: false, display: <></> });
+  dataGridColumns.unshift({
+    id: actionColumnId,
+    isExpandable: false,
+    initialWidth: 24,
+    isResizable: false,
+    display: <></>,
+  });
 
   /**
    * Pagination
@@ -259,16 +264,15 @@ export function DiscoverGrid({
         const showFlyout = typeof flyoutRow === 'undefined';
 
         return (
-          <EuiButtonToggle
-            label={i18n.translate('kbn.discover.grid.viewDoc', {
+          <button
+            aria-label={i18n.translate('kbn.discover.grid.viewDoc', {
               defaultMessage: 'Toggle dialog with details',
             })}
-            iconType={showFlyout ? 'eye' : 'eyeClosed'}
-            onChange={() => setFlyoutRow(row)}
-            isSelected={showFlyout}
-            isEmpty
-            isIconOnly
-          />
+            onClick={() => setFlyoutRow(row)}
+            className="dscTable__buttonToggle"
+          >
+            <EuiIcon type={showFlyout ? 'eye' : 'eyeClosed'} size="s" />
+          </button>
         );
       }
 
@@ -341,9 +345,12 @@ export function DiscoverGrid({
         }}
         toolbarVisibility={{
           showColumnSelector: false,
+          showStyleSelector: false,
         }}
         gridStyle={{
           border: 'horizontal',
+          fontSize: 's',
+          cellPadding: 's',
         }}
         schemaDetectors={[
           {

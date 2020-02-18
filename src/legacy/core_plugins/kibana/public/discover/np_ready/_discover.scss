@@ -28,18 +28,19 @@
 .dscApp__sidebar {
   flex-grow: 0;
   flex-basis: auto;
-  min-width: 304px;
+  min-width: 250px;
   padding: 0 $euiSizeS;
 }
 
 .dscApp__content {
   flex-grow: 1;
+  flex-basis: 0%;
 }
 
 .dscHistogram {
   display: flex;
   height: $euiSize * 8;
-  padding: $euiSizeS;
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -86,24 +87,25 @@
 }
 
 .dscResultCount {
-  text-align: center;
-  padding-top: $euiSizeXS;
-  padding-left: $euiSizeM;
-
-  .dscResultHits {
-    padding-left: $euiSizeXS;
-  }
-
-  > .kuiLink {
-    padding-left: $euiSizeM;
-  }
+  display: flex;
+  justify-content: space-between;
+  padding: 0 $euiSizeS;
 }
 
-.dscTimechart__header {
+.dscResultCount__title {
+  flex-grow: 0;
+  flex-basis: auto;
+}
+
+.dscResultCount__actions {
+  flex-grow: 0;
+  flex-basis: auto;
   display: flex;
-  justify-content: center;
-  min-height: $euiSizeXXL;
-  padding: $euiSizeXS 0;
+  align-items: center;
+
+  > *:not(:first-child) {
+    margin-left: $euiSizeS;
+  }
 }
 
 .dscOverlay {
@@ -135,6 +137,10 @@
   background-color: $euiColorLightShade;
   padding: 5px 10px;
   text-align: center;
+}
+
+.dscTable__buttonToggle {
+  padding: 0 !important;
 }
 
 /**
@@ -264,4 +270,21 @@
     width: auto;
     height: auto;
   }
+}
+
+.dscFormatSource {
+  word-break: break-word;
+}
+
+.dscFormatSource__title {
+  background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
+  border-radius: $euiBorderRadius / 2;
+  color: $euiTextColor;
+  padding: ($euiSizeXS / 2) $euiSizeXS;
+  margin-right: $euiSizeXS;
+  word-break: normal;
+  display: inline;
+}
+.dscFormatSource__description {
+  display: inline;
 }

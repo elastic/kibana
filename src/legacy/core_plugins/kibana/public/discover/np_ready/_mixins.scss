@@ -6,15 +6,16 @@
 @mixin dscDocSourceStyle {
   dl.source {
     margin-bottom: 0;
-    line-height:2em;
+    line-height: 2em;
     word-break: break-word;
 
-    dt, dd {
+    dt,
+    dd {
       display: inline;
     }
 
     dt {
-      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
+      background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
       color: $euiTextColor;
       padding: ($euiSizeXS / 2) $euiSizeXS;
       margin-right: $euiSizeXS;
@@ -23,5 +24,3 @@
     }
   }
 }
-
-
