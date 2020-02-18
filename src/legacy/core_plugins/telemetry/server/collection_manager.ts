@@ -41,8 +41,8 @@ export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   callCluster: CallCluster;
   server: any;
-  start: string;
-  end: string;
+  start: string | number;
+  end: string | number;
 }
 
 export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
@@ -193,7 +193,7 @@ export class TelemetryCollectionManager {
         }
       } catch (err) {
         statsCollectionConfig.server.log(
-          ['debu', 'telemetry', 'collection'],
+          ['debug', 'telemetry', 'collection'],
           `Failed to collect any usage with registered collections.`
         );
         // swallow error to try next collection;
