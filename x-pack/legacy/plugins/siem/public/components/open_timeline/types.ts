@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-
 import { AllTimelinesVariables } from '../../containers/timeline/all';
-import { ColumnHeader, TimelineModel } from '../../store/timeline/model';
+import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 
 /** The users who added a timeline to favorites */
@@ -162,17 +160,3 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
 }: UpdateTimeline) => () => void;
-
-export interface OpenTimelineDispatchProps {
-  updateTimeline: DispatchUpdateTimeline;
-  createNewTimeline: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
-}
-
-export interface OpenTimelineReduxProps {
-  timeline: TimelineModel;
-}

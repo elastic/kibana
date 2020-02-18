@@ -59,7 +59,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
-  eventType: EventType;
+  eventType?: EventType;
   filters: Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
