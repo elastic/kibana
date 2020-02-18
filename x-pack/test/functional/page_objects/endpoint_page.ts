@@ -11,6 +11,25 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
   const table = getService('table');
 
   return {
+    /**
+     * Finds the Table with the given `selector` (test subject) and returns
+     * back an array containing the table's header column text
+     *
+     * @param selector
+     * @returns Promise<string[]>
+     */
+    async tableHeaderVisibleText(selector: string) {
+      const $ = await (await testSubjects.find('policyTable')).parseDomContent();
+      return $('thead tr th')
+        .toArray()
+        .map(th =>
+          $(th)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
+        );
+    },
+
     async welcomeEndpointTitle() {
       return await testSubjects.getVisibleText('welcomeTitle');
     },
