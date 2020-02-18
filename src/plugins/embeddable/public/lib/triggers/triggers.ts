@@ -22,8 +22,11 @@ import { IEmbeddable } from '..';
 
 export interface EmbeddableVisTriggerContext {
   embeddable: IEmbeddable;
-  timeFieldName: any;
-  data: any;
+  timeFieldName: string;
+  data: {
+    e: MouseEvent;
+    data: unknown;
+  };
 }
 
 export type EmbeddableVisTrigger = Trigger<

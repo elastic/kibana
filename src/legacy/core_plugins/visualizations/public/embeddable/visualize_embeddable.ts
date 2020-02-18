@@ -26,6 +26,7 @@ import { SavedObject } from 'ui/saved_objects/types';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { EmbeddableVisTriggerContext } from 'src/plugins/embeddable/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -302,12 +303,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
-
-        npStart.plugins.uiActions.executeTriggerActions(eventName, {
+        const context: EmbeddableVisTriggerContext = {
           embeddable: this,
           timeFieldName: this.vis.indexPattern.timeFieldName,
           data: event.data,
-        });
+        };
+
+        npStart.plugins.uiActions.executeTriggerActions(eventName, context);
       })
     );
 
