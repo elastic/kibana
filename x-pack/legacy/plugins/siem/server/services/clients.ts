@@ -28,6 +28,7 @@ export type GetScopedClients = (request: LegacyRequest) => Promise<Clients>;
 
 export class ClientsService {
   private actions?: StartPlugins['actions'];
+  private alerting?: StartPlugins['alerting'];
   private clusterClient?: IClusterClient;
   private savedObjects?: CoreStart['savedObjects'];
   private spacesService?: SpacesServiceSetup;
@@ -37,9 +38,14 @@ export class ClientsService {
     this.spacesService = spacesService;
   }
 
-  public start(savedObjects: CoreStart['savedObjects'], actions: StartPlugins['actions']) {
+  public start(
+    savedObjects: CoreStart['savedObjects'],
+    actions: StartPlugins['actions'],
+    alerting: StartPlugins['alerting']
+  ) {
     this.savedObjects = savedObjects;
     this.actions = actions;
+    this.alerting = alerting;
   }
 
   public createGetScoped(): GetScopedClients {
@@ -51,7 +57,7 @@ export class ClientsService {
       const kibanaRequest = KibanaRequest.from(request);
 
       return {
-        alertsClient: request.getAlertsClient?.(),
+        alertsClient: await this.alerting?.getAlertsClientWithRequest?.(kibanaRequest),
         actionsClient: await this.actions?.getActionsClientWithRequest?.(kibanaRequest),
         clusterClient: this.clusterClient!.asScoped(kibanaRequest),
         savedObjectsClient: this.savedObjects!.getScopedClient(kibanaRequest),

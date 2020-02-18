@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { PluginStartContract as AlertingStart } from '../../../../plugins/alerting/server';
 import {
   CoreSetup,
   CoreStart,
@@ -42,6 +43,7 @@ export interface SetupPlugins {
 
 export interface StartPlugins {
   actions: ActionsStart;
+  alerting: AlertingStart;
 }
 
 export class Plugin {
@@ -145,7 +147,7 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    this.clients.start(core.savedObjects, plugins.actions);
+    this.clients.start(core.savedObjects, plugins.actions, plugins.alerting);
 
     this.legacyInitRoutes!(this.clients.createGetScoped());
   }
