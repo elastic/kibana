@@ -24,16 +24,18 @@ import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const AdvancedOptions = ({
-  isVisible,
-  indexPatternId,
-  toggleAdvancedOptions,
-  onChangeIndexPatternId,
-}: {
+interface AdvancedOptionsProps {
   isVisible: boolean;
   indexPatternId: string;
   toggleAdvancedOptions: (e: React.FormEvent<HTMLButtonElement>) => void;
   onChangeIndexPatternId: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
+  isVisible,
+  indexPatternId,
+  toggleAdvancedOptions,
+  onChangeIndexPatternId,
 }) => (
   <div>
     <EuiButtonEmpty

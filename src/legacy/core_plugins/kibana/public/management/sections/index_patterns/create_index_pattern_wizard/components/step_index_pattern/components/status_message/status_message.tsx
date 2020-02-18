@@ -24,12 +24,7 @@ import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MatchedIndex } from '../../../../types';
 
-export const StatusMessage = ({
-  matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
-  isIncludingSystemIndices,
-  query,
-  showSystemIndices,
-}: {
+interface StatusMessageProps {
   matchedIndices: {
     allIndices: MatchedIndex[];
     exactMatchedIndices: MatchedIndex[];
@@ -38,6 +33,13 @@ export const StatusMessage = ({
   isIncludingSystemIndices: boolean;
   query: string;
   showSystemIndices: boolean;
+}
+
+export const StatusMessage: React.FC<StatusMessageProps> = ({
+  matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
+  isIncludingSystemIndices,
+  query,
+  showSystemIndices,
 }) => {
   let statusIcon;
   let statusMessage;

@@ -33,7 +33,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({
+interface HeaderProps {
+  isInputInvalid: boolean;
+  errors: any;
+  characterList: string;
+  query: string;
+  onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  goToNextStep: (query: string) => void;
+  isNextStepDisabled: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({
   isInputInvalid,
   errors,
   characterList,
@@ -42,14 +52,6 @@ export const Header = ({
   goToNextStep,
   isNextStepDisabled,
   ...rest
-}: {
-  isInputInvalid: boolean;
-  errors: any;
-  characterList: string;
-  query: string;
-  onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  goToNextStep: (query: string) => void;
-  isNextStepDisabled: boolean;
 }) => (
   <div {...rest}>
     <EuiTitle size="s">

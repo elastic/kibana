@@ -23,13 +23,12 @@ import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({
-  indexPattern,
-  indexPatternName,
-}: {
+interface HeaderProps {
   indexPattern: string;
   indexPatternName: string;
-}) => (
+}
+
+export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }) => (
   <div>
     <EuiTitle size="s">
       <h2>

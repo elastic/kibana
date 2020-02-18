@@ -35,20 +35,22 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const TimeField = ({
-  isVisible,
-  fetchTimeFields,
-  timeFieldOptions,
-  isLoading,
-  selectedTimeField,
-  onTimeFieldChanged,
-}: {
+interface TimeFieldProps {
   isVisible: boolean;
   fetchTimeFields: () => void;
   timeFieldOptions: Array<{ text: string; value?: string }>;
   isLoading: boolean;
   selectedTimeField?: string;
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+export const TimeField: React.FC<TimeFieldProps> = ({
+  isVisible,
+  fetchTimeFields,
+  timeFieldOptions,
+  isLoading,
+  selectedTimeField,
+  onTimeFieldChanged,
 }) => (
   <EuiForm>
     {isVisible ? (
