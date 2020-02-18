@@ -10,8 +10,12 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
-import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import {
+  ColumnHeaderOptions,
+  KqlMode,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../store/timeline/model';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
@@ -39,7 +43,7 @@ export interface OwnProps {
 }
 
 interface StateReduxProps {
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   filters: esFilters.Filter[];
   isLive: boolean;
@@ -57,7 +61,7 @@ interface StateReduxProps {
 interface DispatchProps {
   createTimeline: ActionCreator<{
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     itemsPerPage?: number;
     sort?: Sort;
     showCheckboxes?: boolean;
@@ -76,7 +80,7 @@ interface DispatchProps {
     itemsPerPage: number;
   }>;
   upsertColumn: ActionCreator<{
-    column: ColumnHeader;
+    column: ColumnHeaderOptions;
     id: string;
     index: number;
   }>;
@@ -134,7 +138,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const toggleColumn = useCallback(
-    (column: ColumnHeader) => {
+    (column: ColumnHeaderOptions) => {
       const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
       if (!exists && upsertColumn != null) {
