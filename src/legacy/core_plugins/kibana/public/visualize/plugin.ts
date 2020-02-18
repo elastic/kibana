@@ -30,11 +30,7 @@ import {
 } from 'kibana/public';
 
 import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import {
-  DataPublicPluginStart,
-  DataPublicPluginSetup,
-  getQueryStateContainer,
-} from '../../../../../plugins/data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -84,9 +80,6 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     { home, kibanaLegacy, usageCollection, data }: VisualizePluginSetupDependencies
   ) {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      data.query
-    );
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
@@ -96,12 +89,11 @@ export class VisualizePlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: data.query.global$,
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
 
