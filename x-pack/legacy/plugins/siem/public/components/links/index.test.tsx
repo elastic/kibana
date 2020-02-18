@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
-
+import { useUiSetting$ } from '../../lib/kibana';
 import {
   GoogleLink,
   HostDetailsLink,
@@ -19,7 +19,7 @@ import {
   CertificateFingerprintLink,
   Ja3FingerprintLink,
   PortOrServiceNameLink,
-  VirusTotalLink,
+  DEFAULT_NUMBER_OF_REPUTATION_LINK,
 } from '.';
 
 jest.mock('../../lib/kibana', () => {
@@ -29,7 +29,7 @@ jest.mock('../../lib/kibana', () => {
         { name: 'virustotal.com', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
         {
           name: 'talosIntelligence.com',
-          url_template: 'https://www.talosintelligence.com/reputation_center/lookup?search={{ip}}',
+          url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
         },
       ],
     ]),
@@ -132,7 +132,6 @@ describe('Custom Links', () => {
           .childAt(0)
           .text()
       ).toEqual('talosIntelligence.com');
-      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders correct href', () => {
@@ -174,28 +173,33 @@ describe('Custom Links', () => {
         "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
-  });
 
-  describe('VirusTotalLink', () => {
-    test('it renders sha passed in as value', () => {
-      const wrapper = mountWithIntl(<VirusTotalLink link={'abc'}>{'Example Link'}</VirusTotalLink>);
-      expect(wrapper.text()).toEqual('Example Link');
-    });
-
-    test('it renders sha passed in as link', () => {
-      const wrapper = mountWithIntl(
-        <VirusTotalLink link={'abc'}>{'Example Link'} </VirusTotalLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abc');
-    });
-
-    test("it encodes <script>alert('XSS')</script>", () => {
-      const wrapper = mountWithIntl(
-        <VirusTotalLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</VirusTotalLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
-      );
+    test('it renders correct number of links', () => {
+      (useUiSetting$ as jest.Mock).mockReset();
+      (useUiSetting$ as jest.Mock).mockReturnValue([
+        [
+          { name: 'Link 1', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+          {
+            name: 'Link 2',
+            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+          },
+          { name: 'Link 3', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+          {
+            name: 'Link 4',
+            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+          },
+          { name: 'Link 5', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+          {
+            name: 'Link 6',
+            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+          },
+        ],
+      ]);
+      let wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+      expect(wrapper.find('EuiLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
+      (useUiSetting$ as jest.Mock).mockClear();
+      wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} itemsToShow={1} />);
+      expect(wrapper.find('EuiLink')).toHaveLength(1);
     });
   });
 

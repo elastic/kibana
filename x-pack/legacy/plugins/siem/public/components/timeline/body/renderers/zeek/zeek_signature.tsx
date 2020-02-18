@@ -13,7 +13,7 @@ import { Ecs } from '../../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
-import { GoogleLink, VirusTotalLink } from '../../../../links';
+import { GoogleLink, ReputationLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
@@ -148,7 +148,7 @@ export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) 
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
-        <VirusTotalLink link={value}>{value}</VirusTotalLink>
+        <ReputationLink domain={value} itemsToShow={1} />
         <ExternalLinkIcon />
       </div>
     </LinkFlexItem>

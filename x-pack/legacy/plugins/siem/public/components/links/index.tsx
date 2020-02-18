@@ -136,8 +136,9 @@ function isDefaultReputationLink(name: string): name is DefaultReputationLink {
     name === DefaultReputationLink['talosIntelligence.com']
   );
 }
-
-const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: string }> = ({
+export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
+const ReputationLinkComponent: React.FC<{ itemsToShow?: number; domain: string }> = ({
+  itemsToShow = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   domain,
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
@@ -156,12 +157,14 @@ const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: st
 
   useEffect(() => {
     setIpReputationLinks(
-      ipReputationLinks?.map(({ name, url_template }: { name: string; url_template: string }) => {
-        return {
-          name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
-          url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
-        };
-      })
+      ipReputationLinks
+        ?.slice(0, Math.max(itemsToShow, 1))
+        ?.map(({ name, url_template }: { name: string; url_template: string }) => {
+          return {
+            name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
+            url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
+          };
+        })
     );
   }, [domain]);
 
@@ -180,19 +183,6 @@ const ReputationLinkComponent: React.FC<{ children?: React.ReactNode; domain: st
 export const ReputationLink = React.memo(ReputationLinkComponent);
 
 ReputationLink.displayName = 'ReputationLink';
-
-export const VirusTotalLink = React.memo<{ children?: React.ReactNode; link: string }>(
-  ({ children, link }) => (
-    <EuiLink
-      href={`https://www.virustotal.com/#/search/${encodeURIComponent(link)}`}
-      target="_blank"
-    >
-      {children ? children : link}
-    </EuiLink>
-  )
-);
-
-VirusTotalLink.displayName = 'VirusTotalLink';
 
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (
