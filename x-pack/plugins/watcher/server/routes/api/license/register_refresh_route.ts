@@ -13,11 +13,11 @@ it needs to make a round-trip to the kibana server. This refresh endpoint is pro
 for when the client needs to check the license, but doesn't need to pull data from the
 server for any reason, i.e., when adding a new watch.
 */
-export function registerRefreshRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = (ctx, request, response) => {
-    return response.ok({ body: { success: true } });
-  };
+export const handler: RequestHandler = (ctx, request, response) => {
+  return response.ok({ body: { success: true } });
+};
 
+export function registerRefreshRoute(deps: RouteDependencies) {
   deps.router.get(
     {
       path: '/api/watcher/license/refresh',
