@@ -23,7 +23,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
-import { getSimpleRule } from '../../../../../../../../test/detection_engine_api_integration/security_and_spaces/tests/utils';
+import { getSimpleRule } from '../__mocks__/utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 
