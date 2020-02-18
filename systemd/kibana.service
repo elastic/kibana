@@ -1,4 +1,4 @@
-# Copyright 2019 LogRhythm, Inc
+# Copyright 2020 LogRhythm, Inc
 # Licensed under the LogRhythm Global End User License Agreement,
 # which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -22,6 +22,10 @@ Group=nginx
 
 # Run ExecStartPre with root-permissions
 PermissionsStartOnly=true
+
+# Cleanup old kibana 7.2.0 directory if it exists.
+# NOTE: the dash prefixed to the command causes systemd to ignore any error returned by rm.
+ExecStartPre=-/usr/bin/rm -rf /usr/local/kibana-7.2.0-linux-x64/
 
 # Ensure KibanaStartup.log file exists and is owned by nginx
 ExecStartPre=/usr/bin/touch /var/log/probe/KibanaStartup.log

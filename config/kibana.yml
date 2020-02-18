@@ -1,7 +1,7 @@
 # THIS FILE HAS BEEN MODIFIED FROM THE ORIGINAL SOURCE
-# This comment only applies to modifications applied after the e633644c43a0a0271e0b6c32c382ce1db6b413c3 commit
+# This comment only applies to modifications applied after the f421eec40b5a9f31383591e30bef86724afcd2b3 commit
 #
-# Copyright 2019 LogRhythm, Inc
+# Copyright 2020 LogRhythm, Inc
 # Licensed under the LogRhythm Global End User License Agreement,
 # which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
 
@@ -121,3 +121,16 @@ logging.quiet: true
 # Specifies locale to be used for all localizable strings, dates and number formats.
 # Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"
+
+# If true, users are able to change the telemetry setting at a later time in Advanced Settings.
+# If false, Kibana looks at the value of telemetry.optIn to determine whether to send telemetry data or not.
+# telemetry.allowChangingOptInStatus and telemetry.optIn cannot be false at the same time.
+telemetry.allowChangingOptInStatus: true
+
+# If true, telemetry data is sent to Elastic. If false, collection of telemetry data is disabled.
+# To enable telemetry and prevent users from disabling it, set telemetry.allowChangingOptInStatus to false and telemetry.optIn to true.
+telemetry.optIn: false
+
+# Reporting your cluster statistics helps us improve your user experience. Your data is never shared with anyone.
+# Set to false to disable telemetry capabilities entirely. You can alternatively opt out through the Advanced Settings in Kibana.
+telemetry.enabled: false
