@@ -30,7 +30,7 @@ describe('endpoint_list store concerns', () => {
       agent: {
         version: '',
         id: '',
-        agent: '',
+        name: '',
       },
       host: {
         id: '',
