@@ -38,13 +38,16 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState(title);
 
-  const onCancel = () => setEditMode(false);
-  const onClickEditIcon = () => setEditMode(true);
+  const onCancel = useCallback(() => setEditMode(false), []);
+  const onClickEditIcon = useCallback(() => setEditMode(true), []);
 
-  const onClickSubmit = (newTitle: string): void => {
-    onSubmit(newTitle);
-    setEditMode(false);
-  };
+  const onClickSubmit = useCallback(
+    (newTitle: string): void => {
+      onSubmit(newTitle);
+      setEditMode(false);
+    },
+    [changedTitle]
+  );
 
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
