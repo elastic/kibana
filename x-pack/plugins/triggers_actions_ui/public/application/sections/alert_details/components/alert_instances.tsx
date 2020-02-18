@@ -183,7 +183,7 @@ export function AlertInstances({
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
 
 function getPage(items: any[], pagination: Pagination) {
-  return chunk(items, pagination.size)[pagination.index];
+  return chunk(items, pagination.size)[pagination.index] || [];
 }
 
 interface AlertInstanceListItemStatus {
