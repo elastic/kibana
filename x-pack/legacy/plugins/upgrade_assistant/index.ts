@@ -3,25 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
-import { resolve } from 'path';
 import mappings from './mappings.json';
 import { plugin } from './server/np_ready';
 import { CloudSetup } from '../../../plugins/cloud/server';
 
 export function upgradeAssistant(kibana: any) {
-  const publicSrc = resolve(__dirname, 'public');
-  const npSrc = resolve(publicSrc, 'np_ready');
-
   const config: Legacy.PluginSpecOptions = {
     id: 'upgrade_assistant',
     configPrefix: 'xpack.upgrade_assistant',
-    require: ['elasticsearch'],
     uiExports: {
       // @ts-ignore
-      managementSections: ['plugins/upgrade_assistant'],
       savedObjectSchemas: {
         'upgrade-assistant-reindex-operation': {
           isNamespaceAgnostic: true,
@@ -30,10 +23,8 @@ export function upgradeAssistant(kibana: any) {
           isNamespaceAgnostic: true,
         },
       },
-      styleSheetPaths: resolve(npSrc, 'application/index.scss'),
       mappings,
     },
-    publicDir: publicSrc,
 
     config() {
       return Joi.object({
