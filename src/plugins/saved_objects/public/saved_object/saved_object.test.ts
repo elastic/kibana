@@ -265,7 +265,7 @@ describe('Saved Object', () => {
         );
       });
 
-      it('when index exists in searchSourceJSON', () => {
+      it.skip('when index exists in searchSourceJSON', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
@@ -306,7 +306,7 @@ describe('Saved Object', () => {
         );
       });
 
-      it('when index in searchSourceJSON is not found', () => {
+      it.skip('when index in searchSourceJSON is not found', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
