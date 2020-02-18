@@ -266,14 +266,7 @@ function discoverController(
         const appFiltersState = getAppFilters();
         const appFilters = filterManager.getAppFilters();
         if (!isEqualFilters(appFiltersState, appFilters)) {
-          syncAppState({
-            filters: appFilters.map(filter => {
-              if (typeof filter.meta.value === 'function') {
-                delete filter.meta.value;
-              }
-              return filter;
-            }),
-          });
+          syncAppState({ filters: appFilters });
         }
         $scope.state.filters = appFilters;
         $scope.updateDataSource();
