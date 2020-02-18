@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { connectToQueryGlobalState } from './connect_to_global_state';
-export { connectToQueryAppState } from './connect_to_app_state';
-export { syncGlobalQueryStateWithUrl } from './sync_global_state_with_url';
-export { QueryAppState, QueryGlobalState } from './types';
+export { connectToQueryState } from './connect_to_query_state';
+export { syncQueryStateWithUrl } from './sync_state_with_url';
+export { QueryState, QueryStateChange } from './types';

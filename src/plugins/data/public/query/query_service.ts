@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
-import { QueryAppState, QueryGlobalState } from './state_sync';
-import { createGlobalQueryObservable } from './state_sync/create_global_query_observable';
-import { createAppQueryObservable } from './state_sync/create_app_query_observable';
+import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 
 /**
  * Query Service
@@ -41,8 +38,7 @@ export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
 
-  app$!: Observable<QueryAppState>;
-  global$!: Observable<QueryGlobalState>;
+  state$!: ReturnType<typeof createQueryStateObservable>;
 
   public setup({ uiSettings, storage }: QueryServiceDependencies) {
     this.filterManager = new FilterManager(uiSettings);
@@ -53,12 +49,7 @@ export class QueryService {
       storage,
     });
 
-    this.global$ = createGlobalQueryObservable({
-      filterManager: this.filterManager,
-      timefilter: this.timefilter,
-    }).pipe(share());
-
-    this.app$ = createAppQueryObservable({
+    this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,
       timefilter: this.timefilter,
     }).pipe(share());
@@ -66,8 +57,7 @@ export class QueryService {
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
-      global$: this.global$,
-      app$: this.app$,
+      state$: this.state$,
     };
   }
 
@@ -75,8 +65,7 @@ export class QueryService {
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
-      global$: this.global$,
-      app$: this.app$,
+      state$: this.state$,
       savedQueries: createSavedQueryService(savedObjects.client),
     };
   }

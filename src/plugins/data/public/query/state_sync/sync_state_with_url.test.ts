@@ -31,8 +31,8 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';
-import { syncGlobalQueryStateWithUrl } from './sync_global_state_with_url';
-import { QueryGlobalState } from './types';
+import { syncQueryStateWithUrl } from './sync_state_with_url';
+import { QueryState } from './types';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -50,7 +50,7 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
   }
 });
 
-describe('sync_global_state_with_url', () => {
+describe('sync_query_state_with_url', () => {
   let queryServiceStart: QueryStart;
   let filterManager: FilterManager;
   let timefilter: TimefilterContract;
@@ -91,7 +91,7 @@ describe('sync_global_state_with_url', () => {
   });
 
   test('url is actually changed when data in services changes', () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
     kbnUrlStateStorage.flush(); // sync force location change
     expect(history.location.hash).toMatchInlineSnapshot(
@@ -101,16 +101,16 @@ describe('sync_global_state_with_url', () => {
   });
 
   test('when filters change, global filters synced to urlStorage', () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    expect(kbnUrlStateStorage.get<QueryGlobalState>('_g')?.filters).toHaveLength(1);
+    expect(kbnUrlStateStorage.get<QueryState>('_g')?.filters).toHaveLength(1);
     stop();
   });
 
   test('when time range changes, time synced to urlStorage', () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     timefilter.setTime({ from: 'now-30m', to: 'now' });
-    expect(kbnUrlStateStorage.get<QueryGlobalState>('_g')?.time).toEqual({
+    expect(kbnUrlStateStorage.get<QueryState>('_g')?.time).toEqual({
       from: 'now-30m',
       to: 'now',
     });
@@ -118,9 +118,9 @@ describe('sync_global_state_with_url', () => {
   });
 
   test('when refresh interval changes, refresh interval is synced to urlStorage', () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     timefilter.setRefreshInterval({ pause: true, value: 100 });
-    expect(kbnUrlStateStorage.get<QueryGlobalState>('_g')?.refreshInterval).toEqual({
+    expect(kbnUrlStateStorage.get<QueryState>('_g')?.refreshInterval).toEqual({
       pause: true,
       value: 100,
     });
@@ -128,7 +128,7 @@ describe('sync_global_state_with_url', () => {
   });
 
   test('when url is changed, filters synced back to filterManager', () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     kbnUrlStateStorage.cancel(); // stop initial syncing pending update
     history.push(pathWithFilter);
     expect(filterManager.getGlobalFilters()).toHaveLength(1);
@@ -138,7 +138,7 @@ describe('sync_global_state_with_url', () => {
   test('initial url should be synced with services', () => {
     history.push(pathWithFilter);
 
-    const { stop, hasInheritedQueryFromUrl } = syncGlobalQueryStateWithUrl(
+    const { stop, hasInheritedQueryFromUrl } = syncQueryStateWithUrl(
       queryServiceStart,
       kbnUrlStateStorage
     );
@@ -148,7 +148,7 @@ describe('sync_global_state_with_url', () => {
   });
 
   test("url changes shouldn't trigger services updates if data didn't change", () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManagerChangeTriggered.mockClear();
 
     history.push(pathWithFilter);
@@ -160,7 +160,7 @@ describe('sync_global_state_with_url', () => {
   });
 
   test("if data didn't change, kbnUrlStateStorage.set shouldn't be called", () => {
-    const { stop } = syncGlobalQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
     const spy = jest.spyOn(kbnUrlStateStorage, 'set');
     filterManager.setFilters([gF]); // global filters didn't change

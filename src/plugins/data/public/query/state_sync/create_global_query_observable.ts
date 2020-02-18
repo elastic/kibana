@@ -18,49 +18,67 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { TimefilterSetup } from '../timefilter';
 import { COMPARE_ALL_OPTIONS, compareFilters, FilterManager } from '../filter_manager';
-import { QueryGlobalState } from './index';
+import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
+import { FilterStateStore } from '../../../common/es_query/filters';
 
-export function createGlobalQueryObservable({
+export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
-}): Observable<QueryGlobalState> {
+}): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable(subscriber => {
-    const state = createStateContainer<QueryGlobalState>({
+    const state = createStateContainer<QueryState>({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
-      filters: filterManager.getGlobalFilters(),
+      filters: filterManager.getFilters(),
     });
 
+    let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
       timefilter.getTimeUpdate$().subscribe(() => {
+        currentChange.time = true;
         state.set({ ...state.get(), time: timefilter.getTime() });
       }),
       timefilter.getRefreshIntervalUpdate$().subscribe(() => {
+        currentChange.refreshInterval = true;
         state.set({ ...state.get(), refreshInterval: timefilter.getRefreshInterval() });
       }),
-      filterManager
-        .getUpdates$()
+      filterManager.getUpdates$().subscribe(() => {
+        currentChange.filters = true;
+
+        const { filters } = state.get();
+        const globalOld = filters?.filter(f => f?.$state?.store === FilterStateStore.GLOBAL_STATE);
+        const appOld = filters?.filter(f => f?.$state?.store === FilterStateStore.APP_STATE);
+        const globalNew = filterManager.getGlobalFilters();
+        const appNew = filterManager.getAppFilters();
+
+        if (!globalOld || !compareFilters(globalOld, globalNew, COMPARE_ALL_OPTIONS)) {
+          currentChange.globalFilters = true;
+        }
+
+        if (!appOld || !compareFilters(appOld, appNew, COMPARE_ALL_OPTIONS)) {
+          currentChange.appFilters = true;
+        }
+
+        state.set({
+          ...state.get(),
+          filters: filterManager.getFilters(),
+        });
+      }),
+      state.state$
         .pipe(
-          // we need to track only global filters here
-          map(() => filterManager.getGlobalFilters()),
-          // continue only if global filters changed
-          // and ignore app state filters
-          filter(
-            newGlobalFilters =>
-              !compareFilters(newGlobalFilters, state.get().filters || [], COMPARE_ALL_OPTIONS)
-          )
+          map(newState => ({ state: newState, changes: currentChange })),
+          tap(() => {
+            currentChange = {};
+          })
         )
-        .subscribe(newGlobalFilters => {
-          state.set({ ...state.get(), filters: newGlobalFilters });
-        }),
-      state.state$.subscribe(subscriber),
+        .subscribe(subscriber),
     ];
     return () => {
       subs.forEach(s => s.unsubscribe());

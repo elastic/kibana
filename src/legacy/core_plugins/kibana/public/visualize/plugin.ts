@@ -19,6 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { filter } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -89,7 +90,11 @@ export class VisualizePlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: data.query.global$,
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            )
+          ),
         },
       ],
     });

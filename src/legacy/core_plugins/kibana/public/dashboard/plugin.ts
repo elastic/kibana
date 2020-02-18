@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -86,7 +87,11 @@ export class DashboardPlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: data.query.global$,
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            )
+          ),
         },
       ],
     });

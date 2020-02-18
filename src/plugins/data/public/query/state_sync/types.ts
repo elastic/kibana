@@ -20,17 +20,19 @@
 import { Filter, RefreshInterval, TimeRange } from '../../../common';
 
 /**
- * State from data services that meant to be preserved between apps
+ * All query state service state
  */
-export interface QueryGlobalState {
+export interface QueryState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
-  filters?: Filter[]; // pinned filters only
+  filters?: Filter[];
 }
 
-/**
- * State from data services that should be scope to a single app
- */
-export interface QueryAppState {
-  filters?: Filter[]; // not pinned filters
+type QueryStateChangePartial = {
+  [P in keyof QueryState]?: boolean;
+};
+
+export interface QueryStateChange extends QueryStateChangePartial {
+  appFilters?: boolean; // specifies if app filters change
+  globalFilters?: boolean; // specifies if global filters change
 }

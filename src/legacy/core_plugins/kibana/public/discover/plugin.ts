@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
@@ -108,7 +109,11 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: plugins.data.query.global$,
+          stateUpdate$: plugins.data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            )
+          ),
         },
       ],
     });

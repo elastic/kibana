@@ -18,13 +18,14 @@
  */
 
 import {
+  createStateContainer,
   IKbnUrlStateStorage,
   syncState,
-  createStateContainer,
 } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
-import { connectToQueryGlobalState } from './connect_to_global_state';
-import { QueryGlobalState } from './types';
+import { connectToQueryState } from './connect_to_query_state';
+import { QueryState } from './types';
+import { FilterStateStore } from '../../../common/es_query/filters';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -33,22 +34,22 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  * @param QueryService: either setup or start
  * @param kbnUrlStateStorage to use for syncing
  */
-export const syncGlobalQueryStateWithUrl = (
-  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'global$'>,
+export const syncQueryStateWithUrl = (
+  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'state$'>,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) => {
   const {
     timefilter: { timefilter },
     filterManager,
   } = query;
-  const defaultState: QueryGlobalState = {
+  const defaultState: QueryState = {
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
 
   // retrieve current state from `_g` url
-  const initialStateFromUrl = kbnUrlStateStorage.get<QueryGlobalState>(GLOBAL_STATE_STORAGE_KEY);
+  const initialStateFromUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY);
 
   // remember whether there were info in the URL
   const hasInheritedQueryFromUrl = Boolean(
@@ -56,18 +57,22 @@ export const syncGlobalQueryStateWithUrl = (
   );
 
   // prepare initial state, whatever was in URL takes precedences over current state in services
-  const initialState: QueryGlobalState = {
+  const initialState: QueryState = {
     ...defaultState,
     ...initialStateFromUrl,
   };
 
   const globalQueryStateContainer = createStateContainer(initialState);
-  const stopSyncingWithStateContainer = connectToQueryGlobalState(query, globalQueryStateContainer);
+  const stopSyncingWithStateContainer = connectToQueryState(query, globalQueryStateContainer, {
+    refreshInterval: true,
+    time: true,
+    filters: FilterStateStore.GLOBAL_STATE,
+  });
 
   // if there weren't any initial state in url,
   // then put _g key into url
   if (!initialStateFromUrl) {
-    kbnUrlStateStorage.set<QueryGlobalState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
+    kbnUrlStateStorage.set<QueryState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
       replace: true,
     });
   }
