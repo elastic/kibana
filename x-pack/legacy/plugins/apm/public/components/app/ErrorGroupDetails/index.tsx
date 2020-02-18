@@ -25,7 +25,7 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
