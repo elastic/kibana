@@ -49,7 +49,11 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiFieldText onChange={e => onTitleChange(e.target.value)} value={`${changedTitle}`} />
+        <EuiFieldText
+          onChange={e => onTitleChange(e.target.value)}
+          value={`${changedTitle}`}
+          data-test-subj="editable-title-input-field"
+        />
       </EuiFlexItem>
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
@@ -58,12 +62,15 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
             isDisabled={isLoading}
             isLoading={isLoading}
             onClick={() => onClickSubmit(changedTitle as string)}
+            data-test-subj="editable-title-submit-btn"
           >
             {i18n.SUBMIT}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="editable-title-cancel-btn">
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem />
@@ -78,6 +85,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
           aria-label={title as string}
           iconType="pencil"
           onClick={onClickEditIcon}
+          data-test-subj="editable-title-edit-icon"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
