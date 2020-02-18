@@ -25,10 +25,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const security = getService('security');
   const filterBar = getService('filterBar');
 
   describe('Discover', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_user', 'test_logstash_reader']);
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.update({
