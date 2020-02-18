@@ -37,7 +37,10 @@
     "savedObjects": "src/plugins/saved_objects",
     "server": "src/legacy/server",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": "src/legacy/core_plugins/telemetry",
+    "telemetry": [
+      "src/legacy/core_plugins/telemetry",
+      "src/plugins/telemetry"
+    ],
     "tileMap": "src/legacy/core_plugins/tile_map",
     "timelion": ["src/legacy/core_plugins/timelion", "src/legacy/core_plugins/vis_type_timelion", "src/plugins/timelion"],
     "uiActions": "src/plugins/ui_actions",

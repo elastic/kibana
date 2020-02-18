@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -66,8 +67,17 @@ function valdiateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
+  let url: URL;
   try {
-    configurationUtilities.ensureWhitelistedUri(secretsObject.webhookUrl);
+    url = new URL(secretsObject.webhookUrl);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
+    });
+  }
+
+  try {
+    configurationUtilities.ensureWhitelistedHostname(url.hostname);
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',

@@ -5,8 +5,12 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import * as t from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { alertStateSchema } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId } from '../../types';
+import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
@@ -20,6 +24,27 @@ export async function loadAlert({
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+}
+
+type EmptyHttpResponse = '';
+export async function loadAlertState({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<AlertTaskState> {
+  return await http
+    .get(`${BASE_ALERT_API_PATH}/${alertId}/state`)
+    .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
+    .then((state: AlertTaskState) => {
+      return pipe(
+        alertStateSchema.decode(state),
+        fold((e: t.Errors) => {
+          throw new Error(`Alert "${alertId}" has invalid state`);
+        }, t.identity)
+      );
+    });
 }
 
 export async function loadAlerts({
@@ -131,6 +156,30 @@ export async function disableAlerts({
   http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => disableAlert({ id, http })));
+}
+
+export async function muteAlertInstance({
+  id,
+  instanceId,
+  http,
+}: {
+  id: string;
+  instanceId: string;
+  http: HttpSetup;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_mute`);
+}
+
+export async function unmuteAlertInstance({
+  id,
+  instanceId,
+  http,
+}: {
+  id: string;
+  instanceId: string;
+  http: HttpSetup;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_unmute`);
 }
 
 export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {

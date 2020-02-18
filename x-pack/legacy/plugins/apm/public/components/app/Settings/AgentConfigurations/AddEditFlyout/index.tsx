@@ -26,7 +26,7 @@ import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
-import { ServiceSection } from './ServiceSection';
+import { ServiceForm } from '../../../../shared/ServiceForm';
 import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
@@ -34,6 +34,7 @@ import { isRumAgentName } from '../../../../../../common/agent_name';
 import { ALL_OPTION_VALUE } from '../../../../../../common/agent_configuration_constants';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
+import { useUiTracker } from '../../../../../../../../../plugins/observability/public';
 
 const defaultSettings = {
   TRANSACTION_SAMPLE_RATE: '1.0',
@@ -58,6 +59,9 @@ export function AddEditFlyout({
   const [isSaving, setIsSaving] = useState(false);
 
   const callApmApiFromHook = useCallApmApi();
+
+  // get a telemetry UI event tracker
+  const trackApmEvent = useUiTracker({ app: 'apm' });
 
   // config conditions (service)
   const [serviceName, setServiceName] = useState<string>(
@@ -133,7 +137,8 @@ export function AddEditFlyout({
       transactionMaxSpans,
       configurationId: selectedConfig ? selectedConfig.id : undefined,
       agentName,
-      toasts
+      toasts,
+      trackApmEvent
     });
     setIsSaving(false);
     onSaved();
@@ -176,16 +181,16 @@ export function AddEditFlyout({
                 }
               }}
             >
-              <ServiceSection
+              <ServiceForm
                 isReadOnly={Boolean(selectedConfig)}
                 //
                 // environment
                 environment={environment}
-                setEnvironment={setEnvironment}
+                onEnvironmentChange={setEnvironment}
                 //
                 // serviceName
                 serviceName={serviceName}
-                setServiceName={setServiceName}
+                onServiceNameChange={setServiceName}
               />
 
               <EuiSpacer />

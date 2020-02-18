@@ -77,12 +77,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               200
             </code>
           </span>
@@ -101,12 +97,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:200
             </code>
           </span>
@@ -125,12 +117,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499]
             </code>
           </span>
@@ -149,12 +137,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499] AND extension:PHP
             </code>
           </span>
@@ -173,12 +157,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499] AND (extension:php OR extension:html)
             </code>
           </span>
@@ -291,15 +271,9 @@ Array [
           <div
             class="euiSpacer euiSpacer--s"
           />
-          <div
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
-          >
-            <pre
-              class="euiCodeBlock__pre"
-            >
-              <code
-                class="euiCodeBlock__code"
-              >
+          <div>
+            <pre>
+              <code>
                 {"reason":"Awful error"}
               </code>
             </pre>
@@ -320,15 +294,9 @@ Array [
           <div
             class="euiSpacer euiSpacer--s"
           />
-          <div
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
-          >
-            <pre
-              class="euiCodeBlock__pre"
-            >
-              <code
-                class="euiCodeBlock__code"
-              >
+          <div>
+            <pre>
+              <code>
                 {"reason":"Bad error"}
               </code>
             </pre>

@@ -9,9 +9,9 @@ import { get, pick } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from './components/shared_imports';
+import { FormData, FormHook, FormSchema } from '../../shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
 interface GetStepsData {
@@ -34,7 +34,7 @@ export const getStepsData = ({
           index: rule.index,
           queryBar: {
             query: { query: rule.query as string, language: rule.language },
-            filters: rule.filters as esFilters.Filter[],
+            filters: rule.filters as Filter[],
             saved_id: rule.saved_id ?? null,
           },
         }
