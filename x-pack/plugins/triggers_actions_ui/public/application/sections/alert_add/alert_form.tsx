@@ -160,7 +160,11 @@ export const AlertForm = ({
         // temp hack of API result
         alertTypes.push({
           id: 'threshold',
-          actionGroups: ['alert', 'warning', 'ifUnacknowledged'],
+          actionGroups: [
+            { id: 'alert', name: 'Alert' },
+            { id: 'warning', name: 'Warning' },
+            { id: 'ifUnacknowledged', name: 'If unacknowledged' },
+          ],
           name: 'threshold',
           actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
         });
@@ -169,7 +173,7 @@ export const AlertForm = ({
           index[alertTypeItem.id] = alertTypeItem;
         }
         if (!alertTypeModel?.defaultActionGroup && alert.alertTypeId && index[alert.alertTypeId]) {
-          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
+          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0].id);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -299,7 +303,7 @@ export const AlertForm = ({
             alertTypesIndex[item.id] &&
             alertTypesIndex[item.id].actionGroups.length > 0
           ) {
-            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0]);
+            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0].id);
           }
         }}
       >
