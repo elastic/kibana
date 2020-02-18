@@ -6,11 +6,13 @@
 
 import _ from 'lodash';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
+  IMapSavedObject,
   // @ts-ignore
 } from '../../common/constants';
 
@@ -49,11 +51,11 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns: any[]) {
+function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
-      (field: any) =>
+      field =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
     )
   );
@@ -65,9 +67,9 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects,
   settings,
 }: {
-  mapSavedObjects: any[];
-  indexPatternSavedObjects: any[];
-  settings: any;
+  mapSavedObjects: IMapSavedObject[];
+  indexPatternSavedObjects: IIndexPattern[];
+  settings: object;
 }) {
   const layerLists = mapSavedObjects.map(savedMapObject =>
     JSON.parse(savedMapObject.attributes.layerListJSON)
@@ -75,7 +77,7 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
-    const sourceIdList = lList.map((layer: any) => layer.sourceDescriptor.id);
+    const sourceIdList = lList.map(layer => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -85,7 +87,7 @@ export function buildMapsTelemetry({
   // Count of EMS Vector layers used
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
-      .countBy((layer: any) => {
+      .countBy(layer => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
@@ -144,8 +146,8 @@ export async function getMapsTelemetry(
   savedObjectsClient: SavedObjectsClientContract,
   config: Function
 ) {
-  const mapSavedObjects: Array<Record<string, any>> = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: Array<Record<string, any>> = await getIndexPatternSavedObjects(
+  const mapSavedObjects: IMapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
+  const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );
   const settings = {
