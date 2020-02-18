@@ -7,10 +7,14 @@
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
-import { SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import {
+  ColumnHeaderOptions,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../store/timeline/model';
 import { OnChangeItemsPerPage } from '../timeline/events';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
@@ -86,7 +90,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const toggleColumn = useCallback(
-    (column: ColumnHeader) => {
+    (column: ColumnHeaderOptions) => {
       const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
       if (!exists && upsertColumn != null) {
