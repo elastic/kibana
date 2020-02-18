@@ -1,0 +1,7 @@
+{
+  "id": "upgradeAssistant",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": []
+}
