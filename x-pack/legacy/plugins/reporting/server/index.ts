@@ -10,3 +10,6 @@ import { ReportingPlugin as Plugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
+
+export { ReportingCore } from './core';
+export { ReportingPlugin } from './plugin';
