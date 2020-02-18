@@ -6,7 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { PluginStartContract as AlertingStart } from '../../../../plugins/alerting/server';
+import {
+  PluginStartContract as AlertingStart,
+  PluginSetupContract as AlertingSetup,
+} from '../../../../plugins/alerting/server';
 import {
   CoreSetup,
   CoreStart,
@@ -39,6 +42,7 @@ export interface SetupPlugins {
   features: FeaturesSetup;
   security: SecuritySetup;
   spaces?: SpacesSetup;
+  alerting: AlertingSetup;
 }
 
 export interface StartPlugins {
@@ -132,13 +136,13 @@ export class Plugin {
       },
     });
 
-    if (__legacy.alerting != null) {
+    if (plugins.alerting != null) {
       const type = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
       });
       if (isAlertExecutor(type)) {
-        __legacy.alerting.setup.registerType(type);
+        plugins.alerting.registerType(type);
       }
     }
 
