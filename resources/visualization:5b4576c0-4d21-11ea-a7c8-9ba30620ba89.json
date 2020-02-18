@@ -1,0 +1,24 @@
+{
+   "migrationVersion": {
+      "visualization": "7.4.2"
+   }, 
+   "visualization": {
+      "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"field\":\"Session\"},\"schema\":\"size_node\",\"type\":\"cardinality\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"TotalBytesDelta\"},\"schema\":\"size_edge\",\"type\":\"sum\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"field\":\"SrcIP\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderAgg\":{\"enabled\":true,\"id\":\"3-orderAgg\",\"params\":{\"field\":\"Session\"},\"schema\":{\"aggFilter\":[\"!top_hits\",\"!percentiles\",\"!median\",\"!std_dev\",\"!derivative\",\"!moving_avg\",\"!serial_diff\",\"!cumulative_sum\",\"!avg_bucket\",\"!max_bucket\",\"!min_bucket\",\"!sum_bucket\"],\"editor\":false,\"group\":\"none\",\"hideCustomLabel\":true,\"max\":null,\"min\":0,\"name\":\"orderAgg\",\"params\":[],\"title\":\"Order Agg\"},\"type\":\"cardinality\"},\"orderBy\":\"custom\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":10},\"schema\":\"first\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"4\",\"params\":{\"field\":\"DestIP\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderAgg\":{\"enabled\":true,\"id\":\"4-orderAgg\",\"params\":{\"field\":\"TotalBytesDelta\"},\"schema\":{\"aggFilter\":[\"!top_hits\",\"!percentiles\",\"!median\",\"!std_dev\",\"!derivative\",\"!moving_avg\",\"!serial_diff\",\"!cumulative_sum\",\"!avg_bucket\",\"!max_bucket\",\"!min_bucket\",\"!sum_bucket\"],\"editor\":false,\"group\":\"none\",\"hideCustomLabel\":true,\"max\":null,\"min\":0,\"name\":\"orderAgg\",\"params\":[],\"title\":\"Order Agg\"},\"type\":\"sum\"},\"orderBy\":\"custom\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":5},\"schema\":\"first\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"5\",\"params\":{\"field\":\"Application.keyword\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderBy\":\"2\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":5},\"schema\":\"colornode\",\"type\":\"terms\"}],\"params\":{\"canvasBackgroundColor\":\"#FFFFFF\",\"dimensions\":{\"colornode\":[{\"accessor\":6,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}}],\"first\":[{\"accessor\":0,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}},{\"accessor\":3,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}}],\"metric\":[{\"accessor\":1,\"aggType\":\"cardinality\",\"format\":{\"id\":\"number\"},\"params\":{}},{\"accessor\":2,\"aggType\":\"sum\",\"format\":{\"id\":\"bytes\"},\"params\":{}},{\"accessor\":4,\"aggType\":\"cardinality\",\"format\":{\"id\":\"number\"},\"params\":{}},{\"accessor\":5,\"aggType\":\"sum\",\"format\":{\"id\":\"bytes\"},\"params\":{}},{\"accessor\":7,\"aggType\":\"cardinality\",\"format\":{\"id\":\"number\"},\"params\":{}},{\"accessor\":8,\"aggType\":\"sum\",\"format\":{\"id\":\"bytes\"},\"params\":{}}],\"size_edge\":[],\"size_node\":[]},\"displayArrow\":false,\"firstNodeColor\":\"#6F86D7\",\"gravitationalConstant\":-35000,\"labelColor\":\"#000000\",\"maxEdgeSize\":20,\"maxNodeSize\":80,\"minCutMetricSizeNode\":0,\"minEdgeSize\":0.1,\"minNodeSize\":8,\"nodePhysics\":true,\"posArrow\":\"to\",\"scaleArrow\":1,\"secondNodeColor\":\"#DAA05D\",\"shapeArrow\":\"arrow\",\"shapeFirstNode\":\"circle\",\"shapeSecondNode\":\"box\",\"showColorLegend\":true,\"showLabels\":true,\"showPopup\":true,\"smoothType\":\"continuous\",\"springConstant\":0.001},\"title\":\"Top SrcIPs (By Session) to Their Top DestIPs (By Bandwidth)\",\"type\":\"network\"}", 
+      "description": "", 
+      "title": "Top SrcIPs (By Session) to Their Top DestIPs (By Bandwidth)", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2020-02-18T17:51:22.845Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+      }
+   ]
+}

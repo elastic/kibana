@@ -1,0 +1,46 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.3.0"
+   }, 
+   "references": [
+      {
+         "type": "visualization", 
+         "id": "5b4576c0-4d21-11ea-a7c8-9ba30620ba89", 
+         "name": "panel_0"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "Top-SrcIP-By-Session-(pie)", 
+         "name": "panel_1"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "Top-DestIP-By-Session-(pie)", 
+         "name": "panel_2"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "Top-Applications-By-Bandwidth-(histogram)", 
+         "name": "panel_3"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "7ca7cab0-4f84-11ea-9ef5-7b76731579a6", 
+         "name": "panel_4"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Network Node Link Dashboard", 
+      "panelsJSON": "[{\"version\":\"7.5.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":29,\"i\":\"85cfcb17-2322-4439-a466-8f39894b7ca8\"},\"panelIndex\":\"85cfcb17-2322-4439-a466-8f39894b7ca8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":24,\"y\":0,\"w\":12,\"h\":13,\"i\":\"ca243df1-822e-4d5d-9a69-02ecdd5dbdab\"},\"panelIndex\":\"ca243df1-822e-4d5d-9a69-02ecdd5dbdab\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":13,\"i\":\"b27492e1-1acc-4f06-888c-42a27623d07e\"},\"panelIndex\":\"b27492e1-1acc-4f06-888c-42a27623d07e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":24,\"y\":13,\"w\":24,\"h\":16,\"i\":\"3705a03e-cba4-4d75-9e0c-a22f91483845\"},\"panelIndex\":\"3705a03e-cba4-4d75-9e0c-a22f91483845\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.5.2\",\"gridData\":{\"x\":0,\"y\":29,\"w\":48,\"h\":18,\"i\":\"e322de0f-8768-42ff-bbfa-5286f91f9928\"},\"panelIndex\":\"e322de0f-8768-42ff-bbfa-5286f91f9928\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]", 
+      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+      }
+   }, 
+   "updated_at": "2020-02-18T17:51:22.845Z"
+}
