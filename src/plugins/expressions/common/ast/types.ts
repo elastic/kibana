@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionValue } from '../expression_types';
+import { ExpressionValue, ExpressionValueError } from '../expression_types';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression
@@ -41,10 +41,41 @@ export interface ExpressionAstFunction {
 }
 
 export interface ExpressionAstFunctionDebug {
-  input?: ExpressionValue;
+  /**
+   * True if function successfully returned output, false if function threw.
+   */
+  success: boolean;
+
+  /**
+   * Input that expression function received as its first argument.
+   */
+  input: ExpressionValue;
+
+  /**
+   * Map of resolved arguments expression function received as its second argument.
+   */
+  args: Record<string, ExpressionValue>;
+
+  /**
+   * Result returned by the expression function. Including an error result
+   * if it was returned by the function (not thrown).
+   */
   output?: ExpressionValue;
-  duration?: number;
-  args?: any;
+
+  /**
+   * Error that function threw normalized to `ExpressionValueError`.
+   */
+  error?: ExpressionValueError;
+
+  /**
+   * Raw error that was thrown by the function, if any.
+   */
+  rawError?: any | Error;
+
+  /**
+   * Time in milliseconds it took to execute the function.
+   */
+  duration: number;
 }
 
 export type ExpressionAstArgument = string | boolean | number | ExpressionAstExpression;

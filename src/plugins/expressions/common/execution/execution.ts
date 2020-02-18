@@ -212,6 +212,7 @@ export class Execution<
         if (this.params.debug) {
           (link as any).debug = {
             input,
+            args: resolvedArgs,
             output,
           };
         }

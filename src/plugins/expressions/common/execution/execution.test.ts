@@ -484,6 +484,27 @@ describe('Execution', () => {
       });
     });
 
+    test('stores resolved arguments of a function', async () => {
+      const execution = createExecution(
+        'add val={var_set name=foo value=5 | var name=foo} | add val=10',
+        {},
+        true
+      );
+      execution.start(-1);
+      await execution.result;
+
+      const { chain } = execution.state.get().ast;
+
+      expect(chain[0].debug!.args).toEqual({
+        val: 5,
+      });
+
+      expect((chain[0].arguments.val[0] as ExpressionAstExpression).chain[0].debug!.args).toEqual({
+        name: 'foo',
+        value: 5,
+      });
+    });
+
     test('sore debug information about sub-expressions', async () => {
       const execution = createExecution(
         'add val={var_set name=foo value=5 | var name=foo} | add val=10',
