@@ -17,3 +17,8 @@ export function renderTemplate(str: string, data?: Record<string, string>): stri
 
   return str;
 }
+
+export function getMedianStringLength(strings: string[]) {
+  const sortedStringLengths = strings.map(s => s.length).sort((a, b) => a - b);
+  return sortedStringLengths[Math.floor(sortedStringLengths.length / 2)] || 0;
+}

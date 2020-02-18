@@ -31,6 +31,12 @@ const defaultProps = {
   placeholder: undefined,
 };
 
+jest.mock('../../util/dependency_cache', () => ({
+  getAutocomplete: () => ({
+    getQuerySuggestions: () => {},
+  }),
+}));
+
 describe('KqlFilterBar', () => {
   test('snapshot', () => {
     const wrapper = shallow(<KqlFilterBar {...defaultProps} />);

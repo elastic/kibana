@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker', 'header']);
 
   describe('kibana settings', function describeIndexTests() {
     before(async function() {
@@ -94,14 +94,21 @@ export default function({ getService, getPageObjects }) {
         expect(appState.length).to.be.lessThan(20);
       });
 
-      after(
-        'navigate to settings page and turn state:storeInSessionStorage back to false',
-        async () => {
-          await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickKibanaSettings();
-          await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-        }
-      );
+      it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.header.clickStackManagement();
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
+        await PageObjects.header.clickDashboard();
+        const currentUrl = await browser.getCurrentUrl();
+        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
+        const globalState = urlPieces[2];
+        const appState = urlPieces[3];
+        // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
+        // which is less than 20 characters.
+        expect(globalState.length).to.be.greaterThan(20);
+        expect(appState.length).to.be.greaterThan(20);
+      });
     });
 
     after(async function() {

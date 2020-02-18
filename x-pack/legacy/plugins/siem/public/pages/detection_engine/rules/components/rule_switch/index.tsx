@@ -36,6 +36,7 @@ export interface RuleSwitchProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   optionLabel?: string;
+  onChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -48,6 +49,7 @@ export const RuleSwitchComponent = ({
   isLoading,
   enabled,
   optionLabel,
+  onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
@@ -65,6 +67,9 @@ export const RuleSwitchComponent = ({
             enabled: event.target.checked!,
           });
           setMyEnabled(updatedRules[0].enabled);
+          if (onChange != null) {
+            onChange(updatedRules[0].enabled);
+          }
         } catch {
           setMyIsLoading(false);
         }

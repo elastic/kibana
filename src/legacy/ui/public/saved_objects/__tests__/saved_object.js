@@ -26,7 +26,7 @@ import { createSavedObjectClass } from '../saved_object';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { npStart } from 'ui/new_platform';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
-import { npSetup } from '../../new_platform/new_platform.karma_mock';
+import { npSetup, npStart as npStartMock } from '../../new_platform/new_platform.karma_mock';
 
 const getConfig = cfg => cfg;
 
@@ -34,7 +34,6 @@ describe('Saved Object', function() {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let esDataStub;
   let savedObjectsClientStub;
   let window;
 
@@ -90,28 +89,17 @@ describe('Saved Object', function() {
     obj[fName].restore && obj[fName].restore();
   }
 
-  const mock409FetchError = {
-    res: { status: 409 },
-  };
+  beforeEach(() => {
+    // Use the native window.confirm instead of our specialized version to make testing
+    // this easier.
+    npStartMock.core.overlays.openModal = message =>
+      window.confirm(message) ? Promise.resolve() : Promise.reject();
+  });
 
   beforeEach(
-    ngMock.module(
-      'kibana',
-      // Use the native window.confirm instead of our specialized version to make testing
-      // this easier.
-      function($provide) {
-        const overrideConfirm = message =>
-          window.confirm(message) ? Promise.resolve() : Promise.reject();
-        $provide.decorator('confirmModalPromise', () => overrideConfirm);
-      }
-    )
-  );
-
-  beforeEach(
-    ngMock.inject(function(es, $window) {
+    ngMock.inject(function($window) {
       savedObjectsClientStub = npStart.core.savedObjects.client;
       SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
-      esDataStub = es;
       window = $window;
     })
   );
@@ -130,7 +118,6 @@ describe('Saved Object', function() {
     describe('with confirmOverwrite', function() {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(Bluebird.reject(mock409FetchError));
       }
 
       it('when false does not request overwrite', function() {

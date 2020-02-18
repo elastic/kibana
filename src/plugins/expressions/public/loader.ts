@@ -20,11 +20,13 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
-import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { Data, IExpressionLoaderParams } from './types';
-import { ExpressionAST } from '../common/types';
-import { getInspector } from './services';
+import { IExpressionLoaderParams } from './types';
+import { ExpressionAstExpression } from '../common';
+import { getInspector, getExpressionsService } from './services';
+import { ExecutionContract } from '../common/execution/execution_contract';
+
+type Data = any;
 
 export class ExpressionLoader {
   data$: Observable<Data>;
@@ -33,7 +35,7 @@ export class ExpressionLoader {
   events$: ExpressionRenderHandler['events$'];
   loading$: Observable<void>;
 
-  private dataHandler: ExpressionDataHandler | undefined;
+  private execution: ExecutionContract | undefined;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<boolean>;
@@ -42,7 +44,7 @@ export class ExpressionLoader {
 
   constructor(
     element: HTMLElement,
-    expression?: string | ExpressionAST,
+    expression?: string | ExpressionAstExpression,
     params?: IExpressionLoaderParams
   ) {
     this.dataSubject = new Subject();
@@ -64,8 +66,11 @@ export class ExpressionLoader {
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
 
-    this.update$.subscribe(({ newExpression, newParams }) => {
-      this.update(newExpression, newParams);
+    this.update$.subscribe(value => {
+      if (value) {
+        const { newExpression, newParams } = value;
+        this.update(newExpression, newParams);
+      }
     });
 
     this.data$.subscribe(data => {
@@ -88,26 +93,26 @@ export class ExpressionLoader {
     this.dataSubject.complete();
     this.loadingSubject.complete();
     this.renderHandler.destroy();
-    if (this.dataHandler) {
-      this.dataHandler.cancel();
+    if (this.execution) {
+      this.execution.cancel();
     }
   }
 
   cancel() {
-    if (this.dataHandler) {
-      this.dataHandler.cancel();
+    if (this.execution) {
+      this.execution.cancel();
     }
   }
 
   getExpression(): string | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.getExpression();
+    if (this.execution) {
+      return this.execution.getExpression();
     }
   }
 
-  getAst(): ExpressionAST | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.getAst();
+  getAst(): ExpressionAstExpression | undefined {
+    if (this.execution) {
+      return this.execution.getAst();
     }
   }
 
@@ -125,12 +130,10 @@ export class ExpressionLoader {
   }
 
   inspect(): Adapters | undefined {
-    if (this.dataHandler) {
-      return this.dataHandler.inspect();
-    }
+    return this.execution ? (this.execution.inspect() as Adapters) : undefined;
   }
 
-  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
+  update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
     this.loadingSubject.next(true);
@@ -142,18 +145,22 @@ export class ExpressionLoader {
   }
 
   private loadData = async (
-    expression: string | ExpressionAST,
+    expression: string | ExpressionAstExpression,
     params: IExpressionLoaderParams
   ): Promise<void> => {
-    if (this.dataHandler && this.dataHandler.isPending) {
-      this.dataHandler.cancel();
+    if (this.execution && this.execution.isPending) {
+      this.execution.cancel();
     }
     this.setParams(params);
-    this.dataHandler = new ExpressionDataHandler(expression, params);
-    if (!params.inspectorAdapters) params.inspectorAdapters = this.dataHandler.inspect();
-    const prevDataHandler = this.dataHandler;
+    this.execution = getExpressionsService().execute(expression, params.context, {
+      search: params.searchContext,
+      variables: params.variables || {},
+      inspectorAdapters: params.inspectorAdapters,
+    });
+    if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
+    const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
-    if (this.dataHandler !== prevDataHandler) {
+    if (this.execution !== prevDataHandler) {
       return;
     }
     this.dataSubject.next(data);
@@ -186,7 +193,7 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAST,
+  expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams
 ) => ExpressionLoader;
 

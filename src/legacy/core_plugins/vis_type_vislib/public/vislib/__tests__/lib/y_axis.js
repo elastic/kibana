@@ -19,15 +19,15 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
-import 'ui/persisted_state';
 import $ from 'jquery';
+import expect from '@kbn/expect';
+
 import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 const YAxis = Axis;
-let persistedState;
+let mockUiState;
 let el;
 let buildYAxis;
 let yAxis;
@@ -96,7 +96,7 @@ function createData(seriesData) {
         type: 'histogram',
       },
       data,
-      persistedState,
+      mockUiState,
       node,
       () => undefined
     );
@@ -121,15 +121,10 @@ function createData(seriesData) {
 }
 
 describe('Vislib yAxis Class Test Suite', function() {
-  beforeEach(ngMock.module('kibana'));
-
-  beforeEach(
-    ngMock.inject(function($injector) {
-      persistedState = new ($injector.get('PersistedState'))();
-
-      expect($('.y-axis-wrapper')).to.have.length(0);
-    })
-  );
+  beforeEach(() => {
+    mockUiState = getMockUiState();
+    expect($('.y-axis-wrapper')).to.have.length(0);
+  });
 
   afterEach(function() {
     if (el) {

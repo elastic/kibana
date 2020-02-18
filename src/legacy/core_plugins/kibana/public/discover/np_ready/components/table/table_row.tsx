@@ -18,7 +18,6 @@
  */
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
-import { FieldName } from '../../../kibana_services';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
@@ -27,10 +26,12 @@ import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
+import { FieldName } from '../../angular/directives/field_name/field_name';
 
 export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
+  fieldType?: string;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -46,6 +47,7 @@ export interface Props {
 export function DocViewTableRow({
   field,
   fieldMapping,
+  fieldType,
   displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
@@ -85,7 +87,7 @@ export function DocViewTableRow({
         </td>
       )}
       <td className="kbnDocViewer__field">
-        <FieldName field={fieldMapping} fieldName={field} />
+        <FieldName field={fieldMapping} fieldName={field} fieldType={fieldType} />
       </td>
       <td>
         {isCollapsible && (

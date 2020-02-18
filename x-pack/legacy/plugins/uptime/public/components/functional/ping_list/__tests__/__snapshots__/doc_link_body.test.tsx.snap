@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
+<EuiText>
+  <FormattedMessage
+    defaultMessage="Body not recorded. Read our {docsLink} for more information on recording response bodies."
+    id="xpack.uptime.pingList.expandedRow.response_body.notRecorded"
+    values={
+      Object {
+        "docsLink": <ForwardRef
+          href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+          target="_blank"
+        >
+          docs
+           
+          <EuiIcon
+            size="s"
+            type="popout"
+          />
+        </ForwardRef>,
+      }
+    }
+  />
+</EuiText>
+`;

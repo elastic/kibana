@@ -5,16 +5,24 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { BulkUpdateRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import {
+  BulkUpdateRulesRequest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -28,23 +36,21 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       },
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
+      const { actionsClient, alertsClient, savedObjectsClient, spacesClient } = await getClients(
+        request
+      );
 
-      if (!alertsClient || !actionsClient) {
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
             description,
             enabled,
             false_positives: falsePositives,
             from,
-            immutable,
             query,
             language,
             output_index: outputIndex,
@@ -64,10 +70,11 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             tags,
             to,
             type,
-            threats,
+            threat,
             references,
             version,
           } = payloadRule;
+          const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -75,13 +82,14 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
-              immutable,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
+              savedObjectsClient,
               timelineId,
               timelineTitle,
               meta,
@@ -97,12 +105,22 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               tags,
               to,
               type,
-              threats,
+              threat,
               references,
               version,
             });
             if (rule != null) {
-              return transformOrBulkError(rule.id, rule);
+              const ruleStatuses = await savedObjectsClient.find<
+                IRuleSavedAttributesSavedObjectAttributes
+              >({
+                type: ruleStatusSavedObjectType,
+                perPage: 1,
+                sortField: 'statusDate',
+                sortOrder: 'desc',
+                search: rule.id,
+                searchFields: ['alertId'],
+              });
+              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -116,6 +134,10 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const updateRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createUpdateRulesBulkRoute(server));
+export const updateRulesBulkRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createUpdateRulesBulkRoute(config, getClients));
 };

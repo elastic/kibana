@@ -34,7 +34,7 @@ export class ManagementApp {
   readonly basePath: string;
   readonly order: number;
   readonly mount: ManagementSectionMount;
-  protected enabledStatus: boolean = true;
+  private enabledStatus = true;
 
   constructor(
     { id, title, basePath, order = 100, mount }: CreateManagementApp,
@@ -54,12 +54,18 @@ export class ManagementApp {
       title,
       mount: async ({}, params) => {
         let appUnmount: Unmount;
+        if (!this.enabledStatus) {
+          const [coreStart] = await getStartServices();
+          coreStart.application.navigateToApp('kibana#/management');
+          return () => {};
+        }
         async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
           const [coreStart] = await getStartServices();
           coreStart.chrome.setBreadcrumbs([
             {
               text: i18n.translate('management.breadcrumb', {
-                defaultMessage: 'Management',
+                // todo
+                defaultMessage: 'Stack Management',
               }),
               href: '#/management',
             },

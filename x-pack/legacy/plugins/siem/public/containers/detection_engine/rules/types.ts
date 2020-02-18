@@ -30,7 +30,7 @@ export const NewRuleSchema = t.intersection([
     rule_id: t.string,
     saved_id: t.string,
     tags: t.array(t.string),
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
   }),
@@ -73,7 +73,7 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     type: t.string,
     to: t.string,
-    threats: t.array(t.unknown),
+    threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
   }),
@@ -114,7 +114,6 @@ export interface PaginationOptions {
 export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
-  id?: string;
   signal: AbortSignal;
 }
 
@@ -122,6 +121,9 @@ export interface FilterOptions {
   filter: string;
   sortField: string;
   sortOrder: 'asc' | 'desc';
+  showCustomRules?: boolean;
+  showElasticRules?: boolean;
+  tags?: string[];
 }
 
 export interface FetchRulesResponse {
@@ -146,7 +148,7 @@ export interface DeleteRulesProps {
 }
 
 export interface DuplicateRulesProps {
-  rules: Rules;
+  rules: Rule[];
 }
 
 export interface BasicFetchProps {
@@ -181,11 +183,26 @@ export interface ExportRulesProps {
 }
 
 export interface RuleStatus {
+  current_status: RuleInfoStatus;
+  failures: RuleInfoStatus[];
+}
+
+export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;
-  status: string;
+  status: RuleStatusType | null;
   last_failure_at: string | null;
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
+}
+
+export type RuleStatusResponse = Record<string, RuleStatus>;
+
+export interface PrePackagedRulesStatusResponse {
+  rules_custom_installed: number;
+  rules_installed: number;
+  rules_not_installed: number;
+  rules_not_updated: number;
 }

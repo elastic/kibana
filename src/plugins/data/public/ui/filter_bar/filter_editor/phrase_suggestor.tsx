@@ -63,13 +63,19 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
     this.updateSuggestions(`${value}`);
   };
 
-  protected updateSuggestions = debounce(async (value: string = '') => {
+  protected updateSuggestions = debounce(async (query: string = '') => {
     const { indexPattern, field } = this.props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }
     this.setState({ isLoading: true });
-    const suggestions = await this.services.data.getSuggestions(indexPattern.title, field, value);
+
+    const suggestions = await this.services.data.autocomplete.getValueSuggestions({
+      indexPattern,
+      field,
+      query,
+    });
+
     this.setState({ suggestions, isLoading: false });
   }, 500);
 }

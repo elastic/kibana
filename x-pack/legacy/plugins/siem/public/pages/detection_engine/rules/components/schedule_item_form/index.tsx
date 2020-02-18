@@ -16,7 +16,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 import * as I18n from './translations';
 
@@ -150,7 +150,13 @@ export const ScheduleItem = ({
           />
         }
       >
-        <EuiFieldNumber fullWidth min={0} onChange={onChangeTimeVal} value={timeVal} {...rest} />
+        <EuiFieldNumber
+          fullWidth
+          min={minimumValue}
+          onChange={onChangeTimeVal}
+          value={timeVal}
+          {...rest}
+        />
       </EuiFormControlLayout>
     </StyledEuiFormRow>
   );

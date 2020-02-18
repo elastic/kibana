@@ -18,10 +18,24 @@
  */
 
 import { PluginInitializerContext } from '../../../../core/public';
-import { KbnVislibVisTypesPlugin as Plugin } from './plugin';
+import { VisTypeVislibPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
+export {
+  BasicOptions,
+  RangeOption,
+  ColorRanges,
+  SelectOption,
+  SetColorSchemaOptionsValue,
+  ColorSchemaOptions,
+  NumberInputOption,
+  SwitchOption,
+  TextInputOption,
+} from './components';
+
 export { ColorModes } from './utils/collections';
+
+export * from './types';

@@ -7,18 +7,18 @@
 import { Legacy } from 'kibana';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import {
-  ServerFacade,
-  ResponseFacade,
-  HeadlessChromiumDriverFactory,
-  ReportingResponseToolkit,
-  Logger,
-  JobDocOutputExecuted,
-} from '../../types';
-import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
+import {
+  JobDocOutput,
+  Logger,
+  ReportingResponseToolkit,
+  ResponseFacade,
+  ServerFacade,
+} from '../../types';
+import { ReportingSetupDeps, ReportingCore } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -30,10 +30,13 @@ import { makeRequestFacade } from './lib/make_request_facade';
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
+  reporting: ReportingCore,
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
+  const { elasticsearch } = plugins;
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -55,10 +58,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
        *
        * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
-      const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server, {
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      });
+      const createJobFn = createJobFactory(reporting, server, elasticsearch, logger);
+      const executeJobFn = await executeJobFactory(reporting, server, elasticsearch, logger);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,
@@ -68,7 +69,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
+      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

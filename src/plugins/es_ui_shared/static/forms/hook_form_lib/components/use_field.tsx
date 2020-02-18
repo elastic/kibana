@@ -29,17 +29,27 @@ export interface Props {
   defaultValue?: unknown;
   component?: FunctionComponent<any> | 'input';
   componentProps?: Record<string, any>;
+  readDefaultValueOnForm?: boolean;
   onChange?: (value: unknown) => void;
   children?: (field: FieldHook) => JSX.Element;
 }
 
 export const UseField = React.memo(
-  ({ path, config, defaultValue, component, componentProps, onChange, children }: Props) => {
+  ({
+    path,
+    config,
+    defaultValue,
+    component,
+    componentProps,
+    readDefaultValueOnForm = true,
+    onChange,
+    children,
+  }: Props) => {
     const form = useFormContext();
     component = component === undefined ? 'input' : component;
     componentProps = componentProps === undefined ? {} : componentProps;
 
-    if (typeof defaultValue === 'undefined') {
+    if (typeof defaultValue === 'undefined' && readDefaultValueOnForm) {
       defaultValue = form.getFieldDefaultValue(path);
     }
 

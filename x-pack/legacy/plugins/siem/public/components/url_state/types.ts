@@ -5,8 +5,15 @@
  */
 
 import ApolloClient from 'apollo-client';
+import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  Filter,
+  FilterManager,
+  SavedQueryService,
+} from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -24,7 +31,7 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  'detection-engine': [
+  detections: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
@@ -53,10 +60,13 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timeline,
   ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  case: [],
 };
 
 export type LocationTypes =
-  | CONSTANTS.detectionEnginePage
+  | CONSTANTS.caseDetails
+  | CONSTANTS.casePage
+  | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails
@@ -72,7 +82,7 @@ export interface Timeline {
 
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
-  [CONSTANTS.filters]?: esFilters.Filter[];
+  [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: Timeline;
@@ -109,6 +119,7 @@ export type UrlStateContainerPropTypes = RouteSpyState &
 
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
+  pageName: string | undefined;
   urlState: UrlState;
 }
 
@@ -120,8 +131,10 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
+  filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
+  savedQueries: SavedQueryService;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];
@@ -136,3 +149,21 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
+
+export interface ReplaceStateInLocation<T> {
+  history?: H.History;
+  urlStateToReplace: T;
+  urlStateKey: string;
+  pathName: string;
+  search: string;
+}
+
+export interface UpdateUrlStateString {
+  isInitializing: boolean;
+  history?: H.History;
+  newUrlStateString: string;
+  pathName: string;
+  search: string;
+  updateTimerange: boolean;
+  urlKey: KeyUrlState;
+}

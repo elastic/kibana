@@ -21,12 +21,9 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { AggConfig } from '../../agg_types/agg_config';
-import { Vis } from '..';
-import { AggConfigs } from '../../agg_types/agg_configs';
+import { AggConfig, AggConfigs, AggGroupNames, Schemas } from '../../agg_types';
+import { start as visualizationsStart } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Schemas } from '../editors/default/schemas';
-import { AggGroupNames } from '../editors/default/agg_groups';
 
 describe('AggConfigs', function() {
   let indexPattern;
@@ -41,7 +38,7 @@ describe('AggConfigs', function() {
 
   describe('constructor', function() {
     it('handles passing just a vis', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [],
       });
@@ -51,7 +48,7 @@ describe('AggConfigs', function() {
     });
 
     it('converts configStates into AggConfig objects if they are not already', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [],
       });
@@ -75,7 +72,7 @@ describe('AggConfigs', function() {
     });
 
     it('attempts to ensure that all states have an id', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [],
       });
@@ -157,7 +154,7 @@ describe('AggConfigs', function() {
 
   describe('#getRequestAggs', function() {
     it('performs a stable sort, but moves metrics to the bottom', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'avg', schema: 'metric' },
@@ -188,7 +185,7 @@ describe('AggConfigs', function() {
 
   describe('#getResponseAggs', function() {
     it('returns all request aggs for basic aggs', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'split' },
@@ -209,7 +206,7 @@ describe('AggConfigs', function() {
     });
 
     it('expands aggs that have multiple responses', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'split' },
@@ -234,14 +231,14 @@ describe('AggConfigs', function() {
 
   describe('#toDsl', function() {
     it('uses the sorted aggs', function() {
-      const vis = new Vis(indexPattern, { type: 'histogram' });
+      const vis = new visualizationsStart.Vis(indexPattern, { type: 'histogram' });
       sinon.spy(vis.aggs, 'getRequestAggs');
       vis.aggs.toDsl();
       expect(vis.aggs.getRequestAggs).to.have.property('callCount', 1);
     });
 
     it('calls aggConfig#toDsl() on each aggConfig and compiles the nested output', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'date_histogram', schema: 'segment' },
@@ -275,7 +272,7 @@ describe('AggConfigs', function() {
     });
 
     it("skips aggs that don't have a dsl representation", function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -298,7 +295,7 @@ describe('AggConfigs', function() {
     });
 
     it('writes multiple metric aggregations at the same level', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -329,7 +326,7 @@ describe('AggConfigs', function() {
     });
 
     it('writes multiple metric aggregations at every level if the vis is hierarchical', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           { type: 'terms', schema: 'segment', params: { field: 'ip', orderBy: 1 } },
@@ -365,7 +362,7 @@ describe('AggConfigs', function() {
     });
 
     it('adds the parent aggs of nested metrics at every level if the vis is hierarchical', function() {
-      const vis = new Vis(indexPattern, {
+      const vis = new visualizationsStart.Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {

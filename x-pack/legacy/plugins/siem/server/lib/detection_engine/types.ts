@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { CallAPIOptions } from '../../../../../../../src/core/server';
+import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 
-export type PartialFilter = Partial<esFilters.Filter>;
+export type PartialFilter = Partial<Filter>;
 
 export interface IMitreAttack {
   id: string;
@@ -18,11 +19,10 @@ export interface IMitreAttack {
 export interface ThreatParams {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }
 
 export interface RuleAlertParams {
-  createdAt: string;
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -46,10 +46,9 @@ export interface RuleAlertParams {
   to: string;
   timelineId: string | undefined | null;
   timelineTitle: string | undefined | null;
-  threats: ThreatParams[] | undefined | null;
+  threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  updatedAt: string;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
@@ -58,14 +57,13 @@ export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
   | 'ruleId'
   | 'falsePositives'
+  | 'immutable'
   | 'maxSignals'
   | 'savedId'
   | 'riskScore'
   | 'timelineId'
   | 'timelineTitle'
   | 'outputIndex'
-  | 'updatedAt'
-  | 'createdAt'
 > &
   Omit<
     IRuleStatusAttributes,
@@ -85,8 +83,8 @@ export type RuleAlertParamsRest = Omit<
     max_signals: RuleAlertParams['maxSignals'];
     risk_score: RuleAlertParams['riskScore'];
     output_index: RuleAlertParams['outputIndex'];
-    created_at: RuleAlertParams['createdAt'];
-    updated_at: RuleAlertParams['updatedAt'];
+    created_at: string;
+    updated_at: string;
     status?: IRuleStatusAttributes['status'] | undefined;
     status_date?: IRuleStatusAttributes['statusDate'] | undefined;
     last_failure_at?: IRuleStatusAttributes['lastFailureAt'] | undefined;
@@ -99,11 +97,30 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
+  immutable: boolean;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
   id: string | undefined | null;
   rule_id: string;
+  immutable: boolean;
 };
 
-export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;
+export type PrepackagedRules = Omit<
+  RuleAlertParamsRest,
+  | 'status'
+  | 'status_date'
+  | 'last_failure_at'
+  | 'last_success_at'
+  | 'last_failure_message'
+  | 'last_success_message'
+  | 'updated_at'
+  | 'created_at'
+> & { rule_id: string; immutable: boolean };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CallWithRequest<T extends Record<string, any>, V> = (
+  endpoint: string,
+  params: T,
+  options?: CallAPIOptions
+) => Promise<V>;

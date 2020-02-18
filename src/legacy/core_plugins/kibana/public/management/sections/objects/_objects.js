@@ -21,7 +21,6 @@ import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectIndexHTML from './_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -35,15 +34,13 @@ import { getIndexBreadcrumbs } from './breadcrumbs';
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
 function updateObjectsTable($scope, $injector) {
-  const Private = $injector.get('Private');
   const indexPatterns = npStart.plugins.data.indexPatterns;
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
-  const confirmModalPromise = $injector.get('confirmModalPromise');
 
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const services = savedObjectManagementRegistry.all().map(obj => obj.service);
   const uiCapabilites = npStart.core.application.capabilities;
 
   $scope.$$postDigest(() => {
@@ -56,7 +53,7 @@ function updateObjectsTable($scope, $injector) {
       <I18nContext>
         <ObjectsTable
           savedObjectsClient={savedObjectsClient}
-          confirmModalPromise={confirmModalPromise}
+          confirmModalPromise={npStart.core.overlays.openConfirm}
           services={services}
           indexPatterns={indexPatterns}
           $http={$http}

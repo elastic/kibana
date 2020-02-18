@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 import { Data } from '../../lib/data';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 const seriesData = {
   label: '',
@@ -153,14 +152,11 @@ const colsData = {
 };
 
 describe('Vislib Data Class Test Suite', function() {
-  let persistedState;
+  let mockUiState;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      persistedState = new ($injector.get('PersistedState'))();
-    })
-  );
+  beforeEach(() => {
+    mockUiState = getMockUiState();
+  });
 
   describe('Data Class (main)', function() {
     it('should be a function', function() {
@@ -168,7 +164,7 @@ describe('Vislib Data Class Test Suite', function() {
     });
 
     it('should return an object', function() {
-      const rowIn = new Data(rowsData, persistedState, () => undefined);
+      const rowIn = new Data(rowsData, mockUiState, () => undefined);
       expect(_.isObject(rowIn)).to.be(true);
     });
   });
@@ -182,7 +178,7 @@ describe('Vislib Data Class Test Suite', function() {
     };
 
     beforeEach(function() {
-      data = new Data(pieData, persistedState, () => undefined);
+      data = new Data(pieData, mockUiState, () => undefined);
     });
 
     it('should remove zero values', function() {
@@ -196,7 +192,7 @@ describe('Vislib Data Class Test Suite', function() {
     let serOut;
 
     beforeEach(function() {
-      serIn = new Data(seriesData, persistedState, () => undefined);
+      serIn = new Data(seriesData, mockUiState, () => undefined);
       serOut = serIn.flatten();
     });
 
@@ -210,7 +206,7 @@ describe('Vislib Data Class Test Suite', function() {
 
     function testLength(inputData) {
       return function() {
-        const data = new Data(inputData, persistedState, () => undefined);
+        const data = new Data(inputData, mockUiState, () => undefined);
         const len = _.reduce(
           data.chartData(),
           function(sum, chart) {
@@ -266,7 +262,7 @@ describe('Vislib Data Class Test Suite', function() {
     };
 
     beforeEach(function() {
-      data = new Data(geohashGridData, persistedState, () => undefined);
+      data = new Data(geohashGridData, mockUiState, () => undefined);
     });
 
     describe('getVisData', function() {
@@ -287,7 +283,7 @@ describe('Vislib Data Class Test Suite', function() {
 
   describe('null value check', function() {
     it('should return false', function() {
-      const data = new Data(rowsData, persistedState, () => undefined);
+      const data = new Data(rowsData, mockUiState, () => undefined);
       expect(data.hasNullValues()).to.be(false);
     });
 
@@ -307,7 +303,7 @@ describe('Vislib Data Class Test Suite', function() {
         ],
       });
 
-      const data = new Data(nullRowData, persistedState, () => undefined);
+      const data = new Data(nullRowData, mockUiState, () => undefined);
       expect(data.hasNullValues()).to.be(true);
     });
   });

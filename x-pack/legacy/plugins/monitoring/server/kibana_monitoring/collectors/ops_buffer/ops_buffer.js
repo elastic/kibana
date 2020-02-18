@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../../common/constants';
 import { EventRoller } from './event_roller';
 import { CloudDetector } from '../../../cloud';
 
@@ -13,11 +12,11 @@ import { CloudDetector } from '../../../cloud';
  * @param {Object} server HapiJS server instance
  * @return {Object} the revealed `push` and `flush` modules
  */
-export function opsBuffer({ config, log, getOSInfo }) {
+export function opsBuffer({ config, getOSInfo }) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
 
-  if (config.get('xpack.monitoring.tests.cloud_detector.enabled')) {
+  if (config.get('monitoring.tests.cloud_detector.enabled')) {
     cloudDetector.detectCloudService();
   }
 
@@ -26,7 +25,6 @@ export function opsBuffer({ config, log, getOSInfo }) {
   return {
     push(event) {
       eventRoller.addEvent(event);
-      log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
     },
 
     hasEvents() {

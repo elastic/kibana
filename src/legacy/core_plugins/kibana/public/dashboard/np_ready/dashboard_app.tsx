@@ -19,35 +19,32 @@
 
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+import { History } from 'history';
 
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-  IInjector,
-  KbnUrl,
-} from '../legacy_imports';
+import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
   TimeRange,
   Query,
-  esFilters,
+  Filter,
   SavedQuery,
 } from '../../../../../../plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
+import { IKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public/';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
-  appState: TAppState;
+  appState: DashboardAppState;
   screenTitle: string;
   model: {
     query: Query;
-    filters: esFilters.Filter[];
+    filters: Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -60,7 +57,6 @@ export interface DashboardAppScope extends ng.IScope {
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: IIndexPattern[];
-  $evalAsync: any;
   dashboardViewMode: ViewMode;
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
@@ -73,9 +69,9 @@ export interface DashboardAppScope extends ng.IScope {
     isPaused: boolean;
     refreshInterval: any;
   }) => void;
-  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
+  onFiltersUpdated: (filters: Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: esFilters.Filter[]) => void;
+  onApplyFilters: (filters: Filter[]) => void;
   onQuerySaved: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
@@ -91,11 +87,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
-    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-    const config = deps.uiSettings;
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -105,20 +96,16 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        getAppState: any,
-        globalState: any
+        kbnUrlStateStorage: IKbnUrlStateStorage,
+        history: History
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          getAppState,
-          globalState,
-          kbnUrl,
-          AppStateClass: AppState,
-          config,
-          confirmModal,
-          indexPatterns: deps.npDataStart.indexPatterns,
+          indexPatterns: deps.data.indexPatterns,
+          kbnUrlStateStorage,
+          history,
           ...deps,
         }),
     };

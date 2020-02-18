@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(
         PageObjects.dashboard.getTestVisualizationNames()
       );
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.clickClone();
       await PageObjects.dashboard.confirmClone();

@@ -301,6 +301,14 @@ export enum FlowTarget {
   source = 'source',
 }
 
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns',
+}
+
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
@@ -460,22 +468,14 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-
-  AlertsHistogram: AlertsOverTimeData;
-
-  AnomaliesHistogram: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
-
-  AuthenticationsHistogram: AuthenticationsOverTimeData;
 
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
-
-  EventsHistogram: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -492,6 +492,8 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
+
+  MatrixHistogram: MatrixHistogramOverTimeData;
 
   NetworkTopCountries: NetworkTopCountriesData;
 
@@ -564,36 +566,6 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
-}
-
-export interface AlertsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
-export interface AnomaliesOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -730,12 +702,10 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface AuthenticationsOverTimeData {
-  inspect?: Maybe<Inspect>;
+export interface Inspect {
+  dsl: string[];
 
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
+  response: string[];
 }
 
 export interface TimelineData {
@@ -790,6 +760,8 @@ export interface Ecs {
   host?: Maybe<HostEcsFields>;
 
   network?: Maybe<NetworkEcsField>;
+
+  rule?: Maybe<RuleEcsField>;
 
   signal?: Maybe<SignalField>;
 
@@ -970,6 +942,10 @@ export interface NetworkEcsField {
   transport?: Maybe<string[]>;
 }
 
+export interface RuleEcsField {
+  reference?: Maybe<string[]>;
+}
+
 export interface SignalField {
   rule?: Maybe<RuleField>;
 
@@ -1015,7 +991,7 @@ export interface RuleField {
 
   tags?: Maybe<string[]>;
 
-  threats?: Maybe<ToAny>;
+  threat?: Maybe<ToAny>;
 
   type?: Maybe<string[]>;
 
@@ -1384,14 +1360,6 @@ export interface LastEventTimeData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface EventsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1590,6 +1558,22 @@ export interface KpiHostDetailsData {
   uniqueDestinationIpsHistogram?: Maybe<KpiHostHistogramData[]>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface MatrixHistogramOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x?: Maybe<number>;
+
+  y?: Maybe<number>;
+
+  g?: Maybe<string>;
 }
 
 export interface NetworkTopCountriesData {
@@ -1847,7 +1831,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -2233,24 +2219,6 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
-export interface AlertsHistogramSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  timerange: TimerangeInput;
-
-  stackByField?: Maybe<string>;
-}
-export interface AnomaliesHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
-}
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
@@ -2259,15 +2227,6 @@ export interface AuthenticationsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
-}
-export interface AuthenticationsHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2297,15 +2256,6 @@ export interface LastEventTimeSourceArgs {
   details: LastTimeDetails;
 
   defaultIndex: string[];
-}
-export interface EventsHistogramSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  stackByField?: Maybe<string>;
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2388,6 +2338,17 @@ export interface KpiHostDetailsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+}
+export interface MatrixHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField: string;
+
+  histogramType: HistogramType;
 }
 export interface NetworkTopCountriesSourceArgs {
   id?: Maybe<string>;
@@ -3322,16 +3283,12 @@ export namespace GetKpiNetworkQuery {
 
 export namespace GetMatrixHistogramQuery {
   export type Variables = {
-    isAlertsHistogram: boolean;
-    isAnomaliesHistogram: boolean;
-    isAuthenticationsHistogram: boolean;
-    isDnsHistogram: boolean;
     defaultIndex: string[];
-    isEventsHistogram: boolean;
     filterQuery?: Maybe<string>;
+    histogramType: HistogramType;
     inspect: boolean;
     sourceId: string;
-    stackByField?: Maybe<string>;
+    stackByField: string;
     timerange: TimerangeInput;
   };
 
@@ -3346,19 +3303,11 @@ export namespace GetMatrixHistogramQuery {
 
     id: string;
 
-    AlertsHistogram: AlertsHistogram;
-
-    AnomaliesHistogram: AnomaliesHistogram;
-
-    AuthenticationsHistogram: AuthenticationsHistogram;
-
-    EventsHistogram: EventsHistogram;
-
-    NetworkDnsHistogram: NetworkDnsHistogram;
+    MatrixHistogram: MatrixHistogram;
   };
 
-  export type AlertsHistogram = {
-    __typename?: 'AlertsOverTimeData';
+  export type MatrixHistogram = {
+    __typename?: 'MatrixHistogramOverTimeData';
 
     matrixHistogramData: MatrixHistogramData[];
 
@@ -3370,126 +3319,14 @@ export namespace GetMatrixHistogramQuery {
   export type MatrixHistogramData = {
     __typename?: 'MatrixOverTimeHistogramData';
 
-    x: number;
+    x: Maybe<number>;
 
-    y: number;
+    y: Maybe<number>;
 
-    g: string;
+    g: Maybe<string>;
   };
 
   export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type AnomaliesHistogram = {
-    __typename?: 'AnomaliesOverTimeData';
-
-    matrixHistogramData: _MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<_Inspect>;
-  };
-
-  export type _MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type _Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type AuthenticationsHistogram = {
-    __typename?: 'AuthenticationsOverTimeData';
-
-    matrixHistogramData: __MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<__Inspect>;
-  };
-
-  export type __MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type __Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type EventsHistogram = {
-    __typename?: 'EventsOverTimeData';
-
-    matrixHistogramData: ___MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<___Inspect>;
-  };
-
-  export type ___MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type ___Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type NetworkDnsHistogram = {
-    __typename?: 'NetworkDsOverTimeData';
-
-    matrixHistogramData: ____MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<____Inspect>;
-  };
-
-  export type ____MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type ____Inspect = {
     __typename?: 'Inspect';
 
     dsl: string[];
@@ -4029,7 +3866,9 @@ export namespace GetOverviewHostQuery {
 
     filebeatSystemModule: Maybe<number>;
 
-    winlogbeat: Maybe<number>;
+    winlogbeatSecurity: Maybe<number>;
+
+    winlogbeatMWSysmonOperational: Maybe<number>;
 
     inspect: Maybe<Inspect>;
   };
@@ -4452,6 +4291,8 @@ export namespace GetTimelineQuery {
 
     host: Maybe<Host>;
 
+    rule: Maybe<Rule>;
+
     source: Maybe<_Source>;
 
     destination: Maybe<Destination>;
@@ -4667,6 +4508,12 @@ export namespace GetTimelineQuery {
     ip: Maybe<string[]>;
   };
 
+  export type Rule = {
+    __typename?: 'RuleEcsField';
+
+    reference: Maybe<string[]>;
+  };
+
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
@@ -4788,10 +4635,10 @@ export namespace GetTimelineQuery {
 
     original_time: Maybe<string[]>;
 
-    rule: Maybe<Rule>;
+    rule: Maybe<_Rule>;
   };
 
-  export type Rule = {
+  export type _Rule = {
     __typename?: 'RuleField';
 
     id: Maybe<string[]>;

@@ -5,23 +5,22 @@
  */
 
 import ApolloClient from 'apollo-client';
-import { EuiHorizontalRule, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect } from 'react-redux';
+import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
-import chrome from 'ui/chrome';
 
 import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
-import { fetchUsername, getMeApiUrl } from './helpers';
 import { queryTimelineById, dispatchUpdateTimeline } from '../open_timeline/helpers';
-import { DispatchUpdateTimeline, OnOpenTimeline } from '../open_timeline/types';
-import { RecentTimelines } from './recent_timelines';
+import { OnOpenTimeline } from '../open_timeline/types';
+import { LoadingPlaceholders } from '../page/overview/loading_placeholders';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../store/timeline/actions';
-import { FilterMode } from './types';
 
+import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
+import { FilterMode } from './types';
 
 export interface MeApiResponse {
   username: string;
@@ -32,18 +31,11 @@ interface OwnProps {
   filterBy: FilterMode;
 }
 
-interface DispatchProps {
-  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
-  updateTimeline: DispatchUpdateTimeline;
-}
-
-export type Props = OwnProps & DispatchProps;
+export type Props = OwnProps & PropsFromRedux;
 
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
     const actionDispatcher = updateIsLoading as ActionCreator<{ id: string; isLoading: boolean }>;
-    const [username, setUsername] = useState<string | null | undefined>(undefined);
-    const LoadingSpinner = useMemo(() => <EuiLoadingSpinner size="m" />, []);
     const onOpenTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
         queryTimelineById({
@@ -56,38 +48,6 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       },
       [apolloClient, updateIsLoading, updateTimeline]
     );
-
-    useEffect(() => {
-      let canceled = false;
-
-      const fetchData = async () => {
-        try {
-          const loggedInUser = await fetchUsername(getMeApiUrl(chrome.getBasePath));
-
-          if (!canceled) {
-            setUsername(loggedInUser);
-          }
-        } catch (e) {
-          if (!canceled) {
-            setUsername(null);
-          }
-        }
-      };
-
-      fetchData();
-
-      return () => {
-        canceled = true;
-      };
-    }, []);
-
-    if (username === undefined) {
-      return LoadingSpinner;
-    } else if (username == null) {
-      return null;
-    }
-
-    // TODO: why does `createdBy: <username>` specified as a `search` query does not match results?
 
     const noTimelinesMessage =
       filterBy === 'favorites' ? i18n.NO_FAVORITE_TIMELINES : i18n.NO_TIMELINES;
@@ -108,7 +68,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         {({ timelines, loading }) => (
           <>
             {loading ? (
-              <>{LoadingSpinner}</>
+              <LoadingPlaceholders lines={2} placeholders={filterBy === 'favorites' ? 1 : 5} />
             ) : (
               <RecentTimelines
                 noTimelinesMessage={noTimelinesMessage}
@@ -135,7 +95,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const StatefulRecentTimelines = connect(
-  null,
-  mapDispatchToProps
-)(StatefulRecentTimelinesComponent);
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulRecentTimelines = connector(StatefulRecentTimelinesComponent);

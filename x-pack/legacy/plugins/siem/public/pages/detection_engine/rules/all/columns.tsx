@@ -18,7 +18,7 @@ import React, { Dispatch } from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
-  duplicateRuleAction,
+  duplicateRulesAction,
   editRuleAction,
   exportRulesAction,
 } from './actions';
@@ -30,6 +30,8 @@ import { FormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
 import { SeverityBadge } from '../components/severity_badge';
 import { ActionToaster } from '../../../../components/toasters';
+import { getStatusColor } from '../components/rule_status/helpers';
+import { TruncatableText } from '../../../../components/truncatable_text';
 
 const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -48,7 +50,7 @@ const getActions = (
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
     onClick: (rowItem: TableData) =>
-      duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
+      duplicateRulesAction([rowItem.sourceRule], dispatch, dispatchToaster),
   },
   {
     description: i18n.EXPORT_RULE,
@@ -62,7 +64,6 @@ const getActions = (
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
-    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
 ];
 
@@ -84,10 +85,10 @@ export const getColumns = (
       width: '24%',
     },
     {
-      field: 'method',
-      name: i18n.COLUMN_METHOD,
+      field: 'risk_score',
+      name: i18n.COLUMN_RISK_SCORE,
       truncateText: true,
-      width: '16%',
+      width: '14%',
     },
     {
       field: 'severity',
@@ -114,19 +115,11 @@ export const getColumns = (
       field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
       render: (value: TableData['status']) => {
-        const color =
-          value == null
-            ? 'subdued'
-            : value === 'succeeded'
-            ? 'success'
-            : value === 'failed'
-            ? 'danger'
-            : value === 'executing'
-            ? 'warning'
-            : 'subdued';
         return (
           <>
-            <EuiHealth color={color}>{value ?? getEmptyTagValue()}</EuiHealth>
+            <EuiHealth color={getStatusColor(value ?? null)}>
+              {value ?? getEmptyTagValue()}
+            </EuiHealth>
           </>
         );
       },
@@ -137,13 +130,13 @@ export const getColumns = (
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: TableData['tags']) => (
-        <>
+        <TruncatableText>
           {value.map((tag, i) => (
             <EuiBadge color="hollow" key={`${tag}-${i}`}>
               {tag}
             </EuiBadge>
           ))}
-        </>
+        </TruncatableText>
       ),
       truncateText: true,
       width: '20%',
@@ -162,7 +155,7 @@ export const getColumns = (
         />
       ),
       sortable: true,
-      width: '85px',
+      width: '95px',
     },
   ];
   const actions: RulesColumns[] = [

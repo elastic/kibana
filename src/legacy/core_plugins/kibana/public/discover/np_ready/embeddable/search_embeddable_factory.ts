@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { getServices, IInjector } from '../../kibana_services';
+import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { getServices } from '../../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
@@ -36,13 +38,13 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchEmbeddable
 > {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private $injector: IInjector | null;
-  private getInjector: () => Promise<IInjector> | null;
+  private $injector: auto.IInjectorService | null;
+  private getInjector: () => Promise<auto.IInjectorService> | null;
   public isEditable: () => boolean;
 
   constructor(
-    private readonly executeTriggerActions: TExecuteTriggerActions,
-    getInjector: () => Promise<IInjector>,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
+    getInjector: () => Promise<auto.IInjectorService>,
     isEditable: () => boolean
   ) {
     super({
@@ -77,7 +79,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     if (!this.$injector) {
       this.$injector = await this.getInjector();
     }
-    const $injector = this.$injector as IInjector;
+    const $injector = this.$injector as auto.IInjectorService;
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');

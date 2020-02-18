@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -24,6 +24,7 @@ import {
   createSuccessObject,
   ImportSuccessError,
   createImportErrorObject,
+  OutputError,
 } from '../utils';
 
 export const getIdError = ({
@@ -32,13 +33,22 @@ export const getIdError = ({
 }: {
   id: string | undefined | null;
   ruleId: string | undefined | null;
-}) => {
+}): OutputError => {
   if (id != null) {
-    return Boom.notFound(`id: "${id}" not found`);
+    return {
+      message: `id: "${id}" not found`,
+      statusCode: 404,
+    };
   } else if (ruleId != null) {
-    return Boom.notFound(`rule_id: "${ruleId}" not found`);
+    return {
+      message: `rule_id: "${ruleId}" not found`,
+      statusCode: 404,
+    };
   } else {
-    return Boom.notFound('id or rule_id should have been defined');
+    return {
+      message: 'id or rule_id should have been defined',
+      statusCode: 404,
+    };
   }
 };
 
@@ -81,8 +91,8 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
-    created_at: alert.params.createdAt,
-    updated_at: alert.params.updatedAt,
+    created_at: alert.createdAt.toISOString(),
+    updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -110,7 +120,7 @@ export const transformAlertToRule = (
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
-    threats: alert.params.threats,
+    threat: alert.params.threat,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,
@@ -136,10 +146,10 @@ export const transformAlertsToRules = (
   return alerts.map(alert => transformAlertToRule(alert));
 };
 
-export const transformFindAlertsOrError = (
+export const transformFindAlerts = (
   findResults: { data: unknown[] },
   ruleStatuses?: unknown[]
-): unknown | Boom => {
+): unknown | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
@@ -150,14 +160,14 @@ export const transformFindAlertsOrError = (
     );
     return findResults;
   } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
+    return null;
   }
 };
 
-export const transformOrError = (
+export const transform = (
   alert: unknown,
   ruleStatus?: unknown
-): Partial<OutputRuleAlertRest> | Boom => {
+): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
@@ -166,7 +176,7 @@ export const transformOrError = (
   } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
+    return null;
   }
 };
 
@@ -205,4 +215,12 @@ export const transformOrImportError = (
       existingImportSuccessError,
     });
   }
+};
+
+export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
+  const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
+  if (hasDuplicates) {
+    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
+  }
+  return [];
 };

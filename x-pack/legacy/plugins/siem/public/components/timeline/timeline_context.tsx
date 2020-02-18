@@ -23,6 +23,7 @@ export interface TimelineTypeContextProps {
   selectAll?: boolean;
   timelineActions?: TimelineAction[];
   title?: string;
+  unit?: (totalCount: number) => string;
 }
 const initTimelineType: TimelineTypeContextProps = {
   documentType: undefined,
@@ -32,6 +33,7 @@ const initTimelineType: TimelineTypeContextProps = {
   selectAll: false,
   timelineActions: [],
   title: undefined,
+  unit: undefined,
 };
 export const TimelineTypeContext = createContext<TimelineTypeContextProps>(initTimelineType);
 export const useTimelineTypeContext = () => useContext(TimelineTypeContext);

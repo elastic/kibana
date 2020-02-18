@@ -26,6 +26,7 @@ export const OverviewPageParsingErrorCallout = ({
     })}
     color="danger"
     iconType="alert"
+    style={{ width: '100%' }}
   >
     <p>
       <FormattedMessage

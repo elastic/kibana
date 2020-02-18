@@ -103,12 +103,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
+  HttpServerInfo,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -179,6 +181,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -194,6 +197,8 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
@@ -207,6 +212,15 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeRegistry,
+  SavedObjectsType,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
 } from './saved_objects';
 
 export {
@@ -219,6 +233,8 @@ export {
   ImageValidation,
   DeprecationSettings,
   StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -283,7 +299,7 @@ export interface RequestHandlerContext {
  *
  * @public
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -298,6 +314,13 @@ export interface CoreSetup {
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
+  /**
+   * Allows plugins to get access to APIs available in start inside async handlers.
+   * Promise will not resolve until Core and plugin dependencies have completed `start`.
+   * This should only be used inside handlers registered during `setup` that will only be executed
+   * after `start` lifecycle.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
