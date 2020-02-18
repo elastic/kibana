@@ -6,10 +6,11 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
+import { EuiSuperSelect, EuiSpacer, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
+import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
@@ -25,6 +26,45 @@ export class ColorMapSelect extends Component {
       prevPropsCustomColorMap: nextProps.customColorMap, // reset tracker to latest value
       customColorMap: nextProps.customColorMap, // reset customColorMap to latest value
     };
+  }
+
+  _renderColorMapToggle() {
+    if (!this.props.showColorMapTypeToggle) {
+      return null;
+    }
+    const options = [
+      {
+        value: COLOR_MAP_TYPE.ORDINAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.quantitativeLabel', {
+          defaultMessage: 'Quantitative',
+        }),
+      },
+      {
+        value: COLOR_MAP_TYPE.CATEGORICAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.qualitativeLavel', {
+          defaultMessage: 'Qualitative',
+        }),
+      },
+    ];
+
+    const selectedValue = this.props.styleProperty.isOrdinal()
+      ? COLOR_MAP_TYPE.ORDINAL
+      : COLOR_MAP_TYPE.CATEGORICAL;
+
+    return (
+      <EuiSelect
+        options={options}
+        value={selectedValue}
+        onChange={this.props.onColorMapTypeChange}
+        aria-label={i18n.translate(
+          'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeAriaLabel',
+          {
+            defaultMessage: 'Select to style by gradient or color palette',
+          }
+        )}
+        compressed
+      />
+    );
   }
 
   _onColorMapSelect = selectedValue => {
@@ -100,12 +140,17 @@ export class ColorMapSelect extends Component {
 
     return (
       <Fragment>
-        <EuiSuperSelect
-          options={colorMapOptionsWithCustom}
-          onChange={this._onColorMapSelect}
-          valueOfSelected={valueOfSelected}
-          hasDividers={true}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>{this._renderColorMapToggle()}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSuperSelect
+              options={colorMapOptionsWithCustom}
+              onChange={this._onColorMapSelect}
+              valueOfSelected={valueOfSelected}
+              hasDividers={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {this._renderColorStopsInput()}
       </Fragment>
     );
