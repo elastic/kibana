@@ -83,7 +83,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       if (typeof getSavedObject !== 'function') {
         throw new Error(
           '"getSavedObject" function not available in execution context. ' +
-            'When you execute expression you need to extra execution context ' +
+            'When you execute expression you need to add extra execution context ' +
             'as the third argument and provide "getSavedObject" implementation.'
         );
       }
