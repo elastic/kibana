@@ -36,7 +36,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show trace logs')).not.toBeNull();
+    expect(queryByText('Trace logs')).not.toBeNull();
   });
 
   it('should not render the pod links when there is no pod id', async () => {
@@ -44,8 +44,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show pod logs')).toBeNull();
-    expect(queryByText('Show pod metrics')).toBeNull();
+    expect(queryByText('Pod logs')).toBeNull();
+    expect(queryByText('Pod metrics')).toBeNull();
   });
 
   it('should render the pod links when there is a pod id', async () => {
@@ -53,8 +53,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithKubernetesData
     );
 
-    expect(queryByText('Show pod logs')).not.toBeNull();
-    expect(queryByText('Show pod metrics')).not.toBeNull();
+    expect(queryByText('Pod logs')).not.toBeNull();
+    expect(queryByText('Pod metrics')).not.toBeNull();
   });
 
   it('should not render the container links when there is no container id', async () => {
@@ -62,8 +62,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show container logs')).toBeNull();
-    expect(queryByText('Show container metrics')).toBeNull();
+    expect(queryByText('Container logs')).toBeNull();
+    expect(queryByText('Container metrics')).toBeNull();
   });
 
   it('should render the container links when there is a container id', async () => {
@@ -71,8 +71,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithContainerData
     );
 
-    expect(queryByText('Show container logs')).not.toBeNull();
-    expect(queryByText('Show container metrics')).not.toBeNull();
+    expect(queryByText('Container logs')).not.toBeNull();
+    expect(queryByText('Container metrics')).not.toBeNull();
   });
 
   it('should not render the host links when there is no hostname', async () => {
@@ -80,8 +80,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show host logs')).toBeNull();
-    expect(queryByText('Show host metrics')).toBeNull();
+    expect(queryByText('Host logs')).toBeNull();
+    expect(queryByText('Host metrics')).toBeNull();
   });
 
   it('should render the host links when there is a hostname', async () => {
@@ -89,8 +89,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithHostData
     );
 
-    expect(queryByText('Show host logs')).not.toBeNull();
-    expect(queryByText('Show host metrics')).not.toBeNull();
+    expect(queryByText('Host logs')).not.toBeNull();
+    expect(queryByText('Host metrics')).not.toBeNull();
   });
 
   it('should not render the uptime link if there is no url available', async () => {
@@ -98,7 +98,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should not render the uptime link if there is no domain available', async () => {
@@ -106,7 +106,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlWithoutDomain
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should render the uptime link if there is a url with a domain', async () => {
@@ -114,7 +114,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlAndDomain
     );
 
-    expect(queryByText('View monitor status')).not.toBeNull();
+    expect(queryByText('Status')).not.toBeNull();
   });
 
   it('should match the snapshot', async () => {
