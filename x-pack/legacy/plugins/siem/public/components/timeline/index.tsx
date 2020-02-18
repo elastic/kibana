@@ -8,7 +8,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { WithSource } from '../../containers/source';
+import { useWithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
 import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
@@ -34,6 +34,8 @@ export interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
+
+const EMPTY_INDEX_TO_ADD: string[] = [];
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -76,7 +78,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       ) {
         return [signalIndexName];
       }
-      return [];
+      return EMPTY_INDEX_TO_ADD;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
@@ -164,42 +166,40 @@ const StatefulTimelineComponent = React.memo<Props>(
       }
     }, []);
 
+    const { indexPattern, browserFields } = useWithSource(indexToAdd);
+
     return (
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indexPattern, browserFields }) => (
-          <Timeline
-            browserFields={browserFields}
-            columns={columns}
-            dataProviders={dataProviders!}
-            end={end}
-            eventType={eventType}
-            filters={filters}
-            flyoutHeaderHeight={flyoutHeaderHeight}
-            flyoutHeight={flyoutHeight}
-            id={id}
-            indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            kqlQueryExpression={kqlQueryExpression}
-            loadingIndexName={loading}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onDataProviderEdited={onDataProviderEditedLocal}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
-          />
-        )}
-      </WithSource>
+      <Timeline
+        browserFields={browserFields}
+        columns={columns}
+        dataProviders={dataProviders!}
+        end={end}
+        eventType={eventType}
+        filters={filters}
+        flyoutHeaderHeight={flyoutHeaderHeight}
+        flyoutHeight={flyoutHeight}
+        id={id}
+        indexPattern={indexPattern}
+        indexToAdd={indexToAdd}
+        isLive={isLive}
+        itemsPerPage={itemsPerPage!}
+        itemsPerPageOptions={itemsPerPageOptions!}
+        kqlMode={kqlMode}
+        kqlQueryExpression={kqlQueryExpression}
+        loadingIndexName={loading}
+        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onDataProviderEdited={onDataProviderEditedLocal}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        show={show!}
+        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+        sort={sort!}
+        start={start}
+        toggleColumn={toggleColumn}
+      />
     );
   },
   (prevProps, nextProps) => {
