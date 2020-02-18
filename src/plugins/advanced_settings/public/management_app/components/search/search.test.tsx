@@ -19,7 +19,9 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@elastic/eui';
+
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { Query } from '@elastic/eui';
 import { Search } from './search';
