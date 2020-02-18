@@ -6,7 +6,7 @@
 
 import omit from 'lodash/fp/omit';
 import React from 'react';
-import { InferableComponentEnhancerWithProps } from 'react-redux';
+import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
@@ -25,7 +25,14 @@ interface ChildFunctionRendererOptions<RenderArgs extends {}> {
 export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
   hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>,
   { onInitialize, onCleanup }: ChildFunctionRendererOptions<InjectedProps> = {}
-) =>
+): ConnectedComponent<
+  React.ComponentClass<{}>,
+  {
+    children: RendererFunction<InjectedProps>;
+    initializeOnMount?: boolean;
+    resetOnUnmount?: boolean;
+  } & OwnProps
+> =>
   hoc(
     class ChildFunctionRenderer extends React.Component<ChildFunctionRendererProps<InjectedProps>> {
       public displayName = 'ChildFunctionRenderer';
@@ -53,7 +60,7 @@ export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
           ChildFunctionRendererProps<InjectedProps>,
           keyof InjectedProps
         >;
-    }
+    } as any
   );
 
 export type StateUpdater<State, Props = {}> = (

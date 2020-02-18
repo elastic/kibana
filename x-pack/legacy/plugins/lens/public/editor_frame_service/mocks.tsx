@@ -14,6 +14,7 @@ import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/p
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -103,7 +104,7 @@ export function createExpressionRendererMock(): jest.Mock<
 
 export function createMockSetupDependencies() {
   return ({
-    data: {},
+    data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
   } as unknown) as MockedSetupDependencies;
@@ -111,11 +112,7 @@ export function createMockSetupDependencies() {
 
 export function createMockStartDependencies() {
   return ({
-    data: {
-      indexPatterns: {
-        indexPatterns: {},
-      },
-    },
+    data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
