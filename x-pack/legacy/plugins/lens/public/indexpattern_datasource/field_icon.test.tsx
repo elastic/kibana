@@ -34,14 +34,14 @@ describe('FieldIcon', () => {
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--number"
         color="#54B399"
-        type="number"
+        type="empty"
       />
     `);
     expect(shallow(<FieldIcon type="string" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--string"
-        color="#CA8EAE"
-        type="string"
+        color="#54B399"
+        type="empty"
       />
     `);
     expect(shallow(<FieldIcon type="ip" />)).toMatchInlineSnapshot(`

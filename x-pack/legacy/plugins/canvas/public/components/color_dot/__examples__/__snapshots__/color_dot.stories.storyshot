@@ -126,20 +126,9 @@ Array [
         }
       }
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#000",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#000"
+        data-euiicon-type="plusInCircle"
       />
     </div>
   </div>,
@@ -157,20 +146,9 @@ Array [
         }
       }
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#fff",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#fff"
+        data-euiicon-type="minusInCircle"
       />
     </div>
   </div>,
@@ -188,20 +166,9 @@ Array [
         }
       }
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#fff",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#fff"
+        data-euiicon-type="alert"
       />
     </div>
   </div>,
@@ -219,20 +186,9 @@ Array [
         }
       }
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#fff",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#fff"
+        data-euiicon-type="check"
       />
     </div>
   </div>,

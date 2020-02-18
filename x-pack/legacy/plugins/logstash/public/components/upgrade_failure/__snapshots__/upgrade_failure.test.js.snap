@@ -178,25 +178,10 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                 size="xl"
                                 type="alert"
                               >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
+                                <div
+                                  data-euiicon-type="alert"
+                                  size="xl"
+                                />
                               </EuiIcon>
                             </div>
                           </EuiFlexItem>
@@ -520,25 +505,10 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                 size="xl"
                                 type="alert"
                               >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
+                                <div
+                                  data-euiicon-type="alert"
+                                  size="xl"
+                                />
                               </EuiIcon>
                             </div>
                           </EuiFlexItem>
@@ -862,25 +832,10 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                 size="xl"
                                 type="alert"
                               >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
+                                <div
+                                  data-euiicon-type="alert"
+                                  size="xl"
+                                />
                               </EuiIcon>
                             </div>
                           </EuiFlexItem>

@@ -74,16 +74,11 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="vector"
+                size="m"
               />
             </button>
           </span>
@@ -108,16 +103,11 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="sortDown"
+                  size="m"
                 />
               </button>
             </div>
@@ -143,16 +133,11 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="copyClipboard"
+                  size="m"
                 />
               </button>
             </div>
@@ -174,16 +159,11 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="trash"
+                size="m"
               />
             </button>
           </span>
@@ -268,16 +248,11 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="vector"
+                size="m"
               />
             </button>
           </span>
@@ -302,16 +277,11 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="sortDown"
+                  size="m"
                 />
               </button>
             </div>
@@ -337,16 +307,11 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="copyClipboard"
+                  size="m"
                 />
               </button>
             </div>
@@ -368,16 +333,11 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="trash"
+                size="m"
               />
             </button>
           </span>

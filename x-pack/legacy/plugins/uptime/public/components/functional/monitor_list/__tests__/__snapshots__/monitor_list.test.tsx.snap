@@ -273,15 +273,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <svg
-                            aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            color=""
+                            data-euiicon-type="dot"
                           />
                         </div>
                         <div
@@ -359,16 +353,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 >
                    
-                  <svg
-                    aria-hidden="true"
-                    class="euiIcon euiIcon--small euiIcon-isLoading"
-                    focusable="false"
-                    height="16"
-                    role="img"
-                    style="fill:subbdued"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <div
+                    color="subbdued"
+                    data-euiicon-type="popout"
                   />
                 </button>
               </div>
@@ -406,15 +393,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiButtonIcon euiButtonIcon--primary"
                   type="button"
                 >
-                  <svg
+                  <div
                     aria-hidden="true"
-                    class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height="16"
-                    role="img"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
                   />
                 </button>
               </div>
@@ -451,15 +433,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <svg
-                            aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            color=""
+                            data-euiicon-type="dot"
                           />
                         </div>
                         <div
@@ -537,16 +513,9 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   type="button"
                 >
                    
-                  <svg
-                    aria-hidden="true"
-                    class="euiIcon euiIcon--small euiIcon-isLoading"
-                    focusable="false"
-                    height="16"
-                    role="img"
-                    style="fill:subbdued"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <div
+                    color="subbdued"
+                    data-euiicon-type="popout"
                   />
                 </button>
               </div>
@@ -584,15 +553,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiButtonIcon euiButtonIcon--primary"
                   type="button"
                 >
-                  <svg
+                  <div
                     aria-hidden="true"
-                    class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height="16"
-                    role="img"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
+                    class="euiButtonIcon__icon"
+                    data-euiicon-type="arrowDown"
                   />
                 </button>
               </div>
@@ -618,15 +582,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
         disabled=""
         type="button"
       >
-        <svg
+        <div
           aria-hidden="true"
-          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height="16"
-          role="img"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="arrowLeft"
         />
       </button>
     </div>
@@ -640,15 +599,10 @@ exports[`MonitorList component renders the monitor list 1`] = `
         disabled=""
         type="button"
       >
-        <svg
+        <div
           aria-hidden="true"
-          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height="16"
-          role="img"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="arrowRight"
         />
       </button>
     </div>

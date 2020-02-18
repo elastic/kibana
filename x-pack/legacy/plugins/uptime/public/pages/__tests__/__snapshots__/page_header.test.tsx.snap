@@ -488,25 +488,12 @@ exports[`PageHeaderComponent mount expected page title for valid monitor route 1
                                                 size="m"
                                                 type="arrowDown"
                                               >
-                                                <EuiIconEmpty
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  />
-                                                </EuiIconEmpty>
+                                                <div
+                                                  aria-hidden="true"
+                                                  className="euiButtonEmpty__icon"
+                                                  data-euiicon-type="arrowDown"
+                                                  size="m"
+                                                />
                                               </EuiIcon>
                                               <span
                                                 className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
@@ -514,25 +501,9 @@ exports[`PageHeaderComponent mount expected page title for valid monitor route 1
                                                 <EuiIcon
                                                   type="clock"
                                                 >
-                                                  <EuiIconEmpty
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                                    focusable="false"
-                                                    role="img"
-                                                    style={null}
-                                                  >
-                                                    <svg
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                                      focusable="false"
-                                                      height={16}
-                                                      role="img"
-                                                      style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width={16}
-                                                      xmlns="http://www.w3.org/2000/svg"
-                                                    />
-                                                  </EuiIconEmpty>
+                                                  <div
+                                                    data-euiicon-type="clock"
+                                                  />
                                                 </EuiIcon>
                                               </span>
                                             </span>
@@ -639,25 +610,12 @@ exports[`PageHeaderComponent mount expected page title for valid monitor route 1
                                         size="m"
                                         type="refresh"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                        <div
+                                          aria-hidden="true"
+                                          className="euiButton__icon"
+                                          data-euiicon-type="refresh"
+                                          size="m"
+                                        />
                                       </EuiIcon>
                                       <span
                                         className="euiButton__text euiSuperUpdateButton__text"
@@ -739,28 +697,16 @@ Array [
                   <span
                     class="euiButtonEmpty__content"
                   >
-                    <svg
+                    <div
                       aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                      class="euiButtonEmpty__icon"
+                      data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        data-euiicon-type="clock"
                       />
                     </span>
                   </span>
@@ -802,15 +748,10 @@ Array [
               <span
                 class="euiButton__content"
               >
-                <svg
+                <div
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  class="euiButton__icon"
+                  data-euiicon-type="refresh"
                 />
                 <span
                   class="euiButton__text euiSuperUpdateButton__text"
@@ -872,28 +813,16 @@ Array [
                   <span
                     class="euiButtonEmpty__content"
                   >
-                    <svg
+                    <div
                       aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                      class="euiButtonEmpty__icon"
+                      data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        data-euiicon-type="clock"
                       />
                     </span>
                   </span>
@@ -935,15 +864,10 @@ Array [
               <span
                 class="euiButton__content"
               >
-                <svg
+                <div
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  class="euiButton__icon"
+                  data-euiicon-type="refresh"
                 />
                 <span
                   class="euiButton__text euiSuperUpdateButton__text"
@@ -1005,28 +929,16 @@ Array [
                   <span
                     class="euiButtonEmpty__content"
                   >
-                    <svg
+                    <div
                       aria-hidden="true"
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height="16"
-                      role="img"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                      class="euiButtonEmpty__icon"
+                      data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        data-euiicon-type="clock"
                       />
                     </span>
                   </span>
@@ -1068,15 +980,10 @@ Array [
               <span
                 class="euiButton__content"
               >
-                <svg
+                <div
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  class="euiButton__icon"
+                  data-euiicon-type="refresh"
                 />
                 <span
                   class="euiButton__text euiSuperUpdateButton__text"
