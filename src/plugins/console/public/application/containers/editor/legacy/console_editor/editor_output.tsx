@@ -26,7 +26,7 @@ import {
   useRequestReadContext,
 } from '../../../../contexts';
 
-import * as utils from '../../../../../lib/utils/utils';
+import { expandLiteralStrings } from '../../../../../../../es_ui_shared/console_lang/lib';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
@@ -67,7 +67,7 @@ function EditorOutputUI() {
       editor.update(
         data
           .map(d => d.response.value as string)
-          .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
+          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : a => a)
           .join('\n')
       );
     } else if (error) {

@@ -16,7 +16,7 @@ const noop = () => undefined;
 interface LogTimeControlsProps {
   currentTime: number | null;
   startLiveStreaming: () => any;
-  stopLiveStreaming: () => any;
+  stopLiveStreaming: () => void;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
 }
