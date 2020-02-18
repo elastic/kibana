@@ -48,7 +48,7 @@ export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEA
       signal: options.signal,
     });
 
-    response.then(() => loadingCount$.next(loadingCount$.getValue() - 1));
+    response.finally(() => loadingCount$.next(loadingCount$.getValue() - 1));
 
     return from(response);
   };
