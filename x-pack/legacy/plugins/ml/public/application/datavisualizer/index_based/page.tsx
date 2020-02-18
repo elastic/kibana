@@ -38,7 +38,7 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { useMlKibana } from '../../contexts/kibana';
+import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
@@ -97,11 +97,13 @@ function getDefaultPageState(): DataVisualizerPageState {
 }
 
 export const Page: FC = () => {
-  const { services } = useMlKibana();
   const mlContext = useMlContext();
 
-  const { timefilter } = services.data.query.timefilter;
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const timefilter = useTimefilter({
+    timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
+    autoRefreshSelector: true,
+  });
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -122,13 +124,6 @@ export const Page: FC = () => {
   const [lastRefresh, setLastRefresh] = useState(0);
 
   useEffect(() => {
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      timefilter.enableTimeRangeSelector();
-    } else {
-      timefilter.disableTimeRangeSelector();
-    }
-
-    timefilter.enableAutoRefreshSelector();
     timeBasedIndexCheck(currentIndexPattern, true);
   }, []);
 
