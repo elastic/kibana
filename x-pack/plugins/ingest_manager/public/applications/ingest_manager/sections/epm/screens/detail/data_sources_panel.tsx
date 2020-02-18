@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { Redirect } from 'react-router-dom';
 import { useLinks, useGetPackageInstallStatus } from '../../hooks';
-import { InstallStatus } from '../../types';
+import { InstallStatus } from '../../../../types';
 
 interface DataSourcesPanelProps {
   name: string;
