@@ -207,12 +207,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   _pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
-    const name = this.getField().getName();
-    if (!fieldMetaData[name] || !fieldMetaData[name].buckets) {
+    const realFieldName = this._field.getESDocFieldName
+      ? this._field.getESDocFieldName()
+      : this._field.getName();
+    if (!fieldMetaData[realFieldName] || !fieldMetaData[realFieldName].buckets) {
       return null;
     }
 
-    const ordered = fieldMetaData[name].buckets.map(bucket => {
+    const ordered = fieldMetaData[realFieldName].buckets.map(bucket => {
       return {
         key: bucket.key,
         count: bucket.doc_count,
