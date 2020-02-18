@@ -17,4 +17,4 @@
  * under the License.
  */
 
-module.exports = require('./test_browser_action');
+module.exports = require('./test_mocha_action');
