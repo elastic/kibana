@@ -27,7 +27,7 @@ import {
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
-import { IndexMgmtSetup } from '../../index_management/public';
+import { IndexMgmtSetup } from '../../../../plugins/index_management/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';

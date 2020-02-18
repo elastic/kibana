@@ -28,7 +28,9 @@ initUiMetric(() => () => {});
 
 jest.mock('ui/new_platform');
 jest.mock('../../index_management/public', async () => {
-  const { indexManagementMock } = await import('../../index_management/public/mocks.ts');
+  const { indexManagementMock } = await import(
+    '../../../../plugins/index_management/public/mocks.ts'
+  );
   return indexManagementMock.createSetup();
 });
 

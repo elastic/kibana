@@ -6,12 +6,13 @@
 
 import { IRouter, ElasticsearchServiceSetup, IClusterClient } from 'src/core/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
+import { IndexMgmtSetup } from '../../../../plugins/index_management/server';
 
 export interface ServerShim {
   plugins: {
     xpack_main: XPackMainPlugin;
     rollup: any;
-    index_management: any;
+    index_management: IndexMgmtSetup;
   };
 }
 

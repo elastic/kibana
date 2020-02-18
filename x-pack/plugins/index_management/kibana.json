@@ -1,0 +1,14 @@
+{
+  "id": "indexManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ]
+}
