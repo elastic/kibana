@@ -327,6 +327,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async waitForChartLoadingComplete(renderCount) {
       await elasticChart.waitForRenderingCount('discoverChart', renderCount);
     }
+
+    async waitForDocTableLoadingComplete() {
+      await testSubjects.waitForAttributeToChange(
+        'discoverDocTable',
+        'data-render-complete',
+        'true'
+      );
+    }
   }
 
   return new DiscoverPage();
