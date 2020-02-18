@@ -22,16 +22,23 @@ interface Stats {
   };
 }
 
-function getUniqueLayerCounts(layerCountsList: object[], mapsCount: number) {
+interface ILayerTypeCount {
+  [key: string]: number;
+}
+
+function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
 
   return uniqueLayerTypes.reduce((accu: Stats, type: string) => {
-    const typeCounts = layerCountsList.reduce((tCountsAccu: number[], tCounts: any) => {
-      if (tCounts[type]) {
-        tCountsAccu.push(tCounts[type]);
-      }
-      return tCountsAccu;
-    }, []);
+    const typeCounts = layerCountsList.reduce(
+      (tCountsAccu: number[], tCounts: ILayerTypeCount): number[] => {
+        if (tCounts[type]) {
+          tCountsAccu.push(tCounts[type]);
+        }
+        return tCountsAccu;
+      },
+      []
+    );
     const typeCountsSum = _.sum(typeCounts);
     accu[type] = {
       min: typeCounts.length ? _.min(typeCounts) : 0,
