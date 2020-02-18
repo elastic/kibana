@@ -69,3 +69,9 @@ export interface UpdatedCaseType {
   title?: UpdatedCaseTyped['title'];
   updated_at: string;
 }
+
+export enum SortFieldCase {
+  createdAt = 'created_at',
+  state = 'state',
+  updatedAt = 'updated_at',
+}

@@ -20,6 +20,7 @@ import {
   AllCases,
   NewCaseType,
   NewCommentType,
+  SortFieldCase,
   UserType,
 } from './types';
 
@@ -109,3 +110,18 @@ export const flattenCommentSavedObject = (
   comment_id: savedObject.id,
   ...savedObject.attributes,
 });
+
+export const sortToSnake = (sortField: string): SortFieldCase => {
+  switch (sortField) {
+    case 'state':
+      return SortFieldCase.state;
+    case 'createdAt':
+    case 'created_at':
+      return SortFieldCase.createdAt;
+    case 'updatedAt':
+    case 'updated_at':
+      return SortFieldCase.updatedAt;
+    default:
+      return SortFieldCase.createdAt;
+  }
+};

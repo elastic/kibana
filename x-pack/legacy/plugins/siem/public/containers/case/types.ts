@@ -62,7 +62,6 @@ export interface AllCases {
   perPage: number;
   total: number;
 }
-
 export enum SortFieldCase {
   createdAt = 'createdAt',
   state = 'state',
