@@ -13,11 +13,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           ]) {
             parallel([
               'kibana-intake-agent': {
-                withEnv([
-                  'NODE_ENV=test' // Needed for jest tests only
-                ]) {
-                  kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh')()
-                }
+                kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh')()
               },
               'x-pack-intake-agent': {
                 withEnv([
