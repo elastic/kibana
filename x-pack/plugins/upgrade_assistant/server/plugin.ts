@@ -68,7 +68,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const router = http.createRouter();
 
     const dependencies: RouteDependencies = {
-      elasticsearch,
       cloud,
       router,
       credentialStore: this.credentialStore,
