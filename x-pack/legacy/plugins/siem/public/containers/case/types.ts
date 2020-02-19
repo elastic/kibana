@@ -19,7 +19,7 @@ export interface NewCase extends FormData {
 export interface CaseSnake {
   case_id: string;
   created_at: string;
-  created_by: ElasticUser;
+  created_by: ElasticUserSnake;
   description: string;
   state: string;
   tags: string[];
@@ -69,9 +69,14 @@ export enum SortFieldCase {
   updatedAt = 'updatedAt',
 }
 
+export interface ElasticUserSnake {
+  readonly username: string;
+  readonly full_name?: string | null;
+}
+
 export interface ElasticUser {
   readonly username: string;
-  readonly full_name?: string;
+  readonly fullName?: string | null;
 }
 
 export interface FetchCasesProps {

@@ -11,7 +11,10 @@ export const getTypedPayload = <T>(a: unknown): T => a as T;
 export const convertCaseToCamel = (snakeCase: CaseSnake): Case => ({
   caseId: snakeCase.case_id,
   createdAt: snakeCase.created_at,
-  createdBy: snakeCase.created_by,
+  createdBy: {
+    username: snakeCase.created_by.username,
+    fullName: snakeCase.created_by.full_name,
+  },
   description: snakeCase.description,
   state: snakeCase.state,
   tags: snakeCase.tags,
@@ -38,7 +41,12 @@ export const convertUpdateCaseToCamel = (snakeCase: Partial<CaseSnake>): Partial
         updateCase.createdAt = snakeCase.created_at;
         break;
       case 'created_by':
-        updateCase.createdBy = snakeCase.created_by;
+        if (snakeCase.created_by) {
+          updateCase.createdBy = {
+            username: snakeCase.created_by.username,
+            fullName: snakeCase.created_by.full_name,
+          };
+        }
         break;
       case 'description':
         updateCase.description = snakeCase.description;

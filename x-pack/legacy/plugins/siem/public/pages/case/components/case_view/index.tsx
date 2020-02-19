@@ -58,13 +58,13 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
-interface CasesProps {
+export interface CaseProps {
   caseId: string;
   initialData: Case;
   isLoading: boolean;
 }
 
-export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
+export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
   const [isEditTitle, setIsEditTitle] = useState(false);
@@ -251,6 +251,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 <EuiFlexItem>
                   <EuiButtonToggle
+                    data-test-subj="toggle-case-state"
                     label={isCaseOpen ? 'Close case' : 'Reopen case'}
                     iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
                     onChange={onSetIsCaseOpen}
@@ -306,7 +307,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     );
   }
 
-  return <Cases caseId={caseId} initialData={data} isLoading={isLoading} />;
+  return <CaseComponent caseId={caseId} initialData={data} isLoading={isLoading} />;
 });
 
 CaseView.displayName = 'CaseView';
