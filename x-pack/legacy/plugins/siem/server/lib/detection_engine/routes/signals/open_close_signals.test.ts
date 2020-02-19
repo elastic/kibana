@@ -56,7 +56,7 @@ describe('set signal status', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('catches error if deleteRules throws error', async () => {
+    test('catches error if callAsCurrentUser throws error', async () => {
       clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
         throw new Error('Test error');
       });
