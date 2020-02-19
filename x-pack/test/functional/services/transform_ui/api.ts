@@ -100,7 +100,6 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async createTransform(transformConfig: TransformPivotConfig) {
       const transformId = transformConfig.id;
       log.debug(`Creating transform with id '${transformId}'...`);
-      log.debug(transformConfig);
       await esSupertest
         .put(`/_transform/${transformId}`)
         .send(transformConfig)
