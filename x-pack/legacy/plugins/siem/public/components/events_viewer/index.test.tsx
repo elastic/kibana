@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { wait } from '../../lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../mock';
