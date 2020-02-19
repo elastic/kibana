@@ -25,6 +25,11 @@ const StyledPanel = styled(Panel)`
   max-width: 50%;
 `;
 
+const bgColor = '#222222';
+
+const Resolver = styled(
+  React.memo(({ className }: { className?: string }) => {
+    const dispatch: (action: ResolverAction) => unknown = useDispatch();
 
 const StyledGraphControls = styled(GraphControls)`
   position: absolute;
@@ -63,7 +68,12 @@ export const Resolver = styled(
           />
           ))}
           {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot key={index} position={position} event={processEvent} />
+            <ProcessEventDot
+              key={index}
+              position={position}
+              event={processEvent}
+              bgColor={bgColor}
+            />
           ))}
         </div>
         <StyledPanel />
@@ -88,4 +98,11 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
+
+  background-color: ${bgColor};
+
+  .resolver-graph {
+    display: flex;
+    flex-grow: 1;
+  }
 `;
