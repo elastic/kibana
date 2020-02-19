@@ -11758,7 +11758,6 @@
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkTooltip": "立即运行保留",
     "xpack.snapshotRestore.policyScheduleWarningDescription": "一次仅可以拍取一个快照。要避免快照失败，请编辑或删除策略。",
     "xpack.snapshotRestore.policyScheduleWarningTitle": "两个或更多策略有相同的计划",
-    "xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage": "至少需要一个索引模式。",
     "xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage": "必须至少选择一个索引。",
     "xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage": "最小计数不能大于最大计数。",
     "xpack.snapshotRestore.policyValidation.nameRequiredErroMessage": "策略名称必填。",
