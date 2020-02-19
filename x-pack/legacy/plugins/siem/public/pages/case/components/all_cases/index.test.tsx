@@ -10,7 +10,10 @@ import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
-
+import { useDateFormat, useTimeZone } from '../../../../lib/kibana';
+jest.mock('../../../../lib/kibana');
+const mockUseDateFormat = useDateFormat as jest.Mock;
+const mockUseTimeZone = useTimeZone as jest.Mock;
 jest.mock('ui/new_platform');
 describe('AllCases', () => {
   const setQueryParams = jest.fn();
@@ -20,6 +23,8 @@ describe('AllCases', () => {
     jest
       .spyOn(apiHook, 'useGetCases')
       .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
+    mockUseTimeZone.mockImplementation(() => 'UTC');
   });
   it('should render AllCases', () => {
     const wrapper = mount(
