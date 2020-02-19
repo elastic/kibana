@@ -16,10 +16,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { px, units } from '../../../../style/variables';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -28,20 +26,6 @@ import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/Tra
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-
-const PaginationContainer = styled.div`
-  margin-left: ${px(units.quarter)};
-  display: flex;
-  align-items: center;
-
-  > span:first-of-type {
-    font-weight: 600;
-  }
-
-  > span:last-of-type {
-    margin-right: ${px(units.half)};
-  }
-`;
 
 interface Props {
   urlParams: IUrlParams;
@@ -102,7 +86,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'baseLine' }}>
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
@@ -111,16 +95,12 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
             </h5>
           </EuiTitle>
           {traceSamples && (
-            <PaginationContainer>
-              <span>{sampleActivePage + 1}</span>
-              <span>/{traceSamples.length}</span>
-              <EuiPagination
-                pageCount={traceSamples.length}
-                activePage={sampleActivePage}
-                onPageClick={goToSample}
-                compressed
-              />
-            </PaginationContainer>
+            <EuiPagination
+              pageCount={traceSamples.length}
+              activePage={sampleActivePage}
+              onPageClick={goToSample}
+              compressed
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem>
