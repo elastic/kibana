@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray, take } from 'rxjs/operators';
 
 import { summarizeEventStream } from './event_stream_helpers';
 
@@ -168,4 +168,71 @@ it('interleaves mulitple injected events in order', async () => {
       },
     ]
   `);
+});
+
+it('stops an infinite stream when unsubscribed', async () => {
+  const event$ = Rx.of(1);
+  const initial = 0;
+  const reducer = jest.fn((prev, event, injectEvent) => {
+    // always inject a follow up event, making this infinite and synchronous
+    injectEvent(event + 1);
+    return prev + event;
+  });
+
+  const values = await summarizeEventStream(event$, initial, reducer)
+    .pipe(take(11), toArray())
+    .toPromise();
+
+  expect(values).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "state": 0,
+      },
+      Object {
+        "event": 1,
+        "state": 1,
+      },
+      Object {
+        "event": 2,
+        "state": 3,
+      },
+      Object {
+        "event": 3,
+        "state": 6,
+      },
+      Object {
+        "event": 4,
+        "state": 10,
+      },
+      Object {
+        "event": 5,
+        "state": 15,
+      },
+      Object {
+        "event": 6,
+        "state": 21,
+      },
+      Object {
+        "event": 7,
+        "state": 28,
+      },
+      Object {
+        "event": 8,
+        "state": 36,
+      },
+      Object {
+        "event": 9,
+        "state": 45,
+      },
+      Object {
+        "event": 10,
+        "state": 55,
+      },
+    ]
+  `);
+
+  // ensure reducer still only called 10 times after a timeout
+  expect(reducer).toHaveBeenCalledTimes(10);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  expect(reducer).toHaveBeenCalledTimes(10);
 });
