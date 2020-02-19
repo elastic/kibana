@@ -27,6 +27,7 @@ import {
   ExpressionsService,
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
+  ExecutionContext,
 } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
@@ -36,11 +37,10 @@ import {
   setInterpreter,
   setRenderersRegistry,
   setNotifications,
+  setExpressionsService,
 } from './services';
-import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
@@ -92,8 +92,6 @@ export interface ExpressionsSetup extends ExpressionsServiceSetup {
 }
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  execute: typeof execute;
-  ExpressionDataHandler: typeof ExpressionDataHandler;
   ExpressionLoader: typeof ExpressionLoader;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
@@ -108,16 +106,28 @@ export class ExpressionsPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { expressions } = this;
-    const { executor, renderers } = expressions;
+  private configureExecutor(core: CoreSetup) {
+    const { executor } = this.expressions;
+
+    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
+      const [start] = await core.getStartServices();
+      return start.savedObjects.client.get(type, id);
+    };
 
     executor.extendContext({
       environment: 'client',
+      getSavedObject,
     });
-    executor.registerFunction(kibanaContextFunction());
+  }
+
+  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
+    this.configureExecutor(core);
+
+    const { expressions } = this;
+    const { executor, renderers } = expressions;
 
     setRenderersRegistry(renderers);
+    setExpressionsService(this.expressions);
 
     const expressionsSetup = expressions.setup();
 
@@ -180,8 +190,6 @@ export class ExpressionsPublicPlugin
 
     return {
       ...expressionsStart,
-      execute,
-      ExpressionDataHandler,
       ExpressionLoader,
       ExpressionRenderHandler,
       loader,

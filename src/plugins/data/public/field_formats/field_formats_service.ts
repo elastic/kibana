@@ -20,6 +20,8 @@
 import { CoreSetup } from 'src/core/public';
 import { DateFormat } from './converters/date';
 import { FieldFormatsRegistry, baseFormatters } from '../../common';
+import { deserializeFieldFormat } from './utils/deserialize';
+import { FormatFactory } from '../../common/field_formats/utils';
 
 export class FieldFormatsService {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
@@ -49,6 +51,10 @@ export class FieldFormatsService {
   }
 
   public start() {
+    this.fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
+      this.fieldFormatsRegistry as FieldFormatsStart
+    );
+
     return this.fieldFormatsRegistry as FieldFormatsStart;
   }
 }
@@ -57,4 +63,6 @@ export class FieldFormatsService {
 export type FieldFormatsSetup = Pick<FieldFormatsRegistry, 'register'>;
 
 /** @public */
-export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> & {
+  deserialize: FormatFactory;
+};

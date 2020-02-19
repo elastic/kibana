@@ -152,7 +152,6 @@ export const siem = (kibana: any) => {
       const initializerContext = { ...coreContext, env };
       const __legacy = {
         config: server.config,
-        alerting: server.plugins.alerting,
         route: server.route.bind(server),
       };
 
