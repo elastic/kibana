@@ -31,11 +31,11 @@ export function addFieldToDSL(dsl, field) {
       };
 }
 
-export function extractPropertiesFromBucket(bucket, ignoreKeys) {
+export function extractPropertiesFromBucket(bucket, ignoreKeys = []) {
   const properties = {};
-  Object.keys(bucket).forEach(key => {
+  for (const key in bucket) {
     if (ignoreKeys.includes(key)) {
-      return;
+      continue;
     }
 
     if (_.has(bucket[key], 'value')) {
@@ -45,6 +45,6 @@ export function extractPropertiesFromBucket(bucket, ignoreKeys) {
     } else {
       properties[key] = bucket[key];
     }
-  });
+  }
   return properties;
 }

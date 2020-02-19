@@ -9,6 +9,8 @@ import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
 import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
+const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
+
 export function convertToGeoJson(esResponse, renderAs) {
   const features = [];
 
@@ -23,7 +25,7 @@ export function convertToGeoJson(esResponse, renderAs) {
         renderAs,
       }),
       id: gridBucket.key,
-      properties: extractPropertiesFromBucket(gridBucket, ['key', 'gridCentroid']),
+      properties: extractPropertiesFromBucket(gridBucket, GRID_BUCKET_KEYS_TO_IGNORE),
     });
   }
 

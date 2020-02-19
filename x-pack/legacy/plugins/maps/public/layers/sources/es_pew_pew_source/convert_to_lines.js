@@ -9,6 +9,7 @@ import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 const LAT_INDEX = 0;
 const LON_INDEX = 1;
+const PEW_PEW_BUCKET_KEYS_TO_IGNORE = ['key', 'sourceCentroid'];
 
 function parsePointFromKey(key) {
   const split = key.split(',');
@@ -35,7 +36,7 @@ export function convertToLines(esResponse) {
           coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest],
         },
         id: `${dest.join()},${sourceBucket.key}`,
-        properties: extractPropertiesFromBucket(sourceBucket, ['key', 'sourceCentroid']),
+        properties: extractPropertiesFromBucket(sourceBucket, PEW_PEW_BUCKET_KEYS_TO_IGNORE),
       });
     }
   }

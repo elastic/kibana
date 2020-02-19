@@ -8,9 +8,6 @@ import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('ui/new_platform');
 jest.mock('../vector_layer', () => {});
-jest.mock('ui/agg_types', () => ({
-  Schemas: function() {},
-}));
 jest.mock('ui/timefilter', () => {});
 
 const indexPatternTitle = 'myIndex';

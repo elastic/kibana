@@ -16,11 +16,12 @@ const TERMS_AGG_NAME = 'join';
 
 const FIELD_NAME_PREFIX = '__kbnjoin__';
 const GROUP_BY_DELIMITER = '_groupby_';
+const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
 export function extractPropertiesMap(rawEsData, countPropertyName) {
   const propertiesMap = new Map();
   _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
-    const properties = extractPropertiesFromBucket(termBucket, ['key', 'doc_count']);
+    const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
     }
