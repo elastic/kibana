@@ -26,7 +26,7 @@ function getOverallStats(
   earliestMs: number,
   latestMs: number
 ) {
-  const dv = new DataVisualizer(context);
+  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
   return dv.getOverallStats(
     indexPatternTitle,
     query,
@@ -51,7 +51,7 @@ function getStatsForFields(
   interval: number,
   maxExamples: number
 ) {
-  const dv = new DataVisualizer(context);
+  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
   return dv.getStatsForFields(
     indexPatternTitle,
     query,
