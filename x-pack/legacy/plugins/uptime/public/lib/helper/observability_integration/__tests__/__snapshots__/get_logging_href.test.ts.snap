@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getLoggingHref creates a container href with base path when present 1`] = `"bar/app/infra#/logs?logFilter=(expression:'container.id%20:%20test-container-id',kind:kuery)"`;
+exports[`getLoggingHref creates a container href with base path when present 1`] = `"bar/app/logs?logFilter=(expression:'container.id%20:%20test-container-id',kind:kuery)"`;
 
-exports[`getLoggingHref creates a container href without a base path if it's an empty string 1`] = `"/app/infra#/logs?logFilter=(expression:'container.id%20:%20test-container-id',kind:kuery)"`;
+exports[`getLoggingHref creates a container href without a base path if it's an empty string 1`] = `"/app/logs?logFilter=(expression:'container.id%20:%20test-container-id',kind:kuery)"`;
 
-exports[`getLoggingHref creates a pod href with base path when present 1`] = `"bar/app/infra#/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
+exports[`getLoggingHref creates a pod href with base path when present 1`] = `"bar/app/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
 
-exports[`getLoggingHref creates a pod href without a base path when it's an empty string 1`] = `"/app/infra#/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
+exports[`getLoggingHref creates a pod href without a base path when it's an empty string 1`] = `"/app/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
 
-exports[`getLoggingHref creates an ip href with base path when present 1`] = `"bar/app/infra#/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
+exports[`getLoggingHref creates an ip href with base path when present 1`] = `"bar/app/logs?logFilter=(expression:'pod.uid%20:%20test-pod-id',kind:kuery)"`;
 
-exports[`getLoggingHref creates an ip href without a base path when it's an empty string 1`] = `"/app/infra#/logs?logFilter=(expression:'host.ip%20%3A%20151.101.202.217',kind:kuery)"`;
+exports[`getLoggingHref creates an ip href without a base path when it's an empty string 1`] = `"/app/logs?logFilter=(expression:'host.ip%20%3A%20151.101.202.217',kind:kuery)"`;
