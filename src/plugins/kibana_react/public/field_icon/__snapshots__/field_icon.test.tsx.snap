@@ -7,6 +7,7 @@ exports[`FieldIcon changes fill when scripted is true 1`] = `
   fill="dark"
   iconType="tokenNumber"
   size="s"
+  title="test"
 />
 `;
 
@@ -17,6 +18,7 @@ exports[`FieldIcon renders an icon for an unknown type 1`] = `
   color="gray"
   iconType="questionInCircle"
   size="s"
+  title="test"
 />
 `;
 
@@ -27,6 +29,7 @@ exports[`FieldIcon renders known field types _source is rendered 1`] = `
   color="gray"
   iconType="editorCodeBlock"
   size="s"
+  title="_source"
 />
 `;
 
@@ -36,6 +39,7 @@ exports[`FieldIcon renders known field types boolean is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenBoolean"
   size="s"
+  title="boolean"
 />
 `;
 
@@ -46,6 +50,7 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
   color="euiVisColor9"
   iconType="alert"
   size="s"
+  title="conflict"
 />
 `;
 
@@ -55,6 +60,7 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenDate"
   size="s"
+  title="date"
 />
 `;
 
@@ -62,9 +68,9 @@ exports[`FieldIcon renders known field types geo_point is rendered 1`] = `
 <EuiToken
   aria-label="geo_point"
   className="kbnFieldIcon"
-  color="euiColorVis5"
   iconType="tokenGeo"
   size="s"
+  title="geo_point"
 />
 `;
 
@@ -72,9 +78,9 @@ exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
 <EuiToken
   aria-label="geo_shape"
   className="kbnFieldIcon"
-  color="euiColorVis5"
   iconType="tokenGeo"
   size="s"
+  title="geo_shape"
 />
 `;
 
@@ -84,6 +90,7 @@ exports[`FieldIcon renders known field types ip is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenIP"
   size="s"
+  title="ip"
 />
 `;
 
@@ -93,6 +100,7 @@ exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenFile"
   size="s"
+  title="murmur3"
 />
 `;
 
@@ -102,6 +110,7 @@ exports[`FieldIcon renders known field types nested is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenNested"
   size="s"
+  title="nested"
 />
 `;
 
@@ -111,6 +120,7 @@ exports[`FieldIcon renders known field types number is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenNumber"
   size="s"
+  title="number"
 />
 `;
 
@@ -120,6 +130,7 @@ exports[`FieldIcon renders known field types string is rendered 1`] = `
   className="kbnFieldIcon"
   iconType="tokenString"
   size="s"
+  title="string"
 />
 `;
 
@@ -130,6 +141,7 @@ exports[`FieldIcon renders with className if provided 1`] = `
   color="gray"
   iconType="questionInCircle"
   size="s"
+  title="test"
 />
 `;
 
@@ -142,5 +154,6 @@ exports[`FieldIcon supports same props as EuiToken 1`] = `
   iconType="tokenNumber"
   shape="circle"
   size="l"
+  title="test"
 />
 `;
