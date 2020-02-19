@@ -18,9 +18,10 @@
  */
 
 import _ from 'lodash';
-import { Optional } from '@kbn/utility-types';
+import { Assign } from '@kbn/utility-types';
 
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
+import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
@@ -72,12 +73,12 @@ export class AggConfigs {
   public indexPattern: IndexPattern;
   public schemas: any;
   public timeRange?: TimeRange;
-  private readonly __typesRegistry: AggTypesRegistryStart;
+  private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
 
   constructor(indexPattern: IndexPattern, configStates = [] as any, opts: AggConfigsOptions) {
-    this.__typesRegistry = opts.typesRegistry;
+    this.typesRegistry = opts.typesRegistry;
 
     configStates = AggConfig.ensureIds(configStates);
 
@@ -146,12 +147,13 @@ export class AggConfigs {
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
-    params: Optional<AggConfigOptions, 'typesRegistry'>,
+    params: Assign<AggConfigOptions, { type: string | IAggType }>,
     { addToAggConfigs = true } = {}
   ) => {
+    const { type } = params;
     const aggConfig = new AggConfig(this, {
-      typesRegistry: this.__typesRegistry,
       ...params,
+      type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
     });
 
     if (addToAggConfigs) {

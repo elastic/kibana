@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { IAggType } from './agg_type';
-import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -35,16 +34,15 @@ import {
 
 export interface AggConfigOptions {
   enabled: boolean;
-  type: string;
+  type: IAggType;
   params: any;
-  typesRegistry: AggTypesRegistryStart;
   id?: string;
   schema?: string | Schema;
 }
 
 const unknownSchema: Schema = {
   name: 'unknown',
-  title: 'Unknown',
+  title: 'Unknown', // only here for illustrative purposes
   hideCustomLabel: true,
   aggFilter: [],
   min: 1,
@@ -124,15 +122,12 @@ export class AggConfig {
   public parent?: IAggConfigs;
   public brandNew?: boolean;
 
-  private readonly __typesRegistry: AggTypesRegistryStart;
   private __schema: Schema;
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
 
   constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
-    this.__typesRegistry = opts.typesRegistry;
-
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -446,8 +441,8 @@ export class AggConfig {
     });
   }
 
-  public setType(type: string | IAggType) {
-    this.type = typeof type === 'string' ? this.__typesRegistry.get(type) : type;
+  public setType(type: IAggType) {
+    this.type = type;
   }
 
   public get schema() {
