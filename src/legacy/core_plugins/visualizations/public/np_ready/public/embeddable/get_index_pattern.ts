@@ -18,8 +18,8 @@
  */
 
 import { VisSavedObject } from './visualize_embeddable';
-import { indexPatterns, IIndexPattern } from '../../../../../plugins/data/public';
-import { getUISettings, getSavedObjects } from '../np_ready/public/services';
+import { indexPatterns, IIndexPattern } from '../../../../../../../plugins/data/public';
+import { getUISettings, getSavedObjects } from '../services';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject

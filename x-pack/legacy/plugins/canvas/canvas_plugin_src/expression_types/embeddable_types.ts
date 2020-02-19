@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/visualizations/public/embeddable/constants';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
 
 export const EmbeddableTypes: { map: string; search: string; visualization: string } = {

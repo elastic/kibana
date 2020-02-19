@@ -28,7 +28,7 @@ import { TypesStart } from '../np_ready/public/types';
 export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
   visualizationTypes: TypesStart;
 }
-
+export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
 export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 

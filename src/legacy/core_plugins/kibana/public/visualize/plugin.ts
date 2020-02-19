@@ -139,7 +139,7 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
+          savedVisualizations: visualizations.savedVisualizationsLoader,
           savedQueryService: dataStart.query.savedQueries,
           share,
           toastNotifications: coreStart.notifications.toasts,

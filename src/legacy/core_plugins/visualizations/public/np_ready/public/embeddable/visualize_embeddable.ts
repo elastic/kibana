@@ -21,10 +21,6 @@ import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 
-import { PersistedState } from 'ui/persisted_state';
-import { SavedObject } from 'ui/saved_objects/types';
-import { AppState } from 'ui/state_management/app_state';
-
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -34,7 +30,7 @@ import {
   Filter,
   ISearchSource,
   TimefilterContract,
-} from '../../../../../plugins/data/public';
+} from '../../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -42,15 +38,19 @@ import {
   Container,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
-} from '../../../../../plugins/embeddable/public';
-import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+} from '../../../../../../../plugins/embeddable/public';
+import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
   ExpressionsStart,
-} from '../../../../../plugins/expressions/public';
-import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
-import { Vis, buildPipeline } from '../np_ready/public';
-import { getExpressions, getUiActions } from '../np_ready/public/services';
+} from '../../../../../../../plugins/expressions/public';
+import { buildPipeline } from '../legacy/build_pipeline';
+import { Vis } from '../vis';
+import { getExpressions, getUiActions } from '../services';
+import { PersistedState, AppState, SavedObject } from '../../../legacy_imports';
+
+// TODO:
+import { SavedSearch } from '../../../../../kibana/public/discover/np_ready/types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

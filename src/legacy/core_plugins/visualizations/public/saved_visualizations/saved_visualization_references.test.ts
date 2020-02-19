@@ -18,7 +18,7 @@
  */
 
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { VisSavedObject } from '../embeddable/visualize_embeddable';
+import { VisSavedObject } from '../np_ready/public';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {

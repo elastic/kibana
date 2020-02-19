@@ -31,9 +31,10 @@ import {
   setFilterManager,
   setExpressions,
   setUiActions,
+  setSavedVisualizationsLoader,
+  setTimeFilter,
 } from './services';
-import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
@@ -43,14 +44,11 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
-import {
-  createSavedVisLoader,
-  SavedObjectKibanaServicesWithVisualizations,
-} from '../../saved_visualizations';
-import { SavedVisualizations } from '../../../../kibana/public/visualize/np_ready/types';
+import { createSavedVisLoader, SavedVisualizationsLoader } from '../../saved_visualizations';
 import { VisImpl, VisImplConstructor } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
+
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -62,9 +60,9 @@ export interface VisualizationsSetup {
 
 export interface VisualizationsStart {
   types: TypesStart;
-  getSavedVisualizationsLoader: () => SavedVisualizations;
-  showNewVisModal: typeof showNewVisModal;
+  savedVisualizationsLoader: SavedVisualizationsLoader;
   Vis: VisImplConstructor;
+  showNewVisModal: typeof showNewVisModal;
 }
 
 export interface VisualizationsSetupDeps {
@@ -97,8 +95,6 @@ export class VisualizationsPlugin
       VisualizationsStartDeps
     > {
   private readonly types: TypesService = new TypesService();
-  private savedVisualizations?: SavedVisualizations;
-  private savedVisualizationDependencies?: SavedObjectKibanaServicesWithVisualizations;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -112,10 +108,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory(
-      data.query.timefilter.timefilter,
-      this.getSavedVisualizationsLoader
-    );
+    const embeddableFactory = new VisualizeEmbeddableFactory();
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
@@ -137,31 +130,25 @@ export class VisualizationsPlugin
     setFilterManager(data.query.filterManager);
     setExpressions(expressions);
     setUiActions(uiActions);
-
-    this.savedVisualizationDependencies = {
+    setTimeFilter(data.query.timefilter.timefilter);
+    const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
-    };
+    });
+    setSavedVisualizationsLoader(savedVisualizationsLoader);
 
     return {
       types,
-      getSavedVisualizationsLoader: () => this.getSavedVisualizationsLoader(),
       showNewVisModal,
       Vis: VisImpl,
+      savedVisualizationsLoader,
     };
   }
 
   public stop() {
     this.types.stop();
   }
-
-  private getSavedVisualizationsLoader = () => {
-    if (!this.savedVisualizations) {
-      this.savedVisualizations = createSavedVisLoader(this.savedVisualizationDependencies!);
-    }
-    return this.savedVisualizations;
-  };
 }

@@ -29,6 +29,7 @@
  * either types, or static code.
  */
 
+import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 
@@ -37,14 +38,19 @@ export { VisualizationsSetup, VisualizationsStart };
 
 /** @public types */
 export { VisTypeAlias, VisType } from './types';
+export { VisSavedObject } from './embeddable';
+export { Vis, VisParams, VisState } from './vis';
+import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
+export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
+export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
 }
 
 /** @public static code */
-export { Vis, VisParams, VisState } from './vis';
 export { TypesService } from './types/types_service';
+export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
 
 export { Status } from './legacy/update_status';
 export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/build_pipeline';

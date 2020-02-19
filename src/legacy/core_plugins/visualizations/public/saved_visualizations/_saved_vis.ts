@@ -29,7 +29,7 @@ import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { updateOldState } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../plugins/data/public';
-import { VisSavedObject } from '../embeddable/visualize_embeddable';
+import { VisSavedObject } from '../np_ready/public/embeddable';
 
 import { createSavedSearchesLoader } from '../../../kibana/public/discover';
 import { VisualizeConstants } from '../../../kibana/public/visualize';
