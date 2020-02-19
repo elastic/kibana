@@ -27,7 +27,7 @@ import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
-import { useTrackPageview } from '../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
