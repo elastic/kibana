@@ -22,7 +22,6 @@ import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
-import { createVisualizeEditUrl } from '../../../kibana/public/visualize';
 import { TypesStart } from '../np_ready/public/types';
 
 export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
@@ -57,7 +56,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
       source.icon = source.type.icon;
       source.image = source.type.image;
       source.typeTitle = source.type.title;
-      source.editUrl = `#${createVisualizeEditUrl(id)}`;
+      source.editUrl = `#/visualize/edit/${id}`;
 
       return source;
     };

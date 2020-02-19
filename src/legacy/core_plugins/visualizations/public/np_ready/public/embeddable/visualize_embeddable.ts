@@ -47,10 +47,7 @@ import {
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { PersistedState, AppState, SavedObject } from '../../../legacy_imports';
-
-// TODO:
-import { SavedSearch } from '../../../../../kibana/public/discover/np_ready/types';
+import { PersistedState, AppState, SavedObject, SavedSearch } from '../../../legacy_imports';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

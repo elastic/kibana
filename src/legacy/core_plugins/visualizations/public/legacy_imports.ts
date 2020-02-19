@@ -25,10 +25,7 @@ export {
   isDateHistogramBucketAggConfig,
   setBounds,
 } from '../../../ui/public/agg_types';
-export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-export { I18nContext } from '../../../ui/public/i18n';
-import chrome from '../../../ui/public/chrome';
-export { chrome as legacyChrome };
 import '../../../ui/public/directives/bind';
 export { SavedObject } from 'ui/saved_objects/types'; // https://github.com/elastic/kibana/pull/57452
 export { AppState } from 'ui/state_management/app_state'; // https://github.com/elastic/kibana/pull/57330
+export { SavedSearch } from '../../kibana/public/discover/np_ready/types';
