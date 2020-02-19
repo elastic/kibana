@@ -18,28 +18,21 @@ export const alertListReqSchema = schema.object(
     page_index: schema.maybe(
       schema.number({
         min: 0,
-        // TODO: should we define a max to force cursor-based pagination after a certain point?
       })
     ),
     after: schema.maybe(
-      schema.arrayOf(schema.any(), {
+      schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
       })
     ),
     before: schema.maybe(
-      schema.arrayOf(schema.any(), {
+      schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
       })
     ),
-    sort: schema.maybe(
-      schema.string({
-        validate(value) {
-          // TODO: check for valid key in `AlertData`
-        },
-      })
-    ),
+    sort: schema.maybe(schema.string()),
     order: schema.maybe(
       schema.string({
         validate(value) {
@@ -76,8 +69,6 @@ export const alertListReqSchema = schema.object(
 
     // rison-encoded string
     date_range: schema.string({
-      // TODO: make this configurable... how to handle encoded default?
-      // defaultValue: config.alertResultListDefaultDateRange,
       defaultValue: encode({ from: 'now-2y', to: 'now' }),
       validate(value) {
         try {

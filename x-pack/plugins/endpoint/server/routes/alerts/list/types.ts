@@ -43,8 +43,8 @@ export interface AlertListRequestQueryInternal {
   dateRange?: TimeRange;
   sort: string;
   order: Direction;
-  searchAfter?: [any, any];
-  searchBefore?: [any, any];
+  searchAfter?: [string, string];
+  searchBefore?: [string, string];
   next?: string | null | undefined;
   prev?: string | null | undefined;
 }
@@ -70,7 +70,7 @@ export interface AlertListESRequestBody {
   track_total_hits: number;
   query: JsonObject;
   sort: AlertListSort;
-  search_after?: [any, any];
+  search_after?: [string, string];
 }
 
 /**

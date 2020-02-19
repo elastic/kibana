@@ -140,7 +140,6 @@ export const buildAlertListESQuery = async (
   let totalHitsMin: number = DEFAULT_TOTAL_HITS;
 
   // Calculate minimum total hits set to indicate there's a next page
-  // TODO: handle this for search_after?
   if (reqData.fromIndex) {
     totalHitsMin = Math.max(reqData.fromIndex + reqData.pageSize * 2, DEFAULT_TOTAL_HITS);
   }
@@ -242,8 +241,6 @@ export function mapToAlertResultList(
     hits.reverse();
   }
 
-  // TODO: Is this logic correct? Definitely won't work if NOT on the last page,
-  // and the page contains `pageSize` items.
   if (hitLen > 0 && hitLen <= reqData.pageSize) {
     const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
     const lastEventId: number = hits[hitLen - 1]._source.event.id;
