@@ -17,6 +17,11 @@ jest.mock('ui/new_platform');
 jest.mock('../search_bar', () => ({
   SiemSearchBar: () => null,
 }));
+jest.mock('../../containers/source', () => ({
+  useWithSource: () => ({
+    contentAvailable: true,
+  }),
+}));
 
 describe('HeaderGlobal', () => {
   test('it renders', () => {
