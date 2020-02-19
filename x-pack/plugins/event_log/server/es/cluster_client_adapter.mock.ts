@@ -15,6 +15,9 @@ const createClusterClientMock = () => {
     createIndexTemplate: jest.fn(),
     doesAliasExist: jest.fn(),
     createIndex: jest.fn(),
+    getIndexTemplate: jest.fn(),
+    updateIndexTemplate: jest.fn(),
+    rolloverIndex: jest.fn(),
   };
   return mock;
 };

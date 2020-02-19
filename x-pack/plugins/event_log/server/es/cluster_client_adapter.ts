@@ -84,6 +84,19 @@ export class ClusterClientAdapter {
     }
   }
 
+  public async updateIndexTemplate(name: string, template: any): Promise<void> {
+    const updateTemplateParams = {
+      name,
+      body: template,
+    };
+    await this.callEs('indices.putTemplate', updateTemplateParams);
+  }
+
+  public async getIndexTemplate(name: string): Promise<any> {
+    const response = await this.callEs('indices.getTemplate', { name });
+    return response[name];
+  }
+
   public async doesAliasExist(name: string): Promise<boolean> {
     let result;
     try {
@@ -94,14 +107,21 @@ export class ClusterClientAdapter {
     return result as boolean;
   }
 
-  public async createIndex(name: string): Promise<void> {
+  public async createIndex(name: string, body: any = {}): Promise<void> {
     try {
-      await this.callEs('indices.create', { index: name });
+      await this.callEs('indices.create', {
+        index: name,
+        body,
+      });
     } catch (err) {
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
         throw new Error(`error creating initial index: ${err.message}`);
       }
     }
+  }
+
+  public async rolloverIndex(body: any): Promise<void> {
+    await this.callEs('indices.rollover', body);
   }
 
   private async callEs(operation: string, body?: any): Promise<any> {

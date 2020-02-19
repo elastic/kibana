@@ -27,6 +27,7 @@ async function initializeEsResources(esContext: EsContext) {
   await steps.createIlmPolicyIfNotExists();
   await steps.createIndexTemplateIfNotExists();
   await steps.createInitialIndexIfNotExists();
+  await steps.migrateIndexTemplate();
 }
 
 class EsInitializationSteps {
@@ -62,7 +63,34 @@ class EsInitializationSteps {
   async createInitialIndexIfNotExists(): Promise<void> {
     const exists = await this.esContext.esAdapter.doesAliasExist(this.esContext.esNames.alias);
     if (!exists) {
-      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex);
+      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex, {
+        aliases: {
+          [this.esContext.esNames.alias]: {
+            is_write_index: true,
+          },
+        },
+      });
+    }
+  }
+
+  async migrateIndexTemplate() {
+    const existingTemplate = await this.esContext.esAdapter.getIndexTemplate(
+      this.esContext.esNames.indexTemplate
+    );
+    const updatedTemplateBody = getIndexTemplate(this.esContext.esNames);
+    if (updatedTemplateBody.version > existingTemplate.version) {
+      await this.esContext.esAdapter.updateIndexTemplate(
+        this.esContext.esNames.indexTemplate,
+        updatedTemplateBody
+      );
+      await this.esContext.esAdapter.rolloverIndex({
+        alias: this.esContext.esNames.alias,
+        body: {
+          conditions: {
+            max_age: '0d',
+          },
+        },
+      });
     }
   }
 }

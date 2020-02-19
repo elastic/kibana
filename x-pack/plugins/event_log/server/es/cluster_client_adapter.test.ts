@@ -140,6 +140,22 @@ describe('createIndexTemplate', () => {
   });
 });
 
+describe('getIndexTemplate', () => {
+  test('should call cluster with given name', async () => {
+    await clusterClientAdapter.getIndexTemplate('foo');
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.getTemplate', {
+      name: 'foo',
+    });
+  });
+
+  test('should throw error if call cluster trows', async () => {
+    clusterClient.callAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.getIndexTemplate('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
 describe('doesAliasExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesAliasExist('foo');
