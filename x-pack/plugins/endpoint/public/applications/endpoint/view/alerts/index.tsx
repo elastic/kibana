@@ -137,7 +137,11 @@ export const AlertIndex = memo(() => {
 
       if (columnId === 'alert_type') {
         return (
-          <EuiLink data-alert-id={'TODO'} onClick={handleAlertClick}>
+          <EuiLink
+            data-test-subj="alert-type-cell-link"
+            data-alert-id={'TODO'}
+            onClick={handleAlertClick}
+          >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
               {
