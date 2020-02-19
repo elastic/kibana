@@ -7,7 +7,7 @@
 ```shell
 $ git clone https://github.com/elastic/apm-integration-testing.git
 $ cd apm-integration-testing
-./scripts/compose.py start master --all --apm-server-record
+./scripts/compose.py start master --no-kibana
 ```
 
 2. Download [static data file](https://storage.googleapis.com/apm-ui-e2e-static-data/events.json)
@@ -21,7 +21,7 @@ $ curl https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --outpu
 
 ```shell
 $ cd x-pack/legacy/plugins/apm/e2e/cypress/ingest-data
-$ node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
+$ node replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
 ```
 >This process will take a few minutes to ingest all data
 
