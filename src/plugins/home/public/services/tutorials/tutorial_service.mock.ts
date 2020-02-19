@@ -17,6 +17,34 @@
  * under the License.
  */
 
-export * from './feature_catalogue';
-export * from './environment';
-export * from './tutorials';
+import { TutorialService, TutorialServiceSetup, TutorialServiceStart } from './tutorial_service';
+
+const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
+  const setup = {
+    setVariable: jest.fn(),
+  };
+  return setup;
+};
+
+const createStartMock = (): jest.Mocked<TutorialServiceStart> => {
+  const start = {
+    get: jest.fn(),
+  };
+  return start;
+};
+
+const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
+  const service = {
+    setup: jest.fn(),
+    start: jest.fn(),
+  };
+  service.setup.mockImplementation(createSetupMock);
+  service.start.mockImplementation(createStartMock);
+  return service;
+};
+
+export const tutorialServiceMock = {
+  createSetup: createSetupMock,
+  createStart: createStartMock,
+  create: createMock,
+};

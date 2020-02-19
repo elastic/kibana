@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export * from './feature_catalogue';
-export * from './environment';
-export * from './tutorials';
+export {
+  TutorialService,
+  TutorialVariables,
+  TutorialServiceSetup,
+  TutorialServiceStart,
+} from './tutorial_service';
