@@ -102,6 +102,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
+      ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
@@ -121,6 +122,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       set('server.ssl.enabled', true);
       set('server.ssl.certificate', KBN_CERT_PATH);
       set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
       set('elasticsearch.hosts', elasticsearchHosts);
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
