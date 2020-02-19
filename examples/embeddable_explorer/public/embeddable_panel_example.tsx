@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   EuiPanel,
   EuiPageBody,
@@ -82,7 +82,7 @@ export function EmbeddablePanelExample({
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wenesdays!',
+          task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
         },
@@ -93,7 +93,7 @@ export function EmbeddablePanelExample({
           id: '3',
           icon: 'searchProfilerApp',
           title: 'Learn more',
-          tasks: ['Go to school', 'Watch planet earth', 'Read the encylopedia'],
+          tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
         },
       },
     },
@@ -101,16 +101,24 @@ export function EmbeddablePanelExample({
 
   const [embeddable, setEmbeddable] = useState<IEmbeddable | undefined>(undefined);
 
+  const ref = useRef(false);
+
   useEffect(() => {
+    ref.current = true;
     if (!embeddable) {
       const factory = getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
       const promise = factory?.create(searchableInput);
       if (promise) {
         promise.then(e => {
-          setEmbeddable(e);
+          if (ref.current) {
+            setEmbeddable(e);
+          }
         });
       }
     }
+    return () => {
+      ref.current = false;
+    };
   });
 
   return (

@@ -37,7 +37,7 @@ export default function({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.setValue('taskInputField', 'new task');
       await testSubjects.click('createTodoEmbeddable');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
-      expect(tasks).to.eql(['Goes out on Wenesdays!', 'new task']);
+      expect(tasks).to.eql(['Goes out on Wednesdays!', 'new task']);
     });
   });
 }

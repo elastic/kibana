@@ -60,7 +60,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wenesdays!',
+          task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
         },
@@ -91,7 +91,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wenesdays!',
+          task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
         },
@@ -102,7 +102,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           id: '3',
           icon: 'searchProfilerApp',
           title: 'Learn more',
-          tasks: ['Go to school', 'Watch planet earth', 'Read the encylopedia'],
+          tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
         },
       },
     },
