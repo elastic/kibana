@@ -28,5 +28,5 @@ export interface TimeRange extends RangeFilterParams {
 export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
-  timeRange?: { [key: string]: any };
+  timeRange?: EsRangeFilter['range'];
 }
