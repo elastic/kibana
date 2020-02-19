@@ -5,8 +5,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/public';
 
-export function getField(indexPattern, fieldName) {
+export function getField(indexPattern: IndexPattern, fieldName: string) {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
@@ -19,7 +20,7 @@ export function getField(indexPattern, fieldName) {
   return field;
 }
 
-export function addFieldToDSL(dsl, field) {
+export function addFieldToDSL(dsl: any, field: IFieldType) {
   return !field.scripted
     ? { ...dsl, field: field.name }
     : {
@@ -31,8 +32,8 @@ export function addFieldToDSL(dsl, field) {
       };
 }
 
-export function extractPropertiesFromBucket(bucket, ignoreKeys = []) {
-  const properties = {};
+export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = []) {
+  const properties: any = {};
   for (const key in bucket) {
     if (ignoreKeys.includes(key)) {
       continue;
