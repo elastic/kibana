@@ -75,14 +75,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async parseEuiInMemoryTable(tableSubj: string) {
+    async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
       const rows = [];
 
       // For each row, get the content of each cell and
       // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~${tableSubj}Row`).toArray()) {
+      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
         rows.push(
           $(tr)
             .find('.euiTableCellContent')
@@ -105,7 +105,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiInMemoryTable(tableSubj);
+        const rows = await this.parseEuiDataGrid(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -126,7 +126,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async assertSourceIndexPreview(columns: number, rows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiInMemoryTable('transformSourceIndexPreview');
+        const rowsData = await this.parseEuiDataGrid('transformSourceIndexPreview');
 
         expect(rowsData).to.length(
           rows,
