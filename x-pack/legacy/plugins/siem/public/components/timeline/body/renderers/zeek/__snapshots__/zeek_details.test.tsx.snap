@@ -3360,12 +3360,12 @@ tr:hover .c3:focus::before {
                                               <div>
                                                 <ReputationLink
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                  itemsToShow={1}
+                                                  overflowIndexStart={1}
                                                 >
                                                   <DefaultFieldRendererOverflow
                                                     idPrefix="moreReputationLink"
                                                     moreMaxHeight="200px"
-                                                    overflowIndexStart={5}
+                                                    overflowIndexStart={1}
                                                     render={[Function]}
                                                   >
                                                     <EuiFlexItem

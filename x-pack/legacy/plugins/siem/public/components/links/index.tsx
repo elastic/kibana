@@ -167,6 +167,7 @@ const ReputationLinkComponent: React.FC<{
   const [ipReputationLinks, setIpReputationLinks] = useState<ReputationLinkSetting[]>(
     ipReputationLinksSetting
   );
+
   const defaultNameMapping: Record<DefaultReputationLink, string> = useMemo(
     () => ({
       [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
@@ -183,10 +184,7 @@ const ReputationLinkComponent: React.FC<{
         .map(({ name, url_template }: { name: string; url_template: string }) => {
           return {
             name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
-            url_template:
-              isIPv4(domain) || isIPv6(domain)
-                ? url_template.replace(`{{ip}}`, encodeURIComponent(domain))
-                : '',
+            url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
           };
         })
     );
