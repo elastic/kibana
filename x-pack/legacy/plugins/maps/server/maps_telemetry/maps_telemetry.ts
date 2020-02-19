@@ -12,11 +12,11 @@ import {
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
-  IMapSavedObject,
   // @ts-ignore
 } from '../../common/constants';
+import { ILayerDescriptor, IMapSavedObject } from '../../common/descriptor_types';
 
-interface Stats {
+interface IStats {
   [key: string]: {
     min: number;
     max: number;
@@ -31,7 +31,7 @@ interface ILayerTypeCount {
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
 
-  return uniqueLayerTypes.reduce((accu: Stats, type: string) => {
+  return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
     const typeCounts = layerCountsList.reduce(
       (tCountsAccu: number[], tCounts: ILayerTypeCount): number[] => {
         if (tCounts[type]) {
@@ -77,7 +77,7 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
-    const sourceIdList = lList.map(layer => layer.sourceDescriptor.id);
+    const sourceIdList = lList.map((layer: ILayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -87,7 +87,7 @@ export function buildMapsTelemetry({
   // Count of EMS Vector layers used
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
-      .countBy(layer => {
+      .countBy((layer: ILayerDescriptor) => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })

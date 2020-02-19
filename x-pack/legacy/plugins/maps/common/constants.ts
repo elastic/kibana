@@ -158,25 +158,3 @@ export const SYMBOLIZE_AS_TYPES = {
 };
 
 export const DEFAULT_ICON = 'airfield';
-
-export interface IMapSavedObject {
-  type: string;
-  id: string;
-  attributes: {
-    title: string;
-    description: string;
-    mapStateJSON: string;
-    layerListJSON: string;
-    uiStateJSON: string;
-    bounds: {
-      type: string;
-      coordinates: [];
-    };
-  };
-  references: [Record<string, string>];
-  migrationVersion: {
-    map: string;
-  };
-  updated_at: string;
-  version: string;
-}
