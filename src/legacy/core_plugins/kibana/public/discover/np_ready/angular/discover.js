@@ -207,9 +207,11 @@ function discoverController(
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: false,
   });
-
-  const $state = _.cloneDeep(appStateContainer.getState());
-  $scope.state = $state;
+  if (appStateContainer.getState().index !== $scope.indexPattern.id) {
+    //used index pattern is different than the given by url/state which is invalid
+    syncAppState({ index: $scope.indexPattern.id });
+  }
+  const $state = ($scope.state = { ...appStateContainer.getState() });
 
   filterManager.setFilters(cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
 
@@ -743,9 +745,6 @@ function discoverController(
       }
 
       init.complete = true;
-
-      await replaceUrlState();
-
       if (shouldSearchOnPageLoad()) {
         $fetchObservable.next();
       }
@@ -813,7 +812,6 @@ function discoverController(
       .updateDataSource()
       .then(setupVisualization)
       .then(function() {
-        //$state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
         return $scope.searchSource.fetch({
@@ -957,23 +955,14 @@ function discoverController(
     return filterManager.addFilters(newFilters);
   };
 
-  function getColumns(columns) {
-    if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-      return columns.filter(col => col !== '_source');
-    } else if (columns.length !== 0) {
-      return columns;
-    }
-    return ['_source'];
-  }
-
   $scope.addColumn = function addColumn(columnName) {
     $scope.indexPattern.popularizeField(columnName, 1);
-    $scope.state.columns = getColumns(columnActions.addColumn($scope.state.columns, columnName));
+    $scope.state.columns = columnActions.addColumn($scope.state.columns, columnName);
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    // $scope.indexPattern.popularizeField(columnName, 1);
-    $scope.state.columns = getColumns(columnActions.removeColumn($scope.state.columns, columnName));
+    $scope.indexPattern.popularizeField(columnName, 1);
+    $scope.state.columns = columnActions.removeColumn($scope.state.columns, columnName);
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
@@ -1129,5 +1118,6 @@ function discoverController(
   addHelpMenuToAppChrome(chrome);
 
   init();
+  replaceUrlState();
   startStateSync();
 }
