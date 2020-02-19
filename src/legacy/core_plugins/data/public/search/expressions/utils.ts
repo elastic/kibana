@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createAggConfigs } from 'ui/agg_types';
+import { getSearchServiceShim } from '../../services';
 import { IAggConfig } from '../aggs/types';
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
 import { IndexPattern } from '../../../../../../plugins/data/public';
@@ -41,7 +41,8 @@ export const deserializeAggConfig = ({
   aggConfigParams,
   indexPattern,
 }: DeserializeAggConfigParams) => {
-  const aggConfigs = createAggConfigs(indexPattern);
+  const { aggs } = getSearchServiceShim();
+  const aggConfigs = aggs.createAggConfigs(indexPattern);
   const aggConfig = aggConfigs.createAggConfig({
     enabled: true,
     type,
