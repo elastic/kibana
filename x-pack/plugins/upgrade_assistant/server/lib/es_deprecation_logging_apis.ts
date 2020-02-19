@@ -5,7 +5,6 @@
  */
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { RequestShim } from '../types';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;

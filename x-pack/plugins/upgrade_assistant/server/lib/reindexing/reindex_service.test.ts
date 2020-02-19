@@ -26,7 +26,7 @@ import { securityMock } from '../../../../security/server/mocks';
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
   let callCluster: jest.Mock;
-  let log: jest.Mock<Logger>;
+  let log: Logger;
   let service: ReindexService;
   let security: SecurityPluginSetup;
 
@@ -56,14 +56,14 @@ describe('reindexService', () => {
     callCluster = jest.fn();
     log = loggingServiceMock.create().get();
     security = securityMock.createSetup();
-    security.__legacyCompat = { license: { isEnabled: () => true } };
+    security.__legacyCompat = { license: { isEnabled: () => true } } as any;
 
     service = reindexServiceFactory(callCluster as any, actions, log, security);
   });
 
   describe('hasRequiredPrivileges', () => {
     it('returns true if security is disabled', async () => {
-      security.__legacyCompat = { license: { isEnabled: () => false } };
+      security.__legacyCompat = { license: { isEnabled: () => false } } as any;
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
     });

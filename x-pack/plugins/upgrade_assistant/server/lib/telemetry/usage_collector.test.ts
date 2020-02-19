@@ -65,7 +65,7 @@ describe('Upgrade Assistant Usage Collector', () => {
 
   describe('registerUpgradeAssistantUsageCollector', () => {
     it('should registerCollector', () => {
-      registerUpgradeAssistantUsageCollector({ usageCollection });
+      registerUpgradeAssistantUsageCollector(dependencies);
       expect(registerStub).toHaveBeenCalledTimes(1);
     });
 

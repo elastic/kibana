@@ -21,7 +21,7 @@ describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
         open: true,
         start: true,
         stop: true,
-        savedObjects: { createInternalRepository: () => internalRepo },
+        savedObjects: { createInternalRepository: () => internalRepo } as any,
       });
 
       expect(internalRepo.incrementCounter).toHaveBeenCalledTimes(4);

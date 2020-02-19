@@ -30,7 +30,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(dataClient, {} as any, false);
+    await getUpgradeAssistantStatus(dataClient, false);
     expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('transport.request', {
       path: '/_migration/deprecations',
       method: 'GET',
@@ -38,7 +38,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(dataClient, {} as any, false);
+    const resp = await getUpgradeAssistantStatus(dataClient, false);
     expect(resp).toMatchSnapshot();
   });
 
@@ -50,7 +50,7 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    await expect(getUpgradeAssistantStatus(dataClient, {} as any, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(dataClient, false)).resolves.toHaveProperty(
       'readyForUpgrade',
       false
     );
@@ -64,7 +64,7 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    await expect(getUpgradeAssistantStatus(dataClient, {} as any, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(dataClient, false)).resolves.toHaveProperty(
       'readyForUpgrade',
       true
     );
@@ -84,7 +84,7 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    const result = await getUpgradeAssistantStatus(dataClient, {} as any, true);
+    const result = await getUpgradeAssistantStatus(dataClient, true);
 
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);

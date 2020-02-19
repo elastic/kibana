@@ -9,7 +9,7 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 
 export function registerClusterCheckupRoutes({ cloud, router }: RouteDependencies) {
-  const isCloudEnabled = cloud?.isCloudEnabled;
+  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   router.get(
     {

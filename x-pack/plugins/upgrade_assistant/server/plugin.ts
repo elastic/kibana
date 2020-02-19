@@ -84,7 +84,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     registerClusterCheckupRoutes(dependencies);
     registerDeprecationLoggingRoutes(dependencies);
-    registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this), this.credentialStore);
+    registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this));
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(dependencies);
 
