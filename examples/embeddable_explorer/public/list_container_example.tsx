@@ -60,7 +60,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wenesdays!',
+          task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
         },
@@ -91,7 +91,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wenesdays!',
+          task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
         },
@@ -102,7 +102,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           id: '3',
           icon: 'searchProfilerApp',
           title: 'Learn more',
-          tasks: ['Go to school', 'Watch planet earth', 'Read the encylopedia'],
+          tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
         },
       },
     },
@@ -150,6 +150,11 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
             <p>
               The first HelloWorldEmbeddable does not emit the hasMatch output variable, so the
               container chooses to hide it.
+            </p>
+
+            <p>
+              Check out the &quote;Dynamically adding children&quote; section, to see how to add
+              children to this container, and see it rendered inside an `EmbeddablePanel` component.
             </p>
           </EuiText>
 

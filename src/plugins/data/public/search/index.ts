@@ -17,12 +17,13 @@
  * under the License.
  */
 
-export { ISearchAppMountContext } from './i_search_app_mount_context';
-
-export { ISearchSetup } from './i_search_setup';
-export { ISearchStart } from './search_service';
-
-export { ISearchContext } from './i_search_context';
+export {
+  ISearchSetup,
+  ISearchStart,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+} from './types';
 
 export {
   ISearch,
@@ -31,8 +32,6 @@ export {
   IResponseTypesMap,
   ISearchGeneric,
 } from './i_search';
-
-export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 

@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
+  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -100,8 +101,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      // https://github.com/elastic/kibana/issues/45348
-      it.skip('allow saving via the saved query management component popover with no query loaded', async () => {
+      it('allow saving via the saved query management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
       });
@@ -305,7 +305,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

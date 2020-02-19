@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 
@@ -32,9 +31,11 @@ const callWithRequest = method => {
   });
 };
 
-// mock callWithInternalUserFactory
-// we replace the return value of the factory with the above mocked callWithRequest
-import * as mockModule from '../../../client/call_with_internal_user_factory';
+const callWithInternalUser = () => {
+  return new Promise(resolve => {
+    resolve({});
+  });
+};
 
 // mock xpack_main plugin
 function mockXpackMainPluginFactory(isEnabled = false, licenseType = 'platinum') {
@@ -51,7 +52,6 @@ function mockXpackMainPluginFactory(isEnabled = false, licenseType = 'platinum')
   };
 }
 
-const mockElasticsearchPlugin = {};
 // mock configuration to be passed to the estimator
 const formConfig = {
   aggTypes: ['count'],
@@ -67,20 +67,9 @@ const formConfig = {
 };
 
 describe('ML - BucketSpanEstimator', () => {
-  let mockCallWithInternalUserFactory;
-
-  beforeEach(() => {
-    mockCallWithInternalUserFactory = sinon.mock(mockModule);
-    mockCallWithInternalUserFactory
-      .expects('callWithInternalUserFactory')
-      .once()
-      .returns(callWithRequest);
-  });
-
   it('call factory', () => {
     expect(function() {
-      estimateBucketSpanFactory(callWithRequest);
-      mockCallWithInternalUserFactory.verify();
+      estimateBucketSpanFactory(callWithRequest, callWithInternalUser);
     }).to.not.throwError('Not initialized.');
   });
 
@@ -88,13 +77,13 @@ describe('ML - BucketSpanEstimator', () => {
     expect(function() {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
-        mockElasticsearchPlugin,
+        callWithInternalUser,
         mockXpackMainPluginFactory()
       );
 
       estimateBucketSpan(formConfig).catch(catchData => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
-        mockCallWithInternalUserFactory.verify();
+
         done();
       });
     }).to.not.throwError('Not initialized.');
@@ -104,12 +93,12 @@ describe('ML - BucketSpanEstimator', () => {
     expect(function() {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
-        mockElasticsearchPlugin,
+        callWithInternalUser,
         mockXpackMainPluginFactory(true)
       );
       estimateBucketSpan(formConfig).catch(catchData => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
-        mockCallWithInternalUserFactory.verify();
+
         done();
       });
     }).to.not.throwError('Not initialized.');
@@ -119,19 +108,14 @@ describe('ML - BucketSpanEstimator', () => {
     expect(function() {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
-        mockElasticsearchPlugin,
+        callWithInternalUser,
         mockXpackMainPluginFactory(true)
       );
 
       estimateBucketSpan(formConfig).catch(catchData => {
         expect(catchData).to.be('Insufficient permissions to call bucket span estimation.');
-        mockCallWithInternalUserFactory.verify();
         done();
       });
     }).to.not.throwError('Not initialized.');
-  });
-
-  afterEach(() => {
-    mockCallWithInternalUserFactory.restore();
   });
 });
