@@ -97,7 +97,7 @@ function getStatePhase(states: CompilerMsg[]) {
   throw new Error(`unable to summarize bundle states: ${JSON.stringify(states)}`);
 }
 
-export function createOptimizerReducer(
+export function createOptimizerStateSummarizer(
   config: OptimizerConfig
 ): Summarizer<OptimizerEvent, OptimizerState> {
   return (state, event, injectEvent) => {

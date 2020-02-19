@@ -31,7 +31,7 @@ import {
   watchBundlesForChanges$,
   runWorkers,
   OptimizerInitializedEvent,
-  createOptimizerReducer,
+  createOptimizerStateSummarizer,
   handleOptimizerCompletion,
 } from './optimizer';
 
@@ -76,7 +76,7 @@ export function runOptimizer(config: OptimizerConfig) {
           startTime,
           durSec: 0,
         },
-        createOptimizerReducer(config)
+        createOptimizerStateSummarizer(config)
       );
     }),
     handleOptimizerCompletion(config)

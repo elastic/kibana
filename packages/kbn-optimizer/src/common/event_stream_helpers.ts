@@ -24,11 +24,11 @@ export interface Update<Event, State> {
   state: State;
 }
 
-export type Dispatch<Event> = (event: Event) => void;
+export type EventInjector<Event> = (event: Event) => void;
 export type Summarizer<Event, State> = (
   prev: State,
   event: Event,
-  injectEvent: Dispatch<Event>
+  injectEvent: EventInjector<Event>
 ) => State | undefined;
 
 /**
@@ -38,7 +38,7 @@ export type Summarizer<Event, State> = (
 export const summarizeEventStream = <Event, State>(
   event$: Rx.Observable<Event>,
   initialState: State,
-  reducer: Summarizer<Event, State>
+  summarize: Summarizer<Event, State>
 ) => {
   return new Rx.Observable<Update<Event, State>>(subscriber => {
     const eventBuffer: Event[] = [];
@@ -59,7 +59,7 @@ export const summarizeEventStream = <Event, State>(
 
         while (eventBuffer.length && !subscriber.closed) {
           const event = eventBuffer.shift()!;
-          const nextState = reducer(previousState, event, injectEvent);
+          const nextState = summarize(previousState, event, injectEvent);
 
           if (nextState === undefined) {
             // skip this event
