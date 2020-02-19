@@ -8,7 +8,7 @@ import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 
-export const kibanaRequestToEndpointListQuery = async (
+export const kibanaRequestToMetadataListESQuery = async (
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
 ): Promise<Record<string, any>> => {
@@ -74,7 +74,7 @@ function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, a
   };
 }
 
-export const kibanaRequestToEndpointFetchQuery = (
+export const kibanaRequestToMetadataGetESQuery = (
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
 ) => {

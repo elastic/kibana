@@ -9,9 +9,9 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import {
-  kibanaRequestToEndpointListQuery,
-  kibanaRequestToEndpointFetchQuery,
-} from '../services/endpoint/endpoint_query_builders';
+  kibanaRequestToMetadataListESQuery,
+  kibanaRequestToMetadataGetESQuery,
+} from '../services/endpoint/metadata_query_builders';
 import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { EndpointAppContext } from '../types';
 
@@ -22,7 +22,7 @@ interface HitSource {
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.post(
     {
-      path: '/api/endpoint/endpoints',
+      path: '/api/endpoint/metadata',
       validate: {
         body: schema.nullable(
           schema.object({
@@ -53,7 +53,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const queryParams = await kibanaRequestToEndpointListQuery(req, endpointAppContext);
+        const queryParams = await kibanaRequestToMetadataListESQuery(req, endpointAppContext);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
@@ -67,7 +67,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
   router.get(
     {
-      path: '/api/endpoint/endpoints/{id}',
+      path: '/api/endpoint/metadata/{id}',
       validate: {
         params: schema.object({ id: schema.string() }),
       },
@@ -75,7 +75,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const query = kibanaRequestToEndpointFetchQuery(req, endpointAppContext);
+        const query = kibanaRequestToMetadataGetESQuery(req, endpointAppContext);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query

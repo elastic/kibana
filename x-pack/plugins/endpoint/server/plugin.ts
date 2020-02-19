@@ -10,7 +10,7 @@ import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
 import { addRoutes } from './routes';
-import { registerEndpointRoutes } from './routes/endpoints';
+import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 
