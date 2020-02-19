@@ -9,6 +9,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { useHistory } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -49,7 +50,6 @@ interface Props {
   badLicenseMessage: string;
   showLinks: boolean;
   enableLinks: boolean;
-  redirect: (url: string) => void;
   intl: InjectedIntl;
 }
 
@@ -382,6 +382,7 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private fetchJobs = async () => {
+    const history = useHistory();
     // avoid page flicker when poller is updating table - only display loading screen on first load
     if (this.isInitialJobsFetch) {
       this.setState(() => ({ isLoading: true }));
@@ -396,7 +397,7 @@ class ReportListingUi extends Component<Props, State> {
     } catch (kfetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         toastNotifications.addDanger(this.props.badLicenseMessage);
-        this.props.redirect('/management');
+        history.push('/management');
         return;
       }
 

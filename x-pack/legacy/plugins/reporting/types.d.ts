@@ -338,3 +338,8 @@ export interface InterceptedRequest {
   frameId: string;
   resourceType: string;
 }
+
+export interface LicenseCheckResult {
+  showLinks: boolean;
+  enableLinks: boolean;
+}

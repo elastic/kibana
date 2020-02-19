@@ -5,15 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { npSetup } from 'ui/new_platform';
-import {
-  LicensingPluginSetup,
-  LICENSE_CHECK_STATE,
-} from '../../../../../../plugins/licensing/public';
+import { getLinkState } from '../../lib/license_check';
+import { LicensingPluginSetup } from '../../../../../../plugins/licensing/public';
 import { ReportListing } from '../../components/report_listing';
 
 const management = npSetup.plugins.management;
@@ -25,22 +22,22 @@ const title = i18n.translate('xpack.reporting.management.reportingTitle', {
 
 licensing.license$.subscribe(license => {
   const { state, message } = license.check('reporting', 'gold');
-  const isAvailable = state === LICENSE_CHECK_STATE.Valid;
+  const { showLinks, enableLinks } = getLinkState(state);
 
-  if (isAvailable) {
+  if (showLinks) {
     const kibanaSection = management.sections.getSection('kibana');
     kibanaSection!.registerApp({
-      id: 'test-management',
+      id: 'reporting',
       title,
       order: 15,
       mount(params) {
-        params.setBreadcrumbs([{ text: 'Boot licker' }]);
+        params.setBreadcrumbs([{ text: 'Reporting' }]);
         ReactDOM.render(
           <I18nContext>
             <ReportListing
               badLicenseMessage={message || ''}
-              showLinks={xpackInfo.get('features.reporting.management.showLinks')}
-              enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
+              showLinks={showLinks}
+              enableLinks={enableLinks}
             />
           </I18nContext>,
           params.element
