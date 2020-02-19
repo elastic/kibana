@@ -10,7 +10,7 @@ import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { Config } from '../index';
-import { getOptionLabel } from '../../../../../../common/agent_configuration_constants';
+import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
