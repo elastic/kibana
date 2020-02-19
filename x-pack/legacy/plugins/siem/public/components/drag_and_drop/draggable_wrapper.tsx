@@ -77,7 +77,6 @@ export const DraggableWrapper = React.memo<Props>(
 
     const registerProvider = useCallback(() => {
       if (!providerRegistered) {
-        console.error('register');
         dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
         setProviderRegistered(true);
       }
