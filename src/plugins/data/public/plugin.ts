@@ -57,7 +57,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.searchService = new SearchService(initializerContext);
+    this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.storage = new Storage(window.localStorage);
