@@ -87,7 +87,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
         ],
@@ -176,7 +176,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -272,7 +272,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -371,7 +371,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -455,7 +455,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -565,7 +565,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
         ],
@@ -660,7 +660,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -762,7 +762,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -867,7 +867,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -957,7 +957,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -1056,7 +1056,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
         ],
@@ -1140,7 +1140,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -1231,7 +1231,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -1325,7 +1325,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {
@@ -1404,7 +1404,7 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "my.custom.ui.filter": "foo-bar",
             },
           },
           Object {

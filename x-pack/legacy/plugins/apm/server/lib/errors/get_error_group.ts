@@ -64,7 +64,7 @@ export async function getErrorGroup({
 
   let transaction;
   if (transactionId && traceId) {
-    transaction = await getTransaction(transactionId, traceId, setup);
+    transaction = await getTransaction({ transactionId, traceId, setup });
   }
 
   return {
