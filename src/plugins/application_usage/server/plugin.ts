@@ -259,7 +259,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     });
   }
 
-  private fetchAggregation(
+  private async fetchAggregation(
     callCluster: ICustomClusterClient['callAsInternalUser'],
     query: object = { match_all: {} }
   ): Promise<SearchAggregationResult> {
@@ -278,7 +278,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
       },
     });
 
-    return callCluster('search', {
+    const response = await callCluster('search', {
       index: INDEX_APP_USAGE,
       ignore_unavailable: true,
       allow_no_indices: true,
@@ -309,6 +309,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
         },
       },
     });
+    return response || {};
   }
 
   private async fetchUsage(callCluster: ICustomClusterClient['callAsInternalUser']) {
