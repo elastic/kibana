@@ -8,11 +8,12 @@ import React from 'react';
 import { WrapperPage } from '../../components/wrapper_page';
 import { HeaderPage } from '../../components/header_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import * as i18n from './translations';
 
 const ConfigureCasesPageComponent: React.FC = () => (
   <>
     <WrapperPage>
-      <HeaderPage title="configure" />
+      <HeaderPage title={i18n.CONFIGURE_CASES} />
     </WrapperPage>
     <SpyRoute />
   </>

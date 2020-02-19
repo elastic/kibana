@@ -102,3 +102,7 @@ export const NO_TAGS = i18n.translate('xpack.siem.case.caseView.noTags', {
 export const TITLE_REQUIRED = i18n.translate('xpack.siem.case.createCase.titleFieldRequiredError', {
   defaultMessage: 'A title is required.',
 });
+
+export const CONFIGURE_CASES = i18n.translate('xpack.siem.case.configureCases.headerTitle', {
+  defaultMessage: 'Configure cases',
+});
