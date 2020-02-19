@@ -26,6 +26,7 @@ export type AppCore = Pick<
 >;
 
 export interface AppPlugins {
+  data: DataPublicPluginStart;
   management: {
     sections: typeof management;
   };

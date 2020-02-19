@@ -34,7 +34,7 @@ export class Plugin {
     } = __LEGACY;
     const config = monitoringConfig();
 
-    const { usageCollection, licensing } = pluginsSetup;
+    const { usageCollection, licensing, alerting } = pluginsSetup;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -152,7 +152,7 @@ export class Plugin {
       };
     });
 
-    if (KIBANA_ALERTING_ENABLED && plugins.alerting) {
+    if (KIBANA_ALERTING_ENABLED && alerting) {
       // this is not ready right away but we need to register alerts right away
       async function getMonitoringCluster() {
         const configs = config.get('xpack.monitoring.elasticsearch');
@@ -174,7 +174,7 @@ export class Plugin {
       function getLogger(contexts) {
         return logger.get('plugins', LOGGING_TAG, ...contexts);
       }
-      plugins.alerting.setup.registerType(
+      alerting.registerType(
         getLicenseExpiration(
           hapiServer,
           getMonitoringCluster,
