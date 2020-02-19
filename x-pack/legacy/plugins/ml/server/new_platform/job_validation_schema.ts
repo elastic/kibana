@@ -11,6 +11,7 @@ export const estimateBucketSpanSchema = schema.object({
   aggTypes: schema.arrayOf(schema.nullable(schema.string())),
   duration: schema.object({ start: schema.number(), end: schema.number() }),
   fields: schema.arrayOf(schema.nullable(schema.string())),
+  filters: schema.maybe(schema.arrayOf(schema.any())),
   index: schema.string(),
   query: schema.any(),
   splitField: schema.maybe(schema.string()),
