@@ -51,6 +51,7 @@ import {
 } from '../../legacy_imports';
 
 import { getServices } from '../../kibana_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../../../../../../plugins/dashboard_embeddable_container/public';
 
 export function initEditorDirective(app, deps) {
   app.directive('visualizeApp', function() {
@@ -99,6 +100,7 @@ function VisualizeAppController(
     I18nContext,
     dashboardEmbeddableContainer,
     setActiveUrl,
+    embeddable,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
@@ -170,56 +172,60 @@ function VisualizeAppController(
                   onTitleDuplicate,
                 };
 
-                const currentDashboard = dashboardEmbeddableContainer.getCurrentDashboard();
-                if (currentDashboard) {
-                  currentDashboard
-                    // We need to extract out the serializable data from savedVis, trying it this way will
-                    // cause max call stack size exceeded from parent references inside the `savedVis` object.
-                    // .addNewEmbeddable('visualization', { savedVis }).then(() => {
-                    .addNewEmbeddable('TODO_EMBEDDABLE', { task: 'do something!' })
-                    .then(() => {
-                      const dashInput = currentDashboard.getInput();
+                const currentDashboardInput = dashboardEmbeddableContainer.getLastLoadedDashboardAppDashboardInput();
+                embeddable
+                  .getEmbeddableFactory(DASHBOARD_CONTAINER_TYPE)
+                  .create(currentDashboardInput)
+                  .then(currentDashboard => {
+                    if (currentDashboard) {
+                      currentDashboard
+                        // We need to extract out the serializable data from savedVis, trying it this way will
+                        // cause max call stack size exceeded from parent references inside the `savedVis` object.
+                        // .addNewEmbeddable('visualization', { savedVis }).then(() => {
+                        .addNewEmbeddable('TODO_EMBEDDABLE', { task: 'do something!' })
+                        .then(() => {
+                          const dashInput = currentDashboard.getInput();
 
-                      // We would use the URL service for this. I have a PR up here:
-                      // https://github.com/elastic/kibana/pull/57496/files. I'd probably register a
-                      // new generator that just takes in dashboard embeddable input and returns the
-                      // dashboard app id.  For now, I just hacked in minimum to get it to show the
-                      // added panel.
-                      const hash = dashInput.id ? `dashboard/${dashInput.id}` : `dashboard`;
-                      const parsedUrl = url.parse(window.location.href);
-                      const dashboardAppUrl = url.format({
-                        protocol: parsedUrl.protocol,
-                        host: parsedUrl.host,
-                        pathname: `app/kibana`,
-                        hash,
+                          // We would use the URL service for this. I have a PR up here:
+                          // https://github.com/elastic/kibana/pull/57496/files. I'd probably register a
+                          // new generator that just takes in dashboard embeddable input and returns the
+                          // dashboard app id.  For now, I just hacked in minimum to get it to show the
+                          // added panel.
+                          const hash = dashInput.id ? `dashboard/${dashInput.id}` : `dashboard`;
+                          const parsedUrl = url.parse(window.location.href);
+                          const dashboardAppUrl = url.format({
+                            protocol: parsedUrl.protocol,
+                            host: parsedUrl.host,
+                            pathname: `app/kibana`,
+                            hash,
+                          });
+                          const dashUrl = setStateToKbnUrl(
+                            '_a',
+                            {
+                              query: dashInput.query,
+                              filters: dashInput.filters,
+                              panels: Object.values(dashInput.panels).map(panel =>
+                                convertPanelStateToSavedDashboardPanel(panel)
+                              ),
+                            },
+                            { useHash: false },
+                            dashboardAppUrl
+                          );
+
+                          window.location.hash = url.parse(dashUrl).hash;
+                        });
+                    } else {
+                      return doSave(saveOptions).then(response => {
+                        // If the save wasn't successful, put the original values back.
+                        if (!response.id || response.error) {
+                          savedVis.title = currentTitle;
+                        }
+                        return response;
                       });
-                      const dashUrl = setStateToKbnUrl(
-                        '_a',
-                        {
-                          query: dashInput.query,
-                          filters: dashInput.filters,
-                          panels: Object.values(dashInput.panels).map(panel =>
-                            convertPanelStateToSavedDashboardPanel(panel)
-                          ),
-                        },
-                        { useHash: false },
-                        dashboardAppUrl
-                      );
-
-                      window.location.hash = url.parse(dashUrl).hash;
-                    });
-
-                  // Avoids a console error, this would need to be cleaned up.
-                  return { id: '123' };
-                } else {
-                  return doSave(saveOptions).then(response => {
-                    // If the save wasn't successful, put the original values back.
-                    if (!response.id || response.error) {
-                      savedVis.title = currentTitle;
                     }
-                    return response;
                   });
-                }
+                // Avoids a console error, this would need to be cleaned up.
+                return { id: '123' };
               };
 
               const confirmButtonLabel = $scope.isAddToDashMode() ? (

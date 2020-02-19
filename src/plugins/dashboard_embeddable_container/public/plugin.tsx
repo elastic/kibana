@@ -31,7 +31,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
-import { DashboardContainer } from './embeddable';
+import { DashboardContainer, DashboardContainerInput } from './embeddable';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
@@ -47,13 +47,13 @@ interface StartDependencies {
 export type Setup = void;
 
 export interface DashboardStart {
-  getCurrentDashboard: () => DashboardContainer | undefined;
-  setCurrentDashboard: (dashboard: DashboardContainer | undefined) => void;
+  getLastLoadedDashboardAppDashboardInput: () => DashboardContainerInput | undefined;
+  setLastLoadedDashboardAppDashboardInput: (dashboard: DashboardContainerInput | undefined) => void;
 }
 
 export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
-  private currentDashboard: DashboardContainer | undefined;
+  private currentDashboardInput: DashboardContainerInput | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -104,8 +104,9 @@ export class DashboardEmbeddableContainerPublicPlugin
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
     return {
-      getCurrentDashboard: () => this.currentDashboard,
-      setCurrentDashboard: dashboard => (this.currentDashboard = dashboard),
+      getLastLoadedDashboardAppDashboardInput: () => this.currentDashboardInput,
+      setLastLoadedDashboardAppDashboardInput: dashboardInput =>
+        (this.currentDashboardInput = dashboardInput),
     };
   }
 
