@@ -17,11 +17,11 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // flaky test, see #55179
-  describe.skip('creation_saved_search', function() {
+  describe('creation_saved_search', function() {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
@@ -49,7 +49,7 @@ export default function({ getService }: FtrProviderContext) {
         transformDescription:
           'farequote batch transform with groups terms(airline) and aggregation avg(responsetime.avg) with saved search filter',
         get destinationIndex(): string {
-          return `dest_${this.transformId}`;
+          return `user-${this.transformId}`;
         },
         expected: {
           pivotPreview: {
@@ -195,14 +195,17 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the create and start button', async () => {
           await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCreateAndStartButtonEnabled(true);
         });
 
         it('displays the create button', async () => {
           await transform.wizard.assertCreateButtonExists();
+          await transform.wizard.assertCreateButtonEnabled(true);
         });
 
         it('displays the copy to clipboard button', async () => {
-          await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
         it('creates the transform', async () => {
