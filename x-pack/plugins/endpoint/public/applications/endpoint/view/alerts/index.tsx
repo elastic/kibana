@@ -192,7 +192,11 @@ export const AlertIndex = memo(() => {
         <EuiFlyout size="l" onClose={handleFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>Alert Details</h2>
+              <h2>
+                {i18n.translate('xpack.endpoint.application.endpoint.alerts.detailsTitle', {
+                  defaultMessage: 'Alert Details',
+                })}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody />

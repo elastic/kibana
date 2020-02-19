@@ -90,8 +90,17 @@ export type AlertListState = Immutable<AlertResultList> & {
  * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
  */
 export interface AlertingIndexUIQueryParams {
+  /**
+   * How many items to show in list.
+   */
   page_size?: string;
+  /**
+   * Which page to show. If `page_index` is 1, show page 2.
+   */
   page_index?: string;
+  /**
+   * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
+   */
   selected_alert?: string;
 }
 
@@ -99,6 +108,12 @@ export interface AlertingIndexUIQueryParams {
  * Query params to pass to the alert API when fetching new data.
  */
 export interface AlertsAPIQueryParams {
+  /**
+   * Number of results to return.
+   */
   page_size?: string;
+  /**
+   * 0-based index of 'page' to return.
+   */
   page_index?: string;
 }
