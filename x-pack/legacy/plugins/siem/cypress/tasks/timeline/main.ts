@@ -70,7 +70,7 @@ export const uncheckTimestampToggleField = () => {
 };
 
 export const checkIdToggleField = () => {
-  cy.get(ID_TOGGLE_FIELD).should('not.exist');
+  cy.get(ID_HEADER_FIELD).should('not.exist');
 
   cy.get(ID_TOGGLE_FIELD).check({
     force: true,
@@ -85,4 +85,8 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
     drop(headersDropArea)
   );
+};
+
+export const closeTimeline = () => {
+  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
