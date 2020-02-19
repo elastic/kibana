@@ -15,3 +15,5 @@ export const OVERVIEW = '[data-test-subj="navigation-overview"]';
 export const TIMELINES = '[data-test-subj="navigation-timelines"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
+
+export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
