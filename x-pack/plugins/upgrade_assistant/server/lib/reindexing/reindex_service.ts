@@ -443,7 +443,7 @@ export const reindexServiceFactory = (
   return {
     async hasRequiredPrivileges(indexName: string) {
       // If security is disabled or unavailable, return true.
-      if (security?.__legacyCompat.license.isEnabled()) {
+      if (!security || !security.__legacyCompat.license.isEnabled()) {
         return true;
       }
 

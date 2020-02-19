@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
+import { IClusterClient } from 'kibana/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -14,20 +15,31 @@ import { registerUpgradeAssistantUsageCollector } from './usage_collector';
 describe('Upgrade Assistant Usage Collector', () => {
   let makeUsageCollectorStub: any;
   let registerStub: any;
-  let server: any;
+  let dependencies: any;
   let callClusterStub: any;
   let usageCollection: any;
+  let clusterClient: IClusterClient;
 
   beforeEach(() => {
+    clusterClient = elasticsearchServiceMock.createClusterClient();
+    (clusterClient.callAsInternalUser as jest.Mock).mockResolvedValue({
+      persistent: {},
+      transient: {
+        logger: {
+          deprecation: 'WARN',
+        },
+      },
+    });
     makeUsageCollectorStub = jest.fn();
     registerStub = jest.fn();
     usageCollection = {
       makeUsageCollector: makeUsageCollectorStub,
       registerCollector: registerStub,
     };
-    server = jest.fn().mockReturnValue({
+    dependencies = {
+      usageCollection,
       savedObjects: {
-        getSavedObjectsRepository: jest.fn().mockImplementation(() => {
+        createInternalRepository: jest.fn().mockImplementation(() => {
           return {
             get: () => {
               return {
@@ -45,31 +57,26 @@ describe('Upgrade Assistant Usage Collector', () => {
           };
         }),
       },
-    });
-    callClusterStub = jest.fn().mockResolvedValue({
-      persistent: {},
-      transient: {
-        logger: {
-          deprecation: 'WARN',
-        },
+      elasticsearch: {
+        adminClient: clusterClient,
       },
-    });
+    };
   });
 
   describe('registerUpgradeAssistantUsageCollector', () => {
     it('should registerCollector', () => {
-      registerUpgradeAssistantUsageCollector(usageCollection, server());
+      registerUpgradeAssistantUsageCollector({ usageCollection });
       expect(registerStub).toHaveBeenCalledTimes(1);
     });
 
     it('should call makeUsageCollector with type = upgrade-assistant', () => {
-      registerUpgradeAssistantUsageCollector(usageCollection, server());
+      registerUpgradeAssistantUsageCollector(dependencies);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('upgrade-assistant-telemetry');
     });
 
     it('fetchUpgradeAssistantMetrics should return correct info', async () => {
-      registerUpgradeAssistantUsageCollector(usageCollection, server());
+      registerUpgradeAssistantUsageCollector(dependencies);
       const upgradeAssistantStats = await makeUsageCollectorStub.mock.calls[0][0].fetch(
         callClusterStub
       );

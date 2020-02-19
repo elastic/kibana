@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
@@ -12,9 +12,9 @@ import {
 
 describe('getDeprecationLoggingStatus', () => {
   it('calls cluster.getSettings', async () => {
-    const callWithRequest = jest.fn();
-    await getDeprecationLoggingStatus(callWithRequest, {} as any);
-    expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.getSettings', {
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    await getDeprecationLoggingStatus(dataClient);
+    expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.getSettings', {
       includeDefaults: true,
     });
   });
@@ -23,9 +23,9 @@ describe('getDeprecationLoggingStatus', () => {
 describe('setDeprecationLogging', () => {
   describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
-      const callWithRequest = jest.fn();
-      await setDeprecationLogging(callWithRequest, {} as any, true);
-      expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.putSettings', {
+      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      await setDeprecationLogging(dataClient, true);
+      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'WARN' } },
       });
     });
@@ -33,9 +33,9 @@ describe('setDeprecationLogging', () => {
 
   describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
-      const callWithRequest = jest.fn();
-      await setDeprecationLogging(callWithRequest, {} as any, false);
-      expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.putSettings', {
+      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      await setDeprecationLogging(dataClient, false);
+      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'ERROR' } },
       });
     });

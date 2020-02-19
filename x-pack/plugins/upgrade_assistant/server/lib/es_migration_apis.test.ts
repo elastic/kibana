@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
+import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
@@ -13,7 +14,8 @@ import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 describe('getUpgradeAssistantStatus', () => {
   let deprecationsResponse: DeprecationAPIResponse;
 
-  const callWithRequest = jest.fn().mockImplementation(async (req, api, { path }) => {
+  const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
     } else if (api === 'indices.getMapping') {
@@ -28,15 +30,15 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(callWithRequest, {} as any, false);
-    expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
+    await getUpgradeAssistantStatus(dataClient, {} as any, false);
+    expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('transport.request', {
       path: '/_migration/deprecations',
       method: 'GET',
     });
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, false);
+    const resp = await getUpgradeAssistantStatus(dataClient, {} as any, false);
     expect(resp).toMatchSnapshot();
   });
 
@@ -48,9 +50,10 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    await expect(
-      getUpgradeAssistantStatus(callWithRequest, {} as any, false)
-    ).resolves.toHaveProperty('readyForUpgrade', false);
+    await expect(getUpgradeAssistantStatus(dataClient, {} as any, false)).resolves.toHaveProperty(
+      'readyForUpgrade',
+      false
+    );
   });
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
@@ -61,9 +64,10 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    await expect(
-      getUpgradeAssistantStatus(callWithRequest, {} as any, false)
-    ).resolves.toHaveProperty('readyForUpgrade', true);
+    await expect(getUpgradeAssistantStatus(dataClient, {} as any, false)).resolves.toHaveProperty(
+      'readyForUpgrade',
+      true
+    );
   });
 
   it('filters out security realm deprecation on Cloud', async () => {
@@ -80,7 +84,7 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true);
+    const result = await getUpgradeAssistantStatus(dataClient, {} as any, true);
 
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);
