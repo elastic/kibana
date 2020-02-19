@@ -22,6 +22,8 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { findMlSignals } from './find_ml_signals';
+
 interface AlertAttributes {
   enabled: boolean;
   name: string;
@@ -33,6 +35,7 @@ interface AlertAttributes {
     interval: string;
   };
 }
+
 export const signalRulesAlertType = ({
   logger,
   version,
@@ -175,6 +178,15 @@ export const signalRulesAlertType = ({
             services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
           );
         }
+      }
+
+      if (type === 'machine_learning') {
+        const signals = await findMlSignals(savedObject);
+        if (signals.length) {
+          logger.debug(`Found ${signals.length} signals`);
+        }
+
+        return;
       }
 
       const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
