@@ -31,7 +31,7 @@ licensing.license$.subscribe(license => {
       title,
       order: 15,
       mount(params) {
-        params.setBreadcrumbs([{ text: 'Reporting' }]);
+        params.setBreadcrumbs([{ text: title }]);
         ReactDOM.render(
           <I18nContext>
             <ReportListing
