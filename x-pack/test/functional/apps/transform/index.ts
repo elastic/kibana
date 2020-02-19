@@ -23,5 +23,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
+    loadTestFile(require.resolve('./cloning'));
   });
 }
