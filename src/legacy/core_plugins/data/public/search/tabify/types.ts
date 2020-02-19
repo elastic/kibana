@@ -24,9 +24,9 @@ export interface TimeRange extends RangeFilterParams {
   name: string;
 }
 
-/** @public **/
+/** @internal **/
 export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
-  timeRange?: RangeFilterParams;
+  timeRange?: { [key: string]: RangeFilterParams };
 }

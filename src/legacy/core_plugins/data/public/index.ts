@@ -47,7 +47,6 @@ export {
   ISchemas,
   OptionedParamEditorProps,
   OptionedValueProp,
-  TabbedResponseWriterOptions,
 } from './search/types';
 
 /** @public static code */

@@ -73,12 +73,12 @@ describe('tabifyAggResponse Integration', () => {
   });
 
   describe('transforms a complex response', () => {
+    let esResp: typeof threeTermBuckets;
+    let aggConfigs: IAggConfigs;
     let avg: IAggConfig;
     let ext: IAggConfig;
     let src: IAggConfig;
     let os: IAggConfig;
-    let esResp: typeof threeTermBuckets;
-    let aggConfigs: IAggConfigs;
 
     beforeEach(() => {
       aggConfigs = createAggConfigs([
@@ -105,7 +105,7 @@ describe('tabifyAggResponse Integration', () => {
 
     // check that a row has expected values
     function expectRow(
-      row: Record<string, string>,
+      row: Record<string, string | number>,
       asserts: Array<(val: string | number) => void>
     ) {
       expect(typeof row).toBe('object');

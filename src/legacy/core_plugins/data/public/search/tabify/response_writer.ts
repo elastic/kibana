@@ -25,7 +25,7 @@ import { TabbedResponseWriterOptions } from './types';
 
 interface TabbedAggColumn {
   id: string;
-  value: unknown;
+  value: string | number;
 }
 
 type TabbedAggRow = Record<TabbedAggColumn['id'], TabbedAggColumn['value']>;
@@ -33,11 +33,6 @@ type TabbedAggRow = Record<TabbedAggColumn['id'], TabbedAggColumn['value']>;
 /**
  * Writer class that collects information about an aggregation response and
  * produces a table, or a series of tables.
- *
- * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
- * @param {boolean} partialRows - setting to true will not remove rows with missing values
- * @param {Object} timeRange - time range object, if provided
  */
 export class TabbedAggResponseWriter {
   columns: AggColumn[];
@@ -47,6 +42,11 @@ export class TabbedAggResponseWriter {
 
   private readonly partialRows: boolean;
 
+  /**
+   * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
+   * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
+   * @param {boolean} partialRows - setting to true will not remove rows with missing values
+   */
   constructor(
     aggs: IAggConfigs,
     { metricsAtAllLevels = false, partialRows = false }: Partial<TabbedResponseWriterOptions>

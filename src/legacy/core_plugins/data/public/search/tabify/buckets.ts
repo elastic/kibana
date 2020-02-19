@@ -49,6 +49,7 @@ export class TabifyBuckets {
     }
 
     this.objectMode = isPlainObject(this.buckets);
+
     if (this.objectMode) {
       this._keys = keys(this.buckets);
       this.length = this._keys.length;
@@ -83,12 +84,13 @@ export class TabifyBuckets {
       this._keys = params.filters.map((filter: any) => {
         const query = get(filter, 'input.query.query_string.query', filter.input.query);
         const queryString = typeof query === 'string' ? query : JSON.stringify(query);
+
         return filter.label || queryString || '*';
       });
     } else if (params.ranges && this.objectMode) {
-      this._keys = params.ranges.map((range: TimeRange) => {
-        return findKey(this.buckets, (el: TimeRange) => isRangeEqual(el, range));
-      });
+      this._keys = params.ranges.map((range: TimeRange) =>
+        findKey(this.buckets, (el: TimeRange) => isRangeEqual(el, range))
+      );
     } else if (params.ranges && params.field.type !== 'date') {
       let ranges = params.ranges;
       if (params.ipRangeType) {

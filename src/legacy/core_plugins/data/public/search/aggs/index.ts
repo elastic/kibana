@@ -42,7 +42,6 @@ export { isDateHistogramBucketAggConfig, setBounds } from './buckets/date_histog
 export { termsAggFilter } from './buckets/terms';
 export { isType, isStringType } from './buckets/migrate_include_exclude_format';
 export { CidrMask } from './buckets/lib/cidr_mask';
-export { BucketAggType } from './buckets/_bucket_agg_type';
 export { convertDateRangeToString } from './buckets/date_range';
 export { convertIPRangeToString } from './buckets/ip_range';
 export { aggTypeFilters, propFilter } from './filter';

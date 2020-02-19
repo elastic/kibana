@@ -19,4 +19,3 @@
 
 export * from './aggs/types';
 export * from './utils/types';
-export { TabbedResponseWriterOptions } from './tabify';
