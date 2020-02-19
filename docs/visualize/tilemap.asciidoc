@@ -1,60 +1,38 @@
 [[visualize-maps]]
 == Maps
 
-To visualize and analyze your geographical data, Visualize provides you with several types of maps.
+To visualize and analyze your geographical data, Visualize provides you with coordinate, heat, and region maps.
 
-Visualize supports the following types of maps:
-
-* Coordinate map - Displays geographic areas overlaid with circles keyed to the data determined by the buckets you specify. To use coordinate maps, you plot latitude and longitude coordinates.
-
-* Region (Choropleth) map - Displays colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
-
-* Heat map - Displays graphical representations of data where the individual values are represented as colors.
-
-NOTE: Coordinate, region, and heat maps have been replaced with <<maps>>, which offers more functionality.
+NOTE: Coordinate, heat, and region maps have been replaced with <<maps>>, which offers more functionality.
 
 [float]
-[[maps-supported-aggregations]]
-=== Supported aggregations
+[[maps-before-you-begin]]
+=== Before you begin
 
-Each map type supports a different set of aggregations.
+To use coordinate and region maps, you must configure the `kibana.yml` settings:
 
-[cols=2*,options="header"]
-|===
-|Map type
-|Supported aggregations
+* Set `xpack.maps.showMapVisualizationTypes` to `true`.
 
-|Coordinate
-a|
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
-
-|Region
-a|
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-* <<visualize-bucket-aggregations,Terms bucket aggregation>>
-To join the results to the vector data, use the _key_ term.
-
-|Heat
-a|
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-* <<visualize-bucket-aggregations,Bucket>>
-|===
+* To use a tile service provider for coordinate maps other than https://www.elastic.co/elastic-maps-service[Elastic Maps Service], configure the <<tilemap-settings,tilemap settings>>.
 
 [float]
 [[tilemap]]
 === Create coordinate maps
 
-To create coordinate maps in Visualize:
+Display geographic areas overlaid with circles keyed to the data determined by the buckets you specify.
 
-* Set `xpack.maps.showMapVisualizationTypes` to `true`.
+[float]
+[[coordinate-map-aggregations]]
+==== Supported coordinate map aggregations
 
-* To display map tiles, {kib} uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
-To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
-in `kibana.yml`.
+To display your data on the coordinate map, use the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
+
+[float]
+[[coordinate-map-options]]
+==== Specify the coordinate map options
 
 When you deselect *Change precision on map zoom*, the *Precision* slider appears. The *Precision* slider determines the granularity of the results displayed on the map. For details on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
 
@@ -63,6 +41,7 @@ NOTE: Higher precisions increase memory usage for the browser that displays {kib
 
 When you select *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are
 placed in the center of all documents in the bucket, and a more accurate visualization is created.
+
 NOTE: When you have multiple values in the geo_point, the coordinate map is unable to accurately calculate the geo_centroid.
 
 When you deselect *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are placed in the center
@@ -75,26 +54,32 @@ of the geohash grid cell.
 Use the following navigation options:
 
 * To move the map center, click and hold anywhere on the map and move the cursor.
+
 * To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
+
 * To automatically crop the map boundaries to the
 geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
-
-[float]
-[[region-map]]
-=== Create region maps
-
-Configure an inner join that joins the result of an {es} terms aggregation
-and a reference vector file based on a shared key.
 
 [float]
 [[heat-map]]
 === Create heat maps
 
-Something cool.
+Heat maps display graphical representations of data where the individual values are represented as colors.
+
+[float]
+[[heat-map-aggregations]]
+==== Supported heat map aggregations
+
+To display your data on the heat map, use the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Bucket>>
 
 [float]
 [[navigate-heatmap]]
-=== Change the color ranges
+==== Change the color ranges
 
 When only one color displays on the heat map, you might need to change the color ranges.
 
@@ -111,3 +96,24 @@ To specify custom ranges:
 . Select *Use custom ranges*.
 
 . Enter the ranges to display.
+
+[float]
+[[region-map]]
+=== Create region maps
+
+Displays colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
+
+[float]
+[[region-maps-aggregations]]
+==== Supported region map aggregations
+
+To display your data on the region map, use the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Terms bucket aggregation>>
+
+Configure an inner join that joins the result of an {es} terms aggregation
+and a reference vector file based on a shared key.
+
+To join the results to the vector data, use the _key_ term.
