@@ -80,7 +80,6 @@ export const AlertIndex = memo(() => {
     ];
   }, []);
 
-  // TODO consider structuredSelector
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
   const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
   const urlWithSelectedAlert = useAlertListSelector(selectors.urlWithSelectedAlert);
