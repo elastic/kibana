@@ -37,6 +37,7 @@ import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { ingestManager } from './legacy/plugins/ingest_manager';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
 module.exports = function(kibana) {
@@ -74,6 +75,7 @@ module.exports = function(kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    ingestManager(kibana),
     triggersActionsUI(kibana),
   ];
 };

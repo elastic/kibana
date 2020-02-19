@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padLeft, difference } from 'lodash';
+import { padLeft, difference, chunk } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
+import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -134,22 +135,39 @@ export function AlertInstances({
   unmuteAlertInstance,
   requestRefresh,
 }: AlertInstancesProps) {
+  const [pagination, setPagination] = useState<Pagination>({
+    index: 0,
+    size: DEFAULT_SEARCH_PAGE_SIZE,
+  });
+
+  const mergedAlertInstances = [
+    ...Object.entries(alertInstances).map(([instanceId, instance]) =>
+      alertInstanceToListItem(alert, instanceId, instance)
+    ),
+    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
+      alertInstanceToListItem(alert, instanceId)
+    ),
+  ];
+  const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
+
   const onMuteAction = async (instance: AlertInstanceListItem) => {
     await (instance.isMuted
       ? unmuteAlertInstance(alert, instance.instance)
       : muteAlertInstance(alert, instance.instance));
     requestRefresh();
   };
+
   return (
     <EuiBasicTable
-      items={[
-        ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-          alertInstanceToListItem(alert, instanceId, instance)
-        ),
-        ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-          alertInstanceToListItem(alert, instanceId)
-        ),
-      ]}
+      items={pageOfAlertInstances}
+      pagination={{
+        pageIndex: pagination.index,
+        pageSize: pagination.size,
+        totalItemCount: mergedAlertInstances.length,
+      }}
+      onChange={({ page: changedPage }: { page: Pagination }) => {
+        setPagination(changedPage);
+      }}
       rowProps={() => ({
         'data-test-subj': 'alert-instance-row',
       })}
@@ -162,6 +180,10 @@ export function AlertInstances({
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
+
+function getPage(items: any[], pagination: Pagination) {
+  return chunk(items, pagination.size)[pagination.index] || [];
+}
 
 interface AlertInstanceListItemStatus {
   label: string;
