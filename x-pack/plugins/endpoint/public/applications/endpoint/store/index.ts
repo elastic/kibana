@@ -53,7 +53,6 @@ export const appStoreFactory = (coreStart: CoreStart): Store => {
     appReducer,
     composeWithReduxDevTools(
       applyMiddleware(
-        alertMiddlewareFactory(coreStart),
         substateMiddlewareFactory(
           globalState => globalState.managementList,
           managementMiddlewareFactory(coreStart)
@@ -61,6 +60,10 @@ export const appStoreFactory = (coreStart: CoreStart): Store => {
         substateMiddlewareFactory(
           globalState => globalState.policyList,
           policyListMiddlewareFactory(coreStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.alertList,
+          alertMiddlewareFactory(coreStart)
         )
       )
     )
