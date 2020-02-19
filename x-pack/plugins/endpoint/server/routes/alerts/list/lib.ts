@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { get } from 'lodash';
 import { encode, decode, RisonValue } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
@@ -192,10 +193,6 @@ function getPageUrl(reqData: AlertListRequestQueryInternal): string {
     pageUrl += `order=${reqData.order}&`;
   }
 
-  if (reqData.pageIndex === undefined) {
-    pageUrl += `page_index=${reqData.pageIndex}&`;
-  }
-
   pageUrl += `page_size=${reqData.pageSize}&`;
 
   // NOTE: `search_after` and `search_before` are appended later.
@@ -242,15 +239,15 @@ export function mapToAlertResultList(
   }
 
   if (hitLen > 0 && hitLen <= reqData.pageSize) {
-    const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
-    const lastEventId: number = hits[hitLen - 1]._source.event.id;
-    next = pageUrl + '&after=' + lastTimestamp + '&after=' + lastEventId;
+    const lastCustomSortValue: string = get(hits[hitLen - 1]._source, reqData.sort) as string;
+    const lastEventId: string = hits[hitLen - 1]._source.event.id;
+    next = pageUrl + '&after=' + lastCustomSortValue + '&after=' + lastEventId;
   }
 
   if (hitLen > 0) {
-    const firstTimestamp: Date = hits[0]._source['@timestamp'];
-    const firstEventId: number = hits[0]._source.event.id;
-    prev = pageUrl + '&before=' + firstTimestamp + '&before=' + firstEventId;
+    const firstCustomSortValue: string = get(hits[0]._source, reqData.sort) as string;
+    const firstEventId: string = hits[0]._source.event.id;
+    prev = pageUrl + '&before=' + firstCustomSortValue + '&before=' + firstEventId;
   }
 
   function mapHit(entry: AlertDataWrapper): AlertData {

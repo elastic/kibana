@@ -19,6 +19,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({})
           .expect(200);
+        expect(body).to.eql({});
         expect(body.total).to.eql(132);
         expect(body.alerts.length).to.eql(10);
         expect(body.request_page_size).to.eql(10);
@@ -61,6 +62,53 @@ export default function({ getService }: FtrProviderContext) {
           .expect(400);
         expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
       });
+
+      it('alerts api should return `prev` and `next` using `after` and `before`.', async () => {
+        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const { body } = await supertest
+          .get('/api/endpoint/alerts?page_index=0')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(10);
+        const lastTimestampFirstPage = body.alerts[9]['@timestamp'];
+        const lastEventIdFirstPage = body.alerts[9].event.id;
+        expect(body.next).to.eql(
+          `/api/endpoint/alerts?${prefix}&after=${lastTimestampFirstPage}&after=${lastEventIdFirstPage}`
+        );
+      });
+
+      it('alerts api should return data using `next`', async () => {
+        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${prefix}&after=1542789412000&after=c710bf2d-8686-4038-a2a1-43bdecc06b2a`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(10);
+        const firstTimestampNextPage = body.alerts[0]['@timestamp'];
+        const firstEventIdNextPage = body.alerts[0].event.id;
+        expect(body.prev).to.eql(
+          `/api/endpoint/alerts?${prefix}&before=${firstTimestampNextPage}&before=${firstEventIdNextPage}`
+        );
+      });
+
+      it('alerts api should return data using `prev`', async () => {
+        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${prefix}&before=1542789412000&before=823d814d-fa0c-4e53-a94c-f6b296bb965b`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(10);
+      });
+
+      it('alerts api should return alert details by id', async () => {});
+
+      it('alerts api should return data using `next` by custom sort parameter', async () => {});
+
+      it('alerts api should filter results of alert data', async () => {});
     });
   });
 }

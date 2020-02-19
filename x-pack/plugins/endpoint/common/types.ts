@@ -84,7 +84,7 @@ export interface AlertData {
     version: string;
   };
   event: {
-    id: number;
+    id: string;
     action: string;
   };
   file_classification: {
