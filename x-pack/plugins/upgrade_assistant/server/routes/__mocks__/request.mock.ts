@@ -6,7 +6,7 @@
 export const createRequestMock = (opts?: {
   headers?: any;
   params?: Record<string, any>;
-  payload?: Record<string, any>;
+  body?: Record<string, any>;
 }) => {
   return Object.assign({ headers: {} }, opts || {});
 };

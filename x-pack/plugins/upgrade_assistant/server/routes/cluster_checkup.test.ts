@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { kibanaResponseFactory } from 'kibana/server';
-import { createMockRouter, MockRouter } from './__mocks__/routes.mock';
+import { kibanaResponseFactory } from '../../../../../src/core/server';
+import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
 jest.mock('../lib/es_version_precheck', () => ({
@@ -24,32 +24,22 @@ import { registerClusterCheckupRoutes } from './cluster_checkup';
  * more thoroughly in the es_migration_apis test.
  */
 describe('cluster checkup API', () => {
-  afterEach(() => jest.clearAllMocks());
-
   let mockRouter: MockRouter;
-  let serverShim: any;
-  let ctxMock: any;
-  let mockPluginsSetup: any;
+  let routeDependencies: any;
 
   beforeEach(() => {
     mockRouter = createMockRouter();
-    mockPluginsSetup = {
+    routeDependencies = {
       cloud: {
         isCloudEnabled: true,
       },
-    };
-    ctxMock = {
-      core: {},
-    };
-    serverShim = {
       router: mockRouter,
-      plugins: {
-        elasticsearch: {
-          getCluster: () => ({ callWithRequest: jest.fn() } as any),
-        } as any,
-      },
     };
-    registerClusterCheckupRoutes(serverShim, mockPluginsSetup);
+    registerClusterCheckupRoutes(routeDependencies);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('with cloud enabled', () => {
@@ -62,11 +52,11 @@ describe('cluster checkup API', () => {
         nodes: [],
       });
 
-      await serverShim.router.getHandler({
+      await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
-      })(ctxMock, createRequestMock(), kibanaResponseFactory);
-      expect(spy.mock.calls[0][2]).toBe(true);
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+      expect(spy.mock.calls[0][1]).toBe(true);
     });
   });
 
@@ -77,10 +67,10 @@ describe('cluster checkup API', () => {
         indices: [],
         nodes: [],
       });
-      const resp = await serverShim.router.getHandler({
+      const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
-      })(ctxMock, createRequestMock(), kibanaResponseFactory);
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
       expect(JSON.stringify(resp.payload)).toMatchInlineSnapshot(
@@ -93,10 +83,10 @@ describe('cluster checkup API', () => {
       e.status = 403;
 
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
-      const resp = await serverShim.router.getHandler({
+      const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
-      })(ctxMock, createRequestMock(), kibanaResponseFactory);
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(403);
     });
@@ -104,10 +94,10 @@ describe('cluster checkup API', () => {
     it('returns an 500 error if it throws', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(new Error(`scary error!`));
 
-      const resp = await serverShim.router.getHandler({
+      const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
-      })(ctxMock, createRequestMock(), kibanaResponseFactory);
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(500);
     });

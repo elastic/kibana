@@ -3,7 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler, RequestHandlerContext } from '../../../../../../src/core/server';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../../../src/core/server/mocks';
+
+export const routeHandlerContextMock = ({
+  core: {
+    elasticsearch: {
+      adminClient: elasticsearchServiceMock.createScopedClusterClient(),
+      dataClient: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    savedObjects: { client: savedObjectsClientMock.create() },
+  },
+} as unknown) as RequestHandlerContext;
 
 /**
  * Creates a very crude mock of the new platform router implementation. This enables use to test
