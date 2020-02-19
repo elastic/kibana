@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'kibana/server';
 import moment from 'moment';
 
 import { SecurityPluginSetup } from '../../../../security/server';
@@ -159,8 +159,12 @@ export class ReindexWorker {
     }
 
     // Setup a ReindexService specific to these credentials.
-    const callCluster = this.clusterClient.callAsInternalUser.bind(this.clusterClient);
+    const fakeRequest: FakeRequest = { headers: credential };
+
+    const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
+    const callCluster = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
     const actions = reindexActionsFactory(this.client, callCluster);
+
     const service = reindexServiceFactory(callCluster, actions, this.log, this.security);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
