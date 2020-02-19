@@ -6,21 +6,21 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { usePersistRule, Return } from './persist_rule';
+import { usePersistRule, ReturnPersistRule } from './persist_rule';
 import { ruleMock } from './mock';
 
 jest.mock('./api');
 
 describe('usePersistRule', () => {
   test('init', async () => {
-    const { result } = renderHook<unknown, Return>(() => usePersistRule());
+    const { result } = renderHook<unknown, ReturnPersistRule>(() => usePersistRule());
 
     expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
   });
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<unknown, Return>(() =>
+      const { result, rerender, waitForNextUpdate } = renderHook<unknown, ReturnPersistRule>(() =>
         usePersistRule()
       );
       await waitForNextUpdate();
@@ -32,7 +32,9 @@ describe('usePersistRule', () => {
 
   test('saved rule with isSaved === true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, Return>(() => usePersistRule());
+      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPersistRule>(() =>
+        usePersistRule()
+      );
       await waitForNextUpdate();
       result.current[1](ruleMock);
       await waitForNextUpdate();

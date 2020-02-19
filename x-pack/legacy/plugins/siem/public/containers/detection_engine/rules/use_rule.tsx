@@ -12,7 +12,7 @@ import { fetchRuleById } from './api';
 import * as i18n from './translations';
 import { Rule } from './types';
 
-type Return = [boolean, Rule | null];
+export type ReturnRule = [boolean, Rule | null];
 
 /**
  * Hook for using to get a Rule from the Detection Engine API
@@ -20,7 +20,7 @@ type Return = [boolean, Rule | null];
  * @param id desired Rule ID's (not rule_id)
  *
  */
-export const useRule = (id: string | undefined): Return => {
+export const useRule = (id: string | undefined): ReturnRule => {
   const [rule, setRule] = useState<Rule | null>(null);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
@@ -36,7 +36,6 @@ export const useRule = (id: string | undefined): Return => {
           id: idToFetch,
           signal: abortCtrl.signal,
         });
-
         if (isSubscribed) {
           setRule(ruleResponse);
         }

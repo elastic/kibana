@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewRule, FetchRulesResponse } from './types';
+import { NewRule, FetchRulesResponse, Rule } from './types';
 
 export const ruleMock: NewRule = {
   description: 'some desc',
@@ -32,6 +32,41 @@ export const ruleMock: NewRule = {
   to: 'now',
   type: 'query',
   threat: [],
+};
+
+export const savedRuleMock: Rule = {
+  created_at: 'mockUser',
+  created_by: 'mm/dd/yyyyTHH:MM:sssz',
+  description: 'some desc',
+  enabled: true,
+  false_positives: [],
+  filters: [],
+  from: 'now-360s',
+  id: '12345678987654321',
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  interval: '5m',
+  immutable: false,
+  rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
+  language: 'kuery',
+  risk_score: 75,
+  name: 'Test rule',
+  max_signals: 100,
+  query: "user.email: 'root@elastic.co'",
+  references: [],
+  severity: 'high',
+  tags: ['APM'],
+  to: 'now',
+  type: 'query',
+  threat: [],
+  updated_at: 'mockUser',
+  updated_by: 'mm/dd/yyyyTHH:MM:sssz',
 };
 
 export const rulesMock: FetchRulesResponse = {

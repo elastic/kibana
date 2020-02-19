@@ -522,7 +522,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    };
+    } as File;
     const formData = new FormData();
     formData.append('file', fileToImport);
     beforeEach(() => {
@@ -695,7 +695,7 @@ describe('Detections Rules API', () => {
         slice: jest.fn(),
         stream: jest.fn(),
         text: jest.fn(),
-      };
+      } as Blob;
       mockfetchSuccess(blob);
       const resp = await exportRules({
         ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],

@@ -10,13 +10,13 @@ import { fetchTags } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Return = [boolean, string[]];
+export type ReturnTags = [boolean, string[]];
 
 /**
  * Hook for using the list of Tags from the Detection Engine API
  *
  */
-export const useTags = (): Return => {
+export const useTags = (): ReturnTags => {
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
