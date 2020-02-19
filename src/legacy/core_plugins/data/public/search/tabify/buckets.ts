@@ -20,15 +20,15 @@
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
 import { IAggConfig } from '../aggs';
-import { TimeRange } from './types';
+import { TabbedRangeFilterParams } from './types';
 import { AggResponseBucket } from '../types';
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;
-  ranges: TimeRange[];
+  ranges: TabbedRangeFilterParams[];
 };
 
-const isRangeEqual = (range1: TimeRange, range2: TimeRange) =>
+const isRangeEqual = (range1: TabbedRangeFilterParams, range2: TabbedRangeFilterParams) =>
   range1?.from === range2?.from && range1?.to === range2?.to;
 
 export class TabifyBuckets {
@@ -37,7 +37,7 @@ export class TabifyBuckets {
   buckets: any;
   _keys: any[] = [];
 
-  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRange) {
+  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TabbedRangeFilterParams) {
     if (aggResp && aggResp.buckets) {
       this.buckets = aggResp.buckets;
     } else if (aggResp) {
@@ -88,8 +88,8 @@ export class TabifyBuckets {
         return filter.label || queryString || '*';
       });
     } else if (params.ranges && this.objectMode) {
-      this._keys = params.ranges.map((range: TimeRange) =>
-        findKey(this.buckets, (el: TimeRange) => isRangeEqual(el, range))
+      this._keys = params.ranges.map((range: TabbedRangeFilterParams) =>
+        findKey(this.buckets, (el: TabbedRangeFilterParams) => isRangeEqual(el, range))
       );
     } else if (params.ranges && params.field.type !== 'date') {
       let ranges = params.ranges;
@@ -101,14 +101,14 @@ export class TabifyBuckets {
           return this.buckets.find((el: AggResponseBucket) => el.key === range.mask);
         }
 
-        return this.buckets.find((el: TimeRange) => isRangeEqual(el, range));
+        return this.buckets.find((el: TabbedRangeFilterParams) => isRangeEqual(el, range));
       });
     }
   }
 
   // dropPartials should only be called if the aggParam setting is enabled,
   // and the agg field is the same as the Time Range.
-  private dropPartials(params: AggParams, timeRange?: TimeRange) {
+  private dropPartials(params: AggParams, timeRange?: TabbedRangeFilterParams) {
     if (
       !timeRange ||
       this.buckets.length <= 1 ||

@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions, TimeRange } from './types';
+import { TabbedResponseWriterOptions, TabbedRangeFilterParams } from './types';
 import { AggResponseBucket } from '../types';
 import { IAggConfigs, AggGroupNames } from '../aggs';
 
@@ -153,7 +153,7 @@ export function tabifyAggResponse(
     doc_count: esResponse.hits.total,
   };
 
-  let timeRange: TimeRange | undefined;
+  let timeRange: TabbedRangeFilterParams | undefined;
 
   // Extract the time range object if provided
   if (respOpts && respOpts.timeRange) {

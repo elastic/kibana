@@ -20,7 +20,7 @@
 import { RangeFilterParams } from '../../../../../../plugins/data/public';
 
 /** @internal **/
-export interface TimeRange extends RangeFilterParams {
+export interface TabbedRangeFilterParams extends RangeFilterParams {
   name: string;
 }
 
