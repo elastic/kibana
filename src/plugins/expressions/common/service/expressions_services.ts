@@ -20,6 +20,7 @@
 import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
+import { ExecutionContract } from '../execution/execution_contract';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -37,6 +38,7 @@ export type ExpressionsServiceSetup = Pick<
   | 'registerRenderer'
   | 'registerType'
   | 'run'
+  | 'fork'
 >;
 
 /**
@@ -45,8 +47,21 @@ export type ExpressionsServiceSetup = Pick<
  */
 export type ExpressionsServiceStart = Pick<
   ExpressionsService,
-  'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'run'
+  | 'getFunction'
+  | 'getFunctions'
+  | 'getRenderer'
+  | 'getRenderers'
+  | 'getType'
+  | 'getTypes'
+  | 'run'
+  | 'execute'
+  | 'fork'
 >;
+
+export interface ExpressionServiceParams {
+  executor?: Executor;
+  renderers?: ExpressionRendererRegistry;
+}
 
 /**
  * `ExpressionsService` class is used for multiple purposes:
@@ -68,8 +83,16 @@ export type ExpressionsServiceStart = Pick<
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
 export class ExpressionsService {
-  public readonly executor = Executor.createWithDefaults();
-  public readonly renderers = new ExpressionRendererRegistry();
+  public readonly executor: Executor;
+  public readonly renderers: ExpressionRendererRegistry;
+
+  constructor({
+    executor = Executor.createWithDefaults(),
+    renderers = new ExpressionRendererRegistry(),
+  }: ExpressionServiceParams = {}) {
+    this.executor = executor;
+    this.renderers = renderers;
+  }
 
   /**
    * Register an expression function, which will be possible to execute as
@@ -195,6 +218,43 @@ export class ExpressionsService {
    * names of the types and values are `ExpressionType` instances.
    */
   public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
+
+  /**
+   * Starts expression execution and immediately returns `ExecutionContract`
+   * instance that tracks the progress of the execution and can be used to
+   * interact with the execution.
+   */
+  public readonly execute = <
+    Input = unknown,
+    Output = unknown,
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+  >(
+    ast: string | ExpressionAstExpression,
+    // This any is for legacy reasons.
+    input: Input = { type: 'null' } as any,
+    context?: ExtraContext
+  ): ExecutionContract<ExtraContext, Input, Output> => {
+    const execution = this.executor.createExecution<ExtraContext, Input, Output>(ast, context);
+    execution.start(input);
+    return execution.contract;
+  };
+
+  /**
+   * Create a new instance of `ExpressionsService`. The new instance inherits
+   * all state of the original `ExpressionsService`, including all expression
+   * types, expression functions and context. Also, all new types and functions
+   * registered in the original services AFTER the forking event will be
+   * available in the forked instance. However, all new types and functions
+   * registered in the forked instances will NOT be available to the original
+   * service.
+   */
+  public readonly fork = (): ExpressionsService => {
+    const executor = this.executor.fork();
+    const renderers = this.renderers;
+    const fork = new ExpressionsService({ executor, renderers });
+
+    return fork;
+  };
 
   /**
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the

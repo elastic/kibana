@@ -50,7 +50,7 @@ export async function validateBucketSpan(
   callWithRequest,
   job,
   duration,
-  elasticsearchPlugin,
+  callAsInternalUser,
   xpackMainPlugin
 ) {
   validateJobObject(job);
@@ -123,7 +123,7 @@ export async function validateBucketSpan(
       return new Promise(resolve => {
         estimateBucketSpanFactory(
           callWithRequest,
-          elasticsearchPlugin,
+          callAsInternalUser,
           xpackMainPlugin
         )(data)
           .then(resolve)
