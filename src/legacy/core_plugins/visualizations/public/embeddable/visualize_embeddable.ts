@@ -22,7 +22,6 @@ import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 
 import { PersistedState } from 'ui/persisted_state';
-import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
 import { AppState } from 'ui/state_management/app_state';
 
@@ -50,7 +49,7 @@ import {
   ExpressionsStart,
 } from '../../../../../plugins/expressions/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
-import { Vis } from '../np_ready/public';
+import { Vis, buildPipeline } from '../np_ready/public';
 import { getExpressions, getUiActions } from '../np_ready/public/services';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
