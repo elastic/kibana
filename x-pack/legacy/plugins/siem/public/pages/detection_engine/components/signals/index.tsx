@@ -47,7 +47,7 @@ import {
 } from './types';
 import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
-const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
+export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
 interface OwnProps {
   canUserCRUD: boolean;
