@@ -73,6 +73,7 @@ run(
       boolean: ['clean', 'site'],
       help: `
       --clean            Clean Storybook build folder.
+      --site             Build static version of Storybook.
     `,
     },
   }

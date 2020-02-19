@@ -24,7 +24,7 @@ const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
+const { REPO_ROOT, ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
 exports.runStorybookCli = config => {
@@ -70,7 +70,7 @@ exports.runStorybookCli = config => {
             mode: flags.site ? 'static' : 'dev',
             port: 9001,
             configDir,
-            outputDir: flags.site ? `${REPO_ROOT}/storybook-build` : undefined,
+            outputDir: flags.site ? join(ASSET_DIR, name) : undefined,
           });
 
           // Line is only reached when building the static version
