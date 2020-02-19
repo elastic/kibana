@@ -26,7 +26,6 @@ The most frequently used visualizations support the following aggregations:
 * <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
 
 * <<visualize-bucket-aggregations,Bucket>>
->>>>>>> 0ac60494d6... [DOCS] Updates to heat map page (#55097)
 
 [float]
 === Configure your visualization
