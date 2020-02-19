@@ -178,6 +178,7 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
+      "success",
     ]
   `);
 });

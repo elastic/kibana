@@ -23,7 +23,7 @@ import { createFailError } from '@kbn/dev-utils';
 
 import { pipeClosure, Update } from '../common';
 
-import { OptimizerState } from './optimizer_reducer';
+import { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';
 
 export function handleOptimizerCompletion(config: OptimizerConfig) {
@@ -41,11 +41,6 @@ export function handleOptimizerCompletion(config: OptimizerConfig) {
           }
 
           if (prevState?.phase === 'success') {
-            return;
-          }
-
-          if (prevState?.phase === 'initialized' && prevState.onlineBundles.length === 0) {
-            // all bundles cached
             return;
           }
 
