@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE, NETWORK_PAGE } from '../../lib/urls';
+import { HOSTS_PAGE, NETWORK_PAGE } from '../../../urls/navigation';
 import {
   INSPECT_MODAL,
   INSPECT_NETWORK_BUTTONS_IN_SIEM,
