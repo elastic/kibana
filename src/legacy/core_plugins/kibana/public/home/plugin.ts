@@ -34,7 +34,6 @@ import {
   Environment,
   HomePublicPluginStart,
   HomePublicPluginSetup,
-  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
 export interface HomePluginStartDependencies {
@@ -53,7 +52,7 @@ export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
-  private directories: readonly FeatureCatalogueEntry[] | null = null;
+  private featureCatalogue: HomePublicPluginStart['featureCatalogue'] | null = null;
   private telemetry?: TelemetryPluginStart;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -83,7 +82,7 @@ export class HomePlugin implements Plugin {
           environment: this.environment!,
           config: kibanaLegacy.config,
           homeConfig: home.config,
-          directories: this.directories!,
+          featureCatalogue: this.featureCatalogue!,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -93,7 +92,7 @@ export class HomePlugin implements Plugin {
 
   start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
-    this.directories = home.featureCatalogue.get();
+    this.featureCatalogue = home.featureCatalogue;
     this.dataStart = data;
     this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;

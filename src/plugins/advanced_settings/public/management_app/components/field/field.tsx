@@ -31,7 +31,6 @@ import {
   EuiCodeBlock,
   // @ts-ignore
   EuiCodeEditor,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,

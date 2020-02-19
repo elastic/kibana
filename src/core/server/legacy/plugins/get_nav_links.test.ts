@@ -35,6 +35,7 @@ const createLegacyExports = ({
   savedObjectSchemas: {},
   savedObjectMigrations: {},
   savedObjectValidations: {},
+  savedObjectsManagement: {},
 });
 
 const createPluginSpecs = (...ids: string[]): LegacyPluginSpec[] =>
