@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { EsSearchService } from './es_search_service';
+import { CoreStart } from 'kibana/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 
-export const esSearchService: PluginInitializer<void, void> = (
-  initializerContext: PluginInitializerContext
-) => new EsSearchService(initializerContext);
+export interface AppPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+export interface SearchBarComponentParams {
+  application: CoreStart['application'];
+  basename: string;
+  data: DataPublicPluginStart;
+}
