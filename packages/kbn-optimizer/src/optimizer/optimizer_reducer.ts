@@ -30,8 +30,13 @@ export interface OptimizerInitializedEvent {
   type: 'optimizer initialized';
 }
 
+export interface AllBundlesCachedEvent {
+  type: 'all bundles cached';
+}
+
 export type OptimizerEvent =
   | OptimizerInitializedEvent
+  | AllBundlesCachedEvent
   | ChangeEvent
   | WorkerMsg
   | WorkerStatus
@@ -95,10 +100,22 @@ function getStatePhase(states: CompilerMsg[]) {
 export function createOptimizerReducer(
   config: OptimizerConfig
 ): Summarizer<OptimizerEvent, OptimizerState> {
-  return (state, event) => {
+  return (state, event, injectEvent) => {
     if (event.type === 'optimizer initialized') {
+      if (state.onlineBundles.length === 0) {
+        injectEvent({
+          type: 'all bundles cached',
+        });
+      }
+
       return createOptimizerState(state, {
         phase: 'initialized',
+      });
+    }
+
+    if (event.type === 'all bundles cached') {
+      return createOptimizerState(state, {
+        phase: 'success',
       });
     }
 

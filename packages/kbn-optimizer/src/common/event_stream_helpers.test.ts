@@ -20,49 +20,151 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
-import { summarizeEvent$ } from './event_stream_helpers';
+import { summarizeEventStream } from './event_stream_helpers';
 
 it('emits each state with each event, ignoring events when reducer returns undefined', async () => {
-  const values = await summarizeEvent$(
-    Rx.of(1, 2, 3, 4, 5),
-    {
-      sum: 0,
-    },
-    (state, event) => {
-      if (event % 2) {
-        return {
-          sum: state.sum + event,
-        };
-      }
+  const event$ = Rx.of(1, 2, 3, 4, 5);
+  const initial = 0;
+  const values = await summarizeEventStream(event$, initial, (state, event) => {
+    if (event % 2) {
+      return state + event;
     }
-  )
+  })
     .pipe(toArray())
     .toPromise();
 
   expect(values).toMatchInlineSnapshot(`
     Array [
       Object {
-        "state": Object {
-          "sum": 0,
-        },
+        "state": 0,
       },
       Object {
         "event": 1,
-        "state": Object {
-          "sum": 1,
-        },
+        "state": 1,
       },
       Object {
         "event": 3,
-        "state": Object {
-          "sum": 4,
-        },
+        "state": 4,
       },
       Object {
         "event": 5,
-        "state": Object {
-          "sum": 9,
-        },
+        "state": 9,
+      },
+    ]
+  `);
+});
+
+it('interleaves injected events when source is synchronous', async () => {
+  const event$ = Rx.of(1, 7);
+  const initial = 0;
+  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+    if (event < 5) {
+      injectEvent(event + 2);
+    }
+
+    return state + event;
+  })
+    .pipe(toArray())
+    .toPromise();
+
+  expect(values).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "state": 0,
+      },
+      Object {
+        "event": 1,
+        "state": 1,
+      },
+      Object {
+        "event": 3,
+        "state": 4,
+      },
+      Object {
+        "event": 5,
+        "state": 9,
+      },
+      Object {
+        "event": 7,
+        "state": 16,
+      },
+    ]
+  `);
+});
+
+it('interleaves injected events when source is asynchronous', async () => {
+  const event$ = Rx.of(1, 7, Rx.asyncScheduler);
+  const initial = 0;
+  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+    if (event < 5) {
+      injectEvent(event + 2);
+    }
+
+    return state + event;
+  })
+    .pipe(toArray())
+    .toPromise();
+
+  expect(values).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "state": 0,
+      },
+      Object {
+        "event": 1,
+        "state": 1,
+      },
+      Object {
+        "event": 3,
+        "state": 4,
+      },
+      Object {
+        "event": 5,
+        "state": 9,
+      },
+      Object {
+        "event": 7,
+        "state": 16,
+      },
+    ]
+  `);
+});
+
+it('interleaves mulitple injected events in order', async () => {
+  const event$ = Rx.of(1);
+  const initial = 0;
+  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+    if (event < 10) {
+      injectEvent(10);
+      injectEvent(20);
+      injectEvent(30);
+    }
+
+    return state + event;
+  })
+    .pipe(toArray())
+    .toPromise();
+
+  expect(values).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "state": 0,
+      },
+      Object {
+        "event": 1,
+        "state": 1,
+      },
+      Object {
+        "event": 10,
+        "state": 11,
+      },
+      Object {
+        "event": 20,
+        "state": 31,
+      },
+      Object {
+        "event": 30,
+        "state": 61,
       },
     ]
   `);

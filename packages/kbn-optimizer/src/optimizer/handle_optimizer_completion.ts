@@ -44,11 +44,6 @@ export function handleOptimizerCompletion(config: OptimizerConfig) {
             return;
           }
 
-          if (prevState?.phase === 'initialized' && prevState.onlineBundles.length === 0) {
-            // all bundles cached
-            return;
-          }
-
           if (prevState?.phase === 'issue') {
             throw createFailError('webpack issue');
           }
