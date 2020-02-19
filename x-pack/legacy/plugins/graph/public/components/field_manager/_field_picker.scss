@@ -7,10 +7,6 @@
   margin: 0 (-$euiSizeXS) (-$euiSizeXS);
 }
 
-.gphFieldPicker__fieldIcon {
-  vertical-align: middle;
-}
-
 .gphFieldPicker__button {
   @include gphFieldBadgeSize;
   color: $euiColorPrimary;
