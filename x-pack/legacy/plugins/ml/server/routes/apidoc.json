@@ -76,6 +76,14 @@
     "CreateFilter",
     "UpdateFilter",
     "DeleteFilter",
-    "GetFiltersStats"
+    "GetFiltersStats",
+    "Indices",
+    "FieldCaps",
+    "SystemRoutes",
+    "HasPrivileges",
+    "MlCapabilities",
+    "MlNodeCount",
+    "MlInfo",
+    "MlEsSearch"
   ]
 }
