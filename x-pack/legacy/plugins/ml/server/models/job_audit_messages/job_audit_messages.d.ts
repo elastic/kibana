@@ -9,6 +9,6 @@ import { APICaller } from 'src/core/server';
 export function jobAuditMessagesProvider(
   callAsCurrentUser: APICaller
 ): {
-  getJobAuditMessages: (jobId: string | undefined, from: string | undefined) => any;
-  getAuditMessagesSummary: (jobIds: string[] | undefined) => any;
+  getJobAuditMessages: (jobId?: string, from?: string) => any;
+  getAuditMessagesSummary: (jobIds?: string[]) => any;
 };

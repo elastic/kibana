@@ -87,6 +87,11 @@
     "MlEsSearch",
     "JobAuditMessages",
     "GetJobAuditMessages",
-    "GetAllJobAuditMessages"
+    "GetAllJobAuditMessages",
+    "JobValidation",
+    "EstimateBucketSpan",
+    "CalculateModelMemoryLimit",
+    "ValidateCardinality",
+    "ValidateJob"
   ]
 }

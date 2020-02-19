@@ -35,7 +35,7 @@ export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitial
           context.ml!.mlClient.callAsCurrentUser
         );
         const { jobId } = request.params;
-        const from = request.query.from;
+        const { from } = request.query;
         const resp = await getJobAuditMessages(jobId, from);
 
         return response.ok({
@@ -67,7 +67,7 @@ export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitial
         const { getJobAuditMessages } = jobAuditMessagesProvider(
           context.ml!.mlClient.callAsCurrentUser
         );
-        const from = request.query.from;
+        const { from } = request.query;
         const resp = await getJobAuditMessages(undefined, from);
 
         return response.ok({
