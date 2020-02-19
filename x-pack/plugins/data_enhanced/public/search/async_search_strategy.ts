@@ -25,9 +25,10 @@ declare module '../../../../../src/plugins/data/public' {
 }
 
 export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  search: ISearchGeneric
+  context: ISearchContext
 ): ISearchStrategy<typeof ASYNC_SEARCH_STRATEGY> => {
+  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const { search } = syncStrategyProvider(context);
   return {
     search: (
       request: IAsyncSearchRequest,
@@ -47,7 +48,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
         });
       }
 
-      return search(request, options, SYNC_SEARCH_STRATEGY).pipe(
+      return search(request, options).pipe(
         expand(response => {
           id = response.id;
           // Delay by the given poll interval

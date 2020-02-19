@@ -26,6 +26,8 @@ import { ISearchContext, TSearchStrategyProvider, ISearchStrategy } from '../typ
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const { search } = syncStrategyProvider(context);
   return {
     search: (request, options) => {
       if (typeof request.params.preference === 'undefined') {
@@ -33,11 +35,9 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         const customPreference = context.core.uiSettings.get('courier:customRequestPreference');
         request.params.preference = getEsPreference(setPreference, customPreference);
       }
-      const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
-      return syncStrategyProvider(context).search(
-        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
-        options
-      ) as Observable<IEsSearchResponse>;
+      return search({ ...request, serverStrategy: ES_SEARCH_STRATEGY }, options) as Observable<
+        IEsSearchResponse
+      >;
     },
   };
 };
