@@ -30,6 +30,7 @@ import {
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { InvalidJSONProperty } from '../../../kibana_utils/public';
 import { coreMock } from '../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../plugins/data/public/mocks';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
 
@@ -37,6 +38,7 @@ const getConfig = (cfg: any) => cfg;
 
 describe('Saved Object', () => {
   const startMock = coreMock.createStart();
+  const dataStartMock = dataPluginMock.createStartContract();
   const saveOptionsMock = {} as SavedObjectSaveOpts;
 
   let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
@@ -103,6 +105,7 @@ describe('Saved Object', () => {
   beforeEach(() => {
     SavedObjectClass = createSavedObjectClass({
       savedObjectsClient: savedObjectsClientStub,
+      indexPatterns: dataStartMock.indexPatterns,
     } as SavedObjectKibanaServices);
   });
 
