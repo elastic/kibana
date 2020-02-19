@@ -5,11 +5,10 @@
 
 .gphFieldPicker__selectableList {
   margin: 0 (-$euiSizeXS) (-$euiSizeXS);
+}
 
-  // TODO: Fix in EUI
-  .euiSelectableListItem__prepend {
-    line-height: 1;
-  }
+.gphFieldPicker__fieldIcon {
+  vertical-align: middle;
 }
 
 .gphFieldPicker__button {
