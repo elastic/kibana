@@ -34,7 +34,7 @@ import { createSavedSearchesLoader } from './saved_searches';
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { SavedSearch } from './np_ready/types';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
+import { DocViewsRegistry } from '../../../../../plugins/discover/public/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { VisualizationsStart } from '../../../visualizations/public';
 

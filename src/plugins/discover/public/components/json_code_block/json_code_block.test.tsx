@@ -17,20 +17,18 @@
  * under the License.
  */
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-import { formatMsg, formatStack } from '../../../kibana_services';
+import { shallow } from 'enzyme';
+import { JsonCodeBlock } from './json_code_block';
+import { IndexPattern } from '../../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
 
-interface Props {
-  error: Error | string;
-}
-
-export function DocViewerError({ error }: Props) {
-  const errMsg = formatMsg(error);
-  const errStack = typeof error === 'object' ? formatStack(error) : '';
-
-  return (
-    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
-      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
-    </EuiCallOut>
-  );
-}
+it('returns the `JsonCodeEditor` component', () => {
+  const props = {
+    hit: { _index: 'test', _source: { test: 123 } },
+    columns: [],
+    indexPattern: {} as IndexPattern,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
+});

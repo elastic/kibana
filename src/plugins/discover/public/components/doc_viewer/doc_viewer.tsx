@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 import { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
 

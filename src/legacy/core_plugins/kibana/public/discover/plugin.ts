@@ -40,10 +40,10 @@ import {
   KibanaLegacySetup,
   AngularRenderedAppUpdater,
 } from '../../../../../plugins/kibana_legacy/public';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
-import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_types';
-import { DocViewTable } from './np_ready/components/table/table';
-import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
+import { DocViewsRegistry } from '../../../../../plugins/discover/public/doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from '../../../../../plugins/discover/public/doc_views/doc_views_types';
+import { DocViewTable } from '../../../../../plugins/discover/public/components/table/table';
+import { JsonCodeBlock } from '../../../../../plugins/discover/public/components/json_code_block/json_code_block';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 import {
   VisualizationsStart,

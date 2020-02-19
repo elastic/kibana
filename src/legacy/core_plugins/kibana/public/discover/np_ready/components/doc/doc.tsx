@@ -20,7 +20,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../../../../../../../../plugins/discover/public/components/doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
 import { ElasticSearchHit, getServices } from '../../../kibana_services';
 

@@ -18,7 +18,7 @@
  */
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
-import { IndexPattern } from '../../kibana_services';
+import { IndexPattern } from '../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
 
 export interface AngularDirective {
   controller: (scope: AngularScope) => void;

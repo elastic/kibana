@@ -81,7 +81,7 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
+export { ElasticSearchHit } from '../../../../../plugins/discover/public/doc_views/doc_views_types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore

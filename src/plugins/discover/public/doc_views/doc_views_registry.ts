@@ -17,14 +17,19 @@
  * under the License.
  */
 
+import { Subject } from 'rxjs';
 import { auto } from 'angular';
 import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
+  private angularInjector: Subject<auto.IInjectorService> = new Subject<auto.IInjectorService>();
 
-  constructor(private getInjector: () => Promise<auto.IInjectorService>) {}
+  setAngularInjector(injector: auto.IInjectorService) {
+    this.angularInjector.next(injector);
+    this.angularInjector.complete();
+  }
 
   /**
    * Extends and adds the given doc view to the registry array
@@ -33,7 +38,9 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, this.getInjector);
+      docView.render = convertDirectiveToRenderFn(docView.directive, () =>
+        this.angularInjector.asObservable().toPromise()
+      );
     }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;
