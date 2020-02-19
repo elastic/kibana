@@ -10,18 +10,12 @@ import { CaseComponent } from './';
 import * as apiHook from '../../../../containers/case/use_update_case';
 import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
-import { useDateFormat, useTimeZone } from '../../../../lib/kibana';
-jest.mock('../../../../lib/kibana');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
 
 describe('CaseView ', () => {
   const dispatchUpdateCaseProperty = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue([{ data }, dispatchUpdateCaseProperty]);
-    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
-    mockUseTimeZone.mockImplementation(() => 'UTC');
   });
 
   it('should render CaseComponent', () => {

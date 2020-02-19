@@ -6,14 +6,11 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import moment from 'moment-timezone';
 import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
-import { useDateFormat, useTimeZone } from '../../../../lib/kibana';
-jest.mock('../../../../lib/kibana');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
 
 describe('AllCases', () => {
   const setQueryParams = jest.fn();
@@ -23,8 +20,7 @@ describe('AllCases', () => {
     jest
       .spyOn(apiHook, 'useGetCases')
       .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
-    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
-    mockUseTimeZone.mockImplementation(() => 'US/Pacific');
+    moment.tz.setDefault('UTC');
   });
   it('should render AllCases', () => {
     const wrapper = mount(
