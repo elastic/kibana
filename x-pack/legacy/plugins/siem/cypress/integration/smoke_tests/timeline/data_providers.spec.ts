@@ -11,7 +11,7 @@ import {
   dragFirstHostToTimeline,
   dragFirstHostToEmptyTimelineDataProviders,
 } from '../../../tasks/hosts/all_hosts';
-import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
+import { HOSTS_NAMES_DRAGGABLE } from '../../../screens/hosts/all_hosts';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
 import { createNewTimeline } from '../../../tasks/timeline/main';
 import { openTimeline } from '../../../tasks/siem_main';
@@ -42,7 +42,7 @@ describe('timeline data providers', () => {
       .first()
       .invoke('text')
       .then(dataProviderText => {
-        cy.get(HOSTS_NAMES)
+        cy.get(HOSTS_NAMES_DRAGGABLE)
           .first()
           .invoke('text')
           .should(hostname => {
