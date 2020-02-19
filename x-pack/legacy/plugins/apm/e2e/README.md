@@ -7,7 +7,7 @@
 ```shell
 $ git clone https://github.com/elastic/apm-integration-testing.git
 $ cd apm-integration-testing
-./scripts/compose.py start master --no-kibana
+./scripts/compose.py start master --no-kibana --no-xpack-secure
 ```
 
 2. Download [static data file](https://storage.googleapis.com/apm-ui-e2e-static-data/events.json)
