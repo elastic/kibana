@@ -7,12 +7,20 @@
 import React from 'react';
 
 interface HookWrapperProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hook: (args?: any) => any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hookProps?: any;
+  hook: (args?: unknown) => unknown;
+  hookProps?: unknown;
 }
+
 export const HookWrapper = ({ hook, hookProps }: HookWrapperProps) => {
   const myHook = hook ? (hookProps ? hook(hookProps) : hook()) : null;
   return <div>{JSON.stringify(myHook)}</div>;
+};
+
+export const HookFuncWrapper = ({
+  children,
+  hook,
+  hookProps,
+}: HookWrapperProps & { children: (hookData: unknown) => React.ReactNode | null }) => {
+  const myHook = hook ? (hookProps ? hook(hookProps) : hook()) : null;
+  return <>{() => children(myHook)}</>;
 };

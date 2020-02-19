@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { HookWrapper } from '../../../mock/hook_wrapper';
-import { wait } from '../../../lib/helpers';
 import { useApolloClient } from '../../../utils/apollo_context';
 import { mocksSource } from '../../source/mock';
 
-import { useFetchIndexPatterns } from './fetch_index_patterns';
+import { useFetchIndexPatterns, Return } from './fetch_index_patterns';
 
 const mockUseApolloClient = useApolloClient as jest.Mock;
 jest.mock('../../../utils/apollo_context');
@@ -28,13 +24,13 @@ describe('useFetchIndexPatterns', () => {
       mockUseApolloClient.mockImplementation(() => ({
         query: () => Promise.resolve(mocksSource[0].result),
       }));
-      const wrapper = mount(
-        <HookWrapper hookProps={defaultIndexPattern} hook={args => useFetchIndexPatterns(args)} />
+      const { result, waitForNextUpdate } = renderHook<unknown, Return>(() =>
+        useFetchIndexPatterns(defaultIndexPattern)
       );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
 
-      await wait();
-
-      expect(JSON.parse(wrapper.text())).toEqual([
+      expect(result.current).toEqual([
         {
           browserFields: {
             base: {
@@ -422,7 +418,7 @@ describe('useFetchIndexPatterns', () => {
             title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
           },
         },
-        null,
+        result.current[1],
       ]);
     });
   });
@@ -432,13 +428,14 @@ describe('useFetchIndexPatterns', () => {
       mockUseApolloClient.mockImplementation(() => ({
         query: () => Promise.reject(new Error('Something went wrong')),
       }));
-      const wrapper = mount(
-        <HookWrapper hookProps={defaultIndexPattern} hook={args => useFetchIndexPatterns(args)} />
+      const { result, waitForNextUpdate } = renderHook<unknown, Return>(() =>
+        useFetchIndexPatterns(defaultIndexPattern)
       );
 
-      await wait();
+      await waitForNextUpdate();
+      await waitForNextUpdate();
 
-      expect(JSON.parse(wrapper.text())).toEqual([
+      expect(result.current).toEqual([
         {
           browserFields: {},
           indexPatterns: {
@@ -456,7 +453,7 @@ describe('useFetchIndexPatterns', () => {
           indicesExists: false,
           isLoading: false,
         },
-        null,
+        result.current[1],
       ]);
     });
   });

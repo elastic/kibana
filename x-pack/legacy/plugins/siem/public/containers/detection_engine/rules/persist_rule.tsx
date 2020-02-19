@@ -18,7 +18,7 @@ interface PersistRuleReturn {
   isSaved: boolean;
 }
 
-type Return = [PersistRuleReturn, Dispatch<NewRule | null>];
+export type Return = [PersistRuleReturn, Dispatch<NewRule | null>];
 
 export const usePersistRule = (): Return => {
   const [rule, setRule] = useState<NewRule | null>(null);
@@ -35,7 +35,6 @@ export const usePersistRule = (): Return => {
         try {
           setIsLoading(true);
           await persistRule({ rule, signal: abortCtrl.signal });
-
           if (isSubscribed) {
             setIsSaved(true);
           }
