@@ -5,8 +5,12 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { IIndexPattern } from 'src/plugins/data/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+} from 'src/core/server';
+import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
@@ -14,7 +18,7 @@ import {
   TELEMETRY_TYPE,
   // @ts-ignore
 } from '../../common/constants';
-import { ILayerDescriptor, IMapSavedObject } from '../../common/descriptor_types';
+import { ILayerDescriptor } from '../../common/descriptor_types';
 
 interface IStats {
   [key: string]: {
@@ -26,6 +30,33 @@ interface IStats {
 
 interface ILayerTypeCount {
   [key: string]: number;
+}
+
+interface IMapSavedObject {
+  [key: string]: any;
+  fields: IFieldType[];
+  title: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
+  attributes?: {
+    title?: string;
+    description?: string;
+    mapStateJSON?: string;
+    layerListJSON?: string;
+    uiStateJSON?: string;
+    bounds?: {
+      type?: string;
+      coordinates?: [];
+    };
+  };
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -55,7 +86,7 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
-      field =>
+      (field: IFieldType) =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
     )
   );
@@ -69,10 +100,12 @@ export function buildMapsTelemetry({
 }: {
   mapSavedObjects: IMapSavedObject[];
   indexPatternSavedObjects: IIndexPattern[];
-  settings: object;
-}) {
+  settings: SavedObjectAttribute;
+}): SavedObjectAttributes {
   const layerLists = mapSavedObjects.map(savedMapObject =>
-    JSON.parse(savedMapObject.attributes.layerListJSON)
+    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+      ? JSON.parse(savedMapObject.attributes.layerListJSON)
+      : []
   );
   const mapsCount = layerLists.length;
 
@@ -150,11 +183,11 @@ export async function getMapsTelemetry(
   const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );
-  const settings = {
+  const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config().get('xpack.maps.showMapVisualizationTypes'),
   };
   const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
-  return await savedObjectsClient.create('maps-telemetry', mapsTelemetry, {
+  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
     id: TELEMETRY_TYPE,
     overwrite: true,
   });

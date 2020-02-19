@@ -15,30 +15,3 @@ export interface ILayerDescriptor {
   sourceDescriptor: ISourceDescriptor;
   id: string;
 }
-
-export interface IMapSavedObject {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-  attributes?: {
-    title?: string;
-    description?: string;
-    mapStateJSON?: string;
-    layerListJSON?: string;
-    uiStateJSON?: string;
-    bounds?: {
-      type?: string;
-      coordinates?: [];
-    };
-  };
-}
