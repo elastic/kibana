@@ -29,6 +29,61 @@ import { loadIndexSettings } from './load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 
+function getField(indexPattern, fieldName) {
+  const field = indexPattern.fields.getByName(fieldName);
+  if (!field) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
+        values: { fieldName, indexPatternTitle: indexPattern.title },
+      })
+    );
+  }
+  return field;
+}
+
+function addFieldToDSL(dsl, field) {
+  return !field.scripted
+    ? { ...dsl, field: field.name }
+    : {
+        ...dsl,
+        script: {
+          source: field.script,
+          lang: field.lang,
+        },
+      };
+}
+
+function getDocValueAndSourceFields(indexPattern, fieldNames) {
+  const docValueFields = [];
+  const sourceOnlyFields = [];
+  const scriptFields = {};
+  fieldNames.forEach(fieldName => {
+    const field = getField(indexPattern, fieldName);
+    if (field.scripted) {
+      scriptFields[field.name] = {
+        script: {
+          source: field.script,
+          lang: field.lang,
+        },
+      };
+    } else if (field.readFromDocValues) {
+      const docValueField =
+        field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'epoch_millis',
+            }
+          : fieldName;
+      docValueFields.push(docValueField);
+    } else {
+      sourceOnlyFields.push(fieldName);
+    }
+  });
+
+  return { docValueFields, sourceOnlyFields, scriptFields };
+}
+
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
   static title = i18n.translate('xpack.maps.source.esSearchTitle', {
@@ -219,80 +274,46 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async _excludeDateFields(fieldNames) {
-    const dateFieldNames = (await this.getDateFields()).map(field => field.getName());
-    return fieldNames.filter(field => {
-      return !dateFieldNames.includes(field);
-    });
-  }
-
-  // Returns docvalue_fields array for the union of indexPattern's dateFields and request's field names.
-  async _getDateDocvalueFields(searchFields) {
-    const dateFieldNames = (await this.getDateFields()).map(field => field.getName());
-    return searchFields
-      .filter(fieldName => {
-        return dateFieldNames.includes(fieldName);
-      })
-      .map(fieldName => {
-        return {
-          field: fieldName,
-          format: 'epoch_millis',
-        };
-      });
-  }
-
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
-    const { topHitsSplitField, topHitsSize } = this._descriptor;
+    const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
     const indexPattern = await this.getIndexPattern();
-    const geoField = await this._getGeoField();
 
-    const scriptFields = {};
-    searchFilters.fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.getByName(fieldName);
-      if (field && field.scripted) {
-        scriptFields[field.name] = {
-          script: {
-            source: field.script,
-            lang: field.lang,
-          },
-        };
-      }
-    });
-
+    const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
+      indexPattern,
+      searchFilters.fieldNames
+    );
     const topHits = {
       size: topHitsSize,
       script_fields: scriptFields,
-      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
+      docvalue_fields: docValueFields,
     };
-    const nonDateFieldNames = await this._excludeDateFields(searchFilters.fieldNames);
 
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
     }
-    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+    if (sourceOnlyFields.length === 0) {
       topHits._source = false;
-      topHits.docvalue_fields.push(...nonDateFieldNames);
     } else {
       topHits._source = {
-        includes: nonDateFieldNames,
+        includes: sourceOnlyFields,
       };
     }
+
+    const topHitsSplitField = getField(indexPattern, topHitsSplitFieldName);
+    const cardinalityAgg = { precision_threshold: 1 };
+    const termsAgg = {
+      size: DEFAULT_MAX_BUCKETS_LIMIT,
+      shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
+    };
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       totalEntities: {
-        cardinality: {
-          field: topHitsSplitField,
-          precision_threshold: 1,
-        },
+        cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
       },
       entitySplit: {
-        terms: {
-          field: topHitsSplitField,
-          size: DEFAULT_MAX_BUCKETS_LIMIT,
-          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
-        },
+        terms: addFieldToDSL(termsAgg, topHitsSplitField),
         aggs: {
           entityHits: {
             top_hits: topHits,
@@ -339,41 +360,25 @@ export class ESSearchSource extends AbstractESSource {
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(layerName, searchFilters, maxResultWindow, registerCancelCallback) {
-    const initialSearchContext = {
-      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
-    };
-    const geoField = await this._getGeoField();
+    const indexPattern = await this.getIndexPattern();
 
-    let searchSource;
-    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      // Request geo_point and style fields in docvalue_fields insted of _source
-      // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
-      // 2) Setting _source to false so we avoid pulling back unneeded fields.
-      initialSearchContext.docvalue_fields.push(
-        ...(await this._excludeDateFields(searchFilters.fieldNames))
-      );
-      searchSource = await this._makeSearchSource(
-        searchFilters,
-        maxResultWindow,
-        initialSearchContext
-      );
+    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
+      indexPattern,
+      searchFilters.fieldNames
+    );
+
+    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
+    const searchSource = await this._makeSearchSource(
+      searchFilters,
+      maxResultWindow,
+      initialSearchContext
+    );
+    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
-      searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     } else {
-      // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
-      searchSource = await this._makeSearchSource(
-        searchFilters,
-        maxResultWindow,
-        initialSearchContext
-      );
-      // Setting "fields" instead of "source: { includes: []}"
-      // because SearchSource automatically adds the following by default
-      // 1) all scripted fields
-      // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
-      // By setting "fields", SearchSource removes all of defaults
-      searchSource.setField('fields', searchFilters.fieldNames);
+      searchSource.setField('source', sourceOnlyFields);
     }
-
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }

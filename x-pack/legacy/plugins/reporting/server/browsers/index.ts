@@ -10,6 +10,9 @@ export { ensureAllBrowsersDownloaded } from './download';
 export { createBrowserDriverFactory } from './create_browser_driver_factory';
 export { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 
+export { HeadlessChromiumDriver } from './chromium/driver';
+export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
+
 export const chromium = {
   paths: chromiumDefinition.paths,
   createDriverFactory: chromiumDefinition.createDriverFactory,

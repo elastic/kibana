@@ -21,43 +21,29 @@ import {
   ChromeStart,
   DocLinksStart,
   HttpStart,
-  LegacyNavLink,
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
-  UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
-  FeatureCatalogueEntry,
+  TutorialStart,
+  HomePublicPluginStart,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  metadata: {
-    app: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
-    uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-  };
-  getInjected: (name: string, defaultValue?: any) => unknown;
+  kibanaVersion: string;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
-  directories: readonly FeatureCatalogueEntry[];
+  featureCatalogue: HomePublicPluginStart['featureCatalogue'];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
@@ -68,6 +54,7 @@ export interface HomeKibanaServices {
   addBasePath: (url: string) => string;
   environment: Environment;
   telemetry?: TelemetryPluginStart;
+  tutorialVariables: TutorialStart['get'];
 }
 
 let services: HomeKibanaServices | null = null;

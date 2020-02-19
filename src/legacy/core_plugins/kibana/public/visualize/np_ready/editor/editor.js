@@ -31,6 +31,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -74,7 +75,6 @@ function VisualizeAppController(
   kbnUrl,
   redirectWhenMissing,
   Promise,
-  kbnBaseUrl,
   getAppState,
   globalState
 ) {
@@ -90,13 +90,13 @@ function VisualizeAppController(
       },
     },
     toastNotifications,
-    legacyChrome,
     chrome,
     getBasePath,
     core: { docLinks },
     savedQueryService,
     uiSettings,
     I18nContext,
+    setActiveUrl,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
@@ -441,14 +441,6 @@ function VisualizeAppController(
       })
     );
 
-    subscriptions.add(
-      subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
-        next: () => {
-          $scope.vis.forceReload();
-        },
-      })
-    );
-
     $scope.$on('$destroy', () => {
       if ($scope._handler) {
         $scope._handler.destroy();
@@ -588,10 +580,7 @@ function VisualizeAppController(
               });
               // Manually insert a new url so the back button will open the saved visualization.
               $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-              // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
-              // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
-              // url, not the unsaved one.
-              legacyChrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+              setActiveUrl(savedVisualizationParsedUrl.appPath);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(
