@@ -12,7 +12,7 @@ import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
 import { createBrowserHistory } from 'history';
-import { urlFromNewPageSizeParam, queryParams, urlFromNewPageIndexParam } from './selectors';
+import { urlFromNewPageSizeParam, uiQueryParams, urlFromNewPageIndexParam } from './selectors';
 
 describe('alert list pagination', () => {
   let store: Store<AlertListState, AppAction>;
@@ -32,7 +32,7 @@ describe('alert list pagination', () => {
         store.dispatch({ type: 'userChangedUrl', payload: history.location });
       });
       it('should modify the url correctly', () => {
-        const actualPaginationQuery = queryParams(store.getState());
+        const actualPaginationQuery = uiQueryParams(store.getState());
         expect(actualPaginationQuery).toMatchInlineSnapshot(`
           Object {
             "page_size": "1",
@@ -47,7 +47,7 @@ describe('alert list pagination', () => {
           store.dispatch({ type: 'userChangedUrl', payload: history.location });
         });
         it('should modify the url in the correct order', () => {
-          const actualPaginationQuery = queryParams(store.getState());
+          const actualPaginationQuery = uiQueryParams(store.getState());
           expect(actualPaginationQuery).toMatchInlineSnapshot(`
             Object {
               "page_index": "1",
@@ -65,7 +65,7 @@ describe('alert list pagination', () => {
         store.dispatch({ type: 'userChangedUrl', payload: history.location });
       });
       it('should modify the url correctly', () => {
-        const actualPaginationQuery = queryParams(store.getState());
+        const actualPaginationQuery = uiQueryParams(store.getState());
         expect(actualPaginationQuery).toMatchInlineSnapshot(`
           Object {
             "page_index": "1",
@@ -80,7 +80,7 @@ describe('alert list pagination', () => {
           store.dispatch({ type: 'userChangedUrl', payload: history.location });
         });
         it('should modify the url correctly and reset index to `0`', () => {
-          const actualPaginationQuery = queryParams(store.getState());
+          const actualPaginationQuery = uiQueryParams(store.getState());
           expect(actualPaginationQuery).toMatchInlineSnapshot(`
             Object {
               "page_index": "0",

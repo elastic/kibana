@@ -31,7 +31,7 @@ describe('alert list tests', () => {
         const response: AlertResultList = {
           alerts: [
             {
-              '@timestamp': new Date(1542341895000),
+              '@timestamp': new Date(1542341895000).toString(),
               agent: {
                 id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',
                 version: '3.0.0',

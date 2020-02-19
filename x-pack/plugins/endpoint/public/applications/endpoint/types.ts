@@ -86,8 +86,19 @@ export type AlertListState = Immutable<AlertResultList> & {
   readonly location?: Immutable<EndpointAppLocation>;
 };
 
-export interface AlertIndexQueryParams {
+/**
+ * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
+ */
+export interface AlertingIndexUIQueryParams {
   page_size?: string;
   page_index?: string;
   selected_alert?: string;
+}
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export interface AlertsAPIQueryParams {
+  page_size?: string;
+  page_index?: string;
 }

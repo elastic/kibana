@@ -7,7 +7,7 @@
 import qs from 'querystring';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
-import { AlertListState, AlertIndexQueryParams } from '../../types';
+import { AlertListState, AlertingIndexUIQueryParams, AlertsAPIQueryParams } from '../../types';
 
 /**
  * Returns the Alert Data array from state
@@ -34,16 +34,15 @@ export const isOnAlertPage = (state: AlertListState): boolean => {
 };
 
 /**
- * Returns the query object received from parsing the URL query params.
- * The query value passed when requesting alert list data from the server.
- * Also used to get new client side URLs.
+ * Returns the query object received from parsing the browsers URL query params.
+ * Used to calculate urls for links and such.
  */
-export const queryParams: (
+export const uiQueryParams: (
   state: AlertListState
-) => Immutable<AlertIndexQueryParams> = createSelector(
+) => Immutable<AlertingIndexUIQueryParams> = createSelector(
   (state: AlertListState) => state.location,
   (location: AlertListState['location']) => {
-    const data: AlertIndexQueryParams = {};
+    const data: AlertingIndexUIQueryParams = {};
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = qs.parse(location.search.slice(1));
@@ -70,13 +69,26 @@ export const queryParams: (
 );
 
 /**
+ * query params to use when requesting alert data.
+ */
+export const apiQueryParams: (
+  state: AlertListState
+) => Immutable<AlertsAPIQueryParams> = createSelector(
+  uiQueryParams,
+  ({ page_size, page_index }) => ({
+    page_size,
+    page_index,
+  })
+);
+
+/**
  * Returns a function that takes in a new page size and returns a new query param string
  */
 export const urlFromNewPageSizeParam: (
   state: AlertListState
 ) => (newPageSize: number) => string = state => {
   return newPageSize => {
-    const urlPaginationData: AlertIndexQueryParams = { ...queryParams(state) };
+    const urlPaginationData: AlertingIndexUIQueryParams = { ...uiQueryParams(state) };
     urlPaginationData.page_size = newPageSize.toString();
 
     // Only set the url back to page zero if the user has changed the page index already
@@ -94,7 +106,7 @@ export const urlFromNewPageIndexParam: (
   state: AlertListState
 ) => (newPageIndex: number) => string = state => {
   return newPageIndex => {
-    const urlPaginationData: AlertIndexQueryParams = { ...queryParams(state) };
+    const urlPaginationData: AlertingIndexUIQueryParams = { ...uiQueryParams(state) };
     urlPaginationData.page_index = newPageIndex.toString();
     return '?' + qs.stringify(urlPaginationData);
   };
@@ -107,7 +119,7 @@ export const urlWithSelectedAlert: (
   state: AlertListState
 ) => (alertID: string) => string = state => {
   return (alertID: string) => {
-    const urlPaginationData = { ...queryParams(state) };
+    const urlPaginationData = { ...uiQueryParams(state) };
     urlPaginationData.selected_alert = alertID;
     return '?' + qs.stringify(urlPaginationData);
   };
@@ -117,7 +129,7 @@ export const urlWithSelectedAlert: (
  * Returns a url like the current one, but with no alert id
  */
 export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
-  queryParams,
+  uiQueryParams,
   urlPaginationData => {
     const newUrlPaginationData = { ...urlPaginationData };
     delete newUrlPaginationData.selected_alert;
@@ -126,6 +138,6 @@ export const urlWithoutSelectedAlert: (state: AlertListState) => string = create
 );
 
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
-  queryParams,
+  uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
