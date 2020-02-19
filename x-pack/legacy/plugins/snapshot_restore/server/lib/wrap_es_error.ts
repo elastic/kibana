@@ -45,7 +45,7 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
     // The caused_by chain has the most information so use that if it's available. If not then
     // settle for the root_cause.
     const causedByChain = extractCausedByChain(caused_by);
-    const defaultCause = root_cause.length ? extractCausedByChain(root_cause[0]) : undefined;
+    const defaultCause = root_cause.length ? extractCausedByChain(root_cause[0]) : err.message;
 
     error.cause = causedByChain.length ? causedByChain : defaultCause;
     return error;

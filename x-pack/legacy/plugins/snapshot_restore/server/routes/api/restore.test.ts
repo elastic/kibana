@@ -25,7 +25,9 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
   });
 
   describe('Restore snapshot', () => {
-    const mockRequest = {
+    const mockRequest: RunRequestParam = {
+      method: 'post',
+      path: addBasePath('restore/{repository}/{snapshot}'),
       params: {
         repository: 'foo',
         snapshot: 'snapshot-1',
@@ -33,29 +35,23 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       body: {},
     };
 
-    const restoreSnapshotRequest: RunRequestParam = {
-      method: 'post',
-      path: addBasePath('restore/{repository}/{snapshot}'),
-      mockRequest,
-    };
-
     it('should return successful response from ES', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
+      router.callAsCurrentUserResponses = [mockEsResponse];
 
-      await expect(router.runRequest(restoreSnapshotRequest)).resolves.toEqual({
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: mockEsResponse,
       });
     });
 
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
-      await expect(router.runRequest(restoreSnapshotRequest)).rejects.toThrow();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('getAllHandler()', () => {
-    const getAllRestoresRequest: RunRequestParam = {
+    const mockRequest: RunRequestParam = {
       method: 'get',
       path: addBasePath('restores'),
     };
@@ -78,7 +74,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
         },
       };
 
-      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
+      router.callAsCurrentUserResponses = [mockEsResponse];
 
       const expectedResponse = [
         {
@@ -94,23 +90,23 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
           latestActivityTimeInMillis: 0,
         },
       ];
-      await expect(router.runRequest(getAllRestoresRequest)).resolves.toEqual({
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
     });
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      router.callAsCurrentUserResponses = [jest.fn().mockReturnValueOnce(mockEsResponse)];
+      router.callAsCurrentUserResponses = [mockEsResponse];
       const expectedResponse: any[] = [];
-      await expect(router.runRequest(getAllRestoresRequest)).resolves.toEqual({
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
     });
 
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
-      await expect(router.runRequest(getAllRestoresRequest)).rejects.toThrow();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 });
