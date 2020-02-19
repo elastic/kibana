@@ -69,9 +69,12 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Logs & Metrics UI
+# Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/legacy/plugins/integrations_manager/ @elastic/epm
+/x-pack/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/plugins/ingest_manager/ @elastic/ingest
+/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
+/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
@@ -101,6 +104,7 @@
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
@@ -146,12 +150,15 @@
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
+/x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
 /x-pack/test/plugin_api_integration/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
+/x-pack/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
 
@@ -166,8 +173,14 @@
 /x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/legacy/plugins/index_management/  @elastic/es-ui
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
-/x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
+/x-pack/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+
+# Endpoint
+/x-pack/plugins/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team

@@ -17,7 +17,7 @@ export const KIBANA_MONITORING_LOGGING_TAG = 'kibana-monitoring';
  * The Monitoring API version is the expected API format that we export and expect to import.
  * @type {string}
  */
-export const MONITORING_SYSTEM_API_VERSION = '6';
+export const MONITORING_SYSTEM_API_VERSION = '7';
 /**
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}
@@ -158,8 +158,6 @@ export const INDEX_PATTERN_BEATS =
 export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7' + INDEX_ALERTS_NEW;
 export const INDEX_PATTERN_ELASTICSEARCH =
   '.monitoring-es-6-*,.monitoring-es-7-*' + INDEX_PATTERN_ELASTICSEARCH_NEW;
-
-export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';

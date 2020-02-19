@@ -3,19 +3,46 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
+import { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
+import { addBasePath } from '../index';
 
-interface ReqPayload {
-  indexNames: string[];
-}
+const bodySchema = schema.maybe(
+  schema.object({
+    indexNames: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
 
-const handler: RouterRouteHandler = async (request, callWithRequest) => {
-  const { indexNames = [] } = request.payload as ReqPayload;
-  return fetchIndices(callWithRequest, indexNames);
-};
+export function registerReloadRoute({
+  router,
+  license,
+  indexDataEnricher,
+  lib,
+}: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexNames = [] } = (req.body as typeof bodySchema.type) ?? {};
 
-export function registerReloadRoute(router: Router) {
-  router.post('indices/reload', handler);
+      try {
+        const indices = await fetchIndices(
+          ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+          indexDataEnricher,
+          indexNames
+        );
+        return res.ok({ body: indices });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }

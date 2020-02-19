@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { get } from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
@@ -31,9 +31,10 @@ import {
   IIndexPattern,
   TimeRange,
   Query,
-  onlyDisabledFiltersChanged,
   esFilters,
+  Filter,
   ISearchSource,
+  TimefilterContract,
 } from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -46,7 +47,6 @@ import {
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
-import { queryGeohashBounds } from './query_geohash_bounds';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -75,7 +75,7 @@ export interface VisualizeEmbeddableConfiguration {
 export interface VisualizeInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
@@ -100,15 +100,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
-  private filters?: esFilters.Filter[];
+  private filters?: Filter[];
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+  private autoRefreshFetchSubscription: Subscription;
 
   constructor(
+    timefilter: TimefilterContract,
     {
       savedVisualization,
       editUrl,
@@ -151,6 +153,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     this.vis._setUiState(this.uiState);
+
+    this.autoRefreshFetchSubscription = timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -214,7 +220,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     // Check if filters has changed
-    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+    if (!esFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       this.filters = this.input.filters;
       dirty = true;
     }
@@ -253,17 +259,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.savedVisualization.vis._setUiState(this.uiState);
     this.uiState = this.savedVisualization.vis.getUiState();
 
-    // This is a hack to give maps visualizations access to data in the
-    // globalState, since they can no longer access it via searchSource.
-    // TODO: Remove this as a part of elastic/kibana#30593
-    this.vis.API.getGeohashBounds = () => {
-      return queryGeohashBounds(this.savedVisualization.vis, {
-        filters: this.filters,
-        query: this.query,
-        searchSource: this.savedVisualization.searchSource,
-      });
-    };
-
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
       const visTypesWithoutInspector = [
@@ -290,13 +285,31 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
+        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
+        if (event.name === 'bounds') {
+          const agg = this.vis.getAggConfig().aggs.find((a: any) => {
+            return get(a, 'type.dslName') === 'geohash_grid';
+          });
+          if (
+            agg.params.precision !== event.data.precision ||
+            !_.isEqual(agg.params.boundingBox, event.data.boundingBox)
+          ) {
+            agg.params.boundingBox = event.data.boundingBox;
+            agg.params.precision = event.data.precision;
+            this.reload();
+          }
+          return;
+        }
 
-        npStart.plugins.uiActions.executeTriggerActions(eventName, {
-          embeddable: this,
-          timeFieldName: this.vis.indexPattern.timeFieldName,
-          data: event.data,
-        });
+        if (!this.input.disableTriggers) {
+          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
+
+          npStart.plugins.uiActions.executeTriggerActions(eventName, {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          });
+        }
       })
     );
 
@@ -341,6 +354,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.handler.destroy();
       this.handler.getElement().remove();
     }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {
@@ -350,13 +364,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private async updateHandler() {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
-        type: 'kibana_context',
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
       },
       extraHandlers: {
-        vis: this.vis,
         uiState: this.uiState,
       },
     };

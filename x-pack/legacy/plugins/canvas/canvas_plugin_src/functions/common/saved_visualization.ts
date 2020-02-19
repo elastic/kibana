@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public/embeddable';
 import {
   EmbeddableTypes,
@@ -19,13 +19,13 @@ interface Arguments {
   id: string;
 }
 
-type Return = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput>;
 
-export function savedVisualization(): ExpressionFunction<
+export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
   Filter | null,
   Arguments,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {
@@ -39,13 +39,14 @@ export function savedVisualization(): ExpressionFunction<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, { id }) => {
-      const filters = context ? context.and : [];
+    fn: (input, { id }) => {
+      const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,
         input: {
           id,
+          disableTriggers: true,
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.visualization,

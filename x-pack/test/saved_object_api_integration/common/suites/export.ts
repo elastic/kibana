@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -51,8 +51,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: '"value" must be an object',
-      validation: { source: 'payload', keys: ['value'] },
+      message: '[request body]: expected a plain object value, but found [null] instead.',
     });
   };
 
@@ -60,11 +59,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, lens, map, query, search, url, visualization]]]]`,
-      validation: {
-        source: 'payload',
-        keys: ['objects.0.type'],
-      },
+      message: `[request body.objects.0.type]: hiddentype is not exportable`,
     });
   };
 

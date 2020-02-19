@@ -18,15 +18,13 @@
  */
 
 import angular, { IModule } from 'angular';
-import { EuiConfirmModal } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
-import { AppMountContext, LegacyCoreStart } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
 import {
   AppStateProvider,
   AppState,
   configureAppAngularModule,
-  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
   EventsProvider,
@@ -47,7 +45,7 @@ import { VisualizeKibanaServices } from '../kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (
+export const renderApp = (
   element: HTMLElement,
   appBasePath: string,
   deps: VisualizeKibanaServices
@@ -55,8 +53,11 @@ export const renderApp = async (
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);
@@ -93,7 +94,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalStateModule();
   createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -103,16 +103,8 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/PersistedState',
     'app/visualize/TopNav',
     'app/visualize/State',
-    'app/visualize/ConfirmModal',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/visualize/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
 function createLocalStateModule() {

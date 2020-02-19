@@ -24,23 +24,21 @@ import {
   createLegacyServerInterpreterApi,
   createLegacyServerEndpoints,
 } from './legacy';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
-// eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {
   bfetch: BfetchServerSetup;
 }
 
-// eslint-disable-next-line
 export interface ExpressionsServerStartDependencies {
   bfetch: BfetchServerStart;
 }
 
-export interface ExpressionsServerSetup {
+export interface ExpressionsServerSetup extends ExpressionsServiceSetup {
   __LEGACY: LegacyInterpreterServerApi;
 }
 
-// eslint-disable-next-line
-export interface ExpressionsServerStart {}
+export type ExpressionsServerStart = ExpressionsServiceStart;
 
 export class ExpressionsServerPlugin
   implements
@@ -50,6 +48,8 @@ export class ExpressionsServerPlugin
       ExpressionsServerSetupDependencies,
       ExpressionsServerStartDependencies
     > {
+  readonly expressions: ExpressionsService = new ExpressionsService();
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -57,21 +57,34 @@ export class ExpressionsServerPlugin
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
     const logger = this.initializerContext.logger.get();
+    const { expressions } = this;
+    const { executor } = expressions;
+
+    executor.extendContext({
+      environment: 'server',
+    });
 
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);
 
-    return {
+    const setup = {
+      ...this.expressions.setup(),
       __LEGACY: legacyApi,
     };
+
+    return Object.freeze(setup);
   }
 
   public start(
     core: CoreStart,
     plugins: ExpressionsServerStartDependencies
   ): ExpressionsServerStart {
-    return {};
+    const start = this.expressions.start();
+
+    return Object.freeze(start);
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }

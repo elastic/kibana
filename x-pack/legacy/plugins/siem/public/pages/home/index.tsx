@@ -7,8 +7,8 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import useResizeObserver from 'use-resize-observer';
 
-import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { HeaderGlobal } from '../../components/header_global';
@@ -26,6 +26,7 @@ import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Case } from '../case';
 import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
@@ -42,6 +43,11 @@ const WrappedByAutoSizer = styled.div`
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
+const Main = styled.main`
+  height: 100%;
+`;
+Main.displayName = 'Main';
+
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
@@ -55,95 +61,91 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage: React.FC = () => (
-  <AutoSizer detectAnyWindowResize={true} content>
-    {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
-        <HeaderGlobal />
+export const HomePage: React.FC = () => {
+  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
+  const flyoutHeight = calculateFlyoutHeight({
+    globalHeaderSize: globalHeaderHeightPx,
+    windowHeight,
+  });
 
-        <main data-test-subj="pageContainer">
-          <WithSource sourceId="default">
-            {({ browserFields, indexPattern, indicesExist }) => (
-              <DragDropContextWrapper browserFields={browserFields}>
-                <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
-                  <>
-                    <AutoSaveWarningMsg />
-                    <Flyout
-                      flyoutHeight={calculateFlyoutHeight({
-                        globalHeaderSize: globalHeaderHeightPx,
-                        windowHeight,
-                      })}
-                      headerHeight={flyoutHeaderHeight}
-                      timelineId="timeline-1"
-                      usersViewing={usersViewing}
-                    >
-                      <StatefulTimeline
-                        flyoutHeaderHeight={flyoutHeaderHeight}
-                        flyoutHeight={calculateFlyoutHeight({
-                          globalHeaderSize: globalHeaderHeightPx,
-                          windowHeight,
-                        })}
-                        id="timeline-1"
-                      />
-                    </Flyout>
-                  </>
-                )}
+  return (
+    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
+      <HeaderGlobal />
 
-                <Switch>
-                  <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                  <Route
-                    path={`/:pageName(${SiemPageName.overview})`}
-                    render={() => <Overview />}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.hosts})`}
-                    render={({ location, match }) => (
-                      <HostsContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.network})`}
-                    render={({ location, match }) => (
-                      <NetworkContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.detections})`}
-                    render={({ location, match }) => (
-                      <DetectionEngineContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.timelines})`}
-                    render={() => <Timelines />}
-                  />
-                  <Route path="/link-to" render={props => <LinkToPage {...props} />} />
-                  <Route
-                    path="/ml-hosts"
-                    render={({ location, match }) => (
-                      <MlHostConditionalContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path="/ml-network"
-                    render={({ location, match }) => (
-                      <MlNetworkConditionalContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route render={() => <NotFoundPage />} />
-                </Switch>
-              </DragDropContextWrapper>
-            )}
-          </WithSource>
-        </main>
+      <Main data-test-subj="pageContainer">
+        <WithSource sourceId="default">
+          {({ browserFields, indexPattern, indicesExist }) => (
+            <DragDropContextWrapper browserFields={browserFields}>
+              <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                <>
+                  <AutoSaveWarningMsg />
+                  <Flyout
+                    flyoutHeight={flyoutHeight}
+                    headerHeight={flyoutHeaderHeight}
+                    timelineId="timeline-1"
+                    usersViewing={usersViewing}
+                  >
+                    <StatefulTimeline
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      flyoutHeight={flyoutHeight}
+                      id="timeline-1"
+                    />
+                  </Flyout>
+                </>
+              )}
 
-        <HelpMenu />
+              <Switch>
+                <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
+                <Route path={`/:pageName(${SiemPageName.overview})`} render={() => <Overview />} />
+                <Route
+                  path={`/:pageName(${SiemPageName.hosts})`}
+                  render={({ match }) => <HostsContainer url={match.url} />}
+                />
+                <Route
+                  path={`/:pageName(${SiemPageName.network})`}
+                  render={({ location, match }) => (
+                    <NetworkContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route
+                  path={`/:pageName(${SiemPageName.detections})`}
+                  render={({ location, match }) => (
+                    <DetectionEngineContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route
+                  path={`/:pageName(${SiemPageName.timelines})`}
+                  render={() => <Timelines />}
+                />
+                <Route path="/link-to" render={props => <LinkToPage {...props} />} />
+                <Route
+                  path="/ml-hosts"
+                  render={({ location, match }) => (
+                    <MlHostConditionalContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route
+                  path="/ml-network"
+                  render={({ location, match }) => (
+                    <MlNetworkConditionalContainer location={location} url={match.url} />
+                  )}
+                />
+                <Route path={`/:pageName(${SiemPageName.case})`}>
+                  <Case />
+                </Route>
+                <Route render={() => <NotFoundPage />} />
+              </Switch>
+            </DragDropContextWrapper>
+          )}
+        </WithSource>
+      </Main>
 
-        <SpyRoute />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-);
+      <HelpMenu />
+
+      <SpyRoute />
+    </WrappedByAutoSizer>
+  );
+};
 
 HomePage.displayName = 'HomePage';

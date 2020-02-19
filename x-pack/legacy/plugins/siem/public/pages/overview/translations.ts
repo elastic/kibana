@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
-  defaultMessage: 'External alerts count',
+  defaultMessage: 'External alert count',
 });
 
 export const EVENTS = i18n.translate('xpack.siem.overview.eventsTitle', {
-  defaultMessage: 'Events count',
+  defaultMessage: 'Event count',
 });
 
 export const NEWS_FEED_TITLE = i18n.translate('xpack.siem.overview.newsFeedSidebarTitle', {
@@ -31,7 +31,7 @@ export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimeli
 });
 
 export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle', {
-  defaultMessage: 'Signals count',
+  defaultMessage: 'Signal count',
 });
 
 export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonLabel', {

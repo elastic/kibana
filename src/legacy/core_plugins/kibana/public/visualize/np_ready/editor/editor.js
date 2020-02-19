@@ -31,6 +31,11 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
+import {
+  SavedObjectSaveModal,
+  showSaveModal,
+} from '../../../../../../../plugins/saved_objects/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -40,8 +45,6 @@ import {
   absoluteToParsedUrl,
   KibanaParsedUrl,
   migrateLegacyQuery,
-  SavedObjectSaveModal,
-  showSaveModal,
   stateMonitorFactory,
   DashboardConstants,
 } from '../../legacy_imports';
@@ -72,7 +75,6 @@ function VisualizeAppController(
   kbnUrl,
   redirectWhenMissing,
   Promise,
-  kbnBaseUrl,
   getAppState,
   globalState
 ) {
@@ -88,16 +90,16 @@ function VisualizeAppController(
       },
     },
     toastNotifications,
-    legacyChrome,
     chrome,
     getBasePath,
     core: { docLinks },
     savedQueryService,
     uiSettings,
+    I18nContext,
+    setActiveUrl,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-  const queryFilter = filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   const _applyVis = () => {
@@ -192,7 +194,7 @@ function VisualizeAppController(
                   description={savedVis.description}
                 />
               );
-              showSaveModal(saveModal);
+              showSaveModal(saveModal, I18nContext);
             },
           },
         ]
@@ -311,11 +313,11 @@ function VisualizeAppController(
     return appState;
   })();
 
-  $scope.filters = queryFilter.getFilters();
+  $scope.filters = filterManager.getFilters();
 
   $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
+    // The filters will automatically be set when the filterManager emits an update event (see below)
+    filterManager.setFilters(filters);
   };
 
   $scope.showSaveQuery = visualizeCapabilities.saveQuery;
@@ -426,24 +428,16 @@ function VisualizeAppController(
 
     // update the searchSource when filters update
     subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      subscribeWithScope($scope, filterManager.getUpdates$(), {
         next: () => {
-          $scope.filters = queryFilter.getFilters();
-          $scope.globalFilters = queryFilter.getGlobalFilters();
+          $scope.filters = filterManager.getFilters();
+          $scope.globalFilters = filterManager.getGlobalFilters();
         },
       })
     );
     subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getFetches$(), {
+      subscribeWithScope($scope, filterManager.getFetches$(), {
         next: $scope.fetch,
-      })
-    );
-
-    subscriptions.add(
-      subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
-        next: () => {
-          $scope.vis.forceReload();
-        },
       })
     );
 
@@ -500,7 +494,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.setFilters(queryFilter.getGlobalFilters());
+    filterManager.setFilters(filterManager.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -510,8 +504,8 @@ function VisualizeAppController(
     $state.save();
 
     const savedQueryFilters = savedQuery.attributes.filters || [];
-    const globalFilters = queryFilter.getGlobalFilters();
-    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
+    const globalFilters = filterManager.getGlobalFilters();
+    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
@@ -586,10 +580,7 @@ function VisualizeAppController(
               });
               // Manually insert a new url so the back button will open the saved visualization.
               $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-              // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
-              // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
-              // url, not the unsaved one.
-              legacyChrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+              setActiveUrl(savedVisualizationParsedUrl.appPath);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(

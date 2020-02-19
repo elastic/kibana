@@ -1,0 +1,10 @@
+{
+  "id": "alerting",
+  "server": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "alerting"],
+  "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "actions"],
+  "optionalPlugins": ["spaces", "security"],
+  "ui": false
+}
