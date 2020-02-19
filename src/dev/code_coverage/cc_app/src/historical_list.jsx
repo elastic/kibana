@@ -36,14 +36,9 @@ export default function HistoricalList({testRunnerTypes, historicalItems, curren
   const renderRunnersWithItem = (item, index) =>
     renderWithRunners(currentJobNumber)(item, index);
 
-  // TODO-TRE: Fixup the hardcoded gs url below!!
   return (
     <div className="font-bold text-xl mb-2 flex-horizontal-center">
       <ul>
-        <li className="App-current">
-          {['gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/330/2020-02-18T20-55-49Z/']
-              .map(renderRunnersWithItem)}
-        </li>
         {historicalItems
           .reverse()
           .map(renderRunnersWithItem)}
