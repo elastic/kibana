@@ -8,14 +8,22 @@ import { VectorLayer } from './vector_layer';
 import { VectorStyle } from './styles/vector/vector_style';
 import { getDefaultDynamicProperties, VECTOR_STYLES } from './styles/vector/vector_style_defaults';
 import { DynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from './styles/vector/properties/static_style_property';
 import {
+  COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   ES_GEO_GRID,
   LAYER_TYPE,
+  METRIC_TYPE,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import { ESGeoGridSource, RENDER_AS } from './sources/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
+
+function getAggType(dynamicProperty) {
+  // TODO change 'terms' to constant once top terms PR is merged
+  return dynamicProperty.isOrdinal() ? METRIC_TYPE.AVG : 'terms';
+}
 
 export class BlendedVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
@@ -45,12 +53,39 @@ export class BlendedVectorLayer extends VectorLayer {
     this._documentSource = this._source; // VectorLayer constructor sets _source as document source
     this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
+    this._initClusterSourceAndStyle();
+
+    this._activeSource = this._documentSource;
+    this._activeStyle = this._documentStyle;
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {
+      const requestMeta = sourceDataRequest.getMeta();
+      if (requestMeta && requestMeta.sourceType === ES_GEO_GRID) {
+        this._activeSource = this._clusterSource;
+        this._activeStyle = this._clusterStyle;
+      }
+    }
+  }
+
+  _initClusterSourceAndStyle() {
     // derive cluster source from document source
     const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
       indexPatternId: this._documentSource.getIndexPatternId(),
       geoField: this._documentSource.getGeoFieldName(),
       requestType: RENDER_AS.POINT,
     });
+    clusterSourceDescriptor.metrics = [
+      {
+        type: METRIC_TYPE.COUNT,
+        label: COUNT_PROP_LABEL,
+      },
+      ...this._documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
+        return {
+          type: getAggType(dynamicProperty),
+          field: dynamicProperty.getFieldName(),
+        };
+      }),
+    ];
     this._clusterSource = new ESGeoGridSource(
       clusterSourceDescriptor,
       this._documentSource.getInspectorAdapters()
@@ -71,34 +106,51 @@ export class BlendedVectorLayer extends VectorLayer {
             },
           },
         },
-      },
-    };
-
-    const documentIconSizeStyle = this._documentStyle.getIconSizeStyle();
-    if (!documentIconSizeStyle.isDynamic()) {
-      clusterStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE] = {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+        [VECTOR_STYLES.ICON_SIZE]: {
+          type: DynamicStyleProperty.type,
+          options: {
+            ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
+            field: {
+              name: COUNT_PROP_NAME,
+              origin: SOURCE_DATA_ID_ORIGIN,
+            },
           },
         },
-      };
-    }
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
-
-    this._activeSource = this._documentSource;
-    this._activeStyle = this._documentStyle;
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      const requestMeta = sourceDataRequest.getMeta();
-      if (requestMeta && requestMeta.sourceType === ES_GEO_GRID) {
-        this._activeSource = this._clusterSource;
-        this._activeStyle = this._clusterStyle;
+      },
+    };
+    this._documentStyle.getAllStyleProperties().forEach(styleProperty => {
+      const styleName = styleProperty.getStyleName();
+      if (
+        [VECTOR_STYLES.LABEL_TEXT, VECTOR_STYLES.ICON_SIZE].includes(styleName) &&
+        (!styleProperty.isDynamic() || !styleProperty.isComplete())
+      ) {
+        // Do not migrate static label and icon size properties to provide unique cluster styling out of the box
+        return;
       }
-    }
+
+      const options = styleProperty.getOptions();
+      if (styleProperty.isDynamic()) {
+        clusterStyleDescriptor.properties[styleName] = {
+          type: DynamicStyleProperty.type,
+          options: {
+            ...options,
+            field: {
+              ...options.field,
+              name: this._clusterSource.formatMetricKey(
+                getAggType(styleProperty),
+                options.field.name
+              ),
+            },
+          },
+        };
+      } else {
+        clusterStyleDescriptor.properties[styleName] = {
+          type: StaticStyleProperty.type,
+          options: { ...options },
+        };
+      }
+    });
+    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
   }
 
   isJoinable() {

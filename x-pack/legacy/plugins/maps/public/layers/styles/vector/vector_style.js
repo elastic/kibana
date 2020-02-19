@@ -121,11 +121,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getIconSizeStyle() {
-    return this._iconSizeStyleProperty;
-  }
-
-  _getAllStyleProperties() {
+  getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -166,7 +162,7 @@ export class VectorStyle extends AbstractStyle {
     });
 
     const styleProperties = {};
-    this._getAllStyleProperties().forEach(styleProperty => {
+    this.getAllStyleProperties().forEach(styleProperty => {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -332,7 +328,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getDynamicPropertiesArray() {
-    const styleProperties = this._getAllStyleProperties();
+    const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
     );
