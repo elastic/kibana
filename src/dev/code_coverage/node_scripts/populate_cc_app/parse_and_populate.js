@@ -61,7 +61,7 @@ function onComplete (initData) {
 }
 
 function currentItem(currentBuildNumber) {
-  return prefix => `${prefix}${currentBuildNumber}/`
+  return prefix => `${prefix}${currentBuildNumber}`
 }
 
 function normalize(xs) {
