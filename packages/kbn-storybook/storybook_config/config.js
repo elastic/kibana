@@ -27,7 +27,7 @@ import { create } from '@storybook/theming';
 if (process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line
   require('babel-plugin-require-context-hook/register')();
-} else if (!process.env.PERCY_TOKEN) {
+} else {
   // Customize the info for each story.
   addDecorator(
     withInfo({
