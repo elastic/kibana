@@ -15,6 +15,7 @@ import {
   typicalPayload,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { createMockServer, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -43,6 +44,7 @@ describe('patch_rules_bulk', () => {
       clients.alertsClient.get.mockResolvedValue(getResult());
       clients.actionsClient.update.mockResolvedValue(updateActionResult());
       clients.alertsClient.update.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getPatchBulkRequest());
       expect(statusCode).toBe(200);
     });

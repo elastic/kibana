@@ -180,9 +180,7 @@ export const transform = (
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
-  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
     return null;
@@ -256,8 +254,6 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
             );
           }
           acc.rulesAcc.set(ruleId, parsedRule);
-        } else {
-          acc.rulesAcc.set(uuid.v4(), parsedRule);
         }
       }
 
