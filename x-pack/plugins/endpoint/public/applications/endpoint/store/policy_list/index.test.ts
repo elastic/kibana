@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyListState } from '../../types';
+import { EndpointAppLocation, PolicyListState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { AppAction } from '../action';
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
-import { selectIsLoading } from './selectors';
+import { isOnPolicyListPage, selectIsLoading } from './selectors';
 
 describe('policy list store concerns', () => {
   const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
@@ -30,29 +30,56 @@ describe('policy list store concerns', () => {
     dispatch = store.dispatch;
   });
 
-  test('it sets `isLoading` when `userNavigatedToPage`', async () => {
-    expect(selectIsLoading(getState())).toBe(false);
-    dispatch({ type: 'userNavigatedToPage', payload: 'policyListPage' });
-    expect(selectIsLoading(getState())).toBe(true);
-    await sleep();
-    expect(selectIsLoading(getState())).toBe(false);
+  test('it does nothing on `userChangedUrl` if pathname is NOT `/policy`', async () => {
+    const state = getState();
+    expect(isOnPolicyListPage(state)).toBe(false);
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/foo',
+        search: '',
+        hash: '',
+      } as EndpointAppLocation,
+    });
+    expect(getState()).toEqual(state);
   });
 
-  test('it sets `isLoading` when `userPaginatedPolicyListTable`', async () => {
+  test('it sets `isOnPage` when `userChangedUrl` with pathname `/policy`', async () => {
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/policy',
+        search: '',
+        hash: '',
+      } as EndpointAppLocation,
+    });
+    expect(isOnPolicyListPage(getState())).toBe(true);
+  });
+
+  test('it sets `isLoading` when `userChangedUrl`', async () => {
     expect(selectIsLoading(getState())).toBe(false);
     dispatch({
-      type: 'userPaginatedPolicyListTable',
+      type: 'userChangedUrl',
       payload: {
-        pageSize: 10,
-        pageIndex: 1,
-      },
+        pathname: '/policy',
+        search: '',
+        hash: '',
+      } as EndpointAppLocation,
     });
     expect(selectIsLoading(getState())).toBe(true);
     await sleep();
     expect(selectIsLoading(getState())).toBe(false);
   });
 
-  test('it resets state on `userNavigatedFromPage` action', async () => {
+  test('it resets state on `userChnagedUrl` and pathname is NOT `/policy`', async () => {
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/policy',
+        search: '',
+        hash: '',
+      } as EndpointAppLocation,
+    });
     dispatch({
       type: 'serverReturnedPolicyListData',
       payload: {
@@ -62,10 +89,18 @@ describe('policy list store concerns', () => {
         total: 200,
       },
     });
-    dispatch({ type: 'userNavigatedFromPage', payload: 'policyListPage' });
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/foo',
+        search: '',
+        hash: '',
+      } as EndpointAppLocation,
+    });
     expect(getState()).toEqual({
       policyItems: [],
       isLoading: false,
+      isOnPage: false,
       pageIndex: 0,
       pageSize: 10,
       total: 0,
