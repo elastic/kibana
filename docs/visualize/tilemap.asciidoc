@@ -1,7 +1,15 @@
 [[visualize-maps]]
 == Maps
 
-To visualize and analyze your geographical data, Visualize provides you with coordinate, heat, and region maps.
+To visualize and analyze your geographical data, Visualize provides you with several types of maps.
+
+Visualize supports the following maps:
+
+* <<tilemap,Coordinate>> - Displays geographic areas overlaid with circles keyed to the data determined by the buckets you specify.
+
+* <<heat-map,Heat>> - Displays graphical representations of data where the individual values are represented as colors.
+
+* <<region-map,Region>> - Displays colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
 
 NOTE: Coordinate, heat, and region maps have been replaced with <<maps>>, which offers more functionality.
 
@@ -9,7 +17,7 @@ NOTE: Coordinate, heat, and region maps have been replaced with <<maps>>, which 
 [[maps-before-you-begin]]
 === Before you begin
 
-To use coordinate and region maps, you must configure the `kibana.yml` settings:
+To use coordinate and region maps, configure the following `kibana.yml` settings:
 
 * Set `xpack.maps.showMapVisualizationTypes` to `true`.
 
@@ -19,37 +27,26 @@ To use coordinate and region maps, you must configure the `kibana.yml` settings:
 [[tilemap]]
 === Create coordinate maps
 
-Display geographic areas overlaid with circles keyed to the data determined by the buckets you specify.
-
-[float]
-[[coordinate-map-aggregations]]
-==== Supported coordinate map aggregations
-
 To display your data on the coordinate map, use the following aggregations:
 
 * <<visualize-metric-aggregations,Metric>>
+
 * <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
 
-[float]
-[[coordinate-map-options]]
-==== Specify the coordinate map options
+When you add the geohash bucket aggregation, specify the following options:
 
-When you deselect *Change precision on map zoom*, the *Precision* slider appears. The *Precision* slider determines the granularity of the results displayed on the map. For details on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
+* When you deselect *Change precision on map zoom*, the *Precision* slider appears. The *Precision* slider determines the granularity of the results displayed on the map. For details on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
 
 NOTE: Higher precisions increase memory usage for the browser that displays {kib} and the underlying
 {es} cluster.
 
-When you select *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are
+* When you select *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are
 placed in the center of all documents in the bucket, and a more accurate visualization is created.
 
 NOTE: When you have multiple values in the geo_point, the coordinate map is unable to accurately calculate the geo_centroid.
 
-When you deselect *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are placed in the center
+* When you deselect *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])*, the markers are placed in the center
 of the geohash grid cell.
-
-[float]
-[[navigate-map]]
-==== Navigate the coordinate map
 
 Use the following navigation options:
 
@@ -61,14 +58,24 @@ Use the following navigation options:
 geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
 
 [float]
-[[heat-map]]
-=== Create heat maps
+[[region-map]]
+=== Create region maps
 
-Heat maps display graphical representations of data where the individual values are represented as colors.
+To display your data on the region map, use the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Terms bucket aggregation>>
+
+Use the following navigation options:
+
+* To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
+
+* To automatically crop the map boundaries, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
 
 [float]
-[[heat-map-aggregations]]
-==== Supported heat map aggregations
+[[heat-map]]
+=== Create heat maps
 
 To display your data on the heat map, use the following aggregations:
 
@@ -96,24 +103,3 @@ To specify custom ranges:
 . Select *Use custom ranges*.
 
 . Enter the ranges to display.
-
-[float]
-[[region-map]]
-=== Create region maps
-
-Displays colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
-
-[float]
-[[region-maps-aggregations]]
-==== Supported region map aggregations
-
-To display your data on the region map, use the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-* <<visualize-bucket-aggregations,Terms bucket aggregation>>
-
-Configure an inner join that joins the result of an {es} terms aggregation
-and a reference vector file based on a shared key.
-
-To join the results to the vector data, use the _key_ term.
