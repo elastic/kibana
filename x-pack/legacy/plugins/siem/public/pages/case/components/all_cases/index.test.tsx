@@ -14,7 +14,7 @@ import { useDateFormat, useTimeZone } from '../../../../lib/kibana';
 jest.mock('../../../../lib/kibana');
 const mockUseDateFormat = useDateFormat as jest.Mock;
 const mockUseTimeZone = useTimeZone as jest.Mock;
-jest.mock('ui/new_platform');
+
 describe('AllCases', () => {
   const setQueryParams = jest.fn();
   const setFilters = jest.fn();
@@ -24,7 +24,7 @@ describe('AllCases', () => {
       .spyOn(apiHook, 'useGetCases')
       .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
-    mockUseTimeZone.mockImplementation(() => 'US/Eastern');
+    mockUseTimeZone.mockImplementation(() => 'US/Pacific');
   });
   it('should render AllCases', () => {
     const wrapper = mount(

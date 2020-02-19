@@ -1255,7 +1255,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:23.627Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:23.627
+                                            Feb 13, 2020 @ 11:44:23.627
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -1375,7 +1375,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:23.627Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:23.627
+                                            Feb 13, 2020 @ 11:44:23.627
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -1613,7 +1613,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:13.328Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:13.328
+                                            Feb 13, 2020 @ 11:44:13.328
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -1733,7 +1733,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:13.328Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:13.328
+                                            Feb 13, 2020 @ 11:44:13.328
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -1971,7 +1971,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:11.328Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:11.328
+                                            Feb 13, 2020 @ 11:44:11.328
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -2091,7 +2091,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:11.328Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:11.328
+                                            Feb 13, 2020 @ 11:44:11.328
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -2329,7 +2329,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:05.563Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:05.563
+                                            Feb 13, 2020 @ 11:44:05.563
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -2449,7 +2449,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-18T21:32:24.056Z}
                                           >
-                                            Feb 18, 2020 @ 16:32:24.056
+                                            Feb 18, 2020 @ 13:32:24.056
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -2687,7 +2687,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:01.901Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:01.901
+                                            Feb 13, 2020 @ 11:44:01.901
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
@@ -2807,7 +2807,7 @@ exports[`AllCases should render AllCases 1`] = `
                                             data-test-subj="preference-time"
                                             value={2020-02-13T19:44:01.901Z}
                                           >
-                                            Feb 13, 2020 @ 14:44:01.901
+                                            Feb 13, 2020 @ 11:44:01.901
                                           </PreferenceFormattedDate>
                                         </span>
                                       </EuiToolTip>
