@@ -101,6 +101,5 @@ export function getAlertType(): AlertTypeModel {
       return validationResult;
     },
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
-    defaultActionGroup: 'alert',
   };
 }

@@ -118,9 +118,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<string>(
-    alertTypeModel?.defaultActionGroup ?? 'default'
-  );
+  const [defaultActionGroup, setDefaultActionGroup] = useState<string>('default');
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
@@ -167,13 +165,14 @@ export const AlertForm = ({
           ],
           name: 'threshold',
           actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
+          defaultActionGroup: 'alert',
         });
         const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
         }
-        if (!alertTypeModel?.defaultActionGroup && alert.alertTypeId && index[alert.alertTypeId]) {
-          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0].id);
+        if (alert.alertTypeId && index[alert.alertTypeId]) {
+          setDefaultActionGroup(index[alert.alertTypeId].defaultActionGroup);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -295,15 +294,8 @@ export const AlertForm = ({
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
-          if (item.defaultActionGroup) {
-            setDefaultActionGroup(item.defaultActionGroup);
-          } else if (
-            !alertTypeModel?.defaultActionGroup &&
-            alertTypesIndex &&
-            alertTypesIndex[item.id] &&
-            alertTypesIndex[item.id].actionGroups.length > 0
-          ) {
-            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0].id);
+          if (alertTypesIndex && alertTypesIndex[item.id]) {
+            setDefaultActionGroup(alertTypesIndex[item.id].defaultActionGroup);
           }
         }}
       >

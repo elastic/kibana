@@ -15,6 +15,7 @@ const alertType: AlertType = {
     { id: 'default', name: 'Default' },
     { id: 'other-group', name: 'Other Group' },
   ],
+  defaultActionGroup: 'default',
   executor: jest.fn(),
 };
 
