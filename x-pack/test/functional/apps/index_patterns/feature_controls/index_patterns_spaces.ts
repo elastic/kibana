@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const config = getService('config');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const testSubjects = getService('testSubjects');
@@ -52,8 +53,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // https://github.com/elastic/kibana/issues/57601
-    describe.skip('space with Index Patterns disabled', () => {
+    describe('space with Index Patterns disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -76,7 +76,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });
