@@ -3,8 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext } from 'kibana/public';
-import { RemoteClustersUIPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new RemoteClustersUIPlugin(initializerContext);
+export const IPS_TABLE_LOADED = '[data-test-subj="table-topNFlowSource-loading-false"]';
