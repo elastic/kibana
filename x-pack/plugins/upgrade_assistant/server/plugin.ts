@@ -16,17 +16,17 @@ import {
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
 
+import { CloudSetup } from '../../cloud/server';
+import { LicensingPluginSetup } from '../../licensing/server';
+
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
+import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
-import { CloudSetup } from '../../cloud/server';
 import { registerTelemetryRoutes } from './routes/telemetry';
-import { ReindexWorker } from './lib/reindexing';
-
 import { RouteDependencies } from './types';
-import { LicensingPluginSetup } from '../../licensing/server';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -46,8 +46,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private worker?: ReindexWorker;
 
-  constructor(ctx: PluginInitializerContext) {
-    this.logger = ctx.logger.get();
+  constructor({ logger }: PluginInitializerContext) {
+    this.logger = logger.get();
     this.credentialStore = credentialStoreFactory();
   }
 

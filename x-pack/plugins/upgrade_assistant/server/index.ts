@@ -3,9 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { UpgradeAssistantServerPlugin } from './plugin';
+import { configSchema } from '../common/config';
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return new UpgradeAssistantServerPlugin(ctx);
+};
+
+export const config: PluginConfigDescriptor = {
+  schema: configSchema,
+  exposeToBrowser: {
+    enabled: true,
+  },
 };

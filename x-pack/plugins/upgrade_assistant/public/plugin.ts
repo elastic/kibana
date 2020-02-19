@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+
 import { renderApp } from './application/render_app';
 
 import { CloudSetup } from '../../cloud/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
+import { Config } from '../common/config';
 
 interface Dependencies {
   cloud: CloudSetup;
@@ -18,7 +20,12 @@ interface Dependencies {
 }
 
 export class UpgradeAssistantUIPlugin implements Plugin {
+  constructor(private ctx: PluginInitializerContext) {}
   setup({ http, getStartServices }: CoreSetup, { cloud, management }: Dependencies) {
+    const { enabled } = this.ctx.config.get<Config>();
+    if (!enabled) {
+      return;
+    }
     const appRegistrar = management.sections.getSection('kibana')!;
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 

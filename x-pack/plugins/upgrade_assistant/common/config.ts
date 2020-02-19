@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import './index.scss';
-import { PluginInitializerContext } from 'kibana/public';
-import { UpgradeAssistantUIPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => {
-  return new UpgradeAssistantUIPlugin(ctx);
-};
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
+export type Config = TypeOf<typeof configSchema>;

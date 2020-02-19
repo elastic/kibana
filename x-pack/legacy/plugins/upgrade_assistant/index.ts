@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
 import { Legacy } from 'kibana';
 import mappings from './mappings.json';
 
 export function upgradeAssistant(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'upgrade_assistant',
-    configPrefix: 'xpack.upgrade_assistant',
     uiExports: {
       // @ts-ignore
       savedObjectSchemas: {
@@ -22,12 +20,6 @@ export function upgradeAssistant(kibana: any) {
         },
       },
       mappings,
-    },
-
-    config() {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
     },
 
     init() {},
