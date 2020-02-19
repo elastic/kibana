@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { drag, drop } from '../../integration/lib/drag_n_drop/helpers';
+import { drag, drop } from '../../tasks/common';
 
 import {
   FIELDS_BROWSER_FILTER_INPUT,
@@ -14,7 +14,7 @@ import {
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
 } from '../../screens/timeline/fields_browser';
-import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
+import { DEFAULT_TIMEOUT } from '../../tasks/login';
 import { KQL_SEARCH_BAR } from '../../screens/hosts/main';
 
 export const clearFieldsBrowser = () => {

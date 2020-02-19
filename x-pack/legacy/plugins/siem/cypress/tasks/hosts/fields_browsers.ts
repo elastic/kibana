@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
+import { DEFAULT_TIMEOUT } from '../../tasks/login';
 import { KQL_SEARCH_BAR } from '../../screens/hosts/main';
 
 export const closeFieldsBrowser = () => {
