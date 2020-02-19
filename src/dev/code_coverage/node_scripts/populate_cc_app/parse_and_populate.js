@@ -48,12 +48,20 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 
 function onComplete (initData) {
   const prettyFlush = pipe(pretty, flush);
-  return function mutateInitialData (xs, log, destFile, buildNumber) {
+  return function mutateInitialData (xs, log, destFile, currentJobNumber) {
     initData.historicalItems = normalize(xs);
-    initData.currentJobNumber = buildNumber;
+    initData.currentJobNumber = currentJobNumber;
+
+    const constructCurrentFrom = currentItem(currentJobNumber);
+    initData.currentItem = constructCurrentFrom('gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/');
+
     prettyFlush(initData)(destFile);
     log.debug('### Completed');
   };
+}
+
+function currentItem(currentBuildNumber) {
+  return prefix => `${prefix}${currentBuildNumber}/`
 }
 
 function normalize(xs) {
