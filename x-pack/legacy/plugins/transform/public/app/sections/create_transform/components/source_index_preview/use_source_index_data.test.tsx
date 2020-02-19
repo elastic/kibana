@@ -51,8 +51,7 @@ describe('useSourceIndexData', () => {
         sourceIndexObj = useSourceIndexData(
           { id: 'the-id', title: 'the-title', fields: [] },
           query,
-          [],
-          () => {}
+          { pageIndex: 0, pageSize: 10 }
         );
       });
     });

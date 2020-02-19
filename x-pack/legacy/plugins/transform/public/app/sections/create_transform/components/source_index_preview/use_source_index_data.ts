@@ -36,7 +36,17 @@ const isErrorResponse = (arg: any): arg is ErrorResponse => {
   return arg.error !== undefined;
 };
 
-type SourceIndexSearchResponse = ErrorResponse | SearchResponse<any>;
+// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
+interface SearchResponse7 extends SearchResponse<any> {
+  hits: SearchResponse<any>['hits'] & {
+    total: {
+      value: number;
+      relation: string;
+    };
+  };
+}
+
+type SourceIndexSearchResponse = ErrorResponse | SearchResponse7;
 
 export interface UseSourceIndexDataReturnType {
   errorMessage: string;
