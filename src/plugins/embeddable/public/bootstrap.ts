@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup, Trigger } from 'src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   APPLY_FILTER_TRIGGER,
@@ -34,35 +34,30 @@ import {
  * @param api
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
-  const triggerContext = {
+  const triggerContext: Trigger = {
     id: CONTEXT_MENU_TRIGGER,
     title: 'Context menu',
     description: 'Triggered on top-right corner context-menu select.',
-    actionIds: [],
   };
-  const triggerFilter = {
+  const triggerFilter: Trigger = {
     id: APPLY_FILTER_TRIGGER,
     title: 'Filter click',
     description: 'Triggered when user applies filter to an embeddable.',
-    actionIds: [],
   };
-  const triggerBadge = {
+  const triggerBadge: Trigger = {
     id: PANEL_BADGE_TRIGGER,
     title: 'Panel badges',
     description: 'Actions appear in title bar when an embeddable loads in a panel',
-    actionIds: [],
   };
-  const selectRangeTrigger = {
+  const selectRangeTrigger: Trigger = {
     id: SELECT_RANGE_TRIGGER,
     title: 'Select range',
     description: 'Applies a range filter',
-    actionIds: [],
   };
-  const valueClickTrigger = {
+  const valueClickTrigger: Trigger = {
     id: VALUE_CLICK_TRIGGER,
     title: 'Value clicked',
     description: 'Value was clicked',
-    actionIds: [],
   };
   const actionApplyFilter = createFilterAction();
 

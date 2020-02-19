@@ -10,8 +10,8 @@ import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown'
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { trackEvent } from '../../../../../infra/public/hooks/use_track_metric';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { useUiTracker } from '../../../../../../../plugins/observability/public';
 
 const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
   defaultMessage: 'No data within this time range.'
@@ -21,11 +21,9 @@ const TransactionBreakdown: React.FC<{
   initialIsOpen?: boolean;
 }> = ({ initialIsOpen }) => {
   const [showChart, setShowChart] = useState(!!initialIsOpen);
-
   const { data, status } = useTransactionBreakdown();
-
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { kpis, timeseries } = data;
-
   const noHits = data.kpis.length === 0 && status === FETCH_STATUS.SUCCESS;
   const showEmptyMessage = noHits && !showChart;
 
@@ -38,9 +36,9 @@ const TransactionBreakdown: React.FC<{
             onToggleClick={() => {
               setShowChart(!showChart);
               if (showChart) {
-                trackEvent({ app: 'apm', name: 'hide_breakdown_chart' });
+                trackApmEvent({ metric: 'hide_breakdown_chart' });
               } else {
-                trackEvent({ app: 'apm', name: 'show_breakdown_chart' });
+                trackApmEvent({ metric: 'show_breakdown_chart' });
               }
             }}
           />

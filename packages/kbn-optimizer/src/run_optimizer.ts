@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import { mergeMap, share, observeOn } from 'rxjs/operators';
 
-import { summarizeEvent$, Update } from './common';
+import { summarizeEventStream, Update } from './common';
 
 import {
   OptimizerConfig,
@@ -31,7 +31,8 @@ import {
   watchBundlesForChanges$,
   runWorkers,
   OptimizerInitializedEvent,
-  createOptimizerReducer,
+  createOptimizerStateSummarizer,
+  handleOptimizerCompletion,
 } from './optimizer';
 
 export type OptimizerUpdate = Update<OptimizerEvent, OptimizerState>;
@@ -65,7 +66,7 @@ export function runOptimizer(config: OptimizerConfig) {
       const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
 
       // create the stream that summarized all the events into specific states
-      return summarizeEvent$<OptimizerEvent, OptimizerState>(
+      return summarizeEventStream<OptimizerEvent, OptimizerState>(
         Rx.merge(init$, changeEvent$, workerEvent$),
         {
           phase: 'initializing',
@@ -75,8 +76,9 @@ export function runOptimizer(config: OptimizerConfig) {
           startTime,
           durSec: 0,
         },
-        createOptimizerReducer(config)
+        createOptimizerStateSummarizer(config)
       );
-    })
+    }),
+    handleOptimizerCompletion(config)
   );
 }
