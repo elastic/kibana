@@ -113,7 +113,7 @@ export function systemRoutes({
       path: '/api/ml/ml_capabilities',
       validate: {
         query: schema.object({
-          ignoreSpace: schema.maybe(schema.string()),
+          ignoreSpaces: schema.maybe(schema.string()),
         }),
       },
     },
@@ -228,7 +228,9 @@ export function systemRoutes({
   router.post(
     {
       path: '/api/ml/es_search',
-      validate: false,
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
