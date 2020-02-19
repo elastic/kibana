@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { SPAN_METADATA_SECTIONS } from './sections';
-import { Span } from '../../../../../typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
 

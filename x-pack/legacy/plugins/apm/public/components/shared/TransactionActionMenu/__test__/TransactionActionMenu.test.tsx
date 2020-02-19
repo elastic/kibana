@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
 import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
