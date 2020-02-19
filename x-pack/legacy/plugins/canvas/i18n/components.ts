@@ -926,7 +926,7 @@ export const ComponentStrings = {
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
-        defaultMessage: 'Expression editor',
+        defaultMessage: 'Expression Editor',
       }),
     getNextPageAriaLabel: () =>
       i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
