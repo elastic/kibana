@@ -17,35 +17,120 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createHashHistory } from 'history';
+import { createHashHistory, History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
   ReduxLikeStateContainer,
 } from '../../../../../../../plugins/kibana_utils/public';
-import { esFilters, Filter } from '../../../../../../../plugins/data/public';
+import { esFilters, Filter, Query } from '../../../../../../../plugins/data/public';
 
 interface AppState {
+  /**
+   * Columns displayed in the table
+   */
   columns?: string[];
+  /**
+   * Array of applied filters
+   */
   filters?: Filter[];
+  /**
+   * id of the used index pattern
+   */
   index?: string;
+  /**
+   * Used interval of the histogram
+   */
   interval?: string;
-  query?: any;
-  sort?: string[];
+  /**
+   * Lucence or KQL query
+   */
+  query?: Query;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
 }
 
 interface GlobalState {
+  /**
+   * Array of applied filters
+   */
   filters?: Filter[];
+  /**
+   * Time filter
+   */
   time?: { from: string; to: string };
 }
 
-interface GetStateArgs {
+interface GetStateParams {
+  /**
+   * Default state used for merging with with URL state to get the initial state
+   */
   defaultAppState?: AppState;
+  /**
+   * Determins the use of long vs. short/hashed urls
+   */
   storeInSessionStorage?: boolean;
-  onChangeAppStatus?: (dirty: boolean) => void;
-  hashHistory?: any;
+  /**
+   * Browser history used for testing
+   */
+  hashHistory?: History;
 }
+
+export interface GetStateReturn {
+  /**
+   * Global state, the _g part of the URL
+   */
+  globalStateContainer: ReduxLikeStateContainer<GlobalState>;
+  /**
+   * App state, the _a part of the URL
+   */
+  appStateContainer: ReduxLikeStateContainer<AppState>;
+  /**
+   * Start sync between state and URL
+   */
+  startSync: () => void;
+  /**
+   * Stop sync between state and URL
+   */
+  stopSync: () => void;
+  /**
+   * Set app state to with a partial new app state
+   */
+  setAppState: (newState: Partial<AppState>) => void;
+  /**
+   * Set global state to with a partial new app state
+   */
+  setGlobalState: (newState: Partial<GlobalState>) => void;
+  /**
+   * Get global filters
+   */
+  getGlobalFilters: () => Filter[];
+  /**
+   * Get global filters
+   */
+  getAppFilters: () => Filter[];
+  /**
+   * Sync state to URL, used for testing
+   */
+  flushToUrl: () => void;
+  /**
+   * Reset initial state to the current app state
+   */
+  resetInitialAppState: () => void;
+  /**
+   * Returns whether the current app state is different to the initial state
+   */
+  isAppStateDirty: () => void;
+  /**
+   * Replace the current URL with the current state without adding another browser history entry
+   */
+  replaceUrlState: () => Promise<void>;
+}
+const GLOBAL_STATE_URL_KEY = '_g';
+const APP_STATE_URL_KEY = '_a';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -55,16 +140,16 @@ export function getState({
   defaultAppState = {},
   storeInSessionStorage = false,
   hashHistory,
-}: GetStateArgs) {
+}: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history: hashHistory ? hashHistory : createHashHistory(),
   });
 
-  const globalStateInitial = stateStorage.get('_g') as GlobalState;
+  const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
-  const appStateFromUrl = stateStorage.get('_a') as AppState;
+  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   let initialAppState = {
     ...defaultAppState,
     ...appStateFromUrl,
@@ -74,7 +159,7 @@ export function getState({
 
   const { start, stop } = syncStates([
     {
-      storageKey: '_a',
+      storageKey: APP_STATE_URL_KEY,
       stateContainer: {
         ...appStateContainer,
         // handle null value when url switch doesn't contain state info
@@ -83,7 +168,7 @@ export function getState({
       stateStorage,
     },
     {
-      storageKey: '_g',
+      storageKey: GLOBAL_STATE_URL_KEY,
       stateContainer: {
         ...globalStateContainer,
         // handle null value when url switch doesn't contain state info
@@ -96,24 +181,26 @@ export function getState({
   return {
     globalStateContainer,
     appStateContainer,
-    start,
-    stop,
-    syncGlobalState: (newPartial: GlobalState) => setState(globalStateContainer, newPartial),
-    syncAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
+    startSync: start,
+    stopSync: stop,
+    setGlobalState: (newPartial: GlobalState) => setState(globalStateContainer, newPartial),
+    setAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
     getGlobalFilters: () => getFilters(globalStateContainer.getState()),
     getAppFilters: () => getFilters(appStateContainer.getState()),
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    flush: () => stateStorage.flush(),
+    flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     replaceUrlState: async () => {
       if (appStateContainer.getState()) {
-        await stateStorage.set('_a', appStateContainer.getState(), { replace: true });
+        await stateStorage.set(APP_STATE_URL_KEY, appStateContainer.getState(), { replace: true });
       }
 
       if (globalStateContainer.getState()) {
-        await stateStorage.set('_g', globalStateContainer.getState(), { replace: true });
+        await stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.getState(), {
+          replace: true,
+        });
       }
     },
   };

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { getState } from './discover_state';
+import { getState, GetStateReturn } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 
 let history: History;
-let state: any;
+let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
 
 describe('Test discover state', () => {
@@ -32,31 +32,31 @@ describe('Test discover state', () => {
       defaultAppState: { index: 'test' },
       hashHistory: history,
     });
-    state.start();
+    state.startSync();
     await state.replaceUrlState();
   });
   afterEach(() => {
-    state.stop();
+    state.stopSync();
   });
-  test('syncGlobalState', async () => {
-    state.syncGlobalState({ time: { from: 'a', to: 'b' } });
-    state.flush();
+  test('setting global state and sycing to URL', async () => {
+    state.setGlobalState({ time: { from: 'a', to: 'b' } });
+    state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:test)&_g=(time:(from:a,to:b))"`);
   });
-  test('syncAppState', async () => {
-    state.syncAppState({ index: 'modified' });
-    state.flush();
+  test('setting app state and syncing to URL', async () => {
+    state.setAppState({ index: 'modified' });
+    state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:modified)"`);
   });
-  test('set appState and globalState', async () => {
-    state.syncAppState({ index: 'modified' });
-    state.syncGlobalState({ time: { from: 'a', to: 'b' } });
-    state.flush();
+  test('setting appState and globalState and syncing to URL', async () => {
+    state.setAppState({ index: 'modified' });
+    state.setGlobalState({ time: { from: 'a', to: 'b' } });
+    state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(index:modified)&_g=(time:(from:a,to:b))"`
     );
   });
-  test('URL change is propagated to appState and globalState', async () => {
+  test('changing URL to be propagated to appState and globalState', async () => {
     history.push('/#?_a=(index:modified)&_g=(time:(from:a,to:b))');
     expect(state.globalStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
@@ -72,7 +72,7 @@ describe('Test discover state', () => {
       }
     `);
   });
-  test('URL navigation to url without _g and _a', async () => {
+  test('URL navigation to url without _g and _a, state should not change', async () => {
     await history.push('/#?_g=(time:(from:a,to:b))');
     await history.push('/');
     expect(state.globalStateContainer.getState()).toMatchInlineSnapshot(`
@@ -90,8 +90,8 @@ describe('Test discover state', () => {
     `);
   });
 
-  test('isAppStateDirty', async () => {
-    state.syncAppState({ index: 'modified' });
+  test('isAppStateDirty to find out whether the current state has changed', async () => {
+    state.setAppState({ index: 'modified' });
     expect(state.isAppStateDirty()).toBeTruthy();
     state.resetInitialAppState();
     expect(state.isAppStateDirty()).toBeFalsy();

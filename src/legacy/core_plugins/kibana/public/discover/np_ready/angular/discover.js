@@ -194,10 +194,10 @@ function discoverController(
   const {
     appStateContainer,
     globalStateContainer,
-    start: startStateSync,
-    stop: stopStateSync,
-    syncAppState,
-    syncGlobalState,
+    startSync: startStateSync,
+    stopSync: stopStateSync,
+    setAppState,
+    setGlobalState,
     getAppFilters,
     getGlobalFilters,
     resetInitialAppState,
@@ -209,7 +209,7 @@ function discoverController(
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
-    syncAppState({ index: $scope.indexPattern.id });
+    setAppState({ index: $scope.indexPattern.id });
   }
   const $state = ($scope.state = { ...appStateContainer.getState() });
 
@@ -247,13 +247,13 @@ function discoverController(
 
   $scope.$watch('state.index', (index, prevIndex) => {
     if (prevIndex == null || prevIndex === index) return;
-    syncAppState({ index });
+    setAppState({ index });
     $route.reload();
   });
 
   $scope.$watchCollection('state.columns', val => {
     if (!_.isEqual(val, appStateContainer.get().columns)) {
-      syncAppState({ columns: val });
+      setAppState({ columns: val });
     }
   });
   // update data source when filters update
@@ -263,12 +263,12 @@ function discoverController(
         const globalFiltersState = getGlobalFilters();
         const globalFilters = filterManager.getGlobalFilters();
         if (!isEqualFilters(globalFilters, globalFiltersState)) {
-          syncGlobalState({ filters: globalFilters });
+          setGlobalState({ filters: globalFilters });
         }
         const appFiltersState = getAppFilters();
         const appFilters = filterManager.getAppFilters();
         if (!isEqualFilters(appFiltersState, appFilters)) {
-          syncAppState({ filters: appFilters });
+          setAppState({ filters: appFilters });
         }
         $scope.state.filters = appFilters;
         $scope.updateDataSource();
@@ -657,7 +657,7 @@ function discoverController(
         const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
         // if the searchSource doesn't know, tell it so
         if (!_.isEqual(sort, currentSort)) {
-          syncAppState({ sort });
+          setAppState({ sort });
           $fetchObservable.next();
         }
       });
@@ -668,7 +668,7 @@ function discoverController(
 
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
         if (newInterval !== oldInterval) {
-          syncAppState({ interval: newInterval });
+          setAppState({ interval: newInterval });
           $fetchObservable.next();
         }
       });
@@ -776,7 +776,7 @@ function discoverController(
             kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
           } else {
             // Update defaults so that "reload saved query" functions correctly
-            syncAppState(getStateDefaults());
+            setAppState(getStateDefaults());
             docTitle.change(savedSearch.lastSavedTitle);
           }
         }
@@ -841,7 +841,7 @@ function discoverController(
   $scope.updateQuery = function({ query }) {
     if (!_.isEqual(query, $state.query)) {
       $state.query = query;
-      syncAppState({ query });
+      setAppState({ query });
       $fetchObservable.next();
     }
   };
@@ -904,7 +904,7 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
     };
-    syncGlobalState({
+    setGlobalState({
       time: {
         from: timefilter.getTime().from,
         to: timefilter.getTime().to,
@@ -990,7 +990,7 @@ function discoverController(
     } else {
       delete $state.savedQuery;
     }
-    syncAppState({ savedQuery: $state.savedQuery });
+    setAppState({ savedQuery: $state.savedQuery });
   };
 
   async function setupVisualization() {
