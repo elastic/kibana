@@ -21,6 +21,7 @@ import {
 } from './infraops_graphql_client';
 import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './siem_graphql_client';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
+import { MachineLearningSecurityCommonProvider } from '../../functional/services/machine_learning';
 
 export const services = {
   ...commonServices,
@@ -37,4 +38,5 @@ export const services = {
   siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
+  mlSecurity: MachineLearningSecurityCommonProvider,
 };

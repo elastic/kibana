@@ -24,7 +24,6 @@ export interface Trigger {
   id: string;
   title?: string;
   description?: string;
-  actionIds: string[];
 }
 
 export interface PropertySpec {

@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
-import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import {
   getOptionLabel,
   omitAllOption
 } from '../../../../../../common/agent_configuration_constants';
+import { UiTracker } from '../../../../../../../../../plugins/observability/public';
 
 interface Settings {
   transaction_sample_rate: number;
@@ -29,7 +29,8 @@ export async function saveConfig({
   transactionMaxSpans,
   configurationId,
   agentName,
-  toasts
+  toasts,
+  trackApmEvent
 }: {
   callApmApi: APMClient;
   serviceName: string;
@@ -40,8 +41,9 @@ export async function saveConfig({
   configurationId?: string;
   agentName?: string;
   toasts: NotificationsStart['toasts'];
+  trackApmEvent: UiTracker;
 }) {
-  trackEvent({ app: 'apm', name: 'save_agent_configuration' });
+  trackApmEvent({ metric: 'save_agent_configuration' });
 
   try {
     const settings: Settings = {
