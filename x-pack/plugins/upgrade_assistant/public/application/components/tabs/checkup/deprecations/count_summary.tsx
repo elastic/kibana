@@ -8,7 +8,7 @@ import React, { Fragment, FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EnrichedDeprecationInfo } from '../../../../../../../../legacy/plugins/upgrade_assistant/server/np_ready/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 export const DeprecationCountSummary: FunctionComponent<{
   deprecations: EnrichedDeprecationInfo[];

@@ -7,7 +7,7 @@
 import React, { FunctionComponent } from 'react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../../../../../legacy/plugins/upgrade_assistant/server/np_ready/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption } from '../../../types';
 
 import { COLOR_MAP, LEVEL_MAP } from '../constants';

@@ -6,8 +6,6 @@
 import Joi from 'joi';
 import { Legacy } from 'kibana';
 import mappings from './mappings.json';
-import { plugin } from './server/np_ready';
-import { CloudSetup } from '../../../plugins/cloud/server';
 
 export function upgradeAssistant(kibana: any) {
   const config: Legacy.PluginSpecOptions = {

@@ -6,10 +6,7 @@
 
 import React from 'react';
 
-import {
-  EnrichedDeprecationInfo,
-  UpgradeAssistantStatus,
-} from '../../../../../legacy/plugins/upgrade_assistant/server/np_ready/lib/es_migration_apis';
+import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;
