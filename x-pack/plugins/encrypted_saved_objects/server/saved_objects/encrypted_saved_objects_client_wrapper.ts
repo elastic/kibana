@@ -7,7 +7,6 @@
 import uuid from 'uuid';
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -42,7 +41,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     public readonly errors = options.baseClient.errors
   ) {}
 
-  public async create<T extends SavedObjectAttributes>(
+  public async create<T = unknown>(
     type: string,
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
@@ -66,15 +65,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         type,
         await this.options.service.encryptAttributes(
           { type, id, namespace: options.namespace },
-          attributes
+          attributes as Record<string, unknown>
         ),
         { ...options, id }
       )
-    );
+    ) as SavedObject<T>;
   }
 
-  public async bulkCreate(
-    objects: SavedObjectsBulkCreateObject[],
+  public async bulkCreate<T = unknown>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
@@ -101,14 +100,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           id,
           attributes: await this.options.service.encryptAttributes(
             { type: object.type, id, namespace: options && options.namespace },
-            object.attributes
+            object.attributes as Record<string, unknown>
           ),
-        };
+        } as SavedObjectsBulkCreateObject<T>;
       })
     );
 
     return this.stripEncryptedAttributesFromBulkResponse(
-      await this.options.baseClient.bulkCreate(encryptedObjects, options)
+      await this.options.baseClient.bulkCreate<T>(encryptedObjects, options)
     );
   }
 
@@ -144,28 +143,28 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find(options: SavedObjectsFindOptions) {
+  public async find<T = unknown>(options: SavedObjectsFindOptions) {
     return this.stripEncryptedAttributesFromBulkResponse(
-      await this.options.baseClient.find(options)
+      await this.options.baseClient.find<T>(options)
     );
   }
 
-  public async bulkGet(
+  public async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options?: SavedObjectsBaseOptions
   ) {
     return this.stripEncryptedAttributesFromBulkResponse(
-      await this.options.baseClient.bulkGet(objects, options)
+      await this.options.baseClient.bulkGet<T>(objects, options)
     );
   }
 
-  public async get(type: string, id: string, options?: SavedObjectsBaseOptions) {
+  public async get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return this.stripEncryptedAttributesFromResponse(
-      await this.options.baseClient.get(type, id, options)
+      await this.options.baseClient.get<T>(type, id, options)
     );
   }
 
-  public async update<T extends SavedObjectAttributes>(
+  public async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -199,7 +198,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     if (this.options.service.isRegistered(response.type)) {
       response.attributes = this.options.service.stripEncryptedAttributes(
         response.type,
-        response.attributes
+        response.attributes as Record<string, unknown>
       );
     }
 
@@ -218,7 +217,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       if (this.options.service.isRegistered(savedObject.type)) {
         savedObject.attributes = this.options.service.stripEncryptedAttributes(
           savedObject.type,
-          savedObject.attributes
+          savedObject.attributes as Record<string, unknown>
         );
       }
     }

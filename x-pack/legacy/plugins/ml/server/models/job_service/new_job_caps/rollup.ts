@@ -5,6 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server';
+import { SavedObjectIndexPattern } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { FieldId } from '../../../../common/types/fields';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
@@ -58,8 +59,8 @@ export async function rollupServiceProvider(
 async function loadRollupIndexPattern(
   indexPattern: string,
   savedObjectsClient: SavedObjectsClientContract
-): Promise<SavedObject | null> {
-  const resp = await savedObjectsClient.find({
+): Promise<SavedObject<SavedObjectIndexPattern> | null> {
+  const resp = await savedObjectsClient.find<SavedObjectIndexPattern>({
     type: 'index-pattern',
     fields: ['title', 'type', 'typeMeta'],
     perPage: 1000,

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { shortUrlLookupProvider, ShortUrlLookupService } from './short_url_lookup';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../../core/server';
+import { shortUrlLookupProvider, ShortUrlLookupService, SavedObjectUrl } from './short_url_lookup';
+import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
@@ -31,15 +32,10 @@ describe('shortUrlLookupProvider', () => {
   let shortUrl: ShortUrlLookupService;
 
   beforeEach(() => {
-    savedObjects = ({
-      get: jest.fn(),
-      create: jest.fn(() => Promise.resolve({ id: ID })),
-      update: jest.fn(),
-      errors: SavedObjectsClient.errors,
-    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
-
+    savedObjects = savedObjectsClientMock.create();
+    savedObjects.create.mockResolvedValue({ id: ID } as SavedObject<SavedObjectUrl>);
     deps = { savedObjects };
-    shortUrl = shortUrlLookupProvider({ logger: ({ warn: () => {} } as unknown) as Logger });
+    shortUrl = shortUrlLookupProvider({ logger: loggingServiceMock.create().get() });
   });
 
   describe('generateUrlId', () => {
@@ -55,13 +51,13 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes, options] = savedObjects.create.mock.calls[0];
 
       expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes).sort()).toEqual([
+      expect(Object.keys(attributes as SavedObjectUrl).sort()).toEqual([
         'accessCount',
         'accessDate',
         'createDate',
         'url',
       ]);
-      expect(attributes.url).toEqual(URL);
+      expect((attributes as SavedObjectUrl).url).toEqual(URL);
       expect(options!.id).toEqual(ID);
     });
 
@@ -72,13 +68,13 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes] = savedObjects.create.mock.calls[0];
 
       expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes).sort()).toEqual([
+      expect(Object.keys(attributes as SavedObjectUrl).sort()).toEqual([
         'accessCount',
         'accessDate',
         'createDate',
         'url',
       ]);
-      expect(attributes.url).toEqual(URL);
+      expect((attributes as SavedObjectUrl).url).toEqual(URL);
     });
 
     it('gracefully handles version conflict', async () => {
@@ -119,7 +115,7 @@ describe('shortUrlLookupProvider', () => {
       expect(type).toEqual(TYPE);
       expect(id).toEqual(ID);
       expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate']);
-      expect(attributes.accessCount).toEqual(3);
+      expect((attributes as SavedObjectUrl).accessCount).toEqual(3);
     });
   });
 });

@@ -52,7 +52,7 @@ export const readRawTags = async ({
     page: 1,
     perPage,
   });
-  const tags = await client.find({
+  const tags = await client.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,

@@ -5,14 +5,16 @@
  */
 
 import {
-  SavedObjectAttributes,
+  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
@@ -46,7 +48,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.checkSavedObjectsPrivilegesAsCurrentUser = checkSavedObjectsPrivilegesAsCurrentUser;
   }
 
-  public async create<T extends SavedObjectAttributes>(
+  public async create<T = unknown>(
     type: string,
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
@@ -56,8 +58,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.create(type, attributes, options);
   }
 
-  public async bulkCreate(
-    objects: SavedObjectsBulkCreateObject[],
+  public async bulkCreate<T = unknown>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
     await this.ensureAuthorized(
@@ -76,16 +78,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  public async find(options: SavedObjectsFindOptions) {
+  public async find<T = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T>> {
     await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
     return this.baseClient.find(options);
   }
 
-  public async bulkGet(
+  public async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
-  ) {
+  ): Promise<SavedObjectsBulkResponse<T>> {
     await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_get', options.namespace, {
       objects,
       options,
@@ -94,13 +98,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.bulkGet(objects, options);
   }
 
-  public async get(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  public async get<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObject<T>> {
     await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
     return await this.baseClient.get(type, id, options);
   }
 
-  public async update<T extends SavedObjectAttributes>(
+  public async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -116,8 +124,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.update(type, id, attributes, options);
   }
 
-  public async bulkUpdate(
-    objects: SavedObjectsBulkUpdateObject[] = [],
+  public async bulkUpdate<T = unknown>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
     await this.ensureAuthorized(

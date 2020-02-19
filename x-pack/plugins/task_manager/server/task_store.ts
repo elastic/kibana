@@ -428,7 +428,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
 }
 
 export function savedObjectToConcreteTaskInstance(
-  savedObject: Omit<SavedObject, 'references'>
+  savedObject: Omit<SavedObject<any>, 'references'>
 ): ConcreteTaskInstance {
   return {
     ...savedObject.attributes,

@@ -34,3 +34,10 @@ export interface IIndexPattern {
     }
   >;
 }
+
+export interface SavedObjectIndexPattern {
+  type: string;
+  fields: string;
+  title: string;
+  typeMeta: string;
+}

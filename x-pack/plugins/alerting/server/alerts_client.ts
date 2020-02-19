@@ -203,7 +203,7 @@ export class AlertsClient {
   }
 
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
-    const result = await this.savedObjectsClient.get('alert', id);
+    const result = await this.savedObjectsClient.get<RawAlert>('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 

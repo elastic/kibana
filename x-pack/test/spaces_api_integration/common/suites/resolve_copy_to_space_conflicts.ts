@@ -59,7 +59,9 @@ export function resolveCopyToSpaceConflictsSuite(
       .then((response: any) => response.body);
   };
 
-  const getObjectsAtSpace = async (spaceId: string): Promise<[SavedObject, SavedObject]> => {
+  const getObjectsAtSpace = async (
+    spaceId: string
+  ): Promise<[SavedObject<any>, SavedObject<any>]> => {
     const dashboard = await getDashboardAtSpace(spaceId);
     const visualization = await getVisualizationAtSpace(spaceId);
     return [dashboard, visualization];

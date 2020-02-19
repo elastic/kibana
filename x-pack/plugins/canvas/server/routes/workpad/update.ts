@@ -6,8 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { KibanaResponseFactory } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -25,6 +24,13 @@ const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 const AssetPayloadSchema = schema.object({
   assets: AssetsRecordSchema,
 });
+
+// function getter<T extends SavedObjectAttributes = any>(item: T) {
+//   console.log(item);
+// }
+//
+// const z = ({} as unknown) as CanvasAsset;
+// getter(z);
 
 const workpadUpdateHandler = async (
   payload: TypeOf<typeof WorkpadSchema> | TypeOf<typeof AssetPayloadSchema>,

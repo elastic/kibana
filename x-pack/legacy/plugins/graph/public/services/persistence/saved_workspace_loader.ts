@@ -52,7 +52,7 @@ export function createSavedWorkspacesLoader(
     },
     find: (searchString: string, size: number = 100) => {
       return savedObjectsClient
-        .find({
+        .find<Record<string, unknown>>({
           type: SavedWorkspace.type,
           search: searchString ? `${searchString}*` : undefined,
           perPage: size,

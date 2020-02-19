@@ -29,6 +29,12 @@ interface FieldDescriptor {
   subType?: { multi?: { parent?: string } };
 }
 
+interface IndexPatternSavedObject {
+  title: string;
+  timeFieldName?: string;
+  fields: string;
+}
+
 export interface Field {
   name: string;
   isScript: boolean;
@@ -125,7 +131,10 @@ async function fetchFieldExistence({
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
   const requestClient = context.core.elasticsearch.dataClient;
-  const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternId);
+  const indexPattern = await savedObjectsClient.get<IndexPatternSavedObject>(
+    'index-pattern',
+    indexPatternId
+  );
   const indexPatternTitle = indexPattern.attributes.title;
   // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
   // to look up field values in the resulting documents. We can accomplish the same
@@ -155,7 +164,7 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
  * Exported only for unit tests.
  */
 export function buildFieldList(
-  indexPattern: SavedObject,
+  indexPattern: SavedObject<IndexPatternSavedObject>,
   mappings: MappingResult,
   fieldDescriptors: FieldDescriptor[]
 ): Field[] {

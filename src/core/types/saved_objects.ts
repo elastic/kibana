@@ -46,3 +46,5 @@ export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttri
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttribute;
 }
+
+export type SavedObjectAttributesType = Record<string, unknown>;
