@@ -16,46 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Plugin,
-  CoreSetup,
-  PluginInitializerContext,
-  CoreStart,
-  IContextContainer,
-  PluginOpaqueId,
-  PackageInfo,
-} from '../../../../core/public';
 
-import { ISearchAppMountContext } from './i_search_app_mount_context';
-import { ISearchSetup } from './i_search_setup';
-import { createAppMountSearchContext } from './create_app_mount_context_search';
+import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import {
-  TSearchStrategyProvider,
-  TRegisterSearchStrategyProvider,
-  TSearchStrategiesMap,
-} from './i_search_strategy';
+import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
-import { esSearchService } from './es_search';
-import { ISearchGeneric } from './i_search';
 import { getEsClient, LegacyApiCaller } from './es_client';
-
-/**
- * Extends the AppMountContext so other plugins have access
- * to search functionality in their applications.
- */
-declare module 'kibana/public' {
-  interface AppMountContext {
-    search?: ISearchAppMountContext;
-  }
-}
-
-export interface ISearchStart {
-  search: ISearchGeneric;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
-  };
-}
+import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
+import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -73,63 +42,43 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
    */
   private searchStrategies: TSearchStrategiesMap = {};
 
-  /**
-   * Exposes context to the search strategies.
-   */
-  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
   private esClient?: LegacyApiCaller;
-  private search?: ISearchGeneric;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  private registerSearchStrategyProvider = <T extends TStrategyTypes>(
+    name: T,
+    strategyProvider: TSearchStrategyProvider<T>
+  ) => {
+    this.searchStrategies[name] = strategyProvider;
+  };
+
+  private getSearchStrategy = <T extends TStrategyTypes>(name: T): TSearchStrategyProvider<T> => {
+    const strategyProvider = this.searchStrategies[name];
+    if (!strategyProvider) throw new Error(`Search strategy ${name} not found`);
+    return strategyProvider;
+  };
 
   public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
-    const search = (this.search = createAppMountSearchContext(this.searchStrategies).search);
-    core.application.registerMountContext<'search'>('search', () => {
-      return { search };
-    });
-
-    this.contextContainer = core.context.createContextContainer();
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
 
-    const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = <
-      T extends TStrategyTypes
-    >(
-      plugin: PluginOpaqueId,
-      name: T,
-      strategyProvider: TSearchStrategyProvider<T>
-    ) => {
-      this.searchStrategies[name] = this.contextContainer!.createHandler(plugin, strategyProvider);
+    this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
+
+    this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
+
+    return {
+      registerSearchStrategyProvider: this.registerSearchStrategyProvider,
     };
-
-    const api = {
-      registerSearchStrategyContext: this.contextContainer!.registerContext,
-      registerSearchStrategyProvider,
-      __LEGACY: {
-        esClient: this.esClient,
-      },
-    };
-
-    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
-    api.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      SYNC_SEARCH_STRATEGY,
-      syncSearchStrategyProvider
-    );
-
-    // ES search capabilities are written in a way that it could easily be a separate plugin,
-    // however these two plugins are tightly coupled due to the default search strategy using
-    // es search types.
-    esSearchService(this.initializerContext).setup(core, { search: api });
-
-    return api;
   }
 
   public start(core: CoreStart): ISearchStart {
-    if (!this.search) {
-      throw new Error('Search should always be defined');
-    }
     return {
-      search: this.search,
+      search: (request, options, strategyName) => {
+        const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
+        const { search } = strategyProvider({
+          core,
+          getSearchStrategy: this.getSearchStrategy,
+        });
+        return search(request as any, options);
+      },
       __LEGACY: {
         esClient: this.esClient!,
       },
