@@ -8,7 +8,7 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
-import { AlertResultList } from '../../../common/types';
+import { AlertResultList, Immutable } from '../../../common/types';
 
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
@@ -29,13 +29,40 @@ export interface ManagementListPagination {
   pageSize: number;
 }
 
+// REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
+export interface PolicyData {
+  name: string;
+  total: number;
+  pending: number;
+  failed: number;
+  created_by: string;
+  created: string;
+  updated_by: string;
+  updated: string;
+}
+
+/**
+ * Policy list store state
+ */
+export interface PolicyListState {
+  /** Array of policy items  */
+  policyItems: PolicyData[];
+  /** total number of policies */
+  total: number;
+  /** Number of policies per page */
+  pageSize: number;
+  /** page number (zero based) */
+  pageIndex: number;
+  /** data is being retrieved from server */
+  isLoading: boolean;
+}
+
 export interface GlobalState {
   readonly managementList: ManagementListState;
   readonly alertList: AlertListState;
+  readonly policyList: PolicyListState;
 }
 
-export type AlertListData = AlertResultList;
-export type AlertListState = AlertResultList;
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
@@ -44,4 +71,17 @@ export type CreateStructuredSelector = <
   state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
+};
+
+export interface EndpointAppLocation {
+  pathname: string;
+  search: string;
+  state: never;
+  hash: string;
+  key?: string;
+}
+
+export type AlertListData = AlertResultList;
+export type AlertListState = Immutable<AlertResultList> & {
+  readonly location?: Immutable<EndpointAppLocation>;
 };

@@ -15,6 +15,7 @@ const initialState = (): AlertListState => {
     request_page_index: 0,
     result_from_index: 0,
     total: 0,
+    location: undefined,
   };
 };
 
@@ -26,6 +27,11 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       ...action.payload,
+    };
+  } else if (action.type === 'userChangedUrl') {
+    return {
+      ...state,
+      location: action.payload,
     };
   }
 

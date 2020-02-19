@@ -23,10 +23,13 @@ import {
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
   MachineLearningJobWizardAdvancedProvider,
+  MachineLearningJobWizardCategorizationProvider,
   MachineLearningJobWizardCommonProvider,
   MachineLearningJobWizardMultiMetricProvider,
   MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
+  MachineLearningSecurityCommonProvider,
+  MachineLearningSecurityUIProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
 } from './machine_learning';
@@ -49,10 +52,13 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
+  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
 
@@ -73,10 +79,13 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobTable,
     jobTypeSelection,
     jobWizardAdvanced,
+    jobWizardCategorization,
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
     navigation,
+    securityCommon,
+    securityUI,
     settings,
     singleMetricViewer,
   };

@@ -21,6 +21,7 @@ import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../../public';
+import { ExecutionContract } from './execution_contract';
 
 const createExecution = (
   expression: string = 'foo bar=123',
@@ -48,7 +49,7 @@ const run = async (
 describe('Execution', () => {
   test('can instantiate', () => {
     const execution = createExecution('foo bar=123');
-    expect(execution.params.ast.chain[0].arguments.bar).toEqual([123]);
+    expect(execution.state.get().ast.chain[0].arguments.bar).toEqual([123]);
   });
 
   test('initial input is null at creation', () => {
@@ -124,6 +125,40 @@ describe('Execution', () => {
     expect(result).toEqual({
       type: 'num',
       value: 2,
+    });
+  });
+
+  describe('.expression', () => {
+    test('uses expression passed in to constructor', () => {
+      const expression = 'add val="1"';
+      const executor = createUnitTestExecutor();
+      const execution = new Execution({
+        executor,
+        expression,
+      });
+      expect(execution.expression).toBe(expression);
+    });
+
+    test('generates expression from AST if not passed to constructor', () => {
+      const expression = 'add val="1"';
+      const executor = createUnitTestExecutor();
+      const execution = new Execution({
+        ast: parseExpression(expression),
+        executor,
+      });
+      expect(execution.expression).toBe(expression);
+    });
+  });
+
+  describe('.contract', () => {
+    test('is instance of ExecutionContract', () => {
+      const execution = createExecution('add val=1');
+      expect(execution.contract).toBeInstanceOf(ExecutionContract);
+    });
+
+    test('execution returns the same expression string', () => {
+      const execution = createExecution('add val=1');
+      expect(execution.expression).toBe(execution.contract.getExpression());
     });
   });
 
@@ -301,16 +336,18 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
+      jest.useFakeTimers();
       const execution = createExecution('sleep 20');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 5));
+      jest.advanceTimersByTime(5);
       expect(execution.state.get().state).toBe('pending');
+      jest.useRealTimers();
     });
 
     test('execution state is "result" when execution successfully completes', async () => {
       const execution = createExecution('sleep 1');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 30));
+      await execution.result;
       expect(execution.state.get().state).toBe('result');
     });
 
