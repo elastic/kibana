@@ -226,7 +226,7 @@ export const WatchList = () => {
             defaultMessage="Error loading watches"
           />
         }
-        error={error as Error}
+        error={(error as unknown) as Error}
       />
     );
   } else if (availableWatches) {

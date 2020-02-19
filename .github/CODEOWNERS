@@ -72,7 +72,8 @@
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/legacy/plugins/integrations_manager/ @elastic/epm
+/x-pack/plugins/ingest_manager/ @elastic/ingest
+/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
 /x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
 
 # Machine Learning
@@ -177,3 +178,9 @@
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+
+# Endpoint
+/x-pack/plugins/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
