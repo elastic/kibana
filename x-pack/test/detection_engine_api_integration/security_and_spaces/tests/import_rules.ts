@@ -115,8 +115,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors: [], // TODO: This should have a conflict within it as an error rather than an empty array
-          success: true,
+          errors: [
+            {
+              error: {
+                message: 'More than one rule with rule-id: "rule-1" found',
+                status_code: 400,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
           success_count: 1,
         });
       });
