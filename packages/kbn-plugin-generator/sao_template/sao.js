@@ -68,7 +68,8 @@ module.exports = function({ name, targetPath }) {
         filter(value) {
           // Keep default value empty
           if (value === '/plugins') return '';
-          return value;
+          // Remove leading slash
+          return value.startsWith('/') ? value.slice(1) : value;
         },
         validate(customPath) {
           const p = resolve(process.cwd(), customPath);
@@ -103,7 +104,10 @@ module.exports = function({ name, targetPath }) {
           return !answers.customPath && answers.generateApp;
         },
         message: 'Should translation files be generated?',
-        default: true,
+        default({ customPath }) {
+          // only for 3rd party plugins
+          return !customPath;
+        },
       },
       generateScss: {
         type: 'confirm',
@@ -146,7 +150,10 @@ module.exports = function({ name, targetPath }) {
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
           hasScss: !!answers.generateScss,
-          relRoot: relative(resolve(answers.customPath || targetPath, 'public'), process.cwd()),
+          relRoot: relative(
+            resolve(answers.customPath || targetPath, name, 'public'),
+            process.cwd()
+          ),
         },
         answers
       ),
