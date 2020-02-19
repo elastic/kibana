@@ -20,18 +20,20 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const listingTable = getService('listingTable');
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
-    const deletedDashboardName = 'Dashboard Listing A11y Copy';
+    const clonedDashboardName = 'Dashboard Listing A11y Copy';
+
     before(async () => {
       // await esArchiver.loadIfNeeded('logstash_functional');
       // await kibanaServer.uiSettings.update({
@@ -153,13 +155,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Delete the original', async () => {
-      await listingTable.searchForItemWithName(dashboardName);
+    it('Delete a11y clone dashboard', async () => {
+      await listingTable.searchForItemWithName(clonedDashboardName);
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
       await a11y.testAppSnapshot();
       await PageObjects.common.clickConfirmOnModal();
-      await a11y.testAppSnapshot();
+      await listingTable.searchForItemWithName('');
     });
 
     it('Open flight dashboard', async () => {
