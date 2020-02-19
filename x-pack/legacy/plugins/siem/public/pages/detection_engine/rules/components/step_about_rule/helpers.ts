@@ -14,6 +14,3 @@ export const isUrlInvalid = (url: string | null | undefined) => {
   }
   return false;
 };
-
-export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
-export const isIPv6 = (subject: string) => /^([0-9a-f]){1,4}(:([0-9a-f]){1,4}){7}$/i.test(subject);

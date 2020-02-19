@@ -135,7 +135,7 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
   <ReputationLink domain={ip} />
 );
 
-interface DefaultFieldRendererProps<T = RowItemTypes> {
+interface DefaultFieldRendererProps<T = string> {
   rowItems: T[] | null | undefined;
   attrName: string;
   idPrefix: string;
@@ -143,6 +143,8 @@ interface DefaultFieldRendererProps<T = RowItemTypes> {
   displayCount?: number;
   moreMaxHeight?: string;
 }
+
+type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
@@ -183,7 +185,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
           <DefaultFieldRendererOverflow
             rowItems={rowItems}
             idPrefix={idPrefix}
-            render={render}
+            render={render as OverflowRenderer}
             overflowIndexStart={displayCount}
             moreMaxHeight={moreMaxHeight}
           />
