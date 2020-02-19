@@ -9,12 +9,12 @@ import { FieldIcon, FieldIconProps } from '../../../../../../src/plugins/kibana_
 import { DataType } from '../types';
 import { normalizeOperationDataType } from './utils';
 
-export function LensFieldIcon({ type, fill }: { type: DataType; fill?: FieldIconProps['fill'] }) {
+export function LensFieldIcon({ type, ...rest }: FieldIconProps & { type: DataType }) {
   return (
     <FieldIcon
       className="lnsFieldListPanel__fieldIcon"
       type={normalizeOperationDataType(type)}
-      fill={fill}
+      {...rest}
     />
   );
 }
