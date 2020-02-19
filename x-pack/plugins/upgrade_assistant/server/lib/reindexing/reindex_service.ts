@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { APICaller, Logger } from 'kibana/server';
+import { first } from 'rxjs/operators';
 
 import {
   IndexGroup,
@@ -21,7 +22,7 @@ import {
   transformFlatSettings,
 } from './index_settings';
 import { ReindexActions } from './reindex_actions';
-import { SecurityPluginSetup } from '../../../../security/server';
+import { LicensingPluginSetup } from '../../../../licensing/server';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
@@ -99,7 +100,7 @@ export const reindexServiceFactory = (
   esAPICaller: APICaller,
   actions: ReindexActions,
   log: Logger,
-  security?: SecurityPluginSetup
+  licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
 
@@ -442,8 +443,12 @@ export const reindexServiceFactory = (
 
   return {
     async hasRequiredPrivileges(indexName: string) {
+      const license = await licensing.license$.pipe(first()).toPromise();
+
+      const securityFeature = license.getFeature('security');
+
       // If security is disabled or unavailable, return true.
-      if (!security || !security.__legacyCompat.license.isEnabled()) {
+      if (!securityFeature || !(securityFeature.isAvailable && securityFeature.isEnabled)) {
         return true;
       }
 

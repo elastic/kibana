@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "upgrade_assistant"],
-  "requiredPlugins": ["management"],
-  "optionalPlugins": ["cloud", "usageCollection", "security"]
+  "requiredPlugins": ["management", "licensing"],
+  "optionalPlugins": ["cloud", "usageCollection"]
 }

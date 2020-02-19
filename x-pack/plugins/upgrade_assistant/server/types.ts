@@ -12,7 +12,7 @@ import {
 } from 'kibana/server';
 import { CloudSetup } from '../../cloud/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
-import { SecurityPluginSetup } from '../../security/server';
+import { LicensingPluginSetup } from '../../licensing/server';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -20,7 +20,7 @@ export interface RouteDependencies {
   credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
-  security?: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
 }
 

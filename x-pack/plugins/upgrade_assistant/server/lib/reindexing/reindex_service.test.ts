@@ -20,15 +20,16 @@ import {
   ReindexService,
   reindexServiceFactory,
 } from './reindex_service';
-import { SecurityPluginSetup } from '../../../../security/server';
-import { securityMock } from '../../../../security/server/mocks';
+import { licensingMock } from '../../../../licensing/server/mocks';
+import { LicensingPluginSetup } from '../../../../licensing/server';
+import { BehaviorSubject } from 'rxjs';
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
   let callCluster: jest.Mock;
   let log: Logger;
   let service: ReindexService;
-  let security: SecurityPluginSetup;
+  let licensingPluginSetup: LicensingPluginSetup;
 
   const updateMockImpl = (reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) =>
     Promise.resolve({
@@ -55,15 +56,23 @@ describe('reindexService', () => {
     };
     callCluster = jest.fn();
     log = loggingServiceMock.create().get();
-    security = securityMock.createSetup();
-    security.__legacyCompat = { license: { isEnabled: () => true } } as any;
+    licensingPluginSetup = licensingMock.createSetup();
+    licensingPluginSetup.license$ = new BehaviorSubject(
+      licensingMock.createLicense({
+        features: { security: { isAvailable: true, isEnabled: true } },
+      })
+    );
 
-    service = reindexServiceFactory(callCluster as any, actions, log, security);
+    service = reindexServiceFactory(callCluster as any, actions, log, licensingPluginSetup);
   });
 
   describe('hasRequiredPrivileges', () => {
     it('returns true if security is disabled', async () => {
-      security.__legacyCompat = { license: { isEnabled: () => false } } as any;
+      licensingPluginSetup.license$ = new BehaviorSubject(
+        licensingMock.createLicense({
+          features: { security: { isAvailable: true, isEnabled: false } },
+        })
+      );
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
     });

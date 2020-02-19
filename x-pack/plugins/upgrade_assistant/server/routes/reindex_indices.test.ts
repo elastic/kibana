@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory } from '../../../../../src/core/server';
-import { securityMock } from '../../../security/server/mocks';
+import { licensingMock } from '../../../licensing/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -55,7 +55,7 @@ describe('reindex API', () => {
     routeDependencies = {
       credentialStore,
       router: mockRouter,
-      security: securityMock.createSetup(),
+      licensing: licensingMock.createSetup(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
 

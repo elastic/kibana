@@ -24,13 +24,13 @@ import { registerReindexIndicesRoutes, createReindexWorker } from './routes/rein
 import { CloudSetup } from '../../cloud/server';
 import { registerTelemetryRoutes } from './routes/telemetry';
 import { ReindexWorker } from './lib/reindexing';
-import { SecurityPluginSetup } from '../../security/server';
 
 import { RouteDependencies } from './types';
+import { LicensingPluginSetup } from '../../licensing/server';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
-  security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -39,7 +39,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly credentialStore: CredentialStore;
 
   // Properties set at setup
-  private security?: SecurityPluginSetup;
+  private licensing?: LicensingPluginSetup;
   private elasticSearchService?: ElasticsearchServiceSetup;
 
   // Properties set at start
@@ -60,10 +60,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, elasticsearch, getStartServices, capabilities }: CoreSetup,
-    { usageCollection, cloud, security }: PluginsSetup
+    { usageCollection, cloud, licensing }: PluginsSetup
   ) {
     this.elasticSearchService = elasticsearch;
-    this.security = security;
+    this.licensing = licensing;
 
     const router = http.createRouter();
 
@@ -79,7 +79,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         }
         return this.savedObjectsServiceStart;
       },
-      security,
+      licensing,
     };
 
     registerClusterCheckupRoutes(dependencies);
@@ -95,7 +95,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  start({ savedObjects }: CoreStart, plugins: any) {
+  start({ savedObjects }: CoreStart) {
     this.savedObjectsServiceStart = savedObjects;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
@@ -107,7 +107,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     this.worker = createReindexWorker({
       credentialStore: this.credentialStore,
-      security: this.security,
+      licensing: this.licensing!,
       elasticsearchService: this.elasticSearchService!,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(

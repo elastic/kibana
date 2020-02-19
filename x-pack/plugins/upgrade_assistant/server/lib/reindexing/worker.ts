@@ -6,12 +6,11 @@
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'kibana/server';
 import moment from 'moment';
 
-import { SecurityPluginSetup } from '../../../../security/server';
-
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
+import { LicensingPluginSetup } from '../../../../licensing/server';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
@@ -45,7 +44,7 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private security?: SecurityPluginSetup
+    private licensing: LicensingPluginSetup
   ) {
     this.log = log.get('reindex_worker');
     if (ReindexWorker.workerSingleton) {
@@ -58,7 +57,7 @@ export class ReindexWorker {
       callAsInternalUser,
       reindexActionsFactory(this.client, callAsInternalUser),
       log,
-      this.security
+      this.licensing
     );
 
     ReindexWorker.workerSingleton = this;
@@ -165,7 +164,7 @@ export class ReindexWorker {
     const callCluster = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
     const actions = reindexActionsFactory(this.client, callCluster);
 
-    const service = reindexServiceFactory(callCluster, actions, this.log, this.security);
+    const service = reindexServiceFactory(callCluster, actions, this.log, this.licensing);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.
