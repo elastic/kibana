@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initTelemetryCollection } from './maps_usage_collector';
+import { registerMapsUsageCollector } from './register';
 
 describe('buildCollectorObj#fetch', () => {
   let makeUsageCollectorStub;
+  let savedObjectsClient;
   let registerStub;
   let usageCollection;
+  let config;
 
   beforeEach(() => {
     makeUsageCollectorStub = jest.fn();
+    savedObjectsClient = jest.fn();
     registerStub = jest.fn();
+    config = jest.fn();
     usageCollection = {
       makeUsageCollector: makeUsageCollectorStub,
       registerCollector: registerStub,
@@ -21,8 +25,7 @@ describe('buildCollectorObj#fetch', () => {
   });
 
   test('makes and registers maps usage collector', async () => {
-    const serverPlaceholder = {};
-    initTelemetryCollection(usageCollection, serverPlaceholder);
+    registerMapsUsageCollector(usageCollection, savedObjectsClient, config);
 
     expect(registerStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
