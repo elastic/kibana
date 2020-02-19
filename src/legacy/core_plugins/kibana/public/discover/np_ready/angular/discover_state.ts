@@ -127,7 +127,7 @@ export interface GetStateReturn {
   /**
    * Replace the current URL with the current state without adding another browser history entry
    */
-  replaceUrlState: () => Promise<void>;
+  replaceUrlState: (startSync: boolean) => Promise<void>;
 }
 const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
@@ -147,7 +147,7 @@ export function getState({
   });
 
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
-  const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
+  const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial || {});
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   let initialAppState = {
@@ -159,20 +159,20 @@ export function getState({
 
   const { start, stop } = syncStates([
     {
-      storageKey: APP_STATE_URL_KEY,
-      stateContainer: {
-        ...appStateContainer,
-        // handle null value when url switch doesn't contain state info
-        ...{ set: value => value && appStateContainer.set(value) },
-      },
-      stateStorage,
-    },
-    {
       storageKey: GLOBAL_STATE_URL_KEY,
       stateContainer: {
         ...globalStateContainer,
         // handle null value when url switch doesn't contain state info
         ...{ set: value => value && globalStateContainer.set(value) },
+      },
+      stateStorage,
+    },
+    {
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: {
+        ...appStateContainer,
+        // handle null value when url switch doesn't contain state info
+        ...{ set: value => value && appStateContainer.set(value) },
       },
       stateStorage,
     },
@@ -192,15 +192,17 @@ export function getState({
     },
     flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    replaceUrlState: async () => {
-      if (appStateContainer.getState()) {
-        await stateStorage.set(APP_STATE_URL_KEY, appStateContainer.getState(), { replace: true });
-      }
-
+    replaceUrlState: async (startSync = true) => {
       if (globalStateContainer.getState()) {
         await stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.getState(), {
           replace: true,
         });
+      }
+      if (appStateContainer.getState()) {
+        await stateStorage.set(APP_STATE_URL_KEY, appStateContainer.getState(), { replace: true });
+      }
+      if (startSync) {
+        start();
       }
     },
   };

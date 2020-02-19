@@ -194,7 +194,6 @@ function discoverController(
   const {
     appStateContainer,
     globalStateContainer,
-    startSync: startStateSync,
     stopSync: stopStateSync,
     setAppState,
     setGlobalState,
@@ -1118,6 +1117,5 @@ function discoverController(
   addHelpMenuToAppChrome(chrome);
 
   init();
-  replaceUrlState();
-  startStateSync();
+  replaceUrlState(true);
 }

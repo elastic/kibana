@@ -32,8 +32,7 @@ describe('Test discover state', () => {
       defaultAppState: { index: 'test' },
       hashHistory: history,
     });
-    state.startSync();
-    await state.replaceUrlState();
+    await state.replaceUrlState(true);
   });
   afterEach(() => {
     state.stopSync();
@@ -41,19 +40,19 @@ describe('Test discover state', () => {
   test('setting global state and sycing to URL', async () => {
     state.setGlobalState({ time: { from: 'a', to: 'b' } });
     state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:test)&_g=(time:(from:a,to:b))"`);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_g=(time:(from:a,to:b))&_a=(index:test)"`);
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:modified)"`);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_g=()&_a=(index:modified)"`);
   });
   test('setting appState and globalState and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.setGlobalState({ time: { from: 'a', to: 'b' } });
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(index:modified)&_g=(time:(from:a,to:b))"`
+      `"/#?_g=(time:(from:a,to:b))&_a=(index:modified)"`
     );
   });
   test('changing URL to be propagated to appState and globalState', async () => {

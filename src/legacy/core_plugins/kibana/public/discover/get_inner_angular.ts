@@ -28,6 +28,8 @@ import { PersistedState } from 'ui/persisted_state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
+import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
+// @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
@@ -193,15 +195,18 @@ function createLocalKbnUrlModule() {
 }
 
 function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular.module('discoverConfig', ['discoverPrivate']).provider('config', () => {
-    return {
-      $get: () => ({
-        get: (value: string) => {
-          return uiSettings ? uiSettings.get(value) : undefined;
-        },
-      }),
-    };
-  });
+  angular
+    .module('discoverConfig', ['discoverPrivate'])
+    .provider('stateManagementConfig', StateManagementConfigProvider)
+    .provider('config', () => {
+      return {
+        $get: () => ({
+          get: (value: string) => {
+            return uiSettings ? uiSettings.get(value) : undefined;
+          },
+        }),
+      };
+    });
 }
 
 function createLocalPromiseModule() {
