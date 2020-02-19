@@ -6,27 +6,72 @@
 
 import _ from 'lodash';
 import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+} from 'src/core/server';
+import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
+  // @ts-ignore
 } from '../../common/constants';
+import { ILayerDescriptor } from '../../common/descriptor_types';
 
-function getSavedObjectsClient(server) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const internalRepository = getSavedObjectsRepository(callCluster);
-  return new SavedObjectsClient(internalRepository);
+interface IStats {
+  [key: string]: {
+    min: number;
+    max: number;
+    avg: number;
+  };
 }
 
-function getUniqueLayerCounts(layerCountsList, mapsCount) {
+interface ILayerTypeCount {
+  [key: string]: number;
+}
+
+interface IMapSavedObject {
+  [key: string]: any;
+  fields: IFieldType[];
+  title: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
+  attributes?: {
+    title?: string;
+    description?: string;
+    mapStateJSON?: string;
+    layerListJSON?: string;
+    uiStateJSON?: string;
+    bounds?: {
+      type?: string;
+      coordinates?: [];
+    };
+  };
+}
+
+function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
 
-  return uniqueLayerTypes.reduce((accu, type) => {
-    const typeCounts = layerCountsList.reduce((accu, tCounts) => {
-      tCounts[type] && accu.push(tCounts[type]);
-      return accu;
-    }, []);
+  return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
+    const typeCounts = layerCountsList.reduce(
+      (tCountsAccu: number[], tCounts: ILayerTypeCount): number[] => {
+        if (tCounts[type]) {
+          tCountsAccu.push(tCounts[type]);
+        }
+        return tCountsAccu;
+      },
+      []
+    );
     const typeCountsSum = _.sum(typeCounts);
     accu[type] = {
       min: typeCounts.length ? _.min(typeCounts) : 0,
@@ -37,25 +82,35 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns) {
+function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
-  const fieldListsWithGeoFields = fieldLists.filter(fields => {
-    return fields.some(
-      field =>
+  const fieldListsWithGeoFields = fieldLists.filter(fields =>
+    fields.some(
+      (field: IFieldType) =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-    );
-  });
+    )
+  );
   return fieldListsWithGeoFields.length;
 }
 
-export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings }) {
+export function buildMapsTelemetry({
+  mapSavedObjects,
+  indexPatternSavedObjects,
+  settings,
+}: {
+  mapSavedObjects: IMapSavedObject[];
+  indexPatternSavedObjects: IIndexPattern[];
+  settings: SavedObjectAttribute;
+}): SavedObjectAttributes {
   const layerLists = mapSavedObjects.map(savedMapObject =>
-    JSON.parse(savedMapObject.attributes.layerListJSON)
+    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+      ? JSON.parse(savedMapObject.attributes.layerListJSON)
+      : []
   );
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
-    const sourceIdList = lList.map(layer => layer.sourceDescriptor.id);
+    const sourceIdList = lList.map((layer: ILayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -65,7 +120,7 @@ export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, 
   // Count of EMS Vector layers used
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
-      .countBy(layer => {
+      .countBy((layer: ILayerDescriptor) => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
@@ -110,23 +165,26 @@ export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, 
     },
   };
 }
-
-async function getMapSavedObjects(savedObjectsClient) {
+async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
   return _.get(mapsSavedObjects, 'saved_objects', []);
 }
 
-async function getIndexPatternSavedObjects(savedObjectsClient) {
+async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
-export async function getMapsTelemetry(server) {
-  const savedObjectsClient = getSavedObjectsClient(server);
-  const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
-  const settings = {
-    showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes'),
+export async function getMapsTelemetry(
+  savedObjectsClient: SavedObjectsClientContract,
+  config: Function
+) {
+  const mapSavedObjects: IMapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
+  const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
+    savedObjectsClient
+  );
+  const settings: SavedObjectAttribute = {
+    showMapVisualizationTypes: config().get('xpack.maps.showMapVisualizationTypes'),
   };
   const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
   return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
