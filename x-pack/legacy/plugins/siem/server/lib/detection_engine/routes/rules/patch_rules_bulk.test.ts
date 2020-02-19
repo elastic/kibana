@@ -56,6 +56,13 @@ describe('patch_rules_bulk', () => {
       expect(statusCode).toBe(200);
     });
 
+    test('returns 404 as a response when missing alertsClient', async () => {
+      getClients.mockResolvedValue(omit('alertsClient', clients));
+      clients.actionsClient.update.mockResolvedValue(updateActionResult());
+      const { statusCode } = await server.inject(getPatchBulkRequest());
+      expect(statusCode).toBe(404);
+    });
+
     test('returns 404 within the payload when updating a single rule that does not exist', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResult());
       clients.alertsClient.get.mockResolvedValue(getResult());
