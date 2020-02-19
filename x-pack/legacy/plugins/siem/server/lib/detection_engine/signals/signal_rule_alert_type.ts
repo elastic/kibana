@@ -176,11 +176,8 @@ export const signalRulesAlertType = ({
           );
         }
       }
-      // set searchAfter page size to be the lesser of default page size or maxSignals.
-      const searchAfterSize =
-        DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
-          ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
-          : params.maxSignals;
+
+      const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       try {
         const inputIndex = await getInputIndex(services, version, index);
         const esFilter = await getFilter({
