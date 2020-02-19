@@ -33,7 +33,7 @@ import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
-import { KqlFilterBar } from '../../../../../shared_imports';
+import { KqlFilterBar, useXJsonMode } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
@@ -329,7 +329,15 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
     stringifiedPivotConfig
   );
-  const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+  // const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+
+  const {
+    xJsonMode,
+    convertToJson,
+    setXJson: setAdvancedEditorConfig,
+    xJson: advancedEditorConfig,
+  } = useXJsonMode(stringifiedPivotConfig);
+
   // source config
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
   const [
@@ -353,7 +361,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   };
 
   const applyAdvancedPivotEditorChanges = () => {
-    const pivotConfig = JSON.parse(advancedEditorConfig);
+    const pivotConfig = JSON.parse(convertToJson(advancedEditorConfig));
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
@@ -730,7 +738,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 >
                   <EuiPanel grow={false} paddingSize="none">
                     <EuiCodeEditor
-                      mode="json"
+                      mode={xJsonMode}
                       width="100%"
                       value={advancedEditorConfig}
                       onChange={(d: string) => {
@@ -745,7 +753,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                         // Try to parse the string passed on from the editor.
                         // If parsing fails, the "Apply"-Button will be disabled
                         try {
-                          JSON.parse(d);
+                          JSON.parse(convertToJson(d));
                           setAdvancedPivotEditorApplyButtonEnabled(true);
                         } catch (e) {
                           setAdvancedPivotEditorApplyButtonEnabled(false);
