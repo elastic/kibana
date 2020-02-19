@@ -220,7 +220,7 @@ def uploadCoverageStaticSite_PROD(timestamp) {
   ARTIFACT_PATTERNS.each { pattern ->
     withVaultSecret(secret: 'secret/gce/elastic-bekitzur/service-account/kibana', secret_field: 'value', variable_name: 'GCE_ACCOUNT') {
       sh """
-        gsutil -m cp -r ${pattern} '${uploadPrefix}'
+        gsutil -m cp -r -a public-read -z js,css,html ${pattern} '${uploadPrefix}'
       """
     }
   }
