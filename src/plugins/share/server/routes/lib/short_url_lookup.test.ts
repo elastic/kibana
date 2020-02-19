@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { shortUrlLookupProvider, ShortUrlLookupService, SavedObjectUrl } from './short_url_lookup';
+import { shortUrlLookupProvider, ShortUrlLookupService, UrlAttributes } from './short_url_lookup';
 import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../core/server/mocks';
@@ -33,7 +33,7 @@ describe('shortUrlLookupProvider', () => {
 
   beforeEach(() => {
     savedObjects = savedObjectsClientMock.create();
-    savedObjects.create.mockResolvedValue({ id: ID } as SavedObject<SavedObjectUrl>);
+    savedObjects.create.mockResolvedValue({ id: ID } as SavedObject<UrlAttributes>);
     deps = { savedObjects };
     shortUrl = shortUrlLookupProvider({ logger: loggingServiceMock.create().get() });
   });
@@ -51,13 +51,13 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes, options] = savedObjects.create.mock.calls[0];
 
       expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes as SavedObjectUrl).sort()).toEqual([
+      expect(Object.keys(attributes as UrlAttributes).sort()).toEqual([
         'accessCount',
         'accessDate',
         'createDate',
         'url',
       ]);
-      expect((attributes as SavedObjectUrl).url).toEqual(URL);
+      expect((attributes as UrlAttributes).url).toEqual(URL);
       expect(options!.id).toEqual(ID);
     });
 
@@ -68,13 +68,13 @@ describe('shortUrlLookupProvider', () => {
       const [type, attributes] = savedObjects.create.mock.calls[0];
 
       expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes as SavedObjectUrl).sort()).toEqual([
+      expect(Object.keys(attributes as UrlAttributes).sort()).toEqual([
         'accessCount',
         'accessDate',
         'createDate',
         'url',
       ]);
-      expect((attributes as SavedObjectUrl).url).toEqual(URL);
+      expect((attributes as UrlAttributes).url).toEqual(URL);
     });
 
     it('gracefully handles version conflict', async () => {
@@ -115,7 +115,7 @@ describe('shortUrlLookupProvider', () => {
       expect(type).toEqual(TYPE);
       expect(id).toEqual(ID);
       expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate']);
-      expect((attributes as SavedObjectUrl).accessCount).toEqual(3);
+      expect((attributes as UrlAttributes).accessCount).toEqual(3);
     });
   });
 });

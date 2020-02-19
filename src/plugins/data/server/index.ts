@@ -146,7 +146,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
-  SavedObjectIndexPattern,
+  IndexPatternAttributes,
 } from '../common';
 
 /**

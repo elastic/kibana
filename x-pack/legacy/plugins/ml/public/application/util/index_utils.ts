@@ -10,7 +10,7 @@ import {
   IIndexPattern,
   IndexPatternsContract,
   Query,
-  SavedObjectIndexPattern,
+  IndexPatternAttributes,
 } from '../../../../../../../src/plugins/data/public';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
@@ -23,7 +23,7 @@ export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
   indexPatternsContract = indexPatterns;
   const savedObjectsClient = getSavedObjectsClient();
   return savedObjectsClient
-    .find<SavedObjectIndexPattern>({
+    .find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,

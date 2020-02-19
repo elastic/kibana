@@ -35,9 +35,10 @@ export interface IIndexPattern {
   >;
 }
 
-export interface SavedObjectIndexPattern {
+export interface IndexPatternAttributes {
   type: string;
   fields: string;
   title: string;
   typeMeta: string;
+  timeFieldName?: string;
 }

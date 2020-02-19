@@ -8,7 +8,7 @@ import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
 import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
-import { SavedObjectIndexPattern } from 'src/plugins/data/server';
+import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
 import { MlJob } from '../../../common/types/jobs';
 import {
@@ -533,7 +533,7 @@ export class DataRecognizer {
   }
 
   async loadIndexPatterns() {
-    return await this.savedObjectsClient.find<SavedObjectIndexPattern>({
+    return await this.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       perPage: 1000,
     });

@@ -25,13 +25,6 @@ const AssetPayloadSchema = schema.object({
   assets: AssetsRecordSchema,
 });
 
-// function getter<T extends SavedObjectAttributes = any>(item: T) {
-//   console.log(item);
-// }
-//
-// const z = ({} as unknown) as CanvasAsset;
-// getter(z);
-
 const workpadUpdateHandler = async (
   payload: TypeOf<typeof WorkpadSchema> | TypeOf<typeof AssetPayloadSchema>,
   id: string,

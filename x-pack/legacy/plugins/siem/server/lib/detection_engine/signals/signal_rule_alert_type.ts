@@ -22,7 +22,7 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
-interface SavedObjectsAlert {
+interface AlertAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
@@ -92,10 +92,7 @@ export const signalRulesAlertType = ({
         type,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
-      const savedObject = await services.savedObjectsClient.get<SavedObjectsAlert>(
-        'alert',
-        alertId
-      );
+      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({

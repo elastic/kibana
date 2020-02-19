@@ -58,7 +58,7 @@ export interface SavedObjectMetaData<T = unknown> {
   includeFields?: string[];
 }
 
-interface SavedObjectFinder {
+interface FinderAttributes {
   title?: string;
   type: string;
 }
@@ -68,7 +68,7 @@ interface SavedObjectFinderState {
     title: string | null;
     id: SimpleSavedObject['id'];
     type: SimpleSavedObject['type'];
-    savedObject: SimpleSavedObject<SavedObjectFinder>;
+    savedObject: SimpleSavedObject<FinderAttributes>;
   }>;
   query: string;
   isFetchingItems: boolean;
@@ -88,7 +88,7 @@ interface BaseSavedObjectFinder {
     savedObject: SimpleSavedObject
   ) => void;
   noItemsMessage?: React.ReactNode;
-  savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectFinder>>;
+  savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
 }
 
@@ -132,7 +132,7 @@ class SavedObjectFinderUi extends React.Component<
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
 
     const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
-    const resp = await this.props.savedObjects.client.find<SavedObjectFinder>({
+    const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,

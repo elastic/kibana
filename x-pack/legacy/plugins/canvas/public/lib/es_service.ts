@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectIndexPattern } from 'src/plugins/data/public';
+import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 // @ts-ignore untyped local
@@ -46,7 +46,7 @@ export const getFields = (index = '_all') => {
 
 export const getIndices = () =>
   getSavedObjectsClient()
-    .find<SavedObjectIndexPattern>({
+    .find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title'],
       searchFields: ['title'],
@@ -64,7 +64,7 @@ export const getDefaultIndex = () => {
 
   return defaultIndexId
     ? getSavedObjectsClient()
-        .get<SavedObjectIndexPattern>('index-pattern', defaultIndexId)
+        .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
         .then(defaultIndex => defaultIndex.attributes.title)
         .catch(err => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))
     : Promise.resolve('');

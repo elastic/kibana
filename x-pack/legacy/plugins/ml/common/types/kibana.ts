@@ -7,7 +7,7 @@
 // custom edits or fixes for default kibana types which are incomplete
 
 import { SimpleSavedObject } from 'kibana/public';
-import { SavedObjectIndexPattern } from 'src/plugins/data/common';
+import { IndexPatternAttributes } from 'src/plugins/data/common';
 
 export type IndexPatternTitle = string;
 
@@ -18,7 +18,7 @@ export interface Route {
   k7Breadcrumbs: () => any;
 }
 
-export type IndexPatternSavedObject = SimpleSavedObject<SavedObjectIndexPattern>;
+export type IndexPatternSavedObject = SimpleSavedObject<IndexPatternAttributes>;
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
 export function isSavedSearchSavedObject(

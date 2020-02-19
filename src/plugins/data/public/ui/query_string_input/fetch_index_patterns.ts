@@ -18,7 +18,7 @@
  */
 import { isEmpty } from 'lodash';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { indexPatterns, SavedObjectIndexPattern } from '../..';
+import { indexPatterns, IndexPatternAttributes } from '../..';
 
 export async function fetchIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
@@ -30,7 +30,7 @@ export async function fetchIndexPatterns(
   }
 
   const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
-  const indexPatternsFromSavedObjects = await savedObjectsClient.find<SavedObjectIndexPattern>({
+  const indexPatternsFromSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
     type: 'index-pattern',
     fields: ['title', 'fields'],
     search: searchString,
@@ -48,7 +48,7 @@ export async function fetchIndexPatterns(
       ? exactMatches
       : [
           ...exactMatches,
-          await savedObjectsClient.get<SavedObjectIndexPattern>('index-pattern', defaultIndex),
+          await savedObjectsClient.get<IndexPatternAttributes>('index-pattern', defaultIndex),
         ];
 
   return allMatches.map(indexPatterns.getFromSavedObject);

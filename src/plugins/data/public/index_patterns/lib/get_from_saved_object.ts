@@ -19,10 +19,10 @@
 
 import { SavedObject } from 'src/core/public';
 import { get } from 'lodash';
-import { IIndexPattern, SavedObjectIndexPattern } from '../..';
+import { IIndexPattern, IndexPatternAttributes } from '../..';
 
 export function getFromSavedObject(
-  savedObject: SavedObject<SavedObjectIndexPattern>
+  savedObject: SavedObject<IndexPatternAttributes>
 ): IIndexPattern | undefined {
   if (get(savedObject, 'attributes.fields') === undefined) {
     return;
