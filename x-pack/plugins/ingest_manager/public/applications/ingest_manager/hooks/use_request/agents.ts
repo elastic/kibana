@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { useRequest, UseRequestConfig } from './use_request';
 import { agentRouteService } from '../../services';
 import {
@@ -27,7 +26,7 @@ export function useGetOneAgent(agentId: string, options?: RequestOptions) {
 
 export function useGetOneAgentEvents(
   agentId: string,
-  query: TypeOf<typeof GetOneAgentEventsRequestSchema.query>,
+  query: GetOneAgentEventsRequestSchema['query'],
   options?: RequestOptions
 ) {
   return useRequest<GetOneAgentEventsResponse>({
@@ -38,10 +37,7 @@ export function useGetOneAgentEvents(
   });
 }
 
-export function useGetAgents(
-  query: TypeOf<typeof GetAgentsRequestSchema.query>,
-  options?: RequestOptions
-) {
+export function useGetAgents(query: GetAgentsRequestSchema['query'], options?: RequestOptions) {
   return useRequest<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),

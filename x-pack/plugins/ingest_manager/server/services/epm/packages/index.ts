@@ -11,7 +11,7 @@ import {
   Installation,
   InstallationStatus,
   KibanaAssetType,
-} from '../../../types';
+} from '../../../../common/types/models/epm';
 
 export {
   getCategories,

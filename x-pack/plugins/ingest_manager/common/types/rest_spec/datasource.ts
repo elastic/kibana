@@ -3,25 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema } from '@kbn/config-schema';
 import { NewDatasourceSchema } from '../models';
 import { ListWithKuerySchema } from './common';
 
-export const GetDatasourcesRequestSchema = {
-  query: ListWithKuerySchema,
+export interface GetDatasourcesRequestSchema {
+  query: ListWithKuerySchema;
+}
+
+export interface GetOneDatasourceRequestSchema {
+  params: {
+    datasourceId: string;
+  };
+}
+
+export interface CreateDatasourceRequestSchema {
+  body: NewDatasourceSchema;
+}
+
+export type UpdateDatasourceRequestSchema = GetOneDatasourceRequestSchema & {
+  body: NewDatasourceSchema;
 };
 
-export const GetOneDatasourceRequestSchema = {
-  params: schema.object({
-    datasourceId: schema.string(),
-  }),
-};
+export interface DeleteDatasourcesRequestSchema {
+  body: {
+    datasourceIds: string[];
+  };
+}
 
-export const CreateDatasourceRequestSchema = {
-  body: NewDatasourceSchema,
-};
-
-export const UpdateDatasourceRequestSchema = {
-  ...GetOneDatasourceRequestSchema,
-  body: NewDatasourceSchema,
-};
+export type DeleteDatasourcesResponse = Array<{
+  id: string;
+  success: boolean;
+}>;

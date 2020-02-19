@@ -25,7 +25,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const CreateAgentConfigFlyout: React.FC<Props> = ({ onClose }) => {
+export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const { notifications } = useCore();
 
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({

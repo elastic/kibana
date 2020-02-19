@@ -29,7 +29,7 @@ import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 
-export const AgentConfigListPage: React.FC<{}> = () => {
+export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   // Create agent config flyout state
   const [isCreateAgentConfigFlyoutOpen, setIsCreateAgentConfigFlyoutOpen] = useState<boolean>(
     false

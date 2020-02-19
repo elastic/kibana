@@ -8,8 +8,9 @@ import moment from 'moment-timezone';
 import { get } from 'lodash';
 import { Legacy } from 'kibana';
 import { Logger } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 import { ALERT_TYPE_LICENSE_EXPIRATION, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
-import { AlertType } from '../../../alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -45,7 +46,14 @@ export const getLicenseExpiration = (
   return {
     id: ALERT_TYPE_LICENSE_EXPIRATION,
     name: 'Monitoring Alert - License Expiration',
-    actionGroups: ['default'],
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.monitoring.alerts.licenseExpiration.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
     async executor({
       services,
       params,

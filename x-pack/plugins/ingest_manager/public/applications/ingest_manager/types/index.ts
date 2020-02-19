@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
+  // utility function
+  entries,
   // Object types
   Agent,
   AgentConfig,
@@ -56,10 +58,3 @@ export {
   DetailViewPanelName,
   InstallStatus,
 } from '../../../../common';
-
-// Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
-// which causes a "string is not assignable to type InstallationStatus` error
-// see https://github.com/Microsoft/TypeScript/issues/20322
-// and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
-// and https://github.com/Microsoft/TypeScript/issues/21826#issuecomment-479851685
-export const entries = Object.entries as <T>(o: T) => Array<[keyof T, T[keyof T]]>;

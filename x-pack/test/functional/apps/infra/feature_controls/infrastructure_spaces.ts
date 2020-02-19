@@ -5,9 +5,6 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { DATES } from '../constants';
-
-const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -21,22 +18,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const retry = getService('retry');
 
   describe('infrastructure spaces', () => {
     before(async () => {
-      await esArchiver.load('infra/metrics_and_logs');
+      await esArchiver.load('empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('infra/metrics_and_logs');
+      await esArchiver.unload('empty_kibana');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('empty_kibana');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -46,7 +41,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('empty_kibana');
       });
 
       it('shows Metrics navlink', async () => {
@@ -58,29 +52,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.contain('Metrics');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+      it(`Metrics app is accessible`, async () => {
+        await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
         });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
-
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
-
-        it(`shows link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewLogsContextMenuItem');
-        });
-
-        it(`shows link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
-        });
+        await testSubjects.existOrFail('~noMetricsIndicesPrompt');
       });
     });
 
@@ -109,52 +85,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Metrics');
       });
 
-      it(`infrastructure root renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure home page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure landing page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure', {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`metrics page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/infrastructure/metrics/host/demo-stack-redis-01',
+          '/inventory',
+          undefined,
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: true,
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('~infraNotFoundPage');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
 
@@ -175,30 +121,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+      it(`Metrics app is accessible`, async () => {
+        await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
         });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
-
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
-
-        it(`doesn't show link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          const link = await testSubjects.find('~viewLogsContextMenuItem');
-          expect(await link.isEnabled()).to.be(false);
-        });
-
-        it(`shows link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
-        });
+        await testSubjects.existOrFail('~noMetricsIndicesPrompt');
       });
     });
 
@@ -219,30 +146,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+      it(`Metrics app is accessible`, async () => {
+        await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
         });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
-
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
-
-        it(`shows link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewLogsContextMenuItem');
-        });
-
-        it(`doesn't show link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-          expect(await link.isEnabled()).to.be(false);
-        });
+        await testSubjects.existOrFail('~noMetricsIndicesPrompt');
       });
     });
   });

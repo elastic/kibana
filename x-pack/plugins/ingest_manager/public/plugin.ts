@@ -15,7 +15,10 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
-import { BASE_PATH } from './applications/ingest_manager/constants';
+
+import { IngestManagerConfigType } from '../common/types';
+
+export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
 export type IngestManagerStart = void;
@@ -27,16 +30,6 @@ export interface IngestManagerSetupDeps {
 
 export interface IngestManagerStartDeps {
   data: DataPublicPluginStart;
-}
-
-// Redeclare config type as to not reach into server/ code
-export interface IngestManagerConfigType {
-  epm: {
-    enabled: boolean;
-  };
-  fleet: {
-    enabled: boolean;
-  };
 }
 
 export class IngestManagerPlugin implements Plugin {
@@ -53,7 +46,6 @@ export class IngestManagerPlugin implements Plugin {
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
-      appRoute: BASE_PATH,
       euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
         const [coreStart, startDeps] = (await core.getStartServices()) as [
@@ -66,6 +58,7 @@ export class IngestManagerPlugin implements Plugin {
     });
   }
 
-  public start() {}
+  public start(core: CoreStart) {}
+
   public stop() {}
 }

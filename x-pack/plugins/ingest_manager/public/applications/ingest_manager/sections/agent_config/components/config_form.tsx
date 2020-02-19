@@ -36,7 +36,7 @@ interface Props {
   validation: ValidationResults;
 }
 
-export const AgentConfigForm: React.FC<Props> = ({
+export const AgentConfigForm: React.FunctionComponent<Props> = ({
   agentConfig,
   updateAgentConfig,
   validation,

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { DatasourceSchema } from './datasource';
 
 export enum AgentConfigStatus {
@@ -12,28 +11,22 @@ export enum AgentConfigStatus {
   Inactive = 'inactive',
 }
 
-const AgentConfigBaseSchema = {
-  name: schema.string(),
-  namespace: schema.string(),
-  description: schema.maybe(schema.string()),
+interface AgentConfigBaseSchema {
+  name: string;
+  namespace: string;
+  description?: string;
+}
+
+export type NewAgentConfigSchema = AgentConfigBaseSchema;
+
+export type AgentConfigSchema = AgentConfigBaseSchema & {
+  id: string;
+  status: AgentConfigStatus;
+  datasources: Array<string | DatasourceSchema>;
+  updated_on: string;
+  updated_by: string;
 };
 
-export const NewAgentConfigSchema = schema.object({
-  ...AgentConfigBaseSchema,
-});
+export type NewAgentConfig = NewAgentConfigSchema;
 
-export const AgentConfigSchema = schema.object({
-  ...AgentConfigBaseSchema,
-  id: schema.string(),
-  status: schema.oneOf([
-    schema.literal(AgentConfigStatus.Active),
-    schema.literal(AgentConfigStatus.Inactive),
-  ]),
-  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
-  updated_on: schema.string(),
-  updated_by: schema.string(),
-});
-
-export type NewAgentConfig = TypeOf<typeof NewAgentConfigSchema>;
-
-export type AgentConfig = TypeOf<typeof AgentConfigSchema>;
+export type AgentConfig = AgentConfigSchema;

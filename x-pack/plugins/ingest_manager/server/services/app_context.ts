@@ -3,33 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ICustomClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { IngestManagerAppContext } from '../plugin';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
+import { IngestManagerConfigType } from '../../common';
+import { IngestManagerAppContext } from '../plugin';
 
 class AppContextService {
-  private clusterClient: ICustomClusterClient | undefined;
   private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
   private security: SecurityPluginSetup | undefined;
-  private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
+  private config$?: Observable<IngestManagerConfigType>;
+  private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
 
-  public start(appContext: IngestManagerAppContext) {
-    this.clusterClient = appContext.clusterClient;
+  public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
-    this.internalSavedObjectsClient = appContext.internalSavedObjectsClient;
-  }
 
-  public stop() {
-    if (this.clusterClient) {
-      this.clusterClient.close();
+    if (appContext.config$) {
+      this.config$ = appContext.config$;
+      const initialValue = await this.config$.pipe(first()).toPromise();
+      this.configSubject$ = new BehaviorSubject(initialValue);
+      this.config$.subscribe(this.configSubject$);
     }
   }
 
-  public getClusterClient() {
-    return this.clusterClient;
-  }
+  public stop() {}
 
   public getEncryptedSavedObjects() {
     return this.encryptedSavedObjects;
@@ -39,11 +38,12 @@ class AppContextService {
     return this.security;
   }
 
-  public getInternalSavedObjectsClient() {
-    if (!this.internalSavedObjectsClient) {
-      throw new Error('No internal savedObjectsClient');
-    }
-    return this.internalSavedObjectsClient;
+  public getConfig() {
+    return this.configSubject$?.value;
+  }
+
+  public getConfig$() {
+    return this.config$;
   }
 }
 

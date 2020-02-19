@@ -3,43 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { npStart } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
-import { IndexMgmtPlugin } from './plugin';
-import { __LEGACYStart } from './legacy';
-import {
-  addSummaryExtension,
-  getSummaryExtensions,
-  addActionExtension,
-  getActionExtensions,
-  addBannerExtension,
-  getBannerExtensions,
-  addFilterExtension,
-  getFilterExtensions,
-  addToggleExtension,
-  getToggleExtensions,
-  addBadgeExtension,
-  getBadgeExtensions,
-} from './index_management_extensions';
-
-export const plugin = () => {
-  return new IndexMgmtPlugin();
-};
+import { IndexMgmtUIPlugin, IndexMgmtSetup } from './plugin';
 
 /** @public */
-export {
-  addSummaryExtension,
-  getSummaryExtensions,
-  addActionExtension,
-  getActionExtensions,
-  addBannerExtension,
-  getBannerExtensions,
-  addFilterExtension,
-  getFilterExtensions,
-  addToggleExtension,
-  getToggleExtensions,
-  addBadgeExtension,
-  getBadgeExtensions,
+export { IndexMgmtSetup };
+
+export const plugin = () => {
+  return new IndexMgmtUIPlugin();
 };
 
-plugin().start(npStart.core, npStart.plugins, __LEGACYStart);
+// Temp. To be removed after moving to the "plugins" folder
+
+const { extensionsService } = plugin().setup(npSetup.core, npSetup.plugins);
+
+export { extensionsService };

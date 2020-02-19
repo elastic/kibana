@@ -23,7 +23,6 @@ import {
   GetOneAgentEventsResponse,
 } from '../../types';
 import * as AgentService from '../../services/agents';
-import { appContextService } from '../../services/app_context';
 import * as APIKeyService from '../../services/api_keys';
 
 export const getAgentHandler: RequestHandler<TypeOf<
@@ -163,7 +162,7 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
+    const soClient = context.core.savedObjects.client;
     const res = await APIKeyService.verifyAccessApiKey(request.headers);
     if (!res.valid) {
       return response.unauthorized({
@@ -211,7 +210,7 @@ export const postAgentAcksHandler: RequestHandler<
   TypeOf<typeof PostAgentAcksRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
+    const soClient = context.core.savedObjects.client;
     const res = await APIKeyService.verifyAccessApiKey(request.headers);
     if (!res.valid) {
       return response.unauthorized({
@@ -252,7 +251,7 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = appContextService.getInternalSavedObjectsClient();
+    const soClient = context.core.savedObjects.client;
     const res = await APIKeyService.verifyEnrollmentAPIKey(soClient, request.headers);
     if (!res.valid || !res.enrollmentAPIKey) {
       return response.unauthorized({

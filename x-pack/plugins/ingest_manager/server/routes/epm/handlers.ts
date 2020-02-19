@@ -5,6 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
+import { EPM_API_ROOT } from '../../../common';
 import {
   GetCategoriesResponse,
   GetPackagesRequestSchema,
@@ -16,9 +17,8 @@ import {
   InstallPackageResponse,
   DeletePackageRequestSchema,
   DeletePackageResponse,
-  EPM_API_ROOT,
-} from '../../../common';
-import { appContextService } from '../../services';
+} from '../../types';
+
 import {
   getCategories,
   getPackages,
@@ -27,7 +27,6 @@ import {
   installPackage,
   removeInstallation,
 } from '../../services/epm/packages';
-import { getClusterAccessor } from '../../services/epm/cluster_access';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -150,9 +149,7 @@ export const deletePackageHandler: RequestHandler<TypeOf<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const clusterClient = appContextService.getClusterClient();
-    if (!clusterClient) throw new Error('there was a problem deleting the package');
-    const callCluster = getClusterAccessor(clusterClient, request);
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
     const body: DeletePackageResponse = {
       response: res,

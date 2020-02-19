@@ -28,5 +28,3 @@ export {
   DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
 } from '../../common';
-
-export const DEFAULT_REGISTRY_URL = 'https://epr-staging.elastic.co';

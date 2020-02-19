@@ -20,7 +20,7 @@
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
-import { AppMountContext, LegacyCoreStart } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
 import {
   AppStateProvider,
   AppState,
@@ -45,7 +45,7 @@ import { VisualizeKibanaServices } from '../kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (
+export const renderApp = (
   element: HTMLElement,
   appBasePath: string,
   deps: VisualizeKibanaServices
@@ -53,8 +53,11 @@ export const renderApp = async (
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);

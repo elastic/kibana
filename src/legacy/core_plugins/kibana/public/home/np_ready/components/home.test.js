@@ -29,7 +29,7 @@ import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/publ
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
-    getInjected: () => '',
+    tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
   }),
 }));

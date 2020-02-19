@@ -46,6 +46,11 @@ One common workflow is:
  1. `yarn es snapshot`
  1. In another shell: `yarn start --no-base-path`
 
+## HTTP API
+  1. Nothing by default. If `xpack.ingestManager.enabled=true`, it adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
+  1. [Integration tests](../../test/api_integration/apis/ingest_manager/endpoints.ts)
+  1. In later versions the EPM and Fleet routes will be added when their flags are enabled. See the [currently disabled logic to add those routes](https://github.com/jfsiii/kibana/blob/feature-ingest-manager/x-pack/plugins/ingest_manager/server/plugin.ts#L86-L90).
+
 #### EPM API Tests
   1. in one terminal, change to the `x-pack` directory and start the test server with
       ```shell

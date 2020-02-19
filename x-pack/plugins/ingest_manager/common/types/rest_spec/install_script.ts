@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const InstallScriptRequestSchema = {
-  params: schema.object({
-    osType: schema.oneOf([schema.literal('macos')]),
-  }),
-};
+export interface InstallScriptRequestSchema {
+  params: {
+    osType: 'macos';
+  };
+}

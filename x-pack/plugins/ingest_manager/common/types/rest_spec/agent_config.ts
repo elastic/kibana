@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema } from '@kbn/config-schema';
 import { AgentConfig, NewAgentConfigSchema } from '../models';
 import { ListWithKuerySchema } from './common';
 
-export const GetAgentConfigsRequestSchema = {
-  query: ListWithKuerySchema,
-};
+export interface GetAgentConfigsRequestSchema {
+  query: ListWithKuerySchema;
+}
 
 export interface GetAgentConfigsResponse {
   items: AgentConfig[];
@@ -19,29 +18,28 @@ export interface GetAgentConfigsResponse {
   success: boolean;
 }
 
-export const GetOneAgentConfigRequestSchema = {
-  params: schema.object({
-    agentConfigId: schema.string(),
-  }),
-};
+export interface GetOneAgentConfigRequestSchema {
+  params: {
+    agentConfigId: string;
+  };
+}
 
 export interface GetOneAgentConfigResponse {
   item: AgentConfig;
   success: boolean;
 }
 
-export const CreateAgentConfigRequestSchema = {
-  body: NewAgentConfigSchema,
-};
+export interface CreateAgentConfigRequestSchema {
+  body: NewAgentConfigSchema;
+}
 
 export interface CreateAgentConfigResponse {
   item: AgentConfig;
   success: boolean;
 }
 
-export const UpdateAgentConfigRequestSchema = {
-  ...GetOneAgentConfigRequestSchema,
-  body: NewAgentConfigSchema,
+export type UpdateAgentConfigRequestSchema = GetOneAgentConfigRequestSchema & {
+  body: NewAgentConfigSchema;
 };
 
 export interface UpdateAgentConfigResponse {
@@ -49,11 +47,11 @@ export interface UpdateAgentConfigResponse {
   success: boolean;
 }
 
-export const DeleteAgentConfigsRequestSchema = {
-  body: schema.object({
-    agentConfigIds: schema.arrayOf(schema.string()),
-  }),
-};
+export interface DeleteAgentConfigsRequestSchema {
+  body: {
+    agentConfigIds: string[];
+  };
+}
 
 export type DeleteAgentConfigsResponse = Array<{
   id: string;

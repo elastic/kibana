@@ -1,4 +1,10 @@
 {
   "rule_id": "query-rule-id",
-  "version": 500
+  "version": 500,
+  "name": "Changes the version to arbitrary number",
+  "description": "Changes the version to some arbitrary number",
+  "type": "query",
+  "query": "user.name: root or user.name: admin",
+  "severity": "low",
+  "risk_score": 10
 }

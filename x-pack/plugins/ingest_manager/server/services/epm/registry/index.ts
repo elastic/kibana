@@ -15,7 +15,7 @@ import {
   RegistryPackage,
   RegistrySearchResults,
 } from '../../../types';
-import { configService } from '../../';
+import { appContextService } from '../../';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
@@ -30,7 +30,7 @@ export interface SearchParams {
 export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
@@ -40,17 +40,17 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   return getResponse(`${registryUrl}${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
@@ -132,7 +132,7 @@ async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   const { download: archivePath } = await fetchInfo(key);
-  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
   return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
 }
 

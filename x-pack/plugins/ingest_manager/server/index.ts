@@ -5,7 +5,6 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
-import { DEFAULT_REGISTRY_URL } from './constants';
 import { IngestManagerPlugin } from './plugin';
 
 export const config = {
@@ -14,13 +13,13 @@ export const config = {
     fleet: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     epm: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.uri({ defaultValue: DEFAULT_REGISTRY_URL }),
+      enabled: schema.boolean({ defaultValue: false }),
+      registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
     }),
     fleet: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
       defaultOutputHost: schema.string({ defaultValue: 'http://localhost:9200' }),
     }),
   }),

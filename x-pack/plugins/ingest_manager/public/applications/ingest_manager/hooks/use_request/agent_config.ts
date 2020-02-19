@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TypeOf } from '@kbn/config-schema';
 import { HttpFetchQuery } from 'kibana/public';
 import { useRequest, sendRequest } from './use_request';
 import { agentConfigRouteService } from '../../services';
@@ -33,7 +32,7 @@ export const useGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
-export const sendCreateAgentConfig = (body: TypeOf<typeof CreateAgentConfigRequestSchema.body>) => {
+export const sendCreateAgentConfig = (body: CreateAgentConfigRequestSchema['body']) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
@@ -43,7 +42,7 @@ export const sendCreateAgentConfig = (body: TypeOf<typeof CreateAgentConfigReque
 
 export const sendUpdateAgentConfig = (
   agentConfigId: string,
-  body: TypeOf<typeof UpdateAgentConfigRequestSchema.body>
+  body: UpdateAgentConfigRequestSchema['body']
 ) => {
   return sendRequest<UpdateAgentConfigResponse>({
     path: agentConfigRouteService.getUpdatePath(agentConfigId),
@@ -52,9 +51,7 @@ export const sendUpdateAgentConfig = (
   });
 };
 
-export const sendDeleteAgentConfigs = (
-  body: TypeOf<typeof DeleteAgentConfigsRequestSchema.body>
-) => {
+export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequestSchema['body']) => {
   return sendRequest<DeleteAgentConfigsResponse>({
     path: agentConfigRouteService.getDeletePath(),
     method: 'post',

@@ -5,4 +5,22 @@
  */
 export * from './models';
 export * from './rest_spec';
-export * from './type_utils';
+
+export interface IngestManagerConfigType {
+  enabled: boolean;
+  epm: {
+    enabled: boolean;
+    registryUrl: string;
+  };
+  fleet: {
+    enabled: boolean;
+    defaultOutputHost: string;
+  };
+}
+
+// Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
+// which causes a "string is not assignable to type InstallationStatus` error
+// see https://github.com/Microsoft/TypeScript/issues/20322
+// and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
+// and https://github.com/Microsoft/TypeScript/issues/21826#issuecomment-479851685
+export const entries = Object.entries as <T>(o: T) => Array<[keyof T, T[keyof T]]>;

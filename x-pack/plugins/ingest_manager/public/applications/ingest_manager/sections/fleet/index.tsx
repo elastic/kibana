@@ -6,21 +6,23 @@
 import React from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Loading } from '../../components';
-import { useRequest, useCore } from '../../hooks';
+import { useConfig, useCore, useRequest } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { fleetSetupRouteService } from '../../services';
 
-export const FleetApp: React.FC = () => {
+export const FleetApp: React.FunctionComponent = () => {
   const core = useCore();
+  const { fleet } = useConfig();
 
   const setupRequest = useRequest({
     method: 'get',
     path: fleetSetupRouteService.getFleetSetupPath(),
   });
 
+  if (!fleet.enabled) return null;
   if (setupRequest.isLoading) {
     return <Loading />;
   }

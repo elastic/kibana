@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Agent, AgentEventSchema, AgentTypeSchema, AgentEvent } from '../models';
 
-export const GetAgentsRequestSchema = {
-  query: schema.object({
-    page: schema.number({ defaultValue: 1 }),
-    perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
-    showInactive: schema.boolean({ defaultValue: false }),
-  }),
-};
+export interface GetAgentsRequestSchema {
+  query: {
+    page: number;
+    perPage: number;
+    kuery?: string;
+    showInactive: boolean;
+  };
+}
 
 export interface GetAgentsResponse {
   list: Agent[];
@@ -24,57 +23,50 @@ export interface GetAgentsResponse {
   success: boolean;
 }
 
-export const GetOneAgentRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-};
+export interface GetOneAgentRequestSchema {
+  params: {
+    agentId: string;
+  };
+}
 
 export interface GetOneAgentResponse {
   item: Agent;
   success: boolean;
 }
 
-export const PostAgentCheckinRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  body: schema.object({
-    local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    events: schema.maybe(schema.arrayOf(AgentEventSchema)),
-  }),
-};
+export interface PostAgentCheckinRequestSchema {
+  params: {
+    agentId: string;
+  };
+  body: {
+    local_metadata?: Record<string, any>;
+    events?: AgentEventSchema[];
+  };
+}
 
-export const PostAgentEnrollRequestSchema = {
-  body: schema.object({
-    type: AgentTypeSchema,
-    shared_id: schema.maybe(schema.string()),
-    metadata: schema.object({
-      local: schema.recordOf(schema.string(), schema.any()),
-      user_provided: schema.recordOf(schema.string(), schema.any()),
-    }),
-  }),
-};
+export interface PostAgentEnrollRequestSchema {
+  body: {
+    type: AgentTypeSchema;
+    shared_id?: string;
+    metadata: {
+      local: Record<string, any>;
+      user_provided: Record<string, any>;
+    };
+  };
+}
 
-export const PostAgentAcksRequestSchema = {
-  body: schema.object({
-    action_ids: schema.arrayOf(schema.string()),
-  }),
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-};
+export interface PostAgentAcksRequestSchema {
+  body: {
+    action_ids: string[];
+  };
+  params: {
+    agentId: string;
+  };
+}
 
-export const PostAgentUnenrollRequestSchema = {
-  body: schema.oneOf([
-    schema.object({
-      kuery: schema.string(),
-    }),
-    schema.object({
-      ids: schema.arrayOf(schema.string()),
-    }),
-  ]),
-};
+export interface PostAgentUnenrollRequestSchema {
+  body: { kuery: string } | { ids: string[] };
+}
 
 export interface PostAgentUnenrollResponse {
   results: Array<{
@@ -86,16 +78,16 @@ export interface PostAgentUnenrollResponse {
   success: boolean;
 }
 
-export const GetOneAgentEventsRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  query: schema.object({
-    page: schema.number({ defaultValue: 1 }),
-    perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
-  }),
-};
+export interface GetOneAgentEventsRequestSchema {
+  params: {
+    agentId: string;
+  };
+  query: {
+    page: number;
+    perPage: number;
+    kuery?: string;
+  };
+}
 
 export interface GetOneAgentEventsResponse {
   list: AgentEvent[];
@@ -105,23 +97,23 @@ export interface GetOneAgentEventsResponse {
   success: boolean;
 }
 
-export const DeleteAgentRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-};
+export interface DeleteAgentRequestSchema {
+  params: {
+    agentId: string;
+  };
+}
 
-export const UpdateAgentRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  body: schema.object({
-    user_provided_metadata: schema.recordOf(schema.string(), schema.any()),
-  }),
-};
+export interface UpdateAgentRequestSchema {
+  params: {
+    agentId: string;
+  };
+  body: {
+    user_provided_metadata: Record<string, any>;
+  };
+}
 
-export const GetAgentStatusForPolicySchema = {
-  params: schema.object({
-    policyId: schema.string(),
-  }),
-};
+export interface GetAgentStatusForPolicySchema {
+  params: {
+    policyId: string;
+  };
+}

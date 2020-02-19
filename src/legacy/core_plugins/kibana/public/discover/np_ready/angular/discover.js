@@ -60,7 +60,6 @@ import {
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
-import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,
@@ -71,11 +70,12 @@ const {
   timefilter,
   toastNotifications,
   uiSettings,
+  visualizations,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
-  generateFilters,
+  esFilters,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
@@ -901,7 +901,7 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function(field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    const newFilters = generateFilters(
+    const newFilters = esFilters.generateFilters(
       filterManager,
       field,
       values,
@@ -990,7 +990,10 @@ function discoverController(
       },
     };
 
-    $scope.vis = new Vis($scope.searchSource.getField('index'), visSavedObject.visState);
+    $scope.vis = new visualizations.Vis(
+      $scope.searchSource.getField('index'),
+      visSavedObject.visState
+    );
     visSavedObject.vis = $scope.vis;
 
     $scope.searchSource.onRequestStart((searchSource, options) => {

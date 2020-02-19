@@ -8,7 +8,7 @@ import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';
@@ -18,12 +18,12 @@ import { search } from './helpers';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   data: DetailItem[];
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */

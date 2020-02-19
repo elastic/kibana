@@ -35,7 +35,7 @@ const Nav = euiStyled.nav`
   };
 `;
 
-export const DefaultLayout: React.FC<Props> = ({ section, children }) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
   const { epm, fleet } = useConfig();
   return (
     <div>

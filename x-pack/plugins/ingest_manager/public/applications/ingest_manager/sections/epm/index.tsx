@@ -7,18 +7,23 @@
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 
+import { useConfig } from '../../hooks';
 import { Home } from './screens/home';
 import { Detail } from './screens/detail';
 
-export const EPMApp: React.FC = () => (
-  <Router>
-    <Switch>
-      <Route path="/epm/detail/:pkgkey/:panel?">
-        <Detail />
-      </Route>
-      <Route path="/epm/">
-        <Home />
-      </Route>
-    </Switch>
-  </Router>
-);
+export const EPMApp: React.FC = () => {
+  const { epm } = useConfig();
+
+  return epm.enabled ? (
+    <Router>
+      <Switch>
+        <Route path="/epm/detail/:pkgkey/:panel?">
+          <Detail />
+        </Route>
+        <Route path="/epm/">
+          <Home />
+        </Route>
+      </Switch>
+    </Router>
+  ) : null;
+};
