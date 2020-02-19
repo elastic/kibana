@@ -19,16 +19,10 @@ and general information on <<using-api,how to use APIs>>.
 The Agent configuration API allows you to fine-tune your APM agent configuration,
 without needing to redeploy your application.
 
-[source,console]
---------------------------------------------------
-POST  /api/apm/settings/agent-configuration/new
---------------------------------------------------
-
 The following Agent configuration APIs are available:
 
-* <<apm-create-config>> to create a new Agent configuration.
+* <<apm-update-config>> to create or update an Agent configuration
 * <<apm-delete-config>> to delete an Agent configuration.
-* <<apm-update-config>> to update a preexisting Agent configuration.
 * <<apm-list-config>> to list all Agent configurations.
 * <<apm-search-config>> to search for an Agent configuration.
 
@@ -36,160 +30,51 @@ The following Agent configuration APIs are available:
 *******************************************************
 ////
 
+[[apm-update-config]]
+==== Create or update configuration
 
-[[apm-create-config]]
-==== Create configuration
-
-////
-Add a description.
-Link to related APIs if appropriate.
-
-Guidelines for parameter documentation
-***************************************
-* Use a definition list.
-* End each definition with a period.
-* Include whether the parameter is Optional or Required and the data type.
-* Include default values as the last sentence of the first paragraph.
-* Include a range of valid values, if applicable.
-* If the parameter requires a specific delimiter for multiple values, say so.
-* If the parameter supports wildcards, ditto.
-* For large or nested objects, consider linking to a separate definition list.
-***************************************
-////
-
-[[apm-create-config-req]]
+[[apm-update-config-req]]
 ===== Request
-////
-This section show the basic endpoint, without the body or optional parameters.
-Variables should use <...> syntax.
-If an API supports both PUT and POST, include both here.
-////
 
-`POST /api/apm/settings/agent-configuration/new`
+`PUT /api/apm/settings/agent-configuration`
 
-[[apm-create-config-pre]]
-===== Prerequisites
-////
-Optional list of prerequisites.
-
-For example:
-
-* A snapshot of an index created in 5.x can be restored to 6.x. You must...
-* If the {es} {security-features} are enabled, you must have `write`, `monitor`,
-and `manage_follow_index` index privileges...
-////
-
-[[apm-create-config-params]]
-===== Parameters
-////
-A list of all the parameters within the path of the endpoint (before the query string (?)).
-
-For example:
-`<follower_index>`::
-(Required, string) Name of the follower index
-////
-
-
-[[apm-create-config-query]]
+[[apm-update-config-query]]
 ===== Query parameters
-////
-A list of the parameters in the query string of the endpoint (after the ?).
 
-For example:
-`wait_for_active_shards`::
-(Optional, integer) Specifies the number of shards to wait on being active before
-responding. A shard must be restored from the leader index being active.
-Restoring a follower shard requires transferring all the remote Lucene segment
-files to the follower index. The default is `0`, which means waiting on none of
-the shards to be active.
-////
-
-
-[[apm-create-config-req-body]]
+[[apm-update-config-req-body]]
 ===== Request body
-////
-A list of the properties you can specify in the body of the request.
 
-For example:
-`remote_cluster`::
-(Required, string) The <<modules-remote-clusters,remote cluster>> that contains
-the leader index.
+`service`::
+(required) Service object containing `name` and `environment` on the configuration that should be deleted.
 
-`leader_index`::
-(Required, string) The name of the index in the leader cluster to follow.
-////
+`settings`::
+(required) Key/value object with settings and their corresponding value.
 
+`agent_name`::
+(optional) The agent name is used by the UI to determine which settings to display.
 
-[[apm-create-config-body]]
+[[apm-update-config-body]]
 ===== Response body
-////
-Response body is only required for detailed responses.
 
-For example:
-`auto_follow_stats`::
-  (object) An object representing stats for the auto-follow coordinator. This
-  object consists of the following fields:
-
-`auto_follow_stats.number_of_successful_follow_indices`:::
-  (long) the number of indices that the auto-follow coordinator successfully
-  followed
-...
-
-////
-
-
-[[apm-create-config-codes]]
-===== Response code
-////
-Response codes are only required when needed to understand the response body.
-
-For example:
-`200`::
-Indicates all listed indices or index aliases exist.
-
- `404`::
-Indicates one or more listed indices or index aliases **do not** exist.
-////
-
-
-[[apm-create-config-example]]
+[[apm-update-config-example]]
 ===== Example
-////
-Optional additional examples.
-DO NOT repeat the basic example used earlier.
-
 
 [source,console]
-----
-PUT /follower_index/_ccr/follow?wait_for_active_shards=1
+--------------------------------------------------
+PUT /api/apm/settings/agent-configuration
 {
-  "remote_cluster" : "remote_cluster",
-  "leader_index" : "leader_index",
-  "max_read_request_operation_count" : 1024,
-  "max_outstanding_read_requests" : 16,
-  "max_read_request_size" : "1024k",
-  "max_write_request_operation_count" : 32768,
-  "max_write_request_size" : "16k",
-  "max_outstanding_write_requests" : 8,
-  "max_write_buffer_count" : 512,
-  "max_write_buffer_size" : "512k",
-  "max_retry_delay" : "10s",
-  "read_poll_timeout" : "30s"
+    "agent_name": "nodejs"
+    "service" : {
+        "name" : "frontend",
+        "environment" : "production"
+    },
+    "settings" : {
+        "transaction_sample_rate" : 0.4,
+        "capture_body" : "off",
+        "transaction_max_spans" : 500
+    }
 }
-----
-// TEST[setup:remote_cluster_and_leader_index]
-
-The API returns the following result:
-
-[source,console-result]
-----
-{
-  "follow_index_created" : true,
-  "follow_index_shards_acked" : true,
-  "index_following_started" : true
-}
-----
-////
+--------------------------------------------------
 
 ////
 *******************************************************
@@ -199,65 +84,41 @@ The API returns the following result:
 [[apm-delete-config]]
 ==== Delete configuration
 
+[source,console]
+--------------------------------------------------
+POST  /api/apm/settings/agent-configuration
+--------------------------------------------------
+
 [[apm-delete-config-req]]
 ===== Request
 
-`DELETE /api/apm/settings/agent-configuration/{configurationId}`
+`DELETE /api/apm/settings/agent-configuration`
 
-[[apm-delete-config-pre]]
-===== Prerequisites
-
-[[apm-delete-config-params]]
-===== Parameters
-
-[[apm-delete-config-query]]
-===== Query parameters
 
 [[apm-delete-config-req-body]]
 ===== Request body
 
+
+`service`::
+(required) Service object containing `name` and `environment` on the configuration that should be deleted.
+
 [[apm-delete-config-body]]
 ===== Response body
 
-[[apm-delete-config-codes]]
-===== Response code
 
 [[apm-delete-config-example]]
 ===== Example
 
-////
-*******************************************************
-////
-
-
-[[apm-update-config]]
-==== Update configuration
-
-[[apm-update-config-req]]
-===== Request
-
-`PUT /api/apm/settings/agent-configuration/{configurationId}`
-
-[[apm-update-config-pre]]
-===== Prerequisites
-
-[[apm-update-config-params]]
-===== Parameters
-
-[[apm-update-config-query]]
-===== Query parameters
-
-[[apm-update-config-req-body]]
-===== Request body
-
-[[apm-update-config-body]]
-===== Response body
-
-[[apm-update-config-codes]]
-===== Response code
-
-[[apm-update-config-example]]
-===== Example
+[source,console]
+--------------------------------------------------
+DELETE /api/apm/settings/agent-configuration
+{
+    "service" : {
+        "name" : "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
 
 ////
 *******************************************************
@@ -267,31 +128,64 @@ The API returns the following result:
 [[apm-list-config]]
 ==== List configuration
 
+[source,console]
+--------------------------------------------------
+GET  /api/apm/settings/agent-configuration
+--------------------------------------------------
+
 [[apm-list-config-req]]
 ===== Request
 
 `GET /api/apm/settings/agent-configuration`
 
-[[apm-list-config-pre]]
-===== Prerequisites
-
-[[apm-list-config-params]]
-===== Parameters
-
-[[apm-list-config-query]]
-===== Query parameters
-
-[[apm-list-config-req-body]]
-===== Request body
-
 [[apm-list-config-body]]
 ===== Response body
 
-[[apm-list-config-codes]]
-===== Response code
-
-[[apm-list-config-example]]
-===== Example
+```
+[
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go",
+      "environment": "production"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+      "capture_body": "off",
+      "transaction_max_spans": 200
+    },
+    "@timestamp": 1581934104843,
+    "applied_by_agent": false,
+    "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+  },
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+      "capture_body": "off",
+      "transaction_max_spans": 300
+    },
+    "@timestamp": 1581934111727,
+    "applied_by_agent": false,
+    "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+  },
+  {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+]
+```
 
 ////
 *******************************************************
@@ -306,26 +200,52 @@ The API returns the following result:
 
 `POST /api/apm/settings/agent-configuration/search`
 
-[[apm-search-config-pre]]
-===== Prerequisites
-
-[[apm-search-config-params]]
-===== Parameters
-
-[[apm-search-config-query]]
-===== Query parameters
-
 [[apm-search-config-req-body]]
 ===== Request body
+
+`service`::
+(required) Service object containing `name` and `environment` on the configuration that should be deleted.
+
+`etag`::
+(required) etag is sent by the agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
 
 [[apm-search-config-body]]
 ===== Response body
 
-[[apm-search-config-codes]]
-===== Response code
+```
+{
+  "_index": ".apm-agent-configuration",
+  "_id": "CIaqXXABmQCdPphWj8EJ",
+  "_score": 2,
+  "_source": {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+}
+```
 
 [[apm-search-config-example]]
 ===== Example
+
+[source,console]
+--------------------------------------------------
+POST /api/apm/settings/agent-configuration/search
+{
+    "etag" : "1e58c178efeebae15c25c539da740d21dee422fc",
+    "service" : {
+        "name" : "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
 
 ////
 *******************************************************
