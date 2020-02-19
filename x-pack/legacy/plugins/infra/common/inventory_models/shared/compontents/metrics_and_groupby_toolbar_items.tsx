@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { ToolbarProps } from '../../../../public/components/inventory/toolbars/toolbar';
-import { WaffleMetricControls } from '../../../../public/components/waffle/waffle_metric_controls';
+import { WaffleMetricControls } from '../../../../public/components/waffle/metric_control';
 import { WaffleGroupByControls } from '../../../../public/components/waffle/waffle_group_by_controls';
 import {
   toGroupByOpt,
