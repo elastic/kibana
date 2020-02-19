@@ -29,7 +29,6 @@ export const fileUpload = kibana => {
 
       // legacy dependencies
       const __LEGACY = {
-        route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
         },
