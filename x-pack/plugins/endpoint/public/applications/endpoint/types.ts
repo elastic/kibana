@@ -10,6 +10,7 @@ import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
 import { AlertResultList, Immutable } from '../../../common/types';
 
+export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
 ) => (
