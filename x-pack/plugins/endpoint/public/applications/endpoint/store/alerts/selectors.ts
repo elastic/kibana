@@ -119,7 +119,6 @@ export const urlWithSelectedAlert: (
 export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
   queryParams,
   urlPaginationData => {
-    // TODO, different pattern for calculating URL w/ and w/o qs values
     const newUrlPaginationData = { ...urlPaginationData };
     delete newUrlPaginationData.selected_alert;
     return '?' + qs.stringify(newUrlPaginationData);

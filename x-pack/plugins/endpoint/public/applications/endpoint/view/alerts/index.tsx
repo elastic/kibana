@@ -189,19 +189,14 @@ export const AlertIndex = memo(() => {
 
   return (
     <>
-      {/*
-          TODO, rethink this. we may already have this in state. we still need `hasSelectedAlert`, to know to show this flyout. we should also have `selectedAlert`, which will eventually be loaded from server. */}
       {hasSelectedAlert && (
         <EuiFlyout size="l" onClose={handleFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>
-                alert detailz
-                {/* TODO, make an issue to add logic to get selected alert. it might already be in state! */}
-              </h2>
+              <h2>Alert Details</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>hey!</EuiFlyoutBody>
+          <EuiFlyoutBody />
         </EuiFlyout>
       )}
       <EuiPage data-test-subj="alertListPage">
