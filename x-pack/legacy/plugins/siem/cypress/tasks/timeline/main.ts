@@ -19,6 +19,8 @@ import {
   ID_TOGGLE_FIELD,
   ID_HEADER_FIELD,
   ID_FIELD,
+  TIMELINE_TITLE,
+  TIMELINE_DESCRIPTION,
 } from '../../screens/timeline/main';
 
 import { drag, drop } from '../../tasks/common';
@@ -89,4 +91,14 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+};
+
+export const addNameToTimeline = (name: string) => {
+  cy.get(TIMELINE_TITLE, { timeout: DEFAULT_TIMEOUT }).type(name, { delay: 100 });
+};
+
+export const addDescriptionToTimeline = (description: string) => {
+  cy.get(TIMELINE_DESCRIPTION).type(description, {
+    delay: 100,
+  });
 };

@@ -49,3 +49,7 @@ export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
 export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name-_id"]';
+
+export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+
+export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
