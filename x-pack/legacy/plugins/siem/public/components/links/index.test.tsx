@@ -198,7 +198,7 @@ describe('Custom Links', () => {
       let wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
       expect(wrapper.find('EuiLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
       (useUiSetting$ as jest.Mock).mockClear();
-      wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} itemsToShow={1} />);
+      wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />);
       expect(wrapper.find('EuiLink')).toHaveLength(1);
     });
   });

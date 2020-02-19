@@ -3361,7 +3361,22 @@ tr:hover .c3:focus::before {
                                                 <ReputationLink
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   itemsToShow={1}
-                                                />
+                                                >
+                                                  <DefaultFieldRendererOverflow
+                                                    idPrefix="moreReputationLink"
+                                                    moreMaxHeight="200px"
+                                                    overflowIndexStart={5}
+                                                    render={[Function]}
+                                                  >
+                                                    <EuiFlexItem
+                                                      grow={false}
+                                                    >
+                                                      <div
+                                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                      />
+                                                    </EuiFlexItem>
+                                                  </DefaultFieldRendererOverflow>
+                                                </ReputationLink>
                                                 <ExternalLinkIcon>
                                                   <LinkIconWithMargin
                                                     color="subdued"

@@ -15,7 +15,7 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { HostDetailsLink, ReputationLink, WhoIsLink } from '../links';
+import { HostDetailsLink, ReputationLink, WhoIsLink, ReputationLinkSetting } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
 
@@ -135,82 +135,85 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
   <ReputationLink domain={ip} />
 );
 
-interface DefaultFieldRendererProps {
-  rowItems: string[] | null | undefined;
+interface DefaultFieldRendererProps<T = RowItemTypes> {
+  rowItems: T[] | null | undefined;
   attrName: string;
   idPrefix: string;
-  render?: (item: string) => JSX.Element;
+  render?: (item: T) => JSX.Element;
   displayCount?: number;
   moreMaxHeight?: string;
 }
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
-export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
-  ({
-    attrName,
-    displayCount = 1,
-    idPrefix,
-    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
-    render,
-    rowItems,
-  }) => {
-    if (rowItems != null && rowItems.length > 0) {
-      const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-        const id = escapeDataProviderId(
-          `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
-        );
-        return (
-          <EuiFlexItem key={id} grow={false}>
-            {index !== 0 && (
-              <>
-                {','}
-                <Spacer />
-              </>
-            )}
+export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
+  attrName,
+  displayCount = 1,
+  idPrefix,
+  moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+  render,
+  rowItems,
+}) => {
+  if (rowItems != null && rowItems.length > 0) {
+    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+      const id = escapeDataProviderId(
+        `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
+      );
+      return (
+        <EuiFlexItem key={id} grow={false}>
+          {index !== 0 && (
+            <>
+              {','}
+              <Spacer />
+            </>
+          )}
+          {typeof rowItem === 'string' && (
             <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
-          </EuiFlexItem>
-        );
-      });
-
-      return draggables.length > 0 ? (
-        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
-          {draggables}{' '}
-          {
-            <DefaultFieldRendererOverflow
-              rowItems={rowItems}
-              idPrefix={idPrefix}
-              render={render}
-              overflowIndexStart={displayCount}
-              moreMaxHeight={moreMaxHeight}
-            />
-          }
-        </DraggableContainerFlexGroup>
-      ) : (
-        getEmptyTagValue()
+          )}
+        </EuiFlexItem>
       );
-    } else {
-      return getEmptyTagValue();
-    }
+    });
+
+    return draggables.length > 0 ? (
+      <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+        {draggables}{' '}
+        {
+          <DefaultFieldRendererOverflow
+            rowItems={rowItems}
+            idPrefix={idPrefix}
+            render={render}
+            overflowIndexStart={displayCount}
+            moreMaxHeight={moreMaxHeight}
+          />
+        }
+      </DraggableContainerFlexGroup>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else {
+    return getEmptyTagValue();
   }
-);
+};
+
+export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
-interface DefaultFieldRendererOverflowProps {
-  rowItems: string[];
+type RowItemTypes = string | ReputationLinkSetting;
+interface DefaultFieldRendererOverflowProps<T = RowItemTypes> {
+  rowItems: T[];
   idPrefix: string;
-  render?: (item: string) => React.ReactNode;
+  render?: (item: T) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
 
-interface MoreContainerProps {
+interface MoreContainerProps<T = RowItemTypes> {
   idPrefix: string;
-  render?: (item: string) => React.ReactNode;
-  rowItems: string[];
+  render?: (item: T) => React.ReactNode;
+  rowItems: T[];
   moreMaxHeight: string;
   overflowIndexStart: number;
 }
@@ -242,7 +245,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     const [isOpen, setIsOpen] = useState(false);
     return (
       <EuiFlexItem grow={false}>
-        {rowItems.length > overflowIndexStart && (
+        {rowItems?.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
             button={

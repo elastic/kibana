@@ -7,6 +7,10 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useState, useEffect, useMemo } from 'react';
 
+import {
+  DefaultFieldRendererOverflow,
+  DEFAULT_MORE_MAX_HEIGHT,
+} from '../field_renderers/field_renderers';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
@@ -125,7 +129,7 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
-interface ReputationLinkSetting {
+export interface ReputationLinkSetting {
   name: string;
   url_template: string;
 }
@@ -136,9 +140,20 @@ function isDefaultReputationLink(name: string): name is DefaultReputationLink {
     name === DefaultReputationLink['talosIntelligence.com']
   );
 }
+const isReputationLink = (
+  rowItem: string | ReputationLinkSetting
+): rowItem is ReputationLinkSetting =>
+  (rowItem as ReputationLinkSetting).url_template !== undefined &&
+  (rowItem as ReputationLinkSetting).name !== undefined;
+
 export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
-const ReputationLinkComponent: React.FC<{ itemsToShow?: number; domain: string }> = ({
-  itemsToShow = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+const ReputationLinkComponent: React.FC<{
+  overflowIndexStart?: number;
+  allItemsLimit?: number;
+  domain: string;
+}> = ({
+  overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+  allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   domain,
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
@@ -158,24 +173,41 @@ const ReputationLinkComponent: React.FC<{ itemsToShow?: number; domain: string }
   useEffect(() => {
     setIpReputationLinks(
       ipReputationLinks
-        ?.slice(0, Math.max(itemsToShow, 1))
-        ?.map(({ name, url_template }: { name: string; url_template: string }) => {
+        ?.slice(0, allItemsLimit)
+        .map(({ name, url_template }: { name: string; url_template: string }) => {
           return {
             name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
             url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
           };
         })
     );
-  }, [domain, itemsToShow, setIpReputationLinks, defaultNameMapping]);
+  }, [domain, overflowIndexStart, setIpReputationLinks, defaultNameMapping]);
 
   return (
     <>
-      {ipReputationLinks?.map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-        <EuiLink href={urlTemplate} target="_blank" key={`reputationLink-${id}`}>
-          {name ?? domain}
-          {id !== Math.max(0, ipReputationLinks?.length - 1) && ', '}
-        </EuiLink>
-      ))}
+      {ipReputationLinks
+        ?.slice(0, overflowIndexStart)
+        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+          <EuiLink href={urlTemplate} target="_blank" key={`reputationLink-${id}`}>
+            {name ?? domain}
+            {id !== Math.max(0, Math.min(overflowIndexStart, ipReputationLinks.length) - 1) && ', '}
+          </EuiLink>
+        ))}
+      <DefaultFieldRendererOverflow
+        rowItems={ipReputationLinks}
+        idPrefix="moreReputationLink"
+        render={rowItem => {
+          return (
+            isReputationLink(rowItem) && (
+              <EuiLink href={rowItem.url_template} target="_blank">
+                {rowItem.name ?? domain}
+              </EuiLink>
+            )
+          );
+        }}
+        moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+        overflowIndexStart={overflowIndexStart}
+      />
     </>
   );
 };
