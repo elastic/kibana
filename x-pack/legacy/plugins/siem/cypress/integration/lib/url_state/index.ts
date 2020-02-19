@@ -12,24 +12,6 @@
  */
 
 export const ABSOLUTE_DATE_RANGE = {
-  endTime: '1564691609186',
-  endTimeFormat: '2019-08-01T20:33:29.186Z',
-  endTimeTimeline: '1564779809186',
-  endTimeTimelineFormat: '2019-08-02T21:03:29.186Z',
-  endTimeTimelineTyped: 'Aug 02, 2019 @ 21:03:29.186',
-  endTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
-  newEndTime: '1564693409186',
-  newEndTimeFormat: '2019-08-01T21:03:29.186Z',
-  newEndTimeTyped: 'Aug 01, 2019 @ 15:03:29.186',
-  newStartTime: '1564691609186',
-  newStartTimeFormat: '2019-08-01T20:33:29.186Z',
-  newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
-  startTime: '1564689809186',
-  startTimeFormat: '2019-08-01T20:03:29.186Z',
-  startTimeTimeline: '1564776209186',
-  startTimeTimelineFormat: '2019-08-02T20:03:29.186Z',
-  startTimeTimelineTyped: 'Aug 02, 2019 @ 14:03:29.186',
-  startTimeTyped: 'Aug 01, 2019 @ 14:03:29.186',
   url:
     '/app/siem#/network/?timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))',
 
@@ -41,6 +23,8 @@ export const ABSOLUTE_DATE_RANGE = {
   urlKqlHostsHosts: `/app/siem#/hosts/allHosts?query=(language:kuery,query:'source.ip:%20"10.142.0.9"')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
   urlHost:
     '/app/siem#/hosts/authentications?timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))',
+  urlHostNew:
+    '/app/siem#/hosts/authentications?timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))',
 };
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
   'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';
