@@ -47,7 +47,7 @@ export function registerFieldsForWildcardRoute(server) {
       // Format call to standard index pattern `fields for wildcard`
       const standardRequestQuery = querystring.stringify({ pattern, meta_fields: metaFields });
       const standardRequest = {
-        url: `${request.getBasePath()}/api/index_patterns/_fields_for_wildcard?${standardRequestQuery}`,
+        url: `/api/index_patterns/_fields_for_wildcard?${standardRequestQuery}`,
         method: 'GET',
         headers: request.headers,
       };
