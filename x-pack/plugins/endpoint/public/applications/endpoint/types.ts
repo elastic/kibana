@@ -89,6 +89,5 @@ export type AlertListState = Immutable<AlertResultList> & {
 export interface AlertIndexQueryParams {
   page_size?: string;
   page_index?: string;
-  // TODO, reference alert event id type directly
   selected_alert?: string;
 }
