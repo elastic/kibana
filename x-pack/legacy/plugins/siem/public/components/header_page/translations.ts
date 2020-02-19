@@ -13,3 +13,9 @@ export const SUBMIT = i18n.translate('xpack.siem.header.editableTitle.submit', {
 export const CANCEL = i18n.translate('xpack.siem.header.editableTitle.cancel', {
   defaultMessage: 'Cancel',
 });
+
+export const EDIT_TITLE_ARIA = (title: string) =>
+  i18n.translate('xpack.siem.header.editableTitle.editButtonAria', {
+    values: { title },
+    defaultMessage: 'You can edit {title} by clicking',
+  });

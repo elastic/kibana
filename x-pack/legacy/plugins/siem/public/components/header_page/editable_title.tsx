@@ -85,7 +85,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <StyledEuiButtonIcon
-          aria-label={title as string}
+          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
           iconType="pencil"
           onClick={onClickEditIcon}
           data-test-subj="editable-title-edit-icon"
