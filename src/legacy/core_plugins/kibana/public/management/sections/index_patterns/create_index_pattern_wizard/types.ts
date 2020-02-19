@@ -19,5 +19,10 @@
 
 export interface MatchedIndex {
   name: string;
-  tags: string[];
+  tags: Tag[];
+}
+
+export interface Tag {
+  name: string;
+  key: string;
 }
