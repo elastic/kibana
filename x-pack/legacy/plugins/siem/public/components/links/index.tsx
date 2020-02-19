@@ -155,10 +155,12 @@ export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
 const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
+  showDomain?: boolean;
   domain: string;
 }> = ({
   overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+  showDomain = false,
   domain,
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
@@ -196,7 +198,7 @@ const ReputationLinkComponent: React.FC<{
         ?.slice(0, overflowIndexStart)
         .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
           <EuiLink href={urlTemplate} target="_blank" key={`reputationLink-${id}`}>
-            {name ?? domain}
+            {showDomain ? domain : name ?? domain}
             {id !== Math.max(0, Math.min(overflowIndexStart, ipReputationLinks.length) - 1) && ', '}
           </EuiLink>
         ))}

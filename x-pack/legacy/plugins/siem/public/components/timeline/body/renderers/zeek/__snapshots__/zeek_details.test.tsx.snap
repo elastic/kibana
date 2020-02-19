@@ -3361,6 +3361,7 @@ tr:hover .c3:focus::before {
                                                 <ReputationLink
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   overflowIndexStart={1}
+                                                  showDomain={true}
                                                 >
                                                   <DefaultFieldRendererOverflow
                                                     idPrefix="moreReputationLink"
