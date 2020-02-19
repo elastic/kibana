@@ -46,22 +46,23 @@ export const uiQueryParams: (
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = qs.parse(location.search.slice(1));
-      if (typeof query.page_size === 'string') {
-        data.page_size = query.page_size;
-      } else if (Array.isArray(query.page_size)) {
-        data.page_size = query.page_size[query.page_size.length - 1];
-      }
 
-      if (typeof query.page_index === 'string') {
-        data.page_index = query.page_index;
-      } else if (Array.isArray(query.page_index)) {
-        data.page_index = query.page_index[query.page_index.length - 1];
-      }
-
-      if (typeof query.selected_alert === 'string') {
-        data.selected_alert = query.selected_alert;
-      } else if (Array.isArray(query.selected_alert)) {
-        data.selected_alert = query.selected_alert[query.selected_alert.length - 1];
+      /**
+       * Build an AlertingIndexUIQueryParams object with keys from the query.
+       * If more than one value exists for a key, use the last.
+       */
+      const keys: Array<keyof AlertingIndexUIQueryParams> = [
+        'page_size',
+        'page_index',
+        'selected_alert',
+      ];
+      for (const key of keys) {
+        const value = query[key];
+        if (typeof value === 'string') {
+          data[key] = value;
+        } else if (Array.isArray(value)) {
+          data[key] = value[value.length - 1];
+        }
       }
     }
     return data;
