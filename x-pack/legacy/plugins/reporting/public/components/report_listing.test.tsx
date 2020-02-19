@@ -63,12 +63,7 @@ import { ReportListing } from './report_listing';
 describe('ReportListing', () => {
   it('Report job listing with some items', () => {
     const wrapper = mountWithIntl(
-      <ReportListing
-        badLicenseMessage=""
-        showLinks={false}
-        enableLinks={false}
-        redirect={jest.fn()}
-      />
+      <ReportListing badLicenseMessage="" showLinks={false} enableLinks={false} />
     );
     wrapper.update();
     const input = wrapper.find('[data-test-subj="reportJobListing"]');
