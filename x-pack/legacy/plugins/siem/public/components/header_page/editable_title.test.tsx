@@ -158,5 +158,11 @@ describe('EditableTitle', () => {
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
+    expect(
+      wrapper
+        .find('[data-test-subj="editable-title-edit-icon"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 });
