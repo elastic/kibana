@@ -74,7 +74,7 @@ exports.runStorybookCli = config => {
           });
 
           // Line is only reached when building the static version
-          process.exit();
+          if (flags.site) process.exit();
         }),
       ]);
     },
