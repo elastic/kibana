@@ -22,6 +22,8 @@ export interface ThreatParams {
   technique: IMitreAttack[];
 }
 
+export type RuleType = 'query' | 'saved_query' | 'machine_learning';
+
 export interface RuleAlertParams {
   description: string;
   note: string | undefined | null;
@@ -48,7 +50,7 @@ export interface RuleAlertParams {
   timelineId: string | undefined | null;
   timelineTitle: string | undefined | null;
   threat: ThreatParams[] | undefined | null;
-  type: 'query' | 'saved_query';
+  type: RuleType;
   version: number;
   throttle?: string;
 }

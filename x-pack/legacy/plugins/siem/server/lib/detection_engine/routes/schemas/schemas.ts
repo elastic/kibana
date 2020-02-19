@@ -7,6 +7,7 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
+export const anomaly_threshold = Joi.number();
 export const description = Joi.string();
 export const enabled = Joi.boolean();
 export const exclude_export_details = Joi.boolean();
@@ -48,7 +49,8 @@ export const risk_score = Joi.number()
 export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
-export const type = Joi.string().valid('query', 'saved_query');
+export const type = Joi.string().valid('query', 'saved_query', 'machine_learning');
+export const ml_job_id = Joi.string();
 export const queryFilter = Joi.string();
 export const references = Joi.array()
   .items(Joi.string())
