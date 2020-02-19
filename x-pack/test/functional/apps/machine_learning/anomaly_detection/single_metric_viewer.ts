@@ -47,6 +47,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/farequote');
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

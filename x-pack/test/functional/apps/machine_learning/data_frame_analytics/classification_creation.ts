@@ -15,6 +15,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/bm_classification');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -31,7 +32,7 @@ export default function({ getService }: FtrProviderContext) {
           "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
         source: 'bank-marketing*',
         get destinationIndex(): string {
-          return `dest_${this.jobId}`;
+          return `user-${this.jobId}`;
         },
         dependentVariable: 'y',
         trainingPercent: '20',
