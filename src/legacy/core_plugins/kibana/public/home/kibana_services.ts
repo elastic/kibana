@@ -31,8 +31,8 @@ import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
-  FeatureCatalogueEntry,
   TutorialStart,
+  HomePublicPluginStart,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
@@ -43,7 +43,7 @@ export interface HomeKibanaServices {
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
-  directories: readonly FeatureCatalogueEntry[];
+  featureCatalogue: HomePublicPluginStart['featureCatalogue'];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
