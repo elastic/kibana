@@ -5,7 +5,7 @@
  */
 import { createHash } from 'crypto';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+
 import { parseDuration } from '../../../../../../../plugins/alerting/server';
 
 export const generateId = (
@@ -26,34 +26,25 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
   }
 };
 
-export const parseScheduleDates = (time: string): moment.Moment | null => {
-  const isValidDateString = !isNaN(Date.parse(time));
-  const isValidInput = isValidDateString || time.trim().startsWith('now');
-  const formattedDate = isValidDateString
-    ? moment(time)
-    : isValidInput
-    ? dateMath.parse(time)
-    : null;
-
-  return formattedDate ?? null;
-};
-
 export const getDriftTolerance = ({
   from,
   to,
   interval,
-  now = moment(),
 }: {
   from: string;
   to: string;
   interval: moment.Duration;
-  now?: moment.Moment;
 }): moment.Duration | null => {
-  const toDate = parseScheduleDates(to) ?? now;
-  const fromDate = parseScheduleDates(from) ?? dateMath.parse('now-6m');
-  const timeSegment = toDate.diff(fromDate);
-  const duration = moment.duration(timeSegment);
-
+  if (to.trim() !== 'now') {
+    // we only support 'now' for drift detection
+    return null;
+  }
+  if (!from.trim().startsWith('now-')) {
+    // we only support from tha starts with now for drift detection
+    return null;
+  }
+  const split = from.split('-');
+  const duration = parseInterval(split[1]);
   if (duration !== null) {
     return duration.subtract(interval);
   } else {
