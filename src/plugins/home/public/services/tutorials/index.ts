@@ -17,26 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-
 export {
-  FeatureCatalogueSetup,
-  FeatureCatalogueStart,
-  EnvironmentSetup,
-  EnvironmentStart,
-  TutorialSetup,
-  TutorialStart,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from './plugin';
-export {
-  FeatureCatalogueEntry,
-  FeatureCatalogueCategory,
-  Environment,
+  TutorialService,
   TutorialVariables,
-} from './services';
-export * from '../common/instruction_variant';
-import { HomePublicPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new HomePublicPlugin(initializerContext);
+  TutorialServiceSetup,
+  TutorialServiceStart,
+} from './tutorial_service';
