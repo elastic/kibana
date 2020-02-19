@@ -18,11 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  ISearchContext,
-  SYNC_SEARCH_STRATEGY,
-  ISearchGeneric,
-} from '../../../src/plugins/data/public';
+import { ISearchContext, SYNC_SEARCH_STRATEGY } from '../../../src/plugins/data/public';
 import { TSearchStrategyProvider, ISearchStrategy } from '../../../src/plugins/data/public';
 
 import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
@@ -54,15 +50,15 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * @param search - a search function to access other strategies that have already been registered.
  */
 export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  search: ISearchGeneric
+  context: ISearchContext
 ): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
+  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const { search } = syncStrategyProvider(context);
   return {
-    search: (request, options) =>
-      search(
-        { ...request, serverStrategy: DEMO_SEARCH_STRATEGY },
-        options,
-        SYNC_SEARCH_STRATEGY
-      ) as Observable<IDemoResponse>,
+    search: (request, options) => {
+      return search({ ...request, serverStrategy: DEMO_SEARCH_STRATEGY }, options) as Observable<
+        IDemoResponse
+      >;
+    },
   };
 };
