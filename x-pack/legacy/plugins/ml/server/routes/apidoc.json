@@ -78,6 +78,12 @@
     "DeleteFilter",
     "GetFiltersStats",
     "Indices",
-    "FieldCaps"
+    "FieldCaps",
+    "SystemRoutes",
+    "HasPrivileges",
+    "MlCapabilities",
+    "MlNodeCount",
+    "MlInfo",
+    "MlEsSearch"
   ]
 }
