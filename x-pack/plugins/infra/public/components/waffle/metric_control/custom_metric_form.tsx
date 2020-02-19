@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiHorizontalRule,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
@@ -28,6 +27,7 @@ import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../common/http_api/snapshot_api';
+import { EuiTheme, withTheme } from '../../../../../../legacy/common/eui_styled_components';
 
 interface SelectedOption {
   label: string;
@@ -49,6 +49,7 @@ const AGGREGATION_LABELS = {
 };
 
 interface Props {
+  theme: EuiTheme;
   metric?: SnapshotCustomMetricInput;
   fields: IFieldType[];
   customMetrics: SnapshotCustomMetricInput[];
@@ -56,167 +57,182 @@ interface Props {
   onCancel: () => void;
 }
 
-export const CustomMetricForm = ({ onCancel, fields, onChange, metric }: Props) => {
-  const [label, setLabel] = useState<string | undefined>(metric ? metric.label : void 0);
-  const [aggregation, setAggregation] = useState<SnapshotCustomAggregation>(
-    metric ? metric.aggregation : 'avg'
-  );
-  const [field, setField] = useState<string | undefined>(metric ? metric.field : void 0);
+export const CustomMetricForm = withTheme(
+  ({ theme, onCancel, fields, onChange, metric }: Props) => {
+    const [label, setLabel] = useState<string | undefined>(metric ? metric.label : void 0);
+    const [aggregation, setAggregation] = useState<SnapshotCustomAggregation>(
+      metric ? metric.aggregation : 'avg'
+    );
+    const [field, setField] = useState<string | undefined>(metric ? metric.field : void 0);
 
-  const handleSubmit = useCallback(() => {
-    if (metric && aggregation && field) {
-      onChange({
-        ...metric,
-        label,
-        aggregation,
-        field,
-      });
-    } else if (aggregation && field) {
-      const newMetric: SnapshotCustomMetricInput = {
-        type: 'custom',
-        id: uuid.v1(),
-        label,
-        aggregation,
-        field,
-      };
-      onChange(newMetric);
-    }
-  }, [metric, aggregation, field, onChange, label]);
+    const handleSubmit = useCallback(() => {
+      if (metric && aggregation && field) {
+        onChange({
+          ...metric,
+          label,
+          aggregation,
+          field,
+        });
+      } else if (aggregation && field) {
+        const newMetric: SnapshotCustomMetricInput = {
+          type: 'custom',
+          id: uuid.v1(),
+          label,
+          aggregation,
+          field,
+        };
+        onChange(newMetric);
+      }
+    }, [metric, aggregation, field, onChange, label]);
 
-  const handleLabelChange = useCallback(
-    e => {
-      setLabel(e.target.value);
-    },
-    [setLabel]
-  );
+    const handleLabelChange = useCallback(
+      e => {
+        setLabel(e.target.value);
+      },
+      [setLabel]
+    );
 
-  const handleFieldChange = useCallback(
-    (selectedOptions: SelectedOption[]) => {
-      setField(selectedOptions[0].label);
-    },
-    [setField]
-  );
+    const handleFieldChange = useCallback(
+      (selectedOptions: SelectedOption[]) => {
+        setField(selectedOptions[0].label);
+      },
+      [setField]
+    );
 
-  const handleAggregationChange = useCallback(
-    e => {
-      const value = e.target.value;
-      const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
-        ? value
-        : 'avg';
-      setAggregation(aggValue);
-    },
-    [setAggregation]
-  );
+    const handleAggregationChange = useCallback(
+      e => {
+        const value = e.target.value;
+        const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
+          ? value
+          : 'avg';
+        setAggregation(aggValue);
+      },
+      [setAggregation]
+    );
 
-  const fieldOptions = fields
-    .filter(f => f.aggregatable && f.type === 'number' && !(field && field === f.name))
-    .map(f => ({ label: f.name }));
+    const fieldOptions = fields
+      .filter(f => f.aggregatable && f.type === 'number' && !(field && field === f.name))
+      .map(f => ({ label: f.name }));
 
-  const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map(k => ({
-    text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
-    value: k,
-  }));
+    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map(k => ({
+      text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
+      value: k,
+    }));
 
-  const isSubmitDisabled = !field || !aggregation;
+    const isSubmitDisabled = !field || !aggregation;
 
-  const title = metric
-    ? i18n.translate('xpack.waffle.customMetricPanelLabel.edit', {
-        defaultMessage: 'Edit custom metric',
-      })
-    : i18n.translate('xpack.waffle.customMetricPanelLabel.add', {
-        defaultMessage: 'Add custom metric',
-      });
+    const title = metric
+      ? i18n.translate('xpack.waffle.customMetricPanelLabel.edit', {
+          defaultMessage: 'Edit custom metric',
+        })
+      : i18n.translate('xpack.waffle.customMetricPanelLabel.add', {
+          defaultMessage: 'Add custom metric',
+        });
 
-  return (
-    <div style={{ width: 685 }}>
-      <EuiForm>
-        <EuiPopoverTitle>{title}</EuiPopoverTitle>
-        <div style={{ padding: 16 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.waffle.customMetrics.metricLabel', {
-              defaultMessage: 'Metric',
-            })}
-            display="rowCompressed"
-            fullWidth
+    return (
+      <div style={{ width: 685 }}>
+        <EuiForm>
+          <EuiPopoverTitle>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={onCancel}
+              color="text"
+              size="xs"
+              flush="left"
+              style={{ fontWeight: 700, textTransform: 'uppercase' }}
+            >
+              {title}
+            </EuiButtonEmpty>
+          </EuiPopoverTitle>
+          <div
+            style={{
+              padding: theme.eui.paddingSizes.m,
+              borderBottom: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+            }}
           >
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  onChange={handleAggregationChange}
-                  value={aggregation}
-                  options={aggregationOptions}
-                  fullWidth
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued">
-                  <span>of</span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiComboBox
-                  fullWidth
-                  placeholder={i18n.translate('xpack.infra.waffle.customMetrics.fieldPlaceholder', {
-                    defaultMessage: 'Select a field',
-                  })}
-                  singleSelection={{ asPlainText: true }}
-                  selectedOptions={field ? [{ label: field }] : []}
-                  options={fieldOptions}
-                  onChange={handleFieldChange}
-                  isClearable={false}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.waffle.customMetrics.labelLabel', {
-              defaultMessage: 'Label (optional)',
-            })}
-            display="rowCompressed"
-            fullWidth
-          >
-            <EuiFieldText
-              name="label"
-              placeholder={i18n.translate('xpack.waffle.customMetrics.labelPlaceholder', {
-                defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
+            <EuiFormRow
+              label={i18n.translate('xpack.waffle.customMetrics.metricLabel', {
+                defaultMessage: 'Metric',
               })}
-              compressed
-              value={label}
+              display="rowCompressed"
               fullWidth
-              onChange={handleLabelChange}
-            />
-          </EuiFormRow>
-        </div>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFlexGroup style={{ padding: '6px 16px 16px' }} alignItems="center">
-          <EuiFlexItem>
-            <div>
-              <EuiButtonEmpty onClick={onCancel} size="s" flush="left">
-                <FormattedMessage
-                  id="xpack.infra.waffle.customMetrics.cancelLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <div style={{ textAlign: 'right' }}>
-              <EuiButton
-                type="submit"
-                size="s"
-                fill
-                onClick={handleSubmit}
-                disabled={isSubmitDisabled}
-              >
-                <FormattedMessage
-                  id="xpack.infra.waffle.customMetrics.submitLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiForm>
-    </div>
-  );
-};
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    onChange={handleAggregationChange}
+                    value={aggregation}
+                    options={aggregationOptions}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <span>of</span>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiComboBox
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.infra.waffle.customMetrics.fieldPlaceholder',
+                      {
+                        defaultMessage: 'Select a field',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={field ? [{ label: field }] : []}
+                    options={fieldOptions}
+                    onChange={handleFieldChange}
+                    isClearable={false}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.waffle.customMetrics.labelLabel', {
+                defaultMessage: 'Label (optional)',
+              })}
+              display="rowCompressed"
+              fullWidth
+            >
+              <EuiFieldText
+                name="label"
+                placeholder={i18n.translate('xpack.waffle.customMetrics.labelPlaceholder', {
+                  defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
+                })}
+                value={label}
+                fullWidth
+                onChange={handleLabelChange}
+              />
+            </EuiFormRow>
+          </div>
+          <div style={{ padding: theme.eui.paddingSizes.m, textAlign: 'right' }}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              size="s"
+              style={{ paddingRight: theme.eui.paddingSizes.xl }}
+            >
+              <FormattedMessage
+                id="xpack.infra.waffle.customMetrics.cancelLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+            <EuiButton
+              type="submit"
+              size="s"
+              fill
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+            >
+              <FormattedMessage
+                id="xpack.infra.waffle.customMetrics.submitLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </div>
+        </EuiForm>
+      </div>
+    );
+  }
+);

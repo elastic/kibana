@@ -5,10 +5,13 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { EuiTheme, withTheme } from '../../../../../../legacy/common/eui_styled_components';
 
 interface Props {
+  theme: EuiTheme;
   onEdit: () => void;
   onAdd: () => void;
   onSave: () => void;
@@ -17,53 +20,66 @@ interface Props {
   customMetrics: SnapshotCustomMetricInput[];
 }
 
-export const ModeSwitcher = ({
-  onSave,
-  onEditCancel,
-  onEdit,
-  onAdd,
-  mode,
-  customMetrics,
-}: Props) => {
-  if (['editMetric', 'addMetric'].includes(mode)) {
-    return null;
+export const ModeSwitcher = withTheme(
+  ({ onSave, onEditCancel, onEdit, onAdd, mode, customMetrics, theme }: Props) => {
+    if (['editMetric', 'addMetric'].includes(mode)) {
+      return null;
+    }
+    return (
+      <div
+        style={{
+          borderTop: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+          padding: 12,
+        }}
+      >
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {mode === 'edit' ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty size="s" flush="left" onClick={onEditCancel}>
+                  <FormattedMessage
+                    id="xpack.infra.waffle.customMetrics.modeSwitcher.cancel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onSave} size="s" fill>
+                  Save
+                  <FormattedMessage
+                    id="xpack.infra.waffle.customMetrics.modeSwitcher.saveButton"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </>
+          ) : (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="left"
+                  onClick={onEdit}
+                  disabled={customMetrics.length === 0}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.waffle.customMetrics.modeSwitcher.edit"
+                    defaultMessage="Edit"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onAdd} size="s" flush="right">
+                  <FormattedMessage
+                    id="xpack.infra.waffle.customMetrics.modeSwitcher.addMetric"
+                    defaultMessage="Add metric"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
+      </div>
+    );
   }
-  return (
-    <div style={{ borderTop: '1px solid #DDD', padding: 12 }}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {mode === 'edit' ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" flush="left" onClick={onEditCancel}>
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={onSave} size="s" fill>
-                Save
-              </EuiButton>
-            </EuiFlexItem>
-          </>
-        ) : (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                flush="left"
-                onClick={onEdit}
-                disabled={customMetrics.length === 0}
-              >
-                Edit metrics
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onAdd} size="s" flush="right">
-                Add metric
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
-        )}
-      </EuiFlexGroup>
-    </div>
-  );
-};
+);

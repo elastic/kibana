@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { getCustomMetricLabel } from './get_custom_metric_label';
-import { EuiTheme, withTheme } from '../../../../../../common/eui_styled_components';
+import { EuiTheme, withTheme } from '../../../../../../legacy/common/eui_styled_components';
 
 interface Props {
   theme: EuiTheme;
@@ -37,7 +37,9 @@ export const MetricsEditMode = withTheme(
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH }}>
               <EuiButtonIcon iconType="pencil" onClick={() => onEdit(metric)} />
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>{getCustomMetricLabel(metric)}</EuiFlexItem>
+            <EuiFlexItem grow={1} style={{ overflow: 'hidden' }}>
+              {getCustomMetricLabel(metric)}
+            </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH, textAlign: 'right' }}>
               <EuiButtonIcon iconType="trash" color="danger" onClick={() => onDelete(metric)} />
             </EuiFlexItem>
