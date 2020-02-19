@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
 import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import { CaseService } from './services';
 import { SecurityPluginSetup } from '../../security/server';
+
+function createConfig$(context: PluginInitializerContext) {
+  return context.config.create<ConfigType>().pipe(map(config => config));
+}
 
 export interface PluginsSetup {
   security: SecurityPluginSetup;
@@ -21,6 +27,14 @@ export class CasePlugin {
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
+    const config = await createConfig$(this.initializerContext)
+      .pipe(first())
+      .toPromise();
+
+    if (!config.enabled) {
+      return;
+    }
+
     const service = new CaseService(this.log);
 
     this.log.debug(

@@ -41,6 +41,11 @@ export const UpdatedCaseSchema = schema.object({
   title: schema.maybe(schema.string()),
 });
 
+export const UpdateCaseArguments = schema.object({
+  case: UpdatedCaseSchema,
+  version: schema.string(),
+});
+
 export const SavedObjectsFindOptionsSchema = schema.object({
   defaultSearchOperator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
   fields: schema.maybe(schema.arrayOf(schema.string())),

@@ -62,12 +62,13 @@ export const createCase = async (newCase: NewCase): Promise<Case> => {
 
 export const updateCaseProperty = async (
   caseId: string,
-  updatedCase: Partial<Case>
+  updatedCase: Partial<Case>,
+  version: string
 ): Promise<Partial<Case>> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'PATCH',
     asResponse: true,
-    body: JSON.stringify(updatedCase),
+    body: JSON.stringify({ case: updatedCase, version }),
   });
   await throwIfNotOk(response.response);
   return convertUpdateCaseToCamel(response.body!);

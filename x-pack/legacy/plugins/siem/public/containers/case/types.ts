@@ -25,6 +25,7 @@ export interface CaseSnake {
   tags: string[];
   title: string;
   updated_at: string;
+  version?: string;
 }
 
 export interface Case {
@@ -36,6 +37,7 @@ export interface Case {
   tags: string[];
   title: string;
   updatedAt: string;
+  version?: string;
 }
 
 export interface QueryParams {

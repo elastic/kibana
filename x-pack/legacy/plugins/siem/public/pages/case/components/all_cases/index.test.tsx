@@ -24,7 +24,7 @@ describe('AllCases', () => {
       .spyOn(apiHook, 'useGetCases')
       .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
-    mockUseTimeZone.mockImplementation(() => 'UTC');
+    mockUseTimeZone.mockImplementation(() => 'US/Eastern');
   });
   it('should render AllCases', () => {
     const wrapper = mount(

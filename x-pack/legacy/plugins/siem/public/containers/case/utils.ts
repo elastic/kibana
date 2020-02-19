@@ -20,6 +20,7 @@ export const convertCaseToCamel = (snakeCase: CaseSnake): Case => ({
   tags: snakeCase.tags,
   title: snakeCase.title,
   updatedAt: snakeCase.updated_at,
+  version: snakeCase.version,
 });
 
 export const convertAllCasesToCamel = (snakeCases: AllCasesSnake): AllCases => ({
@@ -62,6 +63,9 @@ export const convertUpdateCaseToCamel = (snakeCase: Partial<CaseSnake>): Partial
         break;
       case 'updated_at':
         updateCase.updatedAt = snakeCase.updated_at;
+        break;
+      case 'version':
+        updateCase.version = snakeCase.version;
         break;
       default:
         return null;

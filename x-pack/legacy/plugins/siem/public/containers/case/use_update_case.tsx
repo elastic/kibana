@@ -96,7 +96,11 @@ export const useUpdateCase = (
     const updateData = async (updateKey: keyof Case) => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await updateCaseProperty(caseId, { [updateKey]: state.data[updateKey] });
+        const response = await updateCaseProperty(
+          caseId,
+          { [updateKey]: state.data[updateKey] },
+          state.data.version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+        );
         dispatch({ type: FETCH_SUCCESS, payload: response });
       } catch (error) {
         errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
