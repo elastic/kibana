@@ -127,6 +127,27 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   },
                 },
                 {
+                  loader: 'resolve-url-loader',
+                  options: {
+                    join: (_: string, __: any) => (uri: string, base?: string) => {
+                      if (!base) {
+                        return null;
+                      }
+
+                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
+                      if (uri.startsWith('ui/') && base.split(Path.sep).includes('legacy')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/legacy/ui/public',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
+                      return null;
+                    },
+                  },
+                },
+                {
                   loader: 'sass-loader',
                   options: {
                     sourceMap: !worker.dist,
