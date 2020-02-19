@@ -74,10 +74,11 @@ class EsInitializationSteps {
   }
 
   async migrateIndexTemplate() {
+    const updatedTemplateBody = getIndexTemplate(this.esContext.esNames);
     const existingTemplate = await this.esContext.esAdapter.getIndexTemplate(
       this.esContext.esNames.indexTemplate
     );
-    const updatedTemplateBody = getIndexTemplate(this.esContext.esNames);
+
     if (updatedTemplateBody.version > existingTemplate.version) {
       await this.esContext.esAdapter.updateIndexTemplate(
         this.esContext.esNames.indexTemplate,
@@ -91,6 +92,10 @@ class EsInitializationSteps {
           },
         },
       });
+    } else if (updatedTemplateBody.version < existingTemplate.version) {
+      throw new Error(
+        `Index template belongs to a more recent version of Kibana (${existingTemplate.version})`
+      );
     }
   }
 }
