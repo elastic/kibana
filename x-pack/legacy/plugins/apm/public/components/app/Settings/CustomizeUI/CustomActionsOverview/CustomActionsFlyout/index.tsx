@@ -13,27 +13,51 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPortal,
-  // EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
+  EuiSelect,
+  EuiFieldText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-// import { SettingsSection } from './SettingsSection';
-// import { ServiceForm } from '../../../../../shared/ServiceForm';
+import React, { useState } from 'react';
+import { isEmpty } from 'lodash';
+import { FormType, useForm } from './useForm';
+import { FieldsSection, Field } from './FieldsSection';
 
 interface Props {
   onClose: () => void;
 }
 
+const actionFields: FormType = [
+  {
+    type: 'text',
+    name: 'label',
+    label: 'Label',
+    helpText: 'Labels can be a maximum of 128 characters',
+    placeholder: 'e.g. Support tickets'
+  },
+  {
+    type: 'text',
+    name: 'url',
+    label: 'URL',
+    helpText: 'You can use relative paths by prefixing with e.g. /dashboards',
+    placeholder: 'e.g. https://www.elastic.co/'
+  }
+];
+
 export const CustomActionsFlyout = ({ onClose }: Props) => {
-  // const [serviceName, setServiceName] = useState('');
-  // const [environment, setEnvironment] = useState('');
-  // const [label, setLabel] = useState('');
-  // const [url, setURL] = useState('');
+  const { label, url, Form } = useForm({
+    fields: actionFields,
+    title: i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.flyOut.action.title',
+      { defaultMessage: 'Action' }
+    )
+  });
+  const [fields, setFields] = useState([] as Field[]);
+
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={onClose} size="s">
+      <EuiFlyout ownFocus onClose={onClose} size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2>
@@ -58,23 +82,9 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
               )}
             </p>
           </EuiText>
-          {/* <EuiSpacer size="l" />
-          <ServiceForm
-            isReadOnly={false}
-            serviceName={serviceName}
-            onServiceNameChange={setServiceName}
-            environment={environment}
-            onEnvironmentChange={setEnvironment}
-          /> */}
+          <Form />
 
-          {/* <EuiSpacer size="l" />
-
-          <SettingsSection
-            label={label}
-            onLabelChange={setLabel}
-            url={url}
-            onURLChange={setURL}
-          /> */}
+          <FieldsSection onFieldsChange={setFields} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -89,10 +99,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                // TODO: onClick={closeFlyout}
-                fill
-              >
+              <EuiButton fill>
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyout.save',
                   {
