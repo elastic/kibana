@@ -19,8 +19,8 @@
 
 export { aggTypes } from './agg_types';
 export { AggType } from './agg_type';
-export { AggConfig, IAggConfig } from './agg_config';
-export { AggConfigs, IAggConfigs } from './agg_configs';
+export { AggConfig } from './agg_config';
+export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
 export { MetricAggType } from './metrics/metric_agg_type';
 export { AggTypeFilters } from './filter';
@@ -51,3 +51,6 @@ export { isValidJson, isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
+
+// types
+export { IAggConfig, IAggConfigs } from './types';

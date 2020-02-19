@@ -20,9 +20,7 @@
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { tabifyAggResponse } from './tabify';
 import { IAggConfig, IAggConfigs, AggGroupNames, Schemas, AggConfigs } from '../aggs';
-
-// @ts-ignore
-import fixtures from '../../../../../../fixtures/fake_hierarchical_data';
+import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 
 jest.mock('ui/new_platform');
 
@@ -60,7 +58,7 @@ describe('tabifyAggResponse Integration', () => {
   test('transforms a simple response properly', () => {
     const aggConfigs = createAggConfigs();
 
-    const resp = tabifyAggResponse(aggConfigs, fixtures.metricOnly, {
+    const resp = tabifyAggResponse(aggConfigs, metricOnly, {
       metricsAtAllLevels: true,
     });
 
@@ -79,7 +77,7 @@ describe('tabifyAggResponse Integration', () => {
     let ext: IAggConfig;
     let src: IAggConfig;
     let os: IAggConfig;
-    let esResp: typeof fixtures.threeTermBuckets;
+    let esResp: typeof threeTermBuckets;
     let aggConfigs: IAggConfigs;
 
     beforeEach(() => {
@@ -92,7 +90,7 @@ describe('tabifyAggResponse Integration', () => {
 
       [avg, ext, src, os] = aggConfigs.aggs;
 
-      esResp = fixtures.threeTermBuckets;
+      esResp = threeTermBuckets;
       esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
     });
 

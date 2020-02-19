@@ -17,16 +17,14 @@
  * under the License.
  */
 
-const data = {};
-
-data.metricOnly = {
+export const metricOnly = {
   hits: { total: 1000, hits: [], max_score: 0 },
   aggregations: {
     agg_1: { value: 412032 },
   },
 };
 
-data.threeTermBuckets = {
+export const threeTermBuckets = {
   hits: { total: 1000, hits: [], max_score: 0 },
   aggregations: {
     agg_2: {
@@ -129,7 +127,7 @@ data.threeTermBuckets = {
   },
 };
 
-data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
+export const oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
   hits: { total: 1000, hits: [], max_score: 0 },
   aggregations: {
     agg_3: {
@@ -520,7 +518,7 @@ data.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = {
   },
 };
 
-data.oneRangeBucket = {
+export const oneRangeBucket = {
   took: 35,
   timed_out: false,
   _shards: {
@@ -555,7 +553,7 @@ data.oneRangeBucket = {
   },
 };
 
-data.oneFilterBucket = {
+export const oneFilterBucket = {
   took: 11,
   timed_out: false,
   _shards: {
@@ -582,7 +580,7 @@ data.oneFilterBucket = {
   },
 };
 
-data.oneHistogramBucket = {
+export const oneHistogramBucket = {
   took: 37,
   timed_out: false,
   _shards: {
@@ -632,5 +630,3 @@ data.oneHistogramBucket = {
     },
   },
 };
-
-export default data;

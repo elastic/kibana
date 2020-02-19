@@ -28,6 +28,9 @@ type AggParams = IAggConfig['params'] & {
   ranges: TimeRange[];
 };
 
+const isRangeEqual = (range1: TimeRange, range2: TimeRange) =>
+  range1?.from === range2?.from && range1?.to === range2?.to;
+
 export class TabifyBuckets {
   length: number;
   objectMode: boolean;
@@ -75,13 +78,6 @@ export class TabifyBuckets {
     }
   }
 
-  private isRangeEqual(range1: TimeRange, range2: TimeRange) {
-    return (
-      get(range1, 'from', null) === get(range2, 'from', null) &&
-      get(range1, 'to', null) === get(range2, 'to', null)
-    );
-  }
-
   private orderBucketsAccordingToParams(params: AggParams) {
     if (params.filters && this.objectMode) {
       this._keys = params.filters.map((filter: any) => {
@@ -91,7 +87,7 @@ export class TabifyBuckets {
       });
     } else if (params.ranges && this.objectMode) {
       this._keys = params.ranges.map((range: TimeRange) => {
-        return findKey(this.buckets, (el: TimeRange) => this.isRangeEqual(el, range));
+        return findKey(this.buckets, (el: TimeRange) => isRangeEqual(el, range));
       });
     } else if (params.ranges && params.field.type !== 'date') {
       let ranges = params.ranges;
@@ -103,7 +99,7 @@ export class TabifyBuckets {
           return this.buckets.find((el: AggResponseBucket) => el.key === range.mask);
         }
 
-        return this.buckets.find((el: TimeRange) => this.isRangeEqual(el, range));
+        return this.buckets.find((el: TimeRange) => isRangeEqual(el, range));
       });
     }
   }

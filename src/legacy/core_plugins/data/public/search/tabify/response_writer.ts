@@ -25,7 +25,7 @@ import { TabbedResponseWriterOptions } from './types';
 
 interface TabbedAggColumn {
   id: string;
-  value: any;
+  value: unknown;
 }
 
 type TabbedAggRow = Record<TabbedAggColumn['id'], TabbedAggColumn['value']>;
