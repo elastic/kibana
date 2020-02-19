@@ -89,6 +89,7 @@ export default function(providerContext: FtrProviderContext) {
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               subtype: 'STARTING',
               message: 'State change: STARTING',
+              agent_id: 'agent1',
             },
           ],
           local_metadata: {
