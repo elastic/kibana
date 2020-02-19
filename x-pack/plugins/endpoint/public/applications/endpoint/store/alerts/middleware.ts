@@ -8,7 +8,7 @@ import { HttpFetchQuery } from 'kibana/public';
 import { AlertResultList } from '../../../../../common/types';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListState } from '../../types';
-import { isOnAlertPage, paginationDataFromUrl } from './selectors';
+import { isOnAlertPage, queryParams } from './selectors';
 
 export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreStart => {
   return api => next => async (action: AppAction) => {

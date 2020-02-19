@@ -38,8 +38,7 @@ export const isOnAlertPage = (state: AlertListState): boolean => {
  * The query value passed when requesting alert list data from the server.
  * Also used to get new client side URLs.
  */
-// TODO rename to alertIndexQueryParams
-export const paginationDataFromUrl: (
+export const queryParams: (
   state: AlertListState
 ) => Immutable<AlertIndexQueryParams> = createSelector(
   (state: AlertListState) => state.location,
@@ -77,7 +76,7 @@ export const urlFromNewPageSizeParam: (
   state: AlertListState
 ) => (newPageSize: number) => string = state => {
   return newPageSize => {
-    const urlPaginationData: AlertIndexQueryParams = { ...paginationDataFromUrl(state) };
+    const urlPaginationData: AlertIndexQueryParams = { ...queryParams(state) };
     urlPaginationData.page_size = newPageSize.toString();
 
     // Only set the url back to page zero if the user has changed the page index already
@@ -95,7 +94,7 @@ export const urlFromNewPageIndexParam: (
   state: AlertListState
 ) => (newPageIndex: number) => string = state => {
   return newPageIndex => {
-    const urlPaginationData: AlertIndexQueryParams = { ...paginationDataFromUrl(state) };
+    const urlPaginationData: AlertIndexQueryParams = { ...queryParams(state) };
     urlPaginationData.page_index = newPageIndex.toString();
     return '?' + qs.stringify(urlPaginationData);
   };
@@ -108,7 +107,7 @@ export const urlWithSelectedAlert: (
   state: AlertListState
 ) => (alertID: string) => string = state => {
   return (alertID: string) => {
-    const urlPaginationData = { ...paginationDataFromUrl(state) };
+    const urlPaginationData = { ...queryParams(state) };
     urlPaginationData.selected_alert = alertID;
     return '?' + qs.stringify(urlPaginationData);
   };
@@ -118,7 +117,7 @@ export const urlWithSelectedAlert: (
  * Returns a url like the current one, but with no alert id
  */
 export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
-  paginationDataFromUrl,
+  queryParams,
   urlPaginationData => {
     // TODO, different pattern for calculating URL w/ and w/o qs values
     const newUrlPaginationData = { ...urlPaginationData };
@@ -128,6 +127,6 @@ export const urlWithoutSelectedAlert: (state: AlertListState) => string = create
 );
 
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
-  paginationDataFromUrl,
+  queryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
