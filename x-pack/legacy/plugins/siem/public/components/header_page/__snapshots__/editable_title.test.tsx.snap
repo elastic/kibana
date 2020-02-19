@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditableTitle it renders 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <Memo(TitleComponent)
+      title="Test title"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <StyledEuiButtonIcon
+      aria-label="You can edit Test title by clicking"
+      data-test-subj="editable-title-edit-icon"
+      iconType="pencil"
+      onClick={[Function]}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
