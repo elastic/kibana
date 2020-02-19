@@ -161,7 +161,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                     totalCountMinusDeleted
                   ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
-                  // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
                   return (
                     <>
                       <HeaderSection
