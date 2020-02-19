@@ -492,7 +492,6 @@ describe('getSortedObjectsForExport()', () => {
     const exportStream = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
-      types: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',
@@ -591,7 +590,6 @@ describe('getSortedObjectsForExport()', () => {
     const exportStream = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
-      types: ['index-pattern', 'search'],
       objects: [
         {
           type: 'search',
@@ -672,7 +670,6 @@ describe('getSortedObjectsForExport()', () => {
     const exportOpts = {
       exportSizeLimit: 1,
       savedObjectsClient,
-      types: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',

@@ -11,7 +11,11 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  IndexPatternsContract,
+  IndexPattern,
+  TimefilterContract,
+} from '../../../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
@@ -27,6 +31,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
   constructor(
+    private timefilter: TimefilterContract,
     private coreHttp: HttpSetup,
     private capabilities: RecursiveReadonly<Capabilities>,
     private savedObjectsClient: SavedObjectsClientContract,
@@ -85,6 +90,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     );
 
     return new Embeddable(
+      this.timefilter,
       this.expressionRenderer,
       {
         savedVis,

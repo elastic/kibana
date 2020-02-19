@@ -21,11 +21,10 @@ import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../common/search';
 import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
 import { getEsPreference } from './get_es_preference';
-import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
+import { ISearchContext, TSearchStrategyProvider, ISearchStrategy } from '../types';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  search: ISearchGeneric
+  context: ISearchContext
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
     search: (request, options) => {
@@ -34,10 +33,10 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         const customPreference = context.core.uiSettings.get('courier:customRequestPreference');
         request.params.preference = getEsPreference(setPreference, customPreference);
       }
-      return search(
+      const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+      return syncStrategyProvider(context).search(
         { ...request, serverStrategy: ES_SEARCH_STRATEGY },
-        options,
-        SYNC_SEARCH_STRATEGY
+        options
       ) as Observable<IEsSearchResponse>;
     },
   };
