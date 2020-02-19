@@ -162,16 +162,14 @@ describe('Custom Links', () => {
           .at(0)
           .childAt(0)
           .prop('href')
-      ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
+      ).toEqual('');
       expect(
         wrapper
           .find('EuiLink')
           .at(1)
           .childAt(0)
           .prop('href')
-      ).toEqual(
-        "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
-      );
+      ).toEqual('');
     });
 
     test('it renders correct number of links', () => {
