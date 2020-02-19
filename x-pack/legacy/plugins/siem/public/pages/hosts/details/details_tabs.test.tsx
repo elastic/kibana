@@ -37,7 +37,7 @@ jest.mock('../../../components/query_bar', () => ({
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('body', () => {

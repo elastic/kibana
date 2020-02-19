@@ -31,7 +31,7 @@ const testFlyoutHeight = 980;
 jest.mock('../../lib/kibana');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer');
+jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {
