@@ -45,7 +45,6 @@ export const ModeSwitcher = withTheme(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={onSave} size="s" fill>
-                  Save
                   <FormattedMessage
                     id="xpack.infra.waffle.customMetrics.modeSwitcher.saveButton"
                     defaultMessage="Save"
