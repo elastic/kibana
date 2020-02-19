@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../kibana_services';
 
 import {
   EuiButton,

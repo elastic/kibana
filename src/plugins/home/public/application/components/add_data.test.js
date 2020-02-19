@@ -20,9 +20,9 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../kibana_services';
 
-jest.mock('../../kibana_services', () => {
+jest.mock('../kibana_services', () => {
   const mock = {
     getBasePath: jest.fn(() => 'path'),
   };

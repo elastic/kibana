@@ -24,9 +24,9 @@ import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
 
-import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
+import { FeatureCatalogueCategory } from '../../services';
 
-jest.mock('../../kibana_services', () => ({
+jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),

@@ -31,7 +31,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
+import { FeatureCatalogueCategory } from '../../services';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

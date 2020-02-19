@@ -38,8 +38,8 @@ import {
 } from '@elastic/eui';
 
 import { Welcome } from './welcome';
-import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../kibana_services';
+import { FeatureCatalogueCategory } from '../../services';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 

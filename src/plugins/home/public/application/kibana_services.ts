@@ -27,14 +27,12 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
-import {
-  Environment,
-  HomePublicPluginSetup,
-  TutorialStart,
-  HomePublicPluginStart,
-} from '../../../../../plugins/home/public';
-import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { TelemetryPluginStart } from '../../../telemetry/public';
+import { KibanaLegacySetup } from '../../../kibana_legacy/public';
+import { TutorialService } from '../services/tutorials';
+import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import { EnvironmentService } from '../services/environment';
+import { ConfigSchema } from '../../config';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -42,8 +40,8 @@ export interface HomeKibanaServices {
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
-  homeConfig: HomePublicPluginSetup['config'];
-  featureCatalogue: HomePublicPluginStart['featureCatalogue'];
+  homeConfig: ConfigSchema;
+  featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
@@ -52,9 +50,9 @@ export interface HomeKibanaServices {
   getBasePath: () => string;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
-  environment: Environment;
+  environmentService: EnvironmentService;
   telemetry?: TelemetryPluginStart;
-  tutorialVariables: TutorialStart['get'];
+  tutorialService: TutorialService;
 }
 
 let services: HomeKibanaServices | null = null;

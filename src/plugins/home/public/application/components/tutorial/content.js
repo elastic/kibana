@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { HomePlugin } from './plugin';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Markdown } from '../../../../../kibana_react/public';
 
-const instance = new HomePlugin({
-  env: npSetup.plugins.kibanaLegacy.env,
-} as PluginInitializerContext);
-instance.setup(npSetup.core, npSetup.plugins);
+const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
 
-instance.start(npStart.core, npStart.plugins);
+export function Content({ text }) {
+  return (
+    <Markdown
+      className="euiText"
+      markdown={text}
+      openLinksInNewTab={true}
+      whiteListedRules={whiteListedRules}
+    />
+  );
+}
+
+Content.propTypes = {
+  text: PropTypes.string.isRequired,
+};

@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../kibana_services';
 
 export class SampleDataViewDataButton extends React.Component {
   addBasePath = getServices().addBasePath;

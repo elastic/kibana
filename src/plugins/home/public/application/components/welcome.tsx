@@ -37,9 +37,9 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices } from '../../kibana_services';
-import { TelemetryPluginStart } from '../../../../../../../plugins/telemetry/public';
-import { PRIVACY_STATEMENT_URL } from '../../../../../../../plugins/telemetry/common/constants';
+import { getServices } from '../kibana_services';
+import { TelemetryPluginStart } from '../../../../telemetry/public';
+import { PRIVACY_STATEMENT_URL } from '../../../../telemetry/common/constants';
 
 import { SampleDataCard } from './sample_data';
 interface Props {

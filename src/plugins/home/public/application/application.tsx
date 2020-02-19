@@ -22,7 +22,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
-import { getServices } from '../kibana_services';
+import { getServices } from './kibana_services';
+
+import './_index.scss';
 
 export const renderApp = async (element: HTMLElement) => {
   const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });

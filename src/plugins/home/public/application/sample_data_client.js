@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getServices } from '../kibana_services';
+import { getServices } from './kibana_services';
 
 const sampleDataUrl = '/api/sample_data';
 

@@ -18,7 +18,7 @@
  */
 
 import { Writer } from 'mustache';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../kibana_services';
 
 const TEMPLATE_TAGS = ['{', '}'];
 
@@ -33,7 +33,7 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 };
 
 export function replaceTemplateStrings(text, params = {}) {
-  const { tutorialVariables, kibanaVersion, docLinks } = getServices();
+  const { tutorialService, kibanaVersion, docLinks } = getServices();
 
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
@@ -41,7 +41,7 @@ export function replaceTemplateStrings(text, params = {}) {
     curlyOpen: '{',
     curlyClose: '}',
     config: {
-      ...tutorialVariables(),
+      ...tutorialService.getVariables(),
       docs: {
         base_url: docLinks.ELASTIC_WEBSITE_URL,
         beats: {

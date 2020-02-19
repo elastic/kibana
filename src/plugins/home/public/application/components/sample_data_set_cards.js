@@ -24,7 +24,7 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 import { SampleDataSetCard, INSTALLED_STATUS, UNINSTALLED_STATUS } from './sample_data_set_card';
 
-import { getServices } from '../../kibana_services';
+import { getServices } from '../kibana_services';
 
 import {
   listSampleDataSets,
