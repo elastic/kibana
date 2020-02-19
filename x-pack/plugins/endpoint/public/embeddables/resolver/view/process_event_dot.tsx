@@ -21,6 +21,7 @@ export const ProcessEventDot = styled(
       className,
       position,
       event,
+      bgColor,
     }: {
       /**
        * A `className` string provided by `styled`
@@ -34,6 +35,11 @@ export const ProcessEventDot = styled(
        * An event which contains details about the process node.
        */
       event: ProcessEvent;
+      /**
+       * A color that the Resolver is using for the background, to
+       * create a "mask" effect for markers on EdgeLines
+       */
+      bgColor?: string;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -64,18 +70,8 @@ export const ProcessEventDot = styled(
           viewBox="-15 -15 30 30"
           preserveAspectRatio="xMidYMid meet"
           role="treeitem"
-          tabIndex={-1}
           aria-level={event.data_buffer.depth}
         >
-          <use
-            role="presentation"
-            xlinkHref={`#${SymbolIds.processNode}`}
-            x="-15.5"
-            y="-12.5"
-            width="31"
-            height="10"
-            opacity="1"
-          />
           <use
             role="presentation"
             xlinkHref={`#${SymbolIds.solidHexagon}`}
@@ -84,10 +80,24 @@ export const ProcessEventDot = styled(
             width={markerSize(magFactorX)}
             height={markerSize(magFactorX)}
             opacity="1"
+            style={{ stroke: `${bgColor}`, fill: '#FFFFFF' }}
+          />
+          <use
+            role="presentation"
+            xlinkHref={
+              magFactorX >= 1.75
+                ? `#${SymbolIds.processNodeWithHorizontalRule}`
+                : `#${SymbolIds.processNode}`
+            }
+            x="-15.5"
+            y="-12.5"
+            width="31"
+            height="10"
+            opacity="1"
           />
           <text
             x="0"
-            y="-7.5"
+            y={magFactorX >= 1.75 ? '-6' : '-7.5'}
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
@@ -95,6 +105,7 @@ export const ProcessEventDot = styled(
             stroke={NamedColors.strokeBehindEmpty}
             strokeWidth=".35"
             paintOrder="stroke"
+            tabIndex={-1}
           >
             {event.data_buffer.process_name}
           </text>
@@ -112,29 +123,10 @@ export const ProcessEventDot = styled(
                 strokeWidth=".25"
                 paintOrder="stroke"
               >
-                Process
+                Terminated Process
               </text>
             </>
           ) : null}
-          {magFactorX >= 2.75 && event.data_buffer.signature_status !== 'trusted' ? (
-            <>
-              <text
-                x="0"
-                y="-5.05"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="1.25"
-                fill={NamedColors.warning}
-                stroke={NamedColors.strokeBehindEmpty}
-                strokeWidth=".25"
-                paintOrder="stroke"
-              >
-                No Trusted Signature
-              </text>
-            </>
-          ) : (
-            <></>
-          )}
         </svg>
       );
     }
@@ -151,5 +143,5 @@ export const ProcessEventDot = styled(
   border-radius: 10%;
   padding: 4px;
   white-space: nowrap;
-  outline: 1px solid red;
+  contain: strict;
 `;
