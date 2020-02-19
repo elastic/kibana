@@ -36,7 +36,7 @@ import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
-import { Permission } from '../components/app/Permission';
+import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -51,13 +51,13 @@ const App = () => {
     <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
-      <Permission>
+      <APMIndicesPermission>
         <Switch>
           {routes.map((route, i) => (
             <Route key={i} {...route} />
           ))}
         </Switch>
-      </Permission>
+      </APMIndicesPermission>
     </MainContainer>
   );
 };

@@ -7,32 +7,32 @@
 import { EuiTitle, EuiSpacer, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
-import { useFetcher } from '../../../../../hooks/useFetcher';
 import {
-  getOptionLabel,
-  omitAllOption
-} from '../../../../../../common/agent_configuration_constants';
+  omitAllOption,
+  getOptionLabel
+} from '../../../../common/agent_configuration_constants';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { SelectWithPlaceholder } from '../SelectWithPlaceholder';
 
 const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
-  'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
+  'xpack.apm.settings.agentConf.flyOut.serviceForm.selectPlaceholder',
   { defaultMessage: 'Select' }
 )} -`;
 
 interface Props {
   isReadOnly: boolean;
   serviceName: string;
-  setServiceName: (env: string) => void;
+  onServiceNameChange: (env: string) => void;
   environment: string;
-  setEnvironment: (env: string) => void;
+  onEnvironmentChange: (env: string) => void;
 }
 
-export function ServiceSection({
+export function ServiceForm({
   isReadOnly,
   serviceName,
-  setServiceName,
+  onServiceNameChange,
   environment,
-  setEnvironment
+  onEnvironmentChange
 }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     callApmApi => {
@@ -60,7 +60,7 @@ export function ServiceSection({
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
-    'xpack.apm.settings.agentConf.flyOut.serviceSection.alreadyConfiguredOption',
+    'xpack.apm.settings.agentConf.flyOut.serviceForm.alreadyConfiguredOption',
     { defaultMessage: 'already configured' }
   );
 
@@ -83,7 +83,7 @@ export function ServiceSection({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceSection.title',
+            'xpack.apm.settings.agentConf.flyOut.serviceForm.title',
             { defaultMessage: 'Service' }
           )}
         </h3>
@@ -93,13 +93,13 @@ export function ServiceSection({
 
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectLabel',
+          'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceNameSelectLabel',
           { defaultMessage: 'Name' }
         )}
         helpText={
           !isReadOnly &&
           i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceNameSelectHelpText',
             { defaultMessage: 'Choose the service you want to configure.' }
           )
         }
@@ -115,8 +115,8 @@ export function ServiceSection({
             disabled={serviceNamesStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setServiceName(e.target.value);
-              setEnvironment('');
+              onServiceNameChange(e.target.value);
+              onEnvironmentChange('');
             }}
           />
         )}
@@ -124,13 +124,13 @@ export function ServiceSection({
 
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectLabel',
+          'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceEnvironmentSelectLabel',
           { defaultMessage: 'Environment' }
         )}
         helpText={
           !isReadOnly &&
           i18n.translate(
-            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceForm.serviceEnvironmentSelectHelpText',
             {
               defaultMessage:
                 'Only a single environment per configuration is supported.'
@@ -149,7 +149,7 @@ export function ServiceSection({
             disabled={!serviceName || environmentStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setEnvironment(e.target.value);
+              onEnvironmentChange(e.target.value);
             }}
           />
         )}
