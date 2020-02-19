@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
-import { AlertsContextProvider, AlertAdd } from '../../../../../plugins/triggers_actions_ui/public';
 import {
   EmptyState,
   MonitorList,
@@ -21,7 +20,6 @@ import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plug
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -73,61 +71,31 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   const linkParameters = stringifyUrlParams(params, true);
 
-  const kibana = useKibana();
-  const {
-    services: { triggers_actions_ui: triggers },
-  } = kibana;
-  const {
-    services: {
-      data: { fieldFormats },
-      http,
-      charts,
-      triggers_actions_ui: { actionTypeRegistry, alertTypeRegistry },
-      uiSettings,
-    },
-    notifications: { toasts },
-  } = kibana;
-  const vals = {
-    addFlyoutVisible: true,
-    setAddFlyoutVisibility: () => true,
-    http,
-    actionTypeRegistry,
-    alertTypeRegistry,
-    dataFieldsFormats: fieldFormats,
-    charts,
-    uiSettings,
-    toastNotifications: toasts,
-  };
   return (
-    <>
-      <AlertsContextProvider value={vals}>
-        <AlertAdd consumer="uptime" />
-      </AlertsContextProvider>
-      <EmptyState implementsCustomErrorState={true} variables={{}}>
-        <EuiFlexGroup gutterSize="xs" wrap responsive>
-          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
-            <KueryBar autocomplete={autocomplete} />
-          </EuiFlexItem>
-          <EuiFlexItemStyled grow={true}>
-            <FilterGroup esFilters={esFilters} />
-          </EuiFlexItemStyled>
-          {error && <OverviewPageParsingErrorCallout error={error} />}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <StatusPanel />
-        <EuiSpacer size="s" />
-        <MonitorList
-          dangerColor={colors.danger}
-          hasActiveFilters={!!esFilters}
-          implementsCustomErrorState={true}
-          linkParameters={linkParameters}
-          successColor={colors.success}
-          variables={{
-            ...sharedProps,
-            pagination,
-          }}
-        />
-      </EmptyState>
-    </>
+    <EmptyState implementsCustomErrorState={true} variables={{}}>
+      <EuiFlexGroup gutterSize="xs" wrap responsive>
+        <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
+          <KueryBar autocomplete={autocomplete} />
+        </EuiFlexItem>
+        <EuiFlexItemStyled grow={true}>
+          <FilterGroup esFilters={esFilters} />
+        </EuiFlexItemStyled>
+        {error && <OverviewPageParsingErrorCallout error={error} />}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <StatusPanel />
+      <EuiSpacer size="s" />
+      <MonitorList
+        dangerColor={colors.danger}
+        hasActiveFilters={!!esFilters}
+        implementsCustomErrorState={true}
+        linkParameters={linkParameters}
+        successColor={colors.success}
+        variables={{
+          ...sharedProps,
+          pagination,
+        }}
+      />
+    </EmptyState>
   );
 };

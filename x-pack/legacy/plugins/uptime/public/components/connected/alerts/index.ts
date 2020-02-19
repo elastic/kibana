@@ -5,3 +5,4 @@
  */
 
 export * from './alert_monitor_status';
+export { ToggleAlertButton, UptimeAlertContextContainer } from './alert_context_container';
