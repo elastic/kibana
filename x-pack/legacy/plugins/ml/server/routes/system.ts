@@ -55,7 +55,9 @@ export function systemRoutes({
   router.post(
     {
       path: '/api/ml/_has_privileges',
-      validate: false,
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
