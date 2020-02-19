@@ -188,7 +188,10 @@ export function createKbnUrlTracker({
     },
     appUnMounted() {
       onUnmountApp();
-      setNavLink(activeUrl);
+
+      if (activeUrl.startsWith(defaultSubUrl)) {
+        setNavLink(activeUrl);
+      }
     },
     stop() {
       unsubscribe();
