@@ -11,17 +11,18 @@ import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
-import { XYConfigPanel, LayerContextMenu } from './xy_config_panel';
-import { Visualization } from '../types';
+import { LayerContextMenu } from './xy_config_panel';
+import { Visualization, OperationMetadata } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { generateId } from '../id_generator';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
 import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
 
 const defaultIcon = chartBarStackedSVG;
 const defaultSeriesType = 'bar_stacked';
+const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getDescription(state?: State) {
   if (!state) {
@@ -133,12 +134,10 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         layers: [
           {
             layerId: frame.addNewLayer(),
-            accessors: [generateId()],
+            accessors: [],
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            splitAccessor: generateId(),
-            xAccessor: generateId(),
           },
         ],
       }
@@ -147,13 +146,86 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  renderLayerConfigPanel: (domElement, props) =>
-    render(
-      <I18nProvider>
-        <XYConfigPanel {...props} />
-      </I18nProvider>,
-      domElement
-    ),
+  getLayerOptions(props) {
+    const layer = props.state.layers.find(l => l.layerId === props.layerId)!;
+    return {
+      dimensions: [
+        {
+          dimensionId: 'x',
+          dimensionLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+            defaultMessage: 'X-axis',
+          }),
+          accessors: layer.xAccessor ? [layer.xAccessor] : [],
+          filterOperations: isBucketed,
+          suggestedPriority: 1,
+          supportsMoreColumns: !layer.xAccessor,
+        },
+        {
+          dimensionId: 'y',
+          dimensionLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
+            defaultMessage: 'Y-axis',
+          }),
+          accessors: layer.accessors,
+          filterOperations: isNumericMetric,
+          supportsMoreColumns: true,
+        },
+        {
+          dimensionId: 'breakdown',
+          dimensionLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
+            defaultMessage: 'Break down by',
+          }),
+          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          filterOperations: isBucketed,
+          suggestedPriority: 0,
+          supportsMoreColumns: !layer.splitAccessor,
+        },
+      ],
+    };
+  },
+
+  setDimension({ prevState, layerId, columnId, dimensionId }) {
+    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    if (!newLayer) {
+      return prevState;
+    }
+
+    if (dimensionId === 'x') {
+      newLayer.xAccessor = columnId;
+    }
+    if (dimensionId === 'y') {
+      newLayer.accessors = [...newLayer.accessors.filter(a => a !== columnId), columnId];
+    }
+    if (dimensionId === 'breakdown') {
+      newLayer.splitAccessor = columnId;
+    }
+
+    return {
+      ...prevState,
+      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+    };
+  },
+
+  removeDimension({ prevState, layerId, columnId, dimensionId }) {
+    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    if (!newLayer) {
+      return prevState;
+    }
+
+    if (dimensionId === 'x') {
+      delete newLayer.xAccessor;
+    }
+    if (dimensionId === 'y') {
+      newLayer.accessors = newLayer.accessors.filter(a => a !== columnId);
+    }
+    if (dimensionId === 'breakdown') {
+      delete newLayer.splitAccessor;
+    }
+
+    return {
+      ...prevState,
+      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+    };
+  },
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find(l => l.layerId === layerId);
@@ -177,8 +249,6 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {
     layerId,
     seriesType,
-    xAccessor: generateId(),
-    accessors: [generateId()],
-    splitAccessor: generateId(),
+    accessors: [],
   };
 }

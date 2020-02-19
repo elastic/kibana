@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
-import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import { MultiColumnEditor } from '../multi_column_editor';
-import {
-  SuggestionRequest,
-  Visualization,
-  VisualizationLayerConfigProps,
-  VisualizationSuggestion,
-  Operation,
-} from '../types';
-import { generateId } from '../id_generator';
+import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
 
 export interface LayerState {
@@ -32,56 +20,8 @@ export interface DatatableVisualizationState {
 function newLayerState(layerId: string): LayerState {
   return {
     layerId,
-    columns: [generateId()],
+    columns: [],
   };
-}
-
-function updateColumns(
-  state: DatatableVisualizationState,
-  layer: LayerState,
-  fn: (columns: string[]) => string[]
-) {
-  const columns = fn(layer.columns);
-  const updatedLayer = { ...layer, columns };
-  const layers = state.layers.map(l => (l.layerId === layer.layerId ? updatedLayer : l));
-  return { ...state, layers };
-}
-
-const allOperations = () => true;
-
-export function DataTableLayer({
-  layer,
-  frame,
-  state,
-  setState,
-  dragDropContext,
-}: { layer: LayerState } & VisualizationLayerConfigProps<DatatableVisualizationState>) {
-  const datasource = frame.datasourceLayers[layer.layerId];
-
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
-  // When we add a column it could be empty, and therefore have no order
-  const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
-
-  return (
-    <EuiFormRow
-      className="lnsConfigPanel__axis"
-      label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
-    >
-      <MultiColumnEditor
-        accessors={sortedColumns}
-        datasource={datasource}
-        dragDropContext={dragDropContext}
-        filterOperations={allOperations}
-        layerId={layer.layerId}
-        onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
-        onRemove={column =>
-          setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
-        }
-        testSubj="datatable_columns"
-        data-test-subj="datatable_multicolumnEditor"
-      />
-    </EuiFormRow>
-  );
 }
 
 export const datatableVisualization: Visualization<
@@ -188,17 +128,48 @@ export const datatableVisualization: Visualization<
     ];
   },
 
-  renderLayerConfigPanel(domElement, props) {
-    const layer = props.state.layers.find(l => l.layerId === props.layerId);
+  getLayerOptions(props) {
+    return {
+      dimensions: [
+        {
+          layerId: props.state.layers[0].layerId,
+          accessors: props.state.layers[0].columns,
+          dimensionId: 'columns',
+          dimensionLabel: i18n.translate('xpack.lens.datatable.columns', {
+            defaultMessage: 'Columns',
+          }),
+          supportsMoreColumns: true,
+          filterOperations: () => true,
+        },
+      ],
+    };
+  },
 
-    if (layer) {
-      render(
-        <I18nProvider>
-          <DataTableLayer {...props} layer={layer} />
-        </I18nProvider>,
-        domElement
-      );
-    }
+  setDimension({ dimensionId, layerId, columnId, prevState }) {
+    return {
+      ...prevState,
+      layers: prevState.layers.map(l =>
+        l.layerId === layerId
+          ? {
+              ...l,
+              columns: l.columns.filter(c => c !== columnId),
+            }
+          : l
+      ),
+    };
+  },
+  removeDimension({ prevState, columnId, layerId }) {
+    return {
+      ...prevState,
+      layers: prevState.layers.map(l =>
+        l.layerId === layerId
+          ? {
+              ...l,
+              columns: l.columns.filter(c => c !== columnId),
+            }
+          : l
+      ),
+    };
   },
 
   toExpression(state, frame) {

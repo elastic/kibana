@@ -12,7 +12,8 @@ import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
-  DatasourceDimensionPanelProps,
+  DatasourceDimensionEditorProps,
+  DatasourceDimensionTriggerProps,
   DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
@@ -20,7 +21,12 @@ import {
 } from '../types';
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
-import { IndexPatternDimensionPanel } from './dimension_panel';
+import {
+  IndexPatternDimensionTrigger,
+  IndexPatternDimensionEditor,
+  canHandleDrop,
+  onDrop,
+} from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -80,6 +86,9 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   };
 
   Object.values(layers).forEach(layer => {
+    if (!layer.columns) {
+      return;
+    }
     Object.entries(layer.columns).forEach(([columnId, column]) => {
       columnLabelMap[columnId] = makeUnique(column.label);
     });
@@ -198,15 +207,72 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI({
-      state,
-      setState,
-      layerId,
-      dateRange,
-    }: PublicAPIProps<IndexPatternPrivateState>) {
+    renderDimensionTrigger: (
+      domElement: Element,
+      props: DatasourceDimensionTriggerProps<IndexPatternPrivateState>
+    ) => {
+      const columnLabelMap = uniqueLabels(props.state.layers);
+
+      render(
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings,
+              data,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+            }}
+          >
+            <IndexPatternDimensionTrigger uniqueLabel={columnLabelMap[props.columnId]} {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>,
+        domElement
+      );
+    },
+
+    renderDimensionEditor: (
+      domElement: Element,
+      props: DatasourceDimensionEditorProps<IndexPatternPrivateState>
+    ) => {
+      const columnLabelMap = uniqueLabels(props.state.layers);
+
+      render(
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings,
+              data,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+            }}
+          >
+            <IndexPatternDimensionEditor
+              uiSettings={uiSettings}
+              storage={storage}
+              savedObjectsClient={core.savedObjects.client}
+              http={core.http}
+              uniqueLabel={columnLabelMap[props.columnId]}
+              {...props}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>,
+        domElement
+      );
+    },
+
+    canHandleDrop,
+    onDrop,
+
+    getPublicAPI({ state, setState, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
+        datasourceId: 'indexpattern',
+
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
         },
@@ -217,36 +283,6 @@ export function getIndexPatternDatasource({
             return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
           }
           return null;
-        },
-        renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
-          render(
-            <I18nProvider>
-              <KibanaContextProvider
-                services={{
-                  appName: 'lens',
-                  storage,
-                  uiSettings,
-                  data,
-                  savedObjects: core.savedObjects,
-                  docLinks: core.docLinks,
-                }}
-              >
-                <IndexPatternDimensionPanel
-                  state={state}
-                  setState={setState}
-                  uiSettings={uiSettings}
-                  storage={storage}
-                  savedObjectsClient={core.savedObjects.client}
-                  layerId={props.layerId}
-                  http={core.http}
-                  uniqueLabel={columnLabelMap[props.columnId]}
-                  dateRange={dateRange}
-                  {...props}
-                />
-              </KibanaContextProvider>
-            </I18nProvider>,
-            domElement
-          );
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
