@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filterFieldsBrowser } from '../../lib/fields_browser/helpers';
+import { filterFieldsBrowser } from '../../../tasks/timeline/fields_browser';
 import {
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
   FIELDS_BROWSER_CHECKBOX,
 } from '../../../screens/hosts/fields_browser';
-import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../../tasks/login';
-import { openEventsViewerFieldsBrowser, filterSearchBar } from '../../lib/events_viewer/helpers';
+import { HOSTS_PAGE } from '../../../urls/navigation';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
 import { closeFieldsBrowser } from '../../../tasks/hosts/fields_browsers';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
@@ -23,8 +22,8 @@ import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   resetFields,
+  openEventsViewerFieldsBrowser,
 } from '../../../tasks/hosts/events';
-
 import {
   HEADER_SUBTITLE,
   INSPECT_MODAL,
@@ -33,9 +32,7 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
 } from '../../../screens/hosts/events';
-import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
-
-import { clearSearchBar } from '../../../tasks/header';
+import { clearSearchBar, kqlSearch } from '../../../tasks/header';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -147,7 +144,7 @@ describe('Events Viewer', () => {
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
         .then(initialNumberOfEvents => {
-          filterSearchBar(filterInput);
+          kqlSearch(`${filterInput}{enter}`);
           cy.get(HEADER_SUBTITLE)
             .invoke('text')
             .should('not.equal', initialNumberOfEvents);
