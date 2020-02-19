@@ -5,14 +5,29 @@
  */
 
 import moment from 'moment';
+import sinon from 'sinon';
 
-import { generateId, parseInterval, getDriftTolerance, getGapBetweenRuns } from './utils';
+import {
+  generateId,
+  parseInterval,
+  parseScheduleDates,
+  getDriftTolerance,
+  getGapBetweenRuns,
+} from './utils';
 
 describe('utils', () => {
+  const anchor = '2020-01-01T06:06:06.666Z';
+  const unix = moment(anchor).valueOf();
   let nowDate = moment('2020-01-01T00:00:00.000Z');
+  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
     nowDate = moment('2020-01-01T00:00:00.000Z');
+    clock = sinon.useFakeTimers(unix);
+  });
+
+  afterEach(() => {
+    clock.restore();
   });
 
   describe('generateId', () => {
@@ -27,7 +42,7 @@ describe('utils', () => {
     });
   });
 
-  describe('getIntervalMilliseconds', () => {
+  describe('parseInterval', () => {
     test('it returns a duration when given one that is valid', () => {
       const duration = parseInterval('5m');
       expect(duration).not.toBeNull();
@@ -40,8 +55,36 @@ describe('utils', () => {
     });
   });
 
-  describe('getDriftToleranceMilliseconds', () => {
-    test('it returns a drift tolerance in milliseconds of 1 minute when from overlaps to by 1 minute and the interval is 5 minutes', () => {
+  describe('parseScheduleDates', () => {
+    test('it returns a moment when given an ISO string', () => {
+      const result = parseScheduleDates('2020-01-01T00:00:00.000Z');
+      expect(result).not.toBeNull();
+      expect(result).toEqual(moment('2020-01-01T00:00:00.000Z'));
+    });
+
+    test('it returns a moment when given `now`', () => {
+      const result = parseScheduleDates('now');
+
+      expect(result).not.toBeNull();
+      expect(moment.isMoment(result)).toBeTruthy();
+    });
+
+    test('it returns a moment when given `now-x`', () => {
+      const result = parseScheduleDates('now-6m');
+
+      expect(result).not.toBeNull();
+      expect(moment.isMoment(result)).toBeTruthy();
+    });
+
+    test('it returns null when given a string that is not an ISO string, `now` or `now-x`', () => {
+      const result = parseScheduleDates('invalid');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getDriftTolerance', () => {
+    test('it returns a drift tolerance in milliseconds of 1 minute when "from" overlaps "to" by 1 minute and the interval is 5 minutes', () => {
       const drift = getDriftTolerance({
         from: 'now-6m',
         to: 'now',
@@ -51,7 +94,7 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    test('it returns a drift tolerance of 0 when from equals the interval', () => {
+    test('it returns a drift tolerance of 0 when "from" equals the interval', () => {
       const drift = getDriftTolerance({
         from: 'now-5m',
         to: 'now',
@@ -60,7 +103,7 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(0);
     });
 
-    test('it returns a drift tolerance of 5 minutes when from is 10 minutes but the interval is 5 minutes', () => {
+    test('it returns a drift tolerance of 5 minutes when "from" is 10 minutes but the interval is 5 minutes', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now',
@@ -70,7 +113,7 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
     });
 
-    test('it returns a drift tolerance of 10 minutes when from is 10 minutes ago and the interval is 0', () => {
+    test('it returns a drift tolerance of 10 minutes when "from" is 10 minutes ago and the interval is 0', () => {
       const drift = getDriftTolerance({
         from: 'now-10m',
         to: 'now',
@@ -80,36 +123,61 @@ describe('utils', () => {
       expect(drift?.asMilliseconds()).toEqual(moment.duration(10, 'minutes').asMilliseconds());
     });
 
-    test('returns null if the "to" is not "now" since we have limited support for date math', () => {
+    test('returns a drift tolerance of 1 minute when "from" is invalid and defaults to "now-6m" and interval is 5 minutes', () => {
+      const drift = getDriftTolerance({
+        from: 'invalid',
+        to: 'now',
+        interval: moment.duration(5, 'minutes'),
+      });
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
+    });
+
+    test('returns a drift tolerance of 1 minute when "from" does not include `now` and defaults to "now-6m" and interval is 5 minutes', () => {
+      const drift = getDriftTolerance({
+        from: '10m',
+        to: 'now',
+        interval: moment.duration(5, 'minutes'),
+      });
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
+    });
+
+    test('returns a drift tolerance of 4 minutes when "to" is "now-x", from is a valid input and interval is 5 minute', () => {
+      const drift = getDriftTolerance({
+        from: 'now-10m',
+        to: 'now-1m',
+        interval: moment.duration(5, 'minutes'),
+      });
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(4, 'minutes').asMilliseconds());
+    });
+
+    test('it returns expected drift tolerance when "from" is an ISO string', () => {
+      const drift = getDriftTolerance({
+        from: moment()
+          .subtract(10, 'minutes')
+          .toISOString(),
+        to: 'now',
+        interval: moment.duration(5, 'minutes'),
+      });
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
+    });
+
+    test('it returns expected drift tolerance when "to" is an ISO string', () => {
       const drift = getDriftTolerance({
         from: 'now-6m',
-        to: 'invalid', // if not set to "now" this function returns null
-        interval: moment.duration(1000, 'milliseconds'),
+        to: moment().toISOString(),
+        interval: moment.duration(5, 'minutes'),
       });
-      expect(drift).toBeNull();
-    });
-
-    test('returns null if the "from" does not start with "now-" since we have limited support for date math', () => {
-      const drift = getDriftTolerance({
-        from: 'valid', // if not set to "now-x" where x is an interval such as 6m
-        to: 'now',
-        interval: moment.duration(1000, 'milliseconds'),
-      });
-      expect(drift).toBeNull();
-    });
-
-    test('returns null if the "from" starts with "now-" but has a string instead of an integer', () => {
-      const drift = getDriftTolerance({
-        from: 'now-dfdf', // if not set to "now-x" where x is an interval such as 6m
-        to: 'now',
-        interval: moment.duration(1000, 'milliseconds'),
-      });
-      expect(drift).toBeNull();
+      expect(drift).not.toBeNull();
+      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
   });
 
   describe('getGapBetweenRuns', () => {
-    test('it returns a gap of 0 when from and interval match each other and the previous started was from the previous interval time', () => {
+    test('it returns a gap of 0 when "from" and interval match each other and the previous started was from the previous interval time', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes'),
         interval: '5m',
@@ -121,7 +189,7 @@ describe('utils', () => {
       expect(gap?.asMilliseconds()).toEqual(0);
     });
 
-    test('it returns a negative gap of 1 minute when from overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
+    test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes'),
         interval: '5m',
@@ -133,7 +201,7 @@ describe('utils', () => {
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-1, 'minute').asMilliseconds());
     });
 
-    test('it returns a negative gap of 5 minutes when from overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
+    test('it returns a negative gap of 5 minutes when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes'),
         interval: '5m',
@@ -145,7 +213,7 @@ describe('utils', () => {
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-5, 'minute').asMilliseconds());
     });
 
-    test('it returns a negative gap of 1 minute when from overlaps to by 1 minute and the previousStartedAt was 10 minutes ago and so was the interval', () => {
+    test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 10 minutes ago and so was the interval', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(10, 'minutes'),
         interval: '10m',
@@ -233,26 +301,28 @@ describe('utils', () => {
       expect(gap).toBeNull();
     });
 
-    test('it returns null if from is an invalid string such as "invalid"', () => {
+    test('it returns the expected result when "from" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes'),
         interval: '5m',
-        from: 'invalid', // if not set to "now-x" where x is an interval such as 6m
+        from: 'invalid',
         to: 'now',
         now: nowDate.clone(),
       });
-      expect(gap).toBeNull();
+      expect(gap?.asMilliseconds()).not.toBeNull();
+      expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
 
-    test('it returns null if to is an invalid string such as "invalid"', () => {
+    test('it returns the expected result when "to" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes'),
         interval: '5m',
-        from: 'now-5m',
-        to: 'invalid', // if not set to "now" this function returns null
+        from: 'now-6m',
+        to: 'invalid',
         now: nowDate.clone(),
       });
-      expect(gap).toBeNull();
+      expect(gap?.asMilliseconds()).not.toBeNull();
+      expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
   });
 });
