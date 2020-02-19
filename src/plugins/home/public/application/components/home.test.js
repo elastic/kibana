@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './home.test.mocks';
-
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';

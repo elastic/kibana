@@ -20,9 +20,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
-import { telemetryPluginMock } from '../../../../../../../plugins/telemetry/public/mocks';
+import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 
-jest.mock('../../kibana_services', () => ({
+jest.mock('../kibana_services', () => ({
   getServices: () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},

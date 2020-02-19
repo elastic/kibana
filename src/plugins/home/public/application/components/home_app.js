@@ -37,7 +37,7 @@ export function HomeApp({ directories }) {
     environmentService,
     telemetry,
   } = getServices();
-  const environment = environmentService.get();
+  const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
   const mlEnabled = environment.ml;
   const apmUiEnabled = environment.apmUi;
