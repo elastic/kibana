@@ -9,6 +9,7 @@ import React from 'react';
 import { DRAW_TYPE } from '../../../../../common/constants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
+import DrawCircle from './draw_circle';
 import {
   createSpatialFilterWithBoundingBox,
   createSpatialFilterWithGeometry,
@@ -19,6 +20,7 @@ import { DrawTooltip } from './draw_tooltip';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
+mbDrawModes.draw_circle = DrawCircle;
 
 export class DrawControl extends React.Component {
   constructor() {
@@ -59,6 +61,9 @@ export class DrawControl extends React.Component {
     if (!e.features.length) {
       return;
     }
+
+    console.log(e);
+    return;
 
     const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
     const geometry = e.features[0].geometry;
@@ -109,11 +114,14 @@ export class DrawControl extends React.Component {
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.create', this._onDraw);
     }
-    const mbDrawMode =
-      this.props.drawState.drawType === DRAW_TYPE.POLYGON
-        ? this._mbDrawControl.modes.DRAW_POLYGON
-        : 'draw_rectangle';
-    this._mbDrawControl.changeMode(mbDrawMode);
+
+    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+      this._mbDrawControl.changeMode('draw_rectangle');
+    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      this._mbDrawControl.changeMode('draw_circle');
+    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+      this._mbDrawControl.changeMode(this._mbDrawControl.modes.DRAW_POLYGON);
+    }
   }
 
   render() {
