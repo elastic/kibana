@@ -3,21 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request, ResponseToolkit } from 'hapi';
-import {
-  getAllHandler,
-  getOneHandler,
-  executeHandler,
-  deleteHandler,
-  createHandler,
-  updateHandler,
-  getIndicesHandler,
-  updateRetentionSettingsHandler,
-} from './policy';
+import { addBasePath } from '../helpers';
+import { registerPolicyRoutes } from './policy';
+import { MockRouter, routeDependencies, RunRequestParam } from './test_helpers';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
-  const mockRequest = {} as Request;
-  const mockResponseToolkit = {} as ResponseToolkit;
   const mockEsPolicy = {
     version: 1,
     modified_date_millis: 1562710315761,
@@ -50,14 +40,27 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     nextExecutionMillis: 1562722200000,
     isManagedPolicy: false,
   };
+  const router = new MockRouter();
+
+  beforeAll(() => {
+    registerPolicyRoutes({
+      router: router as any,
+      ...routeDependencies,
+    });
+  });
 
   describe('getAllHandler()', () => {
+    const mockRequest: RunRequestParam = {
+      method: 'get',
+      path: addBasePath('policies'),
+    };
+
     it('should arrify policies returned from ES', async () => {
       const mockEsResponse = {
         fooPolicy: mockEsPolicy,
         barPolicy: mockEsPolicy,
       };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [[], mockEsResponse];
       const expectedResponse = {
         policies: [
           {
@@ -70,141 +73,142 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
           },
         ],
       };
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [[], mockEsResponse];
       const expectedResponse = { policies: [] };
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('getOneHandler()', () => {
     const name = 'fooPolicy';
-    const mockOneRequest = ({
+    const mockRequest: RunRequestParam = {
+      method: 'get',
+      path: addBasePath('policy/{name}'),
       params: {
         name,
       },
-    } as unknown) as Request;
+    };
 
     it('should return policy if returned from ES', async () => {
       const mockEsResponse = {
         [name]: mockEsPolicy,
       };
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({});
+
+      router.callAsCurrentUserResponses = [mockEsResponse, {}];
+
       const expectedResponse = {
         policy: {
           name,
           ...mockPolicy,
         },
       };
-      await expect(
-        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should return 404 error if not returned from ES', async () => {
       const mockEsResponse = {};
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({});
-      await expect(
-        getOneHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [mockEsResponse, {}];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('executeHandler()', () => {
     const name = 'fooPolicy';
-    const mockExecuteRequest = ({
+
+    const mockRequest: RunRequestParam = {
+      method: 'post',
+      path: addBasePath('policy/{name}/run'),
       params: {
         name,
       },
-    } as unknown) as Request;
+    };
 
     it('should return snapshot name from ES', async () => {
       const mockEsResponse = {
         snapshot_name: 'foo-policy-snapshot',
       };
-      const callWithRequest = jest.fn().mockResolvedValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [mockEsResponse];
+
       const expectedResponse = {
         snapshotName: 'foo-policy-snapshot',
       };
-      await expect(
-        executeHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        executeHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('deleteHandler()', () => {
     const names = ['fooPolicy', 'barPolicy'];
-    const mockCreateRequest = ({
+
+    const mockRequest: RunRequestParam = {
+      method: 'delete',
+      path: addBasePath('policies/{name}'),
       params: {
-        names: names.join(','),
+        name: names.join(','),
       },
-    } as unknown) as Request;
+    };
 
     it('should return successful ES responses', async () => {
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest
-        .fn()
-        .mockResolvedValueOnce(mockEsResponse)
-        .mockResolvedValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [mockEsResponse, mockEsResponse];
+
       const expectedResponse = { itemsDeleted: names, errors: [] };
-      await expect(
-        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should return error ES responses', async () => {
       const mockEsError = new Error('Test error') as any;
       mockEsError.response = '{}';
       mockEsError.statusCode = 500;
-      const callWithRequest = jest
-        .fn()
-        .mockRejectedValueOnce(mockEsError)
-        .mockRejectedValueOnce(mockEsError);
+
+      router.callAsCurrentUserResponses = [
+        jest.fn().mockRejectedValueOnce(mockEsError),
+        jest.fn().mockRejectedValueOnce(mockEsError),
+      ];
+
       const expectedResponse = {
         itemsDeleted: [],
         errors: names.map(name => ({
           name,
-          error: mockEsError,
+          error: {
+            cause: mockEsError.message,
+            statusCode: mockEsError.statusCode,
+          },
         })),
       };
-      await expect(
-        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
     });
 
     it('should return combination of ES successes and errors', async () => {
@@ -212,96 +216,96 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       mockEsError.response = '{}';
       mockEsError.statusCode = 500;
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest
-        .fn()
-        .mockRejectedValueOnce(mockEsError)
-        .mockResolvedValueOnce(mockEsResponse);
+
+      router.callAsCurrentUserResponses = [
+        jest.fn().mockRejectedValueOnce(mockEsError),
+        mockEsResponse,
+      ];
+
       const expectedResponse = {
         itemsDeleted: [names[1]],
         errors: [
           {
             name: names[0],
-            error: mockEsError,
+            error: {
+              cause: mockEsError.message,
+              statusCode: mockEsError.statusCode,
+            },
           },
         ],
       };
-      await expect(
-        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
   });
 
   describe('createHandler()', () => {
     const name = 'fooPolicy';
-    const mockCreateRequest = ({
-      payload: {
+
+    const mockRequest: RunRequestParam = {
+      method: 'put',
+      path: addBasePath('policies'),
+      body: {
         name,
       },
-    } as unknown) as Request;
+    };
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce({})
-        .mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [{}, mockEsResponse];
+
       const expectedResponse = { ...mockEsResponse };
-      await expect(
-        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: expectedResponse,
+      });
     });
 
     it('should return error if policy with the same name already exists', async () => {
       const mockEsResponse = { [name]: {} };
-      const callWithRequest = jest.fn().mockReturnValue(mockEsResponse);
-      await expect(
-        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [mockEsResponse];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce({})
-        .mockRejectedValueOnce(new Error());
-      await expect(
-        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('updateHandler()', () => {
     const name = 'fooPolicy';
-    const mockCreateRequest = ({
+    const mockRequest: RunRequestParam = {
+      method: 'put',
+      path: addBasePath('policies/{name}'),
       params: {
         name,
       },
-      payload: {
+      body: {
         name,
       },
-    } as unknown) as Request;
+    };
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce({ [name]: {} })
-        .mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [{ [name]: {} }, mockEsResponse];
+
       const expectedResponse = { ...mockEsResponse };
-      await expect(
-        updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
   describe('getIndicesHandler()', () => {
+    const mockRequest: RunRequestParam = {
+      method: 'get',
+      path: addBasePath('policies/indices'),
+    };
+
     it('should arrify and sort index names returned from ES', async () => {
       const mockEsResponse = [
         {
@@ -311,29 +315,25 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
           index: 'barIndex',
         },
       ];
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [mockEsResponse];
+
       const expectedResponse = {
         indices: ['barIndex', 'fooIndex'],
       };
-      await expect(
-        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should return empty array if no indices returned from ES', async () => {
       const mockEsResponse: any[] = [];
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [mockEsResponse];
+
       const expectedResponse = { indices: [] };
-      await expect(
-        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -341,24 +341,23 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     const retentionSettings = {
       retentionSchedule: '0 30 1 * * ?',
     };
-    const mockCreateRequest = ({
-      payload: retentionSettings,
-    } as unknown) as Request;
+    const mockRequest: RunRequestParam = {
+      method: 'put',
+      path: addBasePath('policies/retention_settings'),
+      body: retentionSettings,
+    };
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      router.callAsCurrentUserResponses = [mockEsResponse];
+
       const expectedResponse = { ...mockEsResponse };
-      await expect(
-        updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 });

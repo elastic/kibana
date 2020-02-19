@@ -44,7 +44,7 @@ export function registerPolicyRoutes({
 
   // GET one policy
   router.get(
-    { path: 'policy/{name}', validate: { params: nameParameterSchema } },
+    { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -140,7 +140,7 @@ export function registerPolicyRoutes({
             .then(() => response.itemsDeleted.push(policyName))
             .catch(e =>
               response.errors.push({
-                name,
+                name: policyName,
                 error: wrapEsError(e),
               })
             );

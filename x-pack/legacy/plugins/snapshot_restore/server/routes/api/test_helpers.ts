@@ -23,7 +23,7 @@ const mockResponse = {
 export interface RunRequestParam {
   method: RequestMethod;
   path: string;
-  mockRequest?: { [key: string]: any };
+  [key: string]: any;
 }
 
 export class MockRouter {
@@ -61,7 +61,9 @@ export class MockRouter {
   private callAsCurrentUser() {
     const index = this._callAsCurrentUserCallCount;
     this._callAsCurrentUserCallCount += 1;
-    return this._callAsCurrentUserResponses[index]();
+    const response = this._callAsCurrentUserResponses[index];
+
+    return typeof response === 'function' ? Promise.resolve(response()) : Promise.resolve(response);
   }
 
   public set callAsCurrentUserResponses(responses: any[]) {
@@ -69,7 +71,7 @@ export class MockRouter {
     this._callAsCurrentUserResponses = responses;
   }
 
-  runRequest({ method, path, mockRequest = {} }: RunRequestParam) {
+  runRequest({ method, path, ...mockRequest }: RunRequestParam) {
     const mockContext = {
       core: {
         elasticsearch: {
@@ -79,6 +81,11 @@ export class MockRouter {
     };
 
     const handler = this.cacheHandlers[method][path];
+
+    if (typeof handler !== 'function') {
+      throw new Error(`No route handler found for ${method.toUpperCase()} request at "${path}"`);
+    }
+
     return handler(mockContext, mockRequest, mockResponse);
   }
 }
