@@ -204,7 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('renders the active alert instances', async () => {
+      it('renders the active alert instances', async () => {
         const testBeganAt = moment().utc();
 
         // Verify content
