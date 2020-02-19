@@ -25,6 +25,8 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
+const bgColor = '#222222';
+
 const Resolver = styled(
   React.memo(({ className }: { className?: string }) => {
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
@@ -149,7 +151,12 @@ const Resolver = styled(
             <EdgeLine key={index} startPosition={startPosition} endPosition={endPosition} />
           ))}
           {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot key={index} position={position} event={processEvent} />
+            <ProcessEventDot
+              key={index}
+              position={position}
+              event={processEvent}
+              bgColor={bgColor}
+            />
           ))}
         </div>
       </div>
@@ -169,6 +176,8 @@ const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
+
+  background-color: ${bgColor};
 
   .resolver-graph {
     display: flex;
