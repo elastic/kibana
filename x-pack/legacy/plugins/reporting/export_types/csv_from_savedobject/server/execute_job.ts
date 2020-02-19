@@ -5,7 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
 import {
   ExecuteJobFactory,
@@ -21,9 +23,15 @@ import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const generateCsv = createGenerateCsv(reporting, server, elasticsearch, parentLogger);
 
   return async function executeJob(
     jobId: string | null,
@@ -81,10 +89,8 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
     let maxSizeReached = false;
     let size = 0;
     try {
-      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
-        server,
         visType as string,
         panel,
         jobParams

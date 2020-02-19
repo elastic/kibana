@@ -4,7 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
-    "xpack.triggersActionsUI": "legacy/plugins/triggers_actions_ui",
+    "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
     "xpack.beatsManagement": "legacy/plugins/beats_management",
     "xpack.canvas": "legacy/plugins/canvas",
@@ -17,7 +17,7 @@
     "xpack.idxMgmt": "legacy/plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "legacy/plugins/infra",
-    "xpack.kueryAutocomplete": "legacy/plugins/kuery_autocomplete",
+    "xpack.data": "plugins/data_enhanced",
     "xpack.lens": "legacy/plugins/lens",
     "xpack.licensing": "plugins/licensing",
     "xpack.licenseMgmt": "legacy/plugins/license_management",
@@ -26,7 +26,7 @@
     "xpack.logstash": "legacy/plugins/logstash",
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.monitoring": "legacy/plugins/monitoring",
-    "xpack.remoteClusters": "legacy/plugins/remote_clusters",
+    "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
     "xpack.rollupJobs": "legacy/plugins/rollup",
     "xpack.searchProfiler": "plugins/searchprofiler",
@@ -39,7 +39,8 @@
     "xpack.transform": "legacy/plugins/transform",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
-    "xpack.watcher": "plugins/watcher"
+    "xpack.watcher": "plugins/watcher",
+    "xpack.endpoint": "plugins/endpoint"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",

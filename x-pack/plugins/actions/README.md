@@ -404,8 +404,8 @@ The webhook action uses [axios](https://github.com/axios/axios) to send a POST o
 
 |Property|Description|Type|
 |---|---|---|
-|user|Username for HTTP Basic authentication|string|
-|password|Password for HTTP Basic authentication|string|
+|user|Username for HTTP Basic authentication|string _(optional)_|
+|password|Password for HTTP Basic authentication|string _(optional)_|
 
 ### `params` 
 

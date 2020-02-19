@@ -19,15 +19,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
+import { connect, ConnectedProps } from 'react-redux';
 
-import { ActionCreator } from 'typescript-fsa';
-import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
 import {
-  getDetectionEngineUrl,
   getEditRuleUrl,
   getRulesUrl,
+  DETECTION_ENGINE_PAGE_NAME,
 } from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -54,14 +53,11 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
 import { signalsHistogramOptions } from '../../components/signals_histogram_panel/config';
-import { InputsModelId } from '../../../../store/inputs/constants';
-import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
 import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
@@ -70,19 +66,6 @@ import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
-
-interface ReduxProps {
-  filters: esFilters.Filter[];
-  query: Query;
-}
-
-export interface DispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -102,9 +85,7 @@ const ruleDetailTabs = [
   },
 ];
 
-type RuleDetailsComponentProps = ReduxProps & DispatchProps;
-
-const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
+const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -113,6 +94,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
     hasIndexWrite,
@@ -236,12 +218,8 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${getDetectionEngineUrl()}`} />;
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
 
   return (
@@ -420,7 +398,8 @@ const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
 };
 
-export const RuleDetailsPage = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(memo(RuleDetailsPageComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const RuleDetailsPage = connector(memo(RuleDetailsPageComponent));

@@ -13,50 +13,23 @@ import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
-import { isNestedField } from '../../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
 import { indexPatternService } from '../../../../kibana_services';
-
-const getIndexPatternId = props => {
-  return _.get(props, 'join.right.indexPatternId');
-};
 
 export class Join extends Component {
   state = {
-    leftFields: null,
-    leftSourceName: '',
     rightFields: undefined,
     indexPattern: undefined,
     loadError: undefined,
-    prevIndexPatternId: getIndexPatternId(this.props),
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadLeftFields();
-    this._loadLeftSourceName();
+    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-  }
-
-  componentDidUpdate() {
-    if (!this.state.rightFields && getIndexPatternId(this.props) && !this.state.loadError) {
-      this._loadRightFields(getIndexPatternId(this.props));
-    }
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextIndexPatternId = getIndexPatternId(nextProps);
-    if (nextIndexPatternId !== prevState.prevIndexPatternId) {
-      return {
-        rightFields: undefined,
-        loadError: undefined,
-        prevIndexPatternId: nextIndexPatternId,
-      };
-    }
-
-    return null;
   }
 
   async _loadRightFields(indexPatternId) {
@@ -79,47 +52,14 @@ export class Join extends Component {
       return;
     }
 
-    if (indexPatternId !== this.state.prevIndexPatternId) {
-      // ignore out of order responses
-      return;
-    }
-
     if (!this._isMounted) {
       return;
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter(field => !isNestedField(field)),
+      rightFields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
       indexPattern,
     });
-  }
-
-  async _loadLeftSourceName() {
-    const leftSourceName = await this.props.layer.getSourceName();
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ leftSourceName });
-  }
-
-  async _loadLeftFields() {
-    let leftFields;
-    try {
-      const leftFieldsInstances = await this.props.layer.getLeftJoinFields();
-      const leftFieldPromises = leftFieldsInstances.map(async field => {
-        return {
-          name: field.getName(),
-          label: await field.getLabel(),
-        };
-      });
-      leftFields = await Promise.all(leftFieldPromises);
-    } catch (error) {
-      leftFields = [];
-    }
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ leftFields });
   }
 
   _onLeftFieldChange = leftField => {
@@ -130,6 +70,11 @@ export class Join extends Component {
   };
 
   _onRightSourceChange = ({ indexPatternId, indexPatternTitle }) => {
+    this.setState({
+      rightFields: undefined,
+      loadError: undefined,
+    });
+    this._loadRightFields(indexPatternId);
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
@@ -181,8 +126,8 @@ export class Join extends Component {
   };
 
   render() {
-    const { join, onRemove } = this.props;
-    const { leftSourceName, leftFields, rightFields, indexPattern } = this.state;
+    const { join, onRemove, leftFields, leftSourceName } = this.props;
+    const { rightFields, indexPattern } = this.state;
     const right = _.get(join, 'right', {});
     const rightSourceName = right.indexPatternTitle
       ? right.indexPatternTitle

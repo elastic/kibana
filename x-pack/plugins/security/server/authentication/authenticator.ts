@@ -80,13 +80,6 @@ export interface ProviderLoginAttempt {
    * Login attempt can have any form and defined by the specific provider.
    */
   value: unknown;
-
-  /**
-   * Indicates whether login attempt should be performed in a "stateless" manner. If `true` provider
-   * performing login will neither be able to retrieve or update existing state if any nor persist
-   * any new state it may produce as a result of the login attempt. It's `false` by default.
-   */
-  stateless?: boolean;
 }
 
 export interface AuthenticatorOptions {
@@ -95,7 +88,6 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
   getServerBaseURL: () => string;
 }
 
@@ -108,12 +100,12 @@ const providerMap = new Map<
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
   ) => BaseAuthenticationProvider
 >([
-  ['basic', BasicAuthenticationProvider],
-  ['kerberos', KerberosAuthenticationProvider],
-  ['saml', SAMLAuthenticationProvider],
-  ['token', TokenAuthenticationProvider],
-  ['oidc', OIDCAuthenticationProvider],
-  ['pki', PKIAuthenticationProvider],
+  [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
+  [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
+  [SAMLAuthenticationProvider.type, SAMLAuthenticationProvider],
+  [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
+  [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
+  [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {
@@ -256,7 +248,7 @@ export class Authenticator {
 
     // If we detect an existing session that belongs to a different provider than the one requested
     // to perform a login we should clear such session.
-    let existingSession = attempt.stateless ? null : await this.getSessionValue(sessionStorage);
+    let existingSession = await this.getSessionValue(sessionStorage);
     if (existingSession && existingSession.provider !== attempt.provider) {
       this.logger.debug(
         `Clearing existing session of another ("${existingSession.provider}") provider.`
@@ -283,7 +275,7 @@ export class Authenticator {
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
-    } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
+    } else if (authenticationResult.shouldUpdateState()) {
       const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.state,
@@ -319,7 +311,7 @@ export class Authenticator {
 
       this.updateSessionValue(sessionStorage, {
         providerType,
-        isSystemAPIRequest: this.options.isSystemAPIRequest(request),
+        isSystemRequest: request.isSystemRequest,
         authenticationResult,
         existingSession: ownsSession ? existingSession : null,
       });
@@ -443,12 +435,12 @@ export class Authenticator {
       providerType,
       authenticationResult,
       existingSession,
-      isSystemAPIRequest,
+      isSystemRequest,
     }: {
       providerType: string;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
-      isSystemAPIRequest: boolean;
+      isSystemRequest: boolean;
     }
   ) {
     if (!existingSession && !authenticationResult.shouldUpdateState()) {
@@ -460,7 +452,7 @@ export class Authenticator {
     // state we should store it in the session regardless of whether it's a system API request or not.
     const sessionCanBeUpdated =
       (authenticationResult.succeeded() || authenticationResult.redirected()) &&
-      (authenticationResult.shouldUpdateState() || !isSystemAPIRequest);
+      (authenticationResult.shouldUpdateState() || !isSystemRequest);
 
     // If provider owned the session, but failed to authenticate anyway, that likely means that
     // session is not valid and we should clear it. Also provider can specifically ask to clear

@@ -11,8 +11,8 @@ import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens, TokenPair } from '../tokens';
-import { canRedirectRequest } from '..';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -67,6 +67,11 @@ export function isSAMLRequestQuery(query: any): query is { SAMLRequest: string }
  * Provider that supports SAML request authentication.
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'saml';
+
   /**
    * Optionally specifies Elasticsearch SAML realm name that Kibana should use. If not specified
    * Kibana ACS URL is used for realm matching instead.

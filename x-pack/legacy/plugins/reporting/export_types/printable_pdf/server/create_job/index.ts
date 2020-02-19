@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validateUrls } from '../../../../common/validate_urls';
+import { ReportingCore } from '../../../../server';
+import { cryptoFactory } from '../../../../server/lib/crypto';
 import {
+  ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
-  ServerFacade,
-  RequestFacade,
-  ConditionalHeaders,
   Logger,
+  RequestFacade,
+  ServerFacade,
 } from '../../../../types';
-import { validateUrls } from '../../../../common/validate_urls';
-import { cryptoFactory } from '../../../../server/lib/crypto';
 import { JobParamsPDF } from '../../types';
 // @ts-ignore untyped module
 import { compatibilityShimFactory } from './compatibility_shim';
@@ -28,7 +29,12 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(server: ServerFacade, logger: Logger) {
+>> = function createJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: unknown,
+  logger: Logger
+) {
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
 
@@ -42,14 +48,14 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      type: objectType, // Note: this changes the shape of the job params object
-      title,
-      objects: relativeUrls.map(u => ({ relativeUrl: u })),
-      headers: serializedEncryptedHeaders,
-      browserTimezone,
-      layout,
       basePath: request.getBasePath(),
+      browserTimezone,
       forceNow: new Date().toISOString(),
+      headers: serializedEncryptedHeaders,
+      layout,
+      objects: relativeUrls.map(u => ({ relativeUrl: u })),
+      title,
+      type: objectType, // Note: this changes the shape of the job params object
     };
   });
 };

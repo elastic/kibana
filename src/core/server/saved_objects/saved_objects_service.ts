@@ -18,10 +18,9 @@
  */
 
 import { CoreService } from 'src/core/types';
-import { first } from 'rxjs/operators';
+import { first, filter, take } from 'rxjs/operators';
 import {
   SavedObjectsClient,
-  SavedObjectsSchema,
   SavedObjectsClientProvider,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
@@ -32,19 +31,24 @@ import { LegacyServiceDiscoverPlugins } from '../legacy';
 import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
-import { SavedObjectsConfigType } from './saved_objects_config';
-import { KibanaRequest } from '../http';
-import { SavedObjectsClientContract } from './types';
+import {
+  SavedObjectsConfigType,
+  SavedObjectsMigrationConfigType,
+  SavedObjectConfig,
+} from './saved_objects_config';
+import { InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
-import { SavedObjectsMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { convertLegacyTypes } from './utils';
+import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
+import { registerRoutes } from './routes';
+import { SavedObjectsSerializer } from './serialization';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -70,6 +74,7 @@ import { PropertyValidators } from './validation';
  * constructor.
  *
  * @example
+ * ```ts
  * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
  *
  * export class Plugin() {
@@ -79,6 +84,7 @@ import { PropertyValidators } from './validation';
  *     })
  *   }
  * }
+ * ```
  *
  * @public
  */
@@ -102,7 +108,9 @@ export interface SavedObjectsServiceSetup {
 /**
  * @internal
  */
-export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
+export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
+  registerType: (type: SavedObjectsType) => void;
+}
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -146,6 +154,10 @@ export interface SavedObjectsServiceStart {
    * @param extraTypes - A list of additional hidden types the repository should have access to.
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
+   */
+  createSerializer: () => SavedObjectsSerializer;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -157,6 +169,10 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
    * @deprecated Exposed only for injecting into Legacy
    */
   clientProvider: ISavedObjectsClientProvider;
+  /**
+   * @deprecated Exposed only for injecting into Legacy
+   */
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -187,6 +203,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
+  http: InternalHttpServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -204,12 +221,11 @@ export class SavedObjectsService
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
+  private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private mappings: SavedObjectsMapping[] = [];
-  private migrations: MigrationDefinition = {};
-  private schemas: SavedObjectsSchemaDefinition = {};
+  private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
 
   constructor(private readonly coreContext: CoreContext) {
@@ -221,16 +237,33 @@ export class SavedObjectsService
 
     this.setupDeps = setupDeps;
 
-    const {
-      savedObjectSchemas: savedObjectsSchemasDefinition,
-      savedObjectMappings,
-      savedObjectMigrations,
-      savedObjectValidations,
-    } = setupDeps.legacyPlugins.uiExports;
-    this.mappings = savedObjectMappings;
-    this.migrations = savedObjectMigrations;
-    this.schemas = savedObjectsSchemasDefinition;
-    this.validations = savedObjectValidations;
+    const legacyTypes = convertLegacyTypes(
+      setupDeps.legacyPlugins.uiExports,
+      setupDeps.legacyPlugins.pluginExtendedConfig
+    );
+    legacyTypes.forEach(type => this.typeRegistry.registerType(type));
+    this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
+
+    const importableExportableTypes = getImportableAndExportableTypes(
+      setupDeps.legacyPlugins.uiExports
+    );
+
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('savedObjects')
+      .pipe(first())
+      .toPromise();
+    const savedObjectsMigrationConfig = await this.coreContext.configService
+      .atPath<SavedObjectsMigrationConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+
+    registerRoutes({
+      http: setupDeps.http,
+      logger: this.logger,
+      config: this.config,
+      importableExportableTypes,
+    });
 
     return {
       setClientFactoryProvider: provider => {
@@ -246,6 +279,9 @@ export class SavedObjectsService
           factory,
         });
       },
+      registerType: type => {
+        this.typeRegistry.registerType(type);
+      },
     };
   }
 
@@ -253,7 +289,7 @@ export class SavedObjectsService
     core: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
-    if (!this.setupDeps) {
+    if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
 
@@ -263,12 +299,8 @@ export class SavedObjectsService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+    const migrator = this.createMigrator(kibanaConfig, this.config.migration, migrationsRetryDelay);
 
     /**
      * Note: We want to ensure that migrations have completed before
@@ -281,17 +313,29 @@ export class SavedObjectsService
      * So, when the `migrations.skip` is true, we skip migrations altogether.
      */
     const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+    const skipMigrations = cliArgs.optimize || this.config.migration.skip;
 
-    this.logger.debug('Starting saved objects migration');
-    await migrator.runMigrations(skipMigrations);
-    this.logger.debug('Saved objects migration completed');
+    if (skipMigrations) {
+      this.logger.warn(
+        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
+      );
+    } else {
+      this.logger.info(
+        'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
+      );
+      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+        filter(nodes => nodes.isCompatible),
+        take(1)
+      ).toPromise();
+
+      this.logger.info('Starting saved objects migrations');
+      await migrator.runMigrations();
+    }
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
-        new SavedObjectsSchema(this.schemas),
-        this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+        this.typeRegistry,
         kibanaConfig.index,
         callCluster,
         extraTypes
@@ -322,9 +366,11 @@ export class SavedObjectsService
     return {
       migrator,
       clientProvider,
+      typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
+      createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
     };
   }
 
@@ -332,27 +378,36 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsConfigType,
+    savedObjectsConfig: SavedObjectsMigrationConfigType,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
-    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
 
     return new KibanaMigrator({
-      savedObjectSchemas,
-      savedObjectMappings: this.mappings,
-      savedObjectMigrations: this.migrations,
-      savedObjectValidations: this.validations,
-      logger: this.coreContext.logger.get('migrations'),
+      typeRegistry: this.typeRegistry,
+      logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
+      savedObjectValidations: this.validations,
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations'),
+        this.logger,
         migrationsRetryDelay
       ),
     });
   }
+}
+
+function getImportableAndExportableTypes({
+  savedObjectMappings = [],
+  savedObjectsManagement = {},
+}: SavedObjectsLegacyUiExports) {
+  const visibleTypes = savedObjectMappings.reduce(
+    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
+    [] as string[]
+  );
+  return visibleTypes.filter(
+    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
+  );
 }

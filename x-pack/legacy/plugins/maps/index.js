@@ -17,8 +17,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
   return new kibana.Plugin({
-    // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
@@ -55,7 +54,7 @@ export function maps(kibana) {
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
       inspectorViews: ['plugins/maps/inspector/views/register_views'],
-      home: ['plugins/maps/register_feature'],
+      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {

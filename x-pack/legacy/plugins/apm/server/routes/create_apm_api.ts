@@ -59,6 +59,7 @@ import {
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
+import { indicesPrivilegesRoute } from './security';
 
 const createApmApi = () => {
   const api = createApi()
@@ -124,7 +125,10 @@ const createApmApi = () => {
 
     // Service map
     .add(serviceMapRoute)
-    .add(serviceMapServiceNodeRoute);
+    .add(serviceMapServiceNodeRoute)
+
+    // security
+    .add(indicesPrivilegesRoute);
 
   return api;
 };

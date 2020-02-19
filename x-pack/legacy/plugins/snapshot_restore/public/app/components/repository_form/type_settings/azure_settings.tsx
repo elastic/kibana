@@ -77,7 +77,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the Azure client."
           />
         }
-        idAria="azureRepositoryClientDescription"
         fullWidth
       >
         <EuiFormRow
@@ -88,7 +87,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryClientDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
@@ -123,7 +121,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the Azure container to use for snapshots."
           />
         }
-        idAria="azureRepositoryContainerDescription"
         fullWidth
       >
         <EuiFormRow
@@ -134,7 +131,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryContainerDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.container)}
           error={settingErrors.container}
         >
@@ -169,7 +165,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The container path to the repository data."
           />
         }
-        idAria="azureRepositoryBasePathDescription"
         fullWidth
       >
         <EuiFormRow
@@ -180,7 +175,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryBasePathDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
@@ -215,13 +209,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
-        idAria="azureRepositoryCompressDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['azureRepositoryCompressDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
         >
@@ -261,7 +253,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
-        idAria="azureRepositoryChunkSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -272,7 +263,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -308,7 +298,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The rate for creating snapshots for each node."
           />
         }
-        idAria="azureRepositoryMaxSnapshotBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -319,7 +308,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -355,7 +343,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The snapshot restore rate for each node."
           />
         }
-        idAria="azureRepositoryMaxRestoreBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -366,7 +353,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -402,7 +388,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The primary or secondary location. If secondary, read-only is true."
           />
         }
-        idAria="azureRepositoryLocationModeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -413,7 +398,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['azureRepositoryLocationModeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.locationMode)}
           error={settingErrors.locationMode}
         >
@@ -450,13 +434,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
-        idAria="azureRepositoryReadonlyDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['azureRepositoryReadonlyDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >

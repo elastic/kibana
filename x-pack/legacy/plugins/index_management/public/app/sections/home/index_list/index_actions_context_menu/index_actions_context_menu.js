@@ -22,10 +22,23 @@ import {
   EuiOverlayMask,
   EuiCheckbox,
 } from '@elastic/eui';
+
+// We will be able to remove these after the NP migration is complete.
+import { fatalError } from 'ui/notify';
+import { createUiStatsReporter } from '../../../../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { httpService } from '../../../../services/http';
+import { notificationService } from '../../../../services/notification';
+
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { getActionExtensions } from '../../../../../index_management_extensions';
-import { getHttpClient } from '../../../../services/api';
+
+// We will be able to remove this after the NP migration is complete and we can just inject the
+// NP fatalErrors service..
+const getNewPlatformCompatibleFatalErrorService = () => ({
+  add: fatalError.bind(fatalError),
+});
+
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
     super(props);
@@ -210,7 +223,20 @@ export class IndexActionsContextMenu extends Component {
       },
     });
     getActionExtensions().forEach(actionExtension => {
-      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
+      const actionExtensionDefinition = actionExtension({
+        indices,
+        reloadIndices,
+        // These config options can be removed once the NP migration out of legacy is complete.
+        // They're needed for now because ILM's extensions make API calls which require these
+        // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
+        // Within the old platform, "setup" only occurs once the user actually visits the app.
+        // Once ILM and IM have been moved out of legacy this hack won't be necessary.
+        createUiStatsReporter,
+        toasts: notificationService.toasts,
+        fatalErrors: getNewPlatformCompatibleFatalErrorService(),
+        httpClient: httpService.httpClient,
+      });
+
       if (actionExtensionDefinition) {
         const {
           buttonLabel,
@@ -623,17 +649,18 @@ export class IndexActionsContextMenu extends Component {
   };
 
   renderConfirmFreezeModal = () => {
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
     const { freezeIndices, indexNames } = this.props;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={i18n.translate(
             'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
             {
-              defaultMessage: 'Confirm Freeze {entity}',
-              values: { entity },
+              defaultMessage: 'Confirm freeze {count, plural, one {index} other {indices}}',
+              values: {
+                count: indexNames.length,
+              },
             }
           )}
           onCancel={this.closeConfirmModal}
@@ -647,8 +674,10 @@ export class IndexActionsContextMenu extends Component {
           confirmButtonText={i18n.translate(
             'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
             {
-              defaultMessage: 'Freeze {entity}',
-              values: { entity },
+              defaultMessage: 'Freeze {count, plural, one {index} other {indices}}',
+              values: {
+                count: indexNames.length,
+              },
             }
           )}
         >
@@ -690,18 +719,7 @@ export class IndexActionsContextMenu extends Component {
       </EuiOverlayMask>
     );
   };
-  oneIndexSelected = () => {
-    return this.props.indexNames.length === 1;
-  };
-  getEntity = oneIndexSelected => {
-    return oneIndexSelected
-      ? i18n.translate('xpack.idxMgmt.indexActionsMenu.indexMessage', {
-          defaultMessage: 'index',
-        })
-      : i18n.translate('xpack.idxMgmt.indexActionsMenu.indicesMessage', {
-          defaultMessage: 'indices',
-        });
-  };
+
   render() {
     const { indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
@@ -734,7 +752,7 @@ export class IndexActionsContextMenu extends Component {
     return (
       <div>
         {this.state.renderConfirmModal
-          ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient())
+          ? this.state.renderConfirmModal(this.closeConfirmModal)
           : null}
         <EuiPopover
           id="contextMenuIndices"

@@ -6,6 +6,7 @@
 
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
@@ -97,8 +98,10 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
+    currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
@@ -431,11 +434,13 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
     };
     observability: {
         label: string;
+        euiIconType: string;
         order: number;
     };
     security: {
         label: string;
         order: number;
+        euiIconType: string;
     };
     management: {
         label: string;
@@ -728,6 +733,8 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface IHttpFetchError extends Error {
     // (undocumented)
     readonly body?: any;
+    // (undocumented)
+    readonly name: string;
     // @deprecated (undocumented)
     readonly req: Request;
     // (undocumented)

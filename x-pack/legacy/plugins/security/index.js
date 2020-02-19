@@ -109,6 +109,7 @@ export const security = kibana =>
             tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
           },
           enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
+          logoutUrl: `${server.newPlatform.setup.core.http.basePath.serverBasePath}/logout`,
         };
       },
     },
@@ -142,9 +143,6 @@ export const security = kibana =>
           hostname: config.get('server.host'),
           port: config.get('server.port'),
         },
-        isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
-          server.plugins.kibana.systemApi
-        ),
       });
 
       // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
@@ -158,7 +156,7 @@ export const security = kibana =>
         );
 
       server.expose({
-        getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
+        getUser: async request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
       });
 
       initLoginView(securityPlugin, server);

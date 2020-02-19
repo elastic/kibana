@@ -23,6 +23,7 @@ Table of Contents
 		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
 		- [`GET /api/alert/_find`: Find alerts](#get-apialertfind-find-alerts)
 		- [`GET /api/alert/{id}`: Get alert](#get-apialertid-get-alert)
+		- [`GET /api/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
 		- [`GET /api/alert/types`: List alert types](#get-apialerttypes-list-alert-types)
 		- [`PUT /api/alert/{id}`: Update alert](#put-apialertid-update-alert)
 		- [`POST /api/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
@@ -84,7 +85,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
-|actionGroups|An explicit list of groups the alert type may schedule actions for. Alert `actions` validation will use this array to ensure groups are valid.|string[]|
+|actionGroups|An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType. |Array<{id:string, name:string}>|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
@@ -272,6 +273,14 @@ Params:
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to get.|string|
+
+### `GET /api/alert/{id}/state`: Get alert state
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert whose state you're trying to get.|string|
 
 ### `GET /api/alert/types`: List alert types
 

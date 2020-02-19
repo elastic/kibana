@@ -97,6 +97,17 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -162,6 +173,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -177,7 +189,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -738,6 +752,17 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -803,6 +828,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
@@ -818,7 +844,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -1361,6 +1389,17 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -1426,6 +1465,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -1441,7 +1481,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -1999,6 +2041,17 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -2064,6 +2117,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
@@ -2079,7 +2133,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -2622,6 +2678,17 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -2687,6 +2754,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
@@ -2702,7 +2770,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -3260,6 +3330,17 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -3325,6 +3406,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
@@ -3340,7 +3422,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],

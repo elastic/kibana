@@ -6,20 +6,20 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
+
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
-import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { DataProvider } from '../timeline/data_providers/data_provider';
-import { Sort } from '../timeline/body/sort';
+import {
+  ColumnHeaderOptions,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../store/timeline/model';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { InputsModelId } from '../../store/inputs/constants';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { TimelineTypeContextProps } from '../timeline/timeline_context';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -33,56 +33,12 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
-  pageFilters?: esFilters.Filter[];
+  pageFilters?: Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
-interface StateReduxProps {
-  columns: ColumnHeader[];
-  dataProviders?: DataProvider[];
-  filters: esFilters.Filter[];
-  isLive: boolean;
-  itemsPerPage?: number;
-  itemsPerPageOptions?: number[];
-  kqlMode: KqlMode;
-  deletedEventIds: Readonly<string[]>;
-  query: Query;
-  pageCount?: number;
-  sort?: Sort;
-  showCheckboxes: boolean;
-  showRowRenderers: boolean;
-}
-
-interface DispatchProps {
-  createTimeline: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-    itemsPerPage?: number;
-    sort?: Sort;
-    showCheckboxes?: boolean;
-    showRowRenderers?: boolean;
-  }>;
-  deleteEventQuery: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-  }>;
-  removeColumn: ActionCreator<{
-    id: string;
-    columnId: string;
-  }>;
-  updateItemsPerPage: ActionCreator<{
-    id: string;
-    itemsPerPage: number;
-  }>;
-  upsertColumn: ActionCreator<{
-    column: ColumnHeader;
-    id: string;
-    index: number;
-  }>;
-}
-
-type Props = OwnProps & StateReduxProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const defaultTimelineTypeContext = {
   loadingText: i18n.LOADING_EVENTS,
@@ -134,7 +90,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const toggleColumn = useCallback(
-    (column: ColumnHeader) => {
+    (column: ColumnHeaderOptions) => {
       const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
       if (!exists && upsertColumn != null) {
@@ -224,13 +180,19 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulEventsViewer = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
-})(
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
     (prevProps, nextProps) =>
@@ -245,7 +207,6 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
       isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
       isEqual(prevProps.query, nextProps.query) &&
-      prevProps.pageCount === nextProps.pageCount &&
       isEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       isEqual(prevProps.pageFilters, nextProps.pageFilters) &&

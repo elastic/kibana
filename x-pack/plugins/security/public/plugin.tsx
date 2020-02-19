@@ -57,13 +57,14 @@ export class SecurityPlugin
     { home, licensing, management }: PluginSetupDependencies
   ) {
     const { http, notifications, injectedMetadata } = core;
-    const { basePath, anonymousPaths } = http;
+    const { anonymousPaths } = http;
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
 
-    const tenant = `${injectedMetadata.getInjectedVar('session.tenant', '')}`;
-    const sessionExpired = new SessionExpired(basePath, tenant);
+    const tenant = injectedMetadata.getInjectedVar('session.tenant', '') as string;
+    const logoutUrl = injectedMetadata.getInjectedVar('logoutUrl') as string;
+    const sessionExpired = new SessionExpired(logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
     http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
@@ -107,10 +108,11 @@ export class SecurityPlugin
     return {
       authc: this.authc,
       sessionTimeout: this.sessionTimeout,
+      license,
     };
   }
 
-  public start(core: CoreStart, { data, management }: PluginStartDependencies) {
+  public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
 

@@ -27,6 +27,7 @@ A high level overview of our contributing guidelines.
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
+  - [Automated Accessibility Testing](#automated-accessibility-testing)
   - [Cross-browser compatibility](#cross-browser-compatibility)
     - [Testing compatibility locally](#testing-compatibility-locally)
     - [Running Browser Automation Tests](#running-browser-automation-tests)
@@ -54,11 +55,9 @@ Granted that you share your thoughts, we might even be able to come up with crea
 
 First of all, **sorry about that!** We want you to have a great time with Kibana.
 
-Hosting meaningful discussions on GitHub can be challenging. For that reason, we'll sometimes ask that you join us on IRC _([#kibana](https://kiwiirc.com/client/irc.freenode.net/?#kibana) on freenode)_ to chat about your issues. You may also experience **faster response times** when engaging us via IRC.
-
 There's hundreds of open issues and prioritizing what to work on is an important aspect of our daily jobs. We prioritize issues according to impact and difficulty, so some issues can be neglected while we work on more pressing issues.
 
-Feel free to bump your issues if you think they've been neglected for a prolonged period, or just jump on IRC and let us have it!
+Feel free to bump your issues if you think they've been neglected for a prolonged period.
 
 ### "I want to help!"
 
@@ -541,6 +540,23 @@ To run the tests for just your particular plugin run the following command from 
 yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
+
+### Automated Accessibility Testing
+
+To run the tests locally:
+
+1. In one terminal window run `node scripts/functional_tests_server --config test/accessibility/config.ts`
+2. In another terminal window run `node scripts/functional_test_runner.js --config test/accessibility/config.ts`
+
+To run the x-pack tests, swap the config file out for `x-pack/test/accessibility/config.ts`.
+
+After the server is up, you can go to this instance of Kibana at `localhost:5620`.
+
+The testing is done using [axe](https://github.com/dequelabs/axe-core). The same thing that runs in CI,
+can be run locally using their browser plugins:
+
+- [Chrome](https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/)
 
 ### Cross-browser Compatibility
 
