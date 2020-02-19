@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsServiceStart } from 'kibana/server';
 import {
   UIReindex,
   UIReindexOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
 } from '../../../common/types';
-import { RequestShim, ServerShim } from '../../types';
 
-async function incrementUIReindexOptionCounter(
-  server: ServerShim,
-  uiOpenOptionCounter: UIReindexOption
-) {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+interface IncrementUIReindexOptionDependencies {
+  uiOpenOptionCounter: UIReindexOption;
+  savedObjects: SavedObjectsServiceStart;
+}
+
+async function incrementUIReindexOptionCounter({
+  savedObjects,
+  uiOpenOptionCounter,
+}: IncrementUIReindexOptionDependencies) {
+  const internalRepository = savedObjects.createInternalRepository();
 
   await internalRepository.incrementCounter(
     UPGRADE_ASSISTANT_TYPE,
@@ -27,26 +30,29 @@ async function incrementUIReindexOptionCounter(
   );
 }
 
-export async function upsertUIReindexOption(
-  server: ServerShim,
-  req: RequestShim
-): Promise<UIReindex> {
-  const { close, open, start, stop } = req.payload as UIReindex;
+type UpsertUIReindexOptionDepencies = UIReindex & { savedObjects: SavedObjectsServiceStart };
 
+export async function upsertUIReindexOption({
+  start,
+  close,
+  open,
+  stop,
+  savedObjects,
+}: UpsertUIReindexOptionDepencies): Promise<UIReindex> {
   if (close) {
-    await incrementUIReindexOptionCounter(server, 'close');
+    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'close' });
   }
 
   if (open) {
-    await incrementUIReindexOptionCounter(server, 'open');
+    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'open' });
   }
 
   if (start) {
-    await incrementUIReindexOptionCounter(server, 'start');
+    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'start' });
   }
 
   if (stop) {
-    await incrementUIReindexOptionCounter(server, 'stop');
+    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'stop' });
   }
 
   return {

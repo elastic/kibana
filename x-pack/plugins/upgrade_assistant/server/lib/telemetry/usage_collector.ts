@@ -5,8 +5,12 @@
  */
 
 import { set } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsRepository } from 'src/core/server/saved_objects/service/lib/repository';
+import {
+  APICaller,
+  ElasticsearchServiceSetup,
+  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
@@ -15,11 +19,10 @@ import {
   UpgradeAssistantTelemetrySavedObject,
   UpgradeAssistantTelemetrySavedObjectAttributes,
 } from '../../../common/types';
-import { ServerShim } from '../../types';
 import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
-  savedObjectsRepository: SavedObjectsRepository,
+  savedObjectsRepository: ISavedObjectsRepository,
   docType: string,
   docID: string
 ) {
@@ -30,7 +33,7 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(callCluster: any): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(callCluster: APICaller): Promise<boolean> {
   try {
     const loggerDeprecationCallResult = await callCluster('cluster.getSettings', {
       includeDefaults: true,
@@ -43,16 +46,16 @@ async function getDeprecationLoggingStatusValue(callCluster: any): Promise<boole
 }
 
 export async function fetchUpgradeAssistantMetrics(
-  callCluster: any,
-  server: ServerShim
+  { adminClient }: ElasticsearchServiceSetup,
+  savedObjects: SavedObjectsServiceStart
 ): Promise<UpgradeAssistantTelemetry> {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+  const savedObjectsRepository = savedObjects.createInternalRepository();
   const upgradeAssistantSOAttributes = await getSavedObjectAttributesFromRepo(
     savedObjectsRepository,
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
+  const callCluster = adminClient.callAsInternalUser.bind(adminClient);
   const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callCluster);
 
   const getTelemetrySavedObject = (
@@ -98,14 +101,21 @@ export async function fetchUpgradeAssistantMetrics(
   };
 }
 
-export function registerUpgradeAssistantUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  server: ServerShim
-) {
+interface Dependencies {
+  elasticsearch: ElasticsearchServiceSetup;
+  savedObjects: SavedObjectsServiceStart;
+  usageCollection: UsageCollectionSetup;
+}
+
+export function registerUpgradeAssistantUsageCollector({
+  elasticsearch,
+  usageCollection,
+  savedObjects,
+}: Dependencies) {
   const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector({
     type: UPGRADE_ASSISTANT_TYPE,
     isReady: () => true,
-    fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
+    fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
   });
 
   usageCollection.registerCollector(upgradeAssistantUsageCollector);

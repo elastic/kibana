@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CallClusterWithRequest,
-  DeprecationAPIResponse,
-} from 'src/legacy/core_plugins/elasticsearch';
-
+import { IScopedClusterClient } from 'kibana/server';
+import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
-import { RequestShim } from '../types';
-
 export async function getUpgradeAssistantStatus(
-  callWithRequest: CallClusterWithRequest,
-  req: RequestShim,
+  dataClient: IScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = await callWithRequest(req, 'transport.request', {
+  const deprecations = await dataClient.callAsCurrentUser('transport.request', {
     path: '/_migration/deprecations',
     method: 'GET',
   });

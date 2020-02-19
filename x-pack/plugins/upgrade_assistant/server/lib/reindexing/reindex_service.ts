@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import { APICaller, Logger } from 'kibana/server';
 
-import { XPackInfo } from '../../../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,
@@ -97,10 +96,10 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callCluster: APICaller,
-  xpackInfo: SecurityPluginSetup,
+  esAPICaller: APICaller,
   actions: ReindexActions,
-  log: Logger
+  log: Logger,
+  security?: SecurityPluginSetup
 ): ReindexService => {
   // ------ Utility functions
 
@@ -114,7 +113,7 @@ export const reindexServiceFactory = (
     await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
       await validateNodesMinimumVersion(6, 7);
 
-      const res = await callCluster('transport.request', {
+      const res = await esAPICaller('transport.request', {
         path: '/_ml/set_upgrade_mode?enabled=true',
         method: 'POST',
       });
@@ -134,7 +133,7 @@ export const reindexServiceFactory = (
     await actions.decrementIndexGroupReindexes(IndexGroup.ml);
     await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
       if (mlDoc.attributes.runningReindexCount === 0) {
-        const res = await callCluster('transport.request', {
+        const res = await esAPICaller('transport.request', {
           path: '/_ml/set_upgrade_mode?enabled=false',
           method: 'POST',
         });
@@ -154,7 +153,7 @@ export const reindexServiceFactory = (
   const stopWatcher = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
     await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
-      const { acknowledged } = await callCluster('transport.request', {
+      const { acknowledged } = await esAPICaller('transport.request', {
         path: '/_watcher/_stop',
         method: 'POST',
       });
@@ -174,7 +173,7 @@ export const reindexServiceFactory = (
     await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
     await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
       if (watcherDoc.attributes.runningReindexCount === 0) {
-        const { acknowledged } = await callCluster('transport.request', {
+        const { acknowledged } = await esAPICaller('transport.request', {
           path: '/_watcher/_start',
           method: 'POST',
         });
@@ -191,14 +190,14 @@ export const reindexServiceFactory = (
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
     // Cancel reindex task if it was started but not completed
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
-      await callCluster('tasks.cancel', {
+      await esAPICaller('tasks.cancel', {
         taskId: reindexOp.attributes.reindexTaskId,
       }).catch(e => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
-      await callCluster('indices.putSettings', {
+      await esAPICaller('indices.putSettings', {
         index: reindexOp.attributes.indexName,
         body: { 'index.blocks.write': false },
       });
@@ -208,7 +207,7 @@ export const reindexServiceFactory = (
       reindexOp.attributes.lastCompletedStep >= ReindexStep.newIndexCreated &&
       reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated
     ) {
-      await callCluster('indices.delete', { index: reindexOp.attributes.newIndexName });
+      await esAPICaller('indices.delete', { index: reindexOp.attributes.newIndexName });
     }
 
     // Resume consumers if we ever got past this point.
@@ -222,7 +221,7 @@ export const reindexServiceFactory = (
   // ------ Functions used to process the state machine
 
   const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const nodesResponse = await callCluster('transport.request', {
+    const nodesResponse = await esAPICaller('transport.request', {
       path: '/_nodes',
       method: 'GET',
     });
@@ -263,7 +262,7 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const putReadonly = await callCluster('indices.putSettings', {
+    const putReadonly = await esAPICaller('indices.putSettings', {
       index: indexName,
       body: { 'index.blocks.write': true },
     });
@@ -289,7 +288,7 @@ export const reindexServiceFactory = (
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
 
-    const createIndex = await callCluster('indices.create', {
+    const createIndex = await esAPICaller('indices.create', {
       index: newIndexName,
       body: {
         settings,
@@ -313,7 +312,7 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
 
-    const startReindex = (await callCluster('reindex', {
+    const startReindex = (await esAPICaller('reindex', {
       refresh: true,
       waitForCompletion: false,
       body: {
@@ -337,7 +336,7 @@ export const reindexServiceFactory = (
     const taskId = reindexOp.attributes.reindexTaskId;
 
     // Check reindexing task progress
-    const taskResponse = await callCluster('tasks.get', {
+    const taskResponse = await esAPICaller('tasks.get', {
       taskId,
       waitForCompletion: false,
     });
@@ -358,7 +357,7 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { count } = await callCluster('count', { index: reindexOp.attributes.indexName });
+      const { count } = await esAPICaller('count', { index: reindexOp.attributes.indexName });
 
       if (taskResponse.task.status.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
@@ -374,7 +373,7 @@ export const reindexServiceFactory = (
     }
 
     // Delete the task from ES .tasks index
-    const deleteTaskResp = await callCluster('delete', {
+    const deleteTaskResp = await esAPICaller('delete', {
       index: '.tasks',
       id: taskId,
     });
@@ -394,7 +393,7 @@ export const reindexServiceFactory = (
     const { indexName, newIndexName } = reindexOp.attributes;
 
     const existingAliases = (
-      await callCluster('indices.getAlias', {
+      await esAPICaller('indices.getAlias', {
         index: indexName,
       })
     )[indexName].aliases;
@@ -403,7 +402,7 @@ export const reindexServiceFactory = (
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
-    const aliasResponse = await callCluster('indices.updateAliases', {
+    const aliasResponse = await esAPICaller('indices.updateAliases', {
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
@@ -444,8 +443,7 @@ export const reindexServiceFactory = (
   return {
     async hasRequiredPrivileges(indexName: string) {
       // If security is disabled or unavailable, return true.
-      const security = xpackInfo.feature('security');
-      if (!security.isAvailable() || !security.isEnabled()) {
+      if (security?.__legacyCompat.license.isEnabled()) {
         return true;
       }
 
@@ -482,7 +480,7 @@ export const reindexServiceFactory = (
         body.cluster = [...body.cluster, 'manage_watcher'];
       }
 
-      const resp = await callCluster('transport.request', {
+      const resp = await esAPICaller('transport.request', {
         path: '/_security/user/_has_privileges',
         method: 'POST',
         body,
@@ -509,7 +507,7 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string) {
-      const indexExists = await callCluster('indices.exists', { index: indexName });
+      const indexExists = await esAPICaller('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
       }
@@ -644,7 +642,7 @@ export const reindexServiceFactory = (
         throw new Error(`Reindex operation is not current waiting for reindex task to complete`);
       }
 
-      const resp = await callCluster('tasks.cancel', {
+      const resp = await esAPICaller('tasks.cancel', {
         taskId: reindexOp.attributes.reindexTaskId,
       });
 

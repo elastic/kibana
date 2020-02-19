@@ -7,11 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
-import { ServerShimWithRouter } from '../types';
-import { createRequestShim } from './create_request_shim';
+import { RouteDependencies } from '../types';
 
-export function registerTelemetryRoutes(server: ServerShimWithRouter) {
-  server.router.put(
+export function registerTelemetryRoutes({ router, getSavedObjectsService }: RouteDependencies) {
+  router.put(
     {
       path: '/api/upgrade_assistant/telemetry/ui_open',
       validate: {
@@ -23,16 +22,23 @@ export function registerTelemetryRoutes(server: ServerShimWithRouter) {
       },
     },
     async (ctx, request, response) => {
-      const reqShim = createRequestShim(request);
+      const { cluster, indices, overview } = request.body as any;
       try {
-        return response.ok({ body: await upsertUIOpenOption(server, reqShim) });
+        return response.ok({
+          body: await upsertUIOpenOption({
+            savedObjects: getSavedObjectsService(),
+            cluster,
+            indices,
+            overview,
+          }),
+        });
       } catch (e) {
         return response.internalError({ body: e });
       }
     }
   );
 
-  server.router.put(
+  router.put(
     {
       path: '/api/upgrade_assistant/telemetry/ui_reindex',
       validate: {
@@ -45,9 +51,17 @@ export function registerTelemetryRoutes(server: ServerShimWithRouter) {
       },
     },
     async (ctx, request, response) => {
-      const reqShim = createRequestShim(request);
+      const { close, open, start, stop } = request.body as any;
       try {
-        return response.ok({ body: await upsertUIReindexOption(server, reqShim) });
+        return response.ok({
+          body: await upsertUIReindexOption({
+            savedObjects: getSavedObjectsService(),
+            close,
+            open,
+            start,
+            stop,
+          }),
+        });
       } catch (e) {
         return response.internalError({ body: e });
       }

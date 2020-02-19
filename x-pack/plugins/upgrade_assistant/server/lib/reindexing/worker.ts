@@ -56,9 +56,9 @@ export class ReindexWorker {
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      this.security,
       reindexActionsFactory(this.client, callAsInternalUser),
-      log
+      log,
+      this.security
     );
 
     ReindexWorker.workerSingleton = this;
@@ -161,7 +161,7 @@ export class ReindexWorker {
     // Setup a ReindexService specific to these credentials.
     const callCluster = this.clusterClient.callAsInternalUser.bind(this.clusterClient);
     const actions = reindexActionsFactory(this.client, callCluster);
-    const service = reindexServiceFactory(callCluster, this.xpackInfo, actions, this.log);
+    const service = reindexServiceFactory(callCluster, actions, this.log, this.security);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

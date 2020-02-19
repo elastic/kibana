@@ -11,29 +11,35 @@ import {
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { ServerShimWithRouter } from '../types';
-import { createRequestShim } from './create_request_shim';
+import { RouteDependencies } from '../types';
 
-export function registerDeprecationLoggingRoutes(server: ServerShimWithRouter) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-
-  server.router.get(
+export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
+  router.get(
     {
       path: '/api/upgrade_assistant/deprecation_logging',
       validate: false,
     },
-    versionCheckHandlerWrapper(async (ctx, request, response) => {
-      const reqShim = createRequestShim(request);
-      try {
-        const result = await getDeprecationLoggingStatus(callWithRequest, reqShim);
-        return response.ok({ body: result });
-      } catch (e) {
-        return response.internalError({ body: e });
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { dataClient },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const result = await getDeprecationLoggingStatus(dataClient);
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.internalError({ body: e });
+        }
       }
-    })
+    )
   );
 
-  server.router.put(
+  router.put(
     {
       path: '/api/upgrade_assistant/deprecation_logging',
       validate: {
@@ -42,16 +48,25 @@ export function registerDeprecationLoggingRoutes(server: ServerShimWithRouter) {
         }),
       },
     },
-    versionCheckHandlerWrapper(async (ctx, request, response) => {
-      const reqShim = createRequestShim(request);
-      try {
-        const { isEnabled } = reqShim.payload as { isEnabled: boolean };
-        return response.ok({
-          body: await setDeprecationLogging(callWithRequest, reqShim, isEnabled),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { dataClient },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const { isEnabled } = request.body as { isEnabled: boolean };
+          return response.ok({
+            body: await setDeprecationLogging(dataClient, isEnabled),
+          });
+        } catch (e) {
+          return response.internalError({ body: e });
+        }
       }
-    })
+    )
   );
 }

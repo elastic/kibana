@@ -30,30 +30,7 @@ export function upgradeAssistant(kibana: any) {
       }).default();
     },
 
-    init(server: Legacy.Server) {
-      // Add server routes and initialize the plugin here
-      const instance = plugin({} as any);
-
-      const { usageCollection, cloud } = server.newPlatform.setup.plugins;
-      instance.setup(server.newPlatform.setup.core, {
-        usageCollection,
-        cloud: cloud as CloudSetup,
-        __LEGACY: {
-          // Legacy objects
-          events: server.events,
-          savedObjects: server.savedObjects,
-
-          // Legacy functions
-          log: server.log.bind(server),
-
-          // Legacy plugins
-          plugins: {
-            elasticsearch: server.plugins.elasticsearch,
-            xpack_main: server.plugins.xpack_main,
-          },
-        },
-      });
-    },
+    init() {},
   };
   return new kibana.Plugin(config);
 }

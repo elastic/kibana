@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-
-import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
 import { RequestShim } from '../types';
 
 interface DeprecationLoggingStatus {
@@ -13,10 +12,9 @@ interface DeprecationLoggingStatus {
 }
 
 export async function getDeprecationLoggingStatus(
-  callWithRequest: CallClusterWithRequest,
-  req: RequestShim
+  dataClient: IScopedClusterClient
 ): Promise<DeprecationLoggingStatus> {
-  const response = await callWithRequest(req, 'cluster.getSettings', {
+  const response = await dataClient.callAsCurrentUser('cluster.getSettings', {
     includeDefaults: true,
   });
 
@@ -26,11 +24,10 @@ export async function getDeprecationLoggingStatus(
 }
 
 export async function setDeprecationLogging(
-  callWithRequest: CallClusterWithRequest,
-  req: RequestShim,
+  dataClient: IScopedClusterClient,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
-  const response = await callWithRequest(req, 'cluster.putSettings', {
+  const response = await dataClient.callAsCurrentUser('cluster.putSettings', {
     body: {
       transient: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',

@@ -110,7 +110,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  callCluster: APICaller
+  esAPICaller: APICaller
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -229,7 +229,7 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const flatSettings = (await callCluster('transport.request', {
+      const flatSettings = (await esAPICaller('transport.request', {
         path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
       })) as { [indexName: string]: FlatSettings };
 

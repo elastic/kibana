@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import {
   Plugin,
   CoreSetup,
@@ -11,10 +13,9 @@ import {
   Logger,
   ElasticsearchServiceSetup,
   SavedObjectsClient,
-} from 'kibana/server';
+  SavedObjectsServiceStart,
+} from '../../../../src/core/server';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ServerShimWithRouter } from './types';
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
@@ -25,6 +26,8 @@ import { registerTelemetryRoutes } from './routes/telemetry';
 import { ReindexWorker } from './lib/reindexing';
 import { SecurityPluginSetup } from '../../security/server';
 
+import { RouteDependencies } from './types';
+
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   security: SecurityPluginSetup;
@@ -33,11 +36,15 @@ interface PluginsSetup {
 
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
-  private worker: ReindexWorker;
-  private credentialStore: CredentialStore;
+  private readonly credentialStore: CredentialStore;
 
+  // Properties set at setup
   private security?: SecurityPluginSetup;
-  private elasticSearchService: ElasticsearchServiceSetup;
+  private elasticSearchService?: ElasticsearchServiceSetup;
+
+  // Properties set at start
+  private savedObjectsServiceStart?: SavedObjectsServiceStart;
+  private worker?: ReindexWorker;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -52,23 +59,45 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, elasticsearch, savedObjects }: CoreSetup,
+    { http, elasticsearch, getStartServices, capabilities }: CoreSetup,
     { usageCollection, cloud, security }: PluginsSetup
   ) {
     this.elasticSearchService = elasticsearch;
     this.security = security;
 
     const router = http.createRouter();
-    const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };
-    registerClusterCheckupRoutes(shimWithRouter, { cloud });
-    registerDeprecationLoggingRoutes(shimWithRouter);
-    registerReindexIndicesRoutes(shimWithRouter, this.getWorker.bind(this), this.credentialStore);
+
+    const dependencies: RouteDependencies = {
+      elasticsearch,
+      cloud,
+      router,
+      credentialStore: this.credentialStore,
+      log: this.logger,
+      getSavedObjectsService: () => {
+        if (!this.savedObjectsServiceStart) {
+          throw new Error('Saved Objects Start service not available');
+        }
+        return this.savedObjectsServiceStart;
+      },
+      security,
+    };
+
+    registerClusterCheckupRoutes(dependencies);
+    registerDeprecationLoggingRoutes(dependencies);
+    registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this), this.credentialStore);
     // Bootstrap the needed routes and the collector for the telemetry
-    registerTelemetryRoutes(shimWithRouter);
-    registerUpgradeAssistantUsageCollector(usageCollection, __LEGACY);
+    registerTelemetryRoutes(dependencies);
+
+    if (usageCollection) {
+      getStartServices().then(([{ savedObjects }]) => {
+        registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
+      });
+    }
   }
 
   start({ savedObjects }: CoreStart, plugins: any) {
+    this.savedObjectsServiceStart = savedObjects;
+
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
     // want to expose these credentials to any unauthenticated users. We also want to avoid any need
@@ -79,15 +108,19 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.worker = createReindexWorker({
       credentialStore: this.credentialStore,
       security: this.security,
-      elasticsearchService: this.elasticSearchService,
+      elasticsearchService: this.elasticSearchService!,
       logger: this.logger,
-      savedObjects: new SavedObjectsClient(savedObjects.createInternalRepository()),
+      savedObjects: new SavedObjectsClient(
+        this.savedObjectsServiceStart.createInternalRepository()
+      ),
     });
 
     this.worker.start();
   }
 
   stop(): void {
-    this.worker.stop();
+    if (this.worker) {
+      this.worker.stop();
+    }
   }
 }
