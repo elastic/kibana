@@ -30,6 +30,7 @@ import {
   setUsageCollector,
   setFilterManager,
   setExpressions,
+  setUiActions,
 } from './services';
 import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
@@ -49,6 +50,7 @@ import {
 import { SavedVisualizations } from '../../../../kibana/public/visualize/np_ready/types';
 import { VisImpl, VisImplConstructor } from './vis_impl';
 import { showNewVisModal } from './wizard';
+import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -75,6 +77,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -122,7 +125,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions }: VisualizationsStartDeps
+    { data, expressions, uiActions }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -133,6 +136,7 @@ export class VisualizationsPlugin
     setIndexPatterns(data.indexPatterns);
     setFilterManager(data.query.filterManager);
     setExpressions(expressions);
+    setUiActions(uiActions);
 
     this.savedVisualizationDependencies = {
       savedObjectsClient: core.savedObjects.client,

@@ -29,6 +29,7 @@ import { createGetterSetter } from '../../../../../../plugins/kibana_utils/publi
 import { FilterManager, IndexPatternsContract } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../../../../plugins/expressions/public';
+import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -57,3 +58,5 @@ export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCo
 );
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');

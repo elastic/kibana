@@ -24,7 +24,6 @@ import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
 import { AppState } from 'ui/state_management/app_state';
-import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -47,7 +46,7 @@ import {
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
-import { getExpressions } from '../np_ready/public/services';
+import { getExpressions, getUiActions } from '../np_ready/public/services';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -282,7 +281,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
     this.domNode = div;
 
-    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
+    const expressions = getExpressions();
+    this.handler = new expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
@@ -304,7 +304,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
         const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
-        npStart.plugins.uiActions.executeTriggerActions(eventName, {
+        getUiActions().executeTriggerActions(eventName, {
           embeddable: this,
           timeFieldName: this.vis.indexPattern.timeFieldName,
           data: event.data,
