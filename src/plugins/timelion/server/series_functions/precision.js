@@ -37,7 +37,7 @@ export default new Chainable('precision', {
     },
   ],
   help: i18n.translate('timelion.help.functions.precisionHelpText', {
-    defaultMessage: 'The number of digists to truncate the decimal portion of the value to',
+    defaultMessage: 'The number of digits to truncate the decimal portion of the value to',
   }),
   fn: async function precisionFn(args) {
     await alter(args, function(eachSeries, precision) {
