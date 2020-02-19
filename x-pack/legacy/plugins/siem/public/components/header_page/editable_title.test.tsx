@@ -137,6 +137,30 @@ describe('EditableTitle', () => {
     ).toEqual(newTitle);
   });
 
+  test('it should NOT change the title when cancel', () => {
+    const title = 'Test title';
+    const newTitle = 'new test title';
+
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle title={title} onSubmit={submitTitle} isLoading={false} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: newTitle } });
+    wrapper.update();
+
+    wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find('h1[data-test-subj="header-page-title"]').text()).toEqual(title);
+  });
+
   test('it submits the title', () => {
     const newTitle = 'new test title';
 
