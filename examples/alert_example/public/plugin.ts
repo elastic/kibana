@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import { getAlertType } from './components/always_fire_alert_type';
 import {
   AlertExamplePluginSetup,
   AlertExamplePluginStart,
@@ -39,12 +40,16 @@ export class AlertExamplePlugin
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
 
+        const { triggers_actions_ui } = deps;
+
+        triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+
         // Render the application
         return renderApp(
           coreStart,
           {
             ...(depsStart as AppPluginStartDependencies),
-            ...{ triggers_actions_ui: deps.triggers_actions_ui },
+            ...{ triggers_actions_ui },
           },
           params
         );
