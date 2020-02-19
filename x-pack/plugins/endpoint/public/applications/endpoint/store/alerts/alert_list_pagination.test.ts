@@ -83,7 +83,6 @@ describe('alert list pagination', () => {
           const actualPaginationQuery = uiQueryParams(store.getState());
           expect(actualPaginationQuery).toMatchInlineSnapshot(`
             Object {
-              "page_index": "0",
               "page_size": "1",
             }
           `);

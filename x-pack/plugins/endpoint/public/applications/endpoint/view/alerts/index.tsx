@@ -99,26 +99,29 @@ export const AlertIndex = memo(() => {
   );
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
-  const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const formatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(i18n.getLocale(), {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+    []
+  );
 
-  const handleAlertClick = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
+  const handleAlertClick = useMemo(() => {
+    return (event: React.MouseEvent<HTMLElement>) => {
       if (event.target instanceof HTMLElement) {
         const alertId: string | undefined = event.target.dataset.alertId;
         if (alertId !== undefined) {
           history.push(urlWithSelectedAlert(alertId));
         }
       }
-    },
-    [history, urlWithSelectedAlert]
-  );
+    };
+  }, [history, urlWithSelectedAlert]);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlWithoutSelectedAlert);
@@ -189,7 +192,7 @@ export const AlertIndex = memo(() => {
   return (
     <>
       {hasSelectedAlert && (
-        <EuiFlyout size="l" onClose={handleFlyoutClose}>
+        <EuiFlyout data-test-subj="alert-detail-flyout" size="l" onClose={handleFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -209,10 +212,13 @@ export const AlertIndex = memo(() => {
               aria-label="Alert List"
               rowCount={total}
               columns={columns}
-              columnVisibility={{
-                visibleColumns,
-                setVisibleColumns,
-              }}
+              columnVisibility={useMemo(
+                () => ({
+                  visibleColumns,
+                  setVisibleColumns,
+                }),
+                [setVisibleColumns, visibleColumns]
+              )}
               renderCellValue={renderCellValue}
               pagination={pagination}
               data-test-subj="alertListGrid"

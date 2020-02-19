@@ -5,10 +5,19 @@
  */
 
 import qs from 'querystring';
-import { createSelector } from 'reselect';
+import {
+  createSelector,
+  createStructuredSelector as createStructuredSelectorWithBadType,
+} from 'reselect';
 import { Immutable } from '../../../../../common/types';
-import { AlertListState, AlertingIndexUIQueryParams, AlertsAPIQueryParams } from '../../types';
+import {
+  AlertListState,
+  AlertingIndexUIQueryParams,
+  AlertsAPIQueryParams,
+  CreateStructuredSelector,
+} from '../../types';
 
+const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
  * Returns the Alert Data array from state
  */
@@ -17,14 +26,12 @@ export const alertListData = (state: AlertListState) => state.alerts;
 /**
  * Returns the alert list pagination data from state
  */
-export const alertListPagination = (state: AlertListState) => {
-  return {
-    pageIndex: state.request_page_index,
-    pageSize: state.request_page_size,
-    resultFromIndex: state.result_from_index,
-    total: state.total,
-  };
-};
+export const alertListPagination = createStructuredSelector({
+  pageIndex: (state: AlertListState) => state.request_page_index,
+  pageSize: (state: AlertListState) => state.request_page_size,
+  resultFromIndex: (state: AlertListState) => state.result_from_index,
+  total: (state: AlertListState) => state.total,
+});
 
 /**
  * Returns a boolean based on whether or not the user is on the alerts page
@@ -87,44 +94,46 @@ export const apiQueryParams: (
  */
 export const urlFromNewPageSizeParam: (
   state: AlertListState
-) => (newPageSize: number) => string = state => {
+) => (newPageSize: number) => string = createSelector(uiQueryParams, paramData => {
   return newPageSize => {
-    const urlPaginationData: AlertingIndexUIQueryParams = { ...uiQueryParams(state) };
-    urlPaginationData.page_size = newPageSize.toString();
+    const queryParams: AlertingIndexUIQueryParams = { ...paramData };
+    queryParams.page_size = newPageSize.toString();
 
-    // Only set the url back to page zero if the user has changed the page index already
-    if (urlPaginationData.page_index !== undefined) {
-      urlPaginationData.page_index = '0';
+    /**
+     * Reset the page index when changing page size.
+     */
+    if (queryParams.page_index !== undefined) {
+      delete queryParams.page_index;
     }
-    return '?' + qs.stringify(urlPaginationData);
+    return '?' + qs.stringify(queryParams);
   };
-};
+});
 
 /**
  * Returns a function that takes in a new page index and returns a new query param string
  */
 export const urlFromNewPageIndexParam: (
   state: AlertListState
-) => (newPageIndex: number) => string = state => {
+) => (newPageIndex: number) => string = createSelector(uiQueryParams, paramData => {
   return newPageIndex => {
-    const urlPaginationData: AlertingIndexUIQueryParams = { ...uiQueryParams(state) };
-    urlPaginationData.page_index = newPageIndex.toString();
-    return '?' + qs.stringify(urlPaginationData);
+    const queryParams: AlertingIndexUIQueryParams = { ...paramData };
+    queryParams.page_index = newPageIndex.toString();
+    return '?' + qs.stringify(queryParams);
   };
-};
+});
 
 /**
  * Returns a url like the current one, but with a new alert id.
  */
 export const urlWithSelectedAlert: (
   state: AlertListState
-) => (alertID: string) => string = state => {
+) => (alertID: string) => string = createSelector(uiQueryParams, paramData => {
   return (alertID: string) => {
-    const urlPaginationData = { ...uiQueryParams(state) };
-    urlPaginationData.selected_alert = alertID;
-    return '?' + qs.stringify(urlPaginationData);
+    const queryParams = { ...paramData };
+    queryParams.selected_alert = alertID;
+    return '?' + qs.stringify(queryParams);
   };
-};
+});
 
 /**
  * Returns a url like the current one, but with no alert id
@@ -132,9 +141,9 @@ export const urlWithSelectedAlert: (
 export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
   uiQueryParams,
   urlPaginationData => {
-    const newUrlPaginationData = { ...urlPaginationData };
-    delete newUrlPaginationData.selected_alert;
-    return '?' + qs.stringify(newUrlPaginationData);
+    const queryParams = { ...urlPaginationData };
+    delete queryParams.selected_alert;
+    return '?' + qs.stringify(queryParams);
   }
 );
 

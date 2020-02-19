@@ -63,6 +63,10 @@ export interface GlobalState {
   readonly policyList: PolicyListState;
 }
 
+/**
+ * A better type for createStructuredSelector. This doesn't support the options object.
+ * TODO
+ */
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
@@ -76,7 +80,6 @@ export type CreateStructuredSelector = <
 export interface EndpointAppLocation {
   pathname: string;
   search: string;
-  state: never;
   hash: string;
   key?: string;
 }

@@ -48,25 +48,30 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
-export const appStoreFactory = (coreStart: CoreStart): Store => {
+export const appStoreFactory: (coreStart: CoreStart, disableMiddleware?: boolean) => Store = (
+  coreStart,
+  disableMiddleware = false
+) => {
   const store = createStore(
     appReducer,
-    composeWithReduxDevTools(
-      applyMiddleware(
-        substateMiddlewareFactory(
-          globalState => globalState.managementList,
-          managementMiddlewareFactory(coreStart)
-        ),
-        substateMiddlewareFactory(
-          globalState => globalState.policyList,
-          policyListMiddlewareFactory(coreStart)
-        ),
-        substateMiddlewareFactory(
-          globalState => globalState.alertList,
-          alertMiddlewareFactory(coreStart)
+    disableMiddleware
+      ? undefined
+      : composeWithReduxDevTools(
+          applyMiddleware(
+            substateMiddlewareFactory(
+              globalState => globalState.managementList,
+              managementMiddlewareFactory(coreStart)
+            ),
+            substateMiddlewareFactory(
+              globalState => globalState.policyList,
+              policyListMiddlewareFactory(coreStart)
+            ),
+            substateMiddlewareFactory(
+              globalState => globalState.alertList,
+              alertMiddlewareFactory(coreStart)
+            )
+          )
         )
-      )
-    )
   );
 
   return store;
