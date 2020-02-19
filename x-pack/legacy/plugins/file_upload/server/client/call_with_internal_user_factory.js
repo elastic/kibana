@@ -5,14 +5,15 @@
  */
 
 import { once } from 'lodash';
+import { getAdminClient } from '../kibana_server_services';
 
-const _callWithInternalUser = once(elasticsearchPlugin => {
-  const { callWithInternalUser } = elasticsearchPlugin.getCluster('admin');
-  return callWithInternalUser;
+const _callWithInternalUser = once(() => {
+  const { callAsInternalUser } = getAdminClient();
+  return callAsInternalUser;
 });
 
-export const callWithInternalUserFactory = elasticsearchPlugin => {
+export const callWithInternalUserFactory = () => {
   return (...args) => {
-    return _callWithInternalUser(elasticsearchPlugin)(...args);
+    return _callWithInternalUser()(...args);
   };
 };

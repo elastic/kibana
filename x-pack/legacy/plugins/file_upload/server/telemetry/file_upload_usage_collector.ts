@@ -12,16 +12,14 @@ const TELEMETRY_TYPE = 'fileUploadTelemetry';
 export function registerFileUploadUsageCollector(
   usageCollection: UsageCollectionSetup,
   deps: {
-    elasticsearchPlugin: any;
     getSavedObjectsRepository: any;
   }
 ): void {
-  const { elasticsearchPlugin, getSavedObjectsRepository } = deps;
+  const { getSavedObjectsRepository } = deps;
   const fileUploadUsageCollector = usageCollection.makeUsageCollector({
     type: TELEMETRY_TYPE,
     isReady: () => true,
-    fetch: async () =>
-      (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry(),
+    fetch: async () => (await getTelemetry(getSavedObjectsRepository)) || initTelemetry(),
   });
 
   usageCollection.registerCollector(fileUploadUsageCollector);

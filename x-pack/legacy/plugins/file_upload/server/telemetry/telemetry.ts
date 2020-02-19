@@ -17,11 +17,8 @@ export interface TelemetrySavedObject {
   attributes: Telemetry;
 }
 
-export function getInternalRepository(
-  elasticsearchPlugin: any,
-  getSavedObjectsRepository: any
-): any {
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
+export function getInternalRepository(getSavedObjectsRepository: any): any {
+  const callWithInternalUser = callWithInternalUserFactory();
   return getSavedObjectsRepository(callWithInternalUser);
 }
 
@@ -32,12 +29,10 @@ export function initTelemetry(): Telemetry {
 }
 
 export async function getTelemetry(
-  elasticsearchPlugin: any,
   getSavedObjectsRepository: any,
   internalRepo?: object
 ): Promise<Telemetry> {
-  const internalRepository =
-    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
+  const internalRepository = internalRepo || getInternalRepository(getSavedObjectsRepository);
   let telemetrySavedObject;
 
   try {
@@ -50,21 +45,14 @@ export async function getTelemetry(
 }
 
 export async function updateTelemetry({
-  elasticsearchPlugin,
   getSavedObjectsRepository,
   internalRepo,
 }: {
-  elasticsearchPlugin: any;
   getSavedObjectsRepository: any;
   internalRepo?: any;
 }) {
-  const internalRepository =
-    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
-  let telemetry = await getTelemetry(
-    elasticsearchPlugin,
-    getSavedObjectsRepository,
-    internalRepository
-  );
+  const internalRepository = internalRepo || getInternalRepository(getSavedObjectsRepository);
+  let telemetry = await getTelemetry(getSavedObjectsRepository, internalRepository);
   // Create if doesn't exist
   if (!telemetry || _.isEmpty(telemetry)) {
     const newTelemetrySavedObject = await internalRepository.create(

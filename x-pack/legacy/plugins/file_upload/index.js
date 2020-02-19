@@ -29,9 +29,6 @@ export const fileUpload = kibana => {
 
       // legacy dependencies
       const __LEGACY = {
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-        },
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
