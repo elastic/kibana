@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRulesSchema, CreateRulesSchema } from './create_rules_schema_output';
+import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { right } from 'fp-ts/lib/Either';
+import { right, fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+
+import { createRulesSchema, CreateRulesSchema } from './create_rules_schema_output';
 
 describe('output create_rules_schema', () => {
   test('it should validate common output message', () => {
@@ -20,8 +23,16 @@ describe('output create_rules_schema', () => {
       updated_at: new Date().toISOString(),
       created_by: 'elastic',
     });
-    const value = right(either);
-    expect(value).toEqual({});
-    expect(PathReporter.report(either)).toEqual(['No errors!']);
+    // failure handler
+    const onLeft = (errors: t.Errors): string => `${errors.length} error(s) found`;
+    // success handler
+    const onRight = (s: CreateRulesSchema) => `No errors: ${s.created_at}`;
+
+    const message = pipe(either, fold(onLeft, onRight));
+    expect(message).toEqual('');
+    // const value = right(either);
+    // expect(value).toEqual({});
+    expect(true).toEqual(false);
+    // expect(PathReporter.report(either)).toEqual(['No errors!']);
   });
 });
