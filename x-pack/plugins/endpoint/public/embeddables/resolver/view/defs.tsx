@@ -9,21 +9,23 @@ import { darken, saturate } from 'polished';
 
 import {
   htmlIdGenerator,
-  // qualitative pallette functions.
-  //  See: https://elastic.github.io/eui/#/utilities/color-palettes
   euiPaletteForTemperature,
   euiPaletteForStatus,
   colorPalette,
 } from '@elastic/eui';
 
-// Generating from `colorPalette` function: This could potentially
-//  pick up a palette shift and decouple from raw hex
+/**
+ * Generating from `colorPalette` function: This could potentially
+ * pick up a palette shift and decouple from raw hex
+ */
 const [euiColorEmptyShade, , , , , euiColor85Shade, euiColorFullShade] = colorPalette(
   ['#ffffff', '#000000'],
   7
 );
 
-// A catalog of arbitraged colors
+/**
+ * Base Colors - sourced from EUI
+ */
 const resolverPalette: Record<string, string | string[]> = {
   temperatures: euiPaletteForTemperature(7),
   statii: euiPaletteForStatus(7),
@@ -31,12 +33,12 @@ const resolverPalette: Record<string, string | string[]> = {
   emptyShade: euiColorEmptyShade,
 };
 
-/* 
-Define colors by semantics like so:
-`danger`, `attention`, `enabled`, `disabled`
-Or by function like:
-`colorBlindBackground`, `subMenuForeground` 
-*/
+/**
+ * Defines colors by semantics like so:
+ * `danger`, `attention`, `enabled`, `disabled`
+ * Or by function like:
+ * `colorBlindBackground`, `subMenuForeground`
+ */
 type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning' | 'strokeBehindEmpty';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
@@ -50,13 +52,17 @@ export const NamedColors: Record<ResolverColorNames, string> = {
 
 const idGenerator = htmlIdGenerator();
 
-// To be referenced in fill and stroke attributes
+/**
+ * Ids of paint servers to be referenced by fill and stroke attributes
+ */
 export const PaintServerIds = {
   darkLinearReflect: idGenerator('darkreflect'),
 };
 
-// PaintServers: Where color palettes, grandients, patterns and other similar concerns
-//    are exposed to the component
+/**
+ * PaintServers: Where color palettes, grandients, patterns and other similar concerns
+ * are exposed to the component
+ */
 const PaintServers = memo(() => (
   <>
     <linearGradient
@@ -74,14 +80,18 @@ const PaintServers = memo(() => (
   </>
 ));
 
-// To be referenced by <use> elements
+/**
+ * Ids of symbols to be linked by <use> elements
+ */
 export const SymbolIds = {
   processNode: idGenerator('nodeSymbol'),
   processNodeWithHorizontalRule: idGenerator('nodeSymbolWithHR'),
   solidHexagon: idGenerator('hexagon'),
 };
 
-// SymbolsAndShapes: defs that define shapes, masks and other spatial elements
+/**
+ * Defs entries that define shapes, masks and other spatial elements
+ */
 const SymbolsAndShapes = memo(() => (
   <>
     <symbol
@@ -132,6 +142,13 @@ const SymbolsAndShapes = memo(() => (
   </>
 ));
 
+/**
+ * This <defs> element is used to define the reusable assets for the Resolver
+ * It confers sevral advantages, including but not limited to:
+ * 1) Freedom of form for creative assets (beyond box-model constraints)
+ * 2) Separation of concerns between creative assets and more functional areas of the app
+ * 3) <use> elements can be handled by compositor (faster)
+ */
 export const SymbolDefinitions = memo(() => (
   <svg>
     <defs>
