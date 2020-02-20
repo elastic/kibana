@@ -150,7 +150,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <ForwardRef
+                            "configureHeartbeatLink": <EuiLink
                               href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
                             >
@@ -159,7 +159,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>,
+                            </EuiLink>,
                           }
                         }
                       />
@@ -246,7 +246,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <ForwardRef
+                                    "configureHeartbeatLink": <EuiLink
                                       href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
                                     >
@@ -255,7 +255,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </ForwardRef>,
+                                    </EuiLink>,
                                   }
                                 }
                               >
@@ -615,7 +615,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <ForwardRef
+                            "configureHeartbeatLink": <EuiLink
                               href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
                             >
@@ -624,7 +624,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>,
+                            </EuiLink>,
                           }
                         }
                       />
@@ -711,7 +711,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <ForwardRef
+                                    "configureHeartbeatLink": <EuiLink
                                       href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
                                     >
@@ -720,7 +720,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </ForwardRef>,
+                                    </EuiLink>,
                                   }
                                 }
                               >

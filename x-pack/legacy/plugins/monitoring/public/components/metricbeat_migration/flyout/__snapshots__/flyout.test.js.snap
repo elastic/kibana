@@ -160,7 +160,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -169,7 +169,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as the APM server",
@@ -219,7 +219,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -228,7 +228,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -286,7 +286,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -295,7 +295,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -310,7 +310,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -319,7 +319,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
@@ -504,7 +504,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -513,7 +513,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as this beat",
@@ -563,7 +563,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                       values={
                         Object {
                           "beatType": "beat",
-                          "link": <ForwardRef
+                          "link": <EuiLink
                             href="https://www.elastic.co/guide/en/beats/metricbeat/current/http-endpoint.html"
                             target="_blank"
                           >
@@ -576,7 +576,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                                 }
                               }
                             />
-                          </ForwardRef>,
+                          </EuiLink>,
                         }
                       }
                     />
@@ -600,7 +600,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -609,7 +609,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -667,7 +667,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -676,7 +676,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -691,7 +691,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -700,7 +700,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
@@ -874,7 +874,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -883,7 +883,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as Elasticsearch",
@@ -941,7 +941,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -950,7 +950,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1008,7 +1008,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -1017,7 +1017,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1032,7 +1032,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -1041,7 +1041,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
@@ -1230,7 +1230,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -1239,7 +1239,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as Kibana",
@@ -1289,7 +1289,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
@@ -1298,7 +1298,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1356,7 +1356,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
@@ -1365,7 +1365,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1380,7 +1380,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -1389,7 +1389,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
@@ -1569,7 +1569,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -1578,7 +1578,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as Logstash",
@@ -1628,7 +1628,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -1637,7 +1637,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1695,7 +1695,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -1704,7 +1704,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -1719,7 +1719,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -1728,7 +1728,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
@@ -1846,7 +1846,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
@@ -1855,7 +1855,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Install Metricbeat on the same server as this filebeat",
@@ -1905,7 +1905,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                       values={
                         Object {
                           "beatType": "filebeat",
-                          "link": <ForwardRef
+                          "link": <EuiLink
                             href="https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html"
                             target="_blank"
                           >
@@ -1918,7 +1918,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                                 }
                               }
                             />
-                          </ForwardRef>,
+                          </EuiLink>,
                         }
                       }
                     />
@@ -1942,7 +1942,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -1951,7 +1951,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -2009,7 +2009,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                         Object {
                           "link": <React.Fragment>
                              
-                            <ForwardRef
+                            <EuiLink
                               href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
@@ -2018,7 +2018,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                                 values={Object {}}
                               />
-                            </ForwardRef>
+                            </EuiLink>
                           </React.Fragment>,
                         }
                       }
@@ -2033,7 +2033,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
         Object {
           "children": <EuiText>
             <p>
-              <ForwardRef
+              <EuiLink
                 href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
@@ -2042,7 +2042,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>
+              </EuiLink>
             </p>
           </EuiText>,
           "title": "Start Metricbeat",
