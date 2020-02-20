@@ -17,26 +17,34 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { TutorialService, TutorialServiceSetup, TutorialServiceStart } from './tutorial_service';
 
-export {
-  FeatureCatalogueSetup,
-  FeatureCatalogueStart,
-  EnvironmentSetup,
-  EnvironmentStart,
-  TutorialSetup,
-  TutorialStart,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from './plugin';
-export {
-  FeatureCatalogueEntry,
-  FeatureCatalogueCategory,
-  Environment,
-  TutorialVariables,
-} from './services';
-export * from '../common/instruction_variant';
-import { HomePublicPlugin } from './plugin';
+const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
+  const setup = {
+    setVariable: jest.fn(),
+  };
+  return setup;
+};
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new HomePublicPlugin(initializerContext);
+const createStartMock = (): jest.Mocked<TutorialServiceStart> => {
+  const start = {
+    get: jest.fn(),
+  };
+  return start;
+};
+
+const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
+  const service = {
+    setup: jest.fn(),
+    start: jest.fn(),
+  };
+  service.setup.mockImplementation(createSetupMock);
+  service.start.mockImplementation(createStartMock);
+  return service;
+};
+
+export const tutorialServiceMock = {
+  createSetup: createSetupMock,
+  createStart: createStartMock,
+  create: createMock,
+};
