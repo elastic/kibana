@@ -20,7 +20,7 @@ export function getField(indexPattern: IndexPattern, fieldName: string) {
   return field;
 }
 
-export function addFieldToDSL(dsl: any, field: IFieldType) {
+export function addFieldToDSL(dsl: object, field: IFieldType) {
   return !field.scripted
     ? { ...dsl, field: field.name }
     : {
@@ -33,7 +33,7 @@ export function addFieldToDSL(dsl: any, field: IFieldType) {
 }
 
 export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = []) {
-  const properties: any = {};
+  const properties: Record<string | number, unknown> = {};
   for (const key in bucket) {
     if (ignoreKeys.includes(key)) {
       continue;
