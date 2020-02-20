@@ -20,18 +20,21 @@
 import _ from 'lodash';
 import { esFilters, esQuery } from '../../../../../../../plugins/data/public';
 import { AggGroupNames } from '../agg_groups';
+import { IAggConfigs } from '../agg_configs';
+import { IBucketAggConfig } from './_bucket_agg_type';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
  * @param aggNestedDsl: aggregation config DSL (top level)
  * @param startFromId: id of an aggregation from where we want to get the nested DSL
  */
-const getNestedAggDSL = (aggNestedDsl, startFromAggId) => {
+const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: string): any => {
   if (aggNestedDsl[startFromAggId]) {
     return aggNestedDsl[startFromAggId];
   }
-  const nestedAggs = _.values(aggNestedDsl);
+  const nestedAggs: Array<Record<string, any>> = _.values(aggNestedDsl);
   let aggs;
+
   for (let i = 0; i < nestedAggs.length; i++) {
     if (nestedAggs[i].aggs && (aggs = getNestedAggDSL(nestedAggs[i].aggs, startFromAggId))) {
       return aggs;
@@ -46,7 +49,12 @@ const getNestedAggDSL = (aggNestedDsl, startFromAggId) => {
  * @param aggWithOtherBucket: AggConfig of the aggregation with other bucket enabled
  * @param key: key from the other bucket request for a specific other bucket
  */
-const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
+const getAggResultBuckets = (
+  aggConfigs: IAggConfigs,
+  response: any,
+  aggWithOtherBucket: IBucketAggConfig,
+  key: string
+) => {
   const keyParts = key.split('-');
   let responseAgg = response;
   for (const i in keyParts) {
@@ -55,18 +63,20 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
       // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
       // so we need to loop over each agg until we find it.
       for (let aggId = 0; aggId < responseAggs.length; aggId++) {
-        const agg = responseAggs[aggId];
+        const aggById: any = responseAggs[aggId];
         const aggKey = _.keys(responseAgg)[aggId];
         const aggConfig = _.find(aggConfigs.aggs, agg => agg.id === aggKey);
-        const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
-          const bucketKey = aggConfig
-            .getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey)
-            .toString();
-          return bucketKey === keyParts[i];
-        });
-        if (bucket) {
-          responseAgg = bucket;
-          break;
+        if (aggConfig) {
+          const aggResultBucket = _.find(aggById.buckets, (bucket, bucketObjKey) => {
+            const bucketKey = aggConfig
+              .getKey(bucket, _.isNumber(bucketObjKey) ? undefined : bucketObjKey)
+              .toString();
+            return bucketKey === keyParts[i];
+          });
+          if (aggResultBucket) {
+            responseAgg = aggResultBucket;
+            break;
+          }
         }
       }
     }
@@ -82,21 +92,20 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
  * @param responseAggs: array of aggregations from response
  * @param aggId: id of the aggregation with missing bucket
  */
-const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
+const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
   const missingKey = '__missing__';
-  let resultBuckets = [];
+  let resultBuckets: Array<Record<string, any>> = [];
   if (responseAggs[aggId]) {
-    const matchingBucket = responseAggs[aggId].buckets.find(bucket => bucket.key === missingKey);
+    const matchingBucket = responseAggs[aggId].buckets.find(
+      (bucket: Record<string, any>) => bucket.key === missingKey
+    );
     if (matchingBucket) resultBuckets.push(matchingBucket);
     return resultBuckets;
   }
   _.each(responseAggs, agg => {
     if (agg.buckets) {
       _.each(agg.buckets, bucket => {
-        resultBuckets = [
-          ...resultBuckets,
-          ...getAggConfigResultMissingBuckets(bucket, aggId, missingKey),
-        ];
+        resultBuckets = [...resultBuckets, ...getAggConfigResultMissingBuckets(bucket, aggId)];
       });
     }
   });
@@ -110,13 +119,24 @@ const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
  * @param key: the key for this specific other bucket
  * @param otherAgg: AggConfig of the aggregation with other bucket
  */
-const getOtherAggTerms = (requestAgg, key, otherAgg) => {
+const getOtherAggTerms = (
+  requestAgg: Record<string, any>,
+  key: string,
+  otherAgg: IBucketAggConfig
+) => {
   return requestAgg['other-filter'].filters.filters[key].bool.must_not
-    .filter(filter => filter.match_phrase && filter.match_phrase[otherAgg.params.field.name])
-    .map(filter => filter.match_phrase[otherAgg.params.field.name]);
+    .filter(
+      (filter: Record<string, any>) =>
+        filter.match_phrase && filter.match_phrase[otherAgg.params.field.name]
+    )
+    .map((filter: Record<string, any>) => filter.match_phrase[otherAgg.params.field.name]);
 };
 
-export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
+export const buildOtherBucketAgg = (
+  aggConfigs: IAggConfigs,
+  aggWithOtherBucket: IBucketAggConfig,
+  response: any
+) => {
   const bucketAggs = aggConfigs.aggs.filter(agg => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
@@ -130,6 +150,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
       params: {
         filters: [],
       },
+      enabled: false,
     },
     {
       addToAggConfigs: false,
@@ -145,22 +166,28 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
   let noAggBucketResults = false;
 
   // recursively create filters for all parent aggregation buckets
-  const walkBucketTree = (aggIndex, aggs, aggId, filters, key) => {
+  const walkBucketTree = (
+    aggIndex: number,
+    aggregations: any,
+    aggId: string,
+    filters: any[],
+    key: string
+  ) => {
     // make sure there are actually results for the buckets
-    if (aggs[aggId].buckets.length < 1) {
+    if (aggregations[aggId].buckets.length < 1) {
       noAggBucketResults = true;
       return;
     }
 
-    const agg = aggs[aggId];
+    const agg = aggregations[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
     if (aggIndex < index) {
-      _.each(agg.buckets, (bucket, bucketObjKey) => {
+      _.each(agg.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
           bucket,
-          Number.isInteger(bucketObjKey) ? null : bucketObjKey
+          _.isNumber(bucketObjKey) ? undefined : bucketObjKey
         );
         const filter = _.cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
         const newFilters = _.flatten([...filters, filter]);
@@ -177,7 +204,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
 
     if (
       !aggWithOtherBucket.params.missingBucket ||
-      agg.buckets.some(bucket => bucket.key === '__missing__')
+      agg.buckets.some((bucket: { key: string }) => bucket.key === '__missing__')
     ) {
       filters.push(
         esFilters.buildExistsFilter(
@@ -214,15 +241,15 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
 };
 
 export const mergeOtherBucketAggResponse = (
-  aggsConfig,
-  response,
-  otherResponse,
-  otherAgg,
-  requestAgg
+  aggsConfig: IAggConfigs,
+  response: any,
+  otherResponse: any,
+  otherAgg: IBucketAggConfig,
+  requestAgg: Record<string, any>
 ) => {
   const updatedResponse = _.cloneDeep(response);
   _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
-    if (!bucket.doc_count) return;
+    if (!bucket.doc_count || key === undefined) return;
     const bucketKey = key.replace(/^-/, '');
     const aggResultBuckets = getAggResultBuckets(
       aggsConfig,
@@ -241,7 +268,11 @@ export const mergeOtherBucketAggResponse = (
     bucket.filters = [phraseFilter];
     bucket.key = '__other__';
 
-    if (aggResultBuckets.some(bucket => bucket.key === '__missing__')) {
+    if (
+      aggResultBuckets.some(
+        (aggResultBucket: Record<string, any>) => aggResultBucket.key === '__missing__'
+      )
+    ) {
       bucket.filters.push(
         esFilters.buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
       );
@@ -251,7 +282,11 @@ export const mergeOtherBucketAggResponse = (
   return updatedResponse;
 };
 
-export const updateMissingBucket = (response, aggConfigs, agg) => {
+export const updateMissingBucket = (
+  response: any,
+  aggConfigs: IAggConfigs,
+  agg: IBucketAggConfig
+) => {
   const updatedResponse = _.cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
   aggResultBuckets.forEach(bucket => {
