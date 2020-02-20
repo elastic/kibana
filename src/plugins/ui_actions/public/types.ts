@@ -19,7 +19,12 @@
 
 import { Action } from './actions/action';
 import { TriggerInternal } from './triggers/trigger_internal';
+import { Trigger } from './triggers';
 
 export type TriggerRegistry = Map<string, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, Action>;
 export type TriggerToActionsRegistry = Map<string, string[]>;
+
+export interface TriggerContextMapping {
+  [key: string]: Trigger<any, any>;
+}

@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import {
+  TriggerRegistry,
+  ActionRegistry,
+  TriggerToActionsRegistry,
+  TriggerContextMapping,
+} from '../types';
 import { Action } from '../actions';
 import { Trigger, TriggerContextParams } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -59,11 +64,13 @@ export class UiActionsService {
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = <T extends Trigger<any, any>>(id: string): TriggerContract<T> => {
-    const trigger = this.triggers.get(id);
+  public readonly getTrigger = <T extends keyof TriggerContextMapping>(
+    triggerId: T
+  ): TriggerContract<TriggerContextMapping[T]> => {
+    const trigger = this.triggers.get(triggerId as string);
 
     if (!trigger) {
-      throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+      throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
     }
 
     return trigger.contract;
@@ -140,7 +147,7 @@ export class UiActionsService {
     triggerId: string,
     params: TriggerContextParams<T>
   ) => {
-    const trigger = this.getTrigger<T>(triggerId);
+    const trigger = this.getTrigger<any>(triggerId);
     await trigger.exec(params);
   };
 

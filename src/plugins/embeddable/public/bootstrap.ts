@@ -18,6 +18,7 @@
  */
 
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { Trigger } from '../../ui_actions/public';
 import {
   applyFilterTrigger,
   contextMenuTrigger,
@@ -25,7 +26,18 @@ import {
   panelBadgeTrigger,
   selectRangeTrigger,
   valueClickTrigger,
+  EmbeddableVisTrigger,
 } from './lib';
+
+declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    SELECT_RANGE_TRIGGER: EmbeddableVisTrigger;
+    VALUE_CLICK_TRIGGER: EmbeddableVisTrigger;
+    CONTEXT_MENU_TRIGGER: Trigger;
+    APPLY_FILTER_TRIGGER: Trigger;
+    PANEL_BADGE_TRIGGER: Trigger;
+  }
+}
 
 /**
  * This method initializes Embeddable plugin with initial set of

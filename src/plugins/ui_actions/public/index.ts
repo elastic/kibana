@@ -30,6 +30,7 @@ export { UiActionsServiceParams, UiActionsService } from './service';
 export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext, TriggerContextParams } from './triggers';
+export { TriggerContextMapping } from './types';
 
 /**
  * @deprecated
