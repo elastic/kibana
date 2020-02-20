@@ -37,34 +37,14 @@ describe('Test discover state', () => {
   afterEach(() => {
     state.stopSync();
   });
-  test('setting global state and sycing to URL', async () => {
-    state.setGlobalState({ time: { from: 'a', to: 'b' } });
-    state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_g=(time:(from:a,to:b))&_a=(index:test)"`);
-  });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_g=()&_a=(index:modified)"`);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:modified)"`);
   });
-  test('setting appState and globalState and syncing to URL', async () => {
-    state.setAppState({ index: 'modified' });
-    state.setGlobalState({ time: { from: 'a', to: 'b' } });
-    state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(time:(from:a,to:b))&_a=(index:modified)"`
-    );
-  });
-  test('changing URL to be propagated to appState and globalState', async () => {
-    history.push('/#?_a=(index:modified)&_g=(time:(from:a,to:b))');
-    expect(state.globalStateContainer.getState()).toMatchInlineSnapshot(`
-      Object {
-        "time": Object {
-          "from": "a",
-          "to": "b",
-        },
-      }
-    `);
+
+  test('changing URL to be propagated to appState', async () => {
+    history.push('/#?_a=(index:modified)');
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "index": "modified",
@@ -72,19 +52,11 @@ describe('Test discover state', () => {
     `);
   });
   test('URL navigation to url without _g and _a, state should not change', async () => {
-    await history.push('/#?_g=(time:(from:a,to:b))');
+    history.push('/#?_a=(index:modified)');
     await history.push('/');
-    expect(state.globalStateContainer.getState()).toMatchInlineSnapshot(`
-      Object {
-        "time": Object {
-          "from": "a",
-          "to": "b",
-        },
-      }
-    `);
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
-        "index": "test",
+        "index": "modified",
       }
     `);
   });

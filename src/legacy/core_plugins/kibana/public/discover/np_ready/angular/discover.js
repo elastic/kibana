@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import _, { cloneDeep } from 'lodash';
+import _ from 'lodash';
 import React from 'react';
 import { Subscription, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, map } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
-import { getState, isEqualState, isEqualFilters, splitState } from './discover_state';
+import { getState, isEqualState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../../plugins/saved_objects/public';
-// doc table
-import './doc_table';
 import { getSortArray } from './doc_table/lib/get_sort';
 import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
 import * as columnActions from './doc_table/actions/columns';
@@ -62,6 +60,7 @@ import {
 const {
   core,
   chrome,
+  data,
   docTitle,
   filterManager,
   share,
@@ -75,6 +74,8 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadc
 import {
   esFilters,
   indexPatterns as indexPatternsUtils,
+  syncQuery,
+  syncAppFilters,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
@@ -193,15 +194,13 @@ function discoverController(
 
   const {
     appStateContainer,
-    globalStateContainer,
     stopSync: stopStateSync,
     setAppState,
-    setGlobalState,
     getAppFilters,
-    getGlobalFilters,
     resetInitialAppState,
     replaceUrlState,
     isAppStateDirty,
+    kbnUrlStateStorage,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: false,
@@ -212,35 +211,21 @@ function discoverController(
   }
   const $state = ($scope.state = { ...appStateContainer.getState() });
 
-  filterManager.setFilters(cloneDeep([...getGlobalFilters(), ...getAppFilters()]));
+  const stopSyncingAppFilters = syncAppFilters(filterManager, {
+    set: filters => setAppState({ filters: filters }),
+    get: () => getAppFilters(),
+    state$: appStateContainer.state$.pipe(map(state => state.filters)),
+  });
+
+  const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(data.query, kbnUrlStateStorage);
 
   const appStateUnsubscribe = appStateContainer.subscribe(newState => {
-    const { filters: newStateFilters, state: newStatePartial } = splitState(newState);
+    const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState($scope.state);
 
     if (!isEqualState(newStatePartial, oldStatePartial)) {
       $scope.state = { ...newState };
       $scope.$digest();
-    }
-    if (!isEqualFilters(newStateFilters, filterManager.getAppFilters())) {
-      filterManager.setAppFilters(Array.isArray(newStateFilters) ? cloneDeep(newStateFilters) : []);
-    }
-  });
-
-  const globalStateUnsubscribe = globalStateContainer.subscribe(newState => {
-    const { filters: newStateFilters } = splitState(newState);
-
-    const { time, refreshInterval } = newState;
-    if (time && time.from !== timefilter.from) {
-      timefilter.setTime(time);
-    }
-    if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
-      timefilter.setRefreshInterval(refreshInterval);
-    }
-    if (!isEqualFilters(newStateFilters, filterManager.getGlobalFilters())) {
-      filterManager.setGlobalFilters(
-        Array.isArray(newStateFilters) ? cloneDeep(newStateFilters) : []
-      );
     }
   });
 
@@ -259,17 +244,7 @@ function discoverController(
   subscriptions.add(
     subscribeWithScope($scope, filterManager.getUpdates$(), {
       next: () => {
-        const globalFiltersState = getGlobalFilters();
-        const globalFilters = filterManager.getGlobalFilters();
-        if (!isEqualFilters(globalFilters, globalFiltersState)) {
-          setGlobalState({ filters: globalFilters });
-        }
-        const appFiltersState = getAppFilters();
-        const appFilters = filterManager.getAppFilters();
-        if (!isEqualFilters(appFiltersState, appFilters)) {
-          setAppState({ filters: appFilters });
-        }
-        $scope.state.filters = appFilters;
+        $scope.state.filters = filterManager.getAppFilters();
         $scope.updateDataSource();
       },
     })
@@ -309,8 +284,9 @@ function discoverController(
     savedSearch.destroy();
     subscriptions.unsubscribe();
     appStateUnsubscribe();
-    globalStateUnsubscribe();
+    stopSyncingAppFilters();
     stopStateSync();
+    stopSyncingGlobalStateWithUrl();
   });
 
   const getTopNavLinks = () => {
@@ -903,13 +879,6 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
     };
-    setGlobalState({
-      time: {
-        from: timefilter.getTime().from,
-        to: timefilter.getTime().to,
-      },
-      refreshInterval: timefilter.getRefreshInterval(),
-    });
   };
 
   $scope.toMoment = function(datetime) {
