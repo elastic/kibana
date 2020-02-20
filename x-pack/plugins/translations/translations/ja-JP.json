@@ -1449,7 +1449,6 @@
     "kbn.management.indexPatterns.listBreadcrumb": "インデックスパターン",
     "kbn.management.indexPatternTable.createBtn": "インデックスパターンの作成",
     "kbn.management.indexPatternTable.title": "インデックスパターン",
-    "kbn.management.landing.header": "Kibana {version} 管理",
     "kbn.management.landing.subhead": "インデックス、インデックスパターン、保存されたオブジェクト、Kibana の設定、その他を管理します。",
     "kbn.management.landing.text": "すべてのツールの一覧は、左のメニューにあります。",
     "kbn.management.objects.confirmModalOptions.deleteButtonLabel": "削除",
