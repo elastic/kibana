@@ -22,7 +22,10 @@ import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { DescriptionMarkdown } from '../description_md_editor';
 import { Case } from '../../../../containers/case/types';
-import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
+import {
+  FormattedRelativePreferenceDate,
+  FormattedRelativePreferenceLabel,
+} from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
@@ -74,9 +77,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
   const [description, setDescription] = useState(data.description);
   const [title, setTitle] = useState(data.title);
   const [tags, setTags] = useState(data.tags);
-
   const onUpdateField = useCallback(
-    async (updateKey: keyof Case, updateValue: string | string[]) => {
+    (updateKey: keyof Case, updateValue: string | string[]) => {
       switch (updateKey) {
         case 'title':
           if (updateValue.length > 0) {
@@ -160,56 +162,101 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
       onClick: () => null,
     },
   ];
-  const userActions = [
-    {
-      avatarName: data.createdBy.username,
-      title: (
-        <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <p>
-              <strong>{`${data.createdBy.username}`}</strong>
-              {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-              <FormattedRelativePreferenceDate value={data.createdAt} />
-              {/* STEPH FIX come back and add label `on` */}
-            </p>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <PropertyActions propertyActions={propertyActions} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      children: isEditDescription ? (
-        <>
-          <DescriptionMarkdown
-            descriptionInputHeight={200}
-            initialDescription={data.description}
-            isLoading={isLoading}
-            onChange={updatedDescription => setDescription(updatedDescription)}
-          />
-
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+  const userActions = data.comments.reduce(
+    (acc, comment, key) => {
+      return [
+        ...acc,
+        {
+          avatarName: comment.createdBy.fullName
+            ? comment.createdBy.fullName
+            : comment.createdBy.username,
+          title: (
+            <EuiFlexGroup
+              alignItems="baseline"
+              gutterSize="none"
+              justifyContent="spaceBetween"
+              key={`${comment.commentId}.${key}`}
+            >
+              <EuiFlexItem grow={false}>
+                <p>
+                  <strong>{`${comment.createdBy.username}`}</strong>
+                  {` ${i18n.ADDED_COMMENT} `}{' '}
+                  <FormattedRelativePreferenceLabel
+                    value={comment.createdAt}
+                    preferenceLabel={`${i18n.ON} `}
+                  />
+                  <FormattedRelativePreferenceDate value={comment.createdAt} />
+                </p>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PropertyActions propertyActions={propertyActions} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          children: (
+            <Markdown
+              raw={comment.comment}
+              data-test-subj="case-view-comment"
+              key={`${comment.commentId}.${key}`}
+            />
+          ),
+        },
+      ];
+    },
+    [
+      {
+        avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
+        title: (
+          <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={() => onUpdateField('description', description)}
-              >
-                {i18n.SUBMIT}
-              </EuiButton>
+              <p>
+                <strong>{`${data.createdBy.username}`}</strong>
+                {` ${i18n.ADDED_DESCRIPTION} `}{' '}
+                <FormattedRelativePreferenceLabel
+                  value={data.createdAt}
+                  preferenceLabel={`${i18n.ON} `}
+                />
+                <FormattedRelativePreferenceDate value={data.createdAt} />
+              </p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
+              <PropertyActions propertyActions={propertyActions} />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
-      ) : (
-        <Markdown raw={data.description} data-test-subj="case-view-description" />
-      ),
-    },
-  ];
+        ),
+        children: isEditDescription ? (
+          <>
+            <DescriptionMarkdown
+              descriptionInputHeight={200}
+              initialDescription={data.description}
+              isLoading={isLoading}
+              onChange={updatedDescription => setDescription(updatedDescription)}
+            />
+
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={() => onUpdateField('description', description)}
+                >
+                  {i18n.SUBMIT}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ) : (
+          <Markdown raw={data.description} data-test-subj="case-view-description" />
+        ),
+      },
+    ]
+  );
 
   const onSubmit = useCallback(
     newTitle => {

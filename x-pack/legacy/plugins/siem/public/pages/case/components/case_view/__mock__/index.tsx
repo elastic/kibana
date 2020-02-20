@@ -11,6 +11,19 @@ export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   initialData: {
     caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+    comments: [
+      {
+        commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
+        version: 'WzQ3LDFd',
+        comment: 'Solve this fast!',
+        createdAt: '2020-02-20T23:06:33.798Z',
+        createdBy: {
+          fullName: 'Steph Milovic',
+          username: 'smilovic',
+        },
+        updatedAt: '2020-02-20T23:06:33.798Z',
+      },
+    ],
     createdAt: '2020-02-13T19:44:23.627Z',
     createdBy: { fullName: null, username: 'elastic' },
     description: 'Security banana Issue',
@@ -24,6 +37,19 @@ export const caseProps: CaseProps = {
 
 export const data: Case = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+  comments: [
+    {
+      commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
+      version: 'WzQ3LDFd',
+      comment: 'Solve this fast!',
+      createdAt: '2020-02-20T23:06:33.798Z',
+      createdBy: {
+        fullName: 'Steph Milovic',
+        username: 'smilovic',
+      },
+      updatedAt: '2020-02-20T23:06:33.798Z',
+    },
+  ],
   createdAt: '2020-02-13T19:44:23.627Z',
   createdBy: { username: 'elastic', fullName: null },
   description: 'Security banana Issue',

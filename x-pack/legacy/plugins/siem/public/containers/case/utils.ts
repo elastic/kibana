@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AllCases, AllCasesSnake, Case, CaseSnake } from './types';
+import { AllCases, AllCasesSnake, Case, CaseSnake, CommentSnake, Comment } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
+export const convertCommentToCamel = (snakeComment: CommentSnake): Comment => ({
+  commentId: snakeComment.comment_id,
+  comment: snakeComment.comment,
+  createdAt: snakeComment.created_at,
+  createdBy: {
+    username: snakeComment.created_by.username,
+    fullName: snakeComment.created_by.full_name,
+  },
+  updatedAt: snakeComment.updated_at,
+  version: snakeComment.version,
+});
+
 export const convertCaseToCamel = (snakeCase: CaseSnake): Case => ({
   caseId: snakeCase.case_id,
+  comments: snakeCase.comments.map(snakeComment => convertCommentToCamel(snakeComment)),
   createdAt: snakeCase.created_at,
   createdBy: {
     username: snakeCase.created_by.username,

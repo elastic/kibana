@@ -79,4 +79,35 @@ describe('CaseView ', () => {
       updateValue: 'closed',
     });
   });
+
+  it('should render comments', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="user-action-1"] [data-test-subj="user-action-avatar"]`)
+        .first()
+        .prop('name')
+    ).toEqual(data.comments[0].createdBy.fullName);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="user-action-1"] [data-test-subj="user-action-title"] strong`)
+        .first()
+        .text()
+    ).toEqual(data.comments[0].createdBy.username);
+
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="user-action-1"] [data-test-subj="user-action-content"] [data-test-subj="markdown"]`
+        )
+        .first()
+        .prop('source')
+    ).toEqual(data.comments[0].comment);
+  });
 });

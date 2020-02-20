@@ -32,6 +32,10 @@ export const EDITED_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ON = i18n.translate('xpack.siem.case.caseView.actionLabel.on', {
+  defaultMessage: 'on',
+});
+
 export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabel.addComment', {
   defaultMessage: 'added comment',
 });

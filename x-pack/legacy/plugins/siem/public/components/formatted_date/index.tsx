@@ -125,3 +125,39 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
     </LocalizedDateTooltip>
   );
 };
+
+/**
+ * Renders a preceding label according to under/over one hour
+ * Under an hour = relative format
+ * Over an hour = in a format determined by the user's preferences,
+ * with a tooltip that renders:
+ * - the name of the field
+ * - a humanized relative date (e.g. 16 minutes ago)
+ * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
+ * - the raw date value (e.g. 2019-03-22T00:47:46Z)
+ */
+
+export const FormattedRelativePreferenceLabel = ({
+  value,
+  preferenceLabel,
+  relativeLabel,
+}: {
+  value?: string | number | null;
+  preferenceLabel?: string | null;
+  relativeLabel?: string | null;
+}) => {
+  if (value == null) {
+    return null;
+  }
+  const maybeDate = getMaybeDate(value);
+  if (!maybeDate.isValid()) {
+    return null;
+  }
+  return moment(maybeDate.toDate())
+    .add(1, 'hours')
+    .isBefore(new Date()) ? (
+    <>{preferenceLabel}</>
+  ) : (
+    <>{relativeLabel}</>
+  );
+};

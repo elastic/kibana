@@ -34,6 +34,13 @@ const UserAction = styled(EuiFlexGroup)`
       background-position: left ${theme.eui.euiSizeXXL};
       margin-bottom: ${theme.eui.euiSizeS};
     }
+    &.repeatAvatar {
+      margin-top: -${theme.eui.euiSizeS};
+      background-position: left 0;
+      .userAction__circle {
+        visibility: hidden;
+      }
+    }
     .userAction__panel {
       margin-bottom: ${theme.eui.euiSize};
     }
@@ -59,16 +66,29 @@ const UserAction = styled(EuiFlexGroup)`
 
 const renderUserActions = (userActions: UserActionItem[]) => {
   return userActions.map(({ avatarName, children, title }, key) => (
-    <UserAction key={key} gutterSize={'none'}>
+    <UserAction
+      data-test-subj={`user-action-${key}`}
+      key={key}
+      gutterSize={'none'}
+      className={key > 0 && avatarName === userActions[key - 1].avatarName ? 'repeatAvatar' : ''}
+    >
       <EuiFlexItem grow={false}>
-        <EuiAvatar className="userAction__circle" name={avatarName} />
+        <EuiAvatar
+          data-test-subj={`user-action-avatar`}
+          className="userAction__circle"
+          name={avatarName}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel className="userAction__panel" paddingSize="none">
-          <EuiText size="s" className="userAction__title">
+          <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
             {title}
           </EuiText>
-          {children && <div className="userAction__content">{children}</div>}
+          {children && (
+            <div className="userAction__content" data-test-subj={`user-action-content`}>
+              {children}
+            </div>
+          )}
         </EuiPanel>
       </EuiFlexItem>
     </UserAction>
