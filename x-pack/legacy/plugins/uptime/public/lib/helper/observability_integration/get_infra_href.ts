@@ -17,7 +17,10 @@ export const getInfraContainerHref = (
       return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
-    return addBasePath(basePath, `/app/infra#/link-to/container-detail/${encodeURIComponent(ret)}`);
+    return addBasePath(
+      basePath,
+      `/app/metrics/link-to/container-detail/${encodeURIComponent(ret)}`
+    );
   };
   return buildHref(summary.state.checks || [], 'container.id', getHref);
 };
@@ -31,7 +34,7 @@ export const getInfraKubernetesHref = (
       return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
-    return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(ret)}`);
+    return addBasePath(basePath, `/app/metrics/link-to/pod-detail/${encodeURIComponent(ret)}`);
   };
 
   return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
@@ -46,7 +49,7 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
       const expression = encodeURIComponent(`host.ip : ${value}`);
       return addBasePath(
         basePath,
-        `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
+        `/app/metrics/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
       );
     }
     const ips = value.reduce(
@@ -57,9 +60,7 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
       ? undefined
       : addBasePath(
           basePath,
-          `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${encodeURIComponent(
-            ips
-          )}',kind:kuery)`
+          `/app/metrics/inventory?waffleFilter=(expression:'${encodeURIComponent(ips)}',kind:kuery)`
         );
   };
   return buildHref(summary.state.checks || [], 'monitor.ip', getHref);

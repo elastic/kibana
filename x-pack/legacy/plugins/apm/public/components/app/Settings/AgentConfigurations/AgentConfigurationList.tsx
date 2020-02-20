@@ -18,11 +18,12 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
 import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { px, units } from '../../../../style/variables';
-import { getOptionLabel } from '../../../../../common/agent_configuration_constants';
+import { getOptionLabel } from '../../../../../../../../plugins/apm/common/agent_configuration_constants';
 
 export function AgentConfigurationList({
   status,

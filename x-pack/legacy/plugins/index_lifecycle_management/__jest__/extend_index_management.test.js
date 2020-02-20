@@ -7,6 +7,7 @@
 import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import {
   retryLifecycleActionExtension,
@@ -26,6 +27,10 @@ initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
 initUiMetric(() => () => {});
 
 jest.mock('ui/new_platform');
+jest.mock('../../index_management/public', async () => {
+  const { indexManagementMock } = await import('../../index_management/public/mocks.ts');
+  return indexManagementMock.createSetup();
+});
 
 const indexWithoutLifecyclePolicy = {
   health: 'yellow',
