@@ -5,4 +5,5 @@
  */
 
 export const PROCESS_NAME_FIELD = '[data-test-subj="draggable-content-process.name"]';
+
 export const UNCOMMON_PROCESSES_TABLE = '[data-test-subj="table-uncommonProcesses-loading-false"]';
