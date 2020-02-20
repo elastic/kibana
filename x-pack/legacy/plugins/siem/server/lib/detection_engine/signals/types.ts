@@ -7,7 +7,11 @@
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
 import { LegacyRequest } from '../../../types';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server/types';
+import {
+  AlertType,
+  State,
+  AlertExecutorOptions,
+} from '../../../../../../../plugins/alerting/server';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
