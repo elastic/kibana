@@ -19,6 +19,7 @@
 
 import { expressionsPluginMock } from './mocks';
 import { add } from '../common/test_helpers/expression_functions/add';
+import { ExpressionsService } from '../common';
 
 describe('ExpressionsPublicPlugin', () => {
   test('can instantiate from mocks', async () => {
@@ -27,6 +28,13 @@ describe('ExpressionsPublicPlugin', () => {
   });
 
   describe('setup contract', () => {
+    test('.fork() method returns ExpressionsService', async () => {
+      const { setup } = await expressionsPluginMock.createPlugin();
+      const fork = setup.fork();
+
+      expect(fork).toBeInstanceOf(ExpressionsService);
+    });
+
     describe('.registerFunction()', () => {
       test('can register a function', async () => {
         const { setup } = await expressionsPluginMock.createPlugin();
@@ -41,6 +49,14 @@ describe('ExpressionsPublicPlugin', () => {
         const { setup } = await expressionsPluginMock.createPlugin();
         const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
         expect(bar).toBe('bar');
+      });
+
+      test('kibana_context function is available', async () => {
+        const { setup } = await expressionsPluginMock.createPlugin();
+        const result = await setup.run('kibana_context', null);
+        expect(result).toMatchObject({
+          type: 'kibana_context',
+        });
       });
     });
   });
