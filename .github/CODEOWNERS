@@ -75,6 +75,7 @@
 /x-pack/plugins/ingest_manager/ @elastic/ingest
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
 /x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
+/x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
@@ -184,3 +185,10 @@
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
+
+# SIEM
+/x-pack/legacy/plugins/siem/ @elastic/siem
+/x-pack/plugins/siem/ @elastic/siem
+/x-pack/test/detection_engine_api_integration @elastic/siem
+/x-pack/test/api_integration/apis/siem @elastic/siem
+/x-pack/plugins/case @elastic/siem
