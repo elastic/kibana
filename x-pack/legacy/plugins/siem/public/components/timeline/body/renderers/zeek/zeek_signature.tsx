@@ -148,8 +148,13 @@ export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) 
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
-        <ReputationLink domain={value} overflowIndexStart={1} showDomain={true} />
-        <ExternalLinkIcon />
+        <ReputationLink
+          domain={value}
+          overflowIndexStart={1}
+          showDomain={true}
+          showTooltip={true}
+          showExternalIcon={true}
+        />
       </div>
     </LinkFlexItem>
   ) : null

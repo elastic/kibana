@@ -24,15 +24,7 @@ import {
 
 jest.mock('../../lib/kibana', () => {
   return {
-    useUiSetting$: jest.fn().mockReturnValue([
-      [
-        { name: 'virustotal.com', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
-        {
-          name: 'talosIntelligence.com',
-          url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
-        },
-      ],
-    ]),
+    useUiSetting$: jest.fn(),
   };
 });
 
@@ -116,90 +108,235 @@ describe('Custom Links', () => {
   });
 
   describe('ReputationLink', () => {
-    test('it renders link text', () => {
-      const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(0)
-          .childAt(0)
-          .text()
-      ).toEqual('virustotal.com, ');
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(1)
-          .childAt(0)
-          .text()
-      ).toEqual('talosIntelligence.com');
+    const mockCustomizedReputationLinks = [
+      { name: 'Link 1', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 2',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+      { name: 'Link 3', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 4',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+      { name: 'Link 5', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 6',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+    ];
+    const mockDefaultReputationLinks = mockCustomizedReputationLinks.slice(0, 2);
+
+    describe('links property', () => {
+      beforeEach(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockDefaultReputationLinks]);
+      });
+
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
+
+      test('it renders default link text', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(0)
+            .text()
+        ).toEqual('Link 1, ');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(1)
+            .text()
+        ).toEqual('Link 2');
+      });
+
+      test('it renders customized link text', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(0)
+            .text()
+        ).toEqual('Link 1, ');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(1)
+            .text()
+        ).toEqual('Link 2, ');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(2)
+            .text()
+        ).toEqual('Link 3, ');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(3)
+            .text()
+        ).toEqual('Link 4, ');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(4)
+            .text()
+        ).toEqual('Link 5');
+      });
+
+      test('it renders correct href', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(0)
+            .prop('href')
+        ).toEqual('https://www.virustotal.com/gui/search/192.0.2.0');
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(1)
+            .prop('href')
+        ).toEqual('https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0');
+      });
+
+      test("it encodes <script>alert('XSS')</script>", () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={"<script>alert('XSS')</script>"} />);
+
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(0)
+            .prop('href')
+        ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
+        expect(
+          wrapper
+            .find('EuiLink')
+            .at(1)
+            .prop('href')
+        ).toEqual(
+          "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+        );
+      });
     });
 
-    test('it renders correct href', () => {
-      const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+    describe('number of links', () => {
+      beforeAll(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+      });
 
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(0)
-          .childAt(0)
-          .prop('href')
-      ).toEqual('https://www.virustotal.com/gui/search/192.0.2.0');
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(1)
-          .childAt(0)
-          .prop('href')
-      ).toEqual('https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0');
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
+
+      test('it renders correct number of links by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('EuiLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
+      });
+
+      test('it renders correct number of links if given overflow index', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiLink')).toHaveLength(1);
+      });
     });
 
-    test("it encodes <script>alert('XSS')</script>", () => {
-      const wrapper = mountWithIntl(<ReputationLink domain={"<script>alert('XSS')</script>"} />);
+    describe('invalid customized links', () => {
+      const mockInvalidLinksEmptyObj = [{}];
+      const mockInvalidLinksNoName = [
+        { url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}' },
+      ];
+      const mockInvalidLinksNoUrl = [{ name: 'Link 1' }];
+      const mockInvalidUrl = [{ name: 'Link 1', url_template: 'mockUrl' }];
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
 
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(0)
-          .childAt(0)
-          .prop('href')
-      ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
-      expect(
-        wrapper
-          .find('EuiLink')
-          .at(1)
-          .childAt(0)
-          .prop('href')
-      ).toEqual(
-        "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
-      );
+      test('it filters out of empty object is given', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksEmptyObj]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiLink')).toHaveLength(0);
+      });
+
+      test('it filters out of object without name property', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoName]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiLink')).toHaveLength(0);
+      });
+
+      test('it filters out of object without url_template property', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoUrl]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiLink')).toHaveLength(0);
+      });
+
+      test('it filters out of object with invalid url', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidUrl]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiLink')).toHaveLength(0);
+      });
     });
 
-    test('it renders correct number of links', () => {
-      (useUiSetting$ as jest.Mock).mockReset();
-      (useUiSetting$ as jest.Mock).mockReturnValue([
-        [
-          { name: 'Link 1', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
-          {
-            name: 'Link 2',
-            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
-          },
-          { name: 'Link 3', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
-          {
-            name: 'Link 4',
-            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
-          },
-          { name: 'Link 5', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
-          {
-            name: 'Link 6',
-            url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
-          },
-        ],
-      ]);
-      let wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-      expect(wrapper.find('EuiLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
-      (useUiSetting$ as jest.Mock).mockClear();
-      wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />);
-      expect(wrapper.find('EuiLink')).toHaveLength(1);
+    describe('external icon', () => {
+      beforeAll(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+      });
+
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
+
+      test('it renders no external icon by default', () => {
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('ExternalLinkIcon').exists()).toBeFalsy();
+      });
+
+      test('it renders external icon if enabled', () => {
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} showExternalIcon={true} />
+        );
+        expect(wrapper.find('ExternalLinkIcon').exists()).toBeTruthy();
+      });
+
+      test('it renders no external icon if ipReputationLinks is empty', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([[]]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} showExternalIcon={true} />
+        );
+        expect(wrapper.find('ExternalLinkIcon').exists()).toBeFalsy();
+      });
     });
   });
 

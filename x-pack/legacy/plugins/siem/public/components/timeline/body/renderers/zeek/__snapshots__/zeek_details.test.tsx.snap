@@ -598,21 +598,15 @@ tr:hover .c3:focus::before {
   display: block;
 }
 
-.c6 {
-  position: relative;
-  top: -2px;
-  margin-left: 5px;
-}
-
-.c9 {
+.c8 {
   margin: 0 2px;
 }
 
-.c8 {
+.c7 {
   margin-top: 3px;
 }
 
-.c7 {
+.c6 {
   margin-right: 10px;
 }
 
@@ -3362,6 +3356,8 @@ tr:hover .c3:focus::before {
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   overflowIndexStart={1}
                                                   showDomain={true}
+                                                  showExternalIcon={true}
+                                                  showTooltip={true}
                                                 >
                                                   <DefaultFieldRendererOverflow
                                                     idPrefix="moreReputationLink"
@@ -3378,44 +3374,6 @@ tr:hover .c3:focus::before {
                                                     </EuiFlexItem>
                                                   </DefaultFieldRendererOverflow>
                                                 </ReputationLink>
-                                                <ExternalLinkIcon>
-                                                  <LinkIconWithMargin
-                                                    color="subdued"
-                                                    data-test-subj="external-link-icon"
-                                                    size="s"
-                                                    type="popout"
-                                                  >
-                                                    <EuiIcon
-                                                      className="sc-fzXfLO c6"
-                                                      color="subdued"
-                                                      data-test-subj="external-link-icon"
-                                                      size="s"
-                                                      type="popout"
-                                                    >
-                                                      <EuiIconEmpty
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfLO c6"
-                                                        data-test-subj="external-link-icon"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfLO c6"
-                                                          data-test-subj="external-link-icon"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </EuiIconEmpty>
-                                                    </EuiIcon>
-                                                  </LinkIconWithMargin>
-                                                </ExternalLinkIcon>
                                               </div>
                                             </div>
                                           </EuiFlexItem>
@@ -3579,11 +3537,11 @@ tr:hover .c3:focus::before {
                                                     grow={false}
                                                   >
                                                     <EuiFlexItem
-                                                      className="c7"
+                                                      className="c6"
                                                       grow={false}
                                                     >
                                                       <div
-                                                        className="euiFlexItem euiFlexItem--flexGrowZero c7"
+                                                        className="euiFlexItem euiFlexItem--flexGrowZero c6"
                                                       >
                                                         <UserProcess
                                                           contextId="netflow-renderer-test-19"
@@ -3609,11 +3567,11 @@ tr:hover .c3:focus::before {
                                                     grow={false}
                                                   >
                                                     <EuiFlexItem
-                                                      className="c7"
+                                                      className="c6"
                                                       grow={false}
                                                     >
                                                       <div
-                                                        className="euiFlexItem euiFlexItem--flexGrowZero c7"
+                                                        className="euiFlexItem euiFlexItem--flexGrowZero c6"
                                                       >
                                                         <DurationEventStartEnd
                                                           contextId="netflow-renderer-test-19"
@@ -3680,11 +3638,11 @@ tr:hover .c3:focus::before {
                                                               grow={false}
                                                             >
                                                               <EuiFlexItem
-                                                                className="c8"
+                                                                className="c7"
                                                                 grow={false}
                                                               >
                                                                 <div
-                                                                  className="euiFlexItem euiFlexItem--flexGrowZero c8"
+                                                                  className="euiFlexItem euiFlexItem--flexGrowZero c7"
                                                                 >
                                                                   <SourceDestinationWithArrows
                                                                     contextId="netflow-renderer-test-19"
@@ -3723,14 +3681,14 @@ tr:hover .c3:focus::before {
                                                                           >
                                                                             <EuiFlexGroup
                                                                               alignItems="center"
-                                                                              className="c9"
+                                                                              className="c8"
                                                                               data-test-subj="source-destination-arrows-container"
                                                                               direction="column"
                                                                               gutterSize="none"
                                                                               justifyContent="center"
                                                                             >
                                                                               <div
-                                                                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c9"
+                                                                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c8"
                                                                                 data-test-subj="source-destination-arrows-container"
                                                                               />
                                                                             </EuiFlexGroup>

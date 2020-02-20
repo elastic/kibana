@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect, useMemo } from 'react';
 
+import { isNil } from 'lodash/fp';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -23,7 +24,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
 import * as i18n from '../page/network/ip_overview/translations';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
-
+import { ExternalLinkIcon } from '../external_link_icon';
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
   children,
@@ -148,15 +149,43 @@ const isReputationLink = (
   (rowItem as ReputationLinkSetting).name !== undefined;
 
 export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
+
+const ReputationLinkTemplate = React.memo<{
+  name: string;
+  urlTemplate: string;
+  domain: string;
+  overflowIndexStart: number;
+  ipReputationLinks: Array<string | ReputationLinkSetting>;
+  id: number;
+  showDomain?: boolean;
+}>(({ name, urlTemplate, domain, overflowIndexStart, ipReputationLinks, showDomain, id }) => {
+  const lastIndexToShow = useMemo(
+    () => Math.max(0, Math.min(overflowIndexStart - 1, ipReputationLinks.length - 1)),
+    [overflowIndexStart]
+  );
+  return (
+    <EuiLink href={urlTemplate} target="_blank" rel="noopener">
+      {showDomain ? domain : name ?? domain}
+      {id < lastIndexToShow && ', '}
+    </EuiLink>
+  );
+});
+
+ReputationLinkTemplate.displayName = 'ReputationLinkTemplate';
+
 const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
   showDomain?: boolean;
+  showTooltip?: boolean;
+  showExternalIcon?: boolean;
   domain: string;
 }> = ({
   overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   showDomain = false,
+  showTooltip = false,
+  showExternalIcon = false,
   domain,
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
@@ -178,33 +207,57 @@ const ReputationLinkComponent: React.FC<{
     setIpReputationLinks(
       ipReputationLinks
         ?.slice(0, allItemsLimit)
-        .filter(({ url_template }) => !isUrlInvalid(url_template))
+        .filter(
+          ({ url_template, name }) =>
+            !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
+        )
         .map(({ name, url_template }: { name: string; url_template: string }) => {
           return {
             name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
-            url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
+            url_template: url_template?.replace(`{{ip}}`, encodeURIComponent(domain)) ?? '',
           };
         })
     );
-  }, [domain, overflowIndexStart, setIpReputationLinks, defaultNameMapping]);
+  }, [allItemsLimit, domain, overflowIndexStart, setIpReputationLinks, defaultNameMapping]);
 
   return (
     <>
       {ipReputationLinks
         ?.slice(0, overflowIndexStart)
-        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-          <EuiLink href={urlTemplate} target="_blank" key={`reputationLink-${id}`}>
-            {showDomain ? domain : name ?? domain}
-            {id !== Math.max(0, Math.min(overflowIndexStart, ipReputationLinks.length) - 1) && ', '}
-          </EuiLink>
-        ))}
+        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) =>
+          showTooltip ? (
+            <EuiToolTip content={urlTemplate} position="top" key={`reputationLink-${id}`}>
+              <ReputationLinkTemplate
+                name={name}
+                urlTemplate={urlTemplate}
+                domain={domain}
+                overflowIndexStart={overflowIndexStart}
+                ipReputationLinks={ipReputationLinks}
+                showDomain={showDomain}
+                id={id}
+              />
+            </EuiToolTip>
+          ) : (
+            <ReputationLinkTemplate
+              name={name}
+              urlTemplate={urlTemplate}
+              domain={domain}
+              overflowIndexStart={overflowIndexStart}
+              ipReputationLinks={ipReputationLinks}
+              showDomain={showDomain}
+              id={id}
+              key={`reputationLink-${id}`}
+            />
+          )
+        )}
+      {showExternalIcon && ipReputationLinks?.length && <ExternalLinkIcon />}
       <DefaultFieldRendererOverflow
         rowItems={ipReputationLinks}
         idPrefix="moreReputationLink"
         render={rowItem => {
           return (
             isReputationLink(rowItem) && (
-              <EuiLink href={rowItem.url_template} target="_blank">
+              <EuiLink href={rowItem.url_template} target="_blank" rel="noopener">
                 {rowItem.name ?? domain}
               </EuiLink>
             )
