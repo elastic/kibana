@@ -94,26 +94,20 @@ export class ColorMapSelect extends Component {
 
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
       return (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <ColorStopsOrdinal
-            colorStops={this.state.customColorMap}
-            onChange={this._onCustomColorMapChange}
-          />
-        </Fragment>
+        <ColorStopsOrdinal
+          colorStops={this.state.customColorMap}
+          onChange={this._onCustomColorMapChange}
+        />
       );
     }
 
     return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <ColorStopsCategorical
-          colorStops={this.state.customColorMap}
-          field={this.props.styleProperty.getField()}
-          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
-          onChange={this._onCustomColorMapChange}
-        />
-      </Fragment>
+      <ColorStopsCategorical
+        colorStops={this.state.customColorMap}
+        field={this.props.styleProperty.getField()}
+        getValueSuggestions={this.props.styleProperty.getValueSuggestions}
+        onChange={this._onCustomColorMapChange}
+      />
     );
   }
 
@@ -137,40 +131,36 @@ export class ColorMapSelect extends Component {
 
     let toggle;
     if (this.props.showColorMapTypeToggle) {
-      toggle = <EuiFlexItem>{this._renderColorMapToggle()}</EuiFlexItem>;
+      toggle = <EuiFlexItem grow={false}>{this._renderColorMapToggle()}</EuiFlexItem>;
     } else {
       toggle = <Fragment />;
     }
 
     return (
-      <Fragment>
+      <EuiFlexGroup gutterSize={'none'}>
         {toggle}
         <EuiFlexItem>
           <EuiSuperSelect
+            compressed
             options={colorMapOptionsWithCustom}
             onChange={this._onColorMapSelect}
             valueOfSelected={valueOfSelected}
             hasDividers={true}
           />
         </EuiFlexItem>
-      </Fragment>
+      </EuiFlexGroup>
     );
   }
 
   render() {
     return (
       <Fragment>
-        <EuiFlexGroup gutterSize={'none'} direction={'column'}>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize={'xs'} justifyContent="spaceBetween">
-              {this._renderColorMapSelections()}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize={'xs'}>
-              <EuiFlexItem>{this._renderColorStopsInput()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+        {this._renderColorMapSelections()}
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>{this._renderColorStopsInput()}</EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>
     );
