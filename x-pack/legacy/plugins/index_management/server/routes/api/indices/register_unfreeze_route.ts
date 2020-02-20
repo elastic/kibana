@@ -4,23 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
 
-interface ReqPayload {
-  indices: string[];
-}
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
 
-const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
-  const { indices = [] } = request.payload as ReqPayload;
-  const params = {
-    path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
-    method: 'POST',
-  };
+const bodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
 
-  await callWithRequest('transport.request', params);
-  return h.response();
-};
+export function registerUnfreezeRoute({ router, license, lib }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indices = [] } = req.body as typeof bodySchema.type;
+      const params = {
+        path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
+        method: 'POST',
+      };
 
-export function registerUnfreezeRoute(router: Router) {
-  router.post('indices/unfreeze', handler);
+      try {
+        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }
