@@ -38,10 +38,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        pageNavigation: 'individual',
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
@@ -207,7 +204,7 @@ export default function({ getService, getPageObjects }) {
         ]);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await appsMenu.linkExists('Stack Management')) {
+        if (await appsMenu.linkExists('Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -217,7 +214,7 @@ export default function({ getService, getPageObjects }) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (!(await appsMenu.linkExists('Stack Management'))) {
+        if (!(await appsMenu.linkExists('Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });
