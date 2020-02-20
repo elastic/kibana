@@ -54,6 +54,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
