@@ -5,9 +5,8 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { connect, ConnectedProps } from 'react-redux';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -37,37 +36,13 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
-}
-
-interface HostsTableReduxProps {
-  activePage: number;
-  direction: Direction;
-  limit: number;
-  sortField: HostsFields;
-}
-
-interface HostsTableDispatchProps {
-  updateHostsSort: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    sort: HostsSortField;
-  }>;
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    limit: number;
-    tableType: hostsModel.HostsTableType;
-  }>;
 }
 
 export type HostsTableColumns = [
@@ -77,7 +52,7 @@ export type HostsTableColumns = [
   Columns<OsFields['version']>
 ];
 
-type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
+type HostsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -115,12 +90,32 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableActivePage,
     updateTableLimit,
   }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        }),
+      [type, updateTableActivePage]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
           const sort: HostsSortField = {
             field: getSortField(criteria.sort.field),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (sort.direction !== direction || sort.field !== sortField) {
             updateHostsSort({
@@ -130,7 +125,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           }
         }
       },
-      [direction, sortField, type]
+      [direction, sortField, type, updateHostsSort]
     );
 
     const hostsColumns = useMemo(() => getHostsColumns(), []);
@@ -153,26 +148,14 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
-        updateLimitPagination={newLimit =>
-          updateTableLimit({
-            hostsType: type,
-            limit: newLimit,
-            tableType,
-          })
-        }
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            hostsType: type,
-            tableType,
-          })
-        }
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
       />
     );
   }
@@ -209,11 +192,16 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(
-  makeMapStateToProps,
-  {
-    updateHostsSort: hostsActions.updateHostsSort,
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(HostsTableComponent);
+const mapDispatchToProps = {
+  updateHostsSort: hostsActions.updateHostsSort,
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const HostsTable = connector(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

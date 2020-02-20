@@ -4,30 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
-import {
-  assertAtLeastOneEventMatchesSearch,
-  executeKQL,
-  hostExistsQuery,
-  toggleTimelineVisibility,
-} from '../../lib/timeline/helpers';
-import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline/main';
+import { HOSTS_PAGE } from '../../../urls/navigation';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
+import { openTimeline } from '../../../tasks/siem_main';
+import { executeTimelineKQL } from '../../../tasks/timeline/main';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
   });
 
-  afterEach(() => {
-    return logout();
-  });
-
   it('executes a KQL query', () => {
-    toggleTimelineVisibility();
+    const hostExistsQuery = 'host.name: *';
+    openTimeline();
+    executeTimelineKQL(hostExistsQuery);
 
-    executeKQL(hostExistsQuery);
-
-    assertAtLeastOneEventMatchesSearch();
+    cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+      .invoke('text')
+      .should('be.above', 0);
   });
 });

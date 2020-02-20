@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 interface UptimeTelemetry {
   overview_page: number;
@@ -19,9 +20,13 @@ const BUCKET_SIZE = 3600;
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
-  public static initUsageCollector(usageCollector: any) {
-    const { collectorSet } = usageCollector;
-    return collectorSet.makeUsageCollector({
+  public static registerUsageCollector = (usageCollector: UsageCollectionSetup) => {
+    const collector = KibanaTelemetryAdapter.initUsageCollector(usageCollector);
+    usageCollector.registerCollector(collector);
+  };
+
+  public static initUsageCollector(usageCollector: UsageCollectionSetup) {
+    return usageCollector.makeUsageCollector({
       type: 'uptime',
       fetch: async () => {
         const report = this.getReport();

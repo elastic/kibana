@@ -32,6 +32,7 @@ export const getPolicy = ({
   snapshotName = `snapshot-${getRandomString()}`,
   stats = DEFAULT_STATS,
   version = getRandomNumber(),
+  isManagedPolicy = false,
 }: Partial<SlmPolicy> = {}): SlmPolicy => ({
   name,
   config,
@@ -45,4 +46,5 @@ export const getPolicy = ({
   snapshotName,
   stats,
   version,
+  isManagedPolicy,
 });

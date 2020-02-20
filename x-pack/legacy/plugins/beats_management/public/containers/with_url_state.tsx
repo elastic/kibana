@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'querystring';
+import { parse, stringify } from 'query-string';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 
@@ -22,9 +22,7 @@ export interface URLStateProps<URLState = object> {
   ) => void;
   urlState: URLState;
 }
-interface ComponentProps<URLState extends object> {
-  history: any;
-  match: any;
+interface ComponentProps<URLState extends object> extends RouteComponentProps {
   children: RendererFunction<URLStateProps<URLState>>;
 }
 
@@ -33,7 +31,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 > {
   private get URLState(): URLState {
     // slice because parse does not account for the initial ? in the search string
-    return parse(decodeURIComponent(this.props.history.location.search).substring(1)) as URLState;
+    return parse(decodeURIComponent(this.props.history.location.search).substring(1), {
+      sort: false,
+    }) as URLState;
   }
 
   private historyListener: (() => void) | null = null;
@@ -65,10 +65,13 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
       newState = state;
     }
 
-    const search: string = stringify({
-      ...(pastState as any),
-      ...(newState as any),
-    });
+    const search: string = stringify(
+      {
+        ...pastState,
+        ...newState,
+      },
+      { sort: false }
+    );
 
     const newLocation = {
       ...this.props.history.location,
@@ -86,16 +89,12 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     });
   };
 }
-export const WithURLState = withRouter<any>(WithURLStateComponent);
+export const WithURLState = withRouter(WithURLStateComponent);
 
-export function withUrlState<OP>(
-  UnwrappedComponent: React.ComponentType<OP & URLStateProps>
-): React.SFC<any> {
-  return (origProps: OP) => {
-    return (
-      <WithURLState>
-        {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
-      </WithURLState>
-    );
-  };
+export function withUrlState<OP>(UnwrappedComponent: React.ComponentType<OP & URLStateProps>) {
+  return (origProps: OP) => (
+    <WithURLState>
+      {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
+    </WithURLState>
+  );
 }

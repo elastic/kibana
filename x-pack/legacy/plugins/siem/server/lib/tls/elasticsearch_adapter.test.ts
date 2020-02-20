@@ -22,12 +22,9 @@ describe('elasticsearch_adapter', () => {
     let data: TlsData;
     const mockCallWithRequest = jest.fn();
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
 
     beforeAll(async () => {

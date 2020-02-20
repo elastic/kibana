@@ -5,7 +5,9 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import cytoscape from 'cytoscape';
 import databaseIcon from './icons/database.svg';
+import documentsIcon from './icons/documents.svg';
 import globeIcon from './icons/globe.svg';
 
 function getAvatarIcon(
@@ -24,10 +26,16 @@ function getAvatarIcon(
 }
 
 // The colors here are taken from the logos of the corresponding technologies
-export const icons: { [key: string]: string } = {
+const icons: { [key: string]: string } = {
+  cache: databaseIcon,
   database: databaseIcon,
-  dotnet: getAvatarIcon('.N', '#8562AD'),
   external: globeIcon,
+  messaging: documentsIcon,
+  resource: globeIcon
+};
+
+const serviceIcons: { [key: string]: string } = {
+  dotnet: getAvatarIcon('.N', '#8562AD'),
   go: getAvatarIcon('Go', '#00A9D6'),
   java: getAvatarIcon('Jv', '#41717E'),
   'js-base': getAvatarIcon('JS', '#F0DB4E', theme.euiTextColor),
@@ -37,3 +45,25 @@ export const icons: { [key: string]: string } = {
 };
 
 export const defaultIcon = getAvatarIcon();
+
+// IE 11 does not properly load some SVGs, which causes a runtime error and the
+// map to not work at all. We would prefer to do some kind of feature detection
+// rather than browser detection, but IE 11 does support SVG, just not well
+// enough for our use in loading icons.
+//
+// This method of detecting IE is from a Stack Overflow answer:
+// https://stackoverflow.com/a/21825207
+//
+// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+
+export function iconForNode(node: cytoscape.NodeSingular) {
+  const type = node.data('type');
+  if (type === 'service') {
+    return serviceIcons[node.data('agentName') as string];
+  } else if (isIE11) {
+    return defaultIcon;
+  } else {
+    return icons[type];
+  }
+}

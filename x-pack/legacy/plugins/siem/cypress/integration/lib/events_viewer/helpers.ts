@@ -6,11 +6,16 @@
 
 import { EVENTS_VIEWER_FIELDS_BUTTON, KQL_SEARCH_BAR } from './selectors';
 import { FIELDS_BROWSER_CONTAINER } from '../fields_browser/selectors';
+import { SERVER_SIDE_EVENT_COUNT } from '../timeline/selectors';
 import { DEFAULT_TIMEOUT } from '../util/helpers';
 
 /** Opens the eventsViewer Field Browser */
 export const openEventsViewerFieldsBrowser = () => {
   cy.get(EVENTS_VIEWER_FIELDS_BUTTON, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+
+  cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+    .invoke('text')
+    .should('not.equal', '0');
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };

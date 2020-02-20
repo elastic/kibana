@@ -1,0 +1,39 @@
+{
+  "description": "Identifies mshta.exe making a network connection. This may indicate adversarial activity as mshta.exe is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Network Connection via Mshta",
+  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\"",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2017/05/cyber-espionage-apt32.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1170",
+          "name": "Mshta",
+          "reference": "https://attack.mitre.org/techniques/T1170/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

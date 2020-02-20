@@ -6,12 +6,14 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -87,17 +89,27 @@ export const getColumns = (
   }
 
   const columns: [
-    ExpanderColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    ComputedColumnType,
-    ComputedColumnType,
-    ComputedColumnType,
-    ActionsColumnType
+    ExpanderColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ActionsColumnType<TransformListRow>
   ] = [
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.transform.transformList.showDetailsColumn.screenReaderDescription"
+              defaultMessage="This column contains clickable controls for showing more details on each transform"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
@@ -116,29 +128,35 @@ export const getColumns = (
                 })
           }
           iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          data-test-subj="transformListRowDetailsToggle"
         />
       ),
     },
     {
       field: TRANSFORM_LIST_COLUMN.ID,
+      'data-test-subj': 'transformListColumnId',
       name: 'ID',
       sortable: true,
       truncateText: true,
+      scope: 'row',
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
+      'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
     },
     {
       field: TRANSFORM_LIST_COLUMN.CONFIG_SOURCE_INDEX,
+      'data-test-subj': 'transformListColumnSourceIndex',
       name: i18n.translate('xpack.transform.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
       field: TRANSFORM_LIST_COLUMN.CONFIG_DEST_INDEX,
+      'data-test-subj': 'transformListColumnDestinationIndex',
       name: i18n.translate('xpack.transform.destinationIndex', {
         defaultMessage: 'Destination index',
       }),
@@ -147,6 +165,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),
+      'data-test-subj': 'transformListColumnStatus',
       sortable: (item: TransformListRow) => item.stats.state,
       truncateText: true,
       render(item: TransformListRow) {
@@ -156,6 +175,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.transform.mode', { defaultMessage: 'Mode' }),
+      'data-test-subj': 'transformListColumnMode',
       sortable: (item: TransformListRow) => item.mode,
       truncateText: true,
       render(item: TransformListRow) {
@@ -167,6 +187,7 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.transform.progress', { defaultMessage: 'Progress' }),
+      'data-test-subj': 'transformListColumnProgress',
       sortable: (item: TransformListRow) => getTransformProgress(item) || 0,
       truncateText: true,
       render(item: TransformListRow) {
@@ -183,7 +204,13 @@ export const getColumns = (
             {isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  <EuiProgress value={progress} max={100} color="primary" size="m">
+                  <EuiProgress
+                    value={progress}
+                    max={100}
+                    color="primary"
+                    size="m"
+                    data-test-subj="transformListProgress"
+                  >
                     {progress}%
                   </EuiProgress>
                 </EuiFlexItem>

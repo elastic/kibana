@@ -5,33 +5,33 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { AppWithoutRouter } from '../../public/app';
-import { Provider } from 'react-redux';
-import { loadIndicesSuccess } from '../../public/store/actions';
-import { indexManagementStore } from '../../public/store';
-import { BASE_PATH } from '../../common/constants';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-// axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
+import { MemoryRouter } from 'react-router-dom';
+import { AppWithoutRouter } from '../../public/application/app';
+import { AppContextProvider } from '../../public/application/app_context';
+import { Provider } from 'react-redux';
+import { loadIndicesSuccess } from '../../public/application/store/actions';
+import { breadcrumbService } from '../../public/application/services/breadcrumbs';
+import { UiMetricService } from '../../public/application/services/ui_metric';
+import { notificationService } from '../../public/application/services/notification';
+import { httpService } from '../../public/application/services/http';
+import { setUiMetricService } from '../../public/application/services/api';
+import { indexManagementStore } from '../../public/application/store';
+import { setExtensionsService } from '../../public/application/store/selectors';
+import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { ExtensionsService } from '../../public/services';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { notificationServiceMock } from '../../../../../../src/core/public/notifications/notifications_service.mock';
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => { } },
-  addBasePath: path => path || '/api/index_management',
-}));
+jest.mock('ui/new_platform');
 
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: '',
-  CONTAINS_SPACES: '',
-  validateIndexPattern: () => { },
-}));
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;
 
 let store = null;
@@ -45,15 +45,15 @@ for (let i = 0; i < 105; i++) {
     documents: 10000,
     documents_deleted: 100,
     size: '156kb',
-    primary_size: '156kb'
+    primary_size: '156kb',
   };
   indices.push({
     ...baseFake,
-    name: `testy${i}`
+    name: `testy${i}`,
   });
   indices.push({
     ...baseFake,
-    name: `.admin${i}`
+    name: `.admin${i}`,
   });
 }
 let component = null;
@@ -73,16 +73,10 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
   const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
   checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
   rendered.update();
-  const actionButton = findTestSubject(
-    rendered,
-    'indexActionsContextMenuButton'
-  );
+  const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
   actionButton.simulate('click');
   rendered.update();
-  const contextMenuButtons = findTestSubject(
-    rendered,
-    'indexTableContextMenuButton'
-  );
+  const contextMenuButtons = findTestSubject(rendered, 'indexTableContextMenuButton');
   contextMenuButtons.at(buttonIndex).simulate('click');
 };
 const testEditor = (buttonIndex, rowIndex = 0) => {
@@ -114,34 +108,56 @@ const namesText = rendered => {
 
 describe('index table', () => {
   beforeEach(() => {
-    store = indexManagementStore();
+    // Mock initialization of services
+    const services = {
+      extensionsService: new ExtensionsService(),
+      uiMetricService: new UiMetricService('index_management'),
+    };
+    services.uiMetricService.setup({ reportUiStats() {} });
+    setExtensionsService(services.extensionsService);
+    setUiMetricService(services.uiMetricService);
+
+    // @ts-ignore
+    httpService.setup(mockHttpClient);
+    breadcrumbService.setup(() => undefined);
+    notificationService.setup(notificationServiceMock.createStartContract());
+
+    store = indexManagementStore(services);
+
+    const appDependencies = { services, core: {}, plugins: {} };
+
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppWithoutRouter />
+          <AppContextProvider value={appDependencies}>
+            <AppWithoutRouter />
+          </AppContextProvider>
         </MemoryRouter>
       </Provider>
     );
     store.dispatch(loadIndicesSuccess({ indices }));
     server = sinon.fakeServer.create();
-    server.respondWith('/api/index_management/indices', [
+    server.respondWith(`${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(indices)
+      JSON.stringify(indices),
     ]);
     server.respondWith([
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify({ acknowledged: true })
+      JSON.stringify({ acknowledged: true }),
     ]);
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(indices)
+      JSON.stringify(indices),
     ]);
     server.respondImmediately = true;
   });
   afterEach(() => {
+    if (!server) {
+      return;
+    }
     server.restore();
   });
 
@@ -177,18 +193,14 @@ describe('index table', () => {
     const rendered = mountWithIntl(component);
     snapshot(
       rendered
-        .find(
-          '.euiPagination .euiPaginationButton .euiButtonEmpty__content > span'
-        )
+        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
         .map(span => span.text())
     );
-    const switchControl = rendered.find('.euiSwitch__input');
-    switchControl.simulate('change', { target: { checked: true } });
+    const switchControl = rendered.find('.euiSwitch__button');
+    switchControl.simulate('click');
     snapshot(
       rendered
-        .find(
-          '.euiPagination .euiPaginationButton .euiButtonEmpty__content > span'
-        )
+        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
         .map(span => span.text())
     );
   });
@@ -202,10 +214,7 @@ describe('index table', () => {
   });
   test('should sort when header is clicked', () => {
     const rendered = mountWithIntl(component);
-    const nameHeader = findTestSubject(
-      rendered,
-      'indexTableHeaderCell-name'
-    ).find('button');
+    const nameHeader = findTestSubject(rendered, 'indexTableHeaderCell-name').find('button');
     nameHeader.simulate('click');
     rendered.update();
     snapshot(namesText(rendered));
@@ -226,34 +235,20 @@ describe('index table', () => {
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when one index is selected and closed', () => {
     const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when one open and one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -261,17 +256,10 @@ describe('index table', () => {
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when more than one open index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -279,17 +267,10 @@ describe('index table', () => {
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(2).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when more than one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -297,17 +278,10 @@ describe('index table', () => {
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     checkboxes.at(3).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('flush button works from context menu', done => {
     testAction(8, done);
@@ -333,24 +307,24 @@ describe('index table', () => {
       }
       count++;
     });
-    const confirmButton = findTestSubject(
-      rendered,
-      'confirmModalConfirmButton'
-    );
+    const confirmButton = findTestSubject(rendered, 'confirmModalConfirmButton');
     confirmButton.simulate('click');
     snapshot(status(rendered, rowIndex));
   });
+  // Commenting the following 2 tests as it works in the browser (status changes to "closed" or "open") but the
+  // snapshot say the contrary. Need to be investigated.
   test('close index button works from context menu', done => {
     const modifiedIndices = indices.map(index => {
       return {
         ...index,
-        status: index.name === 'testy0' ? 'close' : index.status
+        status: index.name === 'testy0' ? 'close' : index.status,
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices)
+      JSON.stringify(modifiedIndices),
     ]);
     testAction(4, done);
   });
@@ -358,13 +332,13 @@ describe('index table', () => {
     const modifiedIndices = indices.map(index => {
       return {
         ...index,
-        status: index.name === 'testy1' ? 'open' : index.status
+        status: index.name === 'testy1' ? 'open' : index.status,
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices)
+      JSON.stringify(modifiedIndices),
     ]);
     testAction(3, done, 1);
   });

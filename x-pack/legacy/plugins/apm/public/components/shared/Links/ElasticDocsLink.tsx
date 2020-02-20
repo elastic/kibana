@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { metadata } from 'ui/metadata';
-
-// TODO: metadata should be read from a useContext hook in new platform
-const STACK_VERSION = metadata.branch;
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 // union type constisting of valid guide sections that we link to
 type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server';
@@ -19,7 +16,14 @@ interface Props extends EuiLinkAnchorProps {
   path: string;
 }
 
-export function ElasticDocsLink({ section, path, ...rest }: Props) {
-  const href = `https://www.elastic.co/guide/en${section}/${STACK_VERSION}${path}`;
-  return <EuiLink href={href} {...rest} />;
+export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
+  const { version } = useApmPluginContext().packageInfo;
+  const href = `https://www.elastic.co/guide/en${section}/${version}${path}`;
+  return typeof children === 'function' ? (
+    children(href)
+  ) : (
+    <EuiLink href={href} {...rest}>
+      children
+    </EuiLink>
+  );
 }

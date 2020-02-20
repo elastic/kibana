@@ -1,7 +1,7 @@
 [[search]]
 == Searching your data
-You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. By default you can use Kibana's standard query language
+You can search the indices that match the current <<index-patterns, index pattern>> by entering
+your search criteria in the Query bar. By default you can use Kibana's <<kuery-query, standard query language>>
 which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
 language (based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax])
 is still available for the time being under the options menu in the Query Bar. When this

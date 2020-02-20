@@ -7,7 +7,6 @@
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
 
-import { pure } from 'recompose';
 import { FlowDirection } from '../../graphql/types';
 
 import * as i18n from './translations';
@@ -17,7 +16,7 @@ interface Props {
   onChangeDirection: (value: FlowDirection) => void;
 }
 
-export const FlowDirectionSelect = pure<Props>(({ onChangeDirection, selectedDirection }) => (
+export const FlowDirectionSelect = React.memo<Props>(({ onChangeDirection, selectedDirection }) => (
   <EuiFilterGroup>
     <EuiFilterButton
       withNext

@@ -17,19 +17,18 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class RelativeDateFormat extends FieldFormat {
-  static id = 'relative_date';
-  static title = 'Relative Date';
+  static id = FIELD_FORMAT_IDS.RELATIVE_DATE;
+  static title = i18n.translate('data.fieldFormats.relative_date.title', {
+    defaultMessage: 'Relative date',
+  });
   static fieldType = KBN_FIELD_TYPES.DATE;
-
-  constructor(params: Record<string, any>) {
-    super(params);
-  }
 
   textConvert: TextContextTypeConvert = val => {
     if (val === null || val === undefined) {

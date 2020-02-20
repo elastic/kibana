@@ -73,7 +73,6 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           defaultMessage="The time to wait before deleting snapshots."
         />
       }
-      idAria="expirationDescription"
       fullWidth
     >
       <EuiFormRow
@@ -83,9 +82,8 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             defaultMessage="Delete after"
           />
         }
-        describedByIds={['expirationDescription']}
         isInvalid={touched.expireAfterValue && Boolean(errors.expireAfterValue)}
-        error={errors.expireAfter}
+        error={errors.expireAfterValue}
         fullWidth
       >
         <EuiFlexGroup>
@@ -100,6 +98,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="expireAfterValueInput"
+              min={0}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -139,7 +138,6 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
         />
       }
-      idAria="countDescription"
       fullWidth
     >
       <EuiFlexGroup>
@@ -151,7 +149,6 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Mininum count"
               />
             }
-            describedByIds={['countDescription']}
             isInvalid={touched.minCount && Boolean(errors.minCount)}
             error={errors.minCount}
             fullWidth
@@ -167,6 +164,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="minCountInput"
+              min={0}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -178,7 +176,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Maximum count"
               />
             }
-            describedByIds={['countDescription']}
+            isInvalid={touched.maxCount && Boolean(errors.maxCount)}
             error={errors.maxCount}
             fullWidth
           >
@@ -193,6 +191,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="maxCountInput"
+              min={0}
             />
           </EuiFormRow>
         </EuiFlexItem>

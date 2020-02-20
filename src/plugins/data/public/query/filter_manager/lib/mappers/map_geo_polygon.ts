@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import {
-  GeoPolygonFilter,
-  Filter,
-  FILTERS,
-  isGeoPolygonFilter,
   FilterValueFormatter,
-} from '@kbn/es-query';
+  GeoPolygonFilter,
+  FILTERS,
+  Filter,
+  isGeoPolygonFilter,
+} from '../../../../../common';
 
 const POINTS_SEPARATOR = ', ';
 

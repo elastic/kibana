@@ -17,14 +17,17 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 
 export class BoolFormat extends FieldFormat {
-  static id = 'boolean';
-  static title = 'Boolean';
+  static id = FIELD_FORMAT_IDS.BOOLEAN;
+  static title = i18n.translate('data.fieldFormats.boolean.title', {
+    defaultMessage: 'Boolean',
+  });
   static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
   textConvert: TextContextTypeConvert = value => {

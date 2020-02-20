@@ -4,242 +4,268 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import numeral from '@elastic/numeral';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { has } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OverviewHostData } from '../../../../graphql/types';
-import { getEmptyTagValue } from '../../../empty_value';
+import { FormattedStat, StatGroup } from '../types';
+import { StatValue } from '../stat_value';
 
 interface OverviewHostProps {
   data: OverviewHostData;
   loading: boolean;
 }
 
-// eslint-disable-next-line complexity
-const overviewHostStats = (data: OverviewHostData) => [
+export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] => [
   {
-    description:
-      has('auditbeatAuditd', data) && data.auditbeatAuditd !== null
-        ? numeral(data.auditbeatAuditd).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatAuditTitle"
-        defaultMessage="Auditbeat Audit"
-      />
-    ),
+    count: data.auditbeatAuditd ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.auditBeatAuditTitle" defaultMessage="Audit" />,
     id: 'auditbeatAuditd',
   },
   {
-    description:
-      has('auditbeatFIM', data) && data.auditbeatFIM !== null
-        ? numeral(data.auditbeatFIM).format('0,0')
-        : getEmptyTagValue(),
+    count: data.auditbeatFIM ?? 0,
     title: (
       <FormattedMessage
         id="xpack.siem.overview.auditBeatFimTitle"
-        defaultMessage="Auditbeat File Integrity Module"
+        defaultMessage="File Integrity Module"
       />
     ),
     id: 'auditbeatFIM',
   },
   {
-    description:
-      has('auditbeatLogin', data) && data.auditbeatLogin !== null
-        ? numeral(data.auditbeatLogin).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatLoginTitle"
-        defaultMessage="Auditbeat Login"
-      />
-    ),
+    count: data.auditbeatLogin ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.auditBeatLoginTitle" defaultMessage="Login" />,
     id: 'auditbeatLogin',
   },
   {
-    description:
-      has('auditbeatPackage', data) && data.auditbeatPackage !== null
-        ? numeral(data.auditbeatPackage).format('0,0')
-        : getEmptyTagValue(),
+    count: data.auditbeatPackage ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatPackageTitle"
-        defaultMessage="Auditbeat Package"
-      />
+      <FormattedMessage id="xpack.siem.overview.auditBeatPackageTitle" defaultMessage="Package" />
     ),
     id: 'auditbeatPackage',
   },
   {
-    description:
-      has('auditbeatProcess', data) && data.auditbeatProcess !== null
-        ? numeral(data.auditbeatProcess).format('0,0')
-        : getEmptyTagValue(),
+    count: data.auditbeatProcess ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatProcessTitle"
-        defaultMessage="Auditbeat Process"
-      />
+      <FormattedMessage id="xpack.siem.overview.auditBeatProcessTitle" defaultMessage="Process" />
     ),
     id: 'auditbeatProcess',
   },
   {
-    description:
-      has('auditbeatUser', data) && data.auditbeatUser !== null
-        ? numeral(data.auditbeatUser).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage
-        id="xpack.siem.overview.auditBeatUserTitle"
-        defaultMessage="Auditbeat User"
-      />
-    ),
+    count: data.auditbeatUser ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.auditBeatUserTitle" defaultMessage="User" />,
     id: 'auditbeatUser',
   },
   {
-    description:
-      has('endgameDns', data) && data.endgameDns !== null
-        ? numeral(data.endgameDns).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage id="xpack.siem.overview.endgameDnsTitle" defaultMessage="Endgame DNS" />
-    ),
+    count: data.endgameDns ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.endgameDnsTitle" defaultMessage="DNS" />,
     id: 'endgameDns',
   },
   {
-    description:
-      has('endgameFile', data) && data.endgameFile !== null
-        ? numeral(data.endgameFile).format('0,0')
-        : getEmptyTagValue(),
-    title: (
-      <FormattedMessage id="xpack.siem.overview.endgameFileTitle" defaultMessage="Endgame File" />
-    ),
+    count: data.endgameFile ?? 0,
+    title: <FormattedMessage id="xpack.siem.overview.endgameFileTitle" defaultMessage="File" />,
     id: 'endgameFile',
   },
   {
-    description:
-      has('endgameImageLoad', data) && data.endgameImageLoad !== null
-        ? numeral(data.endgameImageLoad).format('0,0')
-        : getEmptyTagValue(),
+    count: data.endgameImageLoad ?? 0,
     title: (
       <FormattedMessage
         id="xpack.siem.overview.endgameImageLoadTitle"
-        defaultMessage="Endgame Image Load"
+        defaultMessage="Image Load"
       />
     ),
     id: 'endgameImageLoad',
   },
   {
-    description:
-      has('endgameNetwork', data) && data.endgameNetwork !== null
-        ? numeral(data.endgameNetwork).format('0,0')
-        : getEmptyTagValue(),
+    count: data.endgameNetwork ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.endgameNetworkTitle"
-        defaultMessage="Endgame Network"
-      />
+      <FormattedMessage id="xpack.siem.overview.endgameNetworkTitle" defaultMessage="Network" />
     ),
     id: 'endgameNetwork',
   },
   {
-    description:
-      has('endgameProcess', data) && data.endgameProcess !== null
-        ? numeral(data.endgameProcess).format('0,0')
-        : getEmptyTagValue(),
+    count: data.endgameProcess ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.endgameProcessTitle"
-        defaultMessage="Endgame Process"
-      />
+      <FormattedMessage id="xpack.siem.overview.endgameProcessTitle" defaultMessage="Process" />
     ),
     id: 'endgameProcess',
   },
   {
-    description:
-      has('endgameRegistry', data) && data.endgameRegistry !== null
-        ? numeral(data.endgameRegistry).format('0,0')
-        : getEmptyTagValue(),
+    count: data.endgameRegistry ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.endgameRegistryTitle"
-        defaultMessage="Endgame Registry"
-      />
+      <FormattedMessage id="xpack.siem.overview.endgameRegistryTitle" defaultMessage="Registry" />
     ),
     id: 'endgameRegistry',
   },
   {
-    description:
-      has('endgameSecurity', data) && data.endgameSecurity !== null
-        ? numeral(data.endgameSecurity).format('0,0')
-        : getEmptyTagValue(),
+    count: data.endgameSecurity ?? 0,
     title: (
-      <FormattedMessage
-        id="xpack.siem.overview.endgameSecurityTitle"
-        defaultMessage="Endgame Security"
-      />
+      <FormattedMessage id="xpack.siem.overview.endgameSecurityTitle" defaultMessage="Security" />
     ),
     id: 'endgameSecurity',
   },
   {
-    description:
-      has('filebeatSystemModule', data) && data.filebeatSystemModule !== null
-        ? numeral(data.filebeatSystemModule).format('0,0')
-        : getEmptyTagValue(),
+    count: data.filebeatSystemModule ?? 0,
     title: (
       <FormattedMessage
         id="xpack.siem.overview.filebeatSystemModuleTitle"
-        defaultMessage="Filebeat System Module"
+        defaultMessage="System Module"
       />
     ),
     id: 'filebeatSystemModule',
   },
   {
-    description:
-      has('winlogbeat', data) && data.winlogbeat !== null
-        ? numeral(data.winlogbeat).format('0,0')
-        : getEmptyTagValue(),
+    count: data.winlogbeatSecurity ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatSecurityTitle"
+        defaultMessage="Security"
+      />
     ),
-    id: 'winlogbeat',
+    id: 'winlogbeatSecurity',
+  },
+  {
+    count: data.winlogbeatMWSysmonOperational ?? 0,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+        defaultMessage="Microsoft-Windows-Sysmon/Operational"
+      />
+    ),
+    id: 'winlogbeatMWSysmonOperational',
   },
 ];
 
-export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
-  text-align: right;
+const HostStatsContainer = styled.div`
+  .accordion-button {
+    width: 100%;
+  }
 `;
 
-DescriptionListDescription.displayName = 'DescriptionListDescription';
+const hostStatGroups: StatGroup[] = [
+  {
+    groupId: 'auditbeat',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.hostStatGroupAuditbeat"
+        defaultMessage="Auditbeat"
+      />
+    ),
+    statIds: [
+      'auditbeatAuditd',
+      'auditbeatFIM',
+      'auditbeatLogin',
+      'auditbeatPackage',
+      'auditbeatProcess',
+      'auditbeatUser',
+    ],
+  },
+  {
+    groupId: 'endgame',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.hostStatGroupElasticEndpointSecurity"
+        defaultMessage="Elastic Endpoint Security"
+      />
+    ),
+    statIds: [
+      'endgameDns',
+      'endgameFile',
+      'endgameImageLoad',
+      'endgameNetwork',
+      'endgameProcess',
+      'endgameRegistry',
+      'endgameSecurity',
+    ],
+  },
+  {
+    groupId: 'filebeat',
+    name: (
+      <FormattedMessage id="xpack.siem.overview.hostStatGroupFilebeat" defaultMessage="Filebeat" />
+    ),
+    statIds: ['filebeatSystemModule'],
+  },
+  {
+    groupId: 'winlogbeat',
+    name: (
+      <FormattedMessage
+        id="xpack.siem.overview.hostStatGroupWinlogbeat"
+        defaultMessage="Winlogbeat"
+      />
+    ),
+    statIds: ['winlogbeatSecurity', 'winlogbeatMWSysmonOperational'],
+  },
+];
 
-const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
-  ({ isLoading, value }) => (
-    <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
-  )
-);
+const Title = styled.div`
+  margin-left: 24px;
+`;
 
-StatValue.displayName = 'StatValue';
+const AccordionContent = styled.div`
+  margin-top: 8px;
+`;
 
-export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => (
-  <EuiDescriptionList type="column">
-    {overviewHostStats(data).map((item, index) => (
-      <React.Fragment key={index}>
-        <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription data-test-subj={`host-stat-${item.id}`}>
-          <StatValue isLoading={loading} value={item.description} />
-        </DescriptionListDescription>
-      </React.Fragment>
-    ))}
-  </EuiDescriptionList>
-));
+const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading }) => {
+  const allHostStats = getOverviewHostStats(data);
+  const allHostStatsCount = allHostStats.reduce((total, stat) => total + stat.count, 0);
 
-OverviewHostStats.displayName = 'OverviewHostStats';
+  return (
+    <HostStatsContainer data-test-subj="overview-hosts-stats">
+      {hostStatGroups.map((statGroup, i) => {
+        const statsForGroup = allHostStats.filter(s => statGroup.statIds.includes(s.id));
+        const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
+
+        return (
+          <React.Fragment key={statGroup.groupId}>
+            <EuiHorizontalRule margin="xs" />
+            <EuiAccordion
+              id={`host-stat-accordion-group${statGroup.groupId}`}
+              buttonContent={
+                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiText>{statGroup.name}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <StatValue
+                      count={statsForGroupCount}
+                      isGroupStat={true}
+                      isLoading={loading}
+                      max={allHostStatsCount}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              buttonContentClassName="accordion-button"
+            >
+              <AccordionContent>
+                {statsForGroup.map(stat => (
+                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="s">
+                        <Title>{stat.title}</Title>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem data-test-subj={`host-stat-${stat.id}`} grow={false}>
+                      <StatValue
+                        count={stat.count}
+                        isGroupStat={false}
+                        isLoading={loading}
+                        max={statsForGroupCount}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
+              </AccordionContent>
+            </EuiAccordion>
+          </React.Fragment>
+        );
+      })}
+    </HostStatsContainer>
+  );
+};
+
+OverviewHostStatsComponent.displayName = 'OverviewHostStatsComponent';
+
+export const OverviewHostStats = React.memo(OverviewHostStatsComponent);

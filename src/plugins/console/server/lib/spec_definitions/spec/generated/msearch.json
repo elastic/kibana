@@ -1,0 +1,27 @@
+{
+  "msearch": {
+    "url_params": {
+      "search_type": [
+        "query_then_fetch",
+        "query_and_fetch",
+        "dfs_query_then_fetch",
+        "dfs_query_and_fetch"
+      ],
+      "max_concurrent_searches": "",
+      "typed_keys": "__flag__",
+      "pre_filter_shard_size": "",
+      "max_concurrent_shard_requests": "",
+      "rest_total_hits_as_int": "__flag__",
+      "ccs_minimize_roundtrips": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_msearch",
+      "{indices}/_msearch"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
+  }
+}

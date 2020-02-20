@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
-
-export * from './lib';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
-}
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
+export * from '../../../../../../plugins/dashboard_embeddable_container/public';

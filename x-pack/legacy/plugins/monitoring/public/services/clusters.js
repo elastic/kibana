@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 function formatClusters(clusters) {
@@ -21,7 +21,7 @@ function formatCluster(cluster) {
 }
 
 const uiModule = uiModules.get('monitoring/clusters');
-uiModule.service('monitoringClusters', ($injector) => {
+uiModule.service('monitoringClusters', $injector => {
   return (clusterUuid, ccs, codePaths) => {
     const { min, max } = timefilter.getBounds();
 
@@ -32,14 +32,15 @@ uiModule.service('monitoringClusters', ($injector) => {
     }
 
     const $http = $injector.get('$http');
-    return $http.post(url, {
-      ccs,
-      timeRange: {
-        min: min.toISOString(),
-        max: max.toISOString()
-      },
-      codePaths
-    })
+    return $http
+      .post(url, {
+        ccs,
+        timeRange: {
+          min: min.toISOString(),
+          max: max.toISOString(),
+        },
+        codePaths,
+      })
       .then(response => response.data)
       .then(data => {
         return formatClusters(data); // return set of clusters

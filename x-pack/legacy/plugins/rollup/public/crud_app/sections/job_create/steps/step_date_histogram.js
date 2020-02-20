@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
@@ -24,14 +24,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  parseEsInterval,
-} from '../../../../../../../../../src/legacy/core_plugins/data/public';
+import { parseEsInterval } from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
-import {
-  dateHistogramDetailsUrl,
-  dateHistogramAggregationUrl,
-} from '../../../services';
+import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
 
 import { StepError } from './components';
 
@@ -40,7 +35,7 @@ const timeZoneOptions = moment.tz.names().map(name => ({
   text: name,
 }));
 
-export class StepDateHistogramUi extends Component {
+export class StepDateHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -48,7 +43,7 @@ export class StepDateHistogramUi extends Component {
     hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     dateFields: PropTypes.array.isRequired,
-  }
+  };
 
   static getDerivedStateFromProps(props) {
     const { dateFields } = props;
@@ -148,7 +143,7 @@ export class StepDateHistogramUi extends Component {
           );
           break;
       }
-    } catch(error) {
+    } catch (error) {
       // Swallow error; the validation logic will handle it elsewhere.
     }
 
@@ -167,18 +162,9 @@ export class StepDateHistogramUi extends Component {
   }
 
   render() {
-    const {
-      fields,
-      onFieldsChange,
-      areStepErrorsVisible,
-      fieldErrors,
-    } = this.props;
+    const { fields, onFieldsChange, areStepErrorsVisible, fieldErrors } = this.props;
 
-    const {
-      dateHistogramInterval,
-      dateHistogramField,
-      dateHistogramTimeZone,
-    } = fields;
+    const { dateHistogramInterval, dateHistogramField, dateHistogramTimeZone } = fields;
 
     const {
       dateHistogramInterval: errorDateHistogramInterval,
@@ -186,9 +172,7 @@ export class StepDateHistogramUi extends Component {
       dateHistogramTimeZone: errorDateHistogramTimeZone,
     } = fieldErrors;
 
-    const {
-      dateHistogramFieldOptions,
-    } = this.state;
+    const { dateHistogramFieldOptions } = this.state;
 
     return (
       <Fragment>
@@ -208,7 +192,7 @@ export class StepDateHistogramUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={dateHistogramDetailsUrl}
+              href={getDateHistogramDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
@@ -226,7 +210,7 @@ export class StepDateHistogramUi extends Component {
         <EuiForm>
           <EuiDescribedFormGroup
             title={<div />}
-            description={(
+            description={
               <Fragment>
                 <p>
                   <FormattedMessage
@@ -234,7 +218,7 @@ export class StepDateHistogramUi extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={dateHistogramAggregationUrl} target="_blank">
+                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"
@@ -252,16 +236,16 @@ export class StepDateHistogramUi extends Component {
                   />
                 </p>
               </Fragment>
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldDateFieldLabel"
                   defaultMessage="Date field"
                 />
-              )}
+              }
               error={errorDateHistogramField}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
               fullWidth
@@ -277,12 +261,12 @@ export class StepDateHistogramUi extends Component {
             </EuiFormRow>
 
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldIntervalLabel"
                   defaultMessage="Time bucket size"
                 />
-              )}
+              }
               error={errorDateHistogramInterval}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
               helpText={this.renderIntervalHelpText()}
@@ -298,12 +282,12 @@ export class StepDateHistogramUi extends Component {
             </EuiFormRow>
 
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZoneLabel"
                   defaultMessage="Time zone"
                 />
-              )}
+              }
               error={errorDateHistogramTimeZone || ''}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
               fullWidth
@@ -332,7 +316,5 @@ export class StepDateHistogramUi extends Component {
     }
 
     return <StepError />;
-  }
+  };
 }
-
-export const StepDateHistogram = injectI18n(StepDateHistogramUi);

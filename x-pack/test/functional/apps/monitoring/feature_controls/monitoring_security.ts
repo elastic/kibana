@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings']);
 
-  describe('securty', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
 
@@ -77,9 +76,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show monitoring navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Stack Monitoring');
       });
     });
@@ -100,9 +97,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows monitoring navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });
     });

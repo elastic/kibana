@@ -56,10 +56,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export const SidebarHeader = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withHandlers(basicHandlerCreators),
   withHandlers(clipboardHandlerCreators),
   withHandlers(layerHandlerCreators),

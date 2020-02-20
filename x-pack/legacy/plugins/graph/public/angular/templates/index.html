@@ -1,4 +1,4 @@
-<div id="graphBasic" ng-controller="graphuiPlugin">
+<main id="graphBasic" ng-controller="graphuiPlugin" aria-labelledby="graphHeading">
   <!-- Local nav. -->
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav>
@@ -81,6 +81,7 @@
         <button
           class="kuiButton kuiButton--basic kuiButton--small"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.undoButtonTooltip' | i18n: { defaultMessage: 'Undo' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.undoButtonTooltip' | i18n: { defaultMessage: 'Undo' } }}"
           type="button"
           ng-click="workspace.undo()"
           ng-disabled="workspace === null||workspace.undoLog.length <1"
@@ -91,6 +92,7 @@
         <button
           class="kuiButton kuiButton--basic kuiButton--small"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.redoButtonTooltip' | i18n: { defaultMessage: 'Redo' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.redoButtonTooltip' | i18n: { defaultMessage: 'Redo' } }}"
           type="button"
           ng-disabled="workspace === null ||workspace.redoLog.length === 0"
           ng-click="workspace.redo()"
@@ -100,48 +102,56 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||liveResponseFields.length === 0||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip' | i18n: { defaultMessage: 'Expand selection' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip' | i18n: { defaultMessage: 'Expand selection' } }}"
           ng-click="setDetail(null);workspace.expandSelecteds({toFields:liveResponseFields});">
           <span class="kuiIcon fa-plus"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.addLinksButtonTooltip' | i18n: { defaultMessage: 'Add links between existing terms' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.addLinksButtonTooltip' | i18n: { defaultMessage: 'Add links between existing terms' } }}"
           ng-click="workspace.fillInGraph();">
           <span class="kuiIcon fa-link"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
           ng-click="setDetail(null);workspace.deleteSelection();" data-test-subj="graphRemoveSelection">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
           ng-click="workspace.blacklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.customStyleButtonTooltip' | i18n: { defaultMessage: 'Custom style selected vertices' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.customStyleButtonTooltip' | i18n: { defaultMessage: 'Custom style selected vertices' } }}"
           ng-click="setDetail({showStyle:true})">
           <span class="kuiIcon fa-paint-brush"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.drillDownButtonTooltip' | i18n: { defaultMessage: 'Drill down' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.drillDownButtonTooltip' | i18n: { defaultMessage: 'Drill down' } }}"
           ng-click="setDetail({showDrillDowns:true})">
           <span class="kuiIcon fa-info"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
           ng-click="workspace.runLayout()" data-test-subj="graphResumeLayout">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
           ng-click="workspace.stopLayout()" data-test-subj="graphPauseLayout">
           <span class="kuiIcon fa-pause"></span>
         </button>
@@ -377,61 +387,6 @@
             } }}"
           >{{mc.v2}}</small>
         </div>
-
-
-
-        <div class="gphSidebar__panel" ng-if="(detail.inferredEdge)">
-          <div class="gphSidebar__header">
-            <span class="kuiIcon fa-cog"></span>
-            {{ ::'xpack.graph.sidebar.similarLabelsTitle' | i18n: { defaultMessage: 'Similar labels' } }}
-          </div>
-
-          <div class="form-group form-group-sm gphFormGroup--small">
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeTargetToSrcButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {targetLabel} into {srcLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topTarget.id, detail.inferredEdge.topSrc.id)">
-                <span class="kui fa-chevron-circle-down"></span>
-              </button>
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}" />
-
-                <text ng-if="detail.inferredEdge.topSrc.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topSrc.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topSrc.label}}</span>
-            </div>
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeSrcToTargetButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {srcLabel} into {targetLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topSrc.id, detail.inferredEdge.topTarget.id)">
-                <span class="kuiIcon fa-chevron-circle-up"></span>
-              </button>
-
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}" />
-
-                <text ng-if="detail.inferredEdge.topTarget.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topTarget.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topTarget.label}}</span>
-
-            </div>
-
-            <div
-              class="col-sm-10"
-              i18n-id="xpack.graph.sidebar.similarLabels.keyTermsText"
-              i18n-default-message="Key terms: {inferredEdgeLabel}"
-              i18n-values="{ html_inferredEdgeLabel: '<small>' + detail.inferredEdge.label + '</small>' }"
-            ></div>
-          </div>
-        </div>
       </div>
       <!-- end edge-merge detail panel -->
 
@@ -441,4 +396,4 @@
   </div>
   <!--end svg container-->
 
-</div>
+</main>

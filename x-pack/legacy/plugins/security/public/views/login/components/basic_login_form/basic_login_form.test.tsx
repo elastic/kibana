@@ -7,7 +7,7 @@
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { LoginState } from '../../../../../common/login_state';
+import { LoginState } from '../../login_state';
 import { BasicLoginForm } from './basic_login_form';
 
 const createMockHttp = ({ simulateError = false } = {}) => {
@@ -33,7 +33,6 @@ const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
-    loginMessage: '',
     ...options,
   } as LoginState;
 };
@@ -51,6 +50,7 @@ describe('BasicLoginForm', () => {
           loginState={loginState}
           next={''}
           intl={null as any}
+          loginAssistanceMessage=""
         />
       )
     ).toMatchSnapshot();
@@ -69,6 +69,7 @@ describe('BasicLoginForm', () => {
         next={''}
         infoMessage={'Hey this is an info message'}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 
@@ -87,6 +88,7 @@ describe('BasicLoginForm', () => {
         loginState={loginState}
         next={''}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 

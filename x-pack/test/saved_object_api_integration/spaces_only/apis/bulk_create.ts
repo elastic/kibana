@@ -12,20 +12,15 @@ import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   expect(resp.body).to.eql({
     error: 'Bad Request',
-    message:
-      '"value" at position 0 fails because ["namespace" is not allowed]. "value" does not contain 1 required value(s)',
+    message: '[request body.0.namespace]: definition for this key is missing',
     statusCode: 400,
-    validation: {
-      keys: ['0.namespace', 'value'],
-      source: 'payload',
-    },
   });
 };
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     bulkCreateTest,

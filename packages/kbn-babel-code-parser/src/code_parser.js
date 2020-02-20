@@ -81,7 +81,7 @@ export async function parseEntries(cwd, entries, strategy, results, wasParsed = 
   // Test each entry against canRequire function
   const entriesQueue = entries.map(entry => canRequire(entry));
 
-  while(entriesQueue.length) {
+  while (entriesQueue.length) {
     // Get the first element in the queue as
     // select it as our current entry to parse
     const mainEntry = entriesQueue.shift();
@@ -93,7 +93,9 @@ export async function parseEntries(cwd, entries, strategy, results, wasParsed = 
     }
 
     // Find new entries and adds them to the end of the queue
-    entriesQueue.push(...(await strategy(sanitizedCwd, parseSingleFile, mainEntry, wasParsed, results)));
+    entriesQueue.push(
+      ...(await strategy(sanitizedCwd, parseSingleFile, mainEntry, wasParsed, results))
+    );
 
     // Mark the current main entry as already parsed
     wasParsed[mainEntry] = true;

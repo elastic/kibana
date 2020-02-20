@@ -5,19 +5,27 @@
  */
 
 import { notFound, notImplemented } from 'boom';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { ReportingCore } from '../../../../server';
+import { cryptoFactory } from '../../../../server/lib';
 import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  Logger,
+  RequestFacade,
+  ServerFacade,
+} from '../../../../types';
+import {
+  JobDocPayloadPanelCsv,
+  JobParamsPanelCsv,
   SavedObject,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-  JobDocPayloadPanelCsv,
-  JobParamsPanelCsv,
 } from '../../types';
 import { createJobSearch } from './create_job_search';
 
@@ -27,19 +35,16 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (
-  jobParams: JobParamsPanelCsv,
-  headers: any,
-  req: RequestFacade
-) => Promise<JobDocPayloadPanelCsv>;
-
-function createJobFn(server: ServerFacade): CreateJobFn {
+export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
+  JobParamsPanelCsv
+>> = function createJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'create-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,
@@ -94,11 +99,8 @@ function createJobFn(server: ServerFacade): CreateJobFn {
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
-}
-
-export const createJobFactory = oncePerServer(createJobFn);
+};

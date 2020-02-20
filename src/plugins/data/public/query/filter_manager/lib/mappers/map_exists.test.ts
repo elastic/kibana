@@ -16,14 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ExistsFilter, buildEmptyFilter, buildExistsFilter } from '@kbn/es-query';
+
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
+import {
+  IIndexPattern,
+  IFieldType,
+  buildExistsFilter,
+  buildEmptyFilter,
+} from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {
+    let indexPattern: IIndexPattern;
+
+    beforeEach(() => {
+      indexPattern = {
+        id: 'index',
+      } as IIndexPattern;
+    });
+
     test('should return the key and value for matching filters', async () => {
-      const filter: ExistsFilter = buildExistsFilter({ name: '_type' }, 'index');
+      const filter = buildExistsFilter({ name: '_type' } as IFieldType, indexPattern);
       const result = mapExists(filter);
 
       expect(result).toHaveProperty('key', '_type');
@@ -31,7 +45,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = buildEmptyFilter(true) as ExistsFilter;
+      const filter = buildEmptyFilter(true);
 
       try {
         mapQueryString(filter);

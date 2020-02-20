@@ -52,6 +52,7 @@ exports[`DetailView should render TabContent 1`] = `
   error={
     Object {
       "context": Object {},
+      "error": Object {},
       "timestamp": Object {
         "us": 0,
       },
@@ -61,11 +62,7 @@ exports[`DetailView should render TabContent 1`] = `
 `;
 
 exports[`DetailView should render tabs 1`] = `
-<EuiTabs
-  display="default"
-  expand={false}
-  size="m"
->
+<EuiTabs>
   <EuiTab
     isSelected={true}
     key="exception_stacktrace"

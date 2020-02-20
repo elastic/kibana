@@ -58,6 +58,47 @@ const configuration = {
   tooltipZ: 1100,
 };
 
+// Polyfill for browsers (IE11) that don't have element.closest
+// From: https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
+function closest(s) {
+  let el = this;
+  const matchFn = el.matches ? 'matches' : 'msMatchesSelector';
+
+  do {
+    if (el[matchFn](s)) {
+      return el;
+    }
+    el = el.parentElement || el.parentNode;
+  } while (el !== null && el.nodeType === 1);
+  return null;
+}
+
+// If you interact with an embeddable panel, only the header should be draggable
+// This function will determine if an element is an embeddable body or not
+const isEmbeddableBody = element => {
+  const hasClosest = typeof element.closest === 'function';
+
+  if (hasClosest) {
+    return element.closest('.embeddable') && !element.closest('.embPanel__header');
+  } else {
+    return closest.call(element, '.embeddable') && !closest.call(element, '.embPanel__header');
+  }
+};
+
+// Some elements in an embeddable may be portaled out of the embeddable container.
+// We do not want clicks on those to trigger drags, etc, in the workpad. This function
+// will check to make sure the clicked item is actually in the container
+const isInWorkpad = element => {
+  const hasClosest = typeof element.closest === 'function';
+  const workpadContainerSelector = '.canvasWorkpadContainer';
+
+  if (hasClosest) {
+    return !!element.closest(workpadContainerSelector);
+  } else {
+    return !!closest.call(element, workpadContainerSelector);
+  }
+};
+
 const componentLayoutState = ({
   aeroStore,
   setAeroStore,
@@ -146,11 +187,7 @@ const mergeProps = (
 });
 
 export const InteractivePage = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('aeroStore', 'setAeroStore'),
   withProps(componentLayoutState),
   withProps(({ aeroStore, updateGlobalState }) => ({
@@ -197,8 +234,17 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: element =>
-      !element.closest('.embeddable') || element.closest('.embPanel__header'),
+    canDragElement: element => {
+      return !isEmbeddableBody(element) && isInWorkpad(element);
+
+      const hasClosest = typeof element.closest === 'function';
+
+      if (hasClosest) {
+        return !element.closest('.embeddable') || element.closest('.embPanel__header');
+      } else {
+        return !closest.call(element, '.embeddable') || closest.call(element, '.embPanel__header');
+      }
+    },
   })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent

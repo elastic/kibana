@@ -46,8 +46,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const {
     error: errorLoadingRepositories,
     isLoading: isLoadingRepositories,
-    data: { repositories } = {
+    data: { repositories, managedRepository } = {
       repositories: [],
+      managedRepository: {
+        name: undefined,
+      },
     },
     sendRequest: reloadRepositories,
   } = useLoadRepositories();
@@ -91,7 +94,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="A unique identifier for this policy."
         />
       }
-      idAria="nameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -101,7 +103,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Name"
           />
         }
-        describedByIds={['nameDescription']}
         isInvalid={touched.name && Boolean(errors.name)}
         error={errors.name}
         fullWidth
@@ -111,9 +112,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
           onChange={e => {
-            updatePolicy({
-              name: e.target.value,
-            });
+            updatePolicy(
+              {
+                name: e.target.value,
+              },
+              {
+                managedRepository,
+                isEditing,
+                policyName: policy.name,
+              }
+            );
           }}
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.namePlaceholder',
@@ -148,7 +156,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The repository where you want to store the snapshots."
         />
       }
-      idAria="policyRepositoryDescription"
       fullWidth
     >
       <EuiFormRow
@@ -158,7 +165,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Repository"
           />
         }
-        describedByIds={['policyRepositoryDescription']}
         isInvalid={touched.repository && Boolean(errors.repository)}
         error={errors.repository}
         fullWidth
@@ -240,9 +246,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       );
     } else {
       if (!policy.repository) {
-        updatePolicy({
-          repository: repositories[0].name,
-        });
+        updatePolicy(
+          {
+            repository: repositories[0].name,
+          },
+          {
+            managedRepository,
+            isEditing,
+            policyName: policy.name,
+          }
+        );
       }
     }
 
@@ -255,9 +268,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         value={policy.repository || repositories[0].name}
         onBlur={() => setTouched({ ...touched, repository: true })}
         onChange={e => {
-          updatePolicy({
-            repository: e.target.value,
-          });
+          updatePolicy(
+            {
+              repository: e.target.value,
+            },
+            {
+              managedRepository,
+              isEditing,
+              policyName: policy.name,
+            }
+          );
         }}
         fullWidth
         data-test-subj="repositorySelect"
@@ -283,7 +303,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The name for the snapshots. A unique identifier is automatically added to each name."
         />
       }
-      idAria="policySnapshotNameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -293,7 +312,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Snapshot name"
           />
         }
-        describedByIds={['policySnapshotNameDescription']}
         isInvalid={touched.snapshotName && Boolean(errors.snapshotName)}
         error={errors.snapshotName}
         helpText={
@@ -321,9 +339,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.snapshotName}
           fullWidth
           onChange={e => {
-            updatePolicy({
-              snapshotName: e.target.value.toLowerCase(),
-            });
+            updatePolicy(
+              {
+                snapshotName: e.target.value,
+              },
+              {
+                managedRepository,
+                isEditing,
+                policyName: policy.name,
+              }
+            );
           }}
           onBlur={() => setTouched({ ...touched, snapshotName: true })}
           placeholder={i18n.translate(
@@ -358,7 +383,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultMessage="The frequency at which to take the snapshots."
         />
       }
-      idAria="policyScheduleDescription"
       fullWidth
     >
       {isAdvancedCronVisible ? (
@@ -370,7 +394,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Schedule"
               />
             }
-            describedByIds={['policyScheduleDescription']}
             isInvalid={touched.schedule && Boolean(errors.schedule)}
             error={errors.schedule}
             helpText={
@@ -395,9 +418,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               defaultValue={policy.schedule}
               fullWidth
               onChange={e => {
-                updatePolicy({
-                  schedule: e.target.value,
-                });
+                updatePolicy(
+                  {
+                    schedule: e.target.value,
+                  },
+                  {
+                    managedRepository,
+                    isEditing,
+                    policyName: policy.name,
+                  }
+                );
               }}
               onBlur={() => setTouched({ ...touched, schedule: true })}
               placeholder={DEFAULT_POLICY_SCHEDULE}
@@ -411,9 +441,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiLink
               onClick={() => {
                 setIsAdvancedCronVisible(false);
-                updatePolicy({
-                  schedule: simpleCron.expression,
-                });
+                updatePolicy(
+                  {
+                    schedule: simpleCron.expression,
+                  },
+                  {
+                    managedRepository,
+                    isEditing,
+                    policyName: policy.name,
+                  }
+                );
               }}
               data-test-subj="showBasicCronLink"
             >
@@ -444,9 +481,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 frequency,
               });
               setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-              updatePolicy({
-                schedule: expression,
-              });
+              updatePolicy(
+                {
+                  schedule: expression,
+                },
+                {
+                  managedRepository,
+                  isEditing,
+                  policyName: policy.name,
+                }
+              );
             }}
           />
 

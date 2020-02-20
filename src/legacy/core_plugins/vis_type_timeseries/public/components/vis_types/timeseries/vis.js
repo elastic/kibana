@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 import reactCSS from 'reactcss';
 
 import { startsWith, get, cloneDeep, map } from 'lodash';
-import { toastNotifications } from 'ui/notify';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
@@ -34,8 +33,9 @@ import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import { isBackgroundDark } from '../../../../common/set_is_reversed';
+import { isBackgroundDark } from '../../../lib/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
+import { getCoreStart } from '../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -79,10 +79,14 @@ export class TimeseriesVisualization extends Component {
   static getYAxisDomain = model => {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
+    const fit = model.series
+      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => fill === '0')
+      : model.fill === '0';
 
     return {
       min: axisMin.length ? Number(axisMin) : undefined,
       max: axisMax.length ? Number(axisMax) : undefined,
+      fit,
     };
   };
 
@@ -104,6 +108,7 @@ export class TimeseriesVisualization extends Component {
     createTickFormatter(get(model, 'formatter'), get(model, 'value_template'), getConfig);
 
   componentDidUpdate() {
+    const toastNotifications = getCoreStart().notifications.toasts;
     if (
       this.showToastNotification &&
       this.notificationReason !== this.showToastNotification.reason

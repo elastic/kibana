@@ -10,7 +10,7 @@ import {
   LOGSTASH_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
-  BEATS_SYSTEM_ID
+  BEATS_SYSTEM_ID,
 } from '../../../common/constants';
 
 const NODE_IDENTIFIER_SINGULAR = i18n.translate('xpack.monitoring.setupMode.node', {
@@ -31,7 +31,6 @@ const SERVER_IDENTIFIER_SINGULAR = i18n.translate('xpack.monitoring.setupMode.se
 const SERVER_IDENTIFIER_PLURAL = i18n.translate('xpack.monitoring.setupMode.servers', {
   defaultMessage: `servers`,
 });
-
 
 export function formatProductName(productName) {
   if (productName === APM_SYSTEM_ID) {

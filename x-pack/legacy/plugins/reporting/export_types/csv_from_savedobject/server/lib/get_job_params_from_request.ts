@@ -10,7 +10,7 @@ import { JobParamsPostPayloadPanelCsv, JobParamsPanelCsv } from '../../types';
 export function getJobParamsFromRequest(
   request: RequestFacade,
   opts: { isImmediate: boolean }
-): Partial<JobParamsPanelCsv> {
+): JobParamsPanelCsv {
   const { savedObjectType, savedObjectId } = request.params;
   const { timerange, state } = request.payload as JobParamsPostPayloadPanelCsv;
   const post = timerange || state ? { timerange, state } : undefined;

@@ -56,12 +56,3 @@ export const getBarStyles = ({ show = true, lineWidth = 0, fill = 1 }, color) =>
     },
   },
 });
-
-export const getSeriesColors = (color, specId) => {
-  const map = new Map();
-  const seriesColorsValues = { specId, colorValues: [] };
-
-  map.set(seriesColorsValues, color);
-
-  return map;
-};

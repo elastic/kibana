@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { Legacy } from 'kibana';
 import { createRouter, Router } from '../../../server/lib/create_router';
 import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
 import { elasticsearchJsPlugin } from './client/elasticsearch_transform';
-
 export interface Core {
   http: {
     createRouter(basePath: string): Router;
@@ -19,11 +17,6 @@ export interface Core {
 export interface Plugins {
   license: {
     registerLicenseChecker: typeof registerLicenseChecker;
-  };
-  cloud: {
-    config: {
-      isCloudEnabled: boolean;
-    };
   };
   xpack_main: any;
   elasticsearch: any;
@@ -45,11 +38,6 @@ export function createServerShim(
     plugins: {
       license: {
         registerLicenseChecker,
-      },
-      cloud: {
-        config: {
-          isCloudEnabled: get(server.plugins, 'cloud.config.isCloudEnabled', false),
-        },
       },
       xpack_main: server.plugins.xpack_main,
       elasticsearch: server.plugins.elasticsearch,

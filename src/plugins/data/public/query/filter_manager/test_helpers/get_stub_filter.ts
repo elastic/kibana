@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '../../../../common';
 
 export function getFilter(
   store: FilterStateStore,

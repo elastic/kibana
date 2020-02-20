@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 import { get } from 'lodash';
+import { Filter, isExistsFilter, FILTERS } from '../../../../../common';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {

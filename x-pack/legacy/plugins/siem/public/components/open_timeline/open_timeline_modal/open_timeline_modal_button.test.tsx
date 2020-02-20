@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
@@ -16,8 +16,6 @@ import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 import * as i18n from '../translations';
 
 import { OpenTimelineModalButton } from './open_timeline_modal_button';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('OpenTimelineModalButton', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

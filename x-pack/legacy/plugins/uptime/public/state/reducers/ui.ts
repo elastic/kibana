@@ -4,28 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionTypes, PopoverState, SET_INTEGRATION_POPOVER_STATE } from '../actions/ui';
+import { handleActions, Action } from 'redux-actions';
+import {
+  PopoverState,
+  toggleIntegrationsPopover,
+  setBasePath,
+  setEsKueryString,
+  triggerAppRefresh,
+  UiPayload,
+} from '../actions/ui';
 
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
+  basePath: string;
+  esKuery: string;
+  lastRefresh: number;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
+  basePath: '',
+  esKuery: '',
+  lastRefresh: Date.now(),
 };
 
-export function uiReducer(state = initialState, action: UiActionTypes): UiState {
-  switch (action.type) {
-    case SET_INTEGRATION_POPOVER_STATE:
-      const popoverState = action.payload;
-      return {
-        ...state,
-        integrationsPopoverOpen: {
-          id: popoverState.id,
-          open: popoverState.open,
-        },
-      };
-    default:
-      return state;
-  }
-}
+export const uiReducer = handleActions<UiState, UiPayload>(
+  {
+    [String(toggleIntegrationsPopover)]: (state, action: Action<PopoverState>) => ({
+      ...state,
+      integrationsPopoverOpen: action.payload as PopoverState,
+    }),
+
+    [String(setBasePath)]: (state, action: Action<string>) => ({
+      ...state,
+      basePath: action.payload as string,
+    }),
+
+    [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
+      ...state,
+      lastRefresh: action.payload as number,
+    }),
+
+    [String(setEsKueryString)]: (state, action: Action<string>) => ({
+      ...state,
+      esKuery: action.payload as string,
+    }),
+  },
+  initialState
+);

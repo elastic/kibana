@@ -22,7 +22,9 @@ import { injectMetaAttributes } from './inject_meta_attributes';
 function getManagementMock(savedObjectSchemas) {
   return {
     isImportAndExportable(type) {
-      return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
+      return (
+        !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false
+      );
     },
     getDefaultSearchField(type) {
       return savedObjectSchemas[type] && savedObjectSchemas[type].defaultSearchField;

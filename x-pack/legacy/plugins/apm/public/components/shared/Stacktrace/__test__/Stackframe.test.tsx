@@ -5,9 +5,8 @@
  */
 
 import { mount, ReactWrapper, shallow } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
-import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 

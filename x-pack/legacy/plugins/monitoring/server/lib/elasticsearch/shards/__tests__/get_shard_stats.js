@@ -28,7 +28,7 @@ describe('getShardStats handler', () => {
     expect(result).to.eql({
       indicesTotals: undefined,
       indices: undefined,
-      nodes: undefined
+      nodes: undefined,
     });
   });
 
@@ -41,11 +41,11 @@ describe('getShardStats handler', () => {
           replica: 26,
           unassigned: {
             primary: 0,
-            replica: 0
-          }
+            replica: 0,
+          },
         },
         indices: undefined,
-        nodes: undefined
+        nodes: undefined,
       });
     });
 
@@ -62,10 +62,10 @@ describe('getShardStats handler', () => {
               {
                 key: 1,
                 key_as_string: 'true',
-                doc_count: 5
-              }
-            ]
-          }
+                doc_count: 5,
+              },
+            ],
+          },
         },
         {
           key: 'UNASSIGNED',
@@ -77,11 +77,11 @@ describe('getShardStats handler', () => {
               {
                 key: 0,
                 key_as_string: 'false',
-                doc_count: 5
-              }
-            ]
-          }
-        }
+                doc_count: 5,
+              },
+            ],
+          },
+        },
       ];
       const result = handleResponse(resp, includeNodes, includeNodes, cluster);
       expect(result).to.eql({
@@ -90,11 +90,11 @@ describe('getShardStats handler', () => {
           replica: 21,
           unassigned: {
             primary: 0,
-            replica: 5
-          }
+            replica: 5,
+          },
         },
         indices: undefined,
-        nodes: undefined
+        nodes: undefined,
       });
     });
 
@@ -111,10 +111,10 @@ describe('getShardStats handler', () => {
               {
                 key: 1,
                 key_as_string: 'true',
-                doc_count: 5
-              }
-            ]
-          }
+                doc_count: 5,
+              },
+            ],
+          },
         },
       ];
       const result = handleResponse(resp, includeNodes, includeNodes, cluster);
@@ -124,15 +124,14 @@ describe('getShardStats handler', () => {
           replica: 21,
           unassigned: {
             primary: 0,
-            replica: 0
-          }
+            replica: 0,
+          },
         },
         indices: undefined,
-        nodes: undefined
+        nodes: undefined,
       });
     });
   });
-
 
   it('returns nodes info and indicesTotals calculation', () => {
     includeNodes = true;
@@ -141,21 +140,21 @@ describe('getShardStats handler', () => {
       indicesTotals: { primary: 26, replica: 26, unassigned: { primary: 0, replica: 0 } },
       indices: undefined,
       nodes: {
-        'B1wJG9MRQoG2ltcvZG2cRw': {
+        B1wJG9MRQoG2ltcvZG2cRw: {
           indexCount: 10,
           name: 'whatever-01',
-          node_ids: [ 'B1wJG9MRQoG2ltcvZG2cRw' ],
+          node_ids: ['B1wJG9MRQoG2ltcvZG2cRw'],
           shardCount: 26,
-          type: 'master' // determined from clusterFixture
+          type: 'master', // determined from clusterFixture
         },
         'GtwLXgbbTEC-sM5ltEqbjg': {
           indexCount: 10,
           name: 'whatever-02',
-          node_ids: [ 'GtwLXgbbTEC-sM5ltEqbjg' ],
+          node_ids: ['GtwLXgbbTEC-sM5ltEqbjg'],
           shardCount: 26,
-          type: 'node'
-        }
-      }
+          type: 'node',
+        },
+      },
     });
   });
 
@@ -165,18 +164,68 @@ describe('getShardStats handler', () => {
     expect(result).to.eql({
       indicesTotals: { primary: 26, replica: 26, unassigned: { primary: 0, replica: 0 } },
       indices: {
-        '.ml-anomalies-shared': { status: 'green', primary: 5, replica: 5, unassigned: { primary: 0, replica: 0 } },
-        'avocado-tweets-2017.09.14': { status: 'green', primary: 5, replica: 5, unassigned: { primary: 0, replica: 0 } },
-        'climate': { status: 'green', primary: 5, replica: 5, unassigned: { primary: 0, replica: 0 } },
-        'watermelon-tweets-2017.09.14': { status: 'green', primary: 5, replica: 5, unassigned: { primary: 0, replica: 0 } },
-        '.kibana': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } },
-        '.ml-notifications': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } },
-        '.security-v6': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } },
-        '.triggered_watches': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } },
-        '.watcher-history-6-2017.09.18': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } },
-        '.watches': { status: 'green', primary: 1, replica: 1, unassigned: { primary: 0, replica: 0 } }
+        '.ml-anomalies-shared': {
+          status: 'green',
+          primary: 5,
+          replica: 5,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        'avocado-tweets-2017.09.14': {
+          status: 'green',
+          primary: 5,
+          replica: 5,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        climate: {
+          status: 'green',
+          primary: 5,
+          replica: 5,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        'watermelon-tweets-2017.09.14': {
+          status: 'green',
+          primary: 5,
+          replica: 5,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.kibana': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.ml-notifications': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.security-v6': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.triggered_watches': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.watcher-history-6-2017.09.18': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
+        '.watches': {
+          status: 'green',
+          primary: 1,
+          replica: 1,
+          unassigned: { primary: 0, replica: 0 },
+        },
       },
-      nodes: undefined
+      nodes: undefined,
     });
   });
 });

@@ -27,10 +27,6 @@ export function oncePerServer(fn: ServerFn) {
       throw new TypeError('This function expects to be called with a single argument');
     }
 
-    if (!server || typeof server.expose !== 'function') {
-      throw new TypeError('This function expects to be passed the server');
-    }
-
     // @ts-ignore
     return fn.call(this, server);
   });

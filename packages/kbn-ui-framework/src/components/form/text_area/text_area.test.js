@@ -22,66 +22,37 @@ import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 import sinon from 'sinon';
 
-import {
-  KuiTextArea,
-  TEXTAREA_SIZE
-} from './text_area';
+import { KuiTextArea, TEXTAREA_SIZE } from './text_area';
 
 describe('KuiTextArea', () => {
   test('renders', () => {
-    const component = (
-      <KuiTextArea
-        value="text area"
-        onChange={()=>{}}
-        {...requiredProps}
-      />
-    );
+    const component = <KuiTextArea value="text area" onChange={() => {}} {...requiredProps} />;
 
     expect(render(component)).toMatchSnapshot();
   });
 
   describe('Props', () => {
     test('placeholder', () => {
-      const component = (
-        <KuiTextArea
-          placeholder="placeholder"
-          onChange={()=>{}}
-        />
-      );
+      const component = <KuiTextArea placeholder="placeholder" onChange={() => {}} />;
 
       expect(render(component)).toMatchSnapshot();
     });
 
     test('value', () => {
-      const component = (
-        <KuiTextArea
-          value="value"
-          onChange={()=>{}}
-        />
-      );
+      const component = <KuiTextArea value="value" onChange={() => {}} />;
 
       expect(render(component)).toMatchSnapshot();
     });
 
     describe('isInvalid', () => {
       test('true renders invalid', () => {
-        const component = (
-          <KuiTextArea
-            isInvalid
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isInvalid onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
 
       test('false renders valid', () => {
-        const component = (
-          <KuiTextArea
-            isInvalid={false}
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isInvalid={false} onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
@@ -89,23 +60,13 @@ describe('KuiTextArea', () => {
 
     describe('isNonResizable', () => {
       test('true renders non-resizable', () => {
-        const component = (
-          <KuiTextArea
-            isNonResizable
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isNonResizable onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
 
       test('false renders resizable', () => {
-        const component = (
-          <KuiTextArea
-            isNonResizable={false}
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isNonResizable={false} onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
@@ -113,37 +74,22 @@ describe('KuiTextArea', () => {
 
     describe('isDisabled', () => {
       test('true renders disabled', () => {
-        const component = (
-          <KuiTextArea
-            isDisabled
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isDisabled onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
 
       test('false renders enabled', () => {
-        const component = (
-          <KuiTextArea
-            isDisabled={false}
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiTextArea isDisabled={false} onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
     });
 
     describe('size', () => {
-      TEXTAREA_SIZE.forEach(size=>{
+      TEXTAREA_SIZE.forEach(size => {
         test(`renders ${size}`, () => {
-          const component = (
-            <KuiTextArea
-              size={size}
-              onChange={()=>{}}
-            />
-          );
+          const component = <KuiTextArea size={size} onChange={() => {}} />;
 
           expect(render(component)).toMatchSnapshot();
         });
@@ -154,11 +100,7 @@ describe('KuiTextArea', () => {
       test(`is called when textarea is written`, () => {
         const onChangeHandler = sinon.spy();
 
-        const wrapper = shallow(
-          <KuiTextArea
-            onChange={onChangeHandler}
-          />
-        );
+        const wrapper = shallow(<KuiTextArea onChange={onChangeHandler} />);
 
         wrapper.simulate('change');
         sinon.assert.calledOnce(onChangeHandler);

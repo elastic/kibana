@@ -93,13 +93,18 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
-        if (!(await successorLoadMoreButton.isEnabled() && await successorLoadMoreButton.isDisplayed() &&
-              await predecessorLoadMoreButton.isEnabled() && await predecessorLoadMoreButton.isDisplayed())) {
+        if (
+          !(
+            (await successorLoadMoreButton.isEnabled()) &&
+            (await successorLoadMoreButton.isDisplayed()) &&
+            (await predecessorLoadMoreButton.isEnabled()) &&
+            (await predecessorLoadMoreButton.isDisplayed())
+          )
+        ) {
           throw new Error('loading context rows');
         }
       });
     }
-
   }
 
   return new ContextPage();

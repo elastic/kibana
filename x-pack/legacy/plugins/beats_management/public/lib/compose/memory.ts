@@ -24,14 +24,14 @@ import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 
 const onKibanaReady = uiModules.get('kibana').run;
 
 export function compose(
   mockIsKueryValid: (kuery: string) => boolean,
   mockKueryToEsQuery: (kuery: string) => string,
-  suggestions: AutocompleteSuggestion[]
+  suggestions: QuerySuggestion[]
 ): FrontendLibs {
   const esAdapter = new MemoryElasticsearchAdapter(
     mockIsKueryValid,

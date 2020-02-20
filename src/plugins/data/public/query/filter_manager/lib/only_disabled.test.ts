@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { onlyDisabledFiltersChanged } from './only_disabled';
+import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('onlyDisabledFiltersChanged()', () => {

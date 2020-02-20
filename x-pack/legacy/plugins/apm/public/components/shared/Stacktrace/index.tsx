@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { LibraryStacktrace } from './LibraryStacktrace';
 import { Stackframe } from './Stackframe';
@@ -78,29 +78,26 @@ interface StackframesGroup {
 }
 
 export function getGroupedStackframes(stackframes: IStackframe[]) {
-  return stackframes.reduce(
-    (acc, stackframe) => {
-      const prevGroup = last(acc);
-      const shouldAppend =
-        prevGroup &&
-        prevGroup.isLibraryFrame === stackframe.library_frame &&
-        !prevGroup.excludeFromGrouping &&
-        !stackframe.exclude_from_grouping;
+  return stackframes.reduce((acc, stackframe) => {
+    const prevGroup = last(acc);
+    const shouldAppend =
+      prevGroup &&
+      prevGroup.isLibraryFrame === stackframe.library_frame &&
+      !prevGroup.excludeFromGrouping &&
+      !stackframe.exclude_from_grouping;
 
-      // append to group
-      if (shouldAppend) {
-        prevGroup.stackframes.push(stackframe);
-        return acc;
-      }
-
-      // create new group
-      acc.push({
-        isLibraryFrame: Boolean(stackframe.library_frame),
-        excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
-        stackframes: [stackframe]
-      });
+    // append to group
+    if (shouldAppend) {
+      prevGroup.stackframes.push(stackframe);
       return acc;
-    },
-    [] as StackframesGroup[]
-  );
+    }
+
+    // create new group
+    acc.push({
+      isLibraryFrame: Boolean(stackframe.library_frame),
+      excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
+      stackframes: [stackframe]
+    });
+    return acc;
+  }, [] as StackframesGroup[]);
 }

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import actionCreatorFactory from 'typescript-fsa';
 
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { InspectQuery, Refetch } from './model';
+import { InspectQuery, Refetch, RefetchKql } from './model';
 import { InputsModelId } from './constants';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 
@@ -42,7 +42,7 @@ export const setQuery = actionCreator<{
   inputId: InputsModelId;
   id: string;
   loading: boolean;
-  refetch: Refetch;
+  refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
 }>('SET_QUERY');
 

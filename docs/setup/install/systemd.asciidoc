@@ -18,5 +18,5 @@ sudo systemctl stop kibana.service
 --------------------------------------------
 
 These commands provide no feedback as to whether Kibana was started
-successfully or not. Instead, this information will be written in the log
-files located in `/var/log/kibana/`.
+successfully or not. Log information can be accessed via
+`journalctl -u kibana.service`.

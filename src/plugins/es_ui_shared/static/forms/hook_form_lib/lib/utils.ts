@@ -33,7 +33,7 @@ export const flattenObject = (
 ): Record<string, any> =>
   Object.entries(object).reduce((acc, [key, value]) => {
     const updatedPaths = [...paths, key];
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && !Array.isArray(value) && typeof value === 'object') {
       return flattenObject(value, to, updatedPaths);
     }
     acc[updatedPaths.join('.')] = value;
@@ -50,10 +50,7 @@ export const mapFormFields = (
   formFields: Record<string, FieldHook>,
   fn: (field: FieldHook) => any
 ) =>
-  Object.entries(formFields).reduce(
-    (acc, [key, field]) => {
-      acc[key] = fn(field);
-      return acc;
-    },
-    {} as Record<string, unknown>
-  );
+  Object.entries(formFields).reduce((acc, [key, field]) => {
+    acc[key] = fn(field);
+    return acc;
+  }, {} as Record<string, unknown>);

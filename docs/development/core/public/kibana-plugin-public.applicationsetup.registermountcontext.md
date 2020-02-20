@@ -4,12 +4,16 @@
 
 ## ApplicationSetup.registerMountContext() method
 
-Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context.
+> Warning: This API is now obsolete.
+> 
+> 
+
+Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
+registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 ```
 
 ## Parameters
@@ -17,7 +21,7 @@ registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  contextName | <code>T</code> | The key of [AppMountContext](./kibana-plugin-public.appmountcontext.md) this provider's return value should be attached to. |
-|  provider | <code>IContextProvider&lt;App['mount'], T&gt;</code> | A [IContextProvider](./kibana-plugin-public.icontextprovider.md) function |
+|  provider | <code>IContextProvider&lt;AppMountDeprecated, T&gt;</code> | A [IContextProvider](./kibana-plugin-public.icontextprovider.md) function |
 
 <b>Returns:</b>
 

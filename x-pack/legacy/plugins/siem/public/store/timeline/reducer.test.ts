@@ -6,7 +6,6 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import {
   IS_OPERATOR,
   DataProvider,
@@ -15,9 +14,9 @@ import {
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
-  getColumnWidthFromType,
   DEFAULT_TIMELINE_WIDTH,
-} from '../../components/timeline/body/helpers';
+} from '../../components/timeline/body/constants';
+import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
@@ -41,7 +40,8 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { timelineDefaults } from './model';
+import { ColumnHeaderOptions } from './model';
+import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 const timelineByIdMock: TimelineById = {
@@ -64,6 +64,7 @@ const timelineByIdMock: TimelineById = {
     ],
     columns: [],
     description: '',
+    deletedEventIds: [],
     eventIdToNoteIds: {},
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -71,11 +72,13 @@ const timelineByIdMock: TimelineById = {
     savedObjectId: null,
     isFavorite: false,
     isLive: false,
+    isSelectAllChecked: false,
     isLoading: false,
     itemsPerPage: 25,
     itemsPerPageOptions: [10, 25, 50],
     kqlMode: 'filter',
     kqlQuery: { filterQuery: null, filterQueryDraft: null },
+    loadingEventIds: [],
     title: '',
     noteIds: [],
     pinnedEventIds: {},
@@ -84,7 +87,10 @@ const timelineByIdMock: TimelineById = {
       start: 0,
       end: 0,
     },
+    selectedEventIds: {},
     show: true,
+    showCheckboxes: false,
+    showRowRenderers: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
@@ -95,7 +101,11 @@ const timelineByIdMock: TimelineById = {
   },
 };
 
-const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
+const columnsMock: ColumnHeaderOptions[] = [
+  defaultHeaders[0],
+  defaultHeaders[1],
+  defaultHeaders[2],
+];
 
 describe('Timeline', () => {
   describe('#add saved object Timeline to store ', () => {
@@ -177,8 +187,8 @@ describe('Timeline', () => {
 
   describe('#upsertTimelineColumn', () => {
     let timelineById: TimelineById = {};
-    let columns: ColumnHeader[] = [];
-    let columnToAdd: ColumnHeader;
+    let columns: ColumnHeaderOptions[] = [];
+    let columnToAdd: ColumnHeaderOptions;
 
     beforeEach(() => {
       timelineById = cloneDeep(timelineByIdMock);
@@ -1087,22 +1097,28 @@ describe('Timeline', () => {
               },
             },
           ],
+          deletedEventIds: [],
           description: '',
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1174,21 +1190,27 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1366,21 +1388,27 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1452,21 +1480,27 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1633,21 +1667,27 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1701,23 +1741,29 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           id: 'foo',
           savedObjectId: null,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
@@ -1795,6 +1841,7 @@ describe('Timeline', () => {
             },
           ],
           description: '',
+          deletedEventIds: [],
           eventIdToNoteIds: {},
           highlightedDropAndProviderId: '',
           historyIds: [],
@@ -1802,16 +1849,21 @@ describe('Timeline', () => {
           savedObjectId: null,
           isFavorite: false,
           isLive: false,
+          isSelectAllChecked: false,
           isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
           title: '',
           noteIds: [],
           dateRange: {
             start: 0,
             end: 0,
           },
+          selectedEventIds: {},
           show: true,
+          showRowRenderers: true,
+          showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,

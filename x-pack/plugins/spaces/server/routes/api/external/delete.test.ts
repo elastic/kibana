@@ -12,7 +12,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
@@ -20,13 +20,12 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initDeleteSpacesApi } from './delete';
-import { RouteSchemas } from 'src/core/server/http/router/route';
-import { ObjectType } from '@kbn/config-schema';
 import { spacesConfig } from '../../../lib/__fixtures__';
+import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -45,9 +44,8 @@ describe('Spaces Public API', () => {
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () =>
-        createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      elasticsearch: elasticsearchServiceMock.createSetup(),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });
@@ -76,14 +74,16 @@ describe('Spaces Public API', () => {
     const [routeDefinition, routeHandler] = router.delete.mock.calls[0];
 
     return {
-      routeValidation: routeDefinition.validate as RouteSchemas<ObjectType, ObjectType, ObjectType>,
+      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
     };
   };
 
   it('requires a space id as part of the path', async () => {
     const { routeValidation } = await setup();
-    expect(() => routeValidation.params!.validate({})).toThrowErrorMatchingInlineSnapshot(
+    expect(() =>
+      (routeValidation.params as ObjectType).validate({})
+    ).toThrowErrorMatchingInlineSnapshot(
       `"[id]: expected value of type [string] but got [undefined]"`
     );
   });

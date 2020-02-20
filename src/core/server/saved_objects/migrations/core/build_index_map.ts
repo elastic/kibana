@@ -17,38 +17,32 @@
  * under the License.
  */
 
-import { Config } from '../../../config';
-import { MappingProperties } from '../../mappings';
-import { SavedObjectsSchema } from '../../schema';
+import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 export interface CreateIndexMapOptions {
-  config: Config;
   kibanaIndexName: string;
-  schema: SavedObjectsSchema;
-  indexMap: MappingProperties;
+  registry: ISavedObjectTypeRegistry;
+  indexMap: SavedObjectsTypeMappingDefinitions;
 }
 
 export interface IndexMap {
   [index: string]: {
-    typeMappings: MappingProperties;
+    typeMappings: SavedObjectsTypeMappingDefinitions;
     script?: string;
   };
 }
 
 /*
- * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
+ * This file contains logic to convert savedObjectSchemas into a dictionary of indexes and documents
  */
-export function createIndexMap({
-  config,
-  kibanaIndexName,
-  schema,
-  indexMap,
-}: CreateIndexMapOptions) {
+export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIndexMapOptions) {
   const map: IndexMap = {};
   Object.keys(indexMap).forEach(type => {
-    const script = schema.getConvertToAliasScript(type);
+    const typeDef = registry.getType(type);
+    const script = typeDef?.convertToAliasScript;
     // Defaults to kibanaIndexName if indexPattern isn't defined
-    const indexPattern = schema.getIndexForType(config, type) || kibanaIndexName;
+    const indexPattern = typeDef?.indexPattern || kibanaIndexName;
     if (!map.hasOwnProperty(indexPattern as string)) {
       map[indexPattern] = { typeMappings: {} };
     }

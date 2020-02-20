@@ -67,9 +67,11 @@ export class WorkpadConfig extends PureComponent {
 
     return (
       <div>
-        <EuiTitle size="xs">
-          <h4>{strings.getTitle()}</h4>
-        </EuiTitle>
+        <div className="canvasLayout__sidebarHeaderWorkpad">
+          <EuiTitle size="xs">
+            <h4>{strings.getTitle()}</h4>
+          </EuiTitle>
+        </div>
 
         <EuiSpacer size="m" />
 
@@ -129,37 +131,38 @@ export class WorkpadConfig extends PureComponent {
         </div>
 
         <EuiSpacer size="m" />
-
-        <EuiAccordion
-          id="accordion-global-css"
-          className="canvasArg__accordion"
-          buttonContent={
-            <EuiToolTip
-              content={strings.getGlobalCSSTooltip()}
-              position="left"
-              className="canvasArg__tooltip"
-            >
-              <EuiText size="s" color="subdued">
-                {strings.getGlobalCSSLabel()}
-              </EuiText>
-            </EuiToolTip>
-          }
-        >
-          <div className="canvasArg__content">
-            <EuiTextArea
-              aria-label={strings.getGlobalCSSTooltip()}
-              value={css}
-              compressed
-              onChange={e => this.setState({ css: e.target.value })}
-              rows={10}
-            />
-            <EuiSpacer size="s" />
-            <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
-              {strings.getApplyStylesheetButtonLabel()}
-            </EuiButton>
-            <EuiSpacer size="xs" />
-          </div>
-        </EuiAccordion>
+        <div className="canvasArg--expandable">
+          <EuiAccordion
+            id="accordion-global-css"
+            className="canvasArg__accordion"
+            buttonContent={
+              <EuiToolTip
+                content={strings.getGlobalCSSTooltip()}
+                position="left"
+                className="canvasArg__tooltip"
+              >
+                <EuiText size="s" color="subdued">
+                  {strings.getGlobalCSSLabel()}
+                </EuiText>
+              </EuiToolTip>
+            }
+          >
+            <div className="canvasArg__content">
+              <EuiTextArea
+                aria-label={strings.getGlobalCSSTooltip()}
+                value={css}
+                compressed
+                onChange={e => this.setState({ css: e.target.value })}
+                rows={10}
+              />
+              <EuiSpacer size="s" />
+              <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
+                {strings.getApplyStylesheetButtonLabel()}
+              </EuiButton>
+              <EuiSpacer size="xs" />
+            </div>
+          </EuiAccordion>
+        </div>
       </div>
     );
   }

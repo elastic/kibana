@@ -1,0 +1,54 @@
+{
+  "description": "This rule detects network events that may indicate the use of VNC traffic\nfrom the Internet. VNC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "false_positives": [
+    "VNC connections may be received directly to Linux cloud server instances but\n    such connections are usually made only by engineers. VNC is less common than SSH\n    or RDP but may be required by some work-flows such as remote access and support\n    for specialized software products or servers. Such work-flows are usually known\n    and not unexpected. Usage that is unfamiliar to server or network owners can be\n    unexpected and suspicious."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "VNC (Virtual Network Computing) from the Internet",
+  "query": "network.transport: tcp and (destination.port >= 5800 and destination.port <= 5810) and (\n    network.direction: inbound or (\n        not source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 73,
+  "rule_id": "5700cb81-df44-46aa-a5d7-337798f53eb8",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1219",
+          "name": "Remote Access Tools",
+          "reference": "https://attack.mitre.org/techniques/T1219/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

@@ -19,8 +19,8 @@
 
 import sinon from 'sinon';
 
-import { Filter } from '@kbn/es-query';
 import { State } from 'ui/state_management/state';
+import { Filter } from '../../../../../../../plugins/data/public';
 
 export class StubState implements State {
   filters: Filter[];

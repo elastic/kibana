@@ -4,42 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
-import { InputsModelId } from '../../../store/inputs/constants';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
 export const type = NetworkType.details;
 
-type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: number;
-  to: number;
-}>;
-
-interface IPDetailsComponentReduxProps {
-  filters: Filter[];
+export type IPDetailsComponentProps = GlobalTimeArgs & {
+  detailName: string;
   flowTarget: FlowTarget;
-  query: Query;
-}
+};
 
-interface IPDetailsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  IPDetailsComponentDispatchProps &
-  GlobalTimeArgs & { detailName: string };
-
-interface OwnProps {
+export interface OwnProps {
   type: NetworkType;
   startDate: number;
   endDate: number;
@@ -69,5 +49,5 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 };

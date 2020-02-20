@@ -19,9 +19,9 @@ import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
 import { first } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
-import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
-import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ErrorGroupAPIResponse } from '../../../../../../../../plugins/apm/server/lib/errors/get_error_group';
+import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit, units } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
@@ -80,11 +80,10 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
 
-  const errorUrl =
-    idx(error, _ => _.error.page.url) || idx(error, _ => _.url.full);
+  const errorUrl = error.error.page?.url || error.url?.full;
 
-  const method = idx(error, _ => _.http.request.method);
-  const status = idx(error, _ => _.http.response.status_code);
+  const method = error.http?.request?.method;
+  const status = error.http?.response?.status_code;
 
   return (
     <EuiPanel>
@@ -188,9 +187,9 @@ function TabContent({
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = idx(error, _ => _.service.language.name);
-  const exceptions = idx(error, _ => _.error.exception) || [];
-  const logStackframes = idx(error, _ => _.error.log.stacktrace);
+  const codeLanguage = error.service.language?.name;
+  const exceptions = error.error.exception || [];
+  const logStackframes = error.error.log?.stacktrace;
 
   switch (currentTab.key) {
     case logStacktraceTab.key:

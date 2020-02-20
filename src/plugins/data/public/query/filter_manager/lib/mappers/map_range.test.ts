@@ -18,7 +18,7 @@
  */
 
 import { mapRange } from './map_range';
-import { RangeFilter, Filter, FilterMeta } from '@kbn/es-query';
+import { FilterMeta, RangeFilter, Filter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {
@@ -26,21 +26,6 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' } as FilterMeta,
         range: { bytes: { lt: 2048, gt: 1024 } },
-      } as RangeFilter;
-      const result = mapRange(filter);
-
-      expect(result).toHaveProperty('key', 'bytes');
-      expect(result).toHaveProperty('value');
-      if (result.value) {
-        const displayName = result.value();
-        expect(displayName).toBe('1024 to 2048');
-      }
-    });
-
-    test('should return the key and value for matching filters with gte/lte', async () => {
-      const filter = {
-        meta: { index: 'logstash-*' } as FilterMeta,
-        range: { bytes: { lte: 2048, gte: 1024 } },
       } as RangeFilter;
       const result = mapRange(filter);
 

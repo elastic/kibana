@@ -58,13 +58,10 @@ export const PagePreviewComponent: FC<Props> = ({
   workpadWidth,
 }) => {
   const scale = height / workpadHeight;
-  const style = {
-    height: workpadHeight * scale,
-    width: workpadWidth * scale,
-  };
 
   const transform = {
-    ...style,
+    height: workpadHeight,
+    width: workpadWidth,
     transform: `scale3d(${scale}, ${scale}, 1)`,
   };
 
@@ -73,7 +70,10 @@ export const PagePreviewComponent: FC<Props> = ({
       className={css.root}
       onClick={() => onClick(index)}
       onKeyPress={() => onClick(index)}
-      style={style}
+      style={{
+        height: workpadHeight * scale,
+        width: workpadWidth * scale,
+      }}
     >
       <div className={css.preview} style={transform}>
         <PageComponent {...{ page }} height={workpadHeight} width={workpadWidth} />

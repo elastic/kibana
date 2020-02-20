@@ -5,23 +5,23 @@
  */
 
 import { omit } from 'lodash/fp';
-import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 
 import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
 const timestampFieldId = '@timestamp';
-const columnHeaders: ColumnHeader[] = [
+const columnHeaders: ColumnHeaderOptions[] = [
   {
     category: 'base',
     columnHeaderType: defaultColumnHeaderType,
@@ -37,6 +37,7 @@ const columnHeaders: ColumnHeader[] = [
 
 describe('field_items', () => {
   const timelineId = 'test';
+  const mount = useMountAppended();
 
   describe('getFieldItems', () => {
     Object.keys(selectedCategoryFields!).forEach(fieldId => {

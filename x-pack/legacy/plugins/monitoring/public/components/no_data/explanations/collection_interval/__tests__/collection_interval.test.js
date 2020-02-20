@@ -14,7 +14,7 @@ const enabler = {};
 const reason = {
   property: 'xpack.monitoring.collection.interval',
   data: '-1',
-  context: 'cluster'
+  context: 'cluster',
 };
 
 describe('ExplainCollectionInterval', () => {

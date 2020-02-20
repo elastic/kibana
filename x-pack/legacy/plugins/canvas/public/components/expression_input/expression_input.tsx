@@ -9,10 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-
-import { Editor } from '../editor';
-
-import { CanvasFunction } from '../../../types';
+import { ExpressionFunction } from '../../../../../../../src/plugins/expressions';
+import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,
@@ -27,7 +25,7 @@ interface Props {
   /** Font size of text within the editor */
 
   /** Canvas function defintions */
-  functionDefinitions: CanvasFunction[];
+  functionDefinitions: ExpressionFunction[];
 
   /** Optional string for displaying error messages */
   error?: string;
@@ -115,7 +113,11 @@ export class ExpressionInput extends React.Component<Props> {
     this.props.onChange(value);
   };
 
-  provideSuggestions = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+  provideSuggestions = (
+    model: monacoEditor.editor.ITextModel,
+    position: monacoEditor.Position,
+    context: monacoEditor.languages.CompletionContext
+  ) => {
     const text = model.getValue();
     const textRange = model.getFullModelRange();
 
@@ -126,25 +128,52 @@ export class ExpressionInput extends React.Component<Props> {
       endColumn: textRange.endColumn,
     });
 
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monacoEditor.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
+    let wordRange: monacoEditor.Range;
+    let aSuggestions;
 
-    const aSuggestions = getAutocompleteSuggestions(
-      this.props.functionDefinitions,
-      text,
-      text.length - lengthAfterPosition
-    );
+    if (context.triggerCharacter === '{') {
+      const wordUntil = model.getWordAtPosition(position.delta(0, -3));
+      if (wordUntil) {
+        wordRange = new monacoEditor.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
 
-    const suggestions = aSuggestions.map((s: AutocompleteSuggestion) => {
+        // Retrieve suggestions for subexpressions
+        // TODO: make this work for expressions nested more than one level deep
+        aSuggestions = getAutocompleteSuggestions(
+          this.props.functionDefinitions,
+          text.substring(0, text.length - lengthAfterPosition) + '}',
+          text.length - lengthAfterPosition
+        );
+      }
+    } else {
+      const wordUntil = model.getWordUntilPosition(position);
+      wordRange = new monacoEditor.Range(
+        position.lineNumber,
+        wordUntil.startColumn,
+        position.lineNumber,
+        wordUntil.endColumn
+      );
+      aSuggestions = getAutocompleteSuggestions(
+        this.props.functionDefinitions,
+        text,
+        text.length - lengthAfterPosition
+      );
+    }
+
+    if (!aSuggestions) {
+      return { suggestions: [] };
+    }
+
+    const suggestions = aSuggestions.map((s: AutocompleteSuggestion, index) => {
+      const sortText = String.fromCharCode(index);
       if (s.type === 'argument') {
         return {
           label: s.argDef.name,
-          kind: monacoEditor.languages.CompletionItemKind.Field,
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
           documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
           insertText: s.text,
           command: {
@@ -152,6 +181,7 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else if (s.type === 'value') {
         return {
@@ -163,6 +193,7 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else {
         return {
@@ -178,6 +209,7 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       }
     });
@@ -268,12 +300,20 @@ export class ExpressionInput extends React.Component<Props> {
           error={error}
         >
           <div className="canvasExpressionInput__editor">
-            <Editor
+            <CodeEditor
               languageId={LANGUAGE_ID}
+              languageConfiguration={{
+                autoClosingPairs: [
+                  {
+                    open: '{',
+                    close: '}',
+                  },
+                ],
+              }}
               value={value}
               onChange={this.onChange}
               suggestionProvider={{
-                triggerCharacters: [' '],
+                triggerCharacters: [' ', '{'],
                 provideCompletionItems: this.provideSuggestions,
               }}
               hoverProvider={{

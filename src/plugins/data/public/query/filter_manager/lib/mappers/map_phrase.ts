@@ -20,14 +20,14 @@
 import { get } from 'lodash';
 import {
   PhraseFilter,
-  Filter,
-  FILTERS,
-  isPhraseFilter,
-  isScriptedPhraseFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
   FilterValueFormatter,
-} from '@kbn/es-query';
+  getPhraseFilterValue,
+  getPhraseFilterField,
+  FILTERS,
+  isScriptedPhraseFilter,
+  Filter,
+  isPhraseFilter,
+} from '../../../../../common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);

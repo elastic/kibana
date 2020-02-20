@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, FILTERS, isQueryStringFilter } from '@kbn/es-query';
+import { FILTERS, Filter, isQueryStringFilter } from '../../../../../common';
 
 export const mapQueryString = (filter: Filter) => {
   if (isQueryStringFilter(filter)) {

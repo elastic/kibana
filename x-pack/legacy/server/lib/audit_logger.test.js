@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AuditLogger } from './audit_logger';
-import { LICENSE_TYPE_STANDARD, LICENSE_TYPE_BASIC, LICENSE_TYPE_GOLD } from '../../common/constants';
+import {
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_BASIC,
+  LICENSE_TYPE_GOLD,
+} from '../../common/constants';
 
-const createMockConfig = (settings) => {
+const createMockConfig = settings => {
   const mockConfig = {
-    get: jest.fn()
+    get: jest.fn(),
   };
 
   mockConfig.get.mockImplementation(key => {
@@ -20,12 +24,18 @@ const createMockConfig = (settings) => {
 
 const mockLicenseInfo = {
   isAvailable: () => true,
-  feature: () => { return { registerLicenseCheckResultsGenerator: () => { return; } };},
+  feature: () => {
+    return {
+      registerLicenseCheckResultsGenerator: () => {
+        return;
+      },
+    };
+  },
   license: {
     isActive: () => true,
     isOneOf: () => true,
-    getType: () => LICENSE_TYPE_STANDARD
-  }
+    getType: () => LICENSE_TYPE_STANDARD,
+  },
 };
 
 const mockConfig = createMockConfig({
@@ -35,7 +45,7 @@ const mockConfig = createMockConfig({
 
 test(`calls server.log with 'info', audit', pluginId and eventType as tags`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
 
   const pluginId = 'foo';
@@ -44,24 +54,32 @@ test(`calls server.log with 'info', audit', pluginId and eventType as tags`, () 
   const eventType = 'bar';
   auditLogger.log(eventType, '');
   expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(['info', 'audit', pluginId, eventType], expect.anything(), expect.anything());
+  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
+    ['info', 'audit', pluginId, eventType],
+    expect.anything(),
+    expect.anything()
+  );
 });
 
 test(`calls server.log with message`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
   const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
 
   const message = 'summary of what happened';
   auditLogger.log('bar', message);
   expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(expect.anything(), message, expect.anything());
+  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
+    expect.anything(),
+    message,
+    expect.anything()
+  );
 });
 
 test(`calls server.log with metadata `, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
 
   const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
@@ -82,16 +100,22 @@ test(`calls server.log with metadata `, () => {
 
 test(`does not call server.log for license level < Standard`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
   const mockLicenseInfo = {
     isAvailable: () => true,
-    feature: () => { return { registerLicenseCheckResultsGenerator: () => { return; } };},
+    feature: () => {
+      return {
+        registerLicenseCheckResultsGenerator: () => {
+          return;
+        },
+      };
+    },
     license: {
       isActive: () => true,
       isOneOf: () => false,
-      getType: () => LICENSE_TYPE_BASIC
-    }
+      getType: () => LICENSE_TYPE_BASIC,
+    },
   };
 
   const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
@@ -101,7 +125,7 @@ test(`does not call server.log for license level < Standard`, () => {
 
 test(`does not call server.log if security is not enabled`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
 
   const mockConfig = createMockConfig({
@@ -116,11 +140,11 @@ test(`does not call server.log if security is not enabled`, () => {
 
 test(`does not call server.log if security audit logging is not enabled`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
 
   const mockConfig = createMockConfig({
-    'xpack.security.enabled': true
+    'xpack.security.enabled': true,
   });
 
   const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
@@ -130,7 +154,7 @@ test(`does not call server.log if security audit logging is not enabled`, () => 
 
 test(`calls server.log after basic -> gold upgrade`, () => {
   const mockServer = {
-    logWithMetadata: jest.fn()
+    logWithMetadata: jest.fn(),
   };
 
   const endLicenseInfo = {
@@ -138,20 +162,26 @@ test(`calls server.log after basic -> gold upgrade`, () => {
     license: {
       isActive: () => true,
       isOneOf: () => true,
-      getType: () => LICENSE_TYPE_GOLD
-    }
+      getType: () => LICENSE_TYPE_GOLD,
+    },
   };
 
   let licenseCheckResultsGenerator;
 
   const startLicenseInfo = {
     isAvailable: () => true,
-    feature: () => { return { registerLicenseCheckResultsGenerator: (fn) => { licenseCheckResultsGenerator = fn; } };},
+    feature: () => {
+      return {
+        registerLicenseCheckResultsGenerator: fn => {
+          licenseCheckResultsGenerator = fn;
+        },
+      };
+    },
     license: {
       isActive: () => true,
       isOneOf: () => false,
-      getType: () => LICENSE_TYPE_BASIC
-    }
+      getType: () => LICENSE_TYPE_BASIC,
+    },
   };
 
   const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, startLicenseInfo);
@@ -162,5 +192,4 @@ test(`calls server.log after basic -> gold upgrade`, () => {
   licenseCheckResultsGenerator(endLicenseInfo);
   auditLogger.log('bar', 'what happened');
   expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-
 });

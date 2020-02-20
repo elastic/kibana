@@ -16,6 +16,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+      await PageObjects.settings.setNavType('individual');
     });
 
     after(async () => {
@@ -39,7 +40,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_all_user', 'global_all_user-password', {
           expectSpaceSelector: false,
@@ -50,15 +51,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`displays Spaces management section`, async () => {
@@ -67,7 +66,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can navigate to spaces grid page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/list', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -76,7 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can navigate to create new space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/create', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -85,10 +84,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can navigate to edit space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/edit/default', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          'management/kibana/spaces/edit/default',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
 
         await testSubjects.existOrFail('spaces-edit-page');
       });
@@ -111,7 +114,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'default_space_all_user',
@@ -126,48 +129,50 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('default_space_all_role'),
           security.user.delete('default_space_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`doesn't display Spaces management section`, async () => {
         await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('objects'); // this ensures we've gotten to the management page
+        await testSubjects.existOrFail('management-landing'); // this ensures we've gotten to the management page
         await testSubjects.missingOrFail('spaces');
       });
 
       it(`can't navigate to spaces grid page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/list', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
 
       it(`can't navigate to create new space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/create', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
 
       it(`can't navigate to edit space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/edit/default', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          'management/kibana/spaces/edit/default',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
 
-        await testSubjects.existOrFail('homeApp');
+        await testSubjects.existOrFail('management-landing');
       });
     });
   });

@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export * from './search_service';
-export * from './search_bar';
+export * from './aggs';
+export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
+export { serializeAggConfig } from './expressions/utils';

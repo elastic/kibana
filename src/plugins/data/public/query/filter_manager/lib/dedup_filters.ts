@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { filter, find } from 'lodash';
-import { compareFilters } from './compare_filters';
+import { compareFilters, FilterCompareOptions } from './compare_filters';
+import { Filter } from '../../../../common';
 
 /**
  * Combine 2 filter collections, removing duplicates
@@ -33,7 +33,7 @@ import { compareFilters } from './compare_filters';
 export const dedupFilters = (
   existingFilters: Filter[],
   filters: Filter[],
-  comparatorOptions: any = {}
+  comparatorOptions: FilterCompareOptions = {}
 ) => {
   if (!Array.isArray(filters)) {
     filters = [filters];

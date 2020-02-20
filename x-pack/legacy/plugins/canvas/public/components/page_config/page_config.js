@@ -6,7 +6,15 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiCard, EuiFormRow, EuiTitle, EuiSpacer, EuiSelect } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFormRow,
+  EuiTitle,
+  EuiSpacer,
+  EuiSelect,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
 import { WorkpadColorPicker } from '../workpad_color_picker';
 import { ComponentStrings } from '../../../i18n';
 
@@ -22,14 +30,20 @@ export const PageConfig = ({
 }) => {
   return (
     <Fragment>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
         <h4>{strings.getTitle()}</h4>
       </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiFormRow
-        display="rowCompressed"
-        label={strings.getBackgroundColorLabel()}
-        helpText={strings.getBackgroundColorDescription()}
+        display="columnCompressed"
+        label={
+          <EuiToolTip content={strings.getBackgroundColorDescription()}>
+            <span>
+              {strings.getBackgroundColorLabel()}{' '}
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </span>
+          </EuiToolTip>
+        }
       >
         <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>

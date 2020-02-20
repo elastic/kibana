@@ -91,7 +91,7 @@ class DatacolumnArgInput extends Component {
     });
 
     return (
-      <EuiFlexGroup gutterSize="s" id={argId}>
+      <EuiFlexGroup gutterSize="s" id={argId} direction="row">
         <EuiFlexItem grow={false}>
           <SimpleMathFunction
             id={argId}

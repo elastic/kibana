@@ -4,42 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
-// @ts-ignore no module definition
-import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { CancellationToken } from '../../../../common/cancellation_token';
-import { ServerFacade, RequestFacade, Logger } from '../../../../types';
 import {
-  IndexPatternSavedObject,
-  SavedSearchObjectAttributes,
-  SearchPanel,
-  SearchRequest,
-  SearchSource,
-  SearchSourceQuery,
-} from '../../types';
+  ElasticsearchServiceSetup,
+  KibanaRequest,
+  IUiSettingsClient,
+} from '../../../../../../../../src/core/server';
+import {
+  esQuery,
+  EsQueryConfig,
+  Filter,
+  IIndexPattern,
+  Query,
+  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under reporting/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../src/plugins/data/server';
+import { CancellationToken } from '../../../../common/cancellation_token';
+import { ReportingCore } from '../../../../server';
+import { Logger, RequestFacade, ServerFacade } from '../../../../types';
+import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
-  ESQueryConfig,
   GenerateCsvParams,
-  Filter,
+  JobParamsDiscoverCsv,
+  SearchRequest,
+} from '../../../csv/types';
+import {
   IndexPatternField,
   QueryFilter,
+  SavedSearchObjectAttributes,
+  SearchPanel,
+  SearchSource,
 } from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { JobParamsDiscoverCsv } from '../../../csv/types';
 
-const getEsQueryConfig = async (config: any) => {
+const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
     config.get('query:allowLeadingWildcards'),
     config.get('query:queryString:options'),
     config.get('courier:ignoreFilterIfFieldNotInIndex'),
   ]);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
+  return {
+    allowLeadingWildcards,
+    queryStringOptions,
+    ignoreFilterIfFieldNotInIndex,
+  } as EsQueryConfig;
 };
 
-const getUiSettings = async (config: any) => {
+const getUiSettings = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
@@ -47,20 +61,24 @@ const getUiSettings = async (config: any) => {
 
 export async function generateCsvSearch(
   req: RequestFacade,
+  reporting: ReportingCore,
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
-  const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
+  const savedObjectsClient = await reporting.getSavedObjectsClient(
+    KibanaRequest.from(req.getRawRequest())
+  );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const { indexPatternSavedObject } = await getDataSource(
     savedObjectsClient,
     indexPatternSavedObjectId
   );
-  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
+
+  const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const esQueryConfig = await getEsQueryConfig(uiConfig);
 
   const {
@@ -80,10 +98,11 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
+  let docValueFields: any[] | undefined;
   if (jobParams.post && jobParams.post.state) {
     ({
       post: {
-        state: { query: payloadQuery, sort: payloadSort = [] },
+        state: { query: payloadQuery, sort: payloadSort = [], docvalue_fields: docValueFields },
       },
     } = jobParams);
   }
@@ -115,28 +134,35 @@ export async function generateCsvSearch(
         },
       };
     }, {});
-  const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
 
-  // this array helps ensure the params are passed to buildEsQuery (non-Typescript) in the right order
-  const buildCsvParams: [IndexPatternSavedObject, SearchSourceQuery, Filter[], ESQueryConfig] = [
-    indexPatternSavedObject,
-    searchSourceQuery,
-    combinedFilter,
-    esQueryConfig,
-  ];
+  if (indexPatternTimeField) {
+    if (docValueFields) {
+      docValueFields = [indexPatternTimeField].concat(docValueFields);
+    } else {
+      docValueFields = [indexPatternTimeField];
+    }
+  }
 
   const searchRequest: SearchRequest = {
     index: esIndex,
     body: {
       _source: { includes },
       docvalue_fields: docValueFields,
-      query: buildEsQuery(...buildCsvParams),
+      query: esQuery.buildEsQuery(
+        indexPatternSavedObject as IIndexPattern,
+        (searchSourceQuery as unknown) as Query,
+        (combinedFilter as unknown) as Filter,
+        esQueryConfig
+      ),
       script_fields: scriptFieldsConfig,
       sort: sortConfig,
     },
   };
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
+
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+    KibanaRequest.from(req.getRawRequest())
+  );
+  const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

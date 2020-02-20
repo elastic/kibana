@@ -1,0 +1,39 @@
+{
+  "description": "This rule detects events that may describe database traffic\n(MS SQL, Oracle, MySQL, and Postgresql) across the Internet. Databases\nshould almost never be directly exposed to the Internet, as they are\nfrequently targeted by threat actors to gain initial access to network resources.\n",
+  "false_positives": [
+    "Because these ports are in the ephemeral range, this rule may false under certain conditions\n    such as when a NATed web server replies to a client which has used a port in the range by\n    coincidence. In this case, such servers can be excluded if desired. Some cloud environments may\n    use this port when VPNs or direct connects are not in use and database instances are accessed\n    directly across the Internet."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "SQL Traffic to the Internet",
+  "query": "network.transport: tcp and destination.port: (1433 or 1521 or 3336 or 5432) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 47,
+  "rule_id": "139c7458-566a-410c-a5cd-f80238d6a5cd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

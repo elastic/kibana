@@ -4,6 +4,11 @@
 
 ## ChromeNavLinks.update() method
 
+> Warning: This API is now obsolete.
+> 
+> Uses the [AppBase.updater$](./kibana-plugin-public.appbase.updater_.md) property when registering your application with [ApplicationSetup.register()](./kibana-plugin-public.applicationsetup.register.md) instead.
+> 
+
 Update the navlink for the given id with the updated attributes. Returns the updated navlink or `undefined` if it does not exist.
 
 <b>Signature:</b>

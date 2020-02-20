@@ -56,6 +56,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
+      resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -68,9 +70,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'xpack.security.authc.api_key.enabled=true'
-      ],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -85,9 +85,10 @@ export default async function ({ readConfigFile }) {
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -133,32 +134,27 @@ export default async function ({ readConfigFile }) {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra',
+        pathname: '/app/metrics',
       },
       infraLogs: {
-        pathname: '/app/infra',
-        hash: '/logs',
+        pathname: '/app/logs',
       },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
       },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
-      },
       uptime: {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
+      },
+      roleMappings: {
+        pathname: '/app/kibana',
+        hash: '/management/security/role_mappings',
       },
       rollupJob: {
         pathname: '/app/kibana',
@@ -198,6 +194,13 @@ export default async function ({ readConfigFile }) {
       watcher: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/watcher/watches/',
+      },
+      transform: {
+        pathname: '/app/kibana/',
+        hash: '/management/elasticsearch/transform',
+      },
+      endpoint: {
+        pathname: '/app/endpoint',
       },
     },
 

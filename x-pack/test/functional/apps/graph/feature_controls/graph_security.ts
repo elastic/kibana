@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -65,10 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Graph',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Graph', 'Stack Management']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -130,10 +126,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows graph navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Graph', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Graph', 'Stack Management']);
       });
 
       it('does not show a "Create new Workspace" button', async () => {
@@ -184,9 +178,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show graph navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 

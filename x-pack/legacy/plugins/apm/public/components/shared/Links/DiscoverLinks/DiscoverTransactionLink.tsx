@@ -9,8 +9,8 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+} from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {
@@ -32,7 +32,7 @@ export function getDiscoverQuery(transaction: Transaction) {
   };
 }
 
-export const DiscoverTransactionLink: React.SFC<{
+export const DiscoverTransactionLink: React.FC<{
   readonly transaction: Transaction;
 }> = ({ transaction, children }) => {
   return (

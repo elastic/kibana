@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/ItemGrid color dot grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#fff",
+        }
+      }
+    />
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#666",
+        }
+      }
+    />
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid complex grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#fff",
+        }
+      }
+    >
+      <svg
+        aria-hidden={true}
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        role="img"
+        style={
+          Object {
+            "fill": "#333",
+          }
+        }
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#666",
+        }
+      }
+    >
+      <svg
+        aria-hidden={true}
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        role="img"
+        style={
+          Object {
+            "fill": "#FFF",
+          }
+        }
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    >
+      <svg
+        aria-hidden={true}
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        role="img"
+        style={
+          Object {
+            "fill": "#FFF",
+          }
+        }
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid icon grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid simple grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div>
+    a
+  </div>
+  <div>
+    b
+  </div>
+  <div>
+    c
+  </div>
+</div>
+`;

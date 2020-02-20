@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
-export default function ({ getService, getPageObjects }) {
-
-  const es = getService('es');
+export default function({ getService, getPageObjects }) {
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common']);
 
-  describe('rollup job', function () {
+  describe('rollup job', function() {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision.
     const rollupJobName = 'rollup-to-be-' + Date.now();
@@ -33,17 +31,23 @@ export default function ({ getService, getPageObjects }) {
     it('create new rollup job', async () => {
       const interval = '1000ms';
 
-      pastDates.map(async (day) => {
+      pastDates.map(async day => {
         await es.index(mockIndices(day, rollupSourceDataPrepend));
       });
 
       await PageObjects.common.navigateToApp('rollupJob');
-      await PageObjects.rollup.createNewRollUpJob(rollupJobName, rollupSourceIndexPattern, targetIndexName,
-        interval, ' ', true, { time: '*/10 * * * * ?', cron: true });
+      await PageObjects.rollup.createNewRollUpJob(
+        rollupJobName,
+        rollupSourceIndexPattern,
+        targetIndexName,
+        interval,
+        ' ',
+        true,
+        { time: '*/10 * * * * ?', cron: true }
+      );
 
       const jobList = await PageObjects.rollup.getJobList();
       expect(jobList.length).to.be(1);
-
     });
 
     after(async () => {

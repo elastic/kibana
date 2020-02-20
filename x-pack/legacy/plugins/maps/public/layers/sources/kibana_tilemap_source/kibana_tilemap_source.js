@@ -13,20 +13,19 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 
 export class KibanaTilemapSource extends AbstractTMSSource {
-
   static type = 'KIBANA_TILEMAP';
   static title = i18n.translate('xpack.maps.source.kbnTMSTitle', {
-    defaultMessage: 'Configured Tile Map Service'
+    defaultMessage: 'Configured Tile Map Service',
   });
   static description = i18n.translate('xpack.maps.source.kbnTMSDescription', {
-    defaultMessage: 'Tile map service configured in kibana.yml'
+    defaultMessage: 'Tile map service configured in kibana.yml',
   });
 
   static icon = 'logoKibana';
 
   static createDescriptor() {
     return {
-      type: KibanaTilemapSource.type
+      type: KibanaTilemapSource.type,
     };
   }
 
@@ -36,20 +35,20 @@ export class KibanaTilemapSource extends AbstractTMSSource {
       const source = new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   };
 
   async getImmutableProperties() {
     return [
       {
         label: getDataSourceLabel(),
-        value: KibanaTilemapSource.title
+        value: KibanaTilemapSource.title,
       },
       {
         label: i18n.translate('xpack.maps.source.kbnTMS.urlLabel', {
-          defaultMessage: 'Tilemap url'
+          defaultMessage: 'Tilemap url',
         }),
-        value: (await this.getUrlTemplate())
+        value: await this.getUrlTemplate(),
       },
     ];
   }
@@ -57,23 +56,25 @@ export class KibanaTilemapSource extends AbstractTMSSource {
   _createDefaultLayerDescriptor(options) {
     return TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
-      ...options
+      ...options,
     });
   }
 
   createDefaultLayer(options) {
     return new TileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
+      source: this,
     });
   }
 
   async getUrlTemplate() {
     const tilemap = getKibanaTileMap();
     if (!tilemap.url) {
-      throw new Error(i18n.translate('xpack.maps.source.kbnTMS.noConfigErrorMessage', {
-        defaultMessage: `Unable to find map.tilemap.url configuration in the kibana.yml`
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.kbnTMS.noConfigErrorMessage', {
+          defaultMessage: `Unable to find map.tilemap.url configuration in the kibana.yml`,
+        })
+      );
     }
     return tilemap.url;
   }

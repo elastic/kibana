@@ -19,6 +19,8 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
       compressed
       checked={Boolean(argValue)}
       onChange={() => onValueChange(!Boolean(argValue))}
+      showLabel={false}
+      label=""
     />
   );
 };

@@ -14,10 +14,8 @@ const getFileReader = () => {
   const fileReader = {
     abort: jest.fn(),
   };
-  fileReader.readAsBinaryString = jest.fn(
-    (binaryString = '123') => fileReader.onloadend(
-      { target: { readyState: FileReader.DONE, result: binaryString } }
-    )
+  fileReader.readAsBinaryString = jest.fn((binaryString = '123') =>
+    fileReader.onloadend({ target: { readyState: FileReader.DONE, result: binaryString } })
   );
   return fileReader;
 };
@@ -26,7 +24,7 @@ const getPatternReader = () => {
     writeDataToPatternStream: jest.fn(),
     abortStream: jest.fn(),
   };
-  require('./pattern_reader').PatternReader = function () {
+  require('./pattern_reader').PatternReader = function() {
     this.writeDataToPatternStream = () => patternReader.writeDataToPatternStream();
     this.abortStream = () => patternReader.abortStream();
   };
@@ -34,16 +32,18 @@ const getPatternReader = () => {
 };
 
 const testJson = {
-  'type': 'Feature',
-  'geometry': {
-    'type': 'Polygon',
-    'coordinates': [[
-      [-104.05, 78.99],
-      [-87.22, 78.98],
-      [-86.58, 75.94],
-      [-104.03, 75.94],
-      [-104.05, 78.99]
-    ]]
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [-104.05, 78.99],
+        [-87.22, 78.98],
+        [-86.58, 75.94],
+        [-104.03, 75.94],
+        [-104.05, 78.99],
+      ],
+    ],
   },
 };
 
@@ -57,7 +57,6 @@ const getFileParseActiveFactory = (boolActive = true) => {
 };
 
 describe('parse file', () => {
-
   afterEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
@@ -80,7 +79,7 @@ describe('parse file', () => {
       setFileProgress,
       cleanAndValidate,
       getFileParseActive,
-      fileReader: cancelledActionFileReader
+      fileReader: cancelledActionFileReader,
     });
 
     expect(fileHandlerResult).toBeNull();
@@ -95,16 +94,17 @@ describe('parse file', () => {
     const patternReaderWithErrorCall = getPatternReader();
 
     // Trigger on error on read
-    fileReaderWithErrorCall.readAsBinaryString =
-      () => fileReaderWithErrorCall.onerror();
+    fileReaderWithErrorCall.readAsBinaryString = () => fileReaderWithErrorCall.onerror();
     const getFileParseActive = getFileParseActiveFactory();
-    expect(fileHandler({
-      file: fileRef,
-      setFileProgress,
-      cleanAndValidate,
-      getFileParseActive,
-      fileReader: fileReaderWithErrorCall
-    })).rejects.toThrow();
+    expect(
+      fileHandler({
+        file: fileRef,
+        setFileProgress,
+        cleanAndValidate,
+        getFileParseActive,
+        fileReader: fileReaderWithErrorCall,
+      })
+    ).rejects.toThrow();
 
     expect(fileReaderWithErrorCall.abort.mock.calls.length).toEqual(1);
     expect(patternReaderWithErrorCall.abortStream.mock.calls.length).toEqual(1);
@@ -122,7 +122,7 @@ describe('parse file', () => {
       setFileProgress,
       cleanAndValidate,
       getFileParseActive,
-      fileReader: fileReaderForValidFile
+      fileReader: fileReaderForValidFile,
     });
 
     expect(fileReaderForValidFile.readAsBinaryString.mock.calls.length).toEqual(2);

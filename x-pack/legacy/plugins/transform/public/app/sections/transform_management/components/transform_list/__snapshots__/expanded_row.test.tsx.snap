@@ -90,7 +90,8 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
           ]
         }
       />,
-      "id": "transform-details",
+      "data-test-subj": "transformDetailsTab",
+      "id": "transform-details-tab-fq_date_histogram_1m_1441",
       "name": "Transform details",
     }
   }
@@ -188,7 +189,8 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
             ]
           }
         />,
-        "id": "transform-details",
+        "data-test-subj": "transformDetailsTab",
+        "id": "transform-details-tab-fq_date_histogram_1m_1441",
         "name": "Transform details",
       },
       Object {
@@ -229,14 +231,16 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
             }
           }
         />,
-        "id": "transform-json",
+        "data-test-subj": "transformJsonTab",
+        "id": "transform-json-tab-fq_date_histogram_1m_1441",
         "name": "JSON",
       },
       Object {
         "content": <ExpandedRowMessagesPane
           transformId="fq_date_histogram_1m_1441"
         />,
-        "id": "transform-messages",
+        "data-test-subj": "transformMessagesTab",
+        "id": "transform-messages-tab-fq_date_histogram_1m_1441",
         "name": "Messages",
       },
       Object {
@@ -277,7 +281,8 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
             }
           }
         />,
-        "id": "transform-preview",
+        "data-test-subj": "transformPreviewTab",
+        "id": "transform-preview-tab-fq_date_histogram_1m_1441",
         "name": "Preview",
       },
     ]

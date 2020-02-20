@@ -44,7 +44,7 @@ export class MapListing extends React.Component {
     perPage: 20,
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 

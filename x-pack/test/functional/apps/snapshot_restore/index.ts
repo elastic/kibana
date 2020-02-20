@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Snapshots app', function() {
-    this.tags('ciGroup1');
+    this.tags(['ciGroup4', 'skipCloud']);
     loadTestFile(require.resolve('./home_page'));
   });
 };

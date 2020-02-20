@@ -4,6 +4,8 @@ The `Url` field formatter can take on the following types:
 * The *Image* type can be used to specify an image directory where a specified image is located.
 * The *Audio* type can be used to specify an audio directory where a specified audio file is located.
 
+For an *Image* type you can specify width and height attributes. These will be used to set the max width / max height of the image, while keeping the aspect ratio. Image will not be upscaled if it's smaller than the provided size parameters.
+
 You can customize either type of URL field formats with templates. A _URL template_ enables you to add specific values
 to a partial URL. Use the string `{{value}}` to add the contents of the field to a fixed URL.
 

@@ -5,8 +5,7 @@
  */
 
 import { EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Markdown } from '../../markdown';
@@ -33,10 +32,8 @@ const TextArea = styled(EuiTextArea)<{ height: number }>`
 
 TextArea.displayName = 'TextArea';
 
-TextArea.displayName = 'TextArea';
-
 /** An input for entering a new note  */
-export const NewNote = pure<{
+export const NewNote = React.memo<{
   noteInputHeight: number;
   note: string;
   updateNewNote: UpdateInternalNewNote;

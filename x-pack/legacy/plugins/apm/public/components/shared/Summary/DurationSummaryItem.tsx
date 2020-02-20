@@ -7,7 +7,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiText } from '@elastic/eui';
 import { PercentOfParent } from '../../app/TransactionDetails/WaterfallWithSummmary/PercentOfParent';
-import { asTime } from '../../../utils/formatters';
+import { asDuration } from '../../../utils/formatters';
 
 interface Props {
   duration: number;
@@ -29,7 +29,7 @@ const DurationSummaryItem = ({
   return (
     <>
       <EuiToolTip content={label}>
-        <EuiText>{asTime(duration)}</EuiText>
+        <EuiText>{asDuration(duration)}</EuiText>
       </EuiToolTip>
       &nbsp;
       <EuiText size="s">

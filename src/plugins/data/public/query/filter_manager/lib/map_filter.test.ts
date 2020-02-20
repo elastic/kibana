@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
+import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   function getDisplayName(filter: Filter) {

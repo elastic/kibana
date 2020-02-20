@@ -65,6 +65,7 @@ exports[`LayerControl is rendered 1`] = `
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
+    isDisabled={true}
     onClick={[Function]}
   >
     <FormattedMessage

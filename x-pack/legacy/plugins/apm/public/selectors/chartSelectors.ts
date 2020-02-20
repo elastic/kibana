@@ -9,15 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { difference, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
-import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from '../../typings/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TimeSeriesAPIResponse } from '../../../../../plugins/apm/server/lib/transactions/charts';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ApmTimeSeriesResponse } from '../../../../../plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   Coordinate,
   RectCoordinate,
   TimeSeries
-} from '../../typings/timeseries';
-import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
+} from '../../../../../plugins/apm/typings/timeseries';
+import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
@@ -71,6 +72,10 @@ export function getResponseTimeSeries({
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
+  const formattedDuration = convertTo({
+    unit: 'milliseconds',
+    microseconds: overallAvgDuration
+  }).formatted;
 
   const series: TimeSeries[] = [
     {
@@ -78,7 +83,7 @@ export function getResponseTimeSeries({
         defaultMessage: 'Avg.'
       }),
       data: avg,
-      legendValue: asMillis(overallAvgDuration),
+      legendValue: formattedDuration,
       type: 'linemark',
       color: theme.euiColorVis1
     },
@@ -192,7 +197,7 @@ function getColorByKey(keys: string[]) {
   const assignedColors = ['HTTP 2xx', 'HTTP 3xx', 'HTTP 4xx', 'HTTP 5xx'];
 
   const unknownKeys = difference(keys, assignedColors);
-  const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
+  const unassignedColors: Record<string, string> = zipObject(unknownKeys, [
     theme.euiColorVis1,
     theme.euiColorVis3,
     theme.euiColorVis4,

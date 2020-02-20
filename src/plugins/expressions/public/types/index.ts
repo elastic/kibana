@@ -17,126 +17,48 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { ExpressionInterpret } from '../interpreter_provider';
-import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-import { Query } from '../../../data/public';
-import { ExpressionAST } from '../../../expressions/public';
-import { ExpressionArgAST } from '../../../../plugins/expressions/public';
+import {
+  IInterpreterRenderHandlers,
+  ExpressionValue,
+  ExecutionContextSearch,
+  ExpressionsService,
+} from '../../common';
 
-export { ArgumentType } from './arguments';
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-  SerializedFieldFormat,
-} from './common';
-
-export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
-export { ExpressionType, AnyExpressionType } from './types';
-
-export * from './style';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
-}
-
-export type ExpressionInterpretWithHandlers = (
-  ast: Parameters<ExpressionInterpret>[0],
-  context: Parameters<ExpressionInterpret>[1],
-  handlers: IInterpreterHandlers
-) => ReturnType<ExpressionInterpret>;
-
-export interface ExpressionInterpreter {
-  interpretAst: ExpressionInterpretWithHandlers;
-}
-
+/**
+ * @deprecated
+ *
+ * This type if remainder from legacy platform, will be deleted going further.
+ */
 export interface ExpressionExecutor {
   interpreter: ExpressionInterpreter;
 }
 
-export type RenderId = number;
-export type Data = any;
-export type event = any;
-export type Context = object;
-
-export interface SearchContext {
-  type: 'kibana_context';
-  filters?: Filter[];
-  query?: Query;
-  timeRange?: TimeRange;
+/**
+ * @deprecated
+ */
+export interface ExpressionInterpreter {
+  interpretAst: ExpressionsService['run'];
 }
 
-export type IGetInitialContext = () => SearchContext | Context;
-
 export interface IExpressionLoaderParams {
-  searchContext?: SearchContext;
-  context?: Context;
+  searchContext?: ExecutionContextSearch;
+  context?: ExpressionValue;
   variables?: Record<string, any>;
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
   extraHandlers?: Record<string, any>;
-}
-
-export interface IInterpreterHandlers {
-  getInitialContext: IGetInitialContext;
   inspectorAdapters?: Adapters;
-  abortSignal?: AbortSignal;
+  onRenderError?: RenderErrorHandlerFnType;
 }
 
-export interface IInterpreterRenderHandlers {
-  /**
-   * Done increments the number of rendering successes
-   */
-  done: () => void;
-  onDestroy: (fn: () => void) => void;
-  reload: () => void;
-  update: (params: any) => void;
-  event: (event: event) => void;
+export interface RenderError extends Error {
+  type?: string;
 }
 
-export interface IInterpreterRenderFunction<T = unknown> {
-  name: string;
-  displayName: string;
-  help: string;
-  validate: () => void;
-  reuseDomNode: boolean;
-  render: (domNode: Element, data: T, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
-}
-
-export interface IInterpreterErrorResult {
-  type: 'error';
-  error: { message: string; name: string; stack: string };
-}
-
-export interface IInterpreterSuccessResult {
-  type: string;
-  as?: string;
-  value?: unknown;
-  error?: unknown;
-}
-
-export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
-
-export interface IInterpreter {
-  interpretAst(
-    ast: ExpressionAST,
-    context: Context,
-    handlers: IInterpreterHandlers
-  ): Promise<IInterpreterResult>;
-}
+export type RenderErrorHandlerFnType = (
+  domNode: HTMLElement,
+  error: RenderError,
+  handlers: IInterpreterRenderHandlers
+) => void;

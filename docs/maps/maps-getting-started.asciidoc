@@ -68,14 +68,16 @@ and lighter shades symbolize countries with less traffic.
 . Click the *EMS Boundaries* data source.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
-. Set *Layer name* to `Total Requests by Country`.
-. Set *Layer transparency* to 0.5.
+. Set *Name* to `Total Requests by Country`.
+. Set *Opacity* to 50%.
+. Click *Add* under *Tooltip fields*.
+. In the popover, select *ISO 3166-1 alpha-2 code* and *name* and click *Add*.
 
 ===== Join the vector layer with the sample web log index
 
 You now have a vector layer containing the world countries.
 To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
-To do this, you'll create a <<terms-join, terms join>> to link the vector source *World Countries* to
+To do this, you'll create a <<terms-join, term join>> to link the vector source *World Countries* to
 the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
 . Click plus image:maps/images/gs_plus_icon.png[] to the right of *Term Joins* label.
@@ -83,15 +85,18 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 . Set *Left field* to *ISO 3166-1 alpha-2 code*.
 . Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
+. Click *and use metric count*.
+. Set *Custom label* to *web logs count*.
 
-===== Set the vector style
+===== Set the layer style
 
 All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
 To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
 
-. Click image:maps/images/gs_link_icon.png[] to the right of *Fill color*.
+. Under *Fill color*, change the selected value from *Solid* to *By value*.
+. In the field select input, select *web logs count*.
 . Select the grey color ramp.
-. In the field select input, select *count of kibana_sample_data_logs:geo.src*.
+. Under *Border color*, change the selected color to *white*.
 . Click *Save & close*.
 +
 Your map now looks like this:
@@ -119,9 +124,11 @@ The layer is only visible when users zoom in the map past zoom level 9.
 . Click the *Documents* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
-. Set *Layer name* to `Actual Requests`.
-. Set *Zoom range for layer visibility* to the range [9, 24].
-. Set *Layer transparency* to 1.
+. Set *Name* to `Actual Requests`.
+. Set *Visibilty* to the range [9, 24].
+. Set *Opacity* to 100%.
+. Click *Add* under *Tooltip fields*.
+. In the popover, select *clientip*, *timestamp*, *host*, *request*, *response*, *machine.os*, *agent*, and *bytes* and click *Add*.
 . Set *Fill color* to *#2200ff*.
 . Click *Save & close*.
 +
@@ -150,29 +157,30 @@ image::maps/images/grid_metrics_both.png[]
 . In the map legend, click *Add layer*.
 . Click the *Grid aggregation* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
+. Set *Show as* to *clusters*.
 . Click the *Add layer* button.
-. Set *Layer name* to `Total Requests and Bytes`.
-. Set *Zoom range for layer visibility* to the range [0, 9].
-. Set *Layer transparency* to 1.
+. Set *Name* to `Total Requests and Bytes`.
+. Set *Visibility* to the range [0, 9].
+. Set *Opacity* to 100%.
 
 ===== Configure the aggregation metrics
 
-. Click plus image:maps/images/gs_plus_icon.png[] to the right of *Metrics* label.
+. Click *Add metric* under of *Metrics* label.
 . Select *Sum* in the aggregation select.
 . Select *bytes* in the field select.
 
-===== Set the vector style
+===== Set the layer style
 
-. In *Vector style*, change *Symbol size*:
-  .. Set *Min size* to 1.
+. In *Layer style*, change *Symbol size*:
+  .. Set *Min size* to 7.
   .. Set *Max size* to 25.
-  .. In the field select, select *sum of bytes*.
+  .. Change the field select from *count* to *sum of bytes*.
 . Click *Save & close* button.
 +
 Your map now looks like this between zoom levels 0 and 9:
 +
 [role="screenshot"]
-image::maps/images/gs_add_es_layer.png[]
+image::maps/images/sample_data_web_logs.png[]
 
 [role="xpack"]
 [[maps-save]]
@@ -181,7 +189,7 @@ Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
-. Click *Confirm Save*.
+. Click *Save*.
 +
 You have completed the steps for re-creating the sample data map.
 

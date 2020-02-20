@@ -18,10 +18,7 @@
  */
 
 import sinon from 'sinon';
-import {
-  sendRequest as sendRequestUnbound,
-  useRequest as useRequestUnbound,
-} from './request';
+import { sendRequest as sendRequestUnbound, useRequest as useRequestUnbound } from './request';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -34,12 +31,11 @@ const TestHook = ({ callback }) => {
 
 let element;
 
-const testHook = (callback) => {
+const testHook = callback => {
   element = mount(<TestHook callback={callback} />);
 };
 
-const wait = async wait =>
-  new Promise(resolve => setTimeout(resolve, wait || 1));
+const wait = async wait => new Promise(resolve => setTimeout(resolve, wait || 1));
 
 // FLAKY:
 // - https://github.com/elastic/kibana/issues/42561
@@ -75,13 +71,13 @@ describe.skip('request lib', () => {
     it('uses the provided path, method, and body to send the request', async () => {
       const response = await sendRequest({ ...successRequest });
       sinon.assert.calledOnce(sendPost);
-      expect(response).toEqual({ data: successResponse.data });
+      expect(response).toEqual({ data: successResponse.data, error: null });
     });
 
     it('surfaces errors', async () => {
       try {
         await sendRequest({ ...errorRequest });
-      } catch(e) {
+      } catch (e) {
         sinon.assert.calledOnce(sendPost);
         expect(e).toBe(errorResponse.error);
       }
@@ -186,11 +182,11 @@ describe.skip('request lib', () => {
           expect(hook.error).toBe(errorResponse);
         });
 
-        it('is undefined when the request is successful', async () => {
+        it('is null when the request is successful', async () => {
           initUseRequest({ ...successRequest });
           await wait(50);
           expect(hook.isLoading).toBe(false);
-          expect(hook.error).toBeUndefined();
+          expect(hook.error).toBeNull();
         });
       });
 
@@ -209,11 +205,11 @@ describe.skip('request lib', () => {
           expect(hook.data).toBe(successResponse.data);
         });
 
-        it('is undefined when the request fails', async () => {
+        it('is null when the request fails', async () => {
           initUseRequest({ ...errorRequest });
           await wait(50);
           expect(hook.isLoading).toBe(false);
-          expect(hook.data).toBeUndefined();
+          expect(hook.data).toBeNull();
         });
       });
     });

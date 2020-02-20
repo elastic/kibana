@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 
 import { EuiProgress } from '@elastic/eui';
 
-import { MlInMemoryTableBasic } from '../../../../../shared_imports';
+import { mlInMemoryTableBasicFactory } from '../../../../../shared_imports';
 
 // The built in loading progress bar of EuiInMemoryTable causes a full DOM replacement
 // of the table and doesn't play well with auto-refreshing. That's why we're displaying
@@ -73,32 +73,35 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-export class TransformTable extends MlInMemoryTableBasic {
-  static getDerivedStateFromProps(nextProps: any, prevState: any) {
-    const derivedState = {
-      ...prevState.prevProps,
-      pageIndex: nextProps.pagination.initialPageIndex,
-      pageSize: nextProps.pagination.initialPageSize,
-    };
+export function transformTableFactory<T>() {
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<T>();
+  return class TransformTable extends MlInMemoryTableBasic {
+    static getDerivedStateFromProps(nextProps: any, prevState: any) {
+      const derivedState = {
+        ...prevState.prevProps,
+        pageIndex: nextProps.pagination.initialPageIndex,
+        pageSize: nextProps.pagination.initialPageSize,
+      };
 
-    if (nextProps.items !== prevState.prevProps.items) {
-      Object.assign(derivedState, {
-        prevProps: {
-          items: nextProps.items,
-        },
-      });
-    }
+      if (nextProps.items !== prevState.prevProps.items) {
+        Object.assign(derivedState, {
+          prevProps: {
+            items: nextProps.items,
+          },
+        });
+      }
 
-    const { sortName, sortDirection } = getInitialSorting(nextProps.columns, nextProps.sorting);
-    if (
-      sortName !== prevState.prevProps.sortName ||
-      sortDirection !== prevState.prevProps.sortDirection
-    ) {
-      Object.assign(derivedState, {
-        sortName,
-        sortDirection,
-      });
+      const { sortName, sortDirection } = getInitialSorting(nextProps.columns, nextProps.sorting);
+      if (
+        sortName !== prevState.prevProps.sortName ||
+        sortDirection !== prevState.prevProps.sortDirection
+      ) {
+        Object.assign(derivedState, {
+          sortName,
+          sortDirection,
+        });
+      }
+      return derivedState;
     }
-    return derivedState;
-  }
+  };
 }

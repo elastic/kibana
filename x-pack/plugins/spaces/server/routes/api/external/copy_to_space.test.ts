@@ -11,7 +11,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
@@ -19,13 +19,12 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
-import { ObjectType } from '@kbn/config-schema';
-import { RouteSchemas } from 'src/core/server/http/router/route';
 import { spacesConfig } from '../../../lib/__fixtures__';
+import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -44,9 +43,8 @@ describe('copy to space', () => {
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () =>
-        createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      elasticsearch: elasticsearchServiceMock.createSetup(),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });
@@ -79,19 +77,11 @@ describe('copy to space', () => {
 
     return {
       copyToSpace: {
-        routeValidation: ctsRouteDefinition.validate as RouteSchemas<
-          ObjectType,
-          ObjectType,
-          ObjectType
-        >,
+        routeValidation: ctsRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: ctsRouteHandler,
       },
       resolveConflicts: {
-        routeValidation: resolveRouteDefinition.validate as RouteSchemas<
-          ObjectType,
-          ObjectType,
-          ObjectType
-        >,
+        routeValidation: resolveRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
@@ -151,7 +141,7 @@ describe('copy to space', () => {
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[spaces]: duplicate space ids are not allowed"`);
     });
 
@@ -164,7 +154,7 @@ describe('copy to space', () => {
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
         `"[spaces.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed"`
       );
@@ -173,20 +163,26 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
     it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'globalType', id: 'bar' }, { type: 'visualization', id: 'bar' }],
+        objects: [
+          { type: 'globalType', id: 'bar' },
+          { type: 'visualization', id: 'bar' },
+        ],
       };
 
       const { copyToSpace, legacyAPI } = await setup();
@@ -308,13 +304,16 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         retries: {},
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { resolveConflicts } = await setup();
 
       expect(() =>
-        resolveConflicts.routeValidation.body!.validate(payload)
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
@@ -335,7 +334,7 @@ describe('copy to space', () => {
       const { resolveConflicts } = await setup();
 
       expect(() =>
-        resolveConflicts.routeValidation.body!.validate(payload)
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
         `"[retries.key(\\"invalid-space-id!@#$%^&*()\\")]: Invalid space id: invalid-space-id!@#$%^&*()"`
       );

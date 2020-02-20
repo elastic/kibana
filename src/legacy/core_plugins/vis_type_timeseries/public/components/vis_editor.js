@@ -22,21 +22,19 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
 import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../../common/extract_index_patterns';
-
-import { npStart } from 'ui/new_platform';
+import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
+import { esKuery } from '../../../../../plugins/data/public';
+import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { timefilter } from 'ui/timefilter';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -44,8 +42,6 @@ const APP_NAME = 'VisEditor';
 export class VisEditor extends Component {
   constructor(props) {
     super(props);
-    const { vis } = props;
-    this.appState = vis.API.getAppState();
     this.localStorage = new Storage(window.localStorage);
     this.state = {
       model: props.visParams,
@@ -54,7 +50,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(timefilter);
+    this.onBrush = createBrushHandler(getDataStart().query.timefilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -62,8 +58,8 @@ export class VisEditor extends Component {
     // core dependencies required by React components downstream.
     this.coreContext = {
       appName: APP_NAME,
-      uiSettings: npStart.core.uiSettings,
-      savedObjectsClient: npStart.core.savedObjects.client,
+      uiSettings: getUISettings(),
+      savedObjectsClient: getSavedObjectsClient(),
       store: this.localStorage,
     };
   }
@@ -83,13 +79,19 @@ export class VisEditor extends Component {
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
     this.props.vis.updateState();
+    // This check should be redundant, since this method should only be called when we're in editor
+    // mode where there's also an appState passed into us.
+    if (this.props.appState) {
+      this.props.appState.vis = this.props.vis.getState();
+      this.props.appState.save();
+    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   isValidKueryQuery = filterQuery => {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
         const queryOptions = this.coreContext.uiSettings.get('query:allowLeadingWildcards');
-        fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
+        esKuery.fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
       } catch (error) {
         return false;
       }
@@ -171,8 +173,8 @@ export class VisEditor extends Component {
           services={{
             appName: APP_NAME,
             storage: this.localStorage,
-            data: npStart.plugins.data,
-            ...npStart.core,
+            data: getDataStart(),
+            ...getCoreStart(),
           }}
         >
           <div className="tvbEditor" data-test-subj="tvbVisEditor">
@@ -183,7 +185,6 @@ export class VisEditor extends Component {
               dirty={this.state.dirty}
               autoApply={this.state.autoApply}
               model={model}
-              appState={this.appState}
               savedObj={this.props.savedObj}
               timeRange={this.props.timeRange}
               uiState={this.uiState}
@@ -239,4 +240,5 @@ VisEditor.propTypes = {
   isEditorMode: PropTypes.bool,
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
+  appState: PropTypes.object,
 };

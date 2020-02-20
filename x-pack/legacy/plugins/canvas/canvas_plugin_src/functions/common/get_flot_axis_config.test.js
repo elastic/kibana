@@ -84,10 +84,16 @@ describe('getFlotAxisConfig', () => {
   describe('ticks', () => {
     it('adds a tick mark mapping for string columns', () => {
       let result = getFlotAxisConfig('x', true, { columns, ticks });
-      expect(result.ticks).toEqual([[2, 'product1'], [1, 'product2']]);
+      expect(result.ticks).toEqual([
+        [2, 'product1'],
+        [1, 'product2'],
+      ]);
 
       result = getFlotAxisConfig('x', xAxisConfig, { columns, ticks });
-      expect(result.ticks).toEqual([[2, 'product1'], [1, 'product2']]);
+      expect(result.ticks).toEqual([
+        [2, 'product1'],
+        [1, 'product2'],
+      ]);
     });
   });
 

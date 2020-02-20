@@ -1,0 +1,39 @@
+{
+  "description": "TCP Port 8000 is commonly used for development environments of web server\nsoftware. It generally should not be exposed directly to the Internet. If you are\nrunning software like this on the Internet, you should consider placing it behind\na reverse proxy.\n",
+  "false_positives": [
+    "Because this port is in the ephemeral range, this rule may false under certain conditions, such as when a NATed web server replies to a client which has used a port in the range by coincidence. In this case, such servers can be excluded. Some applications may use this port but this is very uncommon and usually appears in local traffic using private IPs, which this rule does not match. Some cloud environments, particularly development environments, may use this port when VPNs or direct connects are not in use and cloud instances are accessed across the Internet."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "TCP Port 8000 Activity to the Internet",
+  "query": "network.transport: tcp and destination.port: 8000 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 21,
+  "rule_id": "08d5d7e2-740f-44d8-aeda-e41f4263efaf",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

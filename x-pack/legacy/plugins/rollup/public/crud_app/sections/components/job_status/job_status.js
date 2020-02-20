@@ -12,52 +12,34 @@ import { EuiHealth } from '@elastic/eui';
 const statusToHealthMap = {
   stopped: (
     <EuiHealth color="subdued">
-      <FormattedMessage
-        id="xpack.rollupJobs.jobStatus.stoppedLabel"
-        defaultMessage="Stopped"
-      />
+      <FormattedMessage id="xpack.rollupJobs.jobStatus.stoppedLabel" defaultMessage="Stopped" />
     </EuiHealth>
   ),
   stopping: (
     <EuiHealth color="warning">
-      <FormattedMessage
-        id="xpack.rollupJobs.jobStatus.stoppingLabel"
-        defaultMessage="Stopping"
-      />
+      <FormattedMessage id="xpack.rollupJobs.jobStatus.stoppingLabel" defaultMessage="Stopping" />
     </EuiHealth>
   ),
   started: (
     <EuiHealth color="success">
-      <FormattedMessage
-        id="xpack.rollupJobs.jobStatus.startedLabel"
-        defaultMessage="Started"
-      />
+      <FormattedMessage id="xpack.rollupJobs.jobStatus.startedLabel" defaultMessage="Started" />
     </EuiHealth>
   ),
   indexing: (
     <EuiHealth color="warning">
-      <FormattedMessage
-        id="xpack.rollupJobs.jobStatus.indexingLabel"
-        defaultMessage="Indexing"
-      />
+      <FormattedMessage id="xpack.rollupJobs.jobStatus.indexingLabel" defaultMessage="Indexing" />
     </EuiHealth>
   ),
   abort: (
     <EuiHealth color="danger">
-      <FormattedMessage
-        id="xpack.rollupJobs.jobStatus.abortingLabel"
-        defaultMessage="Aborting"
-      />
+      <FormattedMessage id="xpack.rollupJobs.jobStatus.abortingLabel" defaultMessage="Aborting" />
     </EuiHealth>
   ),
 };
 
 const statusUnknown = (
   <EuiHealth color="subdued">
-    <FormattedMessage
-      id="xpack.rollupJobs.jobStatus.unknownLabel"
-      defaultMessage="Unknown"
-    />
+    <FormattedMessage id="xpack.rollupJobs.jobStatus.unknownLabel" defaultMessage="Unknown" />
   </EuiHealth>
 );
 

@@ -7,8 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -31,19 +30,23 @@ interface Props {
   isLibraryFrame: boolean;
 }
 
-const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
+const FrameHeading: React.FC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber = idx(stackframe, _ => _.line.number) || 0;
+  const lineNumber = stackframe.line?.number ?? 0;
+
+  const name =
+    'filename' in stackframe ? stackframe.filename : stackframe.classname;
+
   return (
     <FileDetails>
-      <FileDetail>{stackframe.filename}</FileDetail> in{' '}
+      <FileDetail>{name}</FileDetail> in{' '}
       <FileDetail>{stackframe.function}</FileDetail>
       {lineNumber > 0 && (
         <Fragment>
           {' at '}
-          <FileDetail>line {stackframe.line.number}</FileDetail>
+          <FileDetail>line {lineNumber}</FileDetail>
         </Fragment>
       )}
     </FileDetails>

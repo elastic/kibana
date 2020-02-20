@@ -106,10 +106,7 @@ describe('RecentlyAccessed#start()', () => {
     const stop$ = new Subject();
     const observedValues$ = recentlyAccessed
       .get$()
-      .pipe(
-        bufferCount(3),
-        takeUntil(stop$)
-      )
+      .pipe(bufferCount(3), takeUntil(stop$))
       .toPromise();
     recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
     recentlyAccessed.add('/app/item2', 'Item 2', 'item2');

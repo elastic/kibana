@@ -9,8 +9,8 @@ import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const es = getService('es');
-  const chance = getService('chance');
+  const es = getService('legacyEs');
+  const randomness = getService('randomness');
   const supertest = getService('supertest');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -21,7 +21,6 @@ export default function({ getService }: FtrProviderContext) {
         _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
       } = await es.get({
         id: generateRawID(id),
-        type: '_doc',
         index: '.kibana',
       });
 
@@ -37,9 +36,9 @@ export default function({ getService }: FtrProviderContext) {
     let savedObject: SavedObject;
     beforeEach(async () => {
       savedObjectOriginalAttributes = {
-        publicProperty: chance.string(),
-        publicPropertyExcludedFromAAD: chance.string(),
-        privateProperty: chance.string(),
+        publicProperty: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
+        privateProperty: randomness.string(),
       };
 
       const { body } = await supertest
@@ -74,17 +73,17 @@ export default function({ getService }: FtrProviderContext) {
         {
           type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
-            publicProperty: chance.string(),
-            publicPropertyExcludedFromAAD: chance.string(),
-            privateProperty: chance.string(),
+            publicProperty: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
+            privateProperty: randomness.string(),
           },
         },
         {
           type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
-            publicProperty: chance.string(),
-            publicPropertyExcludedFromAAD: chance.string(),
-            privateProperty: chance.string(),
+            publicProperty: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
+            privateProperty: randomness.string(),
           },
         },
       ];
@@ -162,9 +161,9 @@ export default function({ getService }: FtrProviderContext) {
 
     it('#update encrypts attributes and strips them from response', async () => {
       const updatedAttributes = {
-        publicProperty: chance.string(),
-        publicPropertyExcludedFromAAD: chance.string(),
-        privateProperty: chance.string(),
+        publicProperty: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
+        privateProperty: randomness.string(),
       };
 
       const { body: response } = await supertest
@@ -197,7 +196,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('#getDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
-      const updatedAttributes = { publicPropertyExcludedFromAAD: chance.string() };
+      const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
@@ -220,7 +219,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('#getDecryptedAsInternalUser fails to decrypt if AAD attribute has changed', async () => {
-      const updatedAttributes = { publicProperty: chance.string() };
+      const updatedAttributes = { publicProperty: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
@@ -253,7 +252,10 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('within a default space', () => {
-      runTests(() => '/api/saved_objects/', id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`);
+      runTests(
+        () => '/api/saved_objects/',
+        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
 
     describe('within a custom space', () => {

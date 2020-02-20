@@ -22,7 +22,7 @@ interface Props {
   onChange(item: PivotAggsConfig): void;
 }
 
-export const AggLabelForm: React.SFC<Props> = ({
+export const AggLabelForm: React.FC<Props> = ({
   deleteHandler,
   item,
   otherAggNames,
@@ -39,7 +39,9 @@ export const AggLabelForm: React.SFC<Props> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="transform__AggregationLabel--text">
-        <span className="eui-textTruncate">{item.aggName}</span>
+        <span className="eui-textTruncate" data-test-subj="transformAggregationEntryLabel">
+          {item.aggName}
+        </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiPopover
@@ -53,6 +55,7 @@ export const AggLabelForm: React.SFC<Props> = ({
               size="s"
               iconType="pencil"
               onClick={() => setPopoverVisibility(!isPopoverVisible)}
+              data-test-subj="transformAggregationEntryEditButton"
             />
           }
           isOpen={isPopoverVisible}
@@ -74,6 +77,7 @@ export const AggLabelForm: React.SFC<Props> = ({
           size="s"
           iconType="cross"
           onClick={() => deleteHandler(item.aggName)}
+          data-test-subj="transformAggregationEntryDeleteButton"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

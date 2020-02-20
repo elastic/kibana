@@ -18,6 +18,23 @@
  */
 
 module.exports = (_, options = {}) => {
+  const overrides = [];
+  if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
+    overrides.push({
+      test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
+      plugins: [
+        [
+          require.resolve('babel-plugin-filter-imports'),
+          {
+            imports: {
+              perf_hooks: ['performance'],
+            },
+          },
+        ],
+      ],
+    });
+  }
+
   return {
     presets: [
       [
@@ -37,9 +54,14 @@ module.exports = (_, options = {}) => {
           // on their own
           useBuiltIns: 'entry',
           modules: 'cjs',
-          corejs: 3,
+          // right now when using `corejs: 3` babel does not use the latest available
+          // core-js version due to a bug: https://github.com/babel/babel/issues/10816
+          // Because of that we should use for that value the same version we install
+          // in the package.json in order to have the same polyfills between the environment
+          // and the tests
+          corejs: '3.2.1',
 
-          ...(options['@babel/preset-env'] || {})
+          ...(options['@babel/preset-env'] || {}),
         },
       ],
       require('./common_preset'),
@@ -48,9 +70,10 @@ module.exports = (_, options = {}) => {
       [
         require.resolve('babel-plugin-transform-define'),
         {
-          'global.__BUILT_WITH_BABEL__': 'true'
-        }
-      ]
-    ]
+          'global.__BUILT_WITH_BABEL__': 'true',
+        },
+      ],
+    ],
+    overrides,
   };
 };

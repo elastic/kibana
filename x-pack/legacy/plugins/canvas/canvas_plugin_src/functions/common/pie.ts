@@ -7,13 +7,20 @@
 import { get, map, groupBy } from 'lodash';
 // @ts-ignore lodash.keyby imports invalid member from @types/lodash
 import keyBy from 'lodash.keyby';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../../i18n';
-import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../../../types';
+import {
+  Legend,
+  Palette,
+  PointSeries,
+  Render,
+  SeriesStyle,
+  Style,
+  ExpressionFunctionDefinition,
+} from '../../../types';
 
 interface PieSeriesOptions {
   show: boolean;
@@ -70,17 +77,15 @@ interface Arguments {
   tilt: number;
 }
 
-export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<Pie>> {
+export function pie(): ExpressionFunctionDefinition<'pie', PointSeries, Arguments, Render<Pie>> {
   const { help, args: argHelp } = getFunctionHelp().pie;
 
   return {
     name: 'pie',
     aliases: [],
     type: 'render',
+    inputTypes: ['pointseries'],
     help,
-    context: {
-      types: ['pointseries'],
-    },
     args: {
       font: {
         types: ['style'],
@@ -129,11 +134,11 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
         help: argHelp.tilt,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } = args;
       const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
-      const data: PieData[] = map(groupBy(context.rows, 'color'), (series, label = '') => {
+      const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {
         const item: PieData = {
           label,
           data: series.map(point => point.size || 1),

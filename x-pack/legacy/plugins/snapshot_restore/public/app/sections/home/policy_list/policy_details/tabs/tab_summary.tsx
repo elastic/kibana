@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -12,8 +13,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiIcon,
-  EuiText,
   EuiPanel,
   EuiStat,
   EuiSpacer,
@@ -22,7 +21,7 @@ import {
 
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-import { FormattedDateTime } from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {
@@ -46,6 +45,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     config,
     stats,
     retention,
+    isManagedPolicy,
   } = policy;
   const { includeGlobalState, ignoreUnavailable, indices, partial } = config || {
     includeGlobalState: undefined,
@@ -54,82 +54,24 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     partial: undefined,
   };
 
-  // Only show 10 indices initially
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const displayIndices = typeof indices === 'string' ? indices.split(',') : indices;
-  const hiddenIndicesCount =
-    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
-  const shortIndicesList =
-    displayIndices && displayIndices.length ? (
-      <EuiText size="m">
-        <ul>
-          {[...displayIndices].splice(0, 10).map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
-                    defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowDown" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
-        </ul>
-      </EuiText>
-    ) : (
-      <FormattedMessage
-        id="xpack.snapshotRestore.policyDetails.allIndicesLabel"
-        defaultMessage="All indices"
-      />
-    );
-  const fullIndicesList =
-    displayIndices && displayIndices.length && displayIndices.length > 10 ? (
-      <EuiText size="m">
-        <ul>
-          {displayIndices.map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
-                    defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowUp" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
-        </ul>
-      </EuiText>
-    ) : null;
-
-  // Reset indices list state when clicking through different policies
-  useEffect(() => {
-    return () => {
-      setIsShowingFullIndicesList(false);
-    };
-  }, []);
-
   return (
     <Fragment>
+      {isManagedPolicy ? (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="iInCircle"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyDetails.managedPolicyWarningTitle"
+                defaultMessage="This is a managed policy used by other systems. Any changes you make might affect how these systems operate."
+              />
+            }
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
       {/** Stats panel */}
       {stats && (
         <Fragment>
@@ -296,7 +238,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {isShowingFullIndicesList ? fullIndicesList : shortIndicesList}
+              <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 

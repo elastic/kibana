@@ -8,7 +8,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../plugins/apm/common/i18n';
 
 const EmptyValue = styled.span`
   color: ${theme.euiColorMediumShade};

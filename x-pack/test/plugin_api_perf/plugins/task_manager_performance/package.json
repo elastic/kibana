@@ -7,6 +7,10 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "joi": "^13.5.2"
+    "lodash": "^4.17.15",
+    "uuid": "3.3.2",
+    "joi": "^13.5.2",
+    "stats-lite": "2.2.0",
+    "pretty-ms": "5.0.0"
   }
 }

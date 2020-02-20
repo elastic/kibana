@@ -7,9 +7,23 @@
 import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 import moment from 'moment-timezone';
 
+// FAILING: https://github.com/elastic/kibana/issues/50005
 describe('getTimezoneOffsetInMs', () => {
+  let originalTimezone: moment.MomentZone | null;
+
+  beforeAll(() => {
+    // @ts-ignore moment types do not define defaultZone but it's there
+    originalTimezone = moment.defaultZone;
+  });
+
+  afterAll(() => {
+    moment.tz.setDefault(originalTimezone ? originalTimezone.name : '');
+  });
+
   describe('when no default timezone is set', () => {
     it('guesses the timezone', () => {
+      moment.tz.setDefault();
+
       const guess = jest.fn(() => 'Etc/UTC');
       jest.spyOn(moment.tz, 'guess').mockImplementationOnce(guess);
 
@@ -20,20 +34,13 @@ describe('getTimezoneOffsetInMs', () => {
   });
 
   describe('when a default timezone is set', () => {
-    let originalTimezone: moment.MomentZone | null;
-
-    beforeAll(() => {
-      // @ts-ignore moment types do not define defaultZone but it's there
-      originalTimezone = moment.defaultZone;
-      moment.tz.setDefault('America/Denver');
-    });
-
-    afterAll(() => {
-      moment.tz.setDefault(originalTimezone ? originalTimezone.name : '');
-    });
-
     it('returns the time in milliseconds', () => {
-      expect(getTimezoneOffsetInMs(Date.now())).toEqual(21600000);
+      moment.tz.setDefault('America/Denver');
+      const now = Date.now();
+      // get the expected offset from moment to prevent any issues with DST
+      const expectedOffset =
+        moment.tz.zone('America/Denver')!.parse(now) * 60000;
+      expect(getTimezoneOffsetInMs(Date.now())).toEqual(expectedOffset);
     });
   });
 });

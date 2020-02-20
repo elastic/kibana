@@ -6,13 +6,13 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { scrollToTop } from '../scroll_to_top';
+import { useScrollToTop } from '../scroll_to_top';
 
 export interface RedirectWrapperProps {
   to: string;
 }
 
 export const RedirectWrapper = ({ to }: RedirectWrapperProps) => {
-  scrollToTop();
+  useScrollToTop();
   return <Redirect to={to} />;
 };

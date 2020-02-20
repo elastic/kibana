@@ -6,11 +6,10 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const log = getService('log');
 
   describe('docvalue_fields', () => {
     before(async () => {
@@ -22,7 +21,6 @@ export default function ({ getPageObjects, getService }) {
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
       const responseBody = await testSubjects.getVisibleText('inspectorResponseBody');
-      log.info(responseBody);
       await inspector.close();
       return JSON.parse(responseBody);
     }
@@ -31,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example');
       const response = await getResponse();
       const firstHit = response.hits.hits[0];
-      expect(Object.keys(firstHit).join(',')).to.equal('_index,_type,_id,_score,fields');
+      expect(Object.keys(firstHit).join(',')).to.equal('_index,_id,_score,fields');
       expect(Object.keys(firstHit.fields).join(',')).to.equal('geo.coordinates');
     });
 
@@ -39,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example with data driven styles');
       const response = await getResponse();
       const firstHit = response.hits.hits[0];
-      expect(Object.keys(firstHit).join(',')).to.equal('_index,_type,_id,_score,fields');
+      expect(Object.keys(firstHit).join(',')).to.equal('_index,_id,_score,fields');
       expect(Object.keys(firstHit.fields).join(',')).to.equal('geo.coordinates,bytes,hour_of_day');
     });
 
@@ -47,11 +45,10 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example with data driven styles on date field');
       const response = await getResponse();
       const firstHit = response.hits.hits[0];
-      expect(Object.keys(firstHit).join(',')).to.equal('_index,_type,_id,_score,fields');
+      expect(Object.keys(firstHit).join(',')).to.equal('_index,_id,_score,fields');
       expect(Object.keys(firstHit.fields).join(',')).to.equal('geo.coordinates,bytes,@timestamp');
       expect(firstHit.fields['@timestamp']).to.be.an('array');
       expect(firstHit.fields['@timestamp'][0]).to.equal('1442709321445');
     });
-
   });
 }

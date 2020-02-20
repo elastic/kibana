@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportRuleModal renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiOverlayMask>
+    <EuiModal
+      maxWidth="750px"
+      onClose={[MockFunction]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          Import rule
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText
+          size="s"
+        >
+          <h4>
+            Select a SIEM rule (as exported from the Detection Engine UI) to import
+          </h4>
+        </EuiText>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiFilePicker
+          compressed={false}
+          display="large"
+          fullWidth={true}
+          id="rule-file-picker"
+          initialPromptText="Select or drag and drop a valid rules_export.ndjson file"
+          isLoading={false}
+          onChange={[Function]}
+        />
+        <EuiSpacer
+          size="s"
+        />
+        <EuiCheckbox
+          checked={false}
+          compressed={false}
+          disabled={false}
+          id="rule-overwrite-saved-object"
+          indeterminate={false}
+          label="Automatically overwrite saved objects with the same rule ID"
+          onChange={[Function]}
+        />
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          onClick={[Function]}
+        >
+          Cancel
+        </EuiButtonEmpty>
+        <EuiButton
+          disabled={true}
+          fill={true}
+          onClick={[Function]}
+        >
+          Import rule
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </EuiOverlayMask>
+</Fragment>
+`;

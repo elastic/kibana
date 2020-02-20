@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
 import { DonutChart } from './charts';
-import { Snapshot as SnapshotType } from '../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { snapshotQuery } from '../../queries';
 import { ChartWrapper } from './charts/chart_wrapper';
+import { SnapshotHeading } from './snapshot_heading';
+import { Snapshot as SnapshotType } from '../../../common/runtime_types';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
 
-interface SnapshotQueryResult {
-  snapshot?: SnapshotType;
+interface SnapshotComponentProps {
+  count: SnapshotType;
+  loading: boolean;
+  height?: string;
 }
 
 /**
@@ -26,35 +26,15 @@ interface SnapshotQueryResult {
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = ({
-  data,
-  loading,
-}: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
-  <ChartWrapper loading={loading}>
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="xpack.uptime.snapshot.downCountsMessage"
-          defaultMessage="{down}/{total} monitors are down"
-          values={{
-            down: get<number>(data, 'snapshot.counts.down', 0),
-            total: get<number>(data, 'snapshot.counts.total', 0),
-          }}
-        />
-      </h2>
-    </EuiTitle>
+export const SnapshotComponent: React.FC<SnapshotComponentProps> = ({ count, height, loading }) => (
+  <ChartWrapper loading={loading} height={height}>
+    <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
     <EuiSpacer size="xs" />
     <DonutChart
-      up={get<number>(data, 'snapshot.counts.up', 0)}
-      down={get<number>(data, 'snapshot.counts.down', 0)}
+      up={get<number>(count, 'up', 0)}
+      down={get<number>(count, 'down', 0)}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />
   </ChartWrapper>
 );
-
-/**
- * This component visualizes a KPI and histogram chart to help users quickly
- * glean the status of their uptime environment.
- */
-export const Snapshot = withUptimeGraphQL<SnapshotQueryResult>(SnapshotComponent, snapshotQuery);

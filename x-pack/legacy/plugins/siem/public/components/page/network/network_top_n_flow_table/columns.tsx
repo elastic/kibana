@@ -7,7 +7,6 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
@@ -48,9 +47,7 @@ export type NetworkTopNFlowColumnsIpDetails = [
 ];
 
 export const getNetworkTopNFlowColumns = (
-  indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetSourceDest,
-  type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns => [
   {
@@ -83,7 +80,7 @@ export const getNetworkTopNFlowColumns = (
                     <Provider dataProvider={dataProvider} />
                   </DragEffects>
                 ) : (
-                  <IPDetailsLink ip={ip} />
+                  <IPDetailsLink ip={ip} flowTarget={flowTarget} />
                 )
               }
             />
@@ -233,12 +230,11 @@ export const getNetworkTopNFlowColumns = (
 ];
 
 export const getNFlowColumnsCurated = (
-  indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns | NetworkTopNFlowColumnsIpDetails => {
-  const columns = getNetworkTopNFlowColumns(indexPattern, flowTarget, type, tableId);
+  const columns = getNetworkTopNFlowColumns(flowTarget, tableId);
 
   // Columns to exclude from host details pages
   if (type === networkModel.NetworkType.details) {

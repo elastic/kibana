@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { createTelemetryUsageCollector } from './telemetry_usage_collector';
+export { registerTelemetryUsageCollector } from './telemetry_usage_collector';

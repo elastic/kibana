@@ -5,20 +5,19 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import {
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiText
-} from '@elastic/eui';
+import { EuiSpacer, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDisableStatusStep } from '../common_instructions';
 
 export function getLogstashInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
-    title: i18n.translate('xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable self monitoring of Logstash monitoring metrics'
-    }),
+    title: i18n.translate(
+      'xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.title',
+      {
+        defaultMessage: 'Disable self monitoring of Logstash monitoring metrics',
+      }
+    ),
     children: (
       <Fragment>
         <EuiText>
@@ -27,21 +26,16 @@ export function getLogstashInstructionsForDisablingInternalCollection(product, m
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.description"
               defaultMessage="Add the following setting in the Logstash configuration file ({file}):"
               values={{
-                file: (
-                  <Monospace>logstash.yml</Monospace>
-                )
+                file: <Monospace>logstash.yml</Monospace>,
               }}
             />
           </p>
         </EuiText>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-          language="bash"
-        >
+        <EuiSpacer size="s" />
+        <EuiCodeBlock isCopyable language="bash">
           xpack.monitoring.enabled: false
         </EuiCodeBlock>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         <EuiText>
           <p>
             <FormattedMessage
@@ -51,13 +45,10 @@ export function getLogstashInstructionsForDisablingInternalCollection(product, m
           </p>
         </EuiText>
       </Fragment>
-    )
+    ),
   };
 
   const migrationStatusStep = getDisableStatusStep(product, meta);
 
-  return [
-    disableInternalCollectionStep,
-    migrationStatusStep
-  ];
+  return [disableInternalCollectionStep, migrationStatusStep];
 }

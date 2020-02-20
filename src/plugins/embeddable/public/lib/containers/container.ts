@@ -240,6 +240,7 @@ export abstract class Container<
         ...this.input.panels,
         [panelState.explicitInput.id]: panelState,
       },
+      isEmptyState: false,
     } as Partial<TContainerInput>);
 
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);

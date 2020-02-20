@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { SPAN_ID } from '../../../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../../../typings/es_schemas/ui/Span';
+import { SPAN_ID } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { Span } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(span: Span) {
@@ -22,7 +22,7 @@ function getDiscoverQuery(span: Span) {
   };
 }
 
-export const DiscoverSpanLink: React.SFC<{
+export const DiscoverSpanLink: React.FC<{
   readonly span: Span;
 }> = ({ span, children }) => {
   return <DiscoverLink query={getDiscoverQuery(span)} children={children} />;

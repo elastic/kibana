@@ -134,12 +134,17 @@ class PipelineEditorUi extends React.Component {
         upstreamJSON: this.state.pipeline,
       })
       .then(() => {
-        toastNotifications.addSuccess(intl.formatMessage({
-          id: 'xpack.logstash.pipelineEditor.pipelineSuccessfullySavedMessage',
-          defaultMessage: 'Saved "{id}"'
-        }, {
-          id,
-        }));
+        toastNotifications.addSuccess(
+          intl.formatMessage(
+            {
+              id: 'xpack.logstash.pipelineEditor.pipelineSuccessfullySavedMessage',
+              defaultMessage: 'Saved "{id}"',
+            },
+            {
+              id,
+            }
+          )
+        );
         this.onClose();
       })
       .catch(this.notifyOnError);
@@ -195,7 +200,7 @@ class PipelineEditorUi extends React.Component {
     return licenseService.checkValidity().then(() => {
       toastNotifications.addError(err, {
         title: i18n.translate('xpack.logstash.pipelineEditor.errorHandlerToastTitle', {
-          defaultMessage: 'Pipeline error'
+          defaultMessage: 'Pipeline error',
         }),
       });
     });
@@ -214,12 +219,17 @@ class PipelineEditorUi extends React.Component {
     return pipelineService
       .deletePipeline(id)
       .then(() => {
-        toastNotifications.addSuccess(intl.formatMessage({
-          id: 'xpack.logstash.pipelineEditor.pipelineSuccessfullyDeletedMessage',
-          defaultMessage: 'Deleted "{id}"'
-        }, {
-          id,
-        }));
+        toastNotifications.addSuccess(
+          intl.formatMessage(
+            {
+              id: 'xpack.logstash.pipelineEditor.pipelineSuccessfullyDeletedMessage',
+              defaultMessage: 'Deleted "{id}"',
+            },
+            {
+              id,
+            }
+          )
+        );
         this.onClose();
       })
       .catch(this.notifyOnError);
@@ -237,24 +247,30 @@ class PipelineEditorUi extends React.Component {
     } = this.props;
 
     if (!!clone && id) {
-      return intl.formatMessage({
-        id: 'xpack.logstash.pipelineEditor.clonePipelineTitle',
-        defaultMessage: 'Clone Pipeline "{id}"'
-      }, {
-        id,
-      });
+      return intl.formatMessage(
+        {
+          id: 'xpack.logstash.pipelineEditor.clonePipelineTitle',
+          defaultMessage: 'Clone Pipeline "{id}"',
+        },
+        {
+          id,
+        }
+      );
     }
     if (!isNewPipeline) {
-      return intl.formatMessage({
-        id: 'xpack.logstash.pipelineEditor.editPipelineTitle',
-        defaultMessage: 'Edit Pipeline "{id}"'
-      }, {
-        id: this.state.pipeline.id,
-      });
+      return intl.formatMessage(
+        {
+          id: 'xpack.logstash.pipelineEditor.editPipelineTitle',
+          defaultMessage: 'Edit Pipeline "{id}"',
+        },
+        {
+          id: this.state.pipeline.id,
+        }
+      );
     }
     return intl.formatMessage({
       id: 'xpack.logstash.pipelineEditor.createPipelineTitle',
-      defaultMessage: 'Create Pipeline'
+      defaultMessage: 'Create Pipeline',
     });
   };
 
@@ -278,10 +294,12 @@ class PipelineEditorUi extends React.Component {
             {this.props.isNewPipeline && (
               <EuiFormRow
                 fullWidth
-                label={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-                  defaultMessage="Pipeline ID"
-                />)}
+                label={
+                  <FormattedMessage
+                    id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+                    defaultMessage="Pipeline ID"
+                  />
+                }
               >
                 <EuiFieldText
                   fullWidth
@@ -296,10 +314,12 @@ class PipelineEditorUi extends React.Component {
             )}
             <EuiFormRow
               fullWidth
-              label={(<FormattedMessage
-                id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-                defaultMessage="Description"
-              />)}
+              label={
+                <FormattedMessage
+                  id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+                  defaultMessage="Description"
+                />
+              }
             >
               <EuiFieldText
                 data-test-subj="inputDescription"
@@ -311,10 +331,12 @@ class PipelineEditorUi extends React.Component {
             </EuiFormRow>
             <EuiFormRow
               fullWidth
-              label={(<FormattedMessage
-                id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-                defaultMessage="Pipeline"
-              />)}
+              label={
+                <FormattedMessage
+                  id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+                  defaultMessage="Pipeline"
+                />
+              }
             >
               <div data-test-subj="acePipeline">
                 <EuiCodeEditor
@@ -336,7 +358,7 @@ class PipelineEditorUi extends React.Component {
                 <FormLabelWithIconTip
                   formRowLabelText={intl.formatMessage({
                     id: 'xpack.logstash.pipelineEditor.pipelineWorkersFormRowLabel',
-                    defaultMessage: 'Pipeline workers'
+                    defaultMessage: 'Pipeline workers',
                   })}
                   formRowTooltipText={TOOLTIPS.settings['pipeline.workers']}
                 />
@@ -353,7 +375,7 @@ class PipelineEditorUi extends React.Component {
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({
                   id: 'xpack.logstash.pipelineEditor.pipelineBatchSizeFormRowLabel',
-                  defaultMessage: 'Pipeline batch size'
+                  defaultMessage: 'Pipeline batch size',
                 })}
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
               >
@@ -366,7 +388,7 @@ class PipelineEditorUi extends React.Component {
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({
                   id: 'xpack.logstash.pipelineEditor.pipelineBatchDelayFormRowLabel',
-                  defaultMessage: 'Pipeline batch delay'
+                  defaultMessage: 'Pipeline batch delay',
                 })}
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
               >
@@ -381,7 +403,7 @@ class PipelineEditorUi extends React.Component {
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({
                   id: 'xpack.logstash.pipelineEditor.queueTypeFormRowLabel',
-                  defaultMessage: 'Queue type'
+                  defaultMessage: 'Queue type',
                 })}
                 formRowTooltipText={TOOLTIPS.settings['queue.type']}
               >
@@ -395,7 +417,7 @@ class PipelineEditorUi extends React.Component {
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({
                   id: 'xpack.logstash.pipelineEditor.queueMaxBytesFormRowLabel',
-                  defaultMessage: 'Queue max bytes'
+                  defaultMessage: 'Queue max bytes',
                 })}
                 formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
               >
@@ -416,7 +438,7 @@ class PipelineEditorUi extends React.Component {
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({
                   id: 'xpack.logstash.pipelineEditor.queueCheckpointWritesFormRowLabel',
-                  defaultMessage: 'Queue checkpoint writes'
+                  defaultMessage: 'Queue checkpoint writes',
                 })}
                 formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
               >

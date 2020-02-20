@@ -13,4 +13,3 @@ describe('PageLoading', () => {
     expect(renderWithIntl(<PageLoading />)).toMatchSnapshot();
   });
 });
-

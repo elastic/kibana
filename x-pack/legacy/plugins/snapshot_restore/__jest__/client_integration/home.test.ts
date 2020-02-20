@@ -17,13 +17,23 @@ import {
 } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
-import moment from 'moment-timezone';
 
 const { setup } = pageHelpers.home;
+
+jest.mock('ui/new_platform');
 
 jest.mock('ui/i18n', () => {
   const I18nContext = ({ children }: any) => children;
   return { I18nContext };
+});
+
+// Mocking FormattedDate and FormattedTime due to timezone differences on CI
+jest.mock('@kbn/i18n/react', () => {
+  return {
+    ...jest.requireActual('@kbn/i18n/react'),
+    FormattedDate: () => '',
+    FormattedTime: () => '',
+  };
 });
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
@@ -34,9 +44,7 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<SnapshotRestoreHome />', () => {
+describe('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
 
@@ -71,7 +79,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -81,8 +88,15 @@ describe.skip('<SnapshotRestoreHome />', () => {
       test('should have 4 tabs', () => {
         const { find } = testBed;
 
-        expect(find('tab').length).toBe(4);
-        expect(find('tab').map(t => t.text())).toEqual([
+        const tabs = [
+          find('snapshots_tab'),
+          find('repositories_tab'),
+          find('policies_tab'),
+          find('restore_status_tab'),
+        ];
+
+        expect(tabs.length).toBe(4);
+        expect(tabs.map(t => t.text())).toEqual([
           'Snapshots',
           'Repositories',
           'Policies',
@@ -98,7 +112,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         actions.selectTab('snapshots');
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -119,7 +132,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', async () => {
         const { component, exists } = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           component.update();
@@ -152,7 +164,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -198,7 +209,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickReloadButton();
           await nextTick();
@@ -255,7 +265,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
             '[data-test-subj="confirmModalConfirmButton"]'
           );
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             confirmButton!.click();
             await nextTick();
@@ -276,7 +285,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
           expect(exists('repositoryDetail')).toBe(false);
 
           await actions.clickRepositoryAt(0);
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             testBed.component.update();
@@ -338,7 +346,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
             const { exists, find, component } = testBed;
             expect(exists('repositoryDetail.verifyRepositoryButton')).toBe(true);
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               find('repositoryDetail.verifyRepositoryButton').simulate('click');
               await nextTick();
@@ -384,7 +391,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(100);
@@ -414,7 +420,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(2000);
@@ -455,7 +460,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(2000);
@@ -465,12 +469,10 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
       test('should list them in the table', async () => {
         const { table } = testBed;
-
         const { tableCellsValues } = table.getMetaData('snapshotTable');
+
         tableCellsValues.forEach((row, i) => {
           const snapshot = snapshots[i];
-          const startTime = moment(new Date(snapshot.startTimeInMillis));
-          const timezone = moment.tz.guess();
 
           expect(row).toEqual([
             '', // Checkbox
@@ -479,7 +481,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
             snapshot.shards.failed.toString(), // Failed shards
-            startTime.tz(timezone).format('MMMM D, YYYY h:mm A z'), // Start time
+            ' ', // Mocked start time
             `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             '',
           ]);
@@ -493,7 +495,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const repositoryLink = findTestSubject(rows[0].reactWrapper, 'repositoryLink');
         const { href } = repositoryLink.props();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           router.navigateTo(href!);
           await nextTick();
@@ -513,7 +514,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickReloadButton();
           await nextTick();
@@ -566,7 +566,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
             const { href } = find('snapshotDetail.repositoryLink').props();
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               router.navigateTo(href);
               await nextTick();
@@ -610,19 +609,9 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
-                const {
-                  version,
-                  versionId,
-                  uuid,
-                  indices,
-                  endTimeInMillis,
-                  startTimeInMillis,
-                } = snapshot1;
+                const { version, versionId, uuid, indices } = snapshot1;
 
                 const { find } = testBed;
-                const startTime = moment(new Date(startTimeInMillis));
-                const endTime = moment(new Date(endTimeInMillis));
-                const timezone = moment.tz.guess();
 
                 expect(find('snapshotDetail.version.value').text()).toBe(
                   `${version} / ${versionId}`
@@ -635,12 +624,6 @@ describe.skip('<SnapshotRestoreHome />', () => {
                 );
                 expect(find('snapshotDetail.indices.value').text()).toContain(
                   indices.splice(0, 10).join('')
-                );
-                expect(find('snapshotDetail.startTime.value').text()).toBe(
-                  startTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
-                );
-                expect(find('snapshotDetail.endTime.value').text()).toBe(
-                  endTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
                 );
               });
 

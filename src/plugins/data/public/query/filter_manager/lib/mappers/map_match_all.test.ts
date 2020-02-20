@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { MatchAllFilter } from '@kbn/es-query';
+
 import { mapMatchAll } from './map_match_all';
+import { MatchAllFilter } from '../../../../../common';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {

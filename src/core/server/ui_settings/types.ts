@@ -16,7 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
+import { UiSettingsParams, UserProvidedValues } from '../../types';
+export {
+  UiSettingsParams,
+  StringValidationRegexString,
+  StringValidationRegex,
+  StringValidation,
+  DeprecationSettings,
+  ImageValidation,
+  UiSettingsType,
+  UserProvidedValues,
+} from '../../types';
+
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
  * The settings provide control over the behavior of the Kibana application.
@@ -33,25 +45,23 @@ export interface IUiSettingsClient {
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+  get: <T = any>(key: string) => Promise<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>() => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */
-  getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
-    Record<string, UserProvidedValues<T>>
-  >;
+  getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
   /**
    * Writes multiple uiSettings values and marks them as set by the user.
    */
-  setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+  setMany: (changes: Record<string, any>) => Promise<void>;
   /**
    * Writes uiSettings value and marks it as set by the user.
    */
-  set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+  set: (key: string, value: any) => Promise<void>;
   /**
    * Removes uiSettings value by key.
    */
@@ -64,46 +74,6 @@ export interface IUiSettingsClient {
    * Shows whether the uiSettings value set by the user.
    */
   isOverridden: (key: string) => boolean;
-}
-
-/**
- * Describes the values explicitly set by user.
- * @public
- * */
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-/**
- * UI element type to represent the settings.
- * @public
- * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-/**
- * UiSettings parameters defined by the plugins.
- * @public
- * */
-export interface UiSettingsParams {
-  /** title in the UI */
-  name?: string;
-  /** default value to fall back to if a user doesn't provide any */
-  value?: SavedObjectAttribute;
-  /** description provided to a user in UI */
-  description?: string;
-  /** used to group the configured setting in the UI */
-  category?: string[];
-  /** array of permitted values for this setting */
-  options?: string[];
-  /** text labels for 'select' type UI element */
-  optionLabels?: Record<string, string>;
-  /** a flag indicating whether new value applying requires page reloading */
-  requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
-  /** defines a type of UI element {@link UiSettingsType} */
-  type?: UiSettingsType;
 }
 
 /** @internal */
@@ -127,6 +97,7 @@ export interface UiSettingsServiceSetup {
    * @param settings
    *
    * @example
+   * ```ts
    * setup(core: CoreSetup){
    *  core.uiSettings.register([{
    *   foo: {
@@ -136,6 +107,29 @@ export interface UiSettingsServiceSetup {
    *   },
    *  }]);
    * }
+   * ```
    */
   register(settings: Record<string, UiSettingsParams>): void;
 }
+
+/** @public */
+export interface UiSettingsServiceStart {
+  /**
+   * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
+   *
+   * This should only be used in the specific case where the client needs to be accessed
+   * from outside of the scope of a {@link RequestHandler}.
+   *
+   * @example
+   * ```ts
+   * start(core: CoreStart) {
+   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
+   *  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+   * }
+   * ```
+   */
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
+/** @internal */
+export type InternalUiSettingsServiceStart = UiSettingsServiceStart;

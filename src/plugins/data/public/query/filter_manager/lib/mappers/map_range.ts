@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import {
-  Filter,
-  RangeFilter,
-  FILTERS,
-  isRangeFilter,
-  isScriptedRangeFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
 import { get, has } from 'lodash';
+import {
+  FilterValueFormatter,
+  RangeFilter,
+  isScriptedRangeFilter,
+  isRangeFilter,
+  Filter,
+  FILTERS,
+} from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: FilterValueFormatter) => {

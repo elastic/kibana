@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const config = getService('config');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -41,10 +41,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -77,7 +76,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

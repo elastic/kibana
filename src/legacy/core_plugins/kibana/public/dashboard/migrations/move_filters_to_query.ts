@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '../../../../../../plugins/data/public';
 
 export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would

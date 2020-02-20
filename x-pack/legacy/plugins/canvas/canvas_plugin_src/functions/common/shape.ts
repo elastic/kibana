@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { getFunctionHelp } from '../../../i18n';
 
 export enum Shape {
@@ -33,21 +34,19 @@ interface Arguments {
   maintainAspect: boolean;
 }
 
-interface Return extends Arguments {
+interface Output extends Arguments {
   type: 'shape';
 }
 
-export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
+export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().shape;
 
   return {
     name: 'shape',
     aliases: [],
     type: 'shape',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       shape: {
         types: ['string'],
@@ -79,7 +78,7 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
         options: [true, false],
       },
     },
-    fn: (_context, args) => ({
+    fn: (input, args) => ({
       type: 'shape',
       ...args,
     }),

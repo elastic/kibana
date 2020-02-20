@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AuthenticatedUser } from '../../../../../plugins/security/public';
+import { RequestHandlerContext } from '../../../../../../src/core/server';
+export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
+
 import { Authentications } from './authentications';
-import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -16,12 +19,13 @@ import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { Sources, SourceConfiguration } from './sources';
+import { Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
+import { MatrixHistogram } from './matrix_histogram';
 
 export * from './hosts';
 
@@ -31,6 +35,7 @@ export interface AppDomainLibs {
   fields: IndexFields;
   hosts: Hosts;
   ipDetails: IpDetails;
+  matrixHistogram: MatrixHistogram;
   network: Network;
   kpiNetwork: KpiNetwork;
   overview: Overview;
@@ -40,7 +45,6 @@ export interface AppDomainLibs {
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
-  configuration: ConfigurationAdapter<Configuration>;
   framework: FrameworkAdapter;
   sources: Sources;
   sourceStatus: SourceStatus;
@@ -49,38 +53,10 @@ export interface AppBackendLibs extends AppDomainLibs {
   pinnedEvent: PinnedEvent;
 }
 
-export interface Configuration {
-  enabled: boolean;
-  query: {
-    partitionSize: number;
-    partitionFactor: number;
-  };
-  sources: Record<string, SourceConfiguration>;
-}
-
 export interface SiemContext {
   req: FrameworkRequest;
-}
-
-export interface SignalHit {
-  signal: {
-    '@timestamp': string;
-    rule_revision: number;
-    rule_id: string;
-    rule_type: string;
-    parent: {
-      id: string;
-      type: string;
-      index: string;
-      depth: number;
-    };
-    name: string;
-    severity: string;
-    description: string;
-    original_time: string;
-    index_patterns: string[];
-    references: string[];
-  };
+  context: RequestHandlerContext;
+  user: AuthenticatedUser | null;
 }
 
 export interface TotalValue {

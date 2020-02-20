@@ -5,15 +5,15 @@
  */
 
 import numeral from '@elastic/numeral';
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { ID_FIELD_NAME } from '../event_details/event_id';
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import {
@@ -45,8 +45,6 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 const getSourceDestinationInstance = () => (
   <SourceDestination
@@ -98,9 +96,11 @@ const getSourceDestinationInstance = () => (
 );
 
 describe('SourceDestination', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<div>{getSourceDestinationInstance()}</div>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {

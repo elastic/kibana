@@ -5,9 +5,7 @@
  */
 
 const path = require('path');
-
-const LIBRARY_NAME = 'KbnCanvas';
-const SHAREABLE_RUNTIME_NAME = 'kbn_canvas';
+const { LIBRARY_NAME, SHAREABLE_RUNTIME_NAME } = require('./constants_static');
 
 const KIBANA_ROOT_PATH = '../../../../..';
 const CANVAS_ROOT_PATH = 'x-pack/legacy/plugins/canvas';

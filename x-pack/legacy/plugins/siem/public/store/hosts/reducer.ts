@@ -46,6 +46,10 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -69,6 +73,10 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
 };

@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import ApolloClient from 'apollo-client';
+import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
+import {
+  IIndexPattern,
+  Query,
+  Filter,
+  FilterManager,
+  SavedQueryService,
+} from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -26,6 +32,13 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
+  detections: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -40,36 +53,41 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
+  overview: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
-  overview: [CONSTANTS.timeline, CONSTANTS.timerange],
+  case: [],
 };
 
 export type LocationTypes =
-  | CONSTANTS.networkDetails
-  | CONSTANTS.networkPage
+  | CONSTANTS.caseDetails
+  | CONSTANTS.casePage
+  | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
-
-export interface Timeline {
-  id: string;
-  isOpen: boolean;
-}
 
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: Timeline;
+  [CONSTANTS.timeline]: TimelineUrl;
 }
 export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
-  indexPattern?: StaticIndexPattern;
+  indexPattern?: IIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -97,6 +115,7 @@ export type UrlStateContainerPropTypes = RouteSpyState &
 
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
+  pageName: string | undefined;
   urlState: UrlState;
 }
 
@@ -108,8 +127,10 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
-  indexPattern: StaticIndexPattern | undefined;
+  filterManager: FilterManager;
+  indexPattern: IIndexPattern | undefined;
   pageName: string;
+  savedQueries: SavedQueryService;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];
@@ -124,3 +145,21 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
+
+export interface ReplaceStateInLocation<T> {
+  history?: H.History;
+  urlStateToReplace: T;
+  urlStateKey: string;
+  pathName: string;
+  search: string;
+}
+
+export interface UpdateUrlStateString {
+  isInitializing: boolean;
+  history?: H.History;
+  newUrlStateString: string;
+  pathName: string;
+  search: string;
+  updateTimerange: boolean;
+  urlKey: KeyUrlState;
+}

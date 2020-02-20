@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { LICENSE_TYPE_BASIC } from '../../../../common/constants';
+import { LicenseType } from '../../../../../plugins/licensing/common/types';
+
+const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN = {
-  ID: 'index_management',
-  NAME: i18n.translate('xpack.idxMgmt.appTitle', {
-    defaultMessage: 'Index Management',
-  }),
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC,
+  id: 'index_management',
+  minimumLicenseType: basicLicense,
+  getI18nName: (i18n: any): string =>
+    i18n.translate('xpack.idxMgmt.appTitle', {
+      defaultMessage: 'Index Management',
+    }),
 };

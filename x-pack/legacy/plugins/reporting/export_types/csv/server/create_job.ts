@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oncePerServer } from '../../../server/lib/once_per_server';
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { ConditionalHeaders, CreateJobFactory, ServerFacade, RequestFacade } from '../../../types';
-import { JobParamsDiscoverCsv, ESQueueCreateJobFnDiscoverCsv } from '../types';
+import {
+  ConditionalHeaders,
+  CreateJobFactory,
+  ESQueueCreateJobFn,
+  RequestFacade,
+  ServerFacade,
+} from '../../../types';
+import { JobParamsDiscoverCsv } from '../types';
 
-function createJobFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsDiscoverCsv
+>> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
@@ -32,8 +40,4 @@ function createJobFn(server: ServerFacade) {
       ...jobParams,
     };
   };
-}
-
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
-  server: ServerFacade
-) => ESQueueCreateJobFnDiscoverCsv);
+};

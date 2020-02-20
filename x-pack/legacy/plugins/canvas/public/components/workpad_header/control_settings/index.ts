@@ -32,7 +32,4 @@ const mapDispatchToProps = {
   setAutoplayInterval,
 };
 
-export const ControlSettings = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const ControlSettings = connect(mapStateToProps, mapDispatchToProps)(Component);

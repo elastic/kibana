@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { mapSeverity } from '../map_severity';
 
 describe('mapSeverity', () => {
-
   it('maps [0, 1000) as low', () => {
     const low = {
       value: 'low',
@@ -63,5 +62,4 @@ describe('mapSeverity', () => {
     expect(mapSeverity(3000)).to.eql(high);
     expect(mapSeverity(123412456)).to.eql(high);
   });
-
 });

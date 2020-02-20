@@ -33,9 +33,10 @@ import {
 import {
   isAutoCreateIndexError,
   showAutoCreateIndexErrorPage,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpFetchOptions, HttpServiceBase } from '../http';
+import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
@@ -157,7 +158,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
  * @public
  */
 export class SavedObjectsClient {
-  private http: HttpServiceBase;
+  private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
 
   /**
@@ -193,7 +194,7 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpServiceBase) {
+  constructor(http: HttpSetup) {
     this.http = http;
     this.batchQueue = [];
   }
@@ -464,11 +465,7 @@ export class SavedObjectsClient {
    * uses `{response: {status: number}}`.
    */
   private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body }).catch(err => {
-      const kfetchError = Object.assign(err, { res: err.response });
-      delete kfetchError.response;
-      return Promise.reject(kfetchError);
-    });
+    return this.http.fetch(path, { method, query, body });
   }
 }
 

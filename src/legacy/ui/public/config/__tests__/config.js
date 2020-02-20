@@ -30,12 +30,14 @@ describe('Config service', () => {
   let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
-    config = $injector.get('config');
-    uiSettings = chrome.getUiSettingsClient();
-    $q = $injector.get('$q');
-    $rootScope = $injector.get('$rootScope');
-  }));
+  beforeEach(
+    ngMock.inject($injector => {
+      config = $injector.get('config');
+      uiSettings = chrome.getUiSettingsClient();
+      $q = $injector.get('$q');
+      $rootScope = $injector.get('$rootScope');
+    })
+  );
 
   describe('#getAll', () => {
     it('calls uiSettings.getAll()', () => {
@@ -110,11 +112,11 @@ describe('Config service', () => {
     it('strips $$-prefixed properties from plain objects', () => {
       config.set('dateFormat:scaled', {
         foo: 'bar',
-        $$bax: 'box'
+        $$bax: 'box',
       });
 
       expect(config.get('dateFormat:scaled')).to.eql({
-        foo: 'bar'
+        foo: 'bar',
       });
     });
   });
@@ -189,8 +191,8 @@ describe('Config service', () => {
     it('synchronously emits events when changes are outside a digest cycle', async () => {
       const stub = sinon.stub();
 
-      await new Promise((resolve) => {
-        setTimeout(function () {
+      await new Promise(resolve => {
+        setTimeout(function() {
           const off = $rootScope.$on('change:config.foobar', stub);
           config.set('foobar', 'baz');
           // we unlisten to make sure that stub is not called before our assertions below

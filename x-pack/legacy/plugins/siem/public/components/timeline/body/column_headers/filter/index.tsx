@@ -5,20 +5,19 @@
  */
 
 import { noop } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { OnFilterChange } from '../../../events';
-import { ColumnHeader } from '../column_header';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { TextFilter } from '../text_filter';
 
 interface Props {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onFilterChange?: OnFilterChange;
 }
 
 /** Renders a header's filter, based on the `columnHeaderType` */
-export const Filter = pure<Props>(({ header, onFilterChange = noop }) => {
+export const Filter = React.memo<Props>(({ header, onFilterChange = noop }) => {
   switch (header.columnHeaderType) {
     case 'text-filter':
       return (

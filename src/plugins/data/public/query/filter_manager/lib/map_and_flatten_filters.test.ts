@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
+import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {

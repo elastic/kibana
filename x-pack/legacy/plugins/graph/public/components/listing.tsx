@@ -10,15 +10,14 @@ import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 import { CoreStart, ApplicationStart } from 'kibana/public';
-// @ts-ignore
-import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
+import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 export interface ListingProps {
   coreStart: CoreStart;
   createItem: () => void;
-  findItems: (query: string, limit: number) => Promise<GraphWorkspaceSavedObject[]>;
-  deleteItems: (ids: string[]) => Promise<void>;
+  findItems: (query: string) => Promise<{ total: number; hits: GraphWorkspaceSavedObject[] }>;
+  deleteItems: (records: GraphWorkspaceSavedObject[]) => Promise<void>;
   editItem: (record: GraphWorkspaceSavedObject) => void;
   getViewUrl: (record: GraphWorkspaceSavedObject) => string;
   listingLimit: number;
@@ -31,10 +30,11 @@ export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
-        createItem={props.capabilities.save ? props.createItem : null}
+        headingId="graphListingHeading"
+        createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}
-        deleteItems={props.capabilities.delete ? props.deleteItems : null}
-        editItem={props.capabilities.save ? props.editItem : null}
+        deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
+        editItem={props.capabilities.save ? props.editItem : undefined}
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
@@ -43,6 +43,7 @@ export function Listing(props: ListingProps) {
           props.createItem,
           props.coreStart.application
         )}
+        toastNotifications={props.coreStart.notifications.toasts}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
           defaultMessage: 'graph',
         })}
@@ -52,6 +53,7 @@ export function Listing(props: ListingProps) {
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
+        uiSettings={props.coreStart.uiSettings}
       />
     </I18nProvider>
   );
@@ -66,14 +68,14 @@ function getNoItemsMessage(
     return (
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="graphApp"
           title={
-            <h2>
+            <h1 id="graphListingHeading">
               <FormattedMessage
                 id="xpack.graph.listing.noItemsMessage"
                 defaultMessage="Looks like you don't have any graphs."
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -87,12 +89,12 @@ function getNoItemsMessage(
       <EuiEmptyPrompt
         iconType="graphApp"
         title={
-          <h2>
+          <h1 id="graphListingHeading">
             <FormattedMessage
               id="xpack.graph.listing.createNewGraph.title"
               defaultMessage="Create your first graph"
             />
-          </h2>
+          </h1>
         }
         body={
           <Fragment>

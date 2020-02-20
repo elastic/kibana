@@ -92,12 +92,7 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const PopoverForm: React.SFC<Props> = ({
-  defaultData,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);
 
   const [agg, setAgg] = useState(defaultData.agg);

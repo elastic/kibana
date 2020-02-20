@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter } from '../../../../common';
 
 export function getFiltersArray(): Filter[] {
   return [

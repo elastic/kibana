@@ -19,7 +19,7 @@
 import { defaultsDeep } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { IUiSettingsClient, UiSettingsParams } from './types';
@@ -30,7 +30,7 @@ export interface UiSettingsServiceOptions {
   id: string;
   buildNum: number;
   savedObjectsClient: SavedObjectsClientContract;
-  overrides?: Record<string, SavedObjectAttribute>;
+  overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
 }
@@ -40,14 +40,14 @@ interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
-interface UserProvidedValue<T extends SavedObjectAttribute = any> {
+interface UserProvidedValue<T = any> {
   userValue?: T;
   isOverridden?: boolean;
 }
 
 type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
-type UserProvided<T extends SavedObjectAttribute = any> = Record<string, UserProvidedValue<T>>;
+type UserProvided<T = any> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -75,25 +75,22 @@ export class UiSettingsClient implements IUiSettingsClient {
     return this.defaults;
   }
 
-  async get<T extends SavedObjectAttribute = any>(key: string): Promise<T> {
+  async get<T = any>(key: string): Promise<T> {
     const all = await this.getAll();
     return all[key];
   }
 
-  async getAll<T extends SavedObjectAttribute = any>() {
+  async getAll<T = any>() {
     const raw = await this.getRaw();
 
-    return Object.keys(raw).reduce(
-      (all, key) => {
-        const item = raw[key];
-        all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-        return all;
-      },
-      {} as Record<string, T>
-    );
+    return Object.keys(raw).reduce((all, key) => {
+      const item = raw[key];
+      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
+      return all;
+    }, {} as Record<string, T>);
   }
 
-  async getUserProvided<T extends SavedObjectAttribute = any>(): Promise<UserProvided<T>> {
+  async getUserProvided<T = any>(): Promise<UserProvided<T>> {
     const userProvided: UserProvided = {};
 
     // write the userValue for each key stored in the saved object that is not overridden
@@ -115,11 +112,11 @@ export class UiSettingsClient implements IUiSettingsClient {
     return userProvided;
   }
 
-  async setMany<T extends SavedObjectAttribute = any>(changes: Record<string, T>) {
+  async setMany(changes: Record<string, any>) {
     await this.write({ changes });
   }
 
-  async set<T extends SavedObjectAttribute = any>(key: string, value: T) {
+  async set(key: string, value: any) {
     await this.setMany({ [key]: value });
   }
 
@@ -150,11 +147,11 @@ export class UiSettingsClient implements IUiSettingsClient {
     return defaultsDeep(userProvided, this.defaults);
   }
 
-  private async write<T extends SavedObjectAttribute = any>({
+  private async write({
     changes,
     autoCreateOrUpgradeIfMissing = true,
   }: {
-    changes: Record<string, T>;
+    changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
   }) {
     for (const key of Object.keys(changes)) {
@@ -183,16 +180,16 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async read<T extends SavedObjectAttribute>({
+  private async read({
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
-  }: ReadOptions = {}): Promise<Record<string, T>> {
+  }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
       const resp = await this.savedObjectsClient.get(this.type, this.id);
       return resp.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
-        const failedUpgradeAttributes = await createOrUpgradeSavedConfig<T>({
+        const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
           savedObjectsClient: this.savedObjectsClient,
           version: this.id,
           buildNum: this.buildNum,

@@ -31,14 +31,11 @@ export const CreateNoticeFileTask = {
     log.info('Generating notice from source');
     log.indent(4);
     const noticeFromSource = await generateNoticeFromSource({
-      productName: build.isOss()
-        ? 'Kibana'
-        : 'Kibana with X-Pack',
+      productName: build.isOss() ? 'Kibana' : 'Kibana with X-Pack',
       directory: build.resolvePath(),
       log,
     });
     log.indent(-4);
-
 
     log.info('Discovering installed packages');
     const packages = await getInstalledPackages({
@@ -47,12 +44,11 @@ export const CreateNoticeFileTask = {
       licenseOverrides: LICENSE_OVERRIDES,
     });
 
-
     log.info('Generating build notice');
-    const {
-      extractDir: nodeDir,
-      version: nodeVersion,
-    } = getNodeDownloadInfo(config, config.getLinuxPlatform());
+    const { extractDir: nodeDir, version: nodeVersion } = getNodeDownloadInfo(
+      config,
+      config.getLinuxPlatform()
+    );
 
     const notice = await generateBuildNoticeText({
       noticeFromSource,
@@ -60,7 +56,6 @@ export const CreateNoticeFileTask = {
       nodeDir,
       nodeVersion,
     });
-
 
     log.info('Writing notice to NOTICE.txt');
     await write(build.resolvePath('NOTICE.txt'), notice);

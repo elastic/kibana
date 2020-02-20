@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extractFilterAggsResults extracts the bucket values of the expected filter fields 1`] = `
+Object {
+  "locations": Array [
+    "us-east-2",
+    "fairbanks",
+  ],
+  "ports": Array [
+    12349,
+    80,
+    5601,
+    8200,
+    9200,
+    9292,
+  ],
+  "schemes": Array [
+    "http",
+    "tcp",
+    "icmp",
+  ],
+  "tags": Array [
+    "api",
+    "dev",
+  ],
+}
+`;

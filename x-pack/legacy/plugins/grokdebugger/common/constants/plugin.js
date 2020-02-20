@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'grokdebugger'
+  ID: 'grokdebugger',
 };

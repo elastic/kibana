@@ -18,7 +18,7 @@
  */
 
 import { mapGeoBoundingBox } from './map_geo_bounding_box';
-import { Filter, GeoBoundingBoxFilter } from '@kbn/es-query';
+import { Filter, GeoBoundingBoxFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapGeoBoundingBox()', () => {
@@ -64,6 +64,7 @@ describe('filter manager utilities', () => {
           },
         },
       } as GeoBoundingBoxFilter;
+
       const result = mapGeoBoundingBox(filter);
 
       expect(result).toHaveProperty('key', 'point');

@@ -5,10 +5,10 @@
  */
 
 import rison from 'rison-node';
-import chrome from 'ui/chrome';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
+import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';
@@ -17,18 +17,21 @@ interface PageCount {
   pageCount: number;
 }
 
-type Arguments = [CanvasWorkpad, PageCount];
+type AddBasePath = (url: string) => string;
+
+type Arguments = [CanvasWorkpad, PageCount, AddBasePath];
 
 interface PdfUrlData {
   createPdfUri: string;
   createPdfPayload: { jobParams: string };
 }
 
-export function getPdfUrl(
+function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
-  { pageCount }: PageCount
+  { pageCount }: PageCount,
+  addBasePath: (path: string) => string
 ): PdfUrlData {
-  const reportingEntry = chrome.addBasePath('/api/reporting/generate');
+  const reportingEntry = addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
 
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
@@ -66,7 +69,15 @@ export function getPdfUrl(
   };
 }
 
+export function getPdfUrl(...args: Arguments): string {
+  const urlParts = getPdfUrlParts(...args);
+  const param = (key: string, val: any) =>
+    url.encodeUriQuery(key, true) + (val === true ? '' : '=' + url.encodeUriQuery(val, true));
+
+  return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
+}
+
 export function createPdf(...args: Arguments) {
-  const { createPdfUri, createPdfPayload } = getPdfUrl(...args);
+  const { createPdfUri, createPdfPayload } = getPdfUrlParts(...args);
   return fetch.post(createPdfUri, createPdfPayload);
 }

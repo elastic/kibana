@@ -13,7 +13,7 @@ import { createQuery } from '../create_query';
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */
-export function createApmQuery(options = { }) {
+export function createApmQuery(options = {}) {
   options = defaults(options, {
     filters: [],
     metric: ApmMetric.getMetricFields(),
@@ -24,10 +24,10 @@ export function createApmQuery(options = { }) {
     bool: {
       must: {
         term: {
-          'beats_stats.beat.type': 'apm-server'
-        }
-      }
-    }
+          'beats_stats.beat.type': 'apm-server',
+        },
+      },
+    },
   });
 
   return createQuery(options);

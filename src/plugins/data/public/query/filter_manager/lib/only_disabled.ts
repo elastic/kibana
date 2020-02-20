@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { filter, isEqual } from 'lodash';
+import { filter } from 'lodash';
+import { Filter } from '../../../../common';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
 
 const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
 
@@ -32,5 +33,5 @@ export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: F
   const newEnabledFilters = filter(newFilters || [], isEnabled);
   const oldEnabledFilters = filter(oldFilters || [], isEnabled);
 
-  return isEqual(oldEnabledFilters, newEnabledFilters);
+  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_ALL_OPTIONS);
 };

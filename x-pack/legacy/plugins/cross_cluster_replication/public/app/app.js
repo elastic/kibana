@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import { fatalError } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -34,15 +34,13 @@ import {
   FollowerIndexEdit,
 } from './sections';
 
-export class App extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+class AppComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);
@@ -56,7 +54,7 @@ export class App extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     routing.userHasLeftApp = false;
   }
 
@@ -92,15 +90,23 @@ export class App extends Component {
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
-      fatalError(error, i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
-        defaultMessage: 'Cross-Cluster Replication app',
-      }));
+      fatalError(
+        error,
+        i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
+          defaultMessage: 'Cross-Cluster Replication app',
+        })
+      );
     }
   }
 
   registerRouter() {
-    const { router } = this.context;
-    routing.reactRouter = router;
+    const { history, location } = this.props;
+    routing.reactRouter = {
+      history,
+      route: {
+        location,
+      },
+    };
   }
 
   render() {
@@ -138,12 +144,12 @@ export class App extends Component {
       return (
         <Fragment>
           <SectionError
-            title={(
+            title={
               <FormattedMessage
                 id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
                 defaultMessage="Error checking permissions"
               />
-            )}
+            }
             error={fetchPermissionError}
           />
 
@@ -164,7 +170,8 @@ export class App extends Component {
                   id="xpack.crossClusterReplication.app.deniedPermissionTitle"
                   defaultMessage="You're missing cluster privileges"
                 />
-              </h2>}
+              </h2>
+            }
             body={
               <p>
                 <FormattedMessage
@@ -176,7 +183,8 @@ export class App extends Component {
                     clusterPrivilegesCount: missingClusterPrivileges.length,
                   }}
                 />
-              </p>}
+              </p>
+            }
           />
         </EuiPageContent>
       );
@@ -186,13 +194,27 @@ export class App extends Component {
       <div>
         <Switch>
           <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/follower_indices`} />
-          <Route exact path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
-          <Route exact path={`${BASE_PATH}/auto_follow_patterns/edit/:id`} component={AutoFollowPatternEdit} />
+          <Route
+            exact
+            path={`${BASE_PATH}/auto_follow_patterns/add`}
+            component={AutoFollowPatternAdd}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}/auto_follow_patterns/edit/:id`}
+            component={AutoFollowPatternEdit}
+          />
           <Route exact path={`${BASE_PATH}/follower_indices/add`} component={FollowerIndexAdd} />
-          <Route exact path={`${BASE_PATH}/follower_indices/edit/:id`} component={FollowerIndexEdit} />
+          <Route
+            exact
+            path={`${BASE_PATH}/follower_indices/edit/:id`}
+            component={FollowerIndexEdit}
+          />
           <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>
     );
   }
 }
+
+export const App = withRouter(AppComponent);

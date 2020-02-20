@@ -12,7 +12,7 @@ import { HashRouter } from 'react-router-dom';
 import { App } from './app';
 import { ccrStore } from './store';
 
-export const renderReact = async (elem) => {
+export const renderReact = async elem => {
   render(
     <I18nContext>
       <Provider store={ccrStore}>

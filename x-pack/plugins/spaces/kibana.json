@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "spaces"],
   "requiredPlugins": ["features", "licensing"],
+  "optionalPlugins": ["advancedSettings", "home", "management", "security", "usageCollection"],
   "server": true,
-  "ui": false
+  "ui": true
 }

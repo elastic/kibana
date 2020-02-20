@@ -6,6 +6,7 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
 >
   <div
     className="euiFormRow euiFormRow--fullWidth canvasExpressionInput__inner"
+    id="generated-id-row"
   >
     <div
       className="euiFormRow__fieldWrapper"

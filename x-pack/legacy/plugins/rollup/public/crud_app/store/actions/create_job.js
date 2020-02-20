@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
@@ -24,7 +23,9 @@ import {
   CLEAR_CREATE_JOB_ERRORS,
 } from '../action_types';
 
-export const createJob = (jobConfig) => async (dispatch) => {
+import { getFatalErrors } from '../../../kibana_services';
+
+export const createJob = jobConfig => async dispatch => {
   dispatch({
     type: CREATE_JOB_START,
   });
@@ -32,27 +33,31 @@ export const createJob = (jobConfig) => async (dispatch) => {
   let newJob;
 
   try {
-    [ newJob ] = await Promise.all([
+    [newJob] = await Promise.all([
       sendCreateJobRequest(serializeJob(jobConfig)),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
       new Promise(resolve => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
-      const { statusCode, data } = error;
+      const { body } = error;
+      const statusCode = error.statusCode || (body && body.statusCode);
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (data) {
+      // Expect an error in the shape provided by http service.
+      if (body) {
         // Some errors have statusCode directly available but some are under a data property.
-        if ((statusCode || (data && data.statusCode)) === 409) {
+        if (statusCode === 409) {
           return dispatch({
             type: CREATE_JOB_FAILURE,
             payload: {
               error: {
-                message: i18n.translate('xpack.rollupJobs.createAction.jobIdAlreadyExistsErrorMessage', {
-                  defaultMessage: `A job with ID '{jobConfigId}' already exists.`,
-                  values: { jobConfigId: jobConfig.id },
-                }),
+                message: i18n.translate(
+                  'xpack.rollupJobs.createAction.jobIdAlreadyExistsErrorMessage',
+                  {
+                    defaultMessage: `A job with ID '{jobConfigId}' already exists.`,
+                    values: { jobConfigId: jobConfig.id },
+                  }
+                ),
               },
             },
           });
@@ -64,9 +69,9 @@ export const createJob = (jobConfig) => async (dispatch) => {
             error: {
               message: i18n.translate('xpack.rollupJobs.createAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
-                values: { statusCode, message: data.message },
+                values: { statusCode, message: body.message },
               }),
-              cause: data.cause,
+              cause: body.cause,
             },
           },
         });
@@ -75,16 +80,19 @@ export const createJob = (jobConfig) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
-      defaultMessage: 'Error creating rollup job',
-    }));
+    return getFatalErrors().add(
+      error,
+      i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
+        defaultMessage: 'Error creating rollup job',
+      })
+    );
   }
 
-  const deserializedJob = deserializeJob(newJob.data);
+  const deserializedJob = deserializeJob(newJob);
 
   dispatch({
     type: CREATE_JOB_SUCCESS,
-    payload: { job: deserializedJob }
+    payload: { job: deserializedJob },
   });
 
   if (jobConfig.startJobAfterCreation) {
@@ -99,7 +107,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
   });
 };
 
-export const clearCreateJobErrors = () => (dispatch) => {
+export const clearCreateJobErrors = () => dispatch => {
   dispatch({
     type: CLEAR_CREATE_JOB_ERRORS,
   });

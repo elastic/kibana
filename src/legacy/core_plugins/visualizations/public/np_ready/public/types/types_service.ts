@@ -19,6 +19,10 @@
 
 import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+// @ts-ignore
+import { BaseVisType } from './base_vis_type';
+// @ts-ignore
+import { ReactVisType } from './react_vis_type';
 
 export interface VisType {
   name: string;
@@ -49,18 +53,27 @@ export interface VisType {
 export class TypesService {
   private types: Record<string, VisType> = {};
   private unregisteredHiddenTypes: string[] = [];
-  public setup() {
-    return {
-      registerVisualization: (registerFn: () => VisType) => {
-        const visDefinition = registerFn();
-        if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
-          visDefinition.hidden = true;
-        }
 
-        if (this.types[visDefinition.name]) {
-          throw new Error('type already exists!');
-        }
-        this.types[visDefinition.name] = visDefinition;
+  public setup() {
+    const registerVisualization = (registerFn: () => VisType) => {
+      const visDefinition = registerFn();
+      if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+        visDefinition.hidden = true;
+      }
+
+      if (this.types[visDefinition.name]) {
+        throw new Error('type already exists!');
+      }
+      this.types[visDefinition.name] = visDefinition;
+    };
+    return {
+      createBaseVisualization: (config: any) => {
+        const vis = new BaseVisType(config);
+        registerVisualization(() => vis);
+      },
+      createReactVisualization: (config: any) => {
+        const vis = new ReactVisType(config);
+        registerVisualization(() => vis);
       },
       registerAlias: visTypeAliasRegistry.add,
       hideTypes: (typeNames: string[]) => {

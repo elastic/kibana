@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
 import { EmbeddableFactory } from '../../../embeddables';
@@ -30,6 +29,7 @@ import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/f
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
 import { GetEmbeddableFactory, ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -40,7 +40,7 @@ let embeddable: FilterableEmbeddable;
 
 beforeEach(async () => {
   const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

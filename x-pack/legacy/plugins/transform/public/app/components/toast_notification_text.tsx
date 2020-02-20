@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { npStart } from 'ui/new_platform';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
@@ -43,27 +44,29 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
 
   const openModal = () => {
     const modal = npStart.core.overlays.openModal(
-      <EuiModal onClose={() => modal.close()}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.translate('xpack.transform.toastText.modalTitle', {
-              defaultMessage: 'Error details',
-            })}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiCodeBlock language="json" fontSize="m" paddingSize="s" isCopyable>
-            {formattedText}
-          </EuiCodeBlock>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={() => modal.close()}>
-            {i18n.translate('xpack.transform.toastText.closeModalButtonText', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiModalFooter>
-      </EuiModal>
+      toMountPoint(
+        <EuiModal onClose={() => modal.close()}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              {i18n.translate('xpack.transform.toastText.modalTitle', {
+                defaultMessage: 'Error details',
+              })}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiCodeBlock language="json" fontSize="m" paddingSize="s" isCopyable>
+              {formattedText}
+            </EuiCodeBlock>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={() => modal.close()}>
+              {i18n.translate('xpack.transform.toastText.closeModalButtonText', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiModalFooter>
+        </EuiModal>
+      )
     );
   };
 

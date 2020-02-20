@@ -6,7 +6,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -49,11 +48,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -76,10 +73,8 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -136,10 +131,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -153,10 +145,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -168,10 +157,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -185,11 +171,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -215,20 +197,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -273,10 +248,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />
@@ -330,7 +302,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -372,11 +343,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -399,10 +368,8 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -459,10 +426,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -476,10 +440,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -491,10 +452,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -508,11 +466,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -538,20 +492,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -596,10 +543,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />
@@ -653,7 +597,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -695,11 +638,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -722,10 +663,8 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -782,10 +721,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -799,10 +735,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -814,10 +747,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -831,11 +761,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -861,20 +787,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -919,10 +838,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />
@@ -976,7 +892,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -1014,10 +929,8 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1074,10 +987,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -1091,10 +1001,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -1106,10 +1013,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -1123,11 +1027,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1153,20 +1053,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1211,10 +1104,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />
@@ -1283,7 +1173,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -1321,11 +1210,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={false}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -1348,10 +1235,8 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1408,10 +1293,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -1425,10 +1307,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -1440,10 +1319,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -1457,11 +1333,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1487,20 +1359,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1545,10 +1410,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />
@@ -1602,7 +1464,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
     style={
       Object {
         "width": 1100,
@@ -1640,10 +1501,8 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1700,10 +1559,7 @@ Default value: Number of the host’s CPU cores"
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
           data-test-subj="inputWorkers"
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={1}
         />
@@ -1717,10 +1573,7 @@ Default value: Number of the host’s CPU cores"
 Default value: 125"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchSize"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={256}
           />
@@ -1732,10 +1585,7 @@ Default value: 125"
 Default value: 50ms"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputBatchDelay"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={10}
           />
@@ -1749,11 +1599,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1779,20 +1625,13 @@ Default value: memory"
 Default value: 1024mb (1g)"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueMaxBytesNumber"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
           />
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1837,10 +1676,7 @@ Default value: 1024mb (1g)"
 Default value: 1024"
         >
           <EuiFieldNumber
-            compressed={false}
             data-test-subj="inputQueueCheckpointWrites"
-            fullWidth={false}
-            isLoading={false}
             onChange={[Function]}
             value={100}
           />

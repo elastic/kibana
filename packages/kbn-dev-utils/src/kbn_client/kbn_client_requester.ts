@@ -62,8 +62,7 @@ export interface ReqOptions {
   query?: Record<string, any>;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
-  attempt?: number;
-  maxAttempts?: number;
+  retries?: number;
 }
 
 const delay = (ms: number) =>
@@ -87,44 +86,47 @@ export class KbnClientRequester {
   async request<T>(options: ReqOptions): Promise<T> {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
-    const attempt = options.attempt === undefined ? 1 : options.attempt;
-    const maxAttempts =
-      options.maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : options.maxAttempts;
+    let attempt = 0;
+    const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
 
-    try {
-      const response = await Axios.request<T>({
-        method: options.method,
-        url,
-        data: options.body,
-        params: options.query,
-        headers: {
-          'kbn-xsrf': 'kbn-client',
-        },
-      });
+    while (true) {
+      attempt += 1;
 
-      return response.data;
-    } catch (error) {
-      let retryErrorMsg: string | undefined;
-      if (isAxiosRequestError(error)) {
-        retryErrorMsg = `[${description}] request failed (attempt=${attempt})`;
-      } else if (isConcliftOnGetError(error)) {
-        retryErrorMsg = `Conflict on GET (path=${options.path}, attempt=${attempt})`;
-      }
+      try {
+        const response = await Axios.request<T>({
+          method: options.method,
+          url,
+          data: options.body,
+          params: options.query,
+          headers: {
+            'kbn-xsrf': 'kbn-client',
+          },
+        });
 
-      if (retryErrorMsg) {
-        if (attempt < maxAttempts) {
-          this.log.error(retryErrorMsg);
-          await delay(1000 * attempt);
-          return await this.request<T>({
-            ...options,
-            attempt: attempt + 1,
-          });
+        return response.data;
+      } catch (error) {
+        const conflictOnGet = isConcliftOnGetError(error);
+        const requestedRetries = options.retries !== undefined;
+        const failedToGetResponse = isAxiosRequestError(error);
+
+        let errorMessage;
+        if (conflictOnGet) {
+          errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
+          this.log.error(errorMessage);
+        } else if (requestedRetries || failedToGetResponse) {
+          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts})`;
+          this.log.error(errorMessage);
+        } else {
+          throw error;
         }
 
-        throw new Error(retryErrorMsg + ' and ran out of retries');
-      }
+        if (attempt < maxAttempts) {
+          await delay(1000 * attempt);
+          continue;
+        }
 
-      throw error;
+        throw new Error(`${errorMessage} -- and ran out of retries`);
+      }
     }
   }
 }

@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   Datatable,
   Filter,
   ExpressionImage,
+  ExpressionFunction,
   KibanaContext,
   KibanaDatatable,
   PointSeries,
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions/public';
-import { CanvasFunction } from './functions';
+} from 'src/plugins/expressions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
 
@@ -31,11 +32,8 @@ export interface AppState {
 }
 
 interface StoreAppState {
-  kbnVersion: string;
   basePath: string;
-  reportingBrowserType: string;
-  // TODO: These server functions are actually missing the fn because they are serialized from the server
-  serverFunctions: CanvasFunction[];
+  serverFunctions: ExpressionFunction[];
   ready: boolean;
 }
 

@@ -17,8 +17,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../plugins/apm/common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -26,7 +25,7 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -115,14 +114,11 @@ export function ErrorGroupDetails() {
 
   // If there are 0 occurrences, show only distribution chart w. empty message
   const showDetails = errorGroupData.occurrencesCount !== 0;
-  const logMessage = idx(errorGroupData, _ => _.error.error.log.message);
-  const excMessage = idx(
-    errorGroupData,
-    _ => _.error.error.exception[0].message
-  );
-  const culprit = idx(errorGroupData, _ => _.error.error.culprit);
+  const logMessage = errorGroupData.error?.error.log?.message;
+  const excMessage = errorGroupData.error?.error.exception?.[0].message;
+  const culprit = errorGroupData.error?.error.culprit;
   const isUnhandled =
-    idx(errorGroupData, _ => _.error.error.exception[0].handled) === false;
+    errorGroupData.error?.error.exception?.[0].handled === false;
 
   return (
     <div>

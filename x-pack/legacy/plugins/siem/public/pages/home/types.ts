@@ -10,13 +10,17 @@ export enum SiemPageName {
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
+  detections = 'detections',
   timelines = 'timelines',
+  case = 'case',
 }
 
 export type SiemNavTabKey =
   | SiemPageName.overview
   | SiemPageName.hosts
   | SiemPageName.network
-  | SiemPageName.timelines;
+  | SiemPageName.detections
+  | SiemPageName.timelines
+  | SiemPageName.case;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;

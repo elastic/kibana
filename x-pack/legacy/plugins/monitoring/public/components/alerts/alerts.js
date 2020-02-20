@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import chrome from '../../np_imports/ui/chrome';
 import { capitalize } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
@@ -21,7 +22,7 @@ const linkToCategories = {
   'kibana/instances': 'Kibana Instances',
   'logstash/instances': 'Logstash Nodes',
 };
-const getColumns = (kbnUrl, scope) => ([
+const getColumns = (kbnUrl, scope, timezone) => [
   {
     name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
       defaultMessage: 'Status',
@@ -29,16 +30,29 @@ const getColumns = (kbnUrl, scope) => ([
     field: 'status',
     sortable: true,
     render: severity => {
-      const severityIcon = mapSeverity(severity);
+      const severityIconDefaults = {
+        title: i18n.translate('xpack.monitoring.alerts.severityTitle.unknown', {
+          defaultMessage: 'Unknown',
+        }),
+        color: 'subdued',
+        value: i18n.translate('xpack.monitoring.alerts.severityValue.unknown', {
+          defaultMessage: 'N/A',
+        }),
+      };
+      const severityIcon = { ...severityIconDefaults, ...mapSeverity(severity) };
 
       return (
         <EuiToolTip content={severityIcon.title} position="bottom">
-          <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
-            { capitalize(severityIcon.value) }
+          <EuiHealth
+            color={severityIcon.color}
+            data-test-subj="alertIcon"
+            aria-label={severityIcon.title}
+          >
+            {capitalize(severityIcon.value)}
           </EuiHealth>
         </EuiToolTip>
       );
-    }
+    },
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.resolvedColumnTitle', {
@@ -46,7 +60,7 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'resolved_timestamp',
     sortable: true,
-    render: (resolvedTimestamp) => {
+    render: resolvedTimestamp => {
       const notResolvedLabel = i18n.translate('xpack.monitoring.alerts.notResolvedDescription', {
         defaultMessage: 'Not Resolved',
       });
@@ -60,8 +74,8 @@ const getColumns = (kbnUrl, scope) => ([
         resolution.text = i18n.translate('xpack.monitoring.alerts.resolvedAgoDescription', {
           defaultMessage: '{duration} ago',
           values: {
-            duration: formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE)
-          }
+            duration: formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE),
+          },
         });
       } else {
         resolution.icon = <EuiIcon type="alert" size="m" aria-label={notResolvedLabel} />;
@@ -69,7 +83,7 @@ const getColumns = (kbnUrl, scope) => ([
 
       return (
         <span>
-          { resolution.icon } { resolution.text }
+          {resolution.icon} {resolution.text}
         </span>
       );
     },
@@ -92,7 +106,7 @@ const getColumns = (kbnUrl, scope) => ([
           });
         }}
       />
-    )
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.categoryColumnTitle', {
@@ -100,11 +114,12 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'category',
     sortable: true,
-    render: link => linkToCategories[link]
-      ? linkToCategories[link]
-      : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
-        defaultMessage: 'General',
-      })
+    render: link =>
+      linkToCategories[link]
+        ? linkToCategories[link]
+        : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
+            defaultMessage: 'General',
+          }),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.lastCheckedColumnTitle', {
@@ -112,7 +127,7 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'update_timestamp',
     sortable: true,
-    render: timestamp => formatDateTimeLocal(timestamp)
+    render: timestamp => formatDateTimeLocal(timestamp, timezone),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
@@ -120,14 +135,15 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp => i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
-      defaultMessage: '{timestamp} ago',
-      values: {
-        timestamp: formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE)
-      }
-    })
+    render: timestamp =>
+      i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
+        defaultMessage: '{timestamp} ago',
+        values: {
+          timestamp: formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE),
+        },
+      }),
   },
-]);
+];
 
 export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
   const alertsFlattened = alerts.map(alert => ({
@@ -136,32 +152,34 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
     category: alert.metadata.link,
   }));
 
+  const injector = chrome.dangerouslyGetActiveInjector();
+  const timezone = injector.get('config').get('dateFormat:tz');
+
   return (
     <EuiMonitoringTable
       className="alertsTable"
       rows={alertsFlattened}
-      columns={getColumns(angular.kbnUrl, angular.scope)}
+      columns={getColumns(angular.kbnUrl, angular.scope, timezone)}
       sorting={{
         ...sorting,
         sort: {
           ...sorting.sort,
           field: 'status',
           direction: EUI_SORT_DESCENDING,
-        }
+        },
       }}
       pagination={pagination}
       search={{
         box: {
           incremental: true,
           placeholder: i18n.translate('xpack.monitoring.alerts.filterAlertsPlaceholder', {
-            defaultMessage: 'Filter Alerts…'
-          })
-
+            defaultMessage: 'Filter Alerts…',
+          }),
         },
       }}
       onTableChange={onTableChange}
       executeQueryOptions={{
-        defaultFields: ['message', 'category']
+        defaultFields: ['message', 'category'],
       }}
     />
   );

@@ -28,66 +28,6 @@
  * server side, it should be respective function's internal implementation detail.
  */
 
-import { get, identity } from 'lodash';
-// @ts-ignore
 import { npSetup } from 'ui/new_platform';
-import { FUNCTIONS_URL } from './consts';
-import { ajaxStream } from './ajax_stream';
-import { batchedFetch } from './batched_fetch';
 
-export function getType(node: any) {
-  if (node == null) return 'null';
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
-  }
-  return typeof node;
-}
-
-export function serializeProvider(types: any) {
-  return {
-    serialize: provider('serialize'),
-    deserialize: provider('deserialize'),
-  };
-
-  function provider(key: any) {
-    return (context: any) => {
-      const type = getType(context);
-      const typeDef = types[type];
-      const fn: any = get(typeDef, key) || identity;
-      return fn(context);
-    };
-  }
-}
-
-let cached: Promise<void> | null = null;
-
-export const loadLegacyServerFunctionWrappers = async () => {
-  if (!cached) {
-    cached = (async () => {
-      const serverFunctionList = await npSetup.core.http.get(FUNCTIONS_URL);
-      const types = npSetup.plugins.expressions.__LEGACY.types.toJS();
-      const { serialize } = serializeProvider(types);
-      const batch = batchedFetch({
-        ajaxStream: ajaxStream(
-          npSetup.core.injectedMetadata.getKibanaVersion(),
-          npSetup.core.injectedMetadata.getBasePath()
-        ),
-        serialize,
-      });
-
-      // For every sever-side function, register a client-side
-      // function that matches its definition, but which simply
-      // calls the server-side function endpoint.
-      Object.keys(serverFunctionList).forEach(functionName => {
-        const fn = () => ({
-          ...serverFunctionList[functionName],
-          fn: (context: any, args: any) => batch({ functionName, args, context }),
-        });
-        npSetup.plugins.expressions.registerFunction(fn);
-      });
-    })();
-  }
-
-  return cached;
-};
+export const { loadLegacyServerFunctionWrappers } = npSetup.plugins.expressions.__LEGACY;

@@ -20,7 +20,7 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
         };
       }
 
-      componentWillReceiveProps(nextProps) {
+      UNSAFE_componentWillReceiveProps(nextProps) {
         this.setState({ value: nextProps[fieldname] });
       }
 

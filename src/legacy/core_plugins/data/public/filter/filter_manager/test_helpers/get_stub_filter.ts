@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '../../../../../../../plugins/data/public';
 
 export function getFilter(
-  store: FilterStateStore,
+  store: any, // I don't want to export only for this, as it should move to data plugin
   disabled: boolean,
   negated: boolean,
   queryKey: string,

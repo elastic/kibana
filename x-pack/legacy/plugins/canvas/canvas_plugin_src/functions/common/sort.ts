@@ -5,8 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../../../types';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -14,16 +13,14 @@ interface Arguments {
   reverse: boolean;
 }
 
-export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatable> {
+export function sort(): ExpressionFunctionDefinition<'sort', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().sort;
 
   return {
     name: 'sort',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       by: {
         types: ['string'],
@@ -38,12 +35,12 @@ export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatab
         default: false,
       },
     },
-    fn: (context, args) => {
-      const column = args.by || context.columns[0].name;
+    fn: (input, args) => {
+      const column = args.by || input.columns[0].name;
 
       return {
-        ...context,
-        rows: args.reverse ? sortBy(context.rows, column).reverse() : sortBy(context.rows, column),
+        ...input,
+        rows: args.reverse ? sortBy(input.rows, column).reverse() : sortBy(input.rows, column),
       };
     },
   };

@@ -5,25 +5,25 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
-import { ColumnHeader } from '../column_header';
+
 import * as i18n from '../translations';
 
 interface Props {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onColumnRemoved: OnColumnRemoved;
   sort: Sort;
 }
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
 
-export const CloseButton = pure<{
+export const CloseButton = React.memo<{
   columnId: string;
   onColumnRemoved: OnColumnRemoved;
 }>(({ columnId, onColumnRemoved }) => (
@@ -40,6 +40,7 @@ export const CloseButton = pure<{
     }}
   />
 ));
+
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
@@ -58,4 +59,5 @@ export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => 
     </>
   );
 });
+
 Actions.displayName = 'Actions';

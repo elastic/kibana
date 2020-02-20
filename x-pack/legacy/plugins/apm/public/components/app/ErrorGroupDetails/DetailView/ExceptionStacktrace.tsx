@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx/target';
-import { Exception } from '../../../../../typings/es_schemas/raw/ErrorRaw';
+import { Exception } from '../../../../../../../../plugins/apm/typings/es_schemas/raw/error_raw';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { CauseStacktrace } from '../../../shared/Stacktrace/CauseStacktrace';
 
@@ -20,7 +19,7 @@ export function ExceptionStacktrace({
   codeLanguage,
   exceptions
 }: ExceptionStacktraceProps) {
-  const title = idx(exceptions, _ => _[0].message);
+  const title = exceptions[0]?.message;
 
   return (
     <>

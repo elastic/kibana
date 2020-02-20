@@ -4,42 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
 
 import { SiemPageName } from '../home/types';
 import { hostsModel } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
 import { GlobalTimeArgs } from '../../containers/global_time';
+import { InputsModelId } from '../../store/inputs/constants';
 
 export const hostsPagePath = `/:pageName(${SiemPageName.hosts})`;
 export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 
-export interface HostsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
-
-export interface HostsComponentDispatchProps {
+export type HostsTabsProps = HostsComponentProps & {
+  filterQuery: string;
+  type: hostsModel.HostsType;
+  indexPattern: IIndexPattern;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
     to: number;
   }>;
-  hostsPagePath: string;
-}
-
-export type HostsTabsProps = HostsComponentDispatchProps &
-  HostsQueryProps & {
-    filterQuery: string;
-    type: hostsModel.HostsType;
-    indexPattern: StaticIndexPattern;
-  };
+};
 
 export type HostsQueryProps = GlobalTimeArgs;
 
-export type HostsComponentProps = HostsComponentReduxProps &
-  HostsComponentDispatchProps &
-  HostsQueryProps;
+export type HostsComponentProps = HostsQueryProps & { hostsPagePath: string };

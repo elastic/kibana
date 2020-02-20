@@ -40,12 +40,7 @@ interface Props {
   onChange(d: PivotAggsConfig): void;
 }
 
-export const PopoverForm: React.SFC<Props> = ({
-  defaultData,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
 
   const [aggName, setAggName] = useState(defaultData.aggName);

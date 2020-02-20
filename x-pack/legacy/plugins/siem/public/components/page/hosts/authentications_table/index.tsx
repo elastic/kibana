@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { has } from 'lodash/fp';
-import React from 'react';
-import { connect } from 'react-redux';
-import { pure } from 'recompose';
-import { ActionCreator } from 'typescript-fsa';
+import React, { useCallback } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
@@ -39,24 +39,6 @@ interface OwnProps {
   type: hostsModel.HostsType;
 }
 
-interface AuthenticationTableReduxProps {
-  activePage: number;
-  limit: number;
-}
-
-interface AuthenticationTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-}
-
 export type AuthTableColumns = [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
@@ -69,9 +51,7 @@ export type AuthTableColumns = [
   Columns<AuthenticationsEdges>
 ];
 
-type AuthenticationTableProps = OwnProps &
-  AuthenticationTableReduxProps &
-  AuthenticationTableDispatchProps;
+type AuthenticationTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -84,7 +64,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const AuthenticationTableComponent = pure<AuthenticationTableProps>(
+const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
   ({
     activePage,
     data,
@@ -99,39 +79,49 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     type,
     updateTableActivePage,
     updateTableLimit,
-  }) => (
-    <PaginatedTable
-      activePage={activePage}
-      columns={getAuthenticationColumnsCurated(type)}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={newActivePage => loadPage(newActivePage)}
-      pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={newLimit =>
+  }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
           tableType,
-        })
-      }
-      updateActivePage={newPage =>
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,
           tableType,
-        })
-      }
-    />
-  )
+        }),
+      [type, updateTableActivePage]
+    );
+
+    return (
+      <PaginatedTable
+        activePage={activePage}
+        columns={getAuthenticationColumnsCurated(type)}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.AUTHENTICATIONS}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    );
+  }
 );
 
 AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
@@ -143,13 +133,16 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const AuthenticationTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(AuthenticationTableComponent);
+const mapDispatchToProps = {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const AuthenticationTable = connector(AuthenticationTableComponent);
 
 const getAuthenticationColumns = (): AuthTableColumns => [
   {
@@ -339,7 +332,10 @@ export const getAuthenticationColumnsCurated = (
   // Columns to exclude from host details pages
   if (pageType === hostsModel.HostsType.details) {
     return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   }

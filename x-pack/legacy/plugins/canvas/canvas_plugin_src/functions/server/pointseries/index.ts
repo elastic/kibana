@@ -10,7 +10,14 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import {
+  Datatable,
+  DatatableRow,
+  PointSeries,
+  PointSeriesColumnName,
+  PointSeriesColumns,
+} from 'src/plugins/expressions/common';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -20,13 +27,6 @@ import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
-import {
-  Datatable,
-  DatatableRow,
-  PointSeries,
-  PointSeriesColumnName,
-  PointSeriesColumns,
-} from '../../../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
@@ -39,7 +39,7 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
-export function pointseries(): ExpressionFunction<
+export function pointseries(): ExpressionFunctionDefinition<
   'pointseries',
   Datatable,
   Arguments,
@@ -50,10 +50,10 @@ export function pointseries(): ExpressionFunction<
   return {
     name: 'pointseries',
     type: 'pointseries',
-    help,
     context: {
       types: ['datatable'],
     },
+    help,
     args: {
       color: {
         types: ['string'],
@@ -78,11 +78,11 @@ export function pointseries(): ExpressionFunction<
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const errors = getFunctionErrors().pointseries;
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
-      const columnNames = context.columns.map(col => col.name);
-      const mathScope = pivotObjectArray(context.rows, columnNames);
+      const columnNames = input.columns.map(col => col.name);
+      const mathScope = pivotObjectArray(input.rows, columnNames);
       const autoQuoteColumn = (col: string | null) => {
         if (!col || !columnNames.includes(col)) {
           return col;
@@ -117,7 +117,7 @@ export function pointseries(): ExpressionFunction<
               name: argName,
               value: mathExp,
             });
-            col.type = getExpressionType(context.columns, mathExp);
+            col.type = getExpressionType(input.columns, mathExp);
             col.role = 'dimension';
           } else {
             measureNames.push(argName);
@@ -131,13 +131,13 @@ export function pointseries(): ExpressionFunction<
       });
 
       const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
-      const rows: DatatableRow[] = context.rows.map((row, i) => ({
+      const rows: DatatableRow[] = input.rows.map((row, i) => ({
         ...row,
         [PRIMARY_KEY]: i,
       }));
 
       function normalizeValue(expression: string, value: string) {
-        switch (getExpressionType(context.columns, expression)) {
+        switch (getExpressionType(input.columns, expression)) {
           case 'string':
             return String(value);
           case 'number':
@@ -186,8 +186,11 @@ export function pointseries(): ExpressionFunction<
 
       // Then compute that 1 value for each measure
       Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
-        const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
-        const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
+        const subtable = { type: 'datatable', columns: input.columns, rows: valueRows };
+        const subScope = pivotObjectArray(
+          subtable.rows,
+          subtable.columns.map(col => col.name)
+        );
         const measureValues = measureNames.map(measure => {
           try {
             const ev = evaluate(args[measure], subScope);

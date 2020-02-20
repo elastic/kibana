@@ -17,12 +17,12 @@
  * under the License.
  */
 import {
+  FilterValueFormatter,
   GeoBoundingBoxFilter,
-  Filter,
   FILTERS,
   isGeoBoundingBoxFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
+  Filter,
+} from '../../../../../common';
 
 const getFormattedValueFn = (params: any) => {
   return (formatter?: FilterValueFormatter) => {

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, FILTERS, isMatchAllFilter } from '@kbn/es-query';
+import { Filter, isMatchAllFilter, FILTERS } from '../../../../../common';
 
 export const mapMatchAll = (filter: Filter) => {
   if (isMatchAllFilter(filter)) {

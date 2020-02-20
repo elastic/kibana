@@ -23,7 +23,15 @@ import { schema } from '..';
 const { duration, object, contextRef, siblingRef } = schema;
 
 test('returns value by default', () => {
-  expect(duration().validate('123s')).toMatchSnapshot();
+  expect(duration().validate('123s')).toEqual(momentDuration(123000));
+});
+
+test('handles numeric string', () => {
+  expect(duration().validate('123000')).toEqual(momentDuration(123000));
+});
+
+test('handles number', () => {
+  expect(duration().validate(123000)).toEqual(momentDuration(123000));
 });
 
 test('is required by default', () => {
@@ -47,6 +55,14 @@ describe('#defaultValue', () => {
     expect(
       duration({
         defaultValue: '1h',
+      }).validate(undefined)
+    ).toMatchSnapshot();
+  });
+
+  test('can be a string-formatted number', () => {
+    expect(
+      duration({
+        defaultValue: '600',
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -85,7 +101,7 @@ describe('#defaultValue', () => {
         source: duration({ defaultValue: 600 }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(700, 'ms') })
+      }).validate({}, { val: momentDuration(700, 'ms') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT0.7S",
@@ -99,7 +115,7 @@ Object {
         source: duration({ defaultValue: '1h' }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(2, 'hour') })
+      }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT2H",
@@ -113,7 +129,7 @@ Object {
         source: duration({ defaultValue: momentDuration(1, 'hour') }),
         target: duration({ defaultValue: siblingRef('source') }),
         fromContext: duration({ defaultValue: contextRef('val') }),
-      }).validate(undefined, { val: momentDuration(2, 'hour') })
+      }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
 Object {
   "fromContext": "PT2H",
@@ -124,7 +140,7 @@ Object {
   });
 });
 
-test('returns error when not string or non-safe positive integer', () => {
+test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate(NaN)).toThrowErrorMatchingSnapshot();
@@ -136,4 +152,8 @@ test('returns error when not string or non-safe positive integer', () => {
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate(/abc/)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate('123foo')).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate('123 456')).toThrowErrorMatchingSnapshot();
 });

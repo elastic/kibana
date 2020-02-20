@@ -5,3 +5,17 @@
  */
 
 export type BrowserType = 'chromium';
+
+export interface BrowserDownload {
+  paths: {
+    archivesPath: string;
+    baseUrl: string;
+    packages: Array<{
+      archiveChecksum: string;
+      archiveFilename: string;
+      binaryChecksum: string;
+      binaryRelativePath: string;
+      platforms: string[];
+    }>;
+  };
+}

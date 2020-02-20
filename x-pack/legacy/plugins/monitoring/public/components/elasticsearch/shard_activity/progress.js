@@ -10,7 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const FilesProgress = ({ filesPercent, filesDone, filesTotal }) => {
   return (
     <Fragment>
-      {filesPercent}<br />
+      {filesPercent}
+      <br />
       {filesDone} / {filesTotal}
     </Fragment>
   );
@@ -19,7 +20,8 @@ export const FilesProgress = ({ filesPercent, filesDone, filesTotal }) => {
 export const BytesProgress = ({ bytesPercent, bytesDone, bytesTotal }) => {
   return (
     <Fragment>
-      {bytesPercent}<br />
+      {bytesPercent}
+      <br />
       {bytesDone} / {bytesTotal}
     </Fragment>
   );
@@ -28,7 +30,8 @@ export const BytesProgress = ({ bytesPercent, bytesDone, bytesTotal }) => {
 export const TranslogProgress = ({ hasTranslog, translogPercent, translogDone, translogTotal }) => {
   return hasTranslog ? (
     <Fragment>
-      {translogPercent}<br />
+      {translogPercent}
+      <br />
       {translogDone} / {translogTotal}
     </Fragment>
   ) : (
@@ -38,4 +41,3 @@ export const TranslogProgress = ({ hasTranslog, translogPercent, translogDone, t
     />
   );
 };
-

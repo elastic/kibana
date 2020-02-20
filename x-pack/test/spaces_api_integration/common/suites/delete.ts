@@ -39,6 +39,11 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       index: '.kibana',
       body: {
         size: 0,
+        query: {
+          terms: {
+            type: ['visualization', 'dashboard', 'space', 'config', 'index-pattern'],
+          },
+        },
         aggs: {
           count: {
             terms: {

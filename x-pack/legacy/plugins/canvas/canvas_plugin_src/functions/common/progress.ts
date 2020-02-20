@@ -5,9 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../../../types';
+import { Render, Style, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Shape {
@@ -32,7 +31,12 @@ interface Arguments {
   valueWeight: number;
 }
 
-export function progress(): ExpressionFunction<'progress', number, Arguments, Render<Arguments>> {
+export function progress(): ExpressionFunctionDefinition<
+  'progress',
+  number,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().progress;
   const errors = getFunctionErrors().progress;
 
@@ -40,10 +44,8 @@ export function progress(): ExpressionFunction<'progress', number, Arguments, Re
     name: 'progress',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       shape: {
         aliases: ['_'],

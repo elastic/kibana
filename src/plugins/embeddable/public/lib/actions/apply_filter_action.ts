@@ -18,9 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { IAction, createAction, IncompatibleActionError } from '../ui_actions';
+import { Action, createAction, IncompatibleActionError } from '../ui_actions';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
+import { Filter } from '../../../../../plugins/data/public';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
@@ -38,7 +38,7 @@ async function isCompatible(context: ActionContext) {
   return Boolean(root.getInput().filters !== undefined && context.filters !== undefined);
 }
 
-export function createFilterAction(): IAction<ActionContext> {
+export function createFilterAction(): Action<ActionContext> {
   return createAction<ActionContext>({
     type: APPLY_FILTER_ACTION,
     id: APPLY_FILTER_ACTION,

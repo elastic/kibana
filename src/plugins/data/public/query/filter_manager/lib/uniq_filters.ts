@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
 import { each, union } from 'lodash';
 import { dedupFilters } from './dedup_filters';
+import { Filter } from '../../../../common';
 
 /**
  * Remove duplicate filters from an array of filters

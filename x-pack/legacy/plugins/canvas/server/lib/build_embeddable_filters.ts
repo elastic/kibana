@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildQueryFilter, Filter as ESFilterType } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
 
+// TODO: We should be importing from `data/server` below instead of `data/common`, but
+// need to keep `data/common` since the contents of this file are currently imported
+// by the browser. This file should probably be refactored so that the pieces required
+// on the client live in a `public` directory instead. See kibana/issues/52343
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import {
+  TimeRange,
+  esFilters,
+  Filter as DataFilter,
+} from '../../../../../../src/plugins/data/server';
+
 export interface EmbeddableFilterInput {
-  filters: ESFilterType[];
+  filters: DataFilter[];
   timeRange?: TimeRange;
 }
 
@@ -30,8 +39,8 @@ function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
     : undefined;
 }
 
-function getQueryFilters(filters: Filter[]): ESFilterType[] {
-  return buildBoolArray(filters.filter(filter => filter.type !== 'time')).map(buildQueryFilter);
+export function getQueryFilters(filters: Filter[]): DataFilter[] {
+  return buildBoolArray(filters).map(esFilters.buildQueryFilter);
 }
 
 export function buildEmbeddableFilters(filters: Filter[]): EmbeddableFilterInput {

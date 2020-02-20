@@ -5,8 +5,6 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { StringMap } from '../../typings/common';
-
 const { euiColorDarkShade, euiColorWarning } = theme;
 
 export const errorColor = '#c23c2b';
@@ -14,7 +12,7 @@ export const neutralColor = euiColorDarkShade;
 export const successColor = '#327a42';
 export const warningColor = euiColorWarning;
 
-const httpStatusCodeColors: StringMap<string> = {
+const httpStatusCodeColors: Record<string, string> = {
   1: neutralColor,
   2: successColor,
   3: neutralColor,

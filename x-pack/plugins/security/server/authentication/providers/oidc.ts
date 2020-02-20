@@ -6,9 +6,9 @@
 
 import Boom from 'boom';
 import type from 'type-detect';
-import { canRedirectRequest } from '../';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';
 import {
@@ -62,6 +62,11 @@ interface ProviderState extends Partial<TokenPair> {
  * Provider that supports authentication using an OpenID Connect realm in Elasticsearch.
  */
 export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'oidc';
+
   /**
    * Specifies Elasticsearch OIDC realm name that Kibana should use.
    */
@@ -250,7 +255,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       const { state, nonce, redirect } = await this.options.client.callAsInternalUser(
         'shield.oidcPrepare',
-        { body: oidcPrepareParams }
+        {
+          body: oidcPrepareParams,
+        }
       );
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
@@ -429,7 +436,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(`${this.options.basePath.get(request)}/logged_out`);
+      return DeauthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/logged_out`
+      );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

@@ -30,7 +30,6 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
-  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
@@ -44,6 +43,7 @@ import {
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
+  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
@@ -119,6 +119,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
+  await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);
@@ -133,7 +134,6 @@ export async function buildDistributables(options) {
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
-  await run(CleanCtagBuildTask);
 
   await run(PathLengthTask);
 

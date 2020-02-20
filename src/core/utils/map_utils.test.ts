@@ -42,7 +42,11 @@ describe('groupIntoMap', () => {
     const groupBy = (item: { id: number }) => item.id;
 
     expect(groupIntoMap([{ id: 1 }, { id: 2 }, { id: 3 }], groupBy)).toEqual(
-      new Map([[1, [{ id: 1 }]], [2, [{ id: 2 }]], [3, [{ id: 3 }]]])
+      new Map([
+        [1, [{ id: 1 }]],
+        [2, [{ id: 2 }]],
+        [3, [{ id: 3 }]],
+      ])
     );
   });
 
@@ -93,7 +97,12 @@ describe('mapValuesOfMap', () => {
     map.set(even, 2);
     map.set(odd, 1);
 
-    expect(mapValuesOfMap(map, mapper)).toEqual(new Map([[even, 6], [odd, 3]]));
+    expect(mapValuesOfMap(map, mapper)).toEqual(
+      new Map([
+        [even, 6],
+        [odd, 3],
+      ])
+    );
     expect(map.get(odd)).toEqual(1);
     expect(map.get(even)).toEqual(2);
   });

@@ -1,0 +1,14 @@
+.prfDevTool__percentBadge {
+  &__progress--percent {
+    @include prfDevToolProgress;
+    width: $badgeSize;
+  }
+
+  &__progress--time {
+    @include prfDevToolProgress(#FFAFAF);
+    background-color: #F5F5F5; // Must be light at all times
+    // Width of 3 badges, with the last child not having padding on the left
+    width: ($badgeSize * 3) - ($euiSizeXS * .75);
+    // Force text to always be dark on top of white -> pink color
+  }
+}

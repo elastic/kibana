@@ -6,7 +6,7 @@
 
 import mappings from './mappings.json';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'hidden_type_plugin',
@@ -14,8 +14,8 @@ export default function (kibana) {
       savedObjectsManagement: {},
       savedObjectSchemas: {
         hiddentype: {
-          hidden: true
-        }
+          hidden: true,
+        },
       },
       mappings,
     },

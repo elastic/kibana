@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 const name = 'seriesStyle';
@@ -19,20 +20,23 @@ interface Arguments {
   stack: number | null;
 }
 
-interface Return extends Arguments {
+interface Output extends Arguments {
   type: 'seriesStyle';
 }
 
-export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments, Return> {
+export function seriesStyle(): ExpressionFunctionDefinition<
+  'seriesStyle',
+  null,
+  Arguments,
+  Output
+> {
   const { help, args: argHelp } = getFunctionHelp().seriesStyle;
 
   return {
     name,
     help,
     type: 'seriesStyle',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       bars: {
         types: ['number'],
@@ -70,6 +74,6 @@ export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments
         help: argHelp.stack,
       },
     },
-    fn: (_context, args) => ({ type: name, ...args }),
+    fn: (input, args) => ({ type: name, ...args }),
   };
 }

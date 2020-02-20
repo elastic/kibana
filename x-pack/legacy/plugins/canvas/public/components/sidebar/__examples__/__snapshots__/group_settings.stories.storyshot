@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Sidebar/GroupSettings default 1`] = `
+<div
+  className="canvasSidebar__panel canvasSidebar__panel--isEmpty"
+>
+  <div
+    className="euiText euiText--small"
+  >
+    <p>
+      Ungroup (U) to edit individual element settings.
+    </p>
+    <p>
+      Save this group as a new element to re-use it throughout your workpad.
+    </p>
+  </div>
+</div>
+`;

@@ -6,17 +6,16 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
   describe('tooltip filter actions', () => {
-
     before(async () => {
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a'
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('dash for tooltip filter action test');

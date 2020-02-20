@@ -17,26 +17,32 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import {
+  TextContextTypeConvert,
+  FIELD_FORMAT_IDS,
+  FieldFormatsGetConfigFn,
+  IFieldFormatMetaParams,
+} from '../types';
 
 export class DateFormat extends FieldFormat {
-  static id = 'date';
-  static title = 'Date';
+  static id = FIELD_FORMAT_IDS.DATE;
+  static title = i18n.translate('data.fieldFormats.date.title', {
+    defaultMessage: 'Date',
+  });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
+  constructor(params: IFieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn) {
+    super(params, getConfig);
 
-    this.getConfig = getConfig;
     this.memoizedConverter = memoize((val: any) => {
       if (val == null) {
         return '-';
@@ -66,8 +72,8 @@ export class DateFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

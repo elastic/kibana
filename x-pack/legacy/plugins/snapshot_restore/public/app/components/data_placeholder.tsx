@@ -13,7 +13,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
+export const DataPlaceholder: React.FC<Props> = ({ data, children }) => {
   const {
     core: { i18n },
   } = useAppDependencies();

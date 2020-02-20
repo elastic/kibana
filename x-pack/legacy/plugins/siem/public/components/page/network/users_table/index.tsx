@@ -6,11 +6,16 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/network';
-import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  FlowTarget,
+  UsersEdges,
+  UsersFields,
+  UsersSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
@@ -32,21 +37,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface UsersTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: UsersSortField;
-}
-
-interface UsersTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type UsersTableProps = OwnProps & UsersTableReduxProps & UsersTableDispatchProps;
+type UsersTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -78,13 +69,33 @@ const UsersTableComponent = React.memo<UsersTableProps>(
     updateNetworkTable,
     sort,
   }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
           const splitField = criteria.sort.field.split('.');
           const newUsersSort: UsersSortField = {
             field: getSortFromString(splitField[splitField.length - 1]),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (!isEqual(newUsersSort, sort)) {
             updateNetworkTable({
@@ -95,7 +106,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
           }
         }
       },
-      [sort, type]
+      [sort, type, updateNetworkTable]
     );
 
     return (
@@ -112,25 +123,13 @@ const UsersTableComponent = React.memo<UsersTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
@@ -145,12 +144,15 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const UsersTable = connect(
-  makeMapStateToProps,
-  {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  }
-)(UsersTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const UsersTable = connector(UsersTableComponent);
 
 const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   switch (sortField.field) {

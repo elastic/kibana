@@ -18,14 +18,172 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
+
+import {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+} from '../common';
+
+/*
+ * Filter helper namespace:
+ */
+
+export const esFilters = {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+};
+
+/*
+ * esQuery and esKuery:
+ */
+
+import {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  getEsQueryConfig,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  getEsQueryConfig,
+  buildEsQuery,
+};
+
+export { EsQueryConfig, KueryNode } from '../common';
+
+/*
+ * Field Formats:
+ */
+
+import {
+  FieldFormatsRegistry,
+  FieldFormat,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+  serializeFieldFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormatsRegistry,
+  FieldFormat,
+
+  serializeFieldFormat,
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
+
+export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+
+/*
+ * Index patterns:
+ */
+
+import { isNestedField, isFilterable } from '../common';
+
+export const indexPatterns = {
+  isFilterable,
+  isNestedField,
+};
+
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor as IndexPatternFieldDescriptor,
+  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+} from './index_patterns';
+
+export {
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+} from '../common';
+
+/**
+ * Search
+ */
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './search';
+
+/**
+ * Types to be shared externally
+ * @public
+ */
+
+export {
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  // query
+  Filter,
+  Query,
+  // timefilter
+  RefreshInterval,
+  TimeRange,
+  // utils
+  parseInterval,
+} from '../common';
+
+/**
+ * Static code to be shared externally
+ * @public
+ */
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
-
-export * from './search';
-
-export { IRequestTypesMap, IResponseTypesMap } from './search';
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};

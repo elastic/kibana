@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter, FILTERS } from '@kbn/es-query';
 import { find, keys, get } from 'lodash';
+import { Filter, FILTERS } from '../../../../../common';
 
 export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;

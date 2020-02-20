@@ -5,20 +5,16 @@
  */
 
 import React from 'react';
-import { render, fireEvent, cleanup } from 'react-testing-library';
-import 'react-testing-library/cleanup-after-each';
+import { render, fireEvent } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
-import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
-import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { ISavedObject } from '../../../../services/rest/savedObjects';
-import { LegacyCoreStart } from 'src/core/public';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
-    <TransactionActionMenu transaction={transaction as Transaction} />
+    <TransactionActionMenu transaction={transaction as Transaction} />,
+    { wrapper: MockApmPluginContextWrapper }
   );
 
   fireEvent.click(rendered.getByText('Actions'));
@@ -27,27 +23,6 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 describe('TransactionActionMenu component', () => {
-  beforeEach(() => {
-    const coreMock = ({
-      http: {
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
-    jest.spyOn(apmIndexPatternHooks, 'useAPMIndexPattern').mockReturnValue({
-      apmIndexPattern: { id: 'foo' } as ISavedObject,
-      status: FETCH_STATUS.SUCCESS
-    });
-    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    cleanup();
-  });
-
   it('should always render the discover link', async () => {
     const { queryByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
@@ -61,7 +36,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show trace logs')).not.toBeNull();
+    expect(queryByText('Trace logs')).not.toBeNull();
   });
 
   it('should not render the pod links when there is no pod id', async () => {
@@ -69,8 +44,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show pod logs')).toBeNull();
-    expect(queryByText('Show pod metrics')).toBeNull();
+    expect(queryByText('Pod logs')).toBeNull();
+    expect(queryByText('Pod metrics')).toBeNull();
   });
 
   it('should render the pod links when there is a pod id', async () => {
@@ -78,8 +53,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithKubernetesData
     );
 
-    expect(queryByText('Show pod logs')).not.toBeNull();
-    expect(queryByText('Show pod metrics')).not.toBeNull();
+    expect(queryByText('Pod logs')).not.toBeNull();
+    expect(queryByText('Pod metrics')).not.toBeNull();
   });
 
   it('should not render the container links when there is no container id', async () => {
@@ -87,8 +62,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show container logs')).toBeNull();
-    expect(queryByText('Show container metrics')).toBeNull();
+    expect(queryByText('Container logs')).toBeNull();
+    expect(queryByText('Container metrics')).toBeNull();
   });
 
   it('should render the container links when there is a container id', async () => {
@@ -96,8 +71,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithContainerData
     );
 
-    expect(queryByText('Show container logs')).not.toBeNull();
-    expect(queryByText('Show container metrics')).not.toBeNull();
+    expect(queryByText('Container logs')).not.toBeNull();
+    expect(queryByText('Container metrics')).not.toBeNull();
   });
 
   it('should not render the host links when there is no hostname', async () => {
@@ -105,8 +80,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Show host logs')).toBeNull();
-    expect(queryByText('Show host metrics')).toBeNull();
+    expect(queryByText('Host logs')).toBeNull();
+    expect(queryByText('Host metrics')).toBeNull();
   });
 
   it('should render the host links when there is a hostname', async () => {
@@ -114,8 +89,8 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithHostData
     );
 
-    expect(queryByText('Show host logs')).not.toBeNull();
-    expect(queryByText('Show host metrics')).not.toBeNull();
+    expect(queryByText('Host logs')).not.toBeNull();
+    expect(queryByText('Host metrics')).not.toBeNull();
   });
 
   it('should not render the uptime link if there is no url available', async () => {
@@ -123,7 +98,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should not render the uptime link if there is no domain available', async () => {
@@ -131,7 +106,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlWithoutDomain
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should render the uptime link if there is a url with a domain', async () => {
@@ -139,7 +114,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlAndDomain
     );
 
-    expect(queryByText('View monitor status')).not.toBeNull();
+    expect(queryByText('Status')).not.toBeNull();
   });
 
   it('should match the snapshot', async () => {

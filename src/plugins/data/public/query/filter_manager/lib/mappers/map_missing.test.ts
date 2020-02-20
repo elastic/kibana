@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { MissingFilter, buildEmptyFilter, ExistsFilter } from '@kbn/es-query';
+
 import { mapMissing } from './map_missing';
+import { MissingFilter, buildEmptyFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapMissing()', () => {
@@ -33,7 +34,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = buildEmptyFilter(true) as ExistsFilter;
+      const filter = buildEmptyFilter(true);
 
       try {
         mapMissing(filter);

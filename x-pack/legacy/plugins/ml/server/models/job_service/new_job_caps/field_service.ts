@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Request } from 'src/legacy/server/kbn_server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import {
   Field,
   Aggregation,
@@ -13,7 +13,7 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/server';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations, mlOnlyAggregations } from './aggregations';
@@ -31,28 +31,36 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
   ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.GEO_POINT,
+  ES_FIELD_TYPES.GEO_SHAPE,
+  ES_FIELD_TYPES.BOOLEAN,
 ];
 
 export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
   callWithRequest: any,
-  request: Request
+  savedObjectsClient: SavedObjectsClientContract
 ) {
-  return new FieldsService(indexPattern, isRollup, callWithRequest, request);
+  return new FieldsService(indexPattern, isRollup, callWithRequest, savedObjectsClient);
 }
 
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
   private _callWithRequest: any;
-  private _request: Request;
+  private _savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(indexPattern: string, isRollup: boolean, callWithRequest: any, request: Request) {
+  constructor(
+    indexPattern: string,
+    isRollup: boolean,
+    callWithRequest: any,
+    savedObjectsClient: any
+  ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._callWithRequest = callWithRequest;
-    this._request = request;
+    this._savedObjectsClient = savedObjectsClient;
   }
 
   private async loadFieldCaps(): Promise<any> {
@@ -101,7 +109,7 @@ class FieldsService {
       const rollupService = await rollupServiceProvider(
         this._indexPattern,
         this._callWithRequest,
-        this._request
+        this._savedObjectsClient
       );
       const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
 
@@ -133,8 +141,10 @@ async function combineFieldsAndAggs(
   rollupFields: RollupFields
 ): Promise<NewJobCaps> {
   const keywordFields = getKeywordFields(fields);
+  const textFields = getTextFields(fields);
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
+  const geoFields = getGeoFields(fields);
 
   const isRollup = Object.keys(rollupFields).length > 0;
   const mix = mixFactory(isRollup, rollupFields);
@@ -142,17 +152,20 @@ async function combineFieldsAndAggs(
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
       switch (a.id) {
+        case ML_JOB_AGGREGATION.LAT_LONG:
+          geoFields.forEach(f => mix(f, a));
+          break;
+        case ML_JOB_AGGREGATION.INFO_CONTENT:
+        case ML_JOB_AGGREGATION.HIGH_INFO_CONTENT:
+        case ML_JOB_AGGREGATION.LOW_INFO_CONTENT:
+          textFields.forEach(f => mix(f, a));
         case ML_JOB_AGGREGATION.DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
-          keywordFields.forEach(f => {
-            mix(f, a);
-          });
-          ipFields.forEach(f => {
-            mix(f, a);
-          });
+          keywordFields.forEach(f => mix(f, a));
+          ipFields.forEach(f => mix(f, a));
         // note, no break to fall through to add numerical fields.
         default:
           // all other aggs take numerical fields
@@ -218,6 +231,10 @@ function getKeywordFields(fields: Field[]): Field[] {
   return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD);
 }
 
+function getTextFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.TEXT);
+}
+
 function getIpFields(fields: Field[]): Field[] {
   return fields.filter(f => f.type === ES_FIELD_TYPES.IP);
 }
@@ -233,5 +250,11 @@ function getNumericalFields(fields: Field[]): Field[] {
       f.type === ES_FIELD_TYPES.FLOAT ||
       f.type === ES_FIELD_TYPES.HALF_FLOAT ||
       f.type === ES_FIELD_TYPES.SCALED_FLOAT
+  );
+}
+
+function getGeoFields(fields: Field[]): Field[] {
+  return fields.filter(
+    f => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
 }

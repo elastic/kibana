@@ -5,19 +5,16 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import useResizeObserver from 'use-resize-observer';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { KqlMode } from '../../store/timeline/model';
-import { AutoSizer } from '../auto_sizer';
-import { ColumnHeader } from './body/column_headers/column_header';
+import { useKibana } from '../../lib/kibana';
+import { ColumnHeaderOptions, KqlMode, EventType } from '../../store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
@@ -37,6 +34,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
+import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -58,18 +56,22 @@ export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   end: number;
+  eventType?: EventType;
+  filters: Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
+  indexToAdd: string[];
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
+  loadingIndexName: boolean;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -81,146 +83,154 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** The parent Timeline component */
-export const Timeline = React.memo<Props>(
-  ({
-    browserFields,
-    columns,
+export const TimelineComponent: React.FC<Props> = ({
+  browserFields,
+  columns,
+  dataProviders,
+  end,
+  eventType,
+  filters,
+  flyoutHeaderHeight,
+  flyoutHeight,
+  id,
+  indexPattern,
+  indexToAdd,
+  isLive,
+  itemsPerPage,
+  itemsPerPageOptions,
+  kqlMode,
+  kqlQueryExpression,
+  loadingIndexName,
+  onChangeDataProviderKqlQuery,
+  onChangeDroppableAndProvider,
+  onChangeItemsPerPage,
+  onDataProviderEdited,
+  onDataProviderRemoved,
+  onToggleDataProviderEnabled,
+  onToggleDataProviderExcluded,
+  show,
+  showCallOutUnauthorizedMsg,
+  start,
+  sort,
+  toggleColumn,
+}) => {
+  const { ref: measureRef, width = 0, height: timelineHeaderHeight = 0 } = useResizeObserver<
+    HTMLDivElement
+  >({});
+  const kibana = useKibana();
+  const combinedQueries = combineQueries({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
-    end,
-    flyoutHeaderHeight,
-    flyoutHeight,
-    id,
     indexPattern,
-    isLive,
-    itemsPerPage,
-    itemsPerPageOptions,
+    browserFields,
+    filters,
+    kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
     kqlMode,
-    kqlQueryExpression,
-    onChangeDataProviderKqlQuery,
-    onChangeDroppableAndProvider,
-    onChangeItemsPerPage,
-    onDataProviderEdited,
-    onDataProviderRemoved,
-    onToggleDataProviderEnabled,
-    onToggleDataProviderExcluded,
-    show,
-    showCallOutUnauthorizedMsg,
     start,
-    sort,
-    toggleColumn,
-  }) => {
-    const core = useKibanaCore();
-    const combinedQueries = combineQueries({
-      config: getEsQueryConfig(core.uiSettings),
-      dataProviders,
-      indexPattern,
-      browserFields,
-      filters: [],
-      kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
-      kqlMode,
-      start,
-      end,
-    });
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    return (
-      <AutoSizer detectAnyWindowResize={true} content>
-        {({ measureRef, content: { height: timelineHeaderHeight = 0, width = 0 } }) => (
-          <TimelineContainer
-            data-test-subj="timeline"
-            direction="column"
-            gutterSize="none"
-            justifyContent="flexStart"
-          >
-            <WrappedByAutoSizer innerRef={measureRef}>
-              <TimelineHeader
-                browserFields={browserFields}
+    end,
+  });
+  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+
+  return (
+    <TimelineContainer
+      data-test-subj="timeline"
+      direction="column"
+      gutterSize="none"
+      justifyContent="flexStart"
+    >
+      <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
+        <TimelineHeader
+          browserFields={browserFields}
+          id={id}
+          indexPattern={indexPattern}
+          dataProviders={dataProviders}
+          onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+          onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+          onDataProviderEdited={onDataProviderEdited}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+          onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+          show={show}
+          showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+          sort={sort}
+        />
+      </WrappedByAutoSizer>
+      <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
+      {combinedQueries != null ? (
+        <TimelineQuery
+          eventType={eventType}
+          id={id}
+          indexToAdd={indexToAdd}
+          fields={columnsHeader.map(c => c.id)}
+          sourceId="default"
+          limit={itemsPerPage}
+          filterQuery={combinedQueries.filterQuery}
+          sortField={{
+            sortFieldId: sort.columnId,
+            direction: sort.sortDirection as Direction,
+          }}
+        >
+          {({
+            events,
+            inspect,
+            loading,
+            totalCount,
+            pageInfo,
+            loadMore,
+            getUpdatedAt,
+            refetch,
+          }) => (
+            <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
+              <TimelineRefetch
                 id={id}
-                indexPattern={indexPattern}
-                dataProviders={dataProviders}
-                onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-                onDataProviderEdited={onDataProviderEdited}
-                onDataProviderRemoved={onDataProviderRemoved}
-                onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                show={show}
-                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                sort={sort}
+                inputId="timeline"
+                inspect={inspect}
+                loading={loading}
+                refetch={refetch}
               />
-            </WrappedByAutoSizer>
-            <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-            {combinedQueries != null ? (
-              <TimelineQuery
+              <StatefulBody
+                browserFields={browserFields}
+                data={events}
                 id={id}
-                fields={columnsHeader.map(c => c.id)}
-                sourceId="default"
-                limit={itemsPerPage}
-                filterQuery={combinedQueries.filterQuery}
-                sortField={{
-                  sortFieldId: sort.columnId,
-                  direction: sort.sortDirection as Direction,
-                }}
-              >
-                {({
-                  events,
-                  inspect,
-                  loading,
-                  totalCount,
-                  pageInfo,
-                  loadMore,
-                  getUpdatedAt,
-                  refetch,
-                }) => (
-                  <ManageTimelineContext loading={loading} width={width}>
-                    <TimelineRefetch
-                      id={id}
-                      inputId="timeline"
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                    />
-                    <StatefulBody
-                      browserFields={browserFields}
-                      data={events}
-                      id={id}
-                      height={calculateBodyHeight({
-                        flyoutHeight,
-                        flyoutHeaderHeight,
-                        timelineHeaderHeight,
-                        timelineFooterHeight: footerHeight,
-                      })}
-                      sort={sort}
-                      toggleColumn={toggleColumn}
-                    />
-                    <Footer
-                      serverSideEventCount={totalCount}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      getUpdatedAt={getUpdatedAt}
-                      compact={isCompactFooter(width)}
-                    />
-                  </ManageTimelineContext>
-                )}
-              </TimelineQuery>
-            ) : null}
-          </TimelineContainer>
-        )}
-      </AutoSizer>
-    );
-  }
-);
+                height={calculateBodyHeight({
+                  flyoutHeight,
+                  flyoutHeaderHeight,
+                  timelineHeaderHeight,
+                  timelineFooterHeight: footerHeight,
+                })}
+                sort={sort}
+                toggleColumn={toggleColumn}
+              />
+              <Footer
+                serverSideEventCount={totalCount}
+                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                height={footerHeight}
+                isLive={isLive}
+                isLoading={loading || loadingIndexName}
+                itemsCount={events.length}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                onLoadMore={loadMore}
+                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                getUpdatedAt={getUpdatedAt}
+                compact={isCompactFooter(width)}
+              />
+            </ManageTimelineContext>
+          )}
+        </TimelineQuery>
+      ) : null}
+    </TimelineContainer>
+  );
+};
+
+TimelineComponent.displayName = 'TimelineComponent';
+
+export const Timeline = React.memo(TimelineComponent);
 
 Timeline.displayName = 'Timeline';

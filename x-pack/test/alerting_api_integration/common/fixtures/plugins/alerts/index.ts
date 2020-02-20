@@ -3,18 +3,49 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
-import { ActionTypeExecutorOptions, ActionType } from '../../../../../../legacy/plugins/actions';
+import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting', 'elasticsearch'],
+    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok', actionId: '' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -31,8 +62,8 @@ export default function(kibana: any) {
             encrypted: schema.string(),
           }),
         },
-        async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
-          return await services.callCluster('index', {
+        async executor({ config, secrets, params, services, actionId }: ActionTypeExecutorOptions) {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -43,6 +74,7 @@ export default function(kibana: any) {
               source: 'action:test.index-record',
             },
           });
+          return { status: 'ok', actionId };
         },
       };
       const failingActionType: ActionType = {
@@ -66,7 +98,7 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {
@@ -94,6 +126,7 @@ export default function(kibana: any) {
           return {
             status: 'error',
             retry: new Date(params.retryAt),
+            actionId: '',
           };
         },
       };
@@ -109,7 +142,7 @@ export default function(kibana: any) {
             reference: schema.string(),
           }),
         },
-        async executor({ params, services }: ActionTypeExecutorOptions) {
+        async executor({ params, services, actionId }: ActionTypeExecutorOptions) {
           // Call cluster
           let callClusterSuccess = false;
           let callClusterError;
@@ -154,22 +187,40 @@ export default function(kibana: any) {
             },
           });
           return {
+            actionId,
             status: 'ok',
           };
         },
       };
-      server.plugins.actions.setup.registerType(indexRecordActionType);
-      server.plugins.actions.setup.registerType(failingActionType);
-      server.plugins.actions.setup.registerType(rateLimitedActionType);
-      server.plugins.actions.setup.registerType(authorizationActionType);
+      server.newPlatform.setup.plugins.actions.registerType(noopActionType);
+      server.newPlatform.setup.plugins.actions.registerType(indexRecordActionType);
+      server.newPlatform.setup.plugins.actions.registerType(failingActionType);
+      server.newPlatform.setup.plugins.actions.registerType(rateLimitedActionType);
+      server.newPlatform.setup.plugins.actions.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: ['default', 'other'],
-        async executor({ services, params, state }: AlertExecutorOptions) {
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const {
+            services,
+            params,
+            state,
+            alertId,
+            spaceId,
+            namespace,
+            name,
+            tags,
+            createdBy,
+            updatedBy,
+          } = alertExecutorOptions;
           let group = 'default';
+          const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
           if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
@@ -192,11 +243,38 @@ export default function(kibana: any) {
               params,
               reference: params.reference,
               source: 'alert:test.always-firing',
+              alertInfo,
             },
           });
           return {
             globalStateValue: true,
             groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+          };
+        },
+      };
+      // Alert types
+      const cumulativeFiringAlertType: AlertType = {
+        id: 'test.cumulative-firing',
+        name: 'Test: Cumulative Firing',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const { services, state } = alertExecutorOptions;
+          const group = 'default';
+
+          const runCount = (state.runCount || 0) + 1;
+
+          times(runCount, index => {
+            services
+              .alertInstanceFactory(`instance-${index}`)
+              .replaceState({ instanceStateValue: true })
+              .scheduleActions(group);
+          });
+
+          return {
+            runCount,
           };
         },
       };
@@ -311,15 +389,16 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: [],
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.setup.registerType(neverFiringAlertType);
-      server.plugins.alerting.setup.registerType(failingAlertType);
-      server.plugins.alerting.setup.registerType(validationAlertType);
-      server.plugins.alerting.setup.registerType(authorizationAlertType);
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(failingAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
     },
   });
 }

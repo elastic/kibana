@@ -17,37 +17,33 @@
  * under the License.
  */
 
-import { Stats } from './stats';
 import { METRIC_TYPE } from './';
 
 export type UiStatsMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
-export interface UiStatsMetricConfig<T extends UiStatsMetricType> {
-  type: T;
+export interface UiStatsMetricConfig {
+  type: UiStatsMetricType;
   appName: string;
   eventName: string;
   count?: number;
 }
 
-export interface UiStatsMetric<T extends UiStatsMetricType = UiStatsMetricType> {
-  type: T;
+export interface UiStatsMetric {
+  type: UiStatsMetricType;
   appName: string;
   eventName: string;
   count: number;
 }
 
-export function createUiStatsMetric<T extends UiStatsMetricType>({
+export function createUiStatsMetric({
   type,
   appName,
   eventName,
   count = 1,
-}: UiStatsMetricConfig<T>): UiStatsMetric<T> {
-  return { type, appName, eventName, count };
-}
-
-export interface UiStatsMetricReport {
-  key: string;
-  appName: string;
-  eventName: string;
-  type: UiStatsMetricType;
-  stats: Stats;
+}: UiStatsMetricConfig): UiStatsMetric {
+  return {
+    type,
+    appName,
+    eventName,
+    count,
+  };
 }

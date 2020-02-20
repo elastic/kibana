@@ -20,6 +20,7 @@ const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
         value={argValue}
         onChange={onValueChange}
         shapes={typeInstance.options.shapes}
+        ariaLabel={typeInstance.displayName}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

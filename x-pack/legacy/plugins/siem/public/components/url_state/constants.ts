@@ -6,17 +6,20 @@
 
 export enum CONSTANTS {
   appQuery = 'query',
+  caseDetails = 'case.details',
+  casePage = 'case.page',
+  detectionsPage = 'detections.page',
   filters = 'filters',
-  savedQuery = 'savedQuery',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
   networkDetails = 'network.details',
   networkPage = 'network.page',
   overviewPage = 'overview.page',
+  savedQuery = 'savedQuery',
+  timeline = 'timeline',
   timelinePage = 'timeline.page',
   timerange = 'timerange',
-  timeline = 'timeline',
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType = 'case' | 'detections' | 'host' | 'network' | 'overview' | 'timeline';

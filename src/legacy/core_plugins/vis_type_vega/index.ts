@@ -28,22 +28,21 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
     // It is required to change the configuration property
     //   vega.enableExternalUrls -> vis_type_vega.enableExternalUrls
     id: 'vega',
-    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({
-        enableExternalUrls: server.config().get('vega.enableExternalUrls'),
-      }),
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+        };
+      },
     },
     init: (server: Legacy.Server) => ({}),
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        enableExternalUrls: Joi.boolean().default(false),
-      }).default();
-    },
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

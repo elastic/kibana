@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
 
   return {
     testFiles: [require.resolve('./auth')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      es: xPackAPITestsConfig.get('services.es'),
+      legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--xpack.security.authc.providers=[\"token\"]',
+        '--xpack.security.authc.providers=["token"]',
       ],
     },
   };

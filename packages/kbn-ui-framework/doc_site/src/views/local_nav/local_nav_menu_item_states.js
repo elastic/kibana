@@ -19,11 +19,7 @@
 
 import React from 'react';
 
-import {
-  KuiLocalNav,
-  KuiLocalNavRow,
-  KuiLocalNavRowSection,
-} from '../../../../components';
+import { KuiLocalNav, KuiLocalNavRow, KuiLocalNavRowSection } from '../../../../components';
 
 export function LocalNavWithMenuItemStates() {
   return (

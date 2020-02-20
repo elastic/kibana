@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trunc } from 'lodash';
+import { trunc, map } from 'lodash';
 import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
@@ -15,6 +15,7 @@ import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
+  InterceptedRequest,
   NetworkPolicy,
 } from '../../../../types';
 
@@ -25,6 +26,15 @@ export interface ChromiumDriverOptions {
 
 interface WaitForSelectorOpts {
   silent?: boolean;
+}
+
+interface EvaluateOpts {
+  fn: EvaluateFn;
+  args: SerializableOrJSHandle[];
+}
+
+interface EvaluateMetaOpts {
+  context: string;
 }
 
 const WAIT_FOR_DELAY_MS: number = 100;
@@ -59,35 +69,57 @@ export class HeadlessChromiumDriver {
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
     logger: LevelLogger
   ) {
-    await this.page.setRequestInterception(true);
     logger.info(`opening url ${url}`);
+    // @ts-ignore
+    const client = this.page._client;
     let interceptedCount = 0;
 
-    this.page.on('request', interceptedRequest => {
-      const interceptedUrl = interceptedRequest.url();
+    await this.page.setRequestInterception(true);
+
+    // We have to reach into the Chrome Devtools Protocol to apply headers as using
+    // puppeteer's API will cause map tile requests to hang indefinitely:
+    //    https://github.com/puppeteer/puppeteer/issues/5003
+    // Docs on this client/protocol can be found here:
+    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
+    client.on('Fetch.requestPaused', (interceptedRequest: InterceptedRequest) => {
+      const {
+        requestId,
+        request: { url: interceptedUrl },
+      } = interceptedRequest;
       const allowed = !interceptedUrl.startsWith('file://');
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
-        interceptedRequest.abort('blockedbyclient');
+        client.send('Fetch.failRequest', {
+          errorReason: 'Aborted',
+          requestId,
+        });
         this.page.browser().close();
         throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
         logger.debug(`Using custom headers for ${interceptedUrl}`);
-        interceptedRequest.continue({
-          headers: {
-            ...interceptedRequest.headers(),
+        const headers = map(
+          {
+            ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
           },
+          (value, name) => ({
+            name,
+            value,
+          })
+        );
+        client.send('Fetch.continueRequest', {
+          requestId,
+          headers,
         });
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
         logger.debug(`No custom headers for ${loggedUrl}`);
-        interceptedRequest.continue();
+        client.send('Fetch.continueRequest', { requestId });
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
@@ -135,11 +167,15 @@ export class HeadlessChromiumDriver {
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: { fn: EvaluateFn; args: SerializableOrJSHandle[] }) {
+  public async evaluate(
+    { fn, args = [] }: EvaluateOpts,
+    meta: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
+    logger.debug(`evaluate ${meta.context}`);
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
-
   public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts = {},
@@ -156,10 +192,14 @@ export class HeadlessChromiumDriver {
         // Provide some troubleshooting info to see if we're on the login page,
         // "Kibana could not load correctly", etc
         logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
-        const pageText = await this.evaluate({
-          fn: () => document.querySelector('body')!.innerText,
-          args: [],
-        });
+        const pageText = await this.evaluate(
+          {
+            fn: () => document.querySelector('body')!.innerText,
+            args: [],
+          },
+          { context: `waitForSelector${selector}` },
+          logger
+        );
         logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
       }
       throw err;
@@ -169,17 +209,21 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor<T>({
-    fn,
-    args,
-    toEqual,
-  }: {
-    fn: EvaluateFn;
-    args: SerializableOrJSHandle[];
-    toEqual: T;
-  }) {
+  public async waitFor<T>(
+    {
+      fn,
+      args,
+      toEqual,
+    }: {
+      fn: EvaluateFn;
+      args: SerializableOrJSHandle[];
+      toEqual: T;
+    },
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
     while (true) {
-      const result = await this.evaluate({ fn, args });
+      const result = await this.evaluate({ fn, args }, context, logger);
       if (result === toEqual) {
         return;
       }

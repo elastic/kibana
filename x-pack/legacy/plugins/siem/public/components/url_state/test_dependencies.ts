@@ -5,8 +5,6 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
-
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { navTabs } from '../../pages/home/home_navigations';
 import { SiemPageName } from '../../pages/home/types';
@@ -17,6 +15,7 @@ import { HostsTableType } from '../../store/hosts/model';
 import { CONSTANTS } from './constants';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
+import { Query } from '../../../../../../../src/plugins/data/public';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -172,7 +171,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: '?_g=()',
+        search: '?',
         state: '',
       },
       page,
@@ -184,7 +183,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: '?_g=()',
+        search: '?',
         state: '',
       },
       page,
@@ -198,7 +197,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -210,11 +209,23 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
       getFilterQuery(),
+      pageName,
+      detailName
+    ),
+    undefinedLinkQuery: getMockProps(
+      {
+        hash: '',
+        pathname: examplePath,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(global),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        state: '',
+      },
+      page,
+      null,
       pageName,
       detailName
     ),
@@ -225,7 +236,7 @@ export const getMockPropsObj = ({
         hash: '',
         pathname: examplePath,
         search:
-          '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
         state: '',
       },
       page,
@@ -238,7 +249,7 @@ export const getMockPropsObj = ({
         hash: '',
         pathname: examplePath,
         search:
-          '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
         state: '',
       },
       page,
@@ -252,7 +263,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -265,9 +276,15 @@ export const getMockPropsObj = ({
 
 // silly that this needs to be an array and not an object
 // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-export const testCases: Array<
-  [LocationTypes, string, string, string, string | null, string, undefined | string]
-> = [
+export const testCases: Array<[
+  LocationTypes,
+  string,
+  string,
+  string,
+  string | null,
+  string,
+  undefined | string
+]> = [
   [
     /* page */ CONSTANTS.networkPage,
     /* namespaceLower */ 'network',

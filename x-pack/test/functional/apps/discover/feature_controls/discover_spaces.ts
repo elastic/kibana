@@ -4,26 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const config = getService('config');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
     'common',
     'discover',
     'timePicker',
     'security',
     'spaceSelector',
+    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
   async function setDiscoverTimeRange() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
   describe('spaces', () => {
@@ -52,9 +51,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Discover');
       });
 
@@ -62,7 +60,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('discoverSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('shows "visualize" field button', async () => {
@@ -96,9 +96,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Discover');
       });
 
@@ -161,7 +159,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });
