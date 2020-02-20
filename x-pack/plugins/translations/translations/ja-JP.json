@@ -885,8 +885,6 @@
     "kbn.advancedSettings.histogram.maxBarsTitle": "最高バー数",
     "kbn.advancedSettings.historyLimitText": "履歴があるフィールド (例: クエリインプット) に個の数の最近の値が表示されます",
     "kbn.advancedSettings.historyLimitTitle": "履歴制限数",
-    "kbn.advancedSettings.indexPattern.recentMatchingText": "名前にタイムスタンプが含まれているインデックスパターンで、フィールドマッチングをクエリする最近の一致したパターンが、この数検索されます",
-    "kbn.advancedSettings.indexPattern.recentMatchingTitle": "最近一致したパターン",
     "kbn.advancedSettings.indexPatternPlaceholderText": "「管理 > インデックスパターン > インデックスパターンを作成」で使用される「インデックスパターン名」フィールドのプレースホルダーです。",
     "kbn.advancedSettings.indexPatternPlaceholderTitle": "インデックスパターンのプレースホルダー",
     "kbn.advancedSettings.maxBucketsText": "1 つのデータソースが返せるバケットの最大数です",
