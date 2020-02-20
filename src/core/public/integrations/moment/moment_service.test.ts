@@ -48,7 +48,7 @@ describe('MomentService', () => {
   });
 
   it('uses the default timezone when a zone is not defined', async () => {
-    const tz$ = new BehaviorSubject('tz4');
+    const tz$ = new BehaviorSubject('timezone/undefined');
     const dow$ = new BehaviorSubject('dow1');
 
     const uiSettings = uiSettingsServiceMock.createSetupContract();
@@ -56,7 +56,7 @@ describe('MomentService', () => {
 
     service.start({ uiSettings });
     await flushPromises();
-    expect(momentMock.tz.setDefault).not.toHaveBeenCalledWith('tz4');
+    expect(momentMock.tz.setDefault).toHaveBeenCalledWith(undefined);
   });
 
   it('sets timezone when a zone is defined', async () => {

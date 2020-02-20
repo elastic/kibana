@@ -21,7 +21,9 @@ export const momentMock = {
   locale: jest.fn(() => 'default-locale'),
   tz: {
     setDefault: jest.fn(),
-    names: jest.fn(() => ['tz1', 'tz2', 'tz3']),
+    zone: jest.fn(
+      z => [{ name: 'tz1' }, { name: 'tz2' }, { name: 'tz3' }].find(f => z === f.name) || null
+    ),
   },
   weekdays: jest.fn(() => ['dow1', 'dow2', 'dow3']),
   updateLocale: jest.fn(),
