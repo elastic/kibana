@@ -25,6 +25,7 @@ import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
@@ -36,7 +37,6 @@ export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
-export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
@@ -168,10 +168,31 @@ function createInternalCoreStartMock() {
   return startDeps;
 }
 
+function createCoreRequestHandlerContextMock() {
+  return {
+    rendering: {
+      render: jest.fn(),
+    },
+    savedObjects: {
+      client: savedObjectsClientMock.create(),
+    },
+    elasticsearch: {
+      adminClient: elasticsearchServiceMock.createScopedClusterClient(),
+      dataClient: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    uiSettings: {
+      client: uiSettingsServiceMock.createClient(),
+    },
+  };
+}
+
 export const coreMock = {
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createInternalSetup: createInternalCoreSetupMock,
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
+
+export { savedObjectsClientMock };

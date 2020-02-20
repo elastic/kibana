@@ -6,6 +6,7 @@
 
 import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../../plugins/actions/server/mocks';
+import { alertsMock } from '../../../../../plugins/alerting/server/mocks';
 
 import { ClientsService } from './clients';
 
@@ -16,13 +17,14 @@ describe('ClientsService', () => {
         const clients = new ClientsService();
 
         const actions = actionsMock.createStart();
+        const alerting = alertsMock.createStart();
         const { elasticsearch } = coreMock.createSetup();
         const { savedObjects } = coreMock.createStart();
         const request = httpServerMock.createRawRequest();
         const spacesService = undefined;
 
         clients.setup(elasticsearch.dataClient, spacesService);
-        clients.start(savedObjects, actions);
+        clients.start(savedObjects, actions, alerting);
 
         const { spacesClient } = await clients.createGetScoped()(request);
         expect(spacesClient.getSpaceId()).toEqual('default');

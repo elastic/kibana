@@ -19,9 +19,11 @@ interface Props extends EuiLinkAnchorProps {
 export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
   const { version } = useApmPluginContext().packageInfo;
   const href = `https://www.elastic.co/guide/en${section}/${version}${path}`;
-  return (
+  return typeof children === 'function' ? (
+    children(href)
+  ) : (
     <EuiLink href={href} {...rest}>
-      {typeof children === 'function' ? children(href) : children}
+      children
     </EuiLink>
   );
 }
