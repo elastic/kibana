@@ -13,14 +13,16 @@ export const SMALL_BYTES = '0.0 b';
 export const LARGE_ABBREVIATED = '0,0.[0]a';
 
 /**
- * Format the {@code date} in the user's expected date/time format using their <em>guessed</em> local time zone.
+ * Format the {@code date} in the user's expected date/time format using their <em>dateFormat:tz</em> defined time zone.
  * @param date Either a numeric Unix timestamp or a {@code Date} object
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date, useUTC = false) {
-  return useUTC
-    ? moment.utc(date).format('LL LTS')
-    : moment.tz(date, moment.tz.guess()).format('LL LTS');
+export function formatDateTimeLocal(date, timezone) {
+  if (timezone === 'Browser') {
+    timezone = moment.tz.guess() || 'utc';
+  }
+
+  return moment.tz(date, timezone).format('LL LTS');
 }
 
 /**

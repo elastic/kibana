@@ -6,7 +6,7 @@
 import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../../../server/lib';
-import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { ServerFacade } from '../../../types';
 import { LayoutTypes } from '../constants';
 import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
@@ -75,7 +75,7 @@ export class PrintLayout extends Layout {
       args: [this.selectors.screenshot, elementSize.height, elementSize.width],
     };
 
-    await browser.evaluate(evalOptions);
+    await browser.evaluate(evalOptions, { context: 'PositionElements' }, logger);
   }
 
   public getPdfImageSize() {

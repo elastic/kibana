@@ -325,9 +325,17 @@ export class ImportView extends Component {
 
   onIndexChange = e => {
     const name = e.target.value;
+    const { indexNames, indexPattern, indexPatternNames } = this.state;
+
     this.setState({
       index: name,
-      indexNameError: isIndexNameValid(name, this.state.indexNames),
+      indexNameError: isIndexNameValid(name, indexNames),
+      // if index pattern has been altered, check that it still matches the inputted index
+      ...(indexPattern === ''
+        ? {}
+        : {
+            indexPatternNameError: isIndexPatternNameValid(indexPattern, indexPatternNames, name),
+          }),
     });
   };
 

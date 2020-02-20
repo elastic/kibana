@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -178,14 +179,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
-      // https://github.com/elastic/kibana/issues/57377
-      it.skip(`does not allow navigation to advanced settings; redirects to management home`, async () => {
+      it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('managementHome', {
-          timeout: 10000,
+          timeout: config.get('timeouts.waitFor'),
         });
       });
     });

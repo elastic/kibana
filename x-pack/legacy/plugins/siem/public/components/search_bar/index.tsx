@@ -6,7 +6,7 @@
 
 import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
@@ -34,29 +34,6 @@ import {
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
 import { useKibana } from '../../lib/kibana';
 
-interface SiemSearchBarRedux {
-  end: number;
-  fromStr: string;
-  isLoading: boolean;
-  queries: inputsModel.GlobalGraphqlQuery[];
-  filterQuery: Query;
-  savedQuery?: SavedQuery;
-  start: number;
-  toStr: string;
-}
-
-interface SiemSearchBarDispatch {
-  updateSearch: DispatchUpdateSearch;
-  setSavedQuery: ({
-    id,
-    savedQuery,
-  }: {
-    id: InputsModelId;
-    savedQuery: SavedQuery | undefined;
-  }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) => void;
-}
-
 interface SiemSearchBarProps {
   id: InputsModelId;
   indexPattern: IIndexPattern;
@@ -70,7 +47,7 @@ const SearchBarContainer = styled.div`
   }
 `;
 
-const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSearchBarDispatch>(
+const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     end,
     filterQuery,
@@ -322,15 +299,7 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   updateTime: boolean;
 }
 
-type DispatchUpdateSearch = ({
-  end,
-  id,
-  isQuickSelection,
-  start,
-  timelineId,
-}: UpdateReduxSearchBar) => void;
-
-const dispatchUpdateSearch = (dispatch: Dispatch) => ({
+export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   end,
   filters,
   id,
@@ -403,4 +372,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const SiemSearchBar = connector(SearchBarComponent);

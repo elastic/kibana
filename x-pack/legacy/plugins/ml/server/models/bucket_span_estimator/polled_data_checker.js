@@ -12,7 +12,7 @@
 
 import _ from 'lodash';
 
-export function polledDataCheckerFactory(callWithRequest) {
+export function polledDataCheckerFactory(callAsCurrentUser) {
   class PolledDataChecker {
     constructor(index, timeField, duration, query) {
       this.index = index;
@@ -68,7 +68,7 @@ export function polledDataCheckerFactory(callWithRequest) {
     performSearch(intervalMs) {
       const body = this.createSearch(intervalMs);
 
-      return callWithRequest('search', {
+      return callAsCurrentUser('search', {
         index: this.index,
         size: 0,
         body,
