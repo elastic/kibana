@@ -2697,8 +2697,6 @@
     "timelion.help.functions.points.args.symbolHelpText": "点のシンボルです。{validSymbols} の 1 つ",
     "timelion.help.functions.points.args.weightHelpText": "点の周りの太さです",
     "timelion.help.functions.pointsHelpText": "数列を点として表示します",
-    "timelion.help.functions.precision.args.precisionHelpText": "各値を四捨五入する桁数です",
-    "timelion.help.functions.precisionHelpText": "値の小数点以下の四捨五入する桁数です",
     "timelion.help.functions.props.args.globalHelpText": "各数列に対し、seriesList にプロップを設定します",
     "timelion.help.functions.propsHelpText": "数列に任意のプロパティを設定するため、自己責任で行ってください。例: {example}",
     "timelion.help.functions.quandl.args.codeHelpText": "プロットする Quandl コードです。これらは quandl.com に掲載されています。",
