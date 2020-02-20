@@ -11,7 +11,7 @@ exports[`LayerPanel is rendered 1`] = `
         "get": [Function],
         "remove": [Function],
         "set": [Function],
-        "store": undefined,
+        "store": Storage {},
       },
     }
   }
