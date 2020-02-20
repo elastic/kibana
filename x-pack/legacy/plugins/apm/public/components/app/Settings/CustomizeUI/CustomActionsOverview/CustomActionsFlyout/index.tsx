@@ -6,32 +6,45 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPortal,
-  EuiText,
-  EuiTitle,
-  EuiSpacer,
   EuiFormRow,
-  EuiFieldText,
-  EuiForm
+  EuiPortal,
+  EuiSpacer,
+  EuiText,
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { isEmpty } from 'lodash';
+import React from 'react';
+import { Controller, useForm, ValidationOptions } from 'react-hook-form';
 import { Filter, FiltersSection } from './FiltersSection';
 
 interface Props {
   onClose: () => void;
 }
 
-const actionFields = [
+interface FormData {
+  label: string;
+  url: string;
+  filters: Filter[];
+}
+
+interface ActionField {
+  name: keyof FormData;
+  label: string;
+  helpText: string;
+  placeholder: string;
+  register: ValidationOptions;
+}
+
+const actionFields: ActionField[] = [
   {
-    type: 'text',
     name: 'label',
     label: 'Label',
     helpText: 'Labels can be a maximum of 128 characters',
@@ -39,7 +52,6 @@ const actionFields = [
     register: { required: true, maxLength: 128 }
   },
   {
-    type: 'text',
     name: 'url',
     label: 'URL',
     helpText:
@@ -49,29 +61,15 @@ const actionFields = [
   }
 ];
 
-interface FormData {
-  label: string;
-  url: string;
-  filters: Filter[];
-}
-
-const FILTERS = 'filters';
-
 export const CustomActionsFlyout = ({ onClose }: Props) => {
-  const { register, handleSubmit, watch, errors, setValue } = useForm<
+  const { register, handleSubmit, errors, control, watch } = useForm<
     FormData
   >();
   const onSubmit = (data: FormData) => {
     console.log('#########', data);
   };
 
-  const handleFiltersChange = (filters: Filter[]) => {
-    setValue(FILTERS, filters);
-  };
-
-  useEffect(() => {
-    register({ name: FILTERS });
-  }, [register]);
+  const filters = watch('filters');
 
   return (
     <EuiPortal>
@@ -114,7 +112,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="l" />
-            {actionFields.map(field => {
+            {actionFields.map((field: ActionField) => {
               return (
                 <EuiFormRow
                   key={field.name}
@@ -126,12 +124,20 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
                     inputRef={register(field.register)}
                     placeholder={field.placeholder}
                     name={field.name}
+                    fullWidth
+                    isInvalid={!isEmpty(errors[field.name])}
                   />
                 </EuiFormRow>
               );
             })}
             <EuiSpacer size="l" />
-            <FiltersSection onFiltersChange={handleFiltersChange} />
+
+            <Controller
+              as={<FiltersSection filters={filters} />}
+              name="filters"
+              control={control}
+              defaultValue={filters}
+            />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">

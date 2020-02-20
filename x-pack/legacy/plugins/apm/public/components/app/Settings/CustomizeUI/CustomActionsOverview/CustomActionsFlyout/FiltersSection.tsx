@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
-  EuiFieldText,
-  EuiButtonEmpty,
   EuiSpacer,
-  EuiTitle,
-  EuiText
+  EuiText,
+  EuiTitle
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import React from 'react';
 
 type Keys = 'key' | 'value';
 export type Filter = {
@@ -41,29 +41,31 @@ const filterOptions = [
 ];
 
 export const FiltersSection = ({
-  onFiltersChange
+  filters = [{ key: '', value: '' }],
+  onChange
 }: {
-  onFiltersChange: (filters: Filter[]) => void;
+  filters: Filter[];
+  onChange?: (filters: Filter[]) => void;
 }) => {
-  const [filters, setFilters] = useState<Filter[]>([{ key: '', value: '' }]);
-
   const onChangeFilter = (key: Keys, value: string, idx: number) => {
     const copyOfFilters = [...filters];
     copyOfFilters[idx][key] = value;
-    setFilters(copyOfFilters);
-    onFiltersChange(copyOfFilters);
+    if (typeof onChange === 'function') {
+      onChange(copyOfFilters);
+    }
   };
 
   const onRemoveFilter = (idx: number) => {
     const copyOfFilters = [...filters];
     copyOfFilters.splice(idx, 1);
     // When empty, means that it was the last filter that got removed,
-    // so instead on showing empty list, will add a new empty filter.
+    // so instead of showing an empty list, will add a new empty filter.
     if (isEmpty(copyOfFilters)) {
       copyOfFilters.push({ key: '', value: '' });
     }
-    setFilters(copyOfFilters);
-    onFiltersChange(copyOfFilters);
+    if (typeof onChange === 'function') {
+      onChange(copyOfFilters);
+    }
   };
 
   return (
@@ -100,6 +102,7 @@ export const FiltersSection = ({
                   const indexUsedFilter = filters.findIndex(
                     _filter => _filter.key === option.value
                   );
+                  // Filter out all items already added, besides the one selected in the current filter.
                   return indexUsedFilter === -1 || idx === indexUsedFilter;
                 })}
                 value={filter.key}
@@ -130,11 +133,11 @@ export const FiltersSection = ({
       <EuiButtonEmpty
         iconType="plusInCircle"
         onClick={() => {
-          setFilters(currentFilters => [
-            ...currentFilters,
-            { key: '', value: '' }
-          ]);
+          if (typeof onChange === 'function') {
+            onChange([...filters, { key: '', value: '' }]);
+          }
         }}
+        // Disable button when user has already added all items available
         disabled={filters.length === filterOptions.length - 1}
       >
         {i18n.translate(
