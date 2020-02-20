@@ -4,104 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
 import {
   getSimpleRuleAsMultipartContent,
   TEST_BOUNDARY,
   UNPARSABLE_LINE,
   getSimpleRule,
 } from '../__mocks__/utils';
+import {
+  createMockServer,
+  createMockServerWithoutAlertClientDecoration,
+  createMockServerWithoutSavedObjectDecoration,
+  getMockNonEmptyIndex,
+  getMockEmptyIndex,
+  createMockServerWithoutActionClientDecoration,
+} from '../__mocks__/_mock_server';
 import { ImportSuccessError } from '../utils';
 import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
   getFindResult,
   getResult,
-  getEmptyIndex,
+  createActionResult,
   getFindResultWithSingleHit,
-  getNonEmptyIndex,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
+
 import { importRulesRoute } from './import_rules_route';
-import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 
 describe('import_rules_route', () => {
-  let server = createMockServer();
-  let config = createMockConfig();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let {
+    server,
+    alertsClient,
+    actionsClient,
+    elasticsearch,
+    savedObjectsClient,
+  } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-
-    server = createMockServer();
-    config = createMockConfig();
-    config = () => ({
-      get: jest.fn(value => {
-        switch (value) {
-          case 'savedObjects.maxImportPayloadBytes': {
-            return 10000;
-          }
-          case 'savedObjects.maxImportExportSize': {
-            return 10000;
-          }
-          case 'xpack.siem.signalsIndex': {
-            return DEFAULT_SIGNALS_INDEX;
-          }
-          default: {
-            const dummyMock = jest.fn();
-            return dummyMock();
-          }
-        }
-      }),
-      has: jest.fn(),
-    });
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
-
-    getClients.mockResolvedValue(clients);
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.spacesClient.getSpaceId.mockReturnValue('default');
-
-    importRulesRoute(server.route, config, getClients);
+    ({
+      server,
+      alertsClient,
+      actionsClient,
+      elasticsearch,
+      savedObjectsClient,
+    } = createMockServer());
+    elasticsearch.getCluster = getMockNonEmptyIndex();
+    importRulesRoute(server);
   });
 
-  describe('status codes with actionsClient and alertClient', () => {
-    test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await server.inject(getImportRulesRequest(requestPayload));
-      expect(statusCode).toEqual(200);
-    });
-
+  describe('status codes with savedObjectsClient and alertClient', () => {
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
-      importRulesRoute(route, config, getClients);
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await inject(getImportRulesRequest(requestPayload));
+      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
+      importRulesRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(
+        getImportRulesRequest(getSimpleRuleAsMultipartContent(['rule-1']))
+      );
       expect(statusCode).toEqual(404);
     });
 
-    test('returns 404 if actionsClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('actionsClient', clients));
-      const { route, inject } = createMockServer();
-      importRulesRoute(route, config, getClients);
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode } = await inject(getImportRulesRequest(requestPayload));
+    test('returns 404 if actionClient is not available on the route', async () => {
+      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
+      importRulesRoute(serverWithoutActionClient);
+      const { statusCode } = await serverWithoutActionClient.inject(
+        getImportRulesRequest(getSimpleRuleAsMultipartContent(['rule-1']))
+      );
+      expect(statusCode).toBe(404);
+    });
+
+    test('returns 404 if savedObjectsClient is not available on the route', async () => {
+      const { serverWithoutSavedObjectClient } = createMockServerWithoutSavedObjectDecoration();
+      importRulesRoute(serverWithoutSavedObjectClient);
+      const { statusCode } = await serverWithoutSavedObjectClient.inject(
+        getImportRulesRequest(getSimpleRuleAsMultipartContent(['rule-1']))
+      );
+
       expect(statusCode).toEqual(404);
     });
-  });
 
-  describe('validation', () => {
     test('returns reported error if index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
+      elasticsearch.getCluster = getMockEmptyIndex();
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.create.mockResolvedValue(createActionResult());
+      alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
       const parsed: ImportSuccessError = JSON.parse(payload);
@@ -122,42 +110,10 @@ describe('import_rules_route', () => {
       });
       expect(statusCode).toEqual(200);
     });
+  });
 
-    test('returns 400 when a thrown error is caught', async () => {
-      const mockFn = jest.fn();
-      const mockThrowError = (): Error => {
-        throw new Error();
-      };
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(
-        mockFn.mockImplementation(mockThrowError)
-      );
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
-      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
-      const parsed: ImportSuccessError = JSON.parse(payload);
-
-      expect(parsed).toEqual({
-        errors: [
-          {
-            error: {
-              message: "Cannot read property 'total' of undefined",
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
-      });
-      expect(statusCode).toEqual(200);
-    });
-
+  describe('payload', () => {
     test('returns 400 if file extension type is not .ndjson', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1'], false);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
       const parsed: ImportSuccessError = JSON.parse(payload);
@@ -172,9 +128,12 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.create.mockResolvedValue(createActionResult());
+      alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
       const parsed: ImportSuccessError = JSON.parse(payload);
@@ -196,9 +155,8 @@ describe('import_rules_route', () => {
         `${UNPARSABLE_LINE}\r\n` +
         `--${TEST_BOUNDARY}--\r\n`;
 
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
+      alertsClient.find.mockResolvedValue(getFindResult());
+
       const requestPayload = Buffer.from(multipartPayload);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
       const parsed: ImportSuccessError = JSON.parse(payload);
@@ -221,7 +179,7 @@ describe('import_rules_route', () => {
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -234,8 +192,8 @@ describe('import_rules_route', () => {
         });
         expect(statusCode).toEqual(200);
 
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
           getImportRulesRequest(requestPayload)
@@ -259,7 +217,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -272,8 +230,8 @@ describe('import_rules_route', () => {
         });
         expect(statusCode).toEqual(200);
 
-        clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
           getImportRulesRequestOverwriteTrue(requestPayload)
@@ -292,7 +250,7 @@ describe('import_rules_route', () => {
 
   describe('multi rule import', () => {
     test('returns 200 if all rules imported successfully', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResult());
 
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2']);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -316,7 +274,7 @@ describe('import_rules_route', () => {
         `${JSON.stringify(getSimpleRule('rule-2'))}\r\n` +
         `--${TEST_BOUNDARY}--\r\n`;
 
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResult());
 
       const requestPayload = Buffer.from(multipartPayload);
       const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -340,8 +298,8 @@ describe('import_rules_route', () => {
 
     describe('rules with matching rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -364,8 +322,8 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1', 'rule-1']);
         const { statusCode, payload } = await server.inject(
@@ -384,7 +342,7 @@ describe('import_rules_route', () => {
 
     describe('rules with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -397,8 +355,8 @@ describe('import_rules_route', () => {
         });
         expect(statusCode).toEqual(200);
 
-        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload2 = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3']);
         const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
@@ -423,7 +381,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns 200 with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.alertsClient.find.mockResolvedValue(getFindResult());
+        alertsClient.find.mockResolvedValue(getFindResult());
 
         const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
         const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
@@ -436,8 +394,8 @@ describe('import_rules_route', () => {
         });
         expect(statusCode).toEqual(200);
 
-        clients.alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
-        clients.alertsClient.get.mockResolvedValue(getResult());
+        alertsClient.find.mockResolvedValueOnce(getFindResultWithSingleHit());
+        alertsClient.get.mockResolvedValue(getResult());
 
         const requestPayload2 = getSimpleRuleAsMultipartContent(['rule-1', 'rule-2', 'rule-3']);
         const { statusCode: statusCodeRequest2, payload: payloadRequest2 } = await server.inject(
