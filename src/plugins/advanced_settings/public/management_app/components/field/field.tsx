@@ -27,6 +27,7 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiScreenReaderOnly,
   // @ts-ignore
   EuiCodeEditor,
   EuiDescribedFormGroup,
@@ -442,7 +443,7 @@ export class Field extends PureComponent<FieldProps> {
     return null;
   }
 
-  renderTitle(setting: FieldSetting) {
+  renderTitle(setting: FieldSetting, unsavedChanges: FieldState | undefined) {
     return (
       <h3>
         {setting.displayName || setting.name}
@@ -462,6 +463,17 @@ export class Field extends PureComponent<FieldProps> {
           />
         ) : (
           ''
+        )}
+        {unsavedChanges && (
+          <EuiScreenReaderOnly>
+            <p>
+              {unsavedChanges.error
+                ? unsavedChanges.error
+                : i18n.translate('advancedSettings.field.settingIsUnsaved', {
+                    defaultMessage: 'Setting is currently not saved.',
+                  })}
+            </p>
+          </EuiScreenReaderOnly>
         )}
       </h3>
     );
@@ -635,15 +647,8 @@ export class Field extends PureComponent<FieldProps> {
 
     return (
       <EuiDescribedFormGroup
-        aria-describedby={
-          unsavedChanges
-            ? i18n.translate('advancedSettings.field.settingIsUnsaved', {
-                defaultMessage: 'Setting is currently not saved.',
-              })
-            : undefined
-        }
         className={className}
-        title={this.renderTitle(setting)}
+        title={this.renderTitle(setting, unsavedChanges)}
         description={this.renderDescription(setting)}
         fullWidth
       >
