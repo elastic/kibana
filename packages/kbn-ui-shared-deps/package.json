@@ -9,6 +9,7 @@
     "kbn:watch": "node scripts/build --watch"
   },
   "devDependencies": {
+    "abortcontroller-polyfill": "^1.4.0",
     "@elastic/eui": "19.0.0",
     "@elastic/charts": "^16.1.0",
     "@kbn/dev-utils": "1.0.0",

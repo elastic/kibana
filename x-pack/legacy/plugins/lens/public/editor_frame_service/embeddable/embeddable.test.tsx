@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Subject } from 'rxjs';
 import { Embeddable } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import { Query, TimeRange, Filter } from 'src/plugins/data/public';
+import { Query, TimeRange, Filter, TimefilterContract } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -44,6 +46,7 @@ describe('embeddable', () => {
 
   it('should render expression with expression renderer', () => {
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -64,6 +67,7 @@ describe('embeddable', () => {
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -89,6 +93,7 @@ describe('embeddable', () => {
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -112,6 +117,7 @@ describe('embeddable', () => {
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -129,5 +135,32 @@ describe('embeddable', () => {
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
+  });
+
+  it('should re-render on auto refresh fetch observable', () => {
+    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+    const query: Query = { language: 'kquery', query: '' };
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+
+    const autoRefreshFetchSubject = new Subject();
+    const timefilter = ({
+      getAutoRefreshFetch$: () => autoRefreshFetchSubject.asObservable(),
+    } as unknown) as TimefilterContract;
+
+    const embeddable = new Embeddable(
+      timefilter,
+      expressionRenderer,
+      {
+        editUrl: '',
+        editable: true,
+        savedVis,
+      },
+      { id: '123', timeRange, query, filters }
+    );
+    embeddable.render(mountpoint);
+
+    autoRefreshFetchSubject.next();
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 });
