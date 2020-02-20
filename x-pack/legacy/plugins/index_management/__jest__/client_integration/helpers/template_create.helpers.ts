@@ -6,8 +6,9 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { TemplateCreate } from '../../../public/app/sections/template_create';
+import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { formSetup, TestSubjects } from './template_form.helpers';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -17,6 +18,9 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<TestSubjects>(TemplateCreate, testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(
+  WithAppDependencies(TemplateCreate),
+  testBedConfig
+);
 
 export const setup = formSetup.bind(null, initTestBed);

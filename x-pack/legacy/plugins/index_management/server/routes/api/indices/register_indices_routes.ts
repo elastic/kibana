@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router } from '../../../../../../server/lib/create_router';
+import { RouteDependencies } from '../../../types';
 
 import { registerClearCacheRoute } from './register_clear_cache_route';
 import { registerCloseRoute } from './register_close_route';
@@ -17,16 +17,16 @@ import { registerDeleteRoute } from './register_delete_route';
 import { registerFreezeRoute } from './register_freeze_route';
 import { registerUnfreezeRoute } from './register_unfreeze_route';
 
-export function registerIndicesRoutes(router: Router) {
-  registerClearCacheRoute(router);
-  registerCloseRoute(router);
-  registerFlushRoute(router);
-  registerForcemergeRoute(router);
-  registerListRoute(router);
-  registerOpenRoute(router);
-  registerRefreshRoute(router);
-  registerReloadRoute(router);
-  registerDeleteRoute(router);
-  registerFreezeRoute(router);
-  registerUnfreezeRoute(router);
+export function registerIndicesRoutes(dependencies: RouteDependencies) {
+  registerClearCacheRoute(dependencies);
+  registerCloseRoute(dependencies);
+  registerFlushRoute(dependencies);
+  registerForcemergeRoute(dependencies);
+  registerListRoute(dependencies);
+  registerOpenRoute(dependencies);
+  registerRefreshRoute(dependencies);
+  registerReloadRoute(dependencies);
+  registerDeleteRoute(dependencies);
+  registerFreezeRoute(dependencies);
+  registerUnfreezeRoute(dependencies);
 }

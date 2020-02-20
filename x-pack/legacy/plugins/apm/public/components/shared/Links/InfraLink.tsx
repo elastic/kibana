@@ -5,12 +5,12 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { compact } from 'lodash';
 import React from 'react';
 import url from 'url';
 import { fromQuery } from './url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
+import { InfraAppId } from '../../../../../../../plugins/infra/public';
 
 interface InfraQueryParams {
   time?: number;
@@ -20,29 +20,32 @@ interface InfraQueryParams {
 }
 
 interface Props extends EuiLinkAnchorProps {
+  app: InfraAppId;
   path?: string;
   query: InfraQueryParams;
   children?: React.ReactNode;
 }
 
 export const getInfraHref = ({
+  app,
   basePath,
   query,
   path
 }: {
+  app: InfraAppId;
   basePath: AppMountContextBasePath;
   query: InfraQueryParams;
   path?: string;
 }) => {
   const nextSearch = fromQuery(query);
   return url.format({
-    pathname: basePath.prepend('/app/infra'),
-    hash: compact([path, nextSearch]).join('?')
+    pathname: basePath.prepend(`/app/${app}${path || ''}`),
+    search: nextSearch
   });
 };
 
-export function InfraLink({ path, query = {}, ...rest }: Props) {
+export function InfraLink({ app, path, query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
-  const href = getInfraHref({ basePath: core.http.basePath, query, path });
+  const href = getInfraHref({ app, basePath: core.http.basePath, query, path });
   return <EuiLink {...rest} href={href} />;
 }
