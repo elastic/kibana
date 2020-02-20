@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import './_get_columns';
-import './_buckets';
-import './_response_writer';
-import './_integration';
-describe('Tabify Agg Response', function() {});
+import { RangeFilterParams } from '../../../../../../plugins/data/public';
+
+/** @internal **/
+export interface TabbedRangeFilterParams extends RangeFilterParams {
+  name: string;
+}
+
+/** @internal **/
+export interface TabbedResponseWriterOptions {
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  timeRange?: { [key: string]: RangeFilterParams };
+}
