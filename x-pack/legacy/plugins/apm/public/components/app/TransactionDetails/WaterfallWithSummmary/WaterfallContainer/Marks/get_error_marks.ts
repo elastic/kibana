@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash';
-import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/ErrorRaw';
+import { ErrorRaw } from '../../../../../../../../../../plugins/apm/typings/es_schemas/raw/error_raw';
 import {
   IWaterfallError,
   IServiceColors
