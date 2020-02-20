@@ -34,6 +34,7 @@ import {
   ruleStatusSavedObjectType,
 } from './saved_objects';
 import { ClientsService } from './services';
+import { SiemClientFactory } from './client';
 
 export { CoreSetup, CoreStart };
 
@@ -54,12 +55,14 @@ export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
   private context: PluginInitializerContext;
+  private siemClientFactory: SiemClientFactory;
   private clients: ClientsService;
   private legacyInitRoutes?: LegacyInitRoutes;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', this.name);
+    this.siemClientFactory = new SiemClientFactory();
     this.clients = new ClientsService();
 
     this.logger.debug('Shim plugin initialized');
@@ -68,6 +71,14 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
 
+    core.http.registerRouteHandlerContext('siem', (context, request, response) => ({
+      getSiemClient: () => this.siemClientFactory.create(request),
+    }));
+
+    this.siemClientFactory.setup({
+      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
+      config: __legacy.config,
+    });
     this.clients.setup(core.elasticsearch.dataClient, plugins.spaces?.spacesService);
 
     this.legacyInitRoutes = initRoutes(
