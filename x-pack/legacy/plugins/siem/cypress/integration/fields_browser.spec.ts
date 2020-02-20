@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../../../urls/navigation';
+import { HOSTS_PAGE } from '../urls/navigation';
 
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
 
 import {
   FIELDS_BROWSER_TITLE,
@@ -20,11 +20,11 @@ import {
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
   FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
-} from '../../../screens/fields_browser';
+} from '../screens/fields_browser';
 
-import { populateTimeline, openTimelineFieldsBrowser } from '../../../tasks/timeline';
+import { populateTimeline, openTimelineFieldsBrowser } from '../tasks/timeline';
 
-import { openTimeline } from '../../../tasks/siem_main';
+import { openTimeline } from '../tasks/siem_main';
 
 import {
   clearFieldsBrowser,
@@ -35,7 +35,7 @@ import {
   addsHostGeoCountryNameToTimelineDraggingIt,
   addsHostGeoContinentNameToTimeline,
   resetFields,
-} from '../../../tasks/fields_browser';
+} from '../tasks/fields_browser';
 
 const defaultHeaders = [
   { id: '@timestamp' },

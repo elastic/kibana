@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE, NETWORK_PAGE } from '../../../urls/navigation';
+import { HOSTS_PAGE, NETWORK_PAGE } from '../urls/navigation';
 import {
   INSPECT_MODAL,
   INSPECT_NETWORK_BUTTONS_IN_SIEM,
   INSPECT_HOSTS_BUTTONS_IN_SIEM,
-} from '../../../screens/inspect';
+} from '../screens/inspect';
 import {
   executeTimelineKQL,
   openTimelineSettings,
   openTimelineInspectButton,
-} from '../../../tasks/timeline';
-import { openTimeline } from '../../../tasks/siem_main';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
-import { closesModal, openStatsAndTables } from '../../../tasks/inspect';
+} from '../tasks/timeline';
+import { openTimeline } from '../tasks/siem_main';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../tasks/login';
+import { closesModal, openStatsAndTables } from '../tasks/inspect';
 
 describe('Inspect', () => {
   context('Hosts stats and tables', () => {

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIMELINES_PAGE } from '../../../urls/navigation';
-import { HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../../../screens/siem_header';
-import { loginAndWaitForPage } from '../../../tasks/login';
-import { navigateFromHeaderTo } from '../../../tasks/siem_header';
+import { TIMELINES_PAGE } from '../urls/navigation';
+import { HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/siem_header';
+import { loginAndWaitForPage } from '../tasks/login';
+import { navigateFromHeaderTo } from '../tasks/siem_header';
 
 describe('top-level navigation common to all pages in the SIEM app', () => {
   before(() => {

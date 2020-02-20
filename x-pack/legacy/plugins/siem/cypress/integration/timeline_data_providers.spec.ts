@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../../../urls/navigation';
+import { HOSTS_PAGE } from '../urls/navigation';
 import {
   waitForAllHostsToBeLoaded,
   dragAndDropFirstHostToTimeline,
   dragFirstHostToTimeline,
   dragFirstHostToEmptyTimelineDataProviders,
-} from '../../../tasks/hosts/all_hosts';
-import { HOSTS_NAMES_DRAGGABLE } from '../../../screens/hosts/all_hosts';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
-import { createNewTimeline } from '../../../tasks/timeline';
-import { openTimeline } from '../../../tasks/siem_main';
+} from '../tasks/hosts/all_hosts';
+import { HOSTS_NAMES_DRAGGABLE } from '../screens/hosts/all_hosts';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../tasks/login';
+import { createNewTimeline } from '../tasks/timeline';
+import { openTimeline } from '../tasks/siem_main';
 import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DROPPED_DATA_PROVIDERS,
-} from '../../../screens/timeline';
+} from '../screens/timeline';
 
 describe('timeline data providers', () => {
   before(() => {

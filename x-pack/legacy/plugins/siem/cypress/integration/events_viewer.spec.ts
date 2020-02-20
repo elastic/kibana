@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filterFieldsBrowser, closeFieldsBrowser } from '../../../tasks/fields_browser';
+import { filterFieldsBrowser, closeFieldsBrowser } from '../tasks/fields_browser';
 import {
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
   FIELDS_BROWSER_CHECKBOX,
-} from '../../../screens/fields_browser';
-import { HOSTS_PAGE } from '../../../urls/navigation';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
-import { openEvents } from '../../../tasks/hosts/main';
+} from '../screens/fields_browser';
+import { HOSTS_PAGE } from '../urls/navigation';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { openEvents } from '../tasks/hosts/main';
 import {
   closeModal,
   opensInspectQueryModal,
@@ -22,7 +22,7 @@ import {
   addsHostGeoCountryNameToHeader,
   resetFields,
   openEventsViewerFieldsBrowser,
-} from '../../../tasks/hosts/events';
+} from '../tasks/hosts/events';
 import {
   HEADER_SUBTITLE,
   INSPECT_MODAL,
@@ -30,8 +30,8 @@ import {
   LOCAL_EVENTS_COUNT,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
-} from '../../../screens/hosts/events';
-import { clearSearchBar, kqlSearch } from '../../../tasks/siem_header';
+} from '../screens/hosts/events';
+import { clearSearchBar, kqlSearch } from '../tasks/siem_header';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },

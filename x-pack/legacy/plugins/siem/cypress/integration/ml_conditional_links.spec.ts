@@ -18,9 +18,9 @@ import {
   mlHostMultiHostKqlQuery,
   mlHostVariableHostNullKqlQuery,
   mlHostVariableHostKqlQuery,
-} from '../../../urls/ml_conditional_links';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
-import { KQL_INPUT } from '../../../screens/siem_header';
+} from '../urls/ml_conditional_links';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { KQL_INPUT } from '../screens/siem_header';
 
 describe('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {
