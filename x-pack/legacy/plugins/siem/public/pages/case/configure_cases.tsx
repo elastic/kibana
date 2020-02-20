@@ -19,7 +19,7 @@ const backOptions = {
 const ConfigureCasesPageComponent: React.FC = () => (
   <>
     <WrapperPage>
-      <CaseHeaderPage title={i18n.CONFIGURE_CASES} backOptions={backOptions} />
+      <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
     </WrapperPage>
     <SpyRoute />
   </>
