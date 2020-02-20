@@ -2698,8 +2698,6 @@
     "timelion.help.functions.points.args.symbolHelpText": "点符号。以下选项之一：{validSymbols}",
     "timelion.help.functions.points.args.weightHelpText": "围绕点的线条粗细",
     "timelion.help.functions.pointsHelpText": "将序列显示为点",
-    "timelion.help.functions.precision.args.precisionHelpText": "將每個值截斷為的位數",
-    "timelion.help.functions.precisionHelpText": "將值的小數部分截斷為的位數",
     "timelion.help.functions.props.args.globalHelpText": "在 seriesList 与每个序列上设置属性",
     "timelion.help.functions.propsHelpText": "在序列上可设置任意属性，但请自担风险。例如 {example}",
     "timelion.help.functions.quandl.args.codeHelpText": "要绘图的 quandl 代码。可以在 quandl.com 找到这些内容。",
