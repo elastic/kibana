@@ -18,19 +18,20 @@
  */
 
 import { findListItems } from './find_list_items';
+import { coreMock } from '../../../../../core/public/mocks';
 
 describe('saved_visualizations', () => {
   function testProps() {
+    const savedObjects = coreMock.createStart().savedObjects.client;
+    (savedObjects.find as jest.Mock).mockImplementation(() => ({
+      total: 0,
+      savedObjects: [],
+    }));
     return {
       visTypes: [],
       search: '',
       size: 10,
-      savedObjectsClient: {
-        find: jest.fn(async () => ({
-          total: 0,
-          savedObjects: [],
-        })),
-      },
+      savedObjectsClient: savedObjects,
       mapSavedObjectApiHits: jest.fn(),
     };
   }
