@@ -15,7 +15,6 @@ import {
   getCreateCaseUrl,
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
-import { TruncatableText } from '../truncatable_text';
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
