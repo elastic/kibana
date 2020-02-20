@@ -18,7 +18,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
+import { ES_GEO_FIELD_TYPE } from '../../common/constants';
 
 const GEO_FIELD_VALUE_DELIMITER = '/'; // `/` is not allowed in index pattern name so should not have collisions
 
@@ -45,7 +45,7 @@ export class DistanceFilterForm extends Component {
     geoFieldTag: this.props.geoFields.length
       ? createIndexGeoFieldName(this.props.geoFields[0])
       : '',
-    pointLabel: '',
+    filterLabel: '',
   };
 
   _getSelectedGeoField = () => {
@@ -64,16 +64,16 @@ export class DistanceFilterForm extends Component {
     this.setState({ geoFieldTag: selectedValue });
   };
 
-  _onPointLabelChange = e => {
+  _onFilterLabelChange = e => {
     this.setState({
-      pointLabel: e.target.value,
+      filterLabel: e.target.value,
     });
   };
 
   _onSubmit = () => {
     const geoField = this._getSelectedGeoField();
     this.props.onSubmit({
-      pointLabel: this.state.pointLabel,
+      filterLabel: this.state.filterLabel,
       indexPatternId: geoField.indexPatternId,
       geoFieldName: geoField.geoFieldName,
     });
@@ -81,36 +81,36 @@ export class DistanceFilterForm extends Component {
 
   render() {
     const options = this.props.geoFields
-    .filter(({ geoFieldType }) => {
-      return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-    })
-    .map(({ indexPatternTitle, geoFieldName }) => {
-      return {
-        inputDisplay: (
-          <EuiText size="s" component="span">
-            <EuiTextColor color="subdued">
-              <small>{indexPatternTitle}</small>
-            </EuiTextColor>
-            <br />
-            {geoFieldName}
-          </EuiText>
-        ),
-        value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
-      };
-    });
+      .filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
+      })
+      .map(({ indexPatternTitle, geoFieldName }) => {
+        return {
+          inputDisplay: (
+            <EuiText size="s" component="span">
+              <EuiTextColor color="subdued">
+                <small>{indexPatternTitle}</small>
+              </EuiTextColor>
+              <br />
+              {geoFieldName}
+            </EuiText>
+          ),
+          value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
+        };
+      });
 
     return (
       <EuiForm className={this.props.className}>
         <EuiFormRow
-          label={i18n.translate('xpack.maps.distanceFilterForm.pointLabelLabel', {
-            defaultMessage: 'Point label',
+          label={i18n.translate('xpack.maps.distanceFilterForm.filterLabelLabel', {
+            defaultMessage: 'Filter label',
           })}
           display="rowCompressed"
         >
           <EuiFieldText
             compressed
-            value={this.state.geometryLabel}
-            onChange={this._onGeometryLabelChange}
+            value={this.state.filterLabel}
+            onChange={this._onFilterLabelChange}
           />
         </EuiFormRow>
 
@@ -136,12 +136,7 @@ export class DistanceFilterForm extends Component {
         <EuiSpacer size="m" />
 
         <EuiTextAlign textAlign="right">
-          <EuiButton
-            size="s"
-            fill
-            onClick={this._onSubmit}
-            isDisabled={!this.state.geoFieldTag}
-          >
+          <EuiButton size="s" fill onClick={this._onSubmit} isDisabled={!this.state.geoFieldTag}>
             {this.props.buttonLabel}
           </EuiButton>
         </EuiTextAlign>

@@ -344,6 +344,39 @@ function createGeometryFilterWithMeta({
   return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
 }
 
+export function createDistanceFilterWithMeta({
+  alias,
+  distanceKm,
+  geoFieldName,
+  indexPatternId,
+  point,
+}) {
+  const meta = {
+    type: SPATIAL_FILTER_TYPE,
+    negate: false,
+    index: indexPatternId,
+    key: geoFieldName,
+    alias: alias
+      ? alias
+      : i18n.translate('xpack.maps.es_geo_utils.distanceFilterAlias', {
+          defaultMessage: '{geoFieldName} within {distanceKm}km of {pointLabel}',
+          values: {
+            distanceKm,
+            geoFieldName,
+            pointLabel: point.join(','),
+          },
+        }),
+  };
+
+  return {
+    geo_distance: {
+      distance: `${distanceKm}km`,
+      [geoFieldName]: point,
+    },
+    meta,
+  };
+}
+
 export function roundCoordinates(coordinates) {
   for (let i = 0; i < coordinates.length; i++) {
     const value = coordinates[i];

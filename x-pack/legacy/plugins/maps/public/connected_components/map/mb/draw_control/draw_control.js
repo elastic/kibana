@@ -9,8 +9,9 @@ import React from 'react';
 import { DRAW_TYPE } from '../../../../../common/constants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import DrawCircle from './draw_circle';
+import { DrawCircle } from './draw_circle';
 import {
+  createDistanceFilterWithMeta,
   createSpatialFilterWithBoundingBox,
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
@@ -62,10 +63,21 @@ export class DrawControl extends React.Component {
       return;
     }
 
-    console.log(e);
-    return;
+    if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      const circle = e.features[0];
+      roundCoordinates(circle.properties.center);
+      const filter = createDistanceFilterWithMeta({
+        alias: this.props.drawState.filterLabel,
+        distanceKm: _.round(circle.properties.radiusKm, circle.properties.radiusKm > 10 ? 0 : 2),
+        geoFieldName: this.props.drawState.geoFieldName,
+        indexPatternId: this.props.drawState.indexPatternId,
+        point: circle.properties.center,
+      });
+      this.props.addFilters([filter]);
+      this.props.disableDrawState();
+      return;
+    }
 
-    const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
     const geometry = e.features[0].geometry;
     // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
     roundCoordinates(geometry.coordinates);
@@ -78,15 +90,16 @@ export class DrawControl extends React.Component {
         geometryLabel: this.props.drawState.geometryLabel,
         relation: this.props.drawState.relation,
       };
-      const filter = isBoundingBox
-        ? createSpatialFilterWithBoundingBox({
-            ...options,
-            geometry: getBoundingBoxGeometry(geometry),
-          })
-        : createSpatialFilterWithGeometry({
-            ...options,
-            geometry,
-          });
+      const filter =
+        this.props.drawState.drawType === DRAW_TYPE.BOUNDS
+          ? createSpatialFilterWithBoundingBox({
+              ...options,
+              geometry: getBoundingBoxGeometry(geometry),
+            })
+          : createSpatialFilterWithGeometry({
+              ...options,
+              geometry,
+            });
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
