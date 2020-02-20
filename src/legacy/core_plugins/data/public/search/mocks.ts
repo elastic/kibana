@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { AggTypesRegistrySetup, AggTypesRegistryStart } from './agg_types_registry';
+import { SearchSetup, SearchStart } from './search_service';
+import { AggTypesRegistrySetup, AggTypesRegistryStart } from './aggs/agg_types_registry';
+import { AggConfigs } from './aggs/agg_configs';
+import { mockAggTypesRegistry } from './aggs/test_helpers';
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -51,4 +54,32 @@ export const aggTypesRegistryStartMock = (): MockedKeys<AggTypesRegistryStart> =
     buckets: [aggTypeConfigMock()],
     metrics: [aggTypeConfigMock()],
   })),
+});
+
+export const searchSetupMock = (): MockedKeys<SearchSetup> => ({
+  aggs: {
+    types: aggTypesRegistrySetupMock(),
+  },
+});
+
+export const searchStartMock = (): MockedKeys<SearchStart> => ({
+  aggs: {
+    createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
+      return new AggConfigs(indexPattern, configStates, {
+        schemas,
+        typesRegistry: mockAggTypesRegistry(),
+      });
+    }),
+    types: mockAggTypesRegistry(),
+    __LEGACY: {
+      AggConfig: jest.fn() as any,
+      AggType: jest.fn(),
+      aggTypeFieldFilters: jest.fn() as any,
+      FieldParamType: jest.fn(),
+      MetricAggType: jest.fn(),
+      parentPipelineAggHelper: jest.fn() as any,
+      setBounds: jest.fn(),
+      siblingPipelineAggHelper: jest.fn() as any,
+    },
+  },
 });

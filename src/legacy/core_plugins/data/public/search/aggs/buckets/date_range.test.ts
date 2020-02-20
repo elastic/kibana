@@ -17,14 +17,21 @@
  * under the License.
  */
 
+import { dateRangeBucketAgg } from './date_range';
 import { AggConfigs } from '../agg_configs';
-import { aggTypesRegistryStartMock } from '../mocks';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { npStart } from 'ui/new_platform';
-
-jest.mock('ui/new_platform');
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setUiSettings } from '../../../../../../../plugins/data/public/services';
 
 describe('date_range params', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry([dateRangeBucketAgg]);
+
   const getAggConfigs = (params: Record<string, any> = {}, hasIncludeTypeMeta: boolean = true) => {
     const field = {
       name: 'bytes',
@@ -60,7 +67,7 @@ describe('date_range params', () => {
           params,
         },
       ],
-      { typesRegistry: aggTypesRegistryStartMock() }
+      { typesRegistry }
     );
   };
 
@@ -97,7 +104,11 @@ describe('date_range params', () => {
     });
 
     it('should use the Kibana time_zone if no parameter specified', () => {
-      npStart.core.uiSettings.get = jest.fn(() => 'kibanaTimeZone' as any);
+      const core = coreMock.createStart();
+      setUiSettings({
+        ...core.uiSettings,
+        get: () => 'kibanaTimeZone' as any,
+      });
 
       const aggConfigs = getAggConfigs(
         {
@@ -107,6 +118,8 @@ describe('date_range params', () => {
       );
       const dateRange = aggConfigs.aggs[0];
       const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
+
+      setUiSettings(core.uiSettings); // clean up
 
       expect(params.time_zone).toBe('kibanaTimeZone');
     });

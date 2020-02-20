@@ -22,7 +22,7 @@ import { cumulativeSumMetricAgg } from './cumulative_sum';
 import { movingAvgMetricAgg } from './moving_avg';
 import { serialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
-import { aggTypesRegistryStartMock } from '../mocks';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 jest.mock('../schemas', () => {
@@ -34,9 +34,13 @@ jest.mock('../schemas', () => {
   };
 });
 
-jest.mock('ui/new_platform');
-
 describe('parent pipeline aggs', function() {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry();
+
   const metrics = [
     { name: 'derivative', title: 'Derivative', provider: derivativeMetricAgg },
     { name: 'cumulative_sum', title: 'Cumulative Sum', provider: cumulativeSumMetricAgg },
@@ -94,7 +98,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry: aggTypesRegistryStartMock() }
+          { typesRegistry }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
