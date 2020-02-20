@@ -19,8 +19,15 @@ export const config = {
       registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
     }),
     fleet: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      defaultOutputHost: schema.string({ defaultValue: 'http://localhost:9200' }),
+      enabled: schema.boolean({ defaultValue: true }),
+      kibana: schema.object({
+        host: schema.maybe(schema.string()),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
+      elasticsearch: schema.object({
+        host: schema.string({ defaultValue: 'http://localhost:9200' }),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
     }),
   }),
 };

@@ -34,7 +34,7 @@ import {
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
 import { AgentConfig } from '../../../../types';
-import { useCore } from '../../../../hooks';
+import { useCore, useConfig } from '../../../../hooks';
 
 interface RouterProps {
   onClose: () => void;
@@ -46,6 +46,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
   policies,
 }) => {
   const core = useCore();
+  const config = useConfig();
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );
@@ -62,6 +63,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enrollmentApiKeys.data]);
   const apiKey = useEnrollmentApiKey(selectedApiKeyId);
+  const kibanaUrl =
+    config.fleet.kibana.host ?? `${window.location.origin}${core.http.basePath.get()}`;
+  const kibanaCASha256 = config.fleet.kibana.ca_sha256;
 
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
@@ -184,7 +188,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
       {quickInstallType === 'shell' ? (
         <ShellEnrollmentInstructions
           apiKey={apiKey.data.item}
-          kibanaUrl={`${window.location.origin}${core.http.basePath.get()}`}
+          kibanaUrl={kibanaUrl}
+          kibanaCASha256={kibanaCASha256}
         />
       ) : null}
       {quickInstallType === 'container' ? <ContainerEnrollmentInstructions /> : null}

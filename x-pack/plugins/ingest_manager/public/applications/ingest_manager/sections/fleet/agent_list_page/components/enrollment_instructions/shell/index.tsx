@@ -66,11 +66,13 @@ const PLATFORM_INSTRUCTIONS: {
 
 interface Props {
   kibanaUrl: string;
+  kibanaCASha256?: string;
   apiKey: EnrollmentAPIKey;
 }
 
 export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   kibanaUrl,
+  kibanaCASha256,
   apiKey,
 }) => {
   // Platform state
@@ -79,7 +81,11 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   const [isManualInstallationOpen, setIsManualInstallationOpen] = useState<boolean>(false);
 
   // Build quick installation command
-  const quickInstallInstructions = `API_KEY=${apiKey.api_key} sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
+  const quickInstallInstructions = `${
+    kibanaCASha256 ? `CA_SHA256=${kibanaCASha256} ` : ''
+  }API_KEY=${
+    apiKey.api_key
+  } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
 
   return (
     <Fragment>
