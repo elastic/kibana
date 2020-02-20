@@ -156,7 +156,7 @@ describe('Server logging configuration', function() {
       );
 
       it(
-        'should recreate file handler on SIGHUP',
+        'should recreate file handle on SIGHUP',
         async function() {
           const logPath = Path.resolve(tempDir, 'kibana.log');
           const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
@@ -230,7 +230,7 @@ describe('Server logging configuration', function() {
         30 * second
       );
       it(
-        'should recreate file handler on SIGHUP',
+        'should recreate file handle on SIGHUP',
         async function() {
           const configFilePath = Path.resolve(tempDir, 'kibana.yml');
           Fs.copyFileSync(configFileLogFile, configFilePath);
