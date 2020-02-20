@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
+import { FormattedDate } from 'react-intl';
+import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 
@@ -98,22 +100,18 @@ export const AlertIndex = memo(() => {
   );
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
-  const formatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat(i18n.getLocale(), {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      }),
-    []
-  );
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlWithoutSelectedAlert);
   }, [history, urlWithoutSelectedAlert]);
+
+  const datesForRows: Map<AlertData, Date> = useMemo(() => {
+    return new Map(
+      alertListData.map(alertData => {
+        return [alertData, new Date(alertData['@timestamp'])];
+      })
+    );
+  }, [alertListData]);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
@@ -125,7 +123,7 @@ export const AlertIndex = memo(() => {
 
       if (columnId === 'alert_type') {
         return (
-          <Link data-test-subj="alert-type-cell-link" to={urlWithSelectedAlert('TODO')}>
+          <Link data-testid="alertTypeCellLink" to={urlWithSelectedAlert('TODO')}>
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
               {
@@ -143,9 +141,19 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'host_name') {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        const date = new Date(row['@timestamp']);
-        if (isFinite(date.getTime())) {
-          return formatter.format(date);
+        const date = datesForRows.get(row)!;
+        if (date && isFinite(date.getTime())) {
+          return (
+            <FormattedDate
+              value={date}
+              year="numeric"
+              month="2-digit"
+              day="2-digit"
+              hour="2-digit"
+              minute="2-digit"
+              second="2-digit"
+            />
+          );
         } else {
           return (
             <EuiBadge color="warning">
@@ -165,7 +173,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, formatter, pageSize, total, urlWithSelectedAlert]);
+  }, [alertListData, datesForRows, pageSize, total, urlWithSelectedAlert]);
 
   const pagination = useMemo(() => {
     return {
@@ -180,7 +188,7 @@ export const AlertIndex = memo(() => {
   return (
     <>
       {hasSelectedAlert && (
-        <EuiFlyout data-test-subj="alert-detail-flyout" size="l" onClose={handleFlyoutClose}>
+        <EuiFlyout data-testid="alertDetailFlyout" size="l" onClose={handleFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -193,7 +201,7 @@ export const AlertIndex = memo(() => {
           <EuiFlyoutBody />
         </EuiFlyout>
       )}
-      <EuiPage data-test-subj="alertListPage">
+      <EuiPage data-test-subj="alertListPage" data-testid="alertListPage">
         <EuiPageBody>
           <EuiPageContent>
             <EuiDataGrid
@@ -210,6 +218,7 @@ export const AlertIndex = memo(() => {
               renderCellValue={renderCellValue}
               pagination={pagination}
               data-test-subj="alertListGrid"
+              data-testid="alertListGrid"
             />
           </EuiPageContent>
         </EuiPageBody>
