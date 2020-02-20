@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { coreMock } from '../../../core/public/mocks';
 import { plugin } from './';
-import { LOCALSTORAGE_KEY, REPORT_INTERVAL } from './constants';
+import { LOCALSTORAGE_KEY } from './constants';
 
 function getHandler(spy: jest.SpyInstance, event: string) {
   const [, handlerCb] = spy.mock.calls.find(([method, fn]) => method === event) || [];
