@@ -47,7 +47,7 @@ import {
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { PersistedState, AppState, SavedObject, SavedSearch } from '../../../legacy_imports';
+import { PersistedState, SavedObject, SavedSearch } from '../../../legacy_imports';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -69,7 +69,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -80,7 +80,7 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -96,7 +96,7 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private savedVisualization: VisSavedObject;
-  private appState: AppState | undefined;
+  private appState: { save(): void } | undefined;
   private uiState: PersistedState;
   private timeRange?: TimeRange;
   private query?: Query;
@@ -303,13 +303,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
+        if (!this.input.disableTriggers) {
+          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
-        getUiActions().executeTriggerActions(eventName, {
-          embeddable: this,
-          timeFieldName: this.vis.indexPattern.timeFieldName,
-          data: event.data,
-        });
+          getUiActions().executeTriggerActions(eventName, {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          });
+        }
       })
     );
 
@@ -389,7 +391,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   private handleVisUpdate = async () => {
     if (this.appState) {
-      this.appState.vis = this.savedVisualization.vis.getState();
       this.appState.save();
     }
 

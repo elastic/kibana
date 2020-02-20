@@ -5,8 +5,10 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { callApi, FetchOptions } from './callApi';
-import { APMAPI } from '../../../server/routes/create_apm_api';
-import { Client } from '../../../server/routes/typings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { APMAPI } from '../../../../../../plugins/apm/server/routes/create_apm_api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Client } from '../../../../../../plugins/apm/server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
