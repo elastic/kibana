@@ -6,8 +6,8 @@
 
 import { IClusterClient } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { APMConfig } from '../../../../../../../plugins/apm/server';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
+import { APMConfig } from '../../..';
 
 export const createApmCustomActionIndex = async ({
   esClient,

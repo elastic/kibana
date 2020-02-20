@@ -23,20 +23,22 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { Controller, useForm, ValidationOptions } from 'react-hook-form';
+import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { Filter, FiltersSection } from './FiltersSection';
+import { saveCustomAction } from './saveCustomAction';
 
 interface Props {
   onClose: () => void;
 }
 
-interface FormData {
+export interface CustomAction {
   label: string;
   url: string;
   filters: Filter[];
 }
 
 interface ActionField {
-  name: keyof FormData;
+  name: keyof CustomAction;
   label: string;
   helpText: string;
   placeholder: string;
@@ -62,11 +64,13 @@ const actionFields: ActionField[] = [
 ];
 
 export const CustomActionsFlyout = ({ onClose }: Props) => {
+  const callApmApiFromHook = useCallApmApi();
   const { register, handleSubmit, errors, control, watch } = useForm<
-    FormData
+    CustomAction
   >();
-  const onSubmit = (data: FormData) => {
-    console.log('#########', data);
+
+  const onSubmit = (customAction: CustomAction) => {
+    saveCustomAction({ callApmApi: callApmApiFromHook, customAction });
   };
 
   const filters = watch('filters');
