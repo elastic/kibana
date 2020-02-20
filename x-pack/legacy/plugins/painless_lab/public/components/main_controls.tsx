@@ -12,9 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -24,12 +22,7 @@ interface Props {
   reset: () => void;
 }
 
-export function MainControls({
-  toggleRequestFlyout,
-  isRequestFlyoutOpen,
-  isLoading,
-  reset,
-}: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [

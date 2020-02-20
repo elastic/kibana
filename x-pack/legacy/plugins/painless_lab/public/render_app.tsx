@@ -9,7 +9,6 @@ import { CoreStart } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Main } from './components/main';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
-import { executeCode } from './lib/execute_code';
 
 export function renderApp(element: any, { http, i18n, uiSettings }: CoreStart) {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -18,7 +17,7 @@ export function renderApp(element: any, { http, i18n, uiSettings }: CoreStart) {
   render(
     <i18n.Context>
       <KibanaReactContextProvider>
-        <Main executeCode={payload => executeCode(http, payload)} />
+        <Main http={http} />
       </KibanaReactContextProvider>
     </i18n.Context>,
     element

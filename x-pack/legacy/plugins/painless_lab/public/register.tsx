@@ -34,6 +34,7 @@ npSetup.core.uiSettings.get$(ADVANCED_SETTINGS_FLAG_NAME, false).subscribe(value
 });
 
 npSetup.plugins.devTools.register({
+  id: 'painless_lab',
   order: 7,
   title: (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -54,7 +55,7 @@ npSetup.plugins.devTools.register({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  ),
+  ) as any,
   enableRouting: false,
   disabled: false,
   tooltipContent: xpackInfo.get('features.painlessLab.message'),
