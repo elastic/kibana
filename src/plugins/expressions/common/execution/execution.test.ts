@@ -336,16 +336,18 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
+      jest.useFakeTimers();
       const execution = createExecution('sleep 20');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 5));
+      jest.advanceTimersByTime(5);
       expect(execution.state.get().state).toBe('pending');
+      jest.useRealTimers();
     });
 
     test('execution state is "result" when execution successfully completes', async () => {
       const execution = createExecution('sleep 1');
       execution.start(null);
-      await new Promise(r => setTimeout(r, 30));
+      await execution.result;
       expect(execution.state.get().state).toBe('result');
     });
 
