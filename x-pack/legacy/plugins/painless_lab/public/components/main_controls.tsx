@@ -87,7 +87,7 @@ export function MainControls({
     <>
       <div className="painlessLabBottomBarPlaceholder" />
 
-      <EuiBottomBar paddingSize="none">
+      <EuiBottomBar paddingSize="s">
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">

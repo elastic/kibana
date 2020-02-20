@@ -52,7 +52,18 @@ function getPainlessLanguage() {
       'this',
       'instanceof',
     ],
-    primitives: ['void', 'boolean', 'byte', 'short', 'char', 'int', 'long', 'float', 'double'],
+    primitives: [
+      'void',
+      'boolean',
+      'byte',
+      'short',
+      'char',
+      'int',
+      'long',
+      'float',
+      'double',
+      'def',
+    ],
     constants: ['true', 'false'],
     operators: [
       '=',
@@ -177,6 +188,8 @@ function getPainlessLanguage() {
 }
 
 export function registerPainless() {
-  monaco.languages.register({ id: LANGUAGE_ID });
-  monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, getPainlessLanguage());
+  // TODO: Referring to `window.monaco` is a temporary fix for the imported `monaco`  module not
+  // being the same one in use by the editor.
+  window.monaco.languages.register({ id: LANGUAGE_ID });
+  window.monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, getPainlessLanguage());
 }
