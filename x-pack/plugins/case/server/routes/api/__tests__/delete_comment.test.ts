@@ -15,6 +15,8 @@ import { initDeleteCommentApi } from '../delete_comment';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('DELETE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -22,7 +24,7 @@ describe('DELETE comment', () => {
   });
   it(`deletes the comment. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{comment_id}',
+      path: `${CASES_API_BASE_URL}/comments/{comment_id}`,
       method: 'delete',
       params: {
         comment_id: 'mock-id-1',
@@ -36,7 +38,7 @@ describe('DELETE comment', () => {
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{comment_id}',
+      path: `${CASES_API_BASE_URL}/comments/{comment_id}`,
       method: 'delete',
       params: {
         comment_id: 'bad-guy',

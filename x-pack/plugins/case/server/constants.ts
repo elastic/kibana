@@ -6,3 +6,5 @@
 
 export const CASE_SAVED_OBJECT = 'case-workflow';
 export const CASE_COMMENT_SAVED_OBJECT = 'case-workflow-comment';
+
+export const CASES_API_BASE_URL = '/api/cases';

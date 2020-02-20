@@ -6,11 +6,12 @@
 
 import { RouteDeps } from './index';
 import { wrapError } from './utils';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initGetTagsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/tags',
+      path: `${CASES_API_BASE_URL}/tags`,
       validate: {},
     },
     async (context, request, response) => {

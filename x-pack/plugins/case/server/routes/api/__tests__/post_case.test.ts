@@ -14,6 +14,8 @@ import { initPostCaseApi } from '../post_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('POST cases', () => {
   });
   it(`Posts a new case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       method: 'post',
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -40,7 +42,7 @@ describe('POST cases', () => {
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       method: 'post',
       body: {
         description: 'Throw an error',
@@ -60,7 +62,7 @@ describe('POST cases', () => {
     routeHandler = await createRoute(initPostCaseApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       method: 'post',
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',

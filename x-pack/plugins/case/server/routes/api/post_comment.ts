@@ -8,12 +8,12 @@ import { schema } from '@kbn/config-schema';
 import { flattenCommentSavedObject, formatNewComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
-import { CASE_SAVED_OBJECT } from '../../constants';
+import { CASE_SAVED_OBJECT, CASES_API_BASE_URL } from '../../constants';
 
 export function initPostCommentApi({ caseService, router }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{id}/comment',
+      path: `${CASES_API_BASE_URL}/{id}/comment`,
       validate: {
         params: schema.object({
           id: schema.string(),

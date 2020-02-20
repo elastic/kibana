@@ -7,11 +7,12 @@
 import { flattenCaseSavedObject, formatNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initPostCaseApi({ caseService, router }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       validate: {
         body: NewCaseSchema,
       },

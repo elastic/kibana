@@ -14,6 +14,8 @@ import { initGetAllCasesApi } from '../get_all_cases';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('GET all cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('GET all cases', () => {
   });
   it(`gets all the cases`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       method: 'get',
     });
 

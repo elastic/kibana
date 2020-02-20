@@ -16,6 +16,8 @@ import { httpServerMock } from 'src/core/server/mocks';
 import { flattenCommentSavedObject } from '../utils';
 import { CommentAttributes } from '../types';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('GET comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -23,7 +25,7 @@ describe('GET comment', () => {
   });
   it(`returns the comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{id}',
+      path: `${CASES_API_BASE_URL}/comments/{id}`,
       method: 'get',
       params: {
         id: 'mock-comment-1',
@@ -42,7 +44,7 @@ describe('GET comment', () => {
   });
   it(`returns an error when getComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comments/{id}',
+      path: `${CASES_API_BASE_URL}/comments/{id}`,
       method: 'get',
       params: {
         id: 'not-real',

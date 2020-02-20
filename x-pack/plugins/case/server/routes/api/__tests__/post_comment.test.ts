@@ -14,6 +14,8 @@ import { initPostCommentApi } from '../post_comment';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('POST comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('POST comment', () => {
   });
   it(`Posts a new comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}/comment',
+      path: `${CASES_API_BASE_URL}/{id}/comment`,
       method: 'post',
       params: {
         id: 'mock-id-1',
@@ -39,7 +41,7 @@ describe('POST comment', () => {
   });
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}/comment',
+      path: `${CASES_API_BASE_URL}/{id}/comment`,
       method: 'post',
       params: {
         id: 'this-is-not-real',
@@ -57,7 +59,7 @@ describe('POST comment', () => {
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}/comment',
+      path: `${CASES_API_BASE_URL}/{id}/comment`,
       method: 'post',
       params: {
         id: 'mock-id-1',
@@ -77,7 +79,7 @@ describe('POST comment', () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}/comment',
+      path: `${CASES_API_BASE_URL}/{id}/comment`,
       method: 'post',
       params: {
         id: 'mock-id-1',

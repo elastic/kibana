@@ -17,6 +17,8 @@ import { httpServerMock } from 'src/core/server/mocks';
 import { flattenCaseSavedObject } from '../utils';
 import { CaseAttributes } from '../types';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -24,7 +26,7 @@ describe('GET case', () => {
   });
   it(`returns the case with empty case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       params: {
         id: 'mock-id-1',
       },
@@ -49,7 +51,7 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getCase`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       params: {
         id: 'abcdefg',
       },
@@ -68,7 +70,7 @@ describe('GET case', () => {
   });
   it(`returns the case with case comments when includeComments is true`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       params: {
         id: 'mock-id-1',
       },
@@ -87,7 +89,7 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       params: {
         id: 'bad-guy',
       },

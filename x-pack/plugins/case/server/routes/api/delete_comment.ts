@@ -7,11 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initDeleteCommentApi({ caseService, router }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/comments/{comment_id}',
+      path: `${CASES_API_BASE_URL}/comments/{comment_id}`,
       validate: {
         params: schema.object({
           comment_id: schema.string(),

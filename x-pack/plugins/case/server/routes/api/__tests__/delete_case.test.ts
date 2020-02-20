@@ -15,6 +15,8 @@ import { initDeleteCaseApi } from '../delete_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('DELETE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -22,7 +24,7 @@ describe('DELETE case', () => {
   });
   it(`deletes the case. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'delete',
       params: {
         id: 'mock-id-1',
@@ -36,7 +38,7 @@ describe('DELETE case', () => {
   });
   it(`returns an error when thrown from deleteCase service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'delete',
       params: {
         id: 'not-real',
@@ -50,7 +52,7 @@ describe('DELETE case', () => {
   });
   it(`returns an error when thrown from getAllCaseComments service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'delete',
       params: {
         id: 'bad-guy',
@@ -66,7 +68,7 @@ describe('DELETE case', () => {
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'delete',
       params: {
         id: 'valid-id',

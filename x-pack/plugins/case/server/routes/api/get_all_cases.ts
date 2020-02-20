@@ -9,11 +9,12 @@ import { RouteDeps } from '.';
 import { formatAllCases, sortToSnake, wrapError } from './utils';
 import { SavedObjectsFindOptionsSchema } from './schema';
 import { AllCases } from './types';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases',
+      path: CASES_API_BASE_URL,
       validate: {
         query: schema.nullable(SavedObjectsFindOptionsSchema),
       },

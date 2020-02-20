@@ -10,17 +10,18 @@ import Boom from 'boom';
 import { difference } from 'lodash';
 import { wrapError } from './utils';
 import { RouteDeps } from '.';
-import { UpdateCaseArguments } from './schema';
+import { UpdatedCaseSchema } from './schema';
 import { CaseAttributes, UpdatedCaseTyped, Writable } from './types';
 
 interface UpdateCase extends Writable<UpdatedCaseTyped> {
   [key: string]: any;
 }
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

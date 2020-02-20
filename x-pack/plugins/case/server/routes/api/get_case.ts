@@ -7,11 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { flattenCaseSavedObject, wrapError } from './utils';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initGetCaseApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

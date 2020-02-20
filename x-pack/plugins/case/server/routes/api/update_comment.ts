@@ -8,11 +8,12 @@ import { schema } from '@kbn/config-schema';
 import { wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
+import { CASES_API_BASE_URL } from '../../constants';
 
 export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/comment/{id}',
+      path: `${CASES_API_BASE_URL}/comment/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

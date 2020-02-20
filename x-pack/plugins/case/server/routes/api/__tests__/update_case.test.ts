@@ -14,6 +14,8 @@ import { initUpdateCaseApi } from '../update_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('UPDATE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('UPDATE case', () => {
   });
   it(`Updates a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'patch',
       params: {
         id: 'mock-id-1',
@@ -77,7 +79,7 @@ describe('UPDATE case', () => {
   });
   it(`Returns an error if updateCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{id}',
+      path: `${CASES_API_BASE_URL}/{id}`,
       method: 'patch',
       params: {
         id: 'mock-id-does-not-exist',

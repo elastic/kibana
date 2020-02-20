@@ -14,6 +14,8 @@ import { initUpdateCommentApi } from '../update_comment';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { CASES_API_BASE_URL } from '../../../constants';
+
 describe('UPDATE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
@@ -21,7 +23,7 @@ describe('UPDATE comment', () => {
   });
   it(`Updates a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comment/{id}',
+      path: `${CASES_API_BASE_URL}/comment/{id}`,
       method: 'patch',
       params: {
         id: 'mock-comment-1',
@@ -39,7 +41,7 @@ describe('UPDATE comment', () => {
   });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/comment/{id}',
+      path: `${CASES_API_BASE_URL}/comment/{id}`,
       method: 'patch',
       params: {
         id: 'mock-comment-does-not-exist',
