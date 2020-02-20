@@ -13,7 +13,7 @@ Report current state of a Fleet agent.
 
 ## Request body
 
-- `events` (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, and `data`.
+- `events` (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, and `agent_id`.
 
 - `local_metadata` (Optional, object) An object that contains the local metadata for an agent. The metadata is a dictionary of strings (example: `{ "os": "macos" }`).
 
@@ -33,7 +33,7 @@ Authorization: ApiKey VALID_ACCESS_API_KEY
     "message": "state changed from STOPPED to STARTING",
     "timestamp": "2019-10-01T13:42:54.323Z",
     "payload": {},
-    "data": "{}"
+    "agent_id": "a4937110-e53e-11e9-934f-47a8e38a522c"
   }]
 }
 ```

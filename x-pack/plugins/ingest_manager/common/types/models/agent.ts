@@ -44,7 +44,7 @@ export interface AgentEvent {
   timestamp: string;
   message: string;
   payload?: any;
-  data?: string;
+  agent_id: string;
   action_id?: string;
   policy_id?: string;
   stream_id?: string;

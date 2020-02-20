@@ -124,7 +124,6 @@ async function createEventsForAgent(
     eventData => {
       return {
         attributes: {
-          agent_id: agentId,
           ...eventData,
           payload: eventData.payload ? JSON.stringify(eventData.payload) : undefined,
         },
