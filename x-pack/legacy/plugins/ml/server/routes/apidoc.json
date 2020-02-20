@@ -84,6 +84,16 @@
     "MlCapabilities",
     "MlNodeCount",
     "MlInfo",
-    "MlEsSearch"
+    "MlEsSearch",
+    "JobAuditMessages",
+    "GetJobAuditMessages",
+    "GetAllJobAuditMessages",
+    "JobValidation",
+    "EstimateBucketSpan",
+    "CalculateModelMemoryLimit",
+    "ValidateCardinality",
+    "ValidateJob",
+    "NotificationSettings",
+    "GetNotificationSettings"
   ]
 }
