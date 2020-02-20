@@ -18,8 +18,6 @@
  */
 import { SavedObjectLoader } from 'ui/saved_objects';
 import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
-
-// @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../np_ready/public/types';

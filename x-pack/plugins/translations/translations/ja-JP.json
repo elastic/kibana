@@ -2888,7 +2888,6 @@
     "visualizations.newVisWizard.title": "新規ビジュアライゼーション",
     "visualizations.newVisWizard.visTypeAliasDescription": "Visualize外でKibanaアプリケーションを開きます。",
     "visualizations.newVisWizard.visTypeAliasTitle": "Kibanaアプリケーション",
-    "visualizations.queryGeohashBounds.unableToGetBoundErrorTitle": "バウンドを取得できませんでした",
     "visDefaultEditor.aggSelect.aggregationLabel": "集約",
     "visDefaultEditor.aggSelect.helpLinkLabel": "{aggTitle} のヘルプ",
     "visDefaultEditor.aggSelect.noCompatibleAggsDescription": "インデックスパターン{indexPatternTitle}には集約可能なフィールドが含まれていません。",

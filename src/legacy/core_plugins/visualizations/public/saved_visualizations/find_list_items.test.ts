@@ -19,10 +19,14 @@
 
 import { findListItems } from './find_list_items';
 import { coreMock } from '../../../../../core/public/mocks';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { VisTypeAlias } from '../np_ready/public/types';
 
 describe('saved_visualizations', () => {
   function testProps() {
-    const savedObjects = coreMock.createStart().savedObjects.client;
+    const savedObjects = coreMock.createStart().savedObjects.client as jest.Mocked<
+      SavedObjectsClientContract
+    >;
     (savedObjects.find as jest.Mock).mockImplementation(() => ({
       total: 0,
       savedObjects: [],
@@ -61,7 +65,7 @@ describe('saved_visualizations', () => {
               searchFields: ['baz', 'bing'],
             },
           },
-        },
+        } as VisTypeAlias,
       ],
     };
     const { find } = props.savedObjectsClient;
@@ -87,7 +91,7 @@ describe('saved_visualizations', () => {
               searchFields: ['baz', 'bing', 'barfield'],
             },
           },
-        },
+        } as VisTypeAlias,
         {
           appExtensions: {
             visualizations: {
@@ -95,7 +99,7 @@ describe('saved_visualizations', () => {
               searchFields: ['baz', 'bing', 'foofield'],
             },
           },
-        },
+        } as VisTypeAlias,
       ],
     };
     const { find } = props.savedObjectsClient;
@@ -129,24 +133,11 @@ describe('saved_visualizations', () => {
   it('uses type-specific toListItem function, if available', async () => {
     const props = {
       ...testProps(),
-      savedObjectsClient: {
-        find: jest.fn(async () => ({
-          total: 2,
-          savedObjects: [
-            {
-              id: 'lotr',
-              type: 'wizard',
-              attributes: { label: 'Gandalf' },
-            },
-            {
-              id: 'wat',
-              type: 'visualization',
-              attributes: { title: 'WATEVER' },
-            },
-          ],
-        })),
-      },
-      mapSavedObjectApiHits(savedObject) {
+      mapSavedObjectApiHits(savedObject: {
+        id: string;
+        type: string;
+        attributes: { title: string };
+      }) {
         return {
           id: savedObject.id,
           title: `DEFAULT ${savedObject.attributes.title}`,
@@ -160,14 +151,31 @@ describe('saved_visualizations', () => {
               toListItem(savedObject) {
                 return {
                   id: savedObject.id,
-                  title: `${savedObject.attributes.label} THE GRAY`,
+                  title: `${(savedObject.attributes as { label: string }).label} THE GRAY`,
                 };
               },
             },
           },
-        },
+        } as VisTypeAlias,
       ],
     };
+
+    (props.savedObjectsClient.find as jest.Mock).mockImplementationOnce(async () => ({
+      total: 2,
+      savedObjects: [
+        {
+          id: 'lotr',
+          type: 'wizard',
+          attributes: { label: 'Gandalf' },
+        },
+        {
+          id: 'wat',
+          type: 'visualization',
+          attributes: { title: 'WATEVER' },
+        },
+      ],
+    }));
+
     const items = await findListItems(props);
     expect(items).toEqual({
       total: 2,
