@@ -161,6 +161,38 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
+
+      it('metadata api should return the latest event for all the events for an endpoint', async () => {
+        const targetEndpointIp = '10.192.213.130';
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `host.ip:${targetEndpointIp}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(1);
+        const resultIp: string = body.endpoints[0].host.ip.filter(ip => ip === targetEndpointIp);
+        expect(resultIp).to.eql([targetEndpointIp]);
+        expect(body.endpoints[0].event.created).to.eql('2020-01-24T16:06:09.541Z');
+        expect(body.endpoints.length).to.eql(1);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('metadata api should return the all endpoints when filter is empty string', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: '',
+          })
+          .expect(200);
+        expect(body.total).to.eql(3);
+        expect(body.endpoints.length).to.eql(3);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
     });
   });
 }

@@ -57,7 +57,7 @@ describe('query builder', () => {
   });
 
   describe('test query builder with kql filter', () => {
-    it('test default query params for all endpoints metadata when no params or body is provided', async () => {
+    it('test default query params for all endpoints metadata when body filter is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
           filter: 'not host.ip:10.140.73.246',
