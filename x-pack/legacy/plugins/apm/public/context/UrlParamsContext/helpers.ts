@@ -7,7 +7,7 @@
 import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '../../../../../../plugins/apm/common/processor_event';
 
 interface PathParams {
   processorEvent?: ProcessorEvent;
