@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { migrateAppState } from './migrate_app_state';
+export { tabifyAggResponse } from './tabify';
+export { tabifyGetColumns } from './get_columns';
