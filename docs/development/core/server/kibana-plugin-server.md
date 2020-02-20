@@ -165,7 +165,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
-|  [config](./kibana-plugin-server.config.md) | Config schemas for the platform services. |
 |  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution. |
 |  [validBodyOutput](./kibana-plugin-server.validbodyoutput.md) | The set of valid body.output |
 

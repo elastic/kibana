@@ -357,7 +357,7 @@ export {
 /**
  * Config schemas for the platform services.
  *
- * @public
+ * @alpha
  */
 export const config = {
   elasticsearch: {

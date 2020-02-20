@@ -503,7 +503,7 @@ export class ClusterClient implements IClusterClient {
     close(): void;
     }
 
-// @public
+// @alpha
 export const config: {
     elasticsearch: {
         schema: import("@kbn/config-schema").ObjectType<{
