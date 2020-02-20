@@ -21,7 +21,7 @@ There are no user-facing breaking changes in 7.6.
 === Breaking changes for plugin developers
 
 [float]
-===== {kib} no longer crashes when a plugin version does not match the server
+==== {kib} no longer crashes when a plugin version does not match the server
 {pull}54404[#54404]
 
 {kib} no longer crashes when a plugin is used against an incompatible {kib} version.
