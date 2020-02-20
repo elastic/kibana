@@ -7,6 +7,7 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import { handleRelatedEvents, validateRelatedEvents } from './resolver/related_events';
+import { handleRelatedAlerts, validateRelatedAlerts } from './resolver/alerts';
 import { handleChildren, validateChildren } from './resolver/children';
 import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
 
@@ -20,6 +21,15 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     handleRelatedEvents(log)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}/alerts',
+      validate: validateRelatedAlerts,
+      options: { authRequired: true },
+    },
+    handleRelatedAlerts(log)
   );
 
   router.get(

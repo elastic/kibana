@@ -6,32 +6,21 @@
 import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-export class RelatedEventsQuery extends ResolverQuery {
+export class RelatedAlertsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     return {
-      body: this.paginateBy('endgame.serial_event_id', {
+      body: this.paginateBy('endgame.metadata.message_id', {
         query: {
           bool: {
             filter: [
               {
-                terms: { 'endgame.unique_pid': uniquePIDs },
+                terms: { 'endgame.data.alert_details.acting_process.unique_pid': uniquePIDs },
               },
               {
                 term: { 'agent.id': endpointID },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
-              },
-              {
-                bool: {
-                  must_not: {
-                    term: { 'event.kind': 'alert' },
-                  },
-                },
+                term: { 'event.kind': 'alert' },
               },
             ],
           },
@@ -60,18 +49,7 @@ export class RelatedEventsQuery extends ResolverQuery {
                 },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
-              },
-              {
-                bool: {
-                  must_not: {
-                    term: { 'event.kind': 'alert' },
-                  },
-                },
+                term: { 'event.kind': 'alert' },
               },
             ],
           },
