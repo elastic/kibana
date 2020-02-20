@@ -171,6 +171,7 @@ import {
 } from '../common/field_formats';
 
 import { DateFormat } from './field_formats';
+export { baseFormattersPublic } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {

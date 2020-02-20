@@ -18,10 +18,10 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { DateFormat } from './converters/date';
-import { FieldFormatsRegistry, baseFormatters } from '../../common';
+import { FieldFormatsRegistry } from '../../common';
 import { deserializeFieldFormat } from './utils/deserialize';
 import { FormatFactory } from '../../common/field_formats/utils';
+import { baseFormattersPublic } from './constants';
 
 export class FieldFormatsService {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
@@ -44,7 +44,7 @@ export class FieldFormatsService {
           basePath: core.http.basePath.get(),
         },
       },
-      [DateFormat, ...baseFormatters]
+      baseFormattersPublic
     );
 
     return this.fieldFormatsRegistry as FieldFormatsSetup;

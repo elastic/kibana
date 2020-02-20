@@ -25,7 +25,7 @@ import {
   KBN_FIELD_TYPES,
   TextContextTypeConvert,
   FIELD_FORMAT_IDS,
-} from '../../../common/';
+} from '../../../common';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
