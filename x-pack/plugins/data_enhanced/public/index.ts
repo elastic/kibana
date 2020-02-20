@@ -7,8 +7,7 @@
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new DataEnhancedPlugin(initializerContext);
+export const plugin = () => new DataEnhancedPlugin();
 
 export { DataEnhancedSetup, DataEnhancedStart };
 
