@@ -6,14 +6,18 @@
 
 import { KQL_INPUT, REFRESH_BUTTON } from '../screens/siem_header';
 
-export const navigateFromHeaderTo = (page: string) => {
-  cy.get(page).click({ force: true });
-};
-
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT)
     .clear()
     .type('{enter}');
+};
+
+export const kqlSearch = (search: string) => {
+  cy.get(KQL_INPUT).type(search);
+};
+
+export const navigateFromHeaderTo = (page: string) => {
+  cy.get(page).click({ force: true });
 };
 
 export const refreshPage = () => {
@@ -21,8 +25,4 @@ export const refreshPage = () => {
     .click({ force: true })
     .invoke('text')
     .should('not.equal', 'Updating');
-};
-
-export const kqlSearch = (search: string) => {
-  cy.get(KQL_INPUT).type(search);
 };

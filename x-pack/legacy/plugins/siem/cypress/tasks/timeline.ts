@@ -5,47 +5,31 @@
  */
 
 import {
-  SEARCH_OR_FILTER_CONTAINER,
-  TIMELINE_FIELDS_BUTTON,
-  SERVER_SIDE_EVENT_COUNT,
-  TIMELINE_SETTINGS_ICON,
-  TIMELINE_INSPECT_BUTTON,
-  CREATE_NEW_TIMELINE,
   CLOSE_TIMELINE_BTN,
-  TOGGLE_TIMELINE_EXPAND_EVENT,
-  TIMESTAMP_TOGGLE_FIELD,
-  ID_TOGGLE_FIELD,
-  ID_HEADER_FIELD,
+  CREATE_NEW_TIMELINE,
   ID_FIELD,
+  ID_HEADER_FIELD,
+  ID_TOGGLE_FIELD,
+  SEARCH_OR_FILTER_CONTAINER,
+  SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_FIELDS_BUTTON,
+  TIMELINE_INSPECT_BUTTON,
+  TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
+  TIMESTAMP_TOGGLE_FIELD,
+  TOGGLE_TIMELINE_EXPAND_EVENT,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
 
 export const hostExistsQuery = 'host.name: *';
 
-export const populateTimeline = () => {
-  executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT)
-    .invoke('text')
-    .should('be.above', 0);
-};
+export const checkIdToggleField = () => {
+  cy.get(ID_TOGGLE_FIELD).should('not.exist');
 
-export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
-};
-
-export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
-};
-
-export const openTimelineSettings = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
-};
-
-export const openTimelineInspectButton = () => {
-  cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
-  cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+  cy.get(ID_TOGGLE_FIELD).check({
+    force: true,
+  });
 };
 
 export const createNewTimeline = () => {
@@ -54,24 +38,40 @@ export const createNewTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };
 
+export const executeTimelineKQL = (query: string) => {
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
+};
+
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT)
     .first()
     .click({ force: true });
 };
 
+export const openTimelineFieldsBrowser = () => {
+  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
+};
+
+export const openTimelineInspectButton = () => {
+  cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
+  cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+};
+
+export const openTimelineSettings = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
+};
+
+export const populateTimeline = () => {
+  executeTimelineKQL(hostExistsQuery);
+  cy.get(SERVER_SIDE_EVENT_COUNT)
+    .invoke('text')
+    .should('be.above', 0);
+};
+
 export const uncheckTimestampToggleField = () => {
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
   cy.get(TIMESTAMP_TOGGLE_FIELD).uncheck({ force: true });
-};
-
-export const checkIdToggleField = () => {
-  cy.get(ID_TOGGLE_FIELD).should('not.exist');
-
-  cy.get(ID_TOGGLE_FIELD).check({
-    force: true,
-  });
 };
 
 export const dragAndDropIdToggleFieldToTimeline = () => {

@@ -5,34 +5,16 @@
  */
 
 import {
-  EVENTS_VIEWER_FIELDS_BUTTON,
   CLOSE_MODAL,
-  INSPECT_QUERY,
-  SERVER_SIDE_EVENT_COUNT,
+  EVENTS_VIEWER_FIELDS_BUTTON,
+  FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
-  FIELDS_BROWSER_CONTAINER,
-  RESET_FIELDS,
+  INSPECT_QUERY,
   LOAD_MORE,
+  RESET_FIELDS,
+  SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
-
-export const closeModal = () => {
-  cy.get(CLOSE_MODAL).click();
-};
-
-export const opensInspectQueryModal = () => {
-  cy.get(INSPECT_QUERY)
-    .should('exist')
-    .trigger('mousemove', { force: true })
-    .click({ force: true });
-};
-
-export const waitsForEventsToBeLoaded = () => {
-  cy.get(SERVER_SIDE_EVENT_COUNT)
-    .should('exist')
-    .invoke('text')
-    .should('not.equal', '0');
-};
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -46,8 +28,12 @@ export const addsHostGeoCountryNameToHeader = () => {
   });
 };
 
-export const resetFields = () => {
-  cy.get(RESET_FIELDS).click({ force: true });
+export const closeModal = () => {
+  cy.get(CLOSE_MODAL).click();
+};
+
+export const loadMoreEvents = () => {
+  cy.get(LOAD_MORE).click({ force: true });
 };
 
 export const openEventsViewerFieldsBrowser = () => {
@@ -60,6 +46,20 @@ export const openEventsViewerFieldsBrowser = () => {
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };
 
-export const loadMoreEvents = () => {
-  cy.get(LOAD_MORE).click({ force: true });
+export const opensInspectQueryModal = () => {
+  cy.get(INSPECT_QUERY)
+    .should('exist')
+    .trigger('mousemove', { force: true })
+    .click({ force: true });
+};
+
+export const resetFields = () => {
+  cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const waitsForEventsToBeLoaded = () => {
+  cy.get(SERVER_SIDE_EVENT_COUNT)
+    .should('exist')
+    .invoke('text')
+    .should('not.equal', '0');
 };
