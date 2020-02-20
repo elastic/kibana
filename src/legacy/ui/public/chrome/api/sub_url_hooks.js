@@ -73,7 +73,7 @@ function updateUsage($event) {
   const scope = $event.targetScope;
   const app = scope.chrome.getApp();
   const appId = app.id === 'kibana' ? scope.getFirstPathSegment() : app.id;
-  npStart.plugins.applicationUsage?.__LEGACY.appChanged(appId);
+  if (npStart.plugins.applicationUsage) npStart.plugins.applicationUsage.__LEGACY.appChanged(appId);
 }
 
 /**
