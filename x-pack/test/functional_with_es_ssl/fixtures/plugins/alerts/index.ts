@@ -23,6 +23,7 @@ function createNoopAlertType(setupContract: any) {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    defaultActionGroup: 'default',
     async executor() {},
   };
   setupContract.registerType(noopAlertType);
