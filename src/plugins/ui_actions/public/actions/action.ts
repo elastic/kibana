@@ -19,47 +19,61 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
-export interface Action<ActionContext extends {} = {}> {
+/**
+ * A convenience interface used to register actions.
+ */
+export interface Action<Context extends {} = {}, Return = Promise<void>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
    */
-  order?: number;
+  readonly order?: number;
 
-  id: string;
+  /**
+   * ID of the action that uniquely identifies this action in the actions registry.
+   */
+  readonly id: string;
 
   readonly type: string;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionContext): string | undefined;
+  getIconType(context: Context): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    * @param context
    */
-  getDisplayName(context: ActionContext): string;
+  getDisplayName(context: Context): string;
 
   /**
    * `UiComponent` to render when displaying this action as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  MenuItem?: UiComponent<{ context: ActionContext }>;
+  readonly MenuItem?: UiComponent<{ context: Context }>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: ActionContext): Promise<boolean>;
+  isCompatible(context: Context): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  getHref?(context: ActionContext): string | undefined;
+  getHref?(context: Context): string | undefined;
 
   /**
    * Executes the action.
    */
-  execute(context: ActionContext): Promise<void>;
+  execute(context: Context): Return;
+}
+
+export interface SerializedDynamicAction<Config extends object = object> {
+  readonly factoryId: string;
+  readonly id: string;
+  readonly type: string;
+  readonly order?: number;
+  readonly config: Config;
 }
