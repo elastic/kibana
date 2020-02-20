@@ -41,7 +41,7 @@ export class Plugin {
     registerPoliciesRoutes(server);
     registerTemplatesRoutes(server);
 
-    const serverPlugins = server.plugins as any;
+    const serverPlugins = server.newPlatform.setup.plugins as any;
 
     if (
       server.config().get('xpack.ilm.ui.enabled') &&

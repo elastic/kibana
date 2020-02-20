@@ -49,13 +49,12 @@ export function crossClusterReplication(kibana) {
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);
-
       if (
         server.config().get('xpack.ccr.ui.enabled') &&
-        server.plugins.indexManagement &&
-        server.plugins.indexManagement.indexDataEnricher
+        server.newPlatform.setup.plugins.indexManagement &&
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher
       ) {
-        server.plugins.indexManagement.indexDataEnricher.add(ccrDataEnricher);
+        server.newPlatform.setup.plugins.indexManagement.indexDataEnricher.add(ccrDataEnricher);
       }
     },
   });
