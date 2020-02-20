@@ -68,8 +68,8 @@ const PaintServers = memo(() => (
       spreadMethod="reflect"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity=".7" />
-      <stop offset="100%" stopColor={darken(0.15, NamedColors.okdark)} stopOpacity=".7" />
+      <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
+      <stop offset="100%" stopColor={darken(0.1, NamedColors.okdark)} stopOpacity="1" />
     </linearGradient>
   </>
 ));
@@ -84,37 +84,6 @@ export const SymbolIds = {
 // SymbolsAndShapes: defs that define shapes, masks and other spatial elements
 const SymbolsAndShapes = memo(() => (
   <>
-    <symbol id={'test'} viewBox="0 0 108.6889 29.31389">
-      <desc>A shape representing a node in a graph</desc>
-      <g transform="translate(-52.244835,-115.27758)">
-        <g
-          fill={`url(#${PaintServerIds.darkLinearReflect})`}
-          fillOpacity="1"
-          paintOrder="normal"
-          strokeWidth="0.79375"
-          strokeMiterlimit="4"
-        >
-          <g transform="matrix(0.26458333,0,0,0.26458333,53.672616,-135.2738)">
-            <path
-              strokeWidth="3.00000004"
-              stroke={NamedColors.ok}
-              strokeLinecap="butt"
-              strokeLinejoin="round"
-              strokeOpacity="0.94117647"
-              d="M 3,1014.0043 C 1.9285712,955.24249 2.5,954.53017 50,955.42048 h 300 c 47.14282,-1.33548 47.71427,-0.62325 47,58.58382"
-            />
-            <path
-              strokeWidth="3.00000004"
-              stroke={NamedColors.ok}
-              strokeLinecap="butt"
-              strokeLinejoin="round"
-              strokeOpacity="0.94117647"
-              d="m 397,1002.3622 c 1.07142,47.1428 0.5,47.7143 -47,47 H 50 c -47.1428203,1.0714 -47.71427,0.4994 -47,-47"
-            />
-          </g>
-        </g>
-      </g>
-    </symbol>
     <symbol
       id={SymbolIds.processNode}
       viewBox="-10 0 128.6889 29.31389"
@@ -164,7 +133,7 @@ const SymbolsAndShapes = memo(() => (
 ));
 
 export const SymbolDefinitions = memo(() => (
-  <svg className="resolver_defs">
+  <svg>
     <defs>
       <PaintServers />
       <SymbolsAndShapes />

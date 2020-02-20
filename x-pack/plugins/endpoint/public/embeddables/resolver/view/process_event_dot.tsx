@@ -122,6 +122,7 @@ export const ProcessEventDot = styled(
                 stroke={NamedColors.strokeBehindEmpty}
                 strokeWidth=".25"
                 paintOrder="stroke"
+                style={{ textTransform: 'uppercase' }}
               >
                 Terminated Process
               </text>
