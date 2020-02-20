@@ -5,10 +5,14 @@
  */
 
 let dataClient;
-let adminClient;
 
 export const setElasticsearchClientServices = elasticsearch => {
-  ({ dataClient, adminClient } = elasticsearch);
+  ({ dataClient } = elasticsearch);
 };
-export const getAdminClient = () => adminClient;
 export const getDataClient = () => dataClient;
+
+let internalRepository;
+export const setInternalRepository = createInternalRepository => {
+  internalRepository = createInternalRepository();
+};
+export const getInternalRepository = () => internalRepository;

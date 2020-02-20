@@ -9,17 +9,11 @@ import { getTelemetry, initTelemetry } from './telemetry';
 
 const TELEMETRY_TYPE = 'fileUploadTelemetry';
 
-export function registerFileUploadUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  deps: {
-    getSavedObjectsRepository: any;
-  }
-): void {
-  const { getSavedObjectsRepository } = deps;
+export function registerFileUploadUsageCollector(usageCollection: UsageCollectionSetup): void {
   const fileUploadUsageCollector = usageCollection.makeUsageCollector({
     type: TELEMETRY_TYPE,
     isReady: () => true,
-    fetch: async () => (await getTelemetry(getSavedObjectsRepository)) || initTelemetry(),
+    fetch: async () => (await getTelemetry()) || initTelemetry(),
   });
 
   usageCollection.registerCollector(fileUploadUsageCollector);

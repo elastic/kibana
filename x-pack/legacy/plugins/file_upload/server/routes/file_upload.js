@@ -75,7 +75,7 @@ export const idConditionalValidation = (body, boolHasId) =>
     )
     .validate(body);
 
-const finishValidationAndProcessReq = getSavedObjectsRepository => {
+const finishValidationAndProcessReq = () => {
   return async (con, req, { ok, badRequest }) => {
     const {
       query: { id },
@@ -103,7 +103,7 @@ const finishValidationAndProcessReq = getSavedObjectsRepository => {
         resp = ok({ body: processedReq });
         // If no id's been established then this is a new index, update telemetry
         if (!boolHasId) {
-          await updateTelemetry({ getSavedObjectsRepository });
+          await updateTelemetry();
         }
       } else {
         resp = badRequest(`Error processing request 1: ${processedReq.error.message}`, ['body']);
@@ -115,7 +115,7 @@ const finishValidationAndProcessReq = getSavedObjectsRepository => {
   };
 };
 
-export const initRoutes = (router, getSavedObjectsRepository) => {
+export const initRoutes = router => {
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,
@@ -125,6 +125,6 @@ export const initRoutes = (router, getSavedObjectsRepository) => {
       },
       options,
     },
-    finishValidationAndProcessReq(getSavedObjectsRepository)
+    finishValidationAndProcessReq()
   );
 };

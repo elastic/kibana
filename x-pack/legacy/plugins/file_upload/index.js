@@ -22,19 +22,14 @@ export const fileUpload = kibana => {
 
     init(server) {
       const coreSetup = server.newPlatform.setup.core;
+      const coreStart = server.newPlatform.start.core;
       const { usageCollection } = server.newPlatform.setup.plugins;
-      const pluginsSetup = {
+      const pluginsStart = {
         usageCollection,
       };
-
-      // legacy dependencies
-      const __LEGACY = {
-        savedObjects: {
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
-        },
-      };
-
-      new FileUploadPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      const fileUploadPlugin = new FileUploadPlugin();
+      fileUploadPlugin.setup(coreSetup);
+      fileUploadPlugin.start(coreStart, pluginsStart);
     },
   });
 };
