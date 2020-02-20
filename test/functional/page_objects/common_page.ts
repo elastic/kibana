@@ -114,7 +114,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         );
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          2 * defaultFindTimeout
+          6 * defaultFindTimeout
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
