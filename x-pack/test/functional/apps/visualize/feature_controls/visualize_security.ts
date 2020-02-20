@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -24,8 +25,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/50018
-  describe.skip('feature controls security', () => {
+  describe('feature controls security', () => {
     before(async () => {
       await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -81,7 +81,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizeLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -94,7 +96,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLoader', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('can save existing Visualization', async () => {
@@ -102,7 +106,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizeSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizeSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('Embed code shows create short-url button', async () => {
@@ -199,7 +205,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizeLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -212,7 +220,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLoader', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it(`can't save existing Visualization`, async () => {
@@ -220,8 +230,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
-        await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('shareTopNavButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.missingOrFail('visualizeSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it(`Embed Code doesn't show create short-url button`, async () => {
@@ -305,7 +319,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`edit page redirects to home page`, async () => {
@@ -313,7 +327,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

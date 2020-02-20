@@ -97,7 +97,13 @@ const createStartContract = (): Start => {
         msearch: jest.fn(),
       },
     },
-    indexPatterns: {} as IndexPatternsContract,
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+    } as unknown) as IndexPatternsContract,
   };
   return startContract;
 };

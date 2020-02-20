@@ -23,7 +23,6 @@ import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
-import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
 import { EmbeddableVisTriggerContext } from 'src/plugins/embeddable/public';
@@ -70,7 +69,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -81,7 +80,7 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -97,7 +96,7 @@ type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.Expressi
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private savedVisualization: VisSavedObject;
-  private appState: AppState | undefined;
+  private appState: { save(): void } | undefined;
   private uiState: PersistedState;
   private timeRange?: TimeRange;
   private query?: Query;
@@ -303,13 +302,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
-        const triggerId = event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
-        const params: EmbeddableVisTriggerContext = {
-          embeddable: this,
-          timeFieldName: this.vis.indexPattern.timeFieldName,
-          data: event.data,
-        };
-        npStart.plugins.uiActions.getTrigger<EmbeddableVisTrigger>(triggerId).exec(params);
+        if (!this.input.disableTriggers) {
+          const triggerId = event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const params: EmbeddableVisTriggerContext = {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          };
+          npStart.plugins.uiActions.getTrigger<EmbeddableVisTrigger>(triggerId).exec(params);
+        }
       })
     );
 
@@ -389,7 +390,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   private handleVisUpdate = async () => {
     if (this.appState) {
-      this.appState.vis = this.savedVisualization.vis.getState();
       this.appState.save();
     }
 
