@@ -163,7 +163,8 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
-    const res = await APIKeyService.verifyAccessApiKey(request.headers);
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
     if (!res.valid) {
       return response.unauthorized({
         body: { message: 'Invalid Access API Key' },
@@ -211,7 +212,8 @@ export const postAgentAcksHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
-    const res = await APIKeyService.verifyAccessApiKey(request.headers);
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
     if (!res.valid) {
       return response.unauthorized({
         body: { message: 'Invalid Access API Key' },
@@ -252,7 +254,12 @@ export const postAgentEnrollHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
-    const res = await APIKeyService.verifyEnrollmentAPIKey(soClient, request.headers);
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const res = await APIKeyService.verifyEnrollmentAPIKey({
+      soClient,
+      headers: request.headers,
+      callCluster,
+    });
     if (!res.valid || !res.enrollmentAPIKey) {
       return response.unauthorized({
         body: { message: 'Invalid Enrollment API Key' },

@@ -5,7 +5,7 @@
  */
 
 import { AssetReference, Dataset, RegistryPackage, IngestAssetType } from '../../../../types';
-import { CallESAsCurrentUser } from '../../cluster_access';
+import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/ingest_pipelines';
 import { generateMappings, generateTemplateName, getTemplate } from './template';

@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest, FakeRequest } from 'kibana/server';
+import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
 
@@ -27,20 +28,14 @@ export async function createAPIKey(name: string, roleDescriptors: any) {
     role_descriptors: roleDescriptors,
   });
 }
-export async function authenticate(headers: any) {
-  const clusterClient = appContextService.getClusterClient();
-  if (!clusterClient) {
-    throw new Error('Missing clusterClient');
-  }
+export async function authenticate(callCluster: CallESAsCurrentUser) {
   try {
-    await clusterClient
-      .asScoped({ headers } as KibanaRequest)
-      .callAsCurrentUser('transport.request', {
-        path: '/_security/_authenticate',
-        method: 'GET',
-      });
+    await callCluster('transport.request', {
+      path: '/_security/_authenticate',
+      method: 'GET',
+    });
   } catch (e) {
-    throw new Error('ApiKey is not valid: impossible to authicate user');
+    throw new Error('ApiKey is not valid: impossible to authenticate user');
   }
 }
 

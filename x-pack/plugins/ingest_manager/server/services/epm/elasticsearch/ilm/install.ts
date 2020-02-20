@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallESAsCurrentUser } from '../../cluster_access';
+import { CallESAsCurrentUser } from '../../../../types';
 import { getPolicy } from './ilm';
 
 export async function installILMPolicy(name: string, callCluster: CallESAsCurrentUser) {

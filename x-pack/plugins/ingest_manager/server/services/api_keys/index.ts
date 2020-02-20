@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'kibana/server';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
+import { CallESAsCurrentUser, EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey, authenticate } from './security';
 
 export * from './enrollment_api_key';
@@ -47,13 +47,17 @@ export async function generateAccessApiKey(agentId: string, policyId: string) {
 /**
  * Verify if an an access api key is valid
  */
-export async function verifyAccessApiKey(
-  headers: any
-): Promise<{ valid: boolean; accessApiKeyId?: string; reason?: string }> {
+export async function verifyAccessApiKey({
+  headers,
+  callCluster,
+}: {
+  headers: KibanaRequest['headers'];
+  callCluster: CallESAsCurrentUser;
+}): Promise<{ valid: boolean; accessApiKeyId?: string; reason?: string }> {
   try {
     const { apiKeyId } = _parseApiKey(headers);
 
-    await authenticate(headers);
+    await authenticate(callCluster);
 
     return {
       valid: true,
@@ -67,11 +71,19 @@ export async function verifyAccessApiKey(
   }
 }
 
-export async function verifyEnrollmentAPIKey(soClient: SavedObjectsClientContract, headers: any) {
+export async function verifyEnrollmentAPIKey({
+  soClient,
+  headers,
+  callCluster,
+}: {
+  soClient: SavedObjectsClientContract;
+  headers: KibanaRequest['headers'];
+  callCluster: CallESAsCurrentUser;
+}) {
   try {
     const { apiKeyId } = _parseApiKey(headers);
 
-    await authenticate(headers);
+    await authenticate(callCluster);
 
     const [enrollmentAPIKey] = (
       await soClient.find<EnrollmentAPIKeySOAttributes>({
@@ -97,11 +109,15 @@ export async function verifyEnrollmentAPIKey(soClient: SavedObjectsClientContrac
   }
 }
 
-function _parseApiKey(headers: any) {
+function _parseApiKey(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;
 
   if (!authorizationHeader) {
     throw new Error('Authorization header must be set');
+  }
+
+  if (Array.isArray(authorizationHeader)) {
+    throw new Error('Authorization header must be `string` not `string[]`');
   }
 
   if (!authorizationHeader.startsWith('ApiKey ')) {
