@@ -42,7 +42,7 @@ const renderUsers = (users: ElasticUser[]) => {
           <EuiFlexItem>
             <p>
               <strong>
-                <small>{username}</small>
+                <small data-test-subj="case-view-username">{username}</small>
               </strong>
             </p>
           </EuiFlexItem>

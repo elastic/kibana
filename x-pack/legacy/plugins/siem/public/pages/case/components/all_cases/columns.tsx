@@ -14,7 +14,8 @@ import * as i18n from './translations';
 
 export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
 
-const renderStringField = (field: string) => (field != null ? field : getEmptyTagValue());
+const renderStringField = (field: string, dataTestSubj: string) =>
+  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
@@ -34,7 +35,11 @@ export const getCasesColumns = (): CasesColumns[] => [
         return (
           <TruncatableText>
             {tags.map((tag: string, i: number) => (
-              <EuiBadge color="hollow" key={`${tag}-${i}`}>
+              <EuiBadge
+                color="hollow"
+                key={`${tag}-${i}`}
+                data-test-subj={`case-table-column-tags-${i}`}
+              >
                 {tag}
               </EuiBadge>
             ))}
@@ -51,7 +56,12 @@ export const getCasesColumns = (): CasesColumns[] => [
     sortable: true,
     render: (createdAt: Case['createdAt']) => {
       if (createdAt != null) {
-        return <FormattedRelativePreferenceDate value={createdAt} />;
+        return (
+          <FormattedRelativePreferenceDate
+            value={createdAt}
+            data-test-subj={`case-table-column-createdAt`}
+          />
+        );
       }
       return getEmptyTagValue();
     },
@@ -59,7 +69,8 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     field: 'createdBy.username',
     name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']['username']) => renderStringField(createdBy),
+    render: (createdBy: Case['createdBy']['username']) =>
+      renderStringField(createdBy, `case-table-column-username`),
   },
   {
     field: 'updatedAt',
@@ -67,7 +78,12 @@ export const getCasesColumns = (): CasesColumns[] => [
     sortable: true,
     render: (updatedAt: Case['updatedAt']) => {
       if (updatedAt != null) {
-        return <FormattedRelativePreferenceDate value={updatedAt} />;
+        return (
+          <FormattedRelativePreferenceDate
+            value={updatedAt}
+            data-test-subj={`case-table-column-updatedAt`}
+          />
+        );
       }
       return getEmptyTagValue();
     },
@@ -76,6 +92,6 @@ export const getCasesColumns = (): CasesColumns[] => [
     field: 'state',
     name: i18n.STATE,
     sortable: true,
-    render: (state: Case['state']) => renderStringField(state),
+    render: (state: Case['state']) => renderStringField(state, `case-table-column-state`),
   },
 ];

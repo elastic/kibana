@@ -206,7 +206,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
           </EuiFlexGroup>
         </>
       ) : (
-        <Markdown raw={data.description} />
+        <Markdown raw={data.description} data-test-subj="case-view-description" />
       ),
     },
   ];
@@ -218,6 +218,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
             href: getCaseUrl(),
             text: i18n.BACK_TO_ALL,
           }}
+          data-test-subj="case-view-title"
           iconAction={{
             'aria-label': title,
             iconType: 'pencil',
@@ -235,13 +236,21 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
                   <EuiFlexItem grow={false}>
                     <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <EuiBadge color={isCaseOpen ? 'secondary' : 'danger'}>{data.state}</EuiBadge>
+                      <EuiBadge
+                        color={isCaseOpen ? 'secondary' : 'danger'}
+                        data-test-subj="case-view-state"
+                      >
+                        {data.state}
+                      </EuiBadge>
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate value={data.createdAt} />
+                      <FormattedRelativePreferenceDate
+                        data-test-subj="case-view-createdAt"
+                        value={data.createdAt}
+                      />
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -273,8 +282,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
               <UserActionTree userActions={userActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              <UserList headline={i18n.REPORTER} users={[data.createdBy]} />
+              <UserList
+                data-test-subj="case-view-user-list"
+                headline={i18n.REPORTER}
+                users={[data.createdBy]}
+              />
               <TagList
+                data-test-subj="case-view-tag-list"
                 tags={tags}
                 iconAction={{
                   'aria-label': title,

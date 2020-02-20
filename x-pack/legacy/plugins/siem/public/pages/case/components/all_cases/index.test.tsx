@@ -22,15 +22,62 @@ describe('AllCases', () => {
       .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
     moment.tz.setDefault('UTC');
   });
-  // TO DO fix tz issue in CI
-  // it('should render AllCases', () => {
-  //   const wrapper = mount(
-  //     <TestProviders>
-  //       <AllCases />
-  //     </TestProviders>
-  //   );
-  //   expect(wrapper.find(AllCases)).toMatchSnapshot();
-  // });
+  it('should render AllCases', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`a[data-test-subj="case-details-link"]`)
+        .first()
+        .prop('href')
+    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].caseId}`);
+    expect(
+      wrapper
+        .find(`a[data-test-subj="case-details-link"]`)
+        .first()
+        .text()
+    ).toEqual(useGetCasesMockState.data.cases[0].title);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-table-column-state"]`)
+        .first()
+        .text()
+    ).toEqual(useGetCasesMockState.data.cases[0].state);
+    expect(
+      wrapper
+        .find(`span[data-test-subj="case-table-column-tags-0"]`)
+        .first()
+        .prop('title')
+    ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-table-column-username"]`)
+        .first()
+        .text()
+    ).toEqual(useGetCasesMockState.data.cases[0].createdBy.username);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-table-column-createdAt"]`)
+        .first()
+        .prop('value')
+    ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-table-column-updatedAt"]`)
+        .first()
+        .prop('value')
+    ).toEqual(useGetCasesMockState.data.cases[0].updatedAt);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-table-case-count"]`)
+        .first()
+        .text()
+    ).toEqual('Showing 10 cases');
+  });
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>

@@ -100,7 +100,9 @@ export const AllCases = React.memo(() => {
           <UtilityBar border>
             <UtilityBarSection>
               <UtilityBarGroup>
-                <UtilityBarText>{i18n.SHOWING_CASES(data.total ?? 0)}</UtilityBarText>
+                <UtilityBarText data-test-subj="case-table-case-count">
+                  {i18n.SHOWING_CASES(data.total ?? 0)}
+                </UtilityBarText>
               </UtilityBarGroup>
             </UtilityBarSection>
           </UtilityBar>
