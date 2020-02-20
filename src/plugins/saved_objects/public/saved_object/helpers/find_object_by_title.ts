@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/public';
-import { SimpleSavedObject } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+  SavedObjectAttributes,
+} from '../../../../../core/public';
 
 /**
  * Returns an object matching a given title

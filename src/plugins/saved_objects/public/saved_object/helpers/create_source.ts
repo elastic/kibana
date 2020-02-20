@@ -18,9 +18,9 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { SavedObjectAttributes } from 'kibana/public';
-import { OVERWRITE_REJECTED } from 'ui/saved_objects/constants';
+import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**
@@ -52,23 +52,20 @@ export async function createSource(
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
-        'common.ui.savedObjects.confirmModal.overwriteConfirmationMessage',
+        'savedObjects.confirmModal.overwriteConfirmationMessage',
         {
           defaultMessage: 'Are you sure you want to overwrite {title}?',
           values: { title: savedObject.title },
         }
       );
 
-      const title = i18n.translate('common.ui.savedObjects.confirmModal.overwriteTitle', {
+      const title = i18n.translate('savedObjects.confirmModal.overwriteTitle', {
         defaultMessage: 'Overwrite {name}?',
         values: { name: savedObject.getDisplayName() },
       });
-      const confirmButtonText = i18n.translate(
-        'common.ui.savedObjects.confirmModal.overwriteButtonLabel',
-        {
-          defaultMessage: 'Overwrite',
-        }
-      );
+      const confirmButtonText = i18n.translate('savedObjects.confirmModal.overwriteButtonLabel', {
+        defaultMessage: 'Overwrite',
+      });
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>

@@ -17,9 +17,9 @@
  * under the License.
  */
 import _ from 'lodash';
-import { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public';
-import { SavedObject } from '../types';
-import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
+import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
+import { SavedObject } from '../../types';
+import { InvalidJSONProperty } from '../../../../kibana_utils/public';
 
 export function parseSearchSource(
   savedObject: SavedObject,

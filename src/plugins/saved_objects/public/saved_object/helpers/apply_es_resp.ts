@@ -17,10 +17,10 @@
  * under the License.
  */
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
-import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source';
-import { expandShorthand, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { IndexPattern } from '../../../../../plugins/data/public';
+import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
+import { parseSearchSource } from './parse_search_source';
+import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { IndexPattern } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given

@@ -103,6 +103,7 @@ const createStartContract = (): Start => {
           fetchForWildcard: jest.fn(),
         },
       }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
     } as unknown) as IndexPatternsContract,
   };
   return startContract;
