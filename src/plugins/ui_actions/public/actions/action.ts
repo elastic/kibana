@@ -18,11 +18,15 @@
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { ActionDefinition } from './action_definition';
 
 /**
- * A convenience interface used to register actions.
+ * @deprecated
+ *
+ * Use `ActionDefinition` instead.
  */
-export interface Action<Context extends {} = {}, Return = Promise<void>> {
+export interface Action<Context extends {} = {}, Return = Promise<void>>
+  extends ActionDefinition<Context, Return> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -68,12 +72,4 @@ export interface Action<Context extends {} = {}, Return = Promise<void>> {
    * Executes the action.
    */
   execute(context: Context): Return;
-}
-
-export interface SerializedDynamicAction<Config extends object = object> {
-  readonly factoryId: string;
-  readonly id: string;
-  readonly type: string;
-  readonly order?: number;
-  readonly config: Config;
 }

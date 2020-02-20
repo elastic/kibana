@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import { SerializedDynamicAction } from './action_internal';
+import { ActionDefinition } from './action_definition';
+import { ActionInternal } from './action_internal';
 
-export interface SerializedEvent {
-  eventId: string;
-  triggerId: string;
-  action: SerializedDynamicAction;
-}
+export class ActionContract<A extends ActionDefinition<any, any>> {
+  public get id() {
+    return this.internal.action.id;
+  }
 
-export interface DynamicActionStorage {
-  create(event: SerializedEvent): Promise<void>;
-  update(event: SerializedEvent): Promise<void>;
-  remove(eventId: string): Promise<void>;
-  read(eventId: string): Promise<SerializedEvent>;
-  list(): Promise<SerializedEvent[]>;
+  constructor(private readonly internal: ActionInternal<A>) {}
 }

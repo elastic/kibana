@@ -1,0 +1,71 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* eslint-disable max-classes-per-file */
+
+import { Mutable } from '@kbn/utility-types';
+import {
+  ActionDefinition,
+  DynamicActionDefinition,
+  FactoryActionDefinition,
+  DynamicActionConfig,
+} from './action_definition';
+
+export interface SerializedDynamicAction<Config extends object = object> {
+  readonly factoryId: string;
+  readonly id: string;
+  readonly type: string;
+  readonly order?: number;
+  readonly config: Config;
+}
+
+export class ActionInternal<
+  A extends
+    | ActionDefinition<any, any>
+    | DynamicActionDefinition<any, any, any>
+    | FactoryActionDefinition<any>
+> {
+  constructor(public readonly action: A) {}
+}
+
+export class DynamicActionInternal<
+  A extends DynamicActionDefinition<any, any, any>
+> extends ActionInternal<A> {
+  config: DynamicActionConfig<A>;
+
+  constructor(definition: A) {
+    super(definition);
+    this.config = definition.defaultConfig;
+  }
+
+  serialize(): SerializedDynamicAction {
+    const serialized: Mutable<SerializedDynamicAction> = {
+      factoryId: this.action.factoryId,
+      id: this.action.id,
+      type: this.action.type || '',
+      config: this.config,
+    };
+
+    if (typeof this.action.order !== 'undefined') {
+      serialized.order = this.action.order;
+    }
+
+    return serialized;
+  }
+}

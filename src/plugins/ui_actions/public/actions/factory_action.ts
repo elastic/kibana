@@ -18,13 +18,13 @@
  */
 
 import { Action } from './action';
-import { DynamicAction } from './dynamic_action';
+import { DynamicActionDefinition } from './dynamic_action_definition';
 
 /**
  * `FactoryAction` is used to create instances of `DynamicAction`.
  */
-export interface FactoryAction<
-  DA extends DynamicAction<any, any, any>,
+export interface FactoryActionDefinition<
+  DA extends DynamicActionDefinition<any, any, any>,
   Context extends object = object
 > extends Action<Context, DA> {
   execute(context: Context): DA;
