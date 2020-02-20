@@ -35,14 +35,14 @@ else
     for i in functional; do
       if [[ -d test/${i}/screenshots ]]; then
         mkdir -p ../../kibana/x-pack/test/${i}/screenshots
-        mv test/${i}/screenshots/* ../../kibana/x-pack/test/${i}/screenshots/
+        cp -R test/${i}/screenshots/. ../../kibana/x-pack/test/${i}/screenshots/
       fi
     done
     mkdir -p ../../kibana/target/junit
-    mv ../target/junit/* ../../kibana/target/junit/
+    cp -R ../target/junit/. ../../kibana/target/junit/
     if [[ -d test/functional/failure_debug/html ]]; then
       mkdir -p ../../kibana/x-pack/test/functional/failure_debug/html
-      mv test/functional/failure_debug/html/* ../../kibana/x-pack/test/functional/failure_debug/html/
+      cp -R test/functional/failure_debug/html/. ../../kibana/x-pack/test/functional/failure_debug/html/
     fi
   fi
 fi

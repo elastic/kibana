@@ -33,14 +33,14 @@ else
     for i in functional plugin_functional; do
       if [[ -d test/${i}/screenshots ]]; then
         mkdir -p ../kibana/test/${i}/screenshots
-        mv test/${i}/screenshots/* ../kibana/test/${i}/screenshots/
+        cp -R test/${i}/screenshots/. ../kibana/test/${i}/screenshots/
       fi
     done
     mkdir -p ../kibana/target/junit
-    mv target/junit/* ../kibana/target/junit/
+    cp -R target/junit/. ../kibana/target/junit/
     if [[ -d test/functional/failure_debug/html ]]; then
       mkdir -p ../kibana/test/functional/failure_debug/html
-      mv test/functional/failure_debug/html/* ../kibana/test/functional/failure_debug/html/
+      cp -R test/functional/failure_debug/html/. ../kibana/test/functional/failure_debug/html/
     fi
   fi
 fi
