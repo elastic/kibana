@@ -22,7 +22,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('dashboard security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/44631
+  describe.skip('dashboard security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -76,7 +77,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Dashboard', 'Stack Management']);
+        expect(navLinks.map(link => link.text)).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -260,7 +261,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Dashboard', 'Stack Management']);
+        expect(navLinks).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
