@@ -20,7 +20,7 @@ import {
 } from '../screens/hosts/events';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openEvents } from '../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -88,13 +88,13 @@ describe('Events Viewer', () => {
 
     after(() => {
       closeModal();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('not.exist');
+      cy.get(INSPECT_MODAL).should('not.exist');
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {
       waitsForEventsToBeLoaded();
       opensInspectQueryModal();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('exist');
+      cy.get(INSPECT_MODAL).should('exist');
     });
   });
 

@@ -28,7 +28,7 @@ import {
   removesMessageField,
   resetFields,
 } from '../tasks/fields_browser';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../tasks/timeline';
 
@@ -87,7 +87,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT, { timeout: DEFAULT_TIMEOUT })
+      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT)
         .invoke('text')
         .should('eq', '2 categories');
     });
@@ -103,7 +103,7 @@ describe('Fields Browser', () => {
           cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
             .invoke('text')
             .then(systemCategoriesCount => {
-              cy.get(FIELDS_BROWSER_FIELDS_COUNT, { timeout: DEFAULT_TIMEOUT })
+              cy.get(FIELDS_BROWSER_FIELDS_COUNT)
                 .invoke('text')
                 .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
             });
@@ -160,9 +160,7 @@ describe('Fields Browser', () => {
       addsHostGeoCityNameToTimeline();
       closeFieldsBrowser();
 
-      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER, {
-        timeout: DEFAULT_TIMEOUT,
-      }).should('exist');
+      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
     it('adds a field to the timeline when the user drags and drops a field', () => {
@@ -174,9 +172,7 @@ describe('Fields Browser', () => {
 
       addsHostGeoCountryNameToTimelineDraggingIt();
 
-      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER, {
-        timeout: DEFAULT_TIMEOUT,
-      }).should('exist');
+      cy.get(FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER).should('exist');
     });
 
     it('resets all fields in the timeline when `Reset Fields` is clicked', () => {

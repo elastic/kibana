@@ -11,7 +11,7 @@ import {
   TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
 
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import {
   checkIdToggleField,
@@ -65,8 +65,6 @@ describe('toggle column in timeline', () => {
     expandFirstTimelineEventDetails();
     dragAndDropIdToggleFieldToTimeline();
 
-    cy.get(ID_HEADER_FIELD, {
-      timeout: DEFAULT_TIMEOUT,
-    }).should('exist');
+    cy.get(ID_HEADER_FIELD).should('exist');
   });
 });

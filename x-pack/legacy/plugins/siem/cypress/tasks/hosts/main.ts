@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
-
 import {
   EVENTS_TAB,
   AUTHENTICATIONS_TAB,
@@ -14,14 +12,10 @@ import {
 } from '../../screens/hosts/main';
 
 /** Clicks the Events tab on the hosts page */
-export const openEvents = () =>
-  cy.get(EVENTS_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+export const openEvents = () => cy.get(EVENTS_TAB).click({ force: true });
 
-export const openAuthentications = () =>
-  cy.get(AUTHENTICATIONS_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+export const openAuthentications = () => cy.get(AUTHENTICATIONS_TAB).click({ force: true });
 
-export const openUncommonProcesses = () =>
-  cy.get(UNCOMMON_PROCESSES_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+export const openUncommonProcesses = () => cy.get(UNCOMMON_PROCESSES_TAB).click({ force: true });
 
-export const openAllHosts = () =>
-  cy.get(ALL_HOSTS_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+export const openAllHosts = () => cy.get(ALL_HOSTS_TAB).click({ force: true });

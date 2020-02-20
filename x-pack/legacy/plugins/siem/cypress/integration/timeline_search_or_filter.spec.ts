@@ -6,7 +6,7 @@
 
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import { executeTimelineKQL } from '../tasks/timeline';
 
@@ -22,7 +22,7 @@ describe('timeline search or filter KQL bar', () => {
     openTimeline();
     executeTimelineKQL(hostExistsQuery);
 
-    cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+    cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
       .should('be.above', 0);
   });

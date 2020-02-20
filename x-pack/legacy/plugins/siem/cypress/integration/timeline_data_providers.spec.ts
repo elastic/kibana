@@ -18,7 +18,7 @@ import {
   waitForAllHostsToBeLoaded,
 } from '../tasks/hosts/all_hosts';
 
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import { createNewTimeline } from '../tasks/timeline';
 
@@ -41,7 +41,7 @@ describe('timeline data providers', () => {
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
     dragAndDropFirstHostToTimeline();
 
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, { timeout: DEFAULT_TIMEOUT })
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS)
       .first()
       .invoke('text')
       .then(dataProviderText => {

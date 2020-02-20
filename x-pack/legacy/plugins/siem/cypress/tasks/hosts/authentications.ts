@@ -5,8 +5,7 @@
  */
 
 import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
 
 export const waitForAuthenticationsToBeLoaded = () => {
-  cy.get(AUTHENTICATIONS_TABLE, { timeout: DEFAULT_TIMEOUT }).should('exist');
+  cy.get(AUTHENTICATIONS_TABLE).should('exist');
 };

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../tasks/login';
-
 import {
   SEARCH_OR_FILTER_CONTAINER,
   TIMELINE_FIELDS_BUTTON,
@@ -28,7 +26,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
     .should('be.above', 0);
 };
@@ -46,7 +44,7 @@ export const openTimelineSettings = () => {
 };
 
 export const openTimelineInspectButton = () => {
-  cy.get(TIMELINE_INSPECT_BUTTON, { timeout: DEFAULT_TIMEOUT }).should('not.be.disabled');
+  cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
   cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
 };
 
@@ -57,7 +55,7 @@ export const createNewTimeline = () => {
 };
 
 export const expandFirstTimelineEventDetails = () => {
-  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT)
     .first()
     .click({ force: true });
 };
@@ -65,9 +63,7 @@ export const expandFirstTimelineEventDetails = () => {
 export const uncheckTimestampToggleField = () => {
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
-  cy.get(TIMESTAMP_TOGGLE_FIELD, {
-    timeout: DEFAULT_TIMEOUT,
-  }).uncheck({ force: true });
+  cy.get(TIMESTAMP_TOGGLE_FIELD).uncheck({ force: true });
 };
 
 export const checkIdToggleField = () => {
@@ -89,5 +85,5 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const addNameToTimeline = (name: string) => {
-  cy.get(TIMELINE_TITLE, { timeout: DEFAULT_TIMEOUT }).type(name);
+  cy.get(TIMELINE_TITLE).type(name);
 };

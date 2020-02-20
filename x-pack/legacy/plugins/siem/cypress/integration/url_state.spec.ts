@@ -15,7 +15,7 @@ import { ANOMALIES_TAB } from '../screens/hosts/main';
 import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/siem_header';
 import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
 
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import {
   setStartDate,
   setEndDate,
@@ -149,20 +149,12 @@ describe('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
-      'have.attr',
-      'value',
-      'source.ip: "10.142.0.9"'
-    );
+    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
-      'have.attr',
-      'value',
-      'source.ip: "10.142.0.9"'
-    );
+    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -200,7 +192,7 @@ describe('url state', () => {
       'href',
       "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
     );
-    cy.get(HOSTS_NAMES, { timeout: DEFAULT_TIMEOUT })
+    cy.get(HOSTS_NAMES)
       .first()
       .invoke('text')
       .should('eq', 'siem-kibana');
@@ -234,11 +226,7 @@ describe('url state', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
 
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
-      'have.attr',
-      'value',
-      'source.ip: "10.142.0.9"'
-    );
+    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
@@ -246,7 +234,7 @@ describe('url state', () => {
     openTimeline();
     executeTimelineKQL('host.name: *');
 
-    cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+    cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
       .should('be.above', 0);
 

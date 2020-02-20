@@ -14,7 +14,6 @@ import {
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
 } from '../screens/fields_browser';
-import { DEFAULT_TIMEOUT } from '../tasks/login';
 import { KQL_SEARCH_BAR } from '../screens/hosts/main';
 
 export const clearFieldsBrowser = () => {
@@ -22,13 +21,13 @@ export const clearFieldsBrowser = () => {
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(FIELDS_BROWSER_FILTER_INPUT)
     .type(fieldName)
     .should('not.have.class', 'euiFieldSearch-isLoading');
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(KQL_SEARCH_BAR, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+  cy.get(KQL_SEARCH_BAR).click({ force: true });
 };
 
 export const removesMessageField = () => {

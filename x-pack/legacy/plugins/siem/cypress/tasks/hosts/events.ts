@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
 import {
   EVENTS_VIEWER_FIELDS_BUTTON,
   CLOSE_MODAL,
@@ -18,20 +17,20 @@ import {
 } from '../../screens/hosts/events';
 
 export const closeModal = () => {
-  cy.get(CLOSE_MODAL, { timeout: DEFAULT_TIMEOUT }).click();
+  cy.get(CLOSE_MODAL).click();
 };
 
 export const opensInspectQueryModal = () => {
-  cy.get(INSPECT_QUERY, { timeout: DEFAULT_TIMEOUT })
+  cy.get(INSPECT_QUERY)
     .should('exist')
     .trigger('mousemove', { force: true })
     .click({ force: true });
 };
 
 export const waitsForEventsToBeLoaded = () => {
-  cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(SERVER_SIDE_EVENT_COUNT)
     .should('exist')
-    .invoke('text', { timeout: DEFAULT_TIMEOUT })
+    .invoke('text')
     .should('not.equal', '0');
 };
 
@@ -52,9 +51,9 @@ export const resetFields = () => {
 };
 
 export const openEventsViewerFieldsBrowser = () => {
-  cy.get(EVENTS_VIEWER_FIELDS_BUTTON, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+  cy.get(EVENTS_VIEWER_FIELDS_BUTTON).click({ force: true });
 
-  cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
     .should('not.equal', '0');
 

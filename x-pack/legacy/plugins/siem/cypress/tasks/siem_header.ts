@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../tasks/login';
 import { KQL_INPUT, REFRESH_BUTTON } from '../screens/siem_header';
 
 export const navigateFromHeaderTo = (page: string) => {
@@ -12,7 +11,7 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const clearSearchBar = () => {
-  cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(KQL_INPUT)
     .clear()
     .type('{enter}');
 };
@@ -20,10 +19,10 @@ export const clearSearchBar = () => {
 export const refreshPage = () => {
   cy.get(REFRESH_BUTTON)
     .click({ force: true })
-    .invoke('text', { timeout: DEFAULT_TIMEOUT })
+    .invoke('text')
     .should('not.equal', 'Updating');
 };
 
 export const kqlSearch = (search: string) => {
-  cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type(search);
+  cy.get(KQL_INPUT).type(search);
 };

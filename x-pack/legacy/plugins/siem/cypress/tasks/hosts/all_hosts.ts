@@ -6,11 +6,10 @@
 
 import { ALL_HOSTS_TABLE, HOSTS_NAMES_DRAGGABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import { TIMELINE_DATA_PROVIDERS, TIMELINE_DATA_PROVIDERS_EMPTY } from '../../screens/timeline';
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
 import { drag, drop, dragWithoutDrop } from '../../tasks/common';
 
 export const waitForAllHostsToBeLoaded = () => {
-  cy.get(ALL_HOSTS_TABLE, { timeout: DEFAULT_TIMEOUT }).should('exist');
+  cy.get(ALL_HOSTS_TABLE).should('exist');
 };
 
 export const dragAndDropFirstHostToTimeline = () => {

@@ -15,8 +15,6 @@ import {
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../screens/date_picker';
 
-import { DEFAULT_TIMEOUT } from '../tasks/login';
-
 export const setStartDate = (date: string) => {
   cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -24,7 +22,7 @@ export const setStartDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT)
     .clear()
     .type(date);
 };
@@ -36,20 +34,20 @@ export const setEndDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT })
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT)
     .clear()
     .type(date);
 };
 
 export const updateDates = () => {
-  cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: DEFAULT_TIMEOUT })
+  cy.get(DATE_PICKER_APPLY_BUTTON)
     .click({ force: true })
-    .invoke('text', { timeout: DEFAULT_TIMEOUT })
+    .invoke('text')
     .should('not.equal', 'Updating');
 };
 
 export const setTimelineStartDate = (date: string) => {
-  cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE, { timeout: DEFAULT_TIMEOUT }).click({
+  cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).click({
     force: true,
   });
 
@@ -57,9 +55,7 @@ export const setTimelineStartDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
-    `{selectall}{backspace}${date}{enter}`
-  );
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`{selectall}{backspace}${date}{enter}`);
 };
 
 export const setTimelineEndDate = (date: string) => {
@@ -69,9 +65,7 @@ export const setTimelineEndDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
-    `{selectall}{backspace}${date}{enter}`
-  );
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`{selectall}{backspace}${date}{enter}`);
 };
 
 export const updateTimelineDates = () => {

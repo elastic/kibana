@@ -5,8 +5,7 @@
  */
 
 import { UNCOMMON_PROCESSES_TABLE } from '../../screens/hosts/uncommon_processes';
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
 
 export const waitForUncommonProcessesToBeLoaded = () => {
-  cy.get(UNCOMMON_PROCESSES_TABLE, { timeout: DEFAULT_TIMEOUT }).should('exist');
+  cy.get(UNCOMMON_PROCESSES_TABLE).should('exist');
 };

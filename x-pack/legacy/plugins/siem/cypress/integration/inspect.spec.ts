@@ -11,7 +11,7 @@ import {
 } from '../screens/inspect';
 
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { loginAndWaitForPage } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import {
   executeTimelineKQL,
@@ -33,7 +33,7 @@ describe('Inspect', () => {
     INSPECT_HOSTS_BUTTONS_IN_SIEM.forEach(table =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
-        cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
+        cy.get(INSPECT_MODAL).should('be.visible');
       })
     );
   });
@@ -49,7 +49,7 @@ describe('Inspect', () => {
     INSPECT_NETWORK_BUTTONS_IN_SIEM.forEach(table =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
-        cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
+        cy.get(INSPECT_MODAL).should('be.visible');
       })
     );
   });
@@ -62,7 +62,7 @@ describe('Inspect', () => {
       executeTimelineKQL(hostExistsQuery);
       openTimelineSettings();
       openTimelineInspectButton();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
+      cy.get(INSPECT_MODAL).should('be.visible');
     });
   });
 });
