@@ -17,6 +17,17 @@
  * under the License.
  */
 
-export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
-export { DateFormat } from './converters';
-export { baseFormattersPublic } from './constants';
+import { StringUtils } from './string_utils';
+
+describe('StringUtils class', () => {
+  describe('static upperFirst', () => {
+    test('should converts the first character of string to upper case', () => {
+      expect(StringUtils.upperFirst()).toBe('');
+      expect(StringUtils.upperFirst('')).toBe('');
+
+      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
+    });
+  });
+});

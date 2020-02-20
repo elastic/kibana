@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
-export { DateFormat } from './converters';
-export { baseFormattersPublic } from './constants';
+import { Plugin } from 'src/core/public';
+
+export class SavedObjectsPublicPlugin implements Plugin {
+  public setup() {}
+  public start() {}
+}

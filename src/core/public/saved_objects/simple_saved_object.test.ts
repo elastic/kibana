@@ -17,36 +17,43 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import expect from '@kbn/expect';
-import { SimpleSavedObject } from '../../../../../core/public';
+import { SavedObject } from '../../server';
+import { SimpleSavedObject } from './simple_saved_object';
+import { SavedObjectsClientContract } from './saved_objects_client';
 
 describe('SimpleSavedObject', () => {
+  let client: SavedObjectsClientContract;
+
+  beforeEach(() => {
+    client = {
+      update: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    } as any;
+  });
+
   it('persists type and id', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
 
-    const client = sinon.stub();
-    const savedObject = new SimpleSavedObject(client, { id, type });
+    const savedObject = new SimpleSavedObject(client, { id, type } as SavedObject);
 
-    expect(savedObject.id).to.be(id);
-    expect(savedObject.type).to.be(type);
+    expect(savedObject.id).toEqual(id);
+    expect(savedObject.type).toEqual(type);
   });
 
   it('persists attributes', () => {
     const attributes = { title: 'My title' };
 
-    const client = sinon.stub();
-    const savedObject = new SimpleSavedObject(client, { attributes });
+    const savedObject = new SimpleSavedObject(client, { attributes } as SavedObject);
 
-    expect(savedObject.attributes).to.be(attributes);
+    expect(savedObject.attributes).toEqual(attributes);
   });
 
   it('persists version', () => {
-    const version = 2;
+    const version = '2';
 
-    const client = sinon.stub();
-    const savedObject = new SimpleSavedObject(client, { version });
-    expect(savedObject._version).to.be(version);
+    const savedObject = new SimpleSavedObject(client, { version } as SavedObject);
+    expect(savedObject._version).toEqual(version);
   });
 });

@@ -21,8 +21,8 @@ import {
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
-} from '../types';
-import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../constants';
+} from '../../types';
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
 

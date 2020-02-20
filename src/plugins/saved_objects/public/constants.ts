@@ -16,17 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { StringUtils } from './string_utils';
+import { i18n } from '@kbn/i18n';
 
-describe('StringUtils class', () => {
-  describe('static upperFirst', () => {
-    test('should converts the first character of string to upper case', () => {
-      expect(StringUtils.upperFirst()).toBe('');
-      expect(StringUtils.upperFirst('')).toBe('');
-
-      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
-      expect(StringUtils.upperFirst('fred')).toBe('Fred');
-      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
-    });
-  });
+/**
+ * An error message to be used when the user rejects a confirm overwrite.
+ * @type {string}
+ */
+export const OVERWRITE_REJECTED = i18n.translate('savedObjects.overwriteRejectedDescription', {
+  defaultMessage: 'Overwrite confirmation was rejected',
 });
+/**
+ * An error message to be used when the user rejects a confirm save with duplicate title.
+ * @type {string}
+ */
+export const SAVE_DUPLICATE_REJECTED = i18n.translate(
+  'savedObjects.saveDuplicateRejectedDescription',
+  {
+    defaultMessage: 'Save with duplicate title confirmation was rejected',
+  }
+);
