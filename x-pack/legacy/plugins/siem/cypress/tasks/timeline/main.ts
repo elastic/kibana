@@ -19,6 +19,7 @@ import {
   ID_TOGGLE_FIELD,
   ID_HEADER_FIELD,
   ID_FIELD,
+  TIMELINE_TITLE,
 } from '../../screens/timeline/main';
 
 import { drag, drop } from '../../tasks/common';
@@ -85,4 +86,8 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
     drop(headersDropArea)
   );
+};
+
+export const addNameToTimeline = (name: string) => {
+  cy.get(TIMELINE_TITLE, { timeout: DEFAULT_TIMEOUT }).type(name);
 };

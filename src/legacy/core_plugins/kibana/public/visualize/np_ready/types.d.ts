@@ -20,10 +20,37 @@
 import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { VisSavedObject, AppState, PersistedState } from '../legacy_imports';
+import { VisState, Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { VisSavedObject, PersistedState } from '../legacy_imports';
+
+export type PureVisState = ReturnType<Vis['getCurrentState']>;
+
+export interface VisualizeAppState {
+  filters: Filter[];
+  uiState: PersistedState;
+  vis: PureVisState;
+  query: Query;
+  savedQuery?: string;
+  linked: boolean;
+}
+
+export interface VisualizeAppStateTransitions {
+  set: (
+    state: VisualizeAppState
+  ) => <T extends keyof VisualizeAppState>(
+    prop: T,
+    value: VisualizeAppState[T]
+  ) => VisualizeAppState;
+  setVis: (state: VisualizeAppState) => (vis: Partial<PureVisState>) => VisualizeAppState;
+  removeSavedQuery: (state: VisualizeAppState) => (defaultQuery: Query) => VisualizeAppState;
+  unlinkSavedSearch: (
+    state: VisualizeAppState
+  ) => (query: Query, filters: Filter[]) => VisualizeAppState;
+  updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
+}
 
 export interface EditorRenderProps {
-  appState: AppState;
+  appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
   embeddable: IEmbeddableStart;
