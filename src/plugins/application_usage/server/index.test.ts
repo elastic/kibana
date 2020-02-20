@@ -30,7 +30,10 @@ class UsageCollection {
 }
 
 describe('ApplicationUsagePlugin/server', () => {
+  jest.useFakeTimers();
   const applicationUsagePlugin = plugin(coreMock.createPluginInitializerContext());
+
+  afterAll(() => jest.clearAllTimers());
 
   test('it registers the routes, ensures the index template but does not register the usage collector because it is not initialised', async () => {
     await applicationUsagePlugin.setup(coreMock.createSetup(), {});
@@ -115,8 +118,6 @@ describe('ApplicationUsagePlugin/server', () => {
     });
 
     test('Fetch the usage while adding the totals from the saved objects', async () => {
-      jest.useFakeTimers();
-
       const localUsageCollection = new UsageCollection() as any;
 
       const esClient = jest.fn((method, options) => {
