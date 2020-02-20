@@ -76,6 +76,22 @@
     "CreateFilter",
     "UpdateFilter",
     "DeleteFilter",
-    "GetFiltersStats"
+    "GetFiltersStats",
+    "Indices",
+    "FieldCaps",
+    "SystemRoutes",
+    "HasPrivileges",
+    "MlCapabilities",
+    "MlNodeCount",
+    "MlInfo",
+    "MlEsSearch",
+    "JobAuditMessages",
+    "GetJobAuditMessages",
+    "GetAllJobAuditMessages",
+    "JobValidation",
+    "EstimateBucketSpan",
+    "CalculateModelMemoryLimit",
+    "ValidateCardinality",
+    "ValidateJob"
   ]
 }
