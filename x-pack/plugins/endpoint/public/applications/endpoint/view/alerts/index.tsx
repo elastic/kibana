@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
 import { FormattedDate } from 'react-intl';
+import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
@@ -82,28 +83,39 @@ export const AlertIndex = memo(() => {
   }, []);
 
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
-  const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
-  const urlWithSelectedAlert = useAlertListSelector(selectors.urlWithSelectedAlert);
-  const urlWithoutSelectedAlert = useAlertListSelector(selectors.urlWithoutSelectedAlert);
-  const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
+  const queryParams = useAlertListSelector(selectors.uiQueryParams);
 
   const onChangeItemsPerPage = useCallback(
-    newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
-    [history, urlFromNewPageSizeParam]
+    newPageSize => {
+      const newQueryParms = { ...queryParams };
+      newQueryParms.page_size = newPageSize;
+      delete newQueryParms.page_index;
+      const relativeURL = urlFromQueryParams(newQueryParms);
+      return history.push(relativeURL);
+    },
+    [history, queryParams]
   );
 
   const onChangePage = useCallback(
-    newPageIndex => history.push(urlFromNewPageIndexParam(newPageIndex)),
-    [history, urlFromNewPageIndexParam]
+    newPageIndex => {
+      return history.push(
+        urlFromQueryParams({
+          ...queryParams,
+          page_index: newPageIndex,
+        })
+      );
+    },
+    [history, queryParams]
   );
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
   const handleFlyoutClose = useCallback(() => {
-    history.push(urlWithoutSelectedAlert);
-  }, [history, urlWithoutSelectedAlert]);
+    const { selected_alert, ...paramsWithoutSelectedAlert } = queryParams;
+    history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
+  }, [history, queryParams]);
 
   const datesForRows: Map<AlertData, Date> = useMemo(() => {
     return new Map(
@@ -123,7 +135,10 @@ export const AlertIndex = memo(() => {
 
       if (columnId === 'alert_type') {
         return (
-          <Link data-testid="alertTypeCellLink" to={urlWithSelectedAlert('TODO')}>
+          <Link
+            data-testid="alertTypeCellLink"
+            to={urlFromQueryParams({ ...queryParams, selected_alert: 'TODO' })}
+          >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
               {
@@ -173,7 +188,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, datesForRows, pageSize, total, urlWithSelectedAlert]);
+  }, [alertListData, datesForRows, pageSize, queryParams, total]);
 
   const pagination = useMemo(() => {
     return {

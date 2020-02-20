@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import querystring from 'querystring';
 import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
@@ -52,7 +52,7 @@ export const uiQueryParams: (
     const data: AlertingIndexUIQueryParams = {};
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
-      const query = qs.parse(location.search.slice(1));
+      const query = querystring.parse(location.search.slice(1));
 
       /**
        * Build an AlertingIndexUIQueryParams object with keys from the query.
@@ -87,64 +87,6 @@ export const apiQueryParams: (
     page_size,
     page_index,
   })
-);
-
-/**
- * Returns a function that takes in a new page size and returns a new query param string
- */
-export const urlFromNewPageSizeParam: (
-  state: AlertListState
-) => (newPageSize: number) => string = createSelector(uiQueryParams, paramData => {
-  return newPageSize => {
-    const queryParams: AlertingIndexUIQueryParams = { ...paramData };
-    queryParams.page_size = newPageSize.toString();
-
-    /**
-     * Reset the page index when changing page size.
-     */
-    if (queryParams.page_index !== undefined) {
-      delete queryParams.page_index;
-    }
-    return '?' + qs.stringify(queryParams);
-  };
-});
-
-/**
- * Returns a function that takes in a new page index and returns a new query param string
- */
-export const urlFromNewPageIndexParam: (
-  state: AlertListState
-) => (newPageIndex: number) => string = createSelector(uiQueryParams, paramData => {
-  return newPageIndex => {
-    const queryParams: AlertingIndexUIQueryParams = { ...paramData };
-    queryParams.page_index = newPageIndex.toString();
-    return '?' + qs.stringify(queryParams);
-  };
-});
-
-/**
- * Returns a url like the current one, but with a new alert id.
- */
-export const urlWithSelectedAlert: (
-  state: AlertListState
-) => (alertID: string) => string = createSelector(uiQueryParams, paramData => {
-  return (alertID: string) => {
-    const queryParams = { ...paramData };
-    queryParams.selected_alert = alertID;
-    return '?' + qs.stringify(queryParams);
-  };
-});
-
-/**
- * Returns a url like the current one, but with no alert id
- */
-export const urlWithoutSelectedAlert: (state: AlertListState) => string = createSelector(
-  uiQueryParams,
-  urlPaginationData => {
-    const queryParams = { ...urlPaginationData };
-    delete queryParams.selected_alert;
-    return '?' + qs.stringify(queryParams);
-  }
 );
 
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
