@@ -8,7 +8,7 @@ export enum OutputType {
   Elasticsearch = 'elasticsearch',
 }
 
-interface OutputBaseSchema {
+export interface NewOutput {
   name: string;
   type: OutputType;
   username?: string;
@@ -22,12 +22,6 @@ interface OutputBaseSchema {
   config?: Record<string, any>;
 }
 
-export type NewOutputSchema = OutputBaseSchema;
-
-export type OutputSchema = OutputBaseSchema & {
+export type Output = NewOutput & {
   id: string;
 };
-
-export type NewOutput = NewOutputSchema;
-
-export type Output = OutputSchema;

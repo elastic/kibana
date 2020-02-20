@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+export { Datasource, NewDatasource } from '../../../common';
 
 const DatasourceBaseSchema = {
   name: schema.string(),
@@ -49,7 +50,3 @@ export const DatasourceSchema = schema.object({
   ...DatasourceBaseSchema,
   id: schema.string(),
 });
-
-export type NewDatasource = TypeOf<typeof NewDatasourceSchema>;
-
-export type Datasource = TypeOf<typeof DatasourceSchema>;

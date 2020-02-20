@@ -13,6 +13,7 @@ import {
   AgentSOAttributes,
   AgentEventSOAttributes,
 } from '../../types';
+
 import { agentConfigService } from '../agent_config';
 import * as APIKeysService from '../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';

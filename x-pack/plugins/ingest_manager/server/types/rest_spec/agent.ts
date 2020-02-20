@@ -5,7 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Agent, AgentEventSchema, AgentTypeSchema, AgentEvent } from '../models';
+import { AgentEventSchema, AgentTypeSchema } from '../models';
+import { Agent, AgentEvent } from '../../../common';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({

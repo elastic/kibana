@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface InstallScriptRequestSchema {
+export interface InstallScriptRequest {
   params: {
     osType: 'macos';
   };

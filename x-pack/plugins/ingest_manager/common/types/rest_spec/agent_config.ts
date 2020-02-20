@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AgentConfig, NewAgentConfigSchema } from '../models';
-import { ListWithKuerySchema } from './common';
+import { AgentConfig, NewAgentConfig } from '../models';
+import { ListWithKuery } from './common';
 
-export interface GetAgentConfigsRequestSchema {
-  query: ListWithKuerySchema;
+export interface GetAgentConfigsRequest {
+  query: ListWithKuery;
 }
 
 export interface GetAgentConfigsResponse {
@@ -18,7 +18,7 @@ export interface GetAgentConfigsResponse {
   success: boolean;
 }
 
-export interface GetOneAgentConfigRequestSchema {
+export interface GetOneAgentConfigRequest {
   params: {
     agentConfigId: string;
   };
@@ -29,8 +29,8 @@ export interface GetOneAgentConfigResponse {
   success: boolean;
 }
 
-export interface CreateAgentConfigRequestSchema {
-  body: NewAgentConfigSchema;
+export interface CreateAgentConfigRequest {
+  body: NewAgentConfig;
 }
 
 export interface CreateAgentConfigResponse {
@@ -38,8 +38,8 @@ export interface CreateAgentConfigResponse {
   success: boolean;
 }
 
-export type UpdateAgentConfigRequestSchema = GetOneAgentConfigRequestSchema & {
-  body: NewAgentConfigSchema;
+export type UpdateAgentConfigRequest = GetOneAgentConfigRequest & {
+  body: NewAgentConfig;
 };
 
 export interface UpdateAgentConfigResponse {
@@ -47,7 +47,7 @@ export interface UpdateAgentConfigResponse {
   success: boolean;
 }
 
-export interface DeleteAgentConfigsRequestSchema {
+export interface DeleteAgentConfigsRequest {
   body: {
     agentConfigIds: string[];
   };

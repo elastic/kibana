@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent, AgentEventSchema, AgentTypeSchema, AgentEvent } from '../models';
+import { Agent, AgentEvent, AgentType } from '../models';
 
-export interface GetAgentsRequestSchema {
+export interface GetAgentsRequest {
   query: {
     page: number;
     perPage: number;
@@ -23,7 +23,7 @@ export interface GetAgentsResponse {
   success: boolean;
 }
 
-export interface GetOneAgentRequestSchema {
+export interface GetOneAgentRequest {
   params: {
     agentId: string;
   };
@@ -34,19 +34,19 @@ export interface GetOneAgentResponse {
   success: boolean;
 }
 
-export interface PostAgentCheckinRequestSchema {
+export interface PostAgentCheckinRequest {
   params: {
     agentId: string;
   };
   body: {
     local_metadata?: Record<string, any>;
-    events?: AgentEventSchema[];
+    events?: AgentEvent[];
   };
 }
 
-export interface PostAgentEnrollRequestSchema {
+export interface PostAgentEnrollRequest {
   body: {
-    type: AgentTypeSchema;
+    type: AgentType;
     shared_id?: string;
     metadata: {
       local: Record<string, any>;
@@ -55,7 +55,7 @@ export interface PostAgentEnrollRequestSchema {
   };
 }
 
-export interface PostAgentAcksRequestSchema {
+export interface PostAgentAcksRequest {
   body: {
     action_ids: string[];
   };
@@ -64,7 +64,7 @@ export interface PostAgentAcksRequestSchema {
   };
 }
 
-export interface PostAgentUnenrollRequestSchema {
+export interface PostAgentUnenrollRequest {
   body: { kuery: string } | { ids: string[] };
 }
 
@@ -78,7 +78,7 @@ export interface PostAgentUnenrollResponse {
   success: boolean;
 }
 
-export interface GetOneAgentEventsRequestSchema {
+export interface GetOneAgentEventsRequest {
   params: {
     agentId: string;
   };
@@ -97,13 +97,13 @@ export interface GetOneAgentEventsResponse {
   success: boolean;
 }
 
-export interface DeleteAgentRequestSchema {
+export interface DeleteAgentRequest {
   params: {
     agentId: string;
   };
 }
 
-export interface UpdateAgentRequestSchema {
+export interface UpdateAgentRequest {
   params: {
     agentId: string;
   };
@@ -112,7 +112,7 @@ export interface UpdateAgentRequestSchema {
   };
 }
 
-export interface GetAgentStatusForPolicySchema {
+export interface GetAgentStatusForPolicy {
   params: {
     policyId: string;
   };

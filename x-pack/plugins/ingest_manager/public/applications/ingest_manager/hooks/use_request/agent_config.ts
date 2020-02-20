@@ -9,11 +9,11 @@ import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
-  CreateAgentConfigRequestSchema,
+  CreateAgentConfigRequest,
   CreateAgentConfigResponse,
-  UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsRequest,
   DeleteAgentConfigsResponse,
 } from '../../types';
 
@@ -32,7 +32,7 @@ export const useGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
-export const sendCreateAgentConfig = (body: CreateAgentConfigRequestSchema['body']) => {
+export const sendCreateAgentConfig = (body: CreateAgentConfigRequest['body']) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
@@ -42,7 +42,7 @@ export const sendCreateAgentConfig = (body: CreateAgentConfigRequestSchema['body
 
 export const sendUpdateAgentConfig = (
   agentConfigId: string,
-  body: UpdateAgentConfigRequestSchema['body']
+  body: UpdateAgentConfigRequest['body']
 ) => {
   return sendRequest<UpdateAgentConfigResponse>({
     path: agentConfigRouteService.getUpdatePath(agentConfigId),
@@ -51,7 +51,7 @@ export const sendUpdateAgentConfig = (
   });
 };
 
-export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequestSchema['body']) => {
+export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequest['body']) => {
   return sendRequest<DeleteAgentConfigsResponse>({
     path: agentConfigRouteService.getDeletePath(),
     method: 'post',

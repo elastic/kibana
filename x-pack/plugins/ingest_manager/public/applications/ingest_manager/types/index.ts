@@ -16,18 +16,18 @@ export {
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
-  CreateAgentConfigRequestSchema,
+  CreateAgentConfigRequest,
   CreateAgentConfigResponse,
-  UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsRequest,
   DeleteAgentConfigsResponse,
   // API schemas - Agents
   GetAgentsResponse,
-  GetAgentsRequestSchema,
+  GetAgentsRequest,
   GetOneAgentResponse,
   PostAgentUnenrollResponse,
-  GetOneAgentEventsRequestSchema,
+  GetOneAgentEventsRequest,
   GetOneAgentEventsResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,

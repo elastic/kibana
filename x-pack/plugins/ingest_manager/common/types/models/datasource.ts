@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface DatasourceBaseSchema {
+export interface NewDatasource {
   name: string;
   namespace?: string;
   read_alias?: string;
@@ -34,10 +34,4 @@ interface DatasourceBaseSchema {
   }>;
 }
 
-export type NewDatasourceSchema = DatasourceBaseSchema;
-
-export type DatasourceSchema = DatasourceBaseSchema & { id: string };
-
-export type NewDatasource = NewDatasourceSchema;
-
-export type Datasource = DatasourceSchema;
+export type Datasource = NewDatasource & { id: string };

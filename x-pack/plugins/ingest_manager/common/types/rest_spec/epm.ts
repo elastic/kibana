@@ -16,7 +16,7 @@ export interface GetCategoriesResponse {
   response: CategorySummaryList;
   success: boolean;
 }
-export interface GetPackagesRequestSchema {
+export interface GetPackagesRequest {
   query: {
     category?: string;
   };
@@ -42,14 +42,14 @@ export interface GetPackagesResponse {
   success: boolean;
 }
 
-export interface GetFileRequestSchema {
+export interface GetFileRequest {
   params: {
     pkgkey: string;
     filePath: string;
   };
 }
 
-export interface GetInfoRequestSchema {
+export interface GetInfoRequest {
   params: {
     pkgkey: string;
   };
@@ -60,7 +60,7 @@ export interface GetInfoResponse {
   success: boolean;
 }
 
-export interface InstallPackageRequestSchema {
+export interface InstallPackageRequest {
   params: {
     pkgkey: string;
   };
@@ -71,7 +71,7 @@ export interface InstallPackageResponse {
   success: boolean;
 }
 
-export interface DeletePackageRequestSchema {
+export interface DeletePackageRequest {
   params: {
     pkgkey: string;
   };

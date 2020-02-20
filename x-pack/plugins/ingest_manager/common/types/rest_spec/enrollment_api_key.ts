@@ -6,7 +6,7 @@
 
 import { EnrollmentAPIKey } from '../models';
 
-export interface GetEnrollmentAPIKeysRequestSchema {
+export interface GetEnrollmentAPIKeysRequest {
   query: {
     page: number;
     perPage: number;
@@ -22,7 +22,7 @@ export interface GetEnrollmentAPIKeysResponse {
   success: boolean;
 }
 
-export interface GetOneEnrollmentAPIKeyRequestSchema {
+export interface GetOneEnrollmentAPIKeyRequest {
   params: {
     keyId: string;
   };
@@ -33,7 +33,7 @@ export interface GetOneEnrollmentAPIKeyResponse {
   success: boolean;
 }
 
-export interface DeleteEnrollmentAPIKeyRequestSchema {
+export interface DeleteEnrollmentAPIKeyRequest {
   params: {
     keyId: string;
   };
@@ -44,7 +44,7 @@ export interface DeleteEnrollmentAPIKeyResponse {
   success: boolean;
 }
 
-export interface PostEnrollmentAPIKeyRequestSchema {
+export interface PostEnrollmentAPIKeyRequest {
   body: {
     name?: string;
     policy_id: string;

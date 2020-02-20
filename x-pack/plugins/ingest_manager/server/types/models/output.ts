@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+export { Output, NewOutput } from '../../../common';
 
 export enum OutputType {
   Elasticsearch = 'elasticsearch',
@@ -31,7 +32,3 @@ export const OutputSchema = schema.object({
   ...OutputBaseSchema,
   id: schema.string(),
 });
-
-export type NewOutput = TypeOf<typeof NewOutputSchema>;
-
-export type Output = TypeOf<typeof OutputSchema>;

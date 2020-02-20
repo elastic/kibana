@@ -6,9 +6,11 @@
 export {
   // Object types
   Agent,
+  AgentSOAttributes,
   AgentStatus,
   AgentType,
   AgentEvent,
+  AgentEventSOAttributes,
   AgentAction,
   Datasource,
   NewDatasource,
@@ -18,7 +20,8 @@ export {
   Output,
   NewOutput,
   OutputType,
-  //   EnrollmentAPIKey,
+  EnrollmentAPIKey,
+  EnrollmentAPIKeySOAttributes,
   Installation,
   InstallationStatus,
   PackageInfo,

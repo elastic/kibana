@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { EnrollmentAPIKey } from '../models';
+import { EnrollmentAPIKey } from '../../../common';
 
 export const GetEnrollmentAPIKeysRequestSchema = {
   query: schema.object({

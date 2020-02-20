@@ -4,29 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourceSchema } from './datasource';
+import { Datasource } from './datasource';
 
 export enum AgentConfigStatus {
   Active = 'active',
   Inactive = 'inactive',
 }
 
-interface AgentConfigBaseSchema {
+export interface NewAgentConfig {
   name: string;
   namespace: string;
   description?: string;
 }
 
-export type NewAgentConfigSchema = AgentConfigBaseSchema;
-
-export type AgentConfigSchema = AgentConfigBaseSchema & {
+export type AgentConfig = NewAgentConfig & {
   id: string;
   status: AgentConfigStatus;
-  datasources: Array<string | DatasourceSchema>;
+  datasources: string[] | Datasource[];
   updated_on: string;
   updated_by: string;
 };
-
-export type NewAgentConfig = NewAgentConfigSchema;
-
-export type AgentConfig = AgentConfigSchema;
