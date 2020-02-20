@@ -31,19 +31,19 @@ import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
-  FeatureCatalogueEntry,
+  TutorialStart,
+  HomePublicPluginStart,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
   kibanaVersion: string;
-  getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
-  directories: readonly FeatureCatalogueEntry[];
+  featureCatalogue: HomePublicPluginStart['featureCatalogue'];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
@@ -54,6 +54,7 @@ export interface HomeKibanaServices {
   addBasePath: (url: string) => string;
   environment: Environment;
   telemetry?: TelemetryPluginStart;
+  tutorialVariables: TutorialStart['get'];
 }
 
 let services: HomeKibanaServices | null = null;

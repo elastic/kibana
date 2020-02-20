@@ -20,6 +20,7 @@ import {
 import { ShardsResponse } from '../../../types';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { TEST_BOUNDARY } from './utils';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -223,6 +224,24 @@ export const getFindResultWithMultiHits = ({
     data,
   };
 };
+
+export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
+export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',

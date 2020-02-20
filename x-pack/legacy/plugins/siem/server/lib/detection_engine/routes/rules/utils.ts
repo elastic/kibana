@@ -7,6 +7,7 @@
 import { pickBy } from 'lodash/fp';
 import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
+import uuid from 'uuid';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -17,7 +18,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -26,6 +27,8 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getIdError = ({
   id,
@@ -59,9 +62,16 @@ export const getIdBulkError = ({
   id: string | undefined | null;
   ruleId: string | undefined | null;
 }): BulkError => {
-  if (id != null) {
+  if (id != null && ruleId != null) {
     return createBulkErrorObject({
-      ruleId: id,
+      id,
+      ruleId,
+      statusCode: 404,
+      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
+    });
+  } else if (id != null) {
+    return createBulkErrorObject({
+      id,
       statusCode: 404,
       message: `id: "${id}" not found`,
     });
@@ -73,7 +83,6 @@ export const getIdBulkError = ({
     });
   } else {
     return createBulkErrorObject({
-      ruleId: '(unknown id)',
       statusCode: 404,
       message: `id or rule_id should have been defined`,
     });
@@ -223,4 +232,42 @@ export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
     return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
   }
   return [];
+};
+
+export const getTupleDuplicateErrorsAndUniqueRules = (
+  rules: PromiseFromStreams[],
+  isOverwrite: boolean
+): [BulkError[], PromiseFromStreams[]] => {
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId } = parsedRule;
+        if (ruleId != null) {
+          if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+            acc.errors.set(
+              uuid.v4(),
+              createBulkErrorObject({
+                ruleId,
+                statusCode: 400,
+                message: `More than one rule with rule-id: "${ruleId}" found`,
+              })
+            );
+          }
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          acc.rulesAcc.set(uuid.v4(), parsedRule);
+        }
+      }
+
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };

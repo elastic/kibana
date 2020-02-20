@@ -15,7 +15,7 @@ import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 60;
