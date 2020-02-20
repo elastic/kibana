@@ -60,13 +60,6 @@ export interface FieldState {
   error?: string | null;
 }
 
-export interface FormState {
-  unsavedChanges: {
-    [key: string]: FieldState;
-  };
-  loading: boolean;
-}
-
 export interface IQuery {
   ast: any; // incomplete
   text: string;

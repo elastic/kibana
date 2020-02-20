@@ -18,7 +18,6 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -37,11 +36,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '../../../../../kibana_react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
-import { FieldSetting, SettingsChanges, FormState, FieldState } from '../../types';
+import { FieldSetting, SettingsChanges, FieldState } from '../../types';
 
 type Category = string;
 const NAV_IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -57,6 +57,13 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+}
+
+interface FormState {
+  unsavedChanges: {
+    [key: string]: FieldState;
+  };
+  loading: boolean;
 }
 
 export class Form extends PureComponent<FormProps> {
@@ -185,23 +192,19 @@ export class Form extends PureComponent<FormProps> {
       title: i18n.translate('advancedSettings.form.requiresPageReloadToastDescription', {
         defaultMessage: 'One or more settings require you to reload the page to take effect.',
       }),
-      text: element => {
-        const content = (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={() => window.location.reload()}>
-                  {i18n.translate('advancedSettings.form.requiresPageReloadToastButtonLabel', {
-                    defaultMessage: 'Reload page',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        );
-        ReactDOM.render(content, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
+      text: toMountPoint(
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={() => window.location.reload()}>
+                {i18n.translate('advancedSettings.form.requiresPageReloadToastButtonLabel', {
+                  defaultMessage: 'Reload page',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ),
       color: 'success',
     });
   };
@@ -300,38 +303,22 @@ export class Form extends PureComponent<FormProps> {
   renderCountOfUnsaved = () => {
     const unsavedCount = this.getCountOfUnsavedChanges();
     const hiddenUnsavedCount = this.getCountOfHiddenUnsavedChanges();
-    const hiddenCountCopy = hiddenUnsavedCount ? (
-      <FormattedMessage
-        id="advancedSettings.form.countOfSettingsHiddenChanged"
-        defaultMessage=", {hiddenCount} hidden"
-        values={{
-          hiddenCount: hiddenUnsavedCount,
-        }}
-      />
-    ) : (
-      ''
-    );
     return (
       <EuiTextColor className="mgtAdvancedSettingsForm__unsavedCountMessage" color="ghost">
-        {unsavedCount > 1 ? (
-          <FormattedMessage
-            id="advancedSettings.form.countOfSettingsChangedPlural"
-            defaultMessage="{unsavedCount} unsaved settings{hiddenCountCopy}"
-            values={{
-              unsavedCount,
-              hiddenCountCopy,
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="advancedSettings.form.countOfSettingsChangedSingular"
-            defaultMessage="{unsavedCount} unsaved setting{hiddenCountCopy}"
-            values={{
-              unsavedCount,
-              hiddenCountCopy,
-            }}
-          />
-        )}
+        <FormattedMessage
+          id="advancedSettings.form.countOfSettingsChanged"
+          defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
+              one {setting}
+              other {settings}
+            }{hiddenCount, plural,
+              =0 {}
+              other {, # hidden}
+            }"
+          values={{
+            unsavedCount,
+            hiddenCount: hiddenUnsavedCount,
+          }}
+        />
       </EuiTextColor>
     );
   };
