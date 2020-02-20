@@ -11,22 +11,6 @@ import { functions as serverFunctions } from '../canvas_plugin_src/functions/ser
 import { clientFunctions } from '../public/functions';
 
 /**
- * Utility type for converting a union of types into an intersection.
- *
- * This is a bit of "black magic" that will interpret a Union type as an Intersection
- * type.  This is necessary in this case of distiguishing one collection from
- * another in `FunctionError` and `FunctionStrings`.
- */
-// prettier-ignore
-export type UnionToIntersection<U> = 
-  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
-
-/**
- * Utility type: gathers values of a collection as a type for use as a type.
- */
-export type ValuesOf<T extends any[]> = T[number];
-
-/**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
  * an `ExpressionFunction`. If it does not meet the signature for such a function,
  * or if it does not produce an `ExpressionFunction`, it will be typed as

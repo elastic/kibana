@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -13,8 +13,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiIcon,
-  EuiText,
   EuiPanel,
   EuiStat,
   EuiSpacer,
@@ -23,7 +21,7 @@ import {
 
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-import { FormattedDateTime } from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {
@@ -55,78 +53,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     indices: undefined,
     partial: undefined,
   };
-
-  // Only show 10 indices initially
-  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
-  const shortIndicesList =
-    indices && indices.length ? (
-      <EuiText size="m">
-        <ul>
-          {[...indices].splice(0, 10).map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
-                    defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowDown" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
-        </ul>
-      </EuiText>
-    ) : (
-      <FormattedMessage
-        id="xpack.snapshotRestore.policyDetails.allIndicesLabel"
-        defaultMessage="All indices"
-      />
-    );
-  const fullIndicesList =
-    indices && indices.length && indices.length > 10 ? (
-      <EuiText size="m">
-        <ul>
-          {indices.map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
-                    defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowUp" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
-        </ul>
-      </EuiText>
-    ) : null;
-
-  // Reset indices list state when clicking through different policies
-  useEffect(() => {
-    return () => {
-      setIsShowingFullIndicesList(false);
-    };
-  }, []);
 
   return (
     <Fragment>
@@ -312,7 +238,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {isShowingFullIndicesList ? fullIndicesList : shortIndicesList}
+              <CollapsibleIndicesList indices={indices} />
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 

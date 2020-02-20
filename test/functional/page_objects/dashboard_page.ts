@@ -190,10 +190,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardEditMode');
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
-        const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('embeddablePanel'),
-          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
-        ]);
+        const panels = await testSubjects.findAll('embeddablePanel', 2500);
+        const menuIcons = await testSubjects.findAll('embeddablePanelToggleMenuIcon', 2500);
         return panels.length === menuIcons.length;
       });
     }
@@ -471,15 +469,16 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
-      const sharedItems = await find.allByCssSelector('[data-shared-item]');
-      return await Promise.all(
-        sharedItems.map(async sharedItem => {
+      const sharedItemscontainer = await find.byCssSelector('[data-shared-items-count]');
+      const $ = await sharedItemscontainer.parseDomContent();
+      return $('[data-shared-item]')
+        .toArray()
+        .map(item => {
           return {
-            title: await sharedItem.getAttribute('data-title'),
-            description: await sharedItem.getAttribute('data-description'),
+            title: $(item).attr('data-title'),
+            description: $(item).attr('data-description'),
           };
-        })
-      );
+        });
     }
 
     public async checkHideTitle() {
