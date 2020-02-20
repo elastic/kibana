@@ -19,7 +19,6 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { ISearchAppMountContext } from '../../../src/plugins/data/public';
 import {
   PHONE_TRIGGER,
   USER_TRIGGER,
@@ -38,12 +37,6 @@ import {
   SHOWCASE_PLUGGABILITY_ACTION,
 } from './actions/actions';
 
-declare module 'kibana/public' {
-  interface AppMountContext {
-    search?: ISearchAppMountContext;
-  }
-}
-
 interface StartDeps {
   uiActions: UiActionsStart;
 }
@@ -56,15 +49,12 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
   public setup(core: CoreSetup<{ uiActions: UiActionsStart }>, deps: SetupDeps) {
     deps.uiActions.registerTrigger({
       id: COUNTRY_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerTrigger({
       id: PHONE_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerTrigger({
       id: USER_TRIGGER,
-      actionIds: [],
     });
     deps.uiActions.registerAction(lookUpWeatherAction);
     deps.uiActions.registerAction(viewInMapsAction);

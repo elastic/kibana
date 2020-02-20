@@ -291,6 +291,7 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
 
 /** @public */
 export interface IHttpFetchError extends Error {
+  readonly name: string;
   readonly request: Request;
   readonly response?: Response;
   /**

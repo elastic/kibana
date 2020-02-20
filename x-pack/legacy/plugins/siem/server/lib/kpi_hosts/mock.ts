@@ -43,8 +43,7 @@ export const mockKpiHostDetailsOptions: RequestBasicOptions = {
 };
 
 export const mockKpiHostsRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetKpiHostsQuery',
     variables: {
       sourceId: 'default',
@@ -54,12 +53,10 @@ export const mockKpiHostsRequest = {
     query:
       'fragment KpiHostChartFields on KpiHostHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      hosts\n      hostsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...KpiHostChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 export const mockKpiHostDetailsRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetKpiHostDetailsQuery',
     variables: {
       sourceId: 'default',
@@ -69,7 +66,6 @@ export const mockKpiHostDetailsRequest = {
     query:
       'fragment KpiHostDetailsChartFields on KpiHostHistogramData {\n  x\n  y\n  __typename\n}\n\nquery GetKpiHostDetailsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $hostName: String!) {\n  source(id: $sourceId) {\n    id\n    KpiHostDetails(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex, hostName: $hostName) {\n      authSuccess\n      authSuccessHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...KpiHostDetailsChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
-  query: {},
 };
 
 const mockUniqueIpsResponse = {

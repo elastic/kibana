@@ -28,7 +28,7 @@ export default function({ getService }: FtrProviderContext) {
       supertest
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-system-api', 'true')
+        .set('kbn-system-request', 'true')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(200);

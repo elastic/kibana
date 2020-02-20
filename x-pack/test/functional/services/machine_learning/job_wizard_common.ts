@@ -224,6 +224,16 @@ export function MachineLearningJobWizardCommonProvider(
       expect(actualCheckedState).to.eql(expectedValue);
     },
 
+    async assertModelPlotSwitchEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlJobWizardSwitchModelPlot');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected model plot switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
     async assertDedicatedIndexSwitchExists(
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ) {

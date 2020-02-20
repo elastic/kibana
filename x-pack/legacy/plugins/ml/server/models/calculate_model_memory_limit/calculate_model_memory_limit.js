@@ -10,8 +10,8 @@
 import numeral from '@elastic/numeral';
 import { fieldsServiceProvider } from '../fields_service';
 
-export function calculateModelMemoryLimitProvider(callWithRequest) {
-  const fieldsService = fieldsServiceProvider(callWithRequest);
+export function calculateModelMemoryLimitProvider(callAsCurrentUser) {
+  const fieldsService = fieldsServiceProvider(callAsCurrentUser);
 
   return function calculateModelMemoryLimit(
     indexPattern,
@@ -26,7 +26,7 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
   ) {
     return new Promise((response, reject) => {
       const limits = {};
-      callWithRequest('ml.info')
+      callAsCurrentUser('ml.info')
         .then(resp => {
           if (resp.limits !== undefined && resp.limits.max_model_memory_limit !== undefined) {
             limits.max_model_memory_limit = resp.limits.max_model_memory_limit;

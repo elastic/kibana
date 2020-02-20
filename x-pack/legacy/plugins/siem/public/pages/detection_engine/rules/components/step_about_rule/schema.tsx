@@ -13,7 +13,7 @@ import {
   FormSchema,
   ValidationFunc,
   ERROR_CODE,
-} from '../shared_imports';
+} from '../../../../shared_imports';
 import { isMitreAttackInvalid } from '../mitre/helpers';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from './helpers';

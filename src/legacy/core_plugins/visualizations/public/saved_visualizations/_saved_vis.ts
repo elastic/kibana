@@ -26,14 +26,14 @@
  */
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-// @ts-ignore
-import { updateOldState, Vis } from '../index';
+import { updateOldState } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../plugins/data/public';
 import { VisSavedObject } from '../embeddable/visualize_embeddable';
 
 import { createSavedSearchesLoader } from '../../../kibana/public/discover';
 import { VisualizeConstants } from '../../../kibana/public/visualize';
+import { VisImpl } from '../np_ready/public/vis_impl';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);
@@ -72,9 +72,8 @@ async function _createVis(savedVis: VisSavedObject) {
   if (savedVis.visState) {
     savedVis.visState.title = savedVis.title;
   }
-  // the typescript compiler is wrong here, will be right when vis.js -> vis.ts
-  // @ts-ignore
-  savedVis.vis = new Vis(savedVis.searchSource!.getField('index'), savedVis.visState);
+
+  savedVis.vis = new VisImpl(savedVis.searchSource!.getField('index')!, savedVis.visState);
 
   savedVis.vis!.savedSearchId = savedVis.savedSearchId;
 

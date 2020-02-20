@@ -95,11 +95,14 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
+
+  serializeFieldFormat,
 
   BoolFormat,
   BytesFormat,

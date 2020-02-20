@@ -26,10 +26,11 @@ import sinon from 'sinon';
 import { tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { round } from 'lodash';
-
-import { Vis } from '../../../../visualizations/public';
 import { tableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../../visualizations/public/np_ready/public/legacy';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
@@ -42,10 +43,10 @@ describe('Table Vis - AggTable Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new Vis(indexPattern, 'table');
+    const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
     tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
 
-    const vis2 = new Vis(indexPattern, {
+    const vis2 = new visualizationsStart.Vis(indexPattern, {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
@@ -64,7 +65,7 @@ describe('Table Vis - AggTable Directive', function() {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = new Vis(indexPattern, {
+    const vis3 = new visualizationsStart.Vis(indexPattern, {
       type: 'table',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
