@@ -66,6 +66,7 @@ export interface HomeKibanaServices {
   addBasePath: (url: string) => string;
   environment: Environment;
   tutorialVariables: TutorialStart['get'];
+  getInjected: (name: string, defaultValue?: any) => unknown;
 }
 
 let services: HomeKibanaServices | null = null;

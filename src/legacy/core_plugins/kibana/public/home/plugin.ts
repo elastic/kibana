@@ -94,6 +94,7 @@ export class HomePlugin implements Plugin {
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
           tutorialVariables: homeStart.tutorials.get,
+          getInjected: core.injectedMetadata.getInjectedVar,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
