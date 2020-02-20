@@ -9,7 +9,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { useHistory } from 'react-router-dom';
+import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -28,6 +28,8 @@ import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
+
+const { core } = npStart;
 
 interface Job {
   id: string;
@@ -382,7 +384,6 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private fetchJobs = async () => {
-    const history = useHistory();
     // avoid page flicker when poller is updating table - only display loading screen on first load
     if (this.isInitialJobsFetch) {
       this.setState(() => ({ isLoading: true }));
@@ -397,7 +398,7 @@ class ReportListingUi extends Component<Props, State> {
     } catch (kfetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         toastNotifications.addDanger(this.props.badLicenseMessage);
-        history.push('/management');
+        core.application.navigateToApp('kibana#/management');
         return;
       }
 
