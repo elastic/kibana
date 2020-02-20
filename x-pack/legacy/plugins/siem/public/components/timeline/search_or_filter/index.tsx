@@ -227,7 +227,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
