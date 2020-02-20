@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions, RequestHandlerContext } from 'kibana/server';
+import { CallAPIOptions, IScopedClusterClient } from 'src/core/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -113,9 +113,8 @@ export class DataVisualizer {
     options?: CallAPIOptions
   ) => Promise<any>;
 
-  constructor(client: RequestHandlerContext | (() => any)) {
-    this.callAsCurrentUser =
-      typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
+  constructor(callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']) {
+    this.callAsCurrentUser = callAsCurrentUser;
   }
 
   // Obtains overall stats on the fields in the supplied index pattern, returning an object

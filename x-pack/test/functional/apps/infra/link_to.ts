@@ -22,22 +22,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const location = {
         hash: '',
         pathname: '/link-to/logs',
-        search: `?time=${timestamp}&filter=trace.id:${traceId}`,
+        search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
       const expectedSearchString = `sourceId=default&logPosition=(end:now,position:(tiebreaker:0,time:${timestamp}),start:now-1d,streamLive:!f)&logFilter=(expression:'trace.id:${traceId}',kind:kuery)`;
       const expectedRedirectPath = '/logs/stream?';
 
-      await pageObjects.common.navigateToActualUrl(
-        'infraOps',
-        `${location.pathname}${location.search}`
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraLogs',
+        location.pathname,
+        location.search,
+        {
+          ensureCurrentUrl: false,
+        }
       );
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const [, currentHash] = decodeURIComponent(currentUrl).split('#');
-        // Account for unpredictable location of the g parameter in the search string
-        expect(currentHash.slice(0, expectedRedirectPath.length)).to.be(expectedRedirectPath);
-        expect(currentHash.slice(expectedRedirectPath.length)).to.contain(expectedSearchString);
+        const decodedUrl = decodeURIComponent(currentUrl);
+        expect(decodedUrl).to.contain(expectedRedirectPath);
+        expect(decodedUrl).to.contain(expectedSearchString);
       });
     });
   });

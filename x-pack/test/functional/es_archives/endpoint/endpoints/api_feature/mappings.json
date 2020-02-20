@@ -28,6 +28,15 @@
                 }
               },
               "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
         },
@@ -114,6 +123,15 @@
                   "type": "text"
                 },
                 "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "variant": {
                   "fields": {
                     "keyword": {
                       "ignore_above": 256,

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
 import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
 import {
   getResult,
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
+import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
 
 describe('get_export_by_object_ids', () => {
   describe('getExportByObjectIds', () => {

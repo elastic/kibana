@@ -181,4 +181,10 @@ describe('kbnUrlTracker', () => {
       `"/app/test#/start?state1=(key1:abc)&state2=(key2:def)"`
     );
   });
+
+  test('set url to storage when setActiveUrl was called', () => {
+    createTracker();
+    urlTracker.setActiveUrl('/deep/path/4');
+    expect(storage.getItem('storageKey')).toEqual('#/deep/path/4');
+  });
 });

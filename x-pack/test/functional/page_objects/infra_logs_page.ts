@@ -27,9 +27,10 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
           return qs;
         }, '?');
       }
-      await pageObjects.common.navigateToActualUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
-        `/logs/${logsUiTab}${decodeURI(queryString)}`,
+        `/${logsUiTab}${decodeURI(queryString)}`,
+        decodeURI(queryString),
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
     },

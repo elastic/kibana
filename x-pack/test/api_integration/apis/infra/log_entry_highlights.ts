@@ -10,16 +10,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import {
-  createPlainError,
-  throwErrors,
-} from '../../../../legacy/plugins/infra/common/runtime_types';
+import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
 
 import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '../../../../legacy/plugins/infra/common/http_api';
+} from '../../../../plugins/infra/common/http_api';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
