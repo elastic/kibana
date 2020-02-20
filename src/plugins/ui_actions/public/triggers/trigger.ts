@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TriggerContextMapping } from '../types';
+import { TriggerContextMapping, TriggerId } from '../types';
 
 /**
  * This is a convenience interface used to register a *trigger*.
@@ -30,7 +30,7 @@ import { TriggerContextMapping } from '../types';
  * trigger is *called* it first displays a context menu for user to pick a
  * single action to execute.
  */
-export interface Trigger<ID extends string = string> {
+export interface Trigger<ID extends TriggerId = TriggerId> {
   /**
    * Unique name of the trigger as identified in `ui_actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
@@ -48,6 +48,4 @@ export interface Trigger<ID extends string = string> {
   description?: string;
 }
 
-export type AnyTrigger = Trigger<any>;
-
-export type TriggerContext<T> = T extends Trigger<infer ID> ? TriggerContextMapping[ID] : never;
+export type TriggerContext<T> = T extends TriggerId ? TriggerContextMapping[T] : never;

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { Filter } from '../../data/public';
 import {
   applyFilterTrigger,
   contextMenuTrigger,
@@ -26,15 +26,24 @@ import {
   selectRangeTrigger,
   valueClickTrigger,
   EmbeddableVisTriggerContext,
+  IEmbeddable,
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+  PANEL_BADGE_TRIGGER,
 } from './lib';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    SELECT_RANGE_TRIGGER: EmbeddableVisTriggerContext;
-    VALUE_CLICK_TRIGGER: EmbeddableVisTriggerContext;
-    CONTEXT_MENU_TRIGGER: object;
-    APPLY_FILTER_TRIGGER: object;
-    PANEL_BADGE_TRIGGER: object;
+    [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
+    [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
+    [APPLY_FILTER_TRIGGER]: {
+      embeddable: IEmbeddable;
+      filters: Filter[];
+    };
+    [CONTEXT_MENU_TRIGGER]: object;
+    [PANEL_BADGE_TRIGGER]: object;
   }
 }
 

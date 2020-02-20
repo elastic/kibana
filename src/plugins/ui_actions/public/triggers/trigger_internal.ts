@@ -17,20 +17,21 @@
  * under the License.
  */
 
-import { AnyTrigger, TriggerContext } from './trigger';
+import { TriggerContext, Trigger } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
+import { TriggerId } from '../types';
 
 /**
  * Internal representation of a trigger kept for consumption only internally
  * within `ui_actions` plugin.
  */
-export class TriggerInternal<T extends AnyTrigger> {
+export class TriggerInternal<T extends TriggerId> {
   public readonly contract = new TriggerContract<T>(this);
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: T) {}
+  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
 
   public async execute(context: TriggerContext<T>) {
     const triggerId = this.trigger.id;
