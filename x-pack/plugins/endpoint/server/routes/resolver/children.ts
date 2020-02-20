@@ -70,7 +70,7 @@ async function potentiallyKillKibana(
   const children = await Promise.all(
     Object.entries(lifecycleGroups).map(async ([entityID, group]) => {
       // Because this is recursive and in a map call, this is going to issue a maximum of
-      // 2 * n * (m - 1) queries where n is the level of children to display and m is the limit of
+      // (2 * (m - 1)) ^ n queries where n is the level of children to display and m is the limit of
       // child processes to query per level. Each of these is going to be held in memory and reconstructed
       // so if we have large documents this is going to be slow and hog a ton of memory. Rather than designing
       // something like this that won't scale, we should change the UX to fit our data constraints that aren't
