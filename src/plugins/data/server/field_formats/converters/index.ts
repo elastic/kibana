@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
-export { DateFormat } from './converters';
-export { baseFormattersPublic } from './constants';
+export { DateFormat } from './date_server';
