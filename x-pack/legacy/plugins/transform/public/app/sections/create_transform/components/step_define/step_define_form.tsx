@@ -28,12 +28,13 @@ import {
 } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
+import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
-import { KqlFilterBar, useXJsonMode } from '../../../../../shared_imports';
+import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
@@ -331,7 +332,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   );
 
   const {
-    xJsonMode,
     convertToJson,
     setXJson: setAdvancedEditorConfig,
     xJson: advancedEditorConfig,
@@ -395,10 +395,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       });
     }
     setAggList(newAggList);
-    const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
 
-    setAdvancedEditorConfig(prettyPivotConfig);
-    setAdvancedEditorConfigLastApplied(prettyPivotConfig);
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
     setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
@@ -466,13 +464,11 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       pivotAggsArr
     );
 
-    const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
     const stringifiedSourceConfigUpdate = JSON.stringify(
       previewRequestUpdate.source.query,
       null,
       2
     );
-    setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
     setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
 
     onChange({

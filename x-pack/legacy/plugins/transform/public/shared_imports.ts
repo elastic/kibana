@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { XJsonMode } from '../../../../plugins/es_ui_shared/console_lang/ace/modes/x_json';
+export {
+  collapseLiteralStrings,
+  expandLiteralStrings,
+} from '../../../../../src/plugins/es_ui_shared/console_lang/lib';
+
 export {
   SendRequestConfig,
   SendRequestResponse,
@@ -37,5 +43,3 @@ export { setDependencyCache } from '../../ml/public/application/util/dependency_
 
 // @ts-ignore: could not find declaration file for module
 export { KqlFilterBar } from '../../ml/public/application/components/kql_filter_bar';
-
-export { useXJsonMode } from '../../../../plugins/watcher/public/application/sections/watch_edit/components/json_watch_edit/use_x_json_mode';
