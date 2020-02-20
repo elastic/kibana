@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
-import MonacoEditor, { EditorDidMount, EditorWillMount } from 'react-monaco-editor';
+import MonacoEditor from 'react-monaco-editor';
 
 import { monaco } from '@kbn/ui-shared-deps/monaco';
 
