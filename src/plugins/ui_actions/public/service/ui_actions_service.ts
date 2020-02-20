@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import {
-  TriggerRegistry,
-  ActionRegistry,
-  TriggerToActionsRegistry,
-  TriggerContextMapping,
-} from '../types';
+import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
 import { Action } from '../actions';
-import { AnyTrigger, Trigger } from '../triggers/trigger';
+import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 
@@ -53,7 +48,7 @@ export class UiActionsService {
     this.triggerToActions = triggerToActions;
   }
 
-  public readonly registerTrigger = <T extends AnyTrigger>(trigger: T) => {
+  public readonly registerTrigger = (trigger: Trigger) => {
     if (this.triggers.has(trigger.id)) {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
@@ -64,9 +59,7 @@ export class UiActionsService {
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = <T extends keyof TriggerContextMapping>(
-    triggerId: T
-  ): TriggerContract<Trigger<T extends string ? T : never>> => {
+  public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
     const trigger = this.triggers.get(triggerId as string);
 
     if (!trigger) {
@@ -143,11 +136,11 @@ export class UiActionsService {
    *
    * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
    */
-  public readonly executeTriggerActions = async <T extends AnyTrigger>(
-    triggerId: string,
-    context: TriggerContextMapping[T['id']]
+  public readonly executeTriggerActions = async <T extends TriggerId>(
+    triggerId: T,
+    context: TriggerContext<T>
   ) => {
-    const trigger = this.getTrigger<any>(triggerId);
+    const trigger = this.getTrigger<T>(triggerId);
     await trigger.exec(context);
   };
 
