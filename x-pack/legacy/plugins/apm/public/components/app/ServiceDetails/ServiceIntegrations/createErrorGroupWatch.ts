@@ -17,7 +17,7 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { createWatch } from '../../../../services/rest/watcher';
 
 function getSlackPathUrl(slackUrl?: string) {
