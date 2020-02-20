@@ -4,48 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Hapi from 'hapi';
-import { chunk, isEmpty, isFunction } from 'lodash/fp';
+import { chunk, isEmpty } from 'lodash/fp';
 import { extname } from 'path';
-import uuid from 'uuid';
+
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
-import {
-  callWithRequestFactory,
-  getIndex,
-  createBulkErrorObject,
-  ImportRuleResponse,
-} from '../utils';
+import { getIndex, createBulkErrorObject, ImportRuleResponse } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
-import { updateRules } from '../../rules/update_rules';
+import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { GetScopedClients } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
-/*
- * We were getting some error like that possible EventEmitter memory leak detected
- * So we decide to batch the update by 10 to avoid any complication in the node side
- * https://nodejs.org/docs/latest/api/events.html#events_emitter_setmaxlisteners_n
- *
- */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createImportRulesRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
     options: {
       tags: ['access:siem'],
       payload: {
-        maxBytes: server.config().get('savedObjects.maxImportPayloadBytes'),
+        maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
         output: 'stream',
         allow: 'multipart/form-data',
       },
@@ -57,46 +49,36 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         payload: importRulesPayloadSchema,
       },
     },
-    async handler(request: ImportRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+    async handler(request: ImportRulesRequest & LegacyRequest, headers) {
+      const {
+        actionsClient,
+        alertsClient,
+        clusterClient,
+        spacesClient,
+        savedObjectsClient,
+      } = await getClients(request);
+
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
+
       const { filename } = request.payload.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return Boom.badRequest(`Invalid file extension ${fileExtension}`);
+        return headers
+          .response({
+            message: `Invalid file extension ${fileExtension}`,
+            status_code: 400,
+          })
+          .code(400);
       }
 
-      const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
-
-      const uniqueParsedObjects = Array.from(
-        parsedObjects
-          .reduce(
-            (acc, parsedRule) => {
-              if (parsedRule instanceof Error) {
-                acc.set(uuid.v4(), parsedRule);
-              } else {
-                const { rule_id: ruleId } = parsedRule;
-                if (ruleId != null) {
-                  acc.set(ruleId, parsedRule);
-                } else {
-                  acc.set(uuid.v4(), parsedRule);
-                }
-              }
-              return acc;
-            }, // using map (preserves ordering)
-            new Map()
-          )
-          .values()
+      const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
+        parsedObjects,
+        request.query.overwrite
       );
 
       const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
@@ -122,6 +104,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 }
                 const {
                   description,
+                  enabled,
                   false_positives: falsePositives,
                   from,
                   immutable,
@@ -148,9 +131,11 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = getIndex(request, server);
-                  const callWithRequest = callWithRequestFactory(request, server);
-                  const indexExists = await getIndexExists(callWithRequest, finalIndex);
+                  const finalIndex = getIndex(spacesClient.getSpaceId, config);
+                  const indexExists = await getIndexExists(
+                    clusterClient.callAsCurrentUser,
+                    finalIndex
+                  );
                   if (!indexExists) {
                     resolve(
                       createBulkErrorObject({
@@ -166,7 +151,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       alertsClient,
                       actionsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -194,12 +179,12 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
-                    await updateRules({
+                    await patchRules({
                       alertsClient,
                       actionsClient,
                       savedObjectsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -232,7 +217,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       createBulkErrorObject({
                         ruleId,
                         statusCode: 409,
-                        message: `This Rule "${rule.name}" already exists`,
+                        message: `rule_id: "${ruleId}" already exists`,
                       })
                     );
                   }
@@ -250,7 +235,11 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             return [...accum, importsWorkerPromise];
           }, [])
         );
-        importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
+        importRuleResponse = [
+          ...duplicateIdErrors,
+          ...importRuleResponse,
+          ...newImportRuleResponse,
+        ];
       }
 
       const errorsResp = importRuleResponse.filter(resp => !isEmpty(resp.error));
@@ -263,6 +252,10 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const importRulesRoute = (server: ServerFacade): void => {
-  server.route(createImportRulesRoute(server));
+export const importRulesRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): void => {
+  route(createImportRulesRoute(config, getClients));
 };

@@ -9,10 +9,8 @@ import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
-import { searchprofiler } from './legacy/plugins/searchprofiler';
 import { ml } from './legacy/plugins/ml';
 import { tilemap } from './legacy/plugins/tilemap';
-import { watcher } from './legacy/plugins/watcher';
 import { grokdebugger } from './legacy/plugins/grokdebugger';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
@@ -39,6 +37,7 @@ import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { ingestManager } from './legacy/plugins/ingest_manager';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
 module.exports = function(kibana) {
@@ -49,10 +48,8 @@ module.exports = function(kibana) {
     reporting(kibana),
     spaces(kibana),
     security(kibana),
-    searchprofiler(kibana),
     ml(kibana),
     tilemap(kibana),
-    watcher(kibana),
     grokdebugger(kibana),
     dashboardMode(kibana),
     logstash(kibana),
@@ -78,6 +75,7 @@ module.exports = function(kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    ingestManager(kibana),
     triggersActionsUI(kibana),
   ];
 };

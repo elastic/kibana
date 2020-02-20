@@ -10,14 +10,14 @@
   },
   "devDependencies": {
     "@elastic/charts": "^17.0.2",
-    "abort-controller": "^3.0.0",
-    "@elastic/eui": "18.3.0",
+    "abortcontroller-polyfill": "^1.4.0",
+    "@elastic/eui": "19.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "angular": "^1.7.9",
     "core-js": "^3.2.1",
-    "css-loader": "^2.1.1",
+    "css-loader": "^3.4.2",
     "custom-event-polyfill": "^0.3.0",
     "del": "^5.1.0",
     "jquery": "^3.4.1",
@@ -30,7 +30,7 @@
     "read-pkg": "^5.2.0",
     "regenerator-runtime": "^0.13.3",
     "symbol-observable": "^1.2.0",
-    "webpack": "4.41.0",
+    "webpack": "^4.41.5",
     "whatwg-fetch": "^3.0.0"
   }
 }

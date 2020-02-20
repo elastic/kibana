@@ -32,7 +32,6 @@ import {
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
-import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
 import {
@@ -47,7 +46,6 @@ describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
     config: ConfigType;
     loggers: LoggerFactory;
-    getLegacyAPI(): Pick<LegacyAPI, 'isSystemAPIRequest'>;
     http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
     license: jest.Mocked<SecurityLicense>;
@@ -73,7 +71,6 @@ describe('setupAuthentication()', () => {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
       loggers: loggingServiceMock.create(),
-      getLegacyAPI: jest.fn(),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

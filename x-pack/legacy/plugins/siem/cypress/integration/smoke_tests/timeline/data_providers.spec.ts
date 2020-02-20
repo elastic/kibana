@@ -4,30 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HOSTS_PAGE } from '../../../urls/navigation';
 import {
+  waitForAllHostsToBeLoaded,
+  dragAndDropFirstHostToTimeline,
+  dragFirstHostToTimeline,
+  dragFirstHostToEmptyTimelineDataProviders,
+} from '../../../tasks/hosts/all_hosts';
+import { HOSTS_NAMES_DRAGGABLE } from '../../../screens/hosts/all_hosts';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
+import { createNewTimeline } from '../../../tasks/timeline/main';
+import { openTimeline } from '../../../tasks/siem_main';
+import {
+  TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DROPPED_DATA_PROVIDERS,
-  TIMELINE_DATA_PROVIDERS_EMPTY,
-} from '../../lib/timeline/selectors';
-import {
-  createNewTimeline,
-  dragFromAllHostsToTimeline,
-  toggleTimelineVisibility,
-} from '../../lib/timeline/helpers';
-import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
-import { HOSTS_PAGE } from '../../lib/urls';
-import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
-import { drag, dragWithoutDrop } from '../../lib/drag_n_drop/helpers';
+} from '../../../screens/timeline/main';
 
 describe('timeline data providers', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-    waitForAllHostsWidget();
+    waitForAllHostsToBeLoaded();
   });
 
   beforeEach(() => {
-    toggleTimelineVisibility();
+    openTimeline();
   });
 
   afterEach(() => {
@@ -35,16 +36,13 @@ describe('timeline data providers', () => {
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
-    dragFromAllHostsToTimeline();
+    dragAndDropFirstHostToTimeline();
 
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, {
-      timeout: DEFAULT_TIMEOUT + 10 * 1000,
-    })
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, { timeout: DEFAULT_TIMEOUT })
       .first()
       .invoke('text')
       .then(dataProviderText => {
-        // verify the data provider displays the same `host.name` as the host dragged from the `All Hosts` widget
-        cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
+        cy.get(HOSTS_NAMES_DRAGGABLE)
           .first()
           .invoke('text')
           .should(hostname => {
@@ -54,9 +52,7 @@ describe('timeline data providers', () => {
   });
 
   it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {
-    cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
-      .first()
-      .then(host => drag(host));
+    dragFirstHostToTimeline();
 
     cy.get(TIMELINE_DATA_PROVIDERS).should(
       'have.css',
@@ -65,29 +61,13 @@ describe('timeline data providers', () => {
     );
   });
 
-  it('sets the background to euiColorSuccess with a 20% alpha channel when the user starts dragging a host AND is hovering over the data providers', () => {
-    cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
-      .first()
-      .then(host => drag(host));
-
-    cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).then(dataProvidersDropArea =>
-      dragWithoutDrop(dataProvidersDropArea)
-    );
+  it('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
+    dragFirstHostToEmptyTimelineDataProviders();
 
     cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).should(
       'have.css',
       'background',
       'rgba(1, 125, 115, 0.2) none repeat scroll 0% 0% / auto padding-box border-box'
-    );
-  });
-
-  it('renders the dashed border color as euiColorSuccess when hovering over the data providers', () => {
-    cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
-      .first()
-      .then(host => drag(host));
-
-    cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).then(dataProvidersDropArea =>
-      dragWithoutDrop(dataProvidersDropArea)
     );
 
     cy.get(TIMELINE_DATA_PROVIDERS).should(

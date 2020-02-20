@@ -6,4 +6,12 @@
 
 export const EVENTS_TAB = '[data-test-subj="navigation-events"]';
 
+export const AUTHENTICATIONS_TAB = '[data-test-subj="navigation-authentications"]';
+
+export const UNCOMMON_PROCESSES_TAB = '[data-test-subj="navigation-uncommonProcesses"]';
+
+export const ALL_HOSTS_TAB = '[data-test-subj="navigation-allHosts';
+
+export const ANOMALIES_TAB = '[data-test-subj="navigation-anomalies"]';
+
 export const KQL_SEARCH_BAR = '[data-test-subj="queryInput"]';
