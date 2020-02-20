@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiExpression,
   EuiFieldNumber,
@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { KueryBar } from '../connected';
+import { KueryBar } from '../../connected';
 
 interface AlertMonitorStatusProps {
   autocomplete: any;
@@ -83,6 +83,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (
     'locations',
     locations.filter(l => l.checked === 'on').map(l => l.label)
   );
+  setAlertParams('filters', props.filters);
+  useEffect(() => {
+    setAlertParams('filters', props.filters);
+  }, [props.filters, setAlertParams]);
+  console.log('props', props);
   return (
     <>
       <KueryBar autocomplete={props.autocomplete} />

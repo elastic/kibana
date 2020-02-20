@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
-import { ActionGroup } from '../../../../alerting/server/types';
 
 export interface StatusCheckExecutorParams {
   filters?: string;
@@ -21,8 +20,6 @@ export interface StatusCheckExecutorParams {
 const getResponse = () => ({
   lastChecked: new Date(),
 });
-
-const actionGroup: ActionGroup | undefined = undefined;
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
   id: 'xpack.uptime.alerts.downMonitor',
@@ -40,11 +37,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
   },
   actionGroups: [
     {
-      id: 'alert',
+      id: 'down-monitor',
       name: 'Alert',
     },
   ],
-  async executor(options) {
+  async executor(options: any) {
     const params = options.params as StatusCheckExecutorParams;
 
     const monitors = await libs.requests.getMonitorStatus({
@@ -57,7 +54,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       alertInstance.replaceState({
         monitors,
       });
-      alertInstance.scheduleActions('uptime.downMonitor', {
+      alertInstance.scheduleActions('down-monitor', {
         server,
         monitors,
       });

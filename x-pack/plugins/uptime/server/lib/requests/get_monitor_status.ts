@@ -21,77 +21,97 @@ export interface GetMonitorStatusResult {
   count: number;
 }
 
+interface MonitorStatusKey {
+  monitor_id: string;
+  status: string;
+  location: string;
+}
+
+const formatBuckets = async (
+  buckets: any[],
+  numTimes: number
+): Promise<GetMonitorStatusResult[]> => {
+  return buckets
+    .filter((monitor: any) => monitor?.doc_count > numTimes)
+    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
+};
+
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
 > = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
-  // today this value is hardcoded. In the future we may support
-  // multiple status types for this alert, and this will become a parameter
-  const STATUS = 'down';
-  const esParams = {
-    index: INDEX_NAMES.HEARTBEAT,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.status': STATUS,
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: from,
-                  lte: to,
-                },
-              },
-            },
-          ],
-        },
-      },
-      size: 0,
-      aggs: {
-        monitors: {
-          composite: {
-            size: 10000,
-            sources: [
+  console.log('filters', JSON.stringify(filters, null, 2));
+  const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
+  let afterKey: MonitorStatusKey | undefined;
+
+  do {
+    // today this value is hardcoded. In the future we may support
+    // multiple status types for this alert, and this will become a parameter
+    const STATUS = 'down';
+    const esParams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            filter: [
               {
-                monitor_id: {
-                  terms: {
-                    field: 'monitor.id',
-                  },
+                term: {
+                  'monitor.status': STATUS,
                 },
               },
               {
-                status: {
-                  terms: {
-                    field: 'monitor.status',
-                  },
-                },
-              },
-              {
-                location: {
-                  terms: {
-                    field: 'observer.geo.name',
-                    missing_bucket: true,
+                range: {
+                  '@timestamp': {
+                    gte: from,
+                    lte: to,
                   },
                 },
               },
             ],
           },
         },
+        size: 0,
+        aggs: {
+          monitors: {
+            composite: {
+              size: 2000,
+              sources: [
+                {
+                  monitor_id: {
+                    terms: {
+                      field: 'monitor.id',
+                    },
+                  },
+                },
+                {
+                  status: {
+                    terms: {
+                      field: 'monitor.status',
+                    },
+                  },
+                },
+                {
+                  location: {
+                    terms: {
+                      field: 'observer.geo.name',
+                      missing_bucket: true,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
       },
-    },
-  };
-  const result = await callES('search', esParams);
-  if (!result.aggregations) {
-    return [];
-  }
-  const monitorBuckets = result?.aggregations?.monitors?.buckets || [];
-  return monitorBuckets
-    .filter(
-      (monitor: any) => monitor?.doc_count > numTimes && locations.includes(monitor?.key?.location)
-    )
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
+    };
+    if (afterKey) {
+      // @ts-ignore the `after` defined here is not available
+      // on the inferred type, so TS says it's an error
+      esParams.body.aggs.monitors.composite.after = afterKey;
+    }
+    const result = await callES('search', esParams);
+    afterKey = result?.aggregations?.monitors?.after_key;
+    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], numTimes));
+  } while (afterKey !== undefined);
+  return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);
 };
