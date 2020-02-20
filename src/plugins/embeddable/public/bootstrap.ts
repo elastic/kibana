@@ -31,8 +31,8 @@ import {
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    SELECT_RANGE_TRIGGER: EmbeddableVisTrigger;
-    VALUE_CLICK_TRIGGER: EmbeddableVisTrigger;
+    SELECT_RANGE_TRIGGER: EmbeddableVisTrigger<'SELECT_RANGE_TRIGGER'>;
+    VALUE_CLICK_TRIGGER: EmbeddableVisTrigger<'VALUE_CLICK_TRIGGER'>;
     CONTEXT_MENU_TRIGGER: Trigger;
     APPLY_FILTER_TRIGGER: Trigger;
     PANEL_BADGE_TRIGGER: Trigger;

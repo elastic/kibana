@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Trigger, TriggerContext, TriggerContextParams } from './trigger';
+import { AnyTrigger, TriggerContext, TriggerContextParams } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 import { Action } from '../actions';
@@ -27,7 +27,7 @@ import { buildContextMenuForActions, openContextMenu } from '../context_menu';
  * Internal representation of a trigger kept for consumption only internally
  * within `ui_actions` plugin.
  */
-export class TriggerInternal<T extends Trigger<any, any>> {
+export class TriggerInternal<T extends AnyTrigger> {
   public readonly contract = new TriggerContract<T>(this);
 
   public get id() {

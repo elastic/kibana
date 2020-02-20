@@ -29,20 +29,21 @@ export interface EmbeddableVisTriggerContext {
   };
 }
 
-export type EmbeddableVisTrigger = Trigger<
+export type EmbeddableVisTrigger<ID extends string> = Trigger<
+  ID,
   EmbeddableVisTriggerContext,
   EmbeddableVisTriggerContext
 >;
 
 export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: EmbeddableVisTrigger = {
+export const selectRangeTrigger: EmbeddableVisTrigger<'SELECT_RANGE_TRIGGER'> = {
   id: SELECT_RANGE_TRIGGER,
   title: 'Select range',
   description: 'Applies a range filter',
 };
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const valueClickTrigger: EmbeddableVisTrigger = {
+export const valueClickTrigger: EmbeddableVisTrigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
   title: 'Value clicked',
   description: 'Value was clicked',

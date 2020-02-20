@@ -24,7 +24,7 @@ import {
   TriggerContextMapping,
 } from '../types';
 import { Action } from '../actions';
-import { Trigger, TriggerContextParams } from '../triggers/trigger';
+import { TriggerContextParams, AnyTrigger } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 
@@ -53,7 +53,7 @@ export class UiActionsService {
     this.triggerToActions = triggerToActions;
   }
 
-  public readonly registerTrigger = <T extends Trigger<any, any>>(trigger: T) => {
+  public readonly registerTrigger = <T extends AnyTrigger>(trigger: T) => {
     if (this.triggers.has(trigger.id)) {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
@@ -143,7 +143,7 @@ export class UiActionsService {
    *
    * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
    */
-  public readonly executeTriggerActions = async <T extends Trigger<any, any>>(
+  public readonly executeTriggerActions = async <T extends AnyTrigger>(
     triggerId: string,
     params: TriggerContextParams<T>
   ) => {

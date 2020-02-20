@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { Trigger, TriggerContextParams } from './trigger';
+import { AnyTrigger, TriggerContextParams } from './trigger';
 import { TriggerInternal } from './trigger_internal';
 
 /**
  * This is a public representation of a trigger that is provided to other plugins.
  */
-export class TriggerContract<T extends Trigger<any, any>> {
+export class TriggerContract<T extends AnyTrigger> {
   /**
    * Unique name of the trigger as identified in `ui_actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".

@@ -43,7 +43,6 @@ import {
   Container,
   selectRangeTrigger,
   valueClickTrigger,
-  EmbeddableVisTrigger,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';

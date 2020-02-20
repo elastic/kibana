@@ -29,6 +29,7 @@
  * single action to execute.
  */
 export interface Trigger<
+  ID extends string = string,
   Context extends object = object,
   CreateContextParams extends object = object
 > {
@@ -36,7 +37,7 @@ export interface Trigger<
    * Unique name of the trigger as identified in `ui_actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
    */
-  id: string;
+  id: ID;
 
   /**
    * User friendly name of the trigger.
@@ -55,7 +56,9 @@ export interface Trigger<
   createContext?: (params: CreateContextParams) => Context;
 }
 
-export type TriggerContext<T> = T extends Trigger<infer Context, any> ? Context : never;
-export type TriggerContextParams<T> = T extends Trigger<any, infer ContextParams>
+export type AnyTrigger = Trigger<any, any, any>;
+
+export type TriggerContext<T> = T extends Trigger<any, infer Context, any> ? Context : never;
+export type TriggerContextParams<T> = T extends Trigger<any, any, infer ContextParams>
   ? ContextParams
   : never;
