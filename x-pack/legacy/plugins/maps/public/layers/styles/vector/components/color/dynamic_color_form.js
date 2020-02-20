@@ -75,12 +75,7 @@ export function DynamicColorForm({
   };
 
   const renderColorMapSelect = () => {
-    // if (!styleOptions.field || !styleOptions.field.name) {
-    //   return null;
-    // }
-
     const field = getField();
-
     if (!field) {
       return null;
     }
