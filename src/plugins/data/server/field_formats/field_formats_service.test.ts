@@ -17,11 +17,18 @@
  * under the License.
  */
 
-export * from './timefilter/types';
-export * from './query/types';
-export * from './kbn_field_types/types';
-export * from './index_patterns/types';
-export {
-  TextContextTypeConvert,
-  IFieldFormatMetaParams, //  IFieldFormatType, // FieldFormat,
-} from './field_formats/types';
+import { FieldFormatsService } from './field_formats_service';
+import { DateFormat } from './converters/date_server';
+import { coreMock } from '../../../../core/server/mocks';
+
+describe('FieldFormatService', () => {
+  test('DateFormat is server version', async () => {
+    const service = new FieldFormatsService();
+    const fieldFormatsService = await service.start();
+    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
+    const fieldFormatsRegistry = await fieldFormatsService.fieldFormatServiceFactory(uiSettings);
+    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
+
+    expect(DateFormatFromRegsitry).toEqual(DateFormat);
+  });
+});
