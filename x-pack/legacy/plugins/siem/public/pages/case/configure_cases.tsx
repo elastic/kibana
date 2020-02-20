@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { WrapperPage } from '../../components/wrapper_page';
-import { HeaderPage } from '../../components/header_page';
+import { CaseHeaderPage } from './components/case_header_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { getCaseUrl } from '../../components/link_to';
 import * as i18n from './translations';
@@ -19,7 +19,7 @@ const backOptions = {
 const ConfigureCasesPageComponent: React.FC = () => (
   <>
     <WrapperPage>
-      <HeaderPage title={i18n.CONFIGURE_CASES} backOptions={backOptions} />
+      <CaseHeaderPage title={i18n.CONFIGURE_CASES} backOptions={backOptions} />
     </WrapperPage>
     <SpyRoute />
   </>
