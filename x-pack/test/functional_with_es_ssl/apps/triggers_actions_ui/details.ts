@@ -204,7 +204,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('renders the active alert instances', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/57426
+      it.skip('renders the active alert instances', async () => {
         const testBeganAt = moment().utc();
 
         // Verify content
