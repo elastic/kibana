@@ -33,7 +33,6 @@ import { dataFeedRoutes } from '../routes/datafeeds';
 import { indicesRoutes } from '../routes/indices';
 import { jobValidationRoutes } from '../routes/job_validation';
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
-// @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
