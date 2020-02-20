@@ -129,6 +129,14 @@ export const CustomMetricForm = withTheme(
           defaultMessage: 'Add custom metric',
         });
 
+    const titleAriaLabel = metric
+      ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.editAriaLabel', {
+          defaultMessage: 'Back to custom metrics edit mode',
+        })
+      : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.addAriaLabel', {
+          defaultMessage: 'Back to metric picker',
+        });
+
     return (
       <div style={{ width: 685 }}>
         <EuiForm>
@@ -140,6 +148,7 @@ export const CustomMetricForm = withTheme(
               size="xs"
               flush="left"
               style={{ fontWeight: 700, textTransform: 'uppercase' }}
+              aria-label={titleAriaLabel}
             >
               {title}
             </EuiButtonEmpty>

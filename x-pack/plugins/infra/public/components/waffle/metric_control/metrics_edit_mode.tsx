@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { getCustomMetricLabel } from './get_custom_metric_label';
 import { EuiTheme, withTheme } from '../../../../../../legacy/common/eui_styled_components';
@@ -35,13 +36,34 @@ export const MetricsEditMode = withTheme(
             style={{ padding: '10px 0px 9px' }}
           >
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH }}>
-              <EuiButtonIcon iconType="pencil" onClick={() => onEdit(metric)} />
+              <EuiButtonIcon
+                iconType="pencil"
+                onClick={() => onEdit(metric)}
+                aria-label={i18n.translate(
+                  'xpack.infra.waffle.customMetrics.editMode.editButtonAriaLabel',
+                  {
+                    defaultMessage: 'Edit custom metric for {name}',
+                    values: { name: getCustomMetricLabel(metric) },
+                  }
+                )}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={1} style={{ overflow: 'hidden' }}>
               {getCustomMetricLabel(metric)}
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH, textAlign: 'right' }}>
-              <EuiButtonIcon iconType="trash" color="danger" onClick={() => onDelete(metric)} />
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                onClick={() => onDelete(metric)}
+                aria-label={i18n.translate(
+                  'xpack.infra.waffle.customMetrics.editMode.deleteAriaLabel',
+                  {
+                    defaultMessage: 'Delete custom metric for {name}',
+                    values: { name: getCustomMetricLabel(metric) },
+                  }
+                )}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ))}

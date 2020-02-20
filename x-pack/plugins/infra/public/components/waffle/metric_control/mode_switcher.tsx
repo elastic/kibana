@@ -5,6 +5,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
@@ -36,7 +37,15 @@ export const ModeSwitcher = withTheme(
           {mode === 'edit' ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" flush="left" onClick={onEditCancel}>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="left"
+                  onClick={onEditCancel}
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.modeSwitcher.cancelAriaLabel',
+                    { defaultMessage: 'Cancel edit mode' }
+                  )}
+                >
                   <FormattedMessage
                     id="xpack.infra.waffle.customMetrics.modeSwitcher.cancel"
                     defaultMessage="Cancel"
@@ -44,7 +53,15 @@ export const ModeSwitcher = withTheme(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onSave} size="s" fill>
+                <EuiButton
+                  onClick={onSave}
+                  size="s"
+                  fill
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.modeSwitcher.saveButtonAriaLabel',
+                    { defaultMessage: 'Save changes to custom metrics' }
+                  )}
+                >
                   <FormattedMessage
                     id="xpack.infra.waffle.customMetrics.modeSwitcher.saveButton"
                     defaultMessage="Save"
@@ -60,6 +77,10 @@ export const ModeSwitcher = withTheme(
                   flush="left"
                   onClick={onEdit}
                   disabled={customMetrics.length === 0}
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.modeSwitcher.editAriaLabel',
+                    { defaultMessage: 'Edit custom metrics' }
+                  )}
                 >
                   <FormattedMessage
                     id="xpack.infra.waffle.customMetrics.modeSwitcher.edit"
@@ -68,7 +89,15 @@ export const ModeSwitcher = withTheme(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onAdd} size="s" flush="right">
+                <EuiButtonEmpty
+                  onClick={onAdd}
+                  size="s"
+                  flush="right"
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.modeSwitcher.addMetricAriaLabel',
+                    { defaultMessage: 'Add custom metric' }
+                  )}
+                >
                   <FormattedMessage
                     id="xpack.infra.waffle.customMetrics.modeSwitcher.addMetric"
                     defaultMessage="Add metric"
