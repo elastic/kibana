@@ -7,5 +7,3 @@
 export const PLUGIN_ID = 'painlessLab';
 
 export const API_ROUTE_EXECUTE = '/api/painless_lab/execute';
-
-export const ADVANCED_SETTINGS_FLAG_NAME = 'devTools:enablePainlessLab';
