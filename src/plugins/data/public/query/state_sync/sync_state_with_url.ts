@@ -51,7 +51,7 @@ export const syncQueryStateWithUrl = (
   // retrieve current state from `_g` url
   const initialStateFromUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY);
 
-  // remember whether there were info in the URL
+  // remember whether there was info in the URL
   const hasInheritedQueryFromUrl = Boolean(
     initialStateFromUrl && Object.keys(initialStateFromUrl).length
   );

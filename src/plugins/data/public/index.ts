@@ -294,7 +294,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  QueryStart,
   getTime,
   getQueryLog,
   FilterManager,

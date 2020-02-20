@@ -24,11 +24,9 @@ import { Router } from 'react-router-dom';
 
 import {
   EuiFieldText,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
   EuiPageHeader,
   EuiTitle,
 } from '@elastic/eui';
@@ -41,7 +39,6 @@ import {
   DataPublicPluginStart,
   IIndexPattern,
   QueryState,
-  QueryStart,
   Filter,
   esFilters,
 } from '../../../../../src/plugins/data/public';
@@ -55,7 +52,6 @@ import {
   syncState,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
-// import { Query } from '../../../../../src/plugins/data/common/query/types';
 
 interface StateDemoAppDeps {
   notifications: CoreStart['notifications'];
@@ -69,7 +65,8 @@ interface StateDemoAppDeps {
 interface AppState {
   name: string;
   filters: Filter[];
-  //  query?: Query;
+  // TODO: https://github.com/elastic/kibana/issues/58111
+  // query?: Query;
 }
 const defaultAppState: AppState = {
   name: '',
@@ -95,6 +92,8 @@ const App = ({
   useGlobalStateSyncing(data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
+  // TODO: https://github.com/elastic/kibana/issues/58111
+  // useEffect indefinite cycle inside TopNavManu
   // const onQuerySubmit = useCallback(
   //   ({ query }) => {
   //     appStateContainer.set({ ...appState, query });
@@ -116,7 +115,7 @@ const App = ({
             showSearchBar={true}
             indexPatterns={[indexPattern]}
             useDefaultBehaviors={true}
-            // TODO: would be cool to also get rid of this query syncing
+            // TODO: https://github.com/elastic/kibana/issues/58111
             // onQuerySubmit={onQuerySubmit}
             // query={appState.query}
           />
@@ -134,23 +133,12 @@ const App = ({
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="stateDemo.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created your first Kibana Plugin!"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
                 <EuiFieldText
-                  placeholder="My name is"
+                  placeholder="Additional application state: My name is..."
                   value={appState.name}
                   onChange={e => appStateContainer.set({ ...appState, name: e.target.value })}
                   aria-label="My name"
                 />
-                <EuiHorizontalRule />
               </EuiPageContent>
             </EuiPageBody>
           </EuiPage>
@@ -195,7 +183,10 @@ function useIndexPattern(data: DataPublicPluginStart) {
   return indexPattern;
 }
 
-function useGlobalStateSyncing(query: QueryStart, kbnUrlStateStorage: IKbnUrlStateStorage) {
+function useGlobalStateSyncing(
+  query: DataPublicPluginStart['query'],
+  kbnUrlStateStorage: IKbnUrlStateStorage
+) {
   // setup sync state utils
   useEffect(() => {
     // sync global filters, time filters, refresh interval from data.query to url '_g'
@@ -208,7 +199,7 @@ function useGlobalStateSyncing(query: QueryStart, kbnUrlStateStorage: IKbnUrlSta
 
 function useAppStateSyncing<AppState extends QueryState>(
   appStateContainer: BaseStateContainer<AppState>,
-  query: QueryStart,
+  query: DataPublicPluginStart['query'],
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) {
   // setup sync state utils
