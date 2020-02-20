@@ -41,6 +41,10 @@ exports[`Should render cancel button when drawing 1`] = `
                   "name": "Draw bounds to filter data",
                   "panel": 2,
                 },
+                Object {
+                  "name": "Draw distance to filter data",
+                  "panel": 3,
+                },
               ],
               "title": "Tools",
             },
@@ -85,6 +89,25 @@ exports[`Should render cancel button when drawing 1`] = `
               />,
               "id": 2,
               "title": "Draw bounds",
+            },
+            Object {
+              "content": <DistanceFilterForm
+                buttonLabel="Draw distance"
+                className="mapDrawControl__geometryFilterForm"
+                geoFields={
+                  Array [
+                    Object {
+                      "geoFieldName": "location",
+                      "geoFieldType": "geo_point",
+                      "indexPatternId": "1",
+                      "indexPatternTitle": "my_index",
+                    },
+                  ]
+                }
+                onSubmit={[Function]}
+              />,
+              "id": 3,
+              "title": "Draw distance",
             },
           ]
         }
@@ -144,6 +167,10 @@ exports[`renders 1`] = `
               "name": "Draw bounds to filter data",
               "panel": 2,
             },
+            Object {
+              "name": "Draw distance to filter data",
+              "panel": 3,
+            },
           ],
           "title": "Tools",
         },
@@ -188,6 +215,25 @@ exports[`renders 1`] = `
           />,
           "id": 2,
           "title": "Draw bounds",
+        },
+        Object {
+          "content": <DistanceFilterForm
+            buttonLabel="Draw distance"
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={
+              Array [
+                Object {
+                  "geoFieldName": "location",
+                  "geoFieldType": "geo_point",
+                  "indexPatternId": "1",
+                  "indexPatternTitle": "my_index",
+                },
+              ]
+            }
+            onSubmit={[Function]}
+          />,
+          "id": 3,
+          "title": "Draw distance",
         },
       ]
     }
