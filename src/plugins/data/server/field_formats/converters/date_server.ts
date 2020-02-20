@@ -20,13 +20,14 @@
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../common';
 import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
   TextContextTypeConvert,
   FIELD_FORMAT_IDS,
   FieldFormatsGetConfigFn,
   IFieldFormatMetaParams,
-} from '../../types';
+} from '../../../common';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
