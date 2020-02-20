@@ -13,7 +13,7 @@ jest.mock('./api');
 describe('useRule', () => {
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRule>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRule>(() =>
         useRule('myOwnRuleID')
       );
       await waitForNextUpdate();
@@ -23,7 +23,7 @@ describe('useRule', () => {
 
   test('fetch rule', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRule>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRule>(() =>
         useRule('myOwnRuleID')
       );
       await waitForNextUpdate();
@@ -31,8 +31,8 @@ describe('useRule', () => {
       expect(result.current).toEqual([
         false,
         {
-          created_at: 'mockUser',
-          created_by: 'mm/dd/yyyyTHH:MM:sssz',
+          created_at: 'mm/dd/yyyyTHH:MM:sssz',
+          created_by: 'mockUser',
           description: 'some desc',
           enabled: true,
           false_positives: [],
@@ -61,8 +61,8 @@ describe('useRule', () => {
           threat: [],
           to: 'now',
           type: 'query',
-          updated_at: 'mockUser',
-          updated_by: 'mm/dd/yyyyTHH:MM:sssz',
+          updated_at: 'mm/dd/yyyyTHH:MM:sssz',
+          updated_by: 'mockUser',
         },
       ]);
     });

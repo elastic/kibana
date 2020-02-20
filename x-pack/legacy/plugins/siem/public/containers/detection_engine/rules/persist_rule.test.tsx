@@ -20,7 +20,7 @@ describe('usePersistRule', () => {
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<unknown, ReturnPersistRule>(() =>
+      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnPersistRule>(() =>
         usePersistRule()
       );
       await waitForNextUpdate();
@@ -32,7 +32,7 @@ describe('usePersistRule', () => {
 
   test('saved rule with isSaved === true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPersistRule>(() =>
+      const { result, waitForNextUpdate } = renderHook<void, ReturnPersistRule>(() =>
         usePersistRule()
       );
       await waitForNextUpdate();

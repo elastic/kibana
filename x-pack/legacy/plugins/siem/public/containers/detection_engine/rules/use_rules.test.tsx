@@ -17,7 +17,10 @@ describe('useRules', () => {
   });
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRules>(props =>
+      const { result, waitForNextUpdate } = renderHook<
+        [PaginationOptions, FilterOptions],
+        ReturnRules
+      >(props =>
         useRules(
           {
             page: 1,
@@ -47,7 +50,10 @@ describe('useRules', () => {
 
   test('fetch rules', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRules>(() =>
+      const { result, waitForNextUpdate } = renderHook<
+        [PaginationOptions, FilterOptions],
+        ReturnRules
+      >(() =>
         useRules(
           {
             page: 1,
@@ -142,7 +148,10 @@ describe('useRules', () => {
   test('re-fetch rules', async () => {
     const spyOnfetchRules = jest.spyOn(api, 'fetchRules');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRules>(id =>
+      const { result, waitForNextUpdate } = renderHook<
+        [PaginationOptions, FilterOptions],
+        ReturnRules
+      >(id =>
         useRules(
           {
             page: 1,

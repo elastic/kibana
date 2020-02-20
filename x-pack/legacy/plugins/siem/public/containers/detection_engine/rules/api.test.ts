@@ -168,7 +168,7 @@ describe('Detections Rules API', () => {
       });
     });
 
-    test('check parameter url, query with showCustomeRules', async () => {
+    test('check parameter url, query with showCustomRules', async () => {
       mockfetchSuccess(null, fetchMock);
 
       await fetchRules({
@@ -707,7 +707,7 @@ describe('Detections Rules API', () => {
     test('unhappy path', async () => {
       mockfetchError();
       try {
-        await await exportRules({
+        await exportRules({
           ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
           signal: abortCtrl.signal,
         });

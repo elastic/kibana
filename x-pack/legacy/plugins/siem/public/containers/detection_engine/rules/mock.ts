@@ -35,8 +35,8 @@ export const ruleMock: NewRule = {
 };
 
 export const savedRuleMock: Rule = {
-  created_at: 'mockUser',
-  created_by: 'mm/dd/yyyyTHH:MM:sssz',
+  created_at: 'mm/dd/yyyyTHH:MM:sssz',
+  created_by: 'mockUser',
   description: 'some desc',
   enabled: true,
   false_positives: [],
@@ -65,8 +65,8 @@ export const savedRuleMock: Rule = {
   to: 'now',
   type: 'query',
   threat: [],
-  updated_at: 'mockUser',
-  updated_by: 'mm/dd/yyyyTHH:MM:sssz',
+  updated_at: 'mm/dd/yyyyTHH:MM:sssz',
+  updated_by: 'mockUser',
 };
 
 export const rulesMock: FetchRulesResponse = {

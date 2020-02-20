@@ -13,7 +13,7 @@ jest.mock('./api');
 describe('useRuleStatus', () => {
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRuleStatus>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
         useRuleStatus('myOwnRuleID')
       );
       await waitForNextUpdate();
@@ -23,7 +23,7 @@ describe('useRuleStatus', () => {
 
   test('fetch rule status', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRuleStatus>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
         useRuleStatus('myOwnRuleID')
       );
       await waitForNextUpdate();
@@ -50,7 +50,7 @@ describe('useRuleStatus', () => {
   test('re-fetch rule status', async () => {
     const spyOngetRuleStatusById = jest.spyOn(api, 'getRuleStatusById');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnRuleStatus>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
         useRuleStatus('myOwnRuleID')
       );
       await waitForNextUpdate();
