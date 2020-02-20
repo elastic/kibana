@@ -14,7 +14,7 @@ interface FormatColumn {
 
 const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) => string }> = {
   number: {
-    decimalsToPattern: (decimals = 3) => {
+    decimalsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0`;
       }
@@ -22,7 +22,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
     },
   },
   percent: {
-    decimalsToPattern: (decimals = 3) => {
+    decimalsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0%`;
       }
@@ -30,7 +30,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
     },
   },
   bytes: {
-    decimalsToPattern: (decimals = 3) => {
+    decimalsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0b`;
       }

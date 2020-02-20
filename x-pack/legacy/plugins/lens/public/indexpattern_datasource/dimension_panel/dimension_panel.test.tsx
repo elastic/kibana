@@ -1124,7 +1124,7 @@ describe('IndexPatternDimensionPanel', () => {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
               params: {
-                format: { id: 'bytes', params: { decimals: 3 } },
+                format: { id: 'bytes', params: { decimals: 2 } },
               },
             }),
           },
@@ -1199,7 +1199,7 @@ describe('IndexPatternDimensionPanel', () => {
               operationType: 'avg',
               sourceField: 'bar',
               params: {
-                format: { id: 'bytes', params: { decimals: 3 } },
+                format: { id: 'bytes', params: { decimals: 2 } },
               },
             },
           },

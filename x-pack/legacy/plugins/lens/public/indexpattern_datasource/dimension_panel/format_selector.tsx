@@ -45,7 +45,7 @@ export function FormatSelector(props: FormatSelectorProps) {
       : undefined;
   const [state, setState] = useState<State>({
     decimalPlaces:
-      typeof currentFormat?.params?.decimals === 'number' ? currentFormat.params.decimals : 3,
+      typeof currentFormat?.params?.decimals === 'number' ? currentFormat.params.decimals : 2,
   });
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
