@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObject, SavedObjectConfig } from '../types';
+import { SavedObject, SavedObjectConfig } from '../../types';
 
 /**
  * Initialize saved object

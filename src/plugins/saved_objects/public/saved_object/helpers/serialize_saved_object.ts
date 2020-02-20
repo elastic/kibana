@@ -18,8 +18,8 @@
  */
 import _ from 'lodash';
 import angular from 'angular';
-import { SavedObject, SavedObjectConfig } from '../types';
-import { expandShorthand } from '../../../../../plugins/kibana_utils/public';
+import { SavedObject, SavedObjectConfig } from '../../types';
+import { expandShorthand } from '../../../../kibana_utils/public';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose

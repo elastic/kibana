@@ -17,25 +17,32 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
-import sinon from 'sinon';
 import Bluebird from 'bluebird';
+import { createSavedObjectClass } from './saved_object';
+import {
+  SavedObject,
+  SavedObjectConfig,
+  SavedObjectKibanaServices,
+  SavedObjectSaveOpts,
+} from '../types';
 
-import { createSavedObjectClass } from '../saved_object';
+// @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
-import { npStart } from 'ui/new_platform';
-import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
-import { npSetup, npStart as npStartMock } from '../../new_platform/new_platform.karma_mock';
+import { InvalidJSONProperty } from '../../../kibana_utils/public';
+import { coreMock } from '../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../plugins/data/public/mocks';
+import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
+import { IIndexPattern } from '../../../data/common/index_patterns';
 
-const getConfig = cfg => cfg;
+const getConfig = (cfg: any) => cfg;
 
-describe('Saved Object', function() {
-  require('test_utils/no_digest_promises').activateForSuite();
+describe('Saved Object', () => {
+  const startMock = coreMock.createStart();
+  const dataStartMock = dataPluginMock.createStartContract();
+  const saveOptionsMock = {} as SavedObjectSaveOpts;
 
-  let SavedObject;
-  let savedObjectsClientStub;
-  let window;
+  let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
+  const savedObjectsClientStub = startMock.savedObjects.client;
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
@@ -44,31 +51,41 @@ describe('Saved Object', function() {
    * @param additionalOptions - object that will be assigned to the mocked doc response.
    * @returns {{attributes: {}, type: string, id: *, _version: string}}
    */
-  function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
+  function getMockedDocResponse(indexPatternId: string, additionalOptions = {}) {
     return {
       type: 'dashboard',
       id: indexPatternId,
       _version: 'foo',
       attributes: {},
       ...additionalOptions,
-    };
+    } as SimpleSavedObject<SavedObjectAttributes>;
   }
 
   /**
    * Stubs some of the es retrieval calls so it returns the given response.
    * @param {Object} mockDocResponse
    */
-  function stubESResponse(mockDocResponse) {
+  function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
-    sinon.stub(savedObjectsClientStub, 'get').returns(Bluebird.resolve(mockDocResponse));
-    sinon.stub(savedObjectsClientStub, 'update').returns(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
 
-    sinon
-      .stub(savedObjectsClientStub, 'find')
-      .returns(Bluebird.resolve({ savedObjects: [], total: 0 }));
-    sinon
-      .stub(savedObjectsClientStub, 'bulkGet')
-      .returns(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+    savedObjectsClientStub.find = jest
+      .fn()
+      .mockReturnValue(Bluebird.resolve({ savedObjects: [], total: 0 }));
+
+    savedObjectsClientStub.bulkGet = jest
+      .fn()
+      .mockReturnValue(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+  }
+
+  function stubSavedObjectsClientCreate(
+    resp: SimpleSavedObject<SavedObjectAttributes> | string,
+    resolve = true
+  ) {
+    savedObjectsClientStub.create = jest
+      .fn()
+      .mockReturnValue(resolve ? Bluebird.resolve(resp) : Bluebird.reject(resp));
   }
 
   /**
@@ -79,168 +96,138 @@ describe('Saved Object', function() {
    * @returns {Promise<SavedObject>} A promise that resolves with an instance of
    * SavedObject
    */
-  function createInitializedSavedObject(config = {}) {
-    const savedObject = new SavedObject(config);
+  function createInitializedSavedObject(config: SavedObjectConfig = {}) {
+    const savedObject = new SavedObjectClass(config);
     savedObject.title = 'my saved object';
-    return savedObject.init();
-  }
-
-  function restoreIfWrapped(obj, fName) {
-    obj[fName].restore && obj[fName].restore();
+    return savedObject.init!();
   }
 
   beforeEach(() => {
-    // Use the native window.confirm instead of our specialized version to make testing
-    // this easier.
-    npStartMock.core.overlays.openModal = message =>
-      window.confirm(message) ? Promise.resolve() : Promise.reject();
+    SavedObjectClass = createSavedObjectClass({
+      savedObjectsClient: savedObjectsClientStub,
+      indexPatterns: dataStartMock.indexPatterns,
+    } as SavedObjectKibanaServices);
   });
 
-  beforeEach(
-    ngMock.inject(function($window) {
-      savedObjectsClientStub = npStart.core.savedObjects.client;
-      SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
-      window = $window;
-    })
-  );
-
-  afterEach(
-    ngMock.inject(function() {
-      restoreIfWrapped(savedObjectsClientStub, 'create');
-      restoreIfWrapped(savedObjectsClientStub, 'get');
-      restoreIfWrapped(savedObjectsClientStub, 'update');
-      restoreIfWrapped(savedObjectsClientStub, 'find');
-      restoreIfWrapped(savedObjectsClientStub, 'bulkGet');
-    })
-  );
-
-  describe('save', function() {
-    describe('with confirmOverwrite', function() {
-      function stubConfirmOverwrite() {
-        window.confirm = sinon.stub().returns(true);
-      }
-
-      it('when false does not request overwrite', function() {
-        const mockDocResponse = getMockedDocResponse('myId');
-        stubESResponse(mockDocResponse);
+  describe('save', () => {
+    describe('with confirmOverwrite', () => {
+      it('when false does not request overwrite', () => {
+        stubESResponse(getMockedDocResponse('myId'));
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          stubConfirmOverwrite();
-
-          sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.resolve({ id: 'myId' }));
+          stubSavedObjectsClientCreate({ id: 'myId' } as SimpleSavedObject<SavedObjectAttributes>);
 
           return savedObject.save({ confirmOverwrite: false }).then(() => {
-            expect(window.confirm.called).to.be(false);
+            expect(startMock.overlays.openModal).not.toHaveBeenCalled();
           });
         });
       });
     });
 
-    describe('with copyOnSave', function() {
-      it('as true creates a copy on save success', function() {
-        const mockDocResponse = getMockedDocResponse('myId');
-        stubESResponse(mockDocResponse);
-        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            return Bluebird.resolve({ type: 'dashboard', id: 'newUniqueId' });
-          });
+    describe('with copyOnSave', () => {
+      it('as true creates a copy on save success', () => {
+        stubESResponse(getMockedDocResponse('myId'));
 
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+          stubSavedObjectsClientCreate({
+            type: 'dashboard',
+            id: 'newUniqueId',
+          } as SimpleSavedObject<SavedObjectAttributes>);
           savedObject.copyOnSave = true;
-          return savedObject.save().then(id => {
-            expect(id).to.be('newUniqueId');
+
+          return savedObject.save(saveOptionsMock).then(id => {
+            expect(id).toBe('newUniqueId');
           });
         });
       });
 
-      it('as true does not create a copy when save fails', function() {
+      it('as true does not create a copy when save fails', () => {
         const originalId = 'id1';
-        const mockDocResponse = getMockedDocResponse(originalId);
-        stubESResponse(mockDocResponse);
+        stubESResponse(getMockedDocResponse(originalId));
+
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(
           savedObject => {
-            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return Bluebird.reject('simulated error');
-            });
+            stubSavedObjectsClientCreate('simulated error', false);
             savedObject.copyOnSave = true;
+
             return savedObject
-              .save()
+              .save(saveOptionsMock)
               .then(() => {
-                throw new Error('Expected a rejection');
+                expect(false).toBe(true);
               })
               .catch(() => {
-                expect(savedObject.id).to.be(originalId);
+                expect(savedObject.id).toBe(originalId);
               });
           }
         );
       });
 
-      it('as false does not create a copy', function() {
-        const id = 'myId';
-        const mockDocResponse = getMockedDocResponse(id);
-        stubESResponse(mockDocResponse);
+      it('as false does not create a copy', () => {
+        const myId = 'myId';
+        stubESResponse(getMockedDocResponse(myId));
 
-        return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            expect(savedObject.id).to.be(id);
-            return Bluebird.resolve(id);
+        return createInitializedSavedObject({ type: 'dashboard', id: myId }).then(savedObject => {
+          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
+            expect(savedObject.id).toBe(myId);
+            return Bluebird.resolve({ id: myId });
           });
           savedObject.copyOnSave = false;
-          return savedObject.save().then(id => {
-            expect(id).to.be(id);
+
+          return savedObject.save(saveOptionsMock).then(id => {
+            expect(id).toBe(myId);
           });
         });
       });
     });
 
-    it('returns id from server on success', function() {
+    it('returns id from server on success', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-        const mockDocResponse = getMockedDocResponse('myId');
-        sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return Bluebird.resolve({
-            type: 'dashboard',
-            id: 'myId',
-            _version: 'foo',
-          });
-        });
+        stubESResponse(getMockedDocResponse('myId'));
+        stubSavedObjectsClientCreate({
+          type: 'dashboard',
+          id: 'myId',
+          _version: 'foo',
+        } as SimpleSavedObject<SavedObjectAttributes>);
 
-        stubESResponse(mockDocResponse);
-        return savedObject.save().then(id => {
-          expect(id).to.be('myId');
+        return savedObject.save(saveOptionsMock).then(id => {
+          expect(id).toBe('myId');
         });
       });
     });
 
-    describe('updates isSaving variable', function() {
-      it('on success', function() {
+    describe('updates isSaving variable', () => {
+      it('on success', () => {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
 
-        return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            expect(savedObject.isSaving).to.be(true);
+        return createInitializedSavedObject({ type: 'dashboard', id }).then(savedObject => {
+          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
+            expect(savedObject.isSaving).toBe(true);
             return Bluebird.resolve({
               type: 'dashboard',
               id,
-              version: 'foo',
+              _version: 'foo',
             });
           });
-          expect(savedObject.isSaving).to.be(false);
-          return savedObject.save().then(() => {
-            expect(savedObject.isSaving).to.be(false);
+
+          expect(savedObject.isSaving).toBe(false);
+          return savedObject.save(saveOptionsMock).then(() => {
+            expect(savedObject.isSaving).toBe(false);
           });
         });
       });
 
-      it('on failure', function() {
+      it('on failure', () => {
         stubESResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            expect(savedObject.isSaving).to.be(true);
-            return Bluebird.reject();
+          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
+            expect(savedObject.isSaving).toBe(true);
+            return Bluebird.reject('');
           });
-          expect(savedObject.isSaving).to.be(false);
-          return savedObject.save().catch(() => {
-            expect(savedObject.isSaving).to.be(false);
+
+          expect(savedObject.isSaving).toBe(false);
+          return savedObject.save(saveOptionsMock).catch(() => {
+            expect(savedObject.isSaving).toBe(false);
           });
         });
       });
@@ -250,7 +237,10 @@ describe('Saved Object', function() {
       it('when "extractReferences" function when passed in', async () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
-        const extractReferences = ({ attributes, references }) => {
+        const extractReferences: SavedObjectConfig['extractReferences'] = ({
+          attributes,
+          references,
+        }) => {
           references.push({
             name: 'test',
             type: 'index-pattern',
@@ -260,17 +250,16 @@ describe('Saved Object', function() {
         };
         return createInitializedSavedObject({ type: 'dashboard', extractReferences }).then(
           savedObject => {
-            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return Bluebird.resolve({
-                id,
-                version: 'foo',
-                type: 'dashboard',
-              });
-            });
-            return savedObject.save().then(() => {
-              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-              expect(references).to.have.length(1);
-              expect(references[0]).to.eql({
+            stubSavedObjectsClientCreate({
+              id,
+              _version: 'foo',
+              type: 'dashboard',
+            } as SimpleSavedObject<SavedObjectAttributes>);
+
+            return savedObject.save(saveOptionsMock).then(() => {
+              const { references } = (savedObjectsClientStub.create as jest.Mock).mock.calls[0][2];
+              expect(references).toHaveLength(1);
+              expect(references[0]).toEqual({
                 name: 'test',
                 type: 'index-pattern',
                 id: 'my-index',
@@ -285,33 +274,33 @@ describe('Saved Object', function() {
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           savedObject => {
-            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return Bluebird.resolve({
-                id,
-                version: 2,
-                type: 'dashboard',
-              });
-            });
+            stubSavedObjectsClientCreate({
+              id,
+              _version: '2',
+              type: 'dashboard',
+            } as SimpleSavedObject<SavedObjectAttributes>);
+
             const indexPattern = new StubIndexPattern(
               'my-index',
               getConfig,
               null,
               [],
-              npSetup.core
+              coreMock.createSetup()
             );
             indexPattern.title = indexPattern.id;
-            savedObject.searchSource.setField('index', indexPattern);
-            return savedObject.save().then(() => {
-              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+            savedObject.searchSource!.setField('index', indexPattern);
+            return savedObject.save(saveOptionsMock).then(() => {
+              const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
+              expect(args[1]).toEqual({
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
                     indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
-              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-              expect(references).to.have.length(1);
-              expect(references[0]).to.eql({
+
+              expect(args[2].references).toHaveLength(1);
+              expect(args[2].references[0]).toEqual({
                 name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'my-index',
@@ -326,25 +315,31 @@ describe('Saved Object', function() {
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           savedObject => {
-            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return Bluebird.resolve({
-                id,
-                version: 2,
-                type: 'dashboard',
-              });
-            });
-            savedObject.searchSource.setFields({ index: 'non-existant-index' });
-            return savedObject.save().then(() => {
-              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+            stubSavedObjectsClientCreate({
+              id,
+              _version: '2',
+              type: 'dashboard',
+            } as SimpleSavedObject<SavedObjectAttributes>);
+
+            const indexPattern = new StubIndexPattern(
+              'non-existant-index',
+              getConfig,
+              null,
+              [],
+              coreMock.createSetup()
+            );
+            savedObject.searchSource!.setFields({ index: indexPattern });
+            return savedObject.save(saveOptionsMock).then(() => {
+              const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
+              expect(args[1]).toEqual({
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
                     indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
-              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-              expect(references).to.have.length(1);
-              expect(references[0]).to.eql({
+              expect(args[2].references).toHaveLength(1);
+              expect(args[2].references[0]).toEqual({
                 name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'non-existant-index',
@@ -359,22 +354,22 @@ describe('Saved Object', function() {
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           savedObject => {
-            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return Bluebird.resolve({
-                id,
-                version: 2,
-                type: 'dashboard',
-              });
-            });
-            savedObject.searchSource.setField('filter', [
+            stubSavedObjectsClientCreate({
+              id,
+              _version: '2',
+              type: 'dashboard',
+            } as SimpleSavedObject<SavedObjectAttributes>);
+
+            savedObject.searchSource!.setField('filter', [
               {
                 meta: {
                   index: 'my-index',
                 },
               },
-            ]);
-            return savedObject.save().then(() => {
-              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+            ] as any);
+            return savedObject.save(saveOptionsMock).then(() => {
+              const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
+              expect(args[1]).toEqual({
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
                     filter: [
@@ -388,9 +383,8 @@ describe('Saved Object', function() {
                   }),
                 },
               });
-              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-              expect(references).to.have.length(1);
-              expect(references[0]).to.eql({
+              expect(args[2].references).toHaveLength(1);
+              expect(args[2].references[0]).toEqual({
                 name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                 type: 'index-pattern',
                 id: 'my-index',
@@ -402,20 +396,20 @@ describe('Saved Object', function() {
     });
   });
 
-  describe('applyESResp', function() {
-    it('throws error if not found', function() {
+  describe('applyESResp', () => {
+    it('throws error if not found', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
-        const response = {};
+        const response = { _source: {} };
         try {
           savedObject.applyESResp(response);
-          expect(true).to.be(false);
+          expect(true).toBe(false);
         } catch (err) {
-          expect(!!err).to.be(true);
+          expect(!!err).toBe(true);
         }
       });
     });
 
-    it('throws error invalid JSON is detected', async function() {
+    it('throws error invalid JSON is detected', async () => {
       const savedObject = await createInitializedSavedObject({
         type: 'dashboard',
         searchSource: true,
@@ -433,11 +427,11 @@ describe('Saved Object', function() {
         await savedObject.applyESResp(response);
         throw new Error('applyESResp should have failed, but did not.');
       } catch (err) {
-        expect(err instanceof InvalidJSONProperty).to.be(true);
+        expect(err instanceof InvalidJSONProperty).toBe(true);
       }
     });
 
-    it('preserves original defaults if not overridden', function() {
+    it('preserves original defaults if not overridden', () => {
       const id = 'anid';
       const preserveMeValue = 'here to stay!';
       const config = {
@@ -445,43 +439,40 @@ describe('Saved Object', function() {
           preserveMe: preserveMeValue,
         },
         type: 'dashboard',
-        id: id,
+        id,
       };
 
       const mockDocResponse = getMockedDocResponse(id);
       stubESResponse(mockDocResponse);
 
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
-          expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
+          expect(savedObject._source.preserveMe).toEqual(preserveMeValue);
           const response = { found: true, _source: {} };
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
+          expect(savedObject._source.preserveMe).toEqual(preserveMeValue);
         });
     });
 
-    it('overrides defaults', function() {
+    it('overrides defaults', () => {
       const id = 'anid';
       const config = {
         defaults: {
           flower: 'rose',
         },
         type: 'dashboard',
-        id: id,
+        id,
       };
 
-      const mockDocResponse = getMockedDocResponse(id);
-      stubESResponse(mockDocResponse);
+      stubESResponse(getMockedDocResponse(id));
 
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
-          expect(savedObject._source.flower).to.equal('rose');
+          expect(savedObject._source.flower).toEqual('rose');
           const response = {
             found: true,
             _source: {
@@ -491,11 +482,11 @@ describe('Saved Object', function() {
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(savedObject._source.flower).to.equal('orchid');
+          expect(savedObject._source.flower).toEqual('orchid');
         });
     });
 
-    it('overrides previous _source and default values', function() {
+    it('overrides previous _source and default values', () => {
       const id = 'anid';
       const config = {
         defaults: {
@@ -504,7 +495,7 @@ describe('Saved Object', function() {
           },
         },
         type: 'dashboard',
-        id: id,
+        id,
       };
 
       const mockDocResponse = getMockedDocResponse(id, {
@@ -512,9 +503,8 @@ describe('Saved Object', function() {
       });
       stubESResponse(mockDocResponse);
 
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
           const response = {
             found: true,
@@ -524,19 +514,18 @@ describe('Saved Object', function() {
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(savedObject._source.dinosaurs.tRex).to.equal('has big teeth');
+          expect((savedObject._source as any).dinosaurs.tRex).toEqual('has big teeth');
         });
     });
 
     it('does not inject references when references array is missing', async () => {
-      const injectReferences = sinon.stub();
+      const injectReferences = jest.fn();
       const config = {
         type: 'dashboard',
         injectReferences,
       };
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
           const response = {
             found: true,
@@ -547,19 +536,18 @@ describe('Saved Object', function() {
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(injectReferences).to.have.property('notCalled', true);
+          expect(injectReferences).not.toHaveBeenCalled();
         });
     });
 
     it('does not inject references when references array is empty', async () => {
-      const injectReferences = sinon.stub();
+      const injectReferences = jest.fn();
       const config = {
         type: 'dashboard',
         injectReferences,
       };
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
           const response = {
             found: true,
@@ -571,19 +559,18 @@ describe('Saved Object', function() {
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(injectReferences).to.have.property('notCalled', true);
+          expect(injectReferences).not.toHaveBeenCalled();
         });
     });
 
     it('injects references when function is provided and references exist', async () => {
-      const injectReferences = sinon.stub();
+      const injectReferences = jest.fn();
       const config = {
         type: 'dashboard',
         injectReferences,
       };
-      const savedObject = new SavedObject(config);
-      return savedObject
-        .init()
+      const savedObject = new SavedObjectClass(config);
+      return savedObject.init!()
         .then(() => {
           const response = {
             found: true,
@@ -595,13 +582,13 @@ describe('Saved Object', function() {
           return savedObject.applyESResp(response);
         })
         .then(() => {
-          expect(injectReferences).to.have.property('calledOnce', true);
+          expect(injectReferences).toHaveBeenCalledTimes(1);
         });
     });
 
     it('injects references from searchSourceJSON', async () => {
-      const savedObject = new SavedObject({ type: 'dashboard', searchSource: true });
-      return savedObject.init().then(() => {
+      const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
+      return savedObject.init!().then(() => {
         const response = {
           found: true,
           _source: {
@@ -632,7 +619,7 @@ describe('Saved Object', function() {
           ],
         };
         savedObject.applyESResp(response);
-        expect(savedObject.searchSource.getFields()).to.eql({
+        expect(savedObject.searchSource!.getFields()).toEqual({
           index: 'my-index-1',
           filter: [
             {
@@ -646,119 +633,115 @@ describe('Saved Object', function() {
     });
   });
 
-  describe('config', function() {
-    it('afterESResp is called', function() {
-      const afterESRespCallback = sinon.spy();
+  describe('config', () => {
+    it('afterESResp is called', () => {
+      const afterESRespCallback = jest.fn();
       const config = {
         type: 'dashboard',
         afterESResp: afterESRespCallback,
       };
 
       return createInitializedSavedObject(config).then(() => {
-        expect(afterESRespCallback.called).to.be(true);
+        expect(afterESRespCallback).toHaveBeenCalled();
       });
     });
 
-    describe('searchSource', function() {
-      it('when true, creates index', function() {
+    describe('searchSource', () => {
+      it('when true, creates index', () => {
         const indexPatternId = 'testIndexPattern';
-        const afterESRespCallback = sinon.spy();
+        const afterESRespCallback = jest.fn();
 
-        const config = {
+        const config: SavedObjectConfig = {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: indexPatternId,
+          indexPattern: { id: indexPatternId } as IIndexPattern,
         };
 
-        stubESResponse({
-          id: indexPatternId,
-          type: 'dashboard',
-          attributes: {
-            title: 'testIndexPattern',
-          },
-          _version: 'foo',
-        });
+        stubESResponse(
+          getMockedDocResponse(indexPatternId, {
+            attributes: {
+              title: 'testIndexPattern',
+            },
+          })
+        );
 
-        const savedObject = new SavedObject(config);
-        sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
+        const savedObject = new SavedObjectClass(config);
+        savedObject.hydrateIndexPattern = jest.fn().mockImplementation(() => {
           const indexPattern = new StubIndexPattern(
             indexPatternId,
             getConfig,
             null,
             [],
-            npSetup.core
+            coreMock.createSetup()
           );
           indexPattern.title = indexPattern.id;
-          savedObject.searchSource.setField('index', indexPattern);
-          return Promise.resolve(indexPattern);
+          savedObject.searchSource!.setField('index', indexPattern);
+          return Bluebird.resolve(indexPattern);
         });
-        expect(!!savedObject.searchSource.getField('index')).to.be(false);
+        expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 
-        return savedObject.init().then(() => {
-          expect(afterESRespCallback.called).to.be(true);
-          const index = savedObject.searchSource.getField('index');
-          expect(index instanceof StubIndexPattern).to.be(true);
-          expect(index.id).to.equal(indexPatternId);
+        return savedObject.init!().then(() => {
+          expect(afterESRespCallback).toHaveBeenCalled();
+          const index = savedObject.searchSource!.getField('index');
+          expect(index instanceof StubIndexPattern).toBe(true);
+          expect(index!.id).toEqual(indexPatternId);
         });
       });
 
-      it('when false, does not create index', function() {
+      it('when false, does not create index', () => {
         const indexPatternId = 'testIndexPattern';
-        const afterESRespCallback = sinon.spy();
+        const afterESRespCallback = jest.fn();
 
-        const config = {
+        const config: SavedObjectConfig = {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: indexPatternId,
+          indexPattern: { id: indexPatternId } as IIndexPattern,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));
 
-        const savedObject = new SavedObject(config);
-        expect(!!savedObject.searchSource).to.be(false);
+        const savedObject = new SavedObjectClass(config);
+        expect(!!savedObject.searchSource).toBe(false);
 
-        return savedObject.init().then(() => {
-          expect(afterESRespCallback.called).to.be(true);
-          expect(!!savedObject.searchSource).to.be(false);
+        return savedObject.init!().then(() => {
+          expect(afterESRespCallback).toHaveBeenCalled();
+          expect(!!savedObject.searchSource).toBe(false);
         });
       });
     });
 
-    describe('type', function() {
-      it('that is not specified throws an error', function() {
+    describe('type', () => {
+      it('that is not specified throws an error', done => {
         const config = {};
 
-        const savedObject = new SavedObject(config);
-        try {
-          savedObject.init();
-          expect(false).to.be(true);
-        } catch (err) {
-          expect(err).to.not.be(null);
-        }
+        const savedObject = new SavedObjectClass(config);
+        savedObject.init!().catch(() => {
+          done();
+        });
       });
 
-      it('that is invalid invalid throws an error', function() {
+      it('that is invalid invalid throws an error', () => {
         const config = { type: 'notypeexists' };
 
-        const savedObject = new SavedObject(config);
+        const savedObject = new SavedObjectClass(config);
         try {
-          savedObject.init();
-          expect(false).to.be(true);
+          savedObject.init!();
+          expect(false).toBe(true);
         } catch (err) {
-          expect(err).to.not.be(null);
+          expect(err).not.toBeNull();
         }
       });
 
-      it('that is valid passes', function() {
+      it('that is valid passes', () => {
         const config = { type: 'dashboard' };
-        return new SavedObject(config).init();
+        return new SavedObjectClass(config).init!();
       });
     });
 
-    describe('defaults', function() {
-      function getTestDefaultConfig(extraOptions) {
+    describe('defaults', () => {
+      function getTestDefaultConfig(extraOptions: object = {}) {
         return {
           defaults: { testDefault: 'hi' },
           type: 'dashboard',
@@ -766,31 +749,31 @@ describe('Saved Object', function() {
         };
       }
 
-      function expectDefaultApplied(config) {
+      function expectDefaultApplied(config: SavedObjectConfig) {
         return createInitializedSavedObject(config).then(savedObject => {
-          expect(savedObject.defaults).to.be(config.defaults);
+          expect(savedObject.defaults).toBe(config.defaults);
         });
       }
 
-      describe('applied to object when id', function() {
-        it('is not specified', function() {
+      describe('applied to object when id', () => {
+        it('is not specified', () => {
           expectDefaultApplied(getTestDefaultConfig());
         });
 
-        it('is undefined', function() {
+        it('is undefined', () => {
           expectDefaultApplied(getTestDefaultConfig({ id: undefined }));
         });
 
-        it('is 0', function() {
+        it('is 0', () => {
           expectDefaultApplied(getTestDefaultConfig({ id: 0 }));
         });
 
-        it('is false', function() {
+        it('is false', () => {
           expectDefaultApplied(getTestDefaultConfig({ id: false }));
         });
       });
 
-      it('applied to source if an id is given', function() {
+      it('applied to source if an id is given', () => {
         const myId = 'myid';
         const customDefault = 'hi';
         const initialOverwriteMeValue = 'this should get overwritten by the server response';
@@ -798,7 +781,7 @@ describe('Saved Object', function() {
         const config = {
           defaults: {
             overwriteMe: initialOverwriteMeValue,
-            customDefault: customDefault,
+            customDefault,
           },
           type: 'dashboard',
           id: myId,
@@ -813,10 +796,10 @@ describe('Saved Object', function() {
         stubESResponse(mockDocResponse);
 
         return createInitializedSavedObject(config).then(savedObject => {
-          expect(!!savedObject._source).to.be(true);
-          expect(savedObject.defaults).to.be(config.defaults);
-          expect(savedObject._source.overwriteMe).to.be(serverValue);
-          expect(savedObject._source.customDefault).to.be(customDefault);
+          expect(!!savedObject._source).toBe(true);
+          expect(savedObject.defaults).toBe(config.defaults);
+          expect(savedObject._source.overwriteMe).toBe(serverValue);
+          expect(savedObject._source.customDefault).toBe(customDefault);
         });
       });
     });

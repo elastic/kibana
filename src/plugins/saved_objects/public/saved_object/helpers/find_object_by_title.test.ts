@@ -17,37 +17,35 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import expect from '@kbn/expect';
-import { findObjectByTitle } from '../helpers/find_object_by_title';
-import { SimpleSavedObject } from '../../../../../core/public';
+import { findObjectByTitle } from './find_object_by_title';
+import {
+  SimpleSavedObject,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '../../../../../core/public';
 
 describe('findObjectByTitle', () => {
-  const sandbox = sinon.createSandbox();
-  const savedObjectsClient = {};
+  const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;
 
   beforeEach(() => {
-    savedObjectsClient.find = sandbox.stub();
+    savedObjectsClient.find = jest.fn();
   });
 
-  afterEach(() => sandbox.restore());
-
   it('returns undefined if title is not provided', async () => {
-    const match = await findObjectByTitle(savedObjectsClient, 'index-pattern');
-    expect(match).to.be(undefined);
+    const match = await findObjectByTitle(savedObjectsClient, 'index-pattern', '');
+    expect(match).toBeUndefined();
   });
 
   it('matches any case', async () => {
     const indexPattern = new SimpleSavedObject(savedObjectsClient, {
       attributes: { title: 'foo' },
-    });
-    savedObjectsClient.find.returns(
+    } as SavedObject);
+    savedObjectsClient.find = jest.fn().mockImplementation(() =>
       Promise.resolve({
         savedObjects: [indexPattern],
       })
     );
-
     const match = await findObjectByTitle(savedObjectsClient, 'index-pattern', 'FOO');
-    expect(match).to.eql(indexPattern);
+    expect(match).toEqual(indexPattern);
   });
 });
