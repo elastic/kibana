@@ -49,6 +49,9 @@ export {
   TimeRange,
 } from '../common';
 
+export { DateFormat } from './field_formats';
+export { baseFormattersPublic } from './field_formats/constants';
+
 /**
  * Static code to be shared externally
  * @public
@@ -68,7 +71,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DEFAULT_CONVERTER_COLOR,
   DurationFormat,

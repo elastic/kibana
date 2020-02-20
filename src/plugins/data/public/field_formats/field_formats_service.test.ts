@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export { DEFAULT_CONVERTER_COLOR } from './color_default';
-export { baseFormatters } from './base_formatters';
+import { FieldFormatsService } from './field_formats_service';
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { DateFormat } from './converters/date';
+
+describe('FieldFormatService', () => {
+  test('DateFormat is public version', () => {
+    const mockCore = coreMock.createSetup();
+    const service = new FieldFormatsService();
+    service.setup(mockCore);
+    const fieldFormatsRegistry = service.start();
+    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
+
+    expect(DateFormatFromRegsitry).toEqual(DateFormat);
+  });
+});

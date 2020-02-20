@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { DEFAULT_CONVERTER_COLOR } from './color_default';
-export { baseFormatters } from './base_formatters';
+export { DateFormat } from './date';

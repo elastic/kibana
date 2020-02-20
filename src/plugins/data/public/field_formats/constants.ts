@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { DEFAULT_CONVERTER_COLOR } from './color_default';
-export { baseFormatters } from './base_formatters';
+import { baseFormatters } from '../../common';
+import { DateFormat } from './converters/date';
+
+export const baseFormattersPublic = [DateFormat, ...baseFormatters];

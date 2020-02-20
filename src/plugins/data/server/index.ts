@@ -72,7 +72,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DEFAULT_CONVERTER_COLOR,
   DurationFormat,
