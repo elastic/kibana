@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALL_HOSTS_TABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
+import { ALL_HOSTS_TABLE, HOSTS_NAMES_DRAGGABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import {
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_EMPTY,
@@ -17,24 +17,30 @@ export const waitForAllHostsToBeLoaded = () => {
 };
 
 export const dragAndDropFirstHostToTimeline = () => {
-  cy.get(HOSTS_NAMES)
+  cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
     .then(firstHost => drag(firstHost));
   cy.get(TIMELINE_DATA_PROVIDERS).then(dataProvidersDropArea => drop(dataProvidersDropArea));
 };
 
 export const dragFirstHostToTimeline = () => {
-  cy.get(HOSTS_NAMES)
+  cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
     .then(host => drag(host));
 };
 
 export const dragFirstHostToEmptyTimelineDataProviders = () => {
-  cy.get(HOSTS_NAMES)
+  cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
     .then(host => drag(host));
 
   cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).then(dataProvidersDropArea =>
     dragWithoutDrop(dataProvidersDropArea)
   );
+};
+
+export const openFirstHostDetails = () => {
+  cy.get(HOSTS_NAMES)
+    .first()
+    .click({ force: true });
 };
