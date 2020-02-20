@@ -38,6 +38,7 @@ export const querySignalsRouteDef = (
         return clusterClient.callAsCurrentUser('search', {
           index,
           body: { query, aggs, _source, track_total_hits, size },
+          ignoreUnavailable: true,
         });
       } catch (exc) {
         // error while getting or updating signal with id: id in signal index .siem-signals

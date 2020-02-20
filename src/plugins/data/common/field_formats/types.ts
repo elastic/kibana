@@ -18,6 +18,7 @@
  */
 
 import { FieldFormat } from './field_format';
+export { FieldFormat };
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';

@@ -16,6 +16,7 @@ import { checkFullLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
+import { useTimefilter } from '../../contexts/kibana';
 import { ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -41,6 +42,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     getMlNodeCount,
     loadMlServerInfo,
   });
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   return (
     <PageLoader context={context}>
