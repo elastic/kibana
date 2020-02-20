@@ -19,15 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
-import moment from 'moment-timezone';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
+import moment from 'moment';
 import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
   TextContextTypeConvert,
   FIELD_FORMAT_IDS,
-  FieldFormatsGetConfigFn,
-  IFieldFormatMetaParams,
-} from '../types';
+} from '../../../common';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
@@ -40,36 +38,6 @@ export class DateFormat extends FieldFormat {
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: IFieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn) {
-    super(params, getConfig);
-
-    this.memoizedConverter = memoize((val: any) => {
-      if (val == null) {
-        return '-';
-      }
-
-      /* On the server, importing moment returns a new instance. Unlike on
-       * the client side, it doesn't have the dateFormat:tz configuration
-       * baked in.
-       * We need to set the timezone manually here. The date is taken in as
-       * UTC and converted into the desired timezone. */
-      let date;
-      if (this.timeZone === 'Browser') {
-        // Assume a warning has been logged this can be unpredictable. It
-        // would be too verbose to log anything here.
-        date = moment.utc(val);
-      } else {
-        date = moment.utc(val).tz(this.timeZone);
-      }
-
-      if (date.isValid()) {
-        return date.format(this.memoizedPattern);
-      } else {
-        return val;
-      }
-    });
-  }
-
   getParamDefaults() {
     return {
       pattern: this.getConfig!('dateFormat'),
@@ -78,7 +46,8 @@ export class DateFormat extends FieldFormat {
   }
 
   textConvert: TextContextTypeConvert = val => {
-    // don't give away our ref to converter so we can hot-swap when config changes
+    // don't give away our ref to converter so
+    // we can hot-swap when config changes
     const pattern = this.param('pattern');
     const timezone = this.param('timezone');
 
@@ -87,6 +56,20 @@ export class DateFormat extends FieldFormat {
     if (timezoneChanged || datePatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+
+      this.memoizedConverter = memoize(function converter(value: any) {
+        if (value === null || value === undefined) {
+          return '-';
+        }
+
+        const date = moment(value);
+
+        if (date.isValid()) {
+          return date.format(pattern);
+        } else {
+          return value;
+        }
+      });
     }
 
     return this.memoizedConverter(val);
