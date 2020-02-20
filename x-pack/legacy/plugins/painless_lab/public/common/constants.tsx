@@ -63,8 +63,7 @@ export const painlessContextOptions = [
 ];
 
 // Render a smiley face as an example.
-export const exampleScript = `
-boolean isInCircle(def posX, def posY, def circleX, def circleY, def radius) {
+export const exampleScript = `boolean isInCircle(def posX, def posY, def circleX, def circleY, def radius) {
   double distanceFromCircleCenter = Math.sqrt(Math.pow(circleX - posX, 2) + Math.pow(circleY - posY, 2));
   return distanceFromCircleCenter <= radius;
 }
