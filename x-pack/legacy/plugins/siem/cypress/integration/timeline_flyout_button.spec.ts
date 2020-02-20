@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../urls/navigation';
-import { waitForAllHostsToBeLoaded, dragFirstHostToTimeline } from '../tasks/hosts/all_hosts';
-import { loginAndWaitForPage } from '../tasks/login';
-import { openTimelineIfClosed, openTimeline } from '../tasks/siem_main';
 import { TIMELINE_FLYOUT_BODY, TIMELINE_NOT_READY_TO_DROP_BUTTON } from '../screens/timeline';
+
+import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
+import { loginAndWaitForPage } from '../tasks/login';
+import { openTimeline, openTimelineIfClosed } from '../tasks/siem_main';
 import { createNewTimeline } from '../tasks/timeline';
+
+import { HOSTS_PAGE } from '../urls/navigation';
 
 describe('timeline flyout button', () => {
   before(() => {

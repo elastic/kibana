@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OVERVIEW_PAGE } from '../urls/navigation';
 import { HOST_STATS, NETWORK_STATS } from '../screens/overview';
+
 import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
+
+import { OVERVIEW_PAGE } from '../urls/navigation';
 
 describe('Overview Page', () => {
   before(() => {

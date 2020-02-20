@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ABSOLUTE_DATE_RANGE } from '../urls/state';
+import {
+  DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
+  DATE_PICKER_START_DATE_POPOVER_BUTTON,
+  DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
+} from '../screens/date_picker';
+import { HOSTS_NAMES } from '../screens/hosts/all_hosts';
+import { ANOMALIES_TAB } from '../screens/hosts/main';
+import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/siem_header';
+import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
+
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../tasks/login';
-import { HOSTS_PAGE } from '../urls/navigation';
 import {
   setStartDate,
   setEndDate,
@@ -15,22 +24,16 @@ import {
   setTimelineEndDate,
   updateTimelineDates,
 } from '../tasks/date_picker';
-import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
-import { openTimeline } from '../tasks/siem_main';
-import {
-  DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
-  DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
-  DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  DATE_PICKER_END_DATE_POPOVER_BUTTON,
-} from '../screens/date_picker';
-import { kqlSearch, navigateFromHeaderTo, clearSearchBar } from '../tasks/siem_header';
-import { HOSTS, NETWORK, KQL_INPUT, BREADCRUMBS } from '../screens/siem_header';
+import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import { openAllHosts } from '../tasks/hosts/main';
-import { ANOMALIES_TAB } from '../screens/hosts/main';
-import { waitForAllHostsToBeLoaded, openFirstHostDetails } from '../tasks/hosts/all_hosts';
-import { HOSTS_NAMES } from '../screens/hosts/all_hosts';
-import { executeTimelineKQL, addNameToTimeline } from '../tasks/timeline';
-import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
+
+import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
+import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/siem_header';
+import { openTimeline } from '../tasks/siem_main';
+import { addNameToTimeline, executeTimelineKQL } from '../tasks/timeline';
+
+import { HOSTS_PAGE } from '../urls/navigation';
+import { ABSOLUTE_DATE_RANGE } from '../urls/state';
 
 const ABSOLUTE_DATE = {
   endTime: '1564691609186',

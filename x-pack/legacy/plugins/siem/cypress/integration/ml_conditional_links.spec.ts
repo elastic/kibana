@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  mlNetworkSingleIpNullKqlQuery,
-  mlNetworkSingleIpKqlQuery,
-  mlNetworkMultipleIpNullKqlQuery,
-  mlNetworkMultipleIpKqlQuery,
-  mlNetworkNullKqlQuery,
-  mlNetworkKqlQuery,
-  mlHostSingleHostNullKqlQuery,
-  mlHostSingleHostKqlQueryVariable,
-  mlHostSingleHostKqlQuery,
-  mlHostMultiHostNullKqlQuery,
-  mlHostMultiHostKqlQuery,
-  mlHostVariableHostNullKqlQuery,
-  mlHostVariableHostKqlQuery,
-} from '../urls/ml_conditional_links';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
 import { KQL_INPUT } from '../screens/siem_header';
+
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+
+import {
+  mlHostMultiHostKqlQuery,
+  mlHostMultiHostNullKqlQuery,
+  mlHostSingleHostKqlQuery,
+  mlHostSingleHostKqlQueryVariable,
+  mlHostSingleHostNullKqlQuery,
+  mlHostVariableHostKqlQuery,
+  mlHostVariableHostNullKqlQuery,
+  mlNetworkKqlQuery,
+  mlNetworkMultipleIpKqlQuery,
+  mlNetworkMultipleIpNullKqlQuery,
+  mlNetworkNullKqlQuery,
+  mlNetworkSingleIpKqlQuery,
+  mlNetworkSingleIpNullKqlQuery,
+} from '../urls/ml_conditional_links';
 
 describe('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {

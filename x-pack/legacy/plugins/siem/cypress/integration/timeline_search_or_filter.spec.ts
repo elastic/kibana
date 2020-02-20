@@ -5,10 +5,12 @@
  */
 
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
-import { HOSTS_PAGE } from '../urls/navigation';
+
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
 import { openTimeline } from '../tasks/siem_main';
 import { executeTimelineKQL } from '../tasks/timeline';
+
+import { HOSTS_PAGE } from '../urls/navigation';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {

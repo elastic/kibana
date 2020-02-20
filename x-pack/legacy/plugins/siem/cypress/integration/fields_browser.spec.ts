@@ -4,38 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../urls/navigation';
-
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
-
 import {
-  FIELDS_BROWSER_TITLE,
-  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
-  FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_CATEGORIES_COUNT,
-  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
-  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
   FIELDS_BROWSER_FIELDS_COUNT,
-  FIELDS_BROWSER_MESSAGE_HEADER,
+  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
   FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
+  FIELDS_BROWSER_MESSAGE_HEADER,
+  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
+  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
+  FIELDS_BROWSER_TITLE,
 } from '../screens/fields_browser';
 
-import { populateTimeline, openTimelineFieldsBrowser } from '../tasks/timeline';
-
-import { openTimeline } from '../tasks/siem_main';
-
 import {
-  clearFieldsBrowser,
-  filterFieldsBrowser,
-  closeFieldsBrowser,
-  removesMessageField,
   addsHostGeoCityNameToTimeline,
-  addsHostGeoCountryNameToTimelineDraggingIt,
   addsHostGeoContinentNameToTimeline,
+  addsHostGeoCountryNameToTimelineDraggingIt,
+  clearFieldsBrowser,
+  closeFieldsBrowser,
+  filterFieldsBrowser,
+  removesMessageField,
   resetFields,
 } from '../tasks/fields_browser';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { openTimeline } from '../tasks/siem_main';
+import { openTimelineFieldsBrowser, populateTimeline } from '../tasks/timeline';
+
+import { HOSTS_PAGE } from '../urls/navigation';
 
 const defaultHeaders = [
   { id: '@timestamp' },

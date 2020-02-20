@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../urls/navigation';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
 import {
-  createNewTimeline,
-  populateTimeline,
-  expandFirstTimelineEventDetails,
-  uncheckTimestampToggleField,
-  checkIdToggleField,
-  dragAndDropIdToggleFieldToTimeline,
-} from '../tasks/timeline';
-import { openTimeline } from '../tasks/siem_main';
-import {
-  TIMESTAMP_TOGGLE_FIELD,
+  ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
   TIMESTAMP_HEADER_FIELD,
-  ID_HEADER_FIELD,
+  TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
+
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../tasks/login';
+import { openTimeline } from '../tasks/siem_main';
+import {
+  checkIdToggleField,
+  createNewTimeline,
+  dragAndDropIdToggleFieldToTimeline,
+  expandFirstTimelineEventDetails,
+  populateTimeline,
+  uncheckTimestampToggleField,
+} from '../tasks/timeline';
+
+import { HOSTS_PAGE } from '../urls/navigation';
 
 describe('toggle column in timeline', () => {
   before(() => {
