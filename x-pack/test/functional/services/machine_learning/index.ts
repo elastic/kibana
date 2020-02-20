@@ -25,5 +25,7 @@ export { MachineLearningJobWizardCategorizationProvider } from './job_wizard_cat
 export { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 export { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
 export { MachineLearningNavigationProvider } from './navigation';
+export { MachineLearningSecurityCommonProvider } from './security_common';
+export { MachineLearningSecurityUIProvider } from './security_ui';
 export { MachineLearningSettingsProvider } from './settings';
 export { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';

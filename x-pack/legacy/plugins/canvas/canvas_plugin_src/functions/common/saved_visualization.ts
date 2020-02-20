@@ -47,6 +47,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          disableTriggers: true,
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.visualization,

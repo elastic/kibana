@@ -109,15 +109,16 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
       };
 
       const legacyPlugins = plugins as Partial<typeof plugins> & { infra?: InfraPlugin };
-      const { xpack_main, elasticsearch, infra, alerting } = legacyPlugins;
+      const { xpack_main, elasticsearch, infra } = legacyPlugins;
       const {
         core: coreSetup,
-        plugins: { usageCollection, licensing },
+        plugins: { usageCollection, licensing, alerting },
       } = server.newPlatform.setup;
 
       const pluginsSetup: PluginsSetup = {
         usageCollection,
         licensing,
+        alerting,
       };
 
       const __LEGACY: LegacySetup = {
@@ -126,7 +127,6 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
           xpack_main,
           elasticsearch,
           infra,
-          alerting,
         },
       };
 
