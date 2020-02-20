@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ace from 'ace';
+import brace from 'brace';
 import 'brace/ext/language_tools';
 
 const splitTokens = line => {
@@ -43,14 +43,14 @@ const wordCompleter = words => {
 };
 
 export const createAceEditor = (div, value, readOnly = true, autocompleteArray) => {
-  const editor = ace.edit(div);
+  const editor = brace.edit(div);
   editor.$blockScrolling = Infinity;
   editor.setValue(value, -1);
   const session = editor.getSession();
   session.setUseWrapMode(true);
   session.setMode('ace/mode/json');
   if (autocompleteArray) {
-    const languageTools = ace.acequire('ace/ext/language_tools');
+    const languageTools = brace.acequire('ace/ext/language_tools');
     const autocompleter = wordCompleter(autocompleteArray);
     languageTools.setCompleters([autocompleter]);
   }
