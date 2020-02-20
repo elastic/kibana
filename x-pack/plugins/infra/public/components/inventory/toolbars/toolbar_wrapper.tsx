@@ -150,7 +150,7 @@ export const toGroupByOpt = (field: string) => ({
 
 export const toMetricOpt = (
   metric: SnapshotMetricType
-): { text: string; value: SnapshotMetricType } => {
+): { text: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
     case 'cpu':
       return {

@@ -6,7 +6,6 @@
 
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
-import { metricsExplorerAggregationRT } from './metrics_explorer';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({

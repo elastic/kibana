@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { getCustomMetricLabel } from './get_custom_metric_label';
 import { EuiTheme, withTheme } from '../../../../../../legacy/common/eui_styled_components';

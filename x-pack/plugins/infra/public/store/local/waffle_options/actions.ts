@@ -24,4 +24,6 @@ export const changeBoundsOverride = actionCreator<InfraWaffleMapBounds>('CHANGE_
 export const changeAutoBounds = actionCreator<boolean>('CHANGE_AUTO_BOUNDS');
 export const changeAccount = actionCreator<string>('CHANGE_ACCOUNT');
 export const changeRegion = actionCreator<string>('CHANGE_REGION');
-export const changeCustomMetrics = actionCreator<SnapshotCustomMetric[]>('CHANGE_CUSTOM_METRICS');
+export const changeCustomMetrics = actionCreator<SnapshotCustomMetricInput[]>(
+  'CHANGE_CUSTOM_METRICS'
+);
