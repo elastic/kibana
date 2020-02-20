@@ -6,18 +6,18 @@
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { DrilldownService } from './service';
 
 export interface DrilldownsSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
 export interface DrilldownsStartDependencies {
-  uiActiosn: UiActionsStart;
+  uiActions: UiActionsStart;
 }
 
-export interface DrilldownsSetupContract {
-  registerDrilldown: () => void;
-}
+export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'>;
+
 // eslint-disable-next-line
 export interface DrilldownsStartContract {}
 
@@ -29,14 +29,14 @@ export class DrilldownsPlugin
       DrilldownsSetupDependencies,
       DrilldownsStartDependencies
     > {
+  private readonly service = new DrilldownService();
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DrilldownsSetupDependencies): DrilldownsSetupContract {
-    return {
-      registerDrilldown: () => {
-        throw new Error('not implemented');
-      },
-    };
+    this.service.bootstrap(core, plugins);
+
+    return this.service;
   }
 
   public start(core: CoreStart, plugins: DrilldownsStartDependencies): DrilldownsStartContract {

@@ -36,7 +36,6 @@ import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
-import { OpenFlyoutAddDrilldown } from './actions/open_flyout_add_drilldown';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -244,9 +243,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
       new EditPanelAction(this.props.getEmbeddableFactory),
-      new OpenFlyoutAddDrilldown({
-        overlays: this.props.overlays,
-      }),
     ];
 
     const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
