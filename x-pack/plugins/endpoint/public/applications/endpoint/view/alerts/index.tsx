@@ -7,7 +7,6 @@
 import { memo, useState, useMemo, useCallback } from 'react';
 import React from 'react';
 import {
-  EuiLink,
   EuiDataGrid,
   EuiDataGridColumn,
   EuiPage,
@@ -20,7 +19,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 
@@ -112,15 +111,6 @@ export const AlertIndex = memo(() => {
     []
   );
 
-  const handleAlertClick = useMemo(() => {
-    return (event: React.MouseEvent<HTMLElement>) => {
-      const alertId: string | undefined = event.currentTarget.dataset.alertId;
-      if (alertId !== undefined) {
-        history.push(urlWithSelectedAlert(alertId));
-      }
-    };
-  }, [history, urlWithSelectedAlert]);
-
   const handleFlyoutClose = useCallback(() => {
     history.push(urlWithoutSelectedAlert);
   }, [history, urlWithoutSelectedAlert]);
@@ -135,18 +125,14 @@ export const AlertIndex = memo(() => {
 
       if (columnId === 'alert_type') {
         return (
-          <EuiLink
-            data-test-subj="alert-type-cell-link"
-            data-alert-id={'TODO'}
-            onClick={handleAlertClick}
-          >
+          <Link data-test-subj="alert-type-cell-link" to={urlWithSelectedAlert('TODO')}>
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
               {
                 defaultMessage: 'Malicious File',
               }
             )}
-          </EuiLink>
+          </Link>
         );
       } else if (columnId === 'event_type') {
         return row.event.action;
@@ -179,7 +165,7 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [alertListData, formatter, handleAlertClick, pageSize, total]);
+  }, [alertListData, formatter, pageSize, total, urlWithSelectedAlert]);
 
   const pagination = useMemo(() => {
     return {
