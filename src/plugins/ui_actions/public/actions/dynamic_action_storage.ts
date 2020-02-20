@@ -19,12 +19,21 @@
 
 import { SerializedDynamicAction } from './action_internal';
 
+/**
+ * Serialized representation of event-action pair, used to persist in storage.
+ */
 export interface SerializedEvent {
   eventId: string;
   triggerId: string;
   action: SerializedDynamicAction;
 }
 
+/**
+ * This interface needs to be implemented by dynamic action users if they
+ * want to persist the dynamic actions. It has a default implementation in
+ * Embeddables, however one can use the dynamic actions without Embeddables,
+ * in that case they have to implement this interface.
+ */
 export interface DynamicActionStorage {
   create(event: SerializedEvent): Promise<void>;
   update(event: SerializedEvent): Promise<void>;

@@ -20,7 +20,7 @@
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
 /**
- * A convenience interface used to register actions.
+ * A convenience interface used to register an action.
  */
 export interface ActionDefinition<Context extends {} = {}, Return = Promise<void>> {
   /**
@@ -71,7 +71,7 @@ export interface ActionDefinition<Context extends {} = {}, Return = Promise<void
 }
 
 /**
- * A convenience interface used to register dynamic actions.
+ * A convenience interface used to register a dynamic action.
  *
  * A dynamic action is one that can be create by user and registered into the
  * actions registry at runtime. User can also provide custom config for this
