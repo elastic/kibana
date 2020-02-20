@@ -328,7 +328,7 @@ TBD
 
 | Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
 | --------------- | ------------------------------------------ | ------------------------------------------ |
-| date            | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
+| @timestamp      | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
 | context         | `parent.child`                             | `['parent', 'child']`                      |
 | level           | `DEBUG`                                    | `['debug']`                                |
 | meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
@@ -336,7 +336,10 @@ TBD
 
 | Parameter       | Platform log record in **json** format     | Legacy Platform log record **json** format   |
 | --------------- | ------------------------------------------ | -------------------------------------------- |
-| date            | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
+| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
 | context         | `context: parent.child`                    | `tags: ['parent', 'child']`                  |
 | level           | `level: DEBUG`                             | `tags: ['debug']`                            |
 | meta            | separate property `"meta": {"to": "v8"}`   | merged in log record  `{... "to": "v8"}`     |
+| pid             | `pid: 12345`                               | `pid: 12345`                                 |
+| type            | N/A                                        | `type: log`                                  |
+| error           | `{ message, name, stack }`                 | `{ message, name, stack, code, signal }`     |
