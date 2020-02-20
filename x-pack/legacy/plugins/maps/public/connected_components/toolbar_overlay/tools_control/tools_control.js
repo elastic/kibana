@@ -39,9 +39,12 @@ const DRAW_BOUNDS_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawBo
   defaultMessage: 'Draw bounds',
 });
 
-const DRAW_DISTANCE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawDistanceLabelShort', {
-  defaultMessage: 'Draw distance',
-});
+const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
+  'xpack.maps.toolbarOverlay.drawDistanceLabelShort',
+  {
+    defaultMessage: 'Draw distance',
+  }
+);
 
 export class ToolsControl extends Component {
   state = {
@@ -80,7 +83,7 @@ export class ToolsControl extends Component {
       ...options,
     });
     this._closePopover();
-  }
+  };
 
   _getDrawPanels() {
     const tools = [
@@ -91,7 +94,7 @@ export class ToolsControl extends Component {
       {
         name: DRAW_BOUNDS_LABEL,
         panel: 2,
-      }
+      },
     ];
 
     const hasGeoPoints = this.props.geoFields.some(({ geoFieldType }) => {
@@ -155,7 +158,9 @@ export class ToolsControl extends Component {
           <DistanceFilterForm
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_DISTANCE_LABEL_SHORT}
-            geoFields={this.props.geoFields}
+            geoFields={this.props.geoFields.filter(({ geoFieldType }) => {
+              return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
+            })}
             onSubmit={this._initiateDistanceDraw}
           />
         ),
