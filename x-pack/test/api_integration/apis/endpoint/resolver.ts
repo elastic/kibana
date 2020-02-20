@@ -168,6 +168,27 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.children[0].lifecycle[0].endgame.unique_pid).to.eql(94042);
       });
 
+      it('dangerously returns multiple levels of child process lifecycle events', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&levels=3`)
+          .set(commonHeaders)
+          .expect(200);
+        expect(body.pagination.total).to.eql(8);
+        expect(body.pagination.next).to.eql(
+          'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MSJ9'
+        );
+        expect(body.children[0].pagination.total).to.eql(1);
+        expect(body.children[0].pagination.next).to.eql(
+          'eyJ0aW1lc3RhbXAiOjE1ODE0NTU5MzkwMDAsImV2ZW50SUQiOiI5MzkzMyJ9'
+        );
+        // default limit
+        expect(body.pagination.limit).to.eql(10);
+
+        expect(body.children.length).to.eql(8);
+        expect(body.children[0].children[0].lifecycle.length).to.eql(2);
+        expect(body.children[0].lifecycle[0].endgame.unique_pid).to.eql(93932);
+      });
+
       it('returns no values when there is no more data', async () => {
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
