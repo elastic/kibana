@@ -87,7 +87,6 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         })}
         onClick={openAdvancedJobWizard}
         href={`#/jobs/new_job/advanced?index=${indexPattern}`}
-        data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
       />
     </div>
   );
