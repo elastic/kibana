@@ -18,11 +18,9 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-// @ts-ignore
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { ISearchSource } from 'src/plugins/data/public';
-import { fieldFormats } from 'src/plugins/data/public';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
+import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
 import { IAggConfig, setBounds, isDateHistogramBucketAggConfig } from '../../../legacy_imports';
 import { Vis, VisParams } from '..';
 
