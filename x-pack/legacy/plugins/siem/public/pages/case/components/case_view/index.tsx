@@ -24,7 +24,8 @@ import { DescriptionMarkdown } from '../description_md_editor';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
-import { HeaderPage } from '../../../../components/header_page_new';
+import { HeaderPage } from '../../../../components/header_page';
+import { EditableTitle } from '../../../../components/header_page/editable_title';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
@@ -50,6 +51,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
 `;
+
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade};
@@ -67,7 +69,6 @@ interface CasesProps {
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
-  const [isEditTitle, setIsEditTitle] = useState(false);
   const [isEditTags, setIsEditTags] = useState(false);
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
   const [description, setDescription] = useState(data.description);
@@ -83,7 +84,6 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               updateKey: 'title',
               updateValue,
             });
-            setIsEditTitle(false);
           }
           break;
         case 'description':
@@ -210,6 +210,17 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
       ),
     },
   ];
+
+  const onSubmit = useCallback(
+    newTitle => {
+      onUpdateField('title', newTitle);
+      setTitle(newTitle);
+    },
+    [title]
+  );
+
+  const titleNode = <EditableTitle isLoading={isLoading} title={title} onSubmit={onSubmit} />;
+
   return (
     <>
       <MyWrapper>
@@ -218,14 +229,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
             href: getCaseUrl(),
             text: i18n.BACK_TO_ALL,
           }}
-          iconAction={{
-            'aria-label': title,
-            iconType: 'pencil',
-            onChange: newTitle => setTitle(newTitle),
-            onSubmit: () => onUpdateField('title', title),
-            onClick: isEdit => setIsEditTitle(isEdit),
-          }}
-          isEditTitle={isEditTitle}
+          titleNode={titleNode}
           title={title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">

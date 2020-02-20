@@ -6,7 +6,12 @@
 
 import { DEFAULT_TIMEOUT } from '../../integration/lib/util/helpers';
 
-import { EVENTS_TAB, AUTHENTICATIONS_TAB, UNCOMMON_PROCESSES_TAB } from '../../screens/hosts/main';
+import {
+  EVENTS_TAB,
+  AUTHENTICATIONS_TAB,
+  UNCOMMON_PROCESSES_TAB,
+  ALL_HOSTS_TAB,
+} from '../../screens/hosts/main';
 
 /** Clicks the Events tab on the hosts page */
 export const openEvents = () =>
@@ -17,3 +22,6 @@ export const openAuthentications = () =>
 
 export const openUncommonProcesses = () =>
   cy.get(UNCOMMON_PROCESSES_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
+
+export const openAllHosts = () =>
+  cy.get(ALL_HOSTS_TAB, { timeout: DEFAULT_TIMEOUT }).click({ force: true });

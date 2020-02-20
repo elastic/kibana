@@ -301,13 +301,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
+        if (!this.input.disableTriggers) {
+          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
-        npStart.plugins.uiActions.executeTriggerActions(eventName, {
-          embeddable: this,
-          timeFieldName: this.vis.indexPattern.timeFieldName,
-          data: event.data,
-        });
+          npStart.plugins.uiActions.executeTriggerActions(eventName, {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          });
+        }
       })
     );
 

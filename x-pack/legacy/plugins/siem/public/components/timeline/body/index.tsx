@@ -9,6 +9,7 @@ import React, { useMemo, useRef } from 'react';
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -23,9 +24,8 @@ import {
 } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
-import { ColumnHeader } from './column_headers/column_header';
+import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -34,7 +34,7 @@ import { useTimelineTypeContext } from '../timeline_context';
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -58,7 +58,7 @@ export interface BodyProps {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 

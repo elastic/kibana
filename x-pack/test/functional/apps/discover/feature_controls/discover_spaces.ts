@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const config = getService('config');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
     'common',
@@ -59,7 +60,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('discoverSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('shows "visualize" field button', async () => {
@@ -156,7 +159,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });
