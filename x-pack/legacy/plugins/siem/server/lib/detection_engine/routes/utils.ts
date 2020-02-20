@@ -63,7 +63,16 @@ export const createBulkErrorObject = ({
   statusCode: number;
   message: string;
 }): BulkError => {
-  if (id != null) {
+  if (id != null && ruleId != null) {
+    return {
+      id,
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (id != null) {
     return {
       id,
       error: {
