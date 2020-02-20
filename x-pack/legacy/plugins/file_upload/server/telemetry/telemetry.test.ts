@@ -25,7 +25,7 @@ describe('file upload plugin telemetry', () => {
   describe('getTelemetry', () => {
     it('should get existing telemetry', async () => {
       const internalRepo = mockInit();
-      await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository, internalRepo);
+      await getTelemetry(internalRepo);
       expect(internalRepo.update.mock.calls.length).toBe(0);
       expect(internalRepo.get.mock.calls.length).toBe(1);
       expect(internalRepo.create.mock.calls.length).toBe(0);
@@ -40,11 +40,7 @@ describe('file upload plugin telemetry', () => {
         },
       });
 
-      await updateTelemetry({
-        elasticsearchPlugin,
-        getSavedObjectsRepository,
-        internalRepo,
-      });
+      await updateTelemetry(internalRepo);
       expect(internalRepo.update.mock.calls.length).toBe(1);
       expect(internalRepo.get.mock.calls.length).toBe(1);
       expect(internalRepo.create.mock.calls.length).toBe(0);

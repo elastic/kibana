@@ -8,9 +8,10 @@ import { mappings } from './mappings';
 
 export const fileUpload = kibana => {
   return new kibana.Plugin({
-    require: ['elasticsearch', 'xpack_main'],
+    require: ['elasticsearch'],
     name: 'file_upload',
     id: 'file_upload',
+    // TODO: uiExports and savedObjectSchemas to be removed on migration
     uiExports: {
       mappings,
     },
