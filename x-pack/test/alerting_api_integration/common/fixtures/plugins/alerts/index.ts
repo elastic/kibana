@@ -5,7 +5,7 @@
  */
 import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
+import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
@@ -392,13 +392,13 @@ export default function(kibana: any) {
         actionGroups: [{ id: 'default', name: 'Default' }],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.setup.registerType(cumulativeFiringAlertType);
-      server.plugins.alerting.setup.registerType(neverFiringAlertType);
-      server.plugins.alerting.setup.registerType(failingAlertType);
-      server.plugins.alerting.setup.registerType(validationAlertType);
-      server.plugins.alerting.setup.registerType(authorizationAlertType);
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(failingAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
     },
   });
 }

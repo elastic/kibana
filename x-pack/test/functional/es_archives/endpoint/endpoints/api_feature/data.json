@@ -7,7 +7,8 @@
       "@timestamp": 1579881969541,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
-        "version": "6.6.1"
+        "version": "6.6.1",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -33,7 +34,8 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
-          "version": "10.0"
+          "version": "10.0",
+          "variant" : "Windows Pro"
         }
       }
     }
@@ -49,7 +51,8 @@
       "@timestamp": 1579881969541,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
-        "version": "6.0.0"
+        "version": "6.0.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -74,7 +77,8 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
-          "version": "10.0"
+          "version": "10.0",
+          "variant" : "Windows Server"
         }
       }
     }
@@ -90,7 +94,8 @@
       "@timestamp": 1579881969541,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
-        "version": "6.8.0"
+        "version": "6.8.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -113,7 +118,8 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
-          "version": "10.0"
+          "version": "10.0",
+          "variant" : "Windows Pro"
         }
       }
     }
@@ -129,7 +135,8 @@
       "@timestamp": 1579878369541,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
-        "version": "6.6.1"
+        "version": "6.6.1",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -155,7 +162,8 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
-          "version": "10.0"
+          "version": "10.0",
+          "variant" : "Windows Server 2016"
         }
       }
     }
@@ -171,7 +179,8 @@
       "@timestamp": 1579878369541,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
-        "version": "6.0.0"
+        "version": "6.0.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -195,7 +204,8 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
-          "version": "6.2"
+          "version": "6.2",
+          "variant" : "Windows Server 2012"
         }
       }
     }
@@ -211,7 +221,8 @@
       "@timestamp": 1579878369541,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
-        "version": "6.8.0"
+        "version": "6.8.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -235,7 +246,8 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
-          "version": "6.2"
+          "version": "6.2",
+          "variant" : "Windows Server 2012"
         }
       }
     }
@@ -251,7 +263,8 @@
       "@timestamp": 1579874769541,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
-        "version": "6.6.1"
+        "version": "6.6.1",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -276,7 +289,8 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
-          "version": "6.3"
+          "version": "6.3",
+          "variant" : "Windows Server 2012 R2"
         }
       }
     }
@@ -292,7 +306,8 @@
       "@timestamp": 1579874769541,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
-        "version": "6.0.0"
+        "version": "6.0.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -316,7 +331,8 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
-          "version": "6.3"
+          "version": "6.3",
+          "variant" : "Windows Server 2012 R2"
         }
       }
     }
@@ -332,7 +348,8 @@
       "@timestamp": 1579874769541,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
-        "version": "6.8.0"
+        "version": "6.8.0",
+        "name" : "Elastic Endpoint"
       },
       "endpoint": {
         "policy": {
@@ -356,7 +373,8 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
-          "version": "6.2"
+          "version": "6.2",
+          "variant" : "Windows Server 2012"
         }
       }
     }
