@@ -43,5 +43,5 @@ exports.externals = {
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   '@kbn/ui-shared-deps/monaco': '__kbnSharedDeps__.Monaco',
   // this is how plugins/consumers from npm load monaco
-  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.Monaco',
+  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBare',
 };
