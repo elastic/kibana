@@ -30,10 +30,6 @@ import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 export class TriggerInternal<T extends AnyTrigger> {
   public readonly contract = new TriggerContract<T>(this);
 
-  public get id() {
-    return this.trigger.id;
-  }
-
   constructor(public readonly service: UiActionsService, public readonly trigger: T) {}
 
   public createContext(params: TriggerContextParams<T>): TriggerContext<T> {
@@ -43,7 +39,7 @@ export class TriggerInternal<T extends AnyTrigger> {
 
   public async execute(params: TriggerContextParams<T>) {
     const context = this.createContext(params);
-    const triggerId = this.id;
+    const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
     if (!actions.length) {
