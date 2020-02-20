@@ -17,9 +17,15 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { PanelOptionsMenu as PanelOptionsMenuUi } from '../../../components/panel_options_menu';
+
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+} from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
@@ -35,7 +41,6 @@ interface State {
 
 export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, State> {
   private mounted = false;
-
   public static getDerivedStateFromProps(props: PanelOptionsMenuProps, state: State) {
     if (props.closeContextMenu) {
       return {
@@ -59,9 +64,9 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     this.mounted = true;
     this.setState({ actionContextMenuPanel: undefined });
     const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
-    if (!this.mounted) return;
-
-    this.setState({ actionContextMenuPanel });
+    if (this.mounted) {
+      this.setState({ actionContextMenuPanel });
+    }
   }
 
   public componentWillUnmount() {
@@ -69,17 +74,75 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
   }
 
   public render() {
-    const { isViewMode, title, closeContextMenu } = this.props;
+    const { isViewMode, title } = this.props;
+    const enhancedAriaLabel = i18n.translate(
+      'embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel',
+      {
+        defaultMessage: 'Panel options for {title}',
+        values: { title },
+      }
+    );
+    const ariaLabelWithoutTitle = i18n.translate(
+      'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
+      {
+        defaultMessage: 'Panel options',
+      }
+    );
 
-    return (
-      <PanelOptionsMenuUi
-        panelDescriptor={
-          this.state.actionContextMenuPanel ? this.state.actionContextMenuPanel : undefined
-        }
-        close={closeContextMenu}
-        isViewMode={isViewMode}
-        title={title}
+    const button = (
+      <EuiButtonIcon
+        iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
+        color="text"
+        className="embPanel__optionsMenuButton"
+        aria-label={title ? enhancedAriaLabel : ariaLabelWithoutTitle}
+        data-test-subj="embeddablePanelToggleMenuIcon"
+        onClick={this.toggleContextMenu}
       />
     );
+
+    return (
+      <EuiPopover
+        className="embPanel__optionsMenuPopover"
+        button={button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+        data-test-subj={
+          this.state.isPopoverOpen
+            ? 'embeddablePanelContextMenuOpen'
+            : 'embeddablePanelContextMenuClosed'
+        }
+        withTitle
+      >
+        <EuiContextMenu
+          initialPanelId="mainMenu"
+          panels={this.state.actionContextMenuPanel ? [this.state.actionContextMenuPanel] : []}
+        />
+      </EuiPopover>
+    );
   }
+  private closePopover = () => {
+    if (this.mounted) {
+      this.setState({
+        isPopoverOpen: false,
+      });
+    }
+  };
+
+  private toggleContextMenu = () => {
+    if (!this.mounted) return;
+    const after = () => {
+      if (!this.state.isPopoverOpen) return;
+      this.setState({ actionContextMenuPanel: undefined });
+      this.props
+        .getActionContextMenuPanel()
+        .then(actionContextMenuPanel => {
+          if (!this.mounted) return;
+          this.setState({ actionContextMenuPanel });
+        })
+        .catch(error => console.error(error)); // eslint-disable-line no-console
+    };
+    this.setState(({ isPopoverOpen }) => ({ isPopoverOpen: !isPopoverOpen }), after);
+  };
 }
