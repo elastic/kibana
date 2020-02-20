@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsStart } from '../../../../../../../src/core/public';
+import { NotificationsStart } from '../../../../../../src/core/public';
 
 export class NotificationService {
   private _toasts: any;

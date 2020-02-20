@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString, getRandomNumber } from '../../../../../test_utils';
+import { getRandomString, getRandomNumber } from '../../../../test_utils';
 import { Template } from '../../common/types';
 
 export const getTemplate = ({

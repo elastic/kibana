@@ -10,7 +10,7 @@ export {
   getRandomString,
   findTestSubject,
   TestBed,
-} from '../../../../../../../../../../test_utils';
+} from '../../../../../../../../../test_utils';
 
 export const componentHelpers = {
   mappingsEditor: { setup: mappingsEditorSetup },

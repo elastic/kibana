@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocLinksStart } from '../../../../../../../src/core/public';
+import { DocLinksStart } from '../../../../../../src/core/public';
 import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 

@@ -19,7 +19,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-import { registerTestBed, nextTick, TestBed } from '../../../../../../../../../test_utils';
+import { registerTestBed, nextTick, TestBed } from '../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (

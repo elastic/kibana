@@ -9,7 +9,7 @@ import { setup as templateCreateSetup } from './template_create.helpers';
 import { setup as templateCloneSetup } from './template_clone.helpers';
 import { setup as templateEditSetup } from './template_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
 export { setupEnvironment } from './setup_environment';
 
