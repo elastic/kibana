@@ -48,10 +48,16 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
-export const appStoreFactory: (coreStart: CoreStart, disableMiddleware?: boolean) => Store = (
-  coreStart,
-  disableMiddleware = false
-) => {
+export const appStoreFactory: (
+  /**
+   * Allow middleware to communicate with Kibana core.
+   */
+  coreStart: CoreStart,
+  /**
+   * Create the store without any middleware. This is useful for testing the store w/o side effects.
+   */
+  disableMiddleware?: boolean
+) => Store = (coreStart, disableMiddleware = false) => {
   const store = createStore(
     appReducer,
     disableMiddleware
