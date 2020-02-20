@@ -17,6 +17,23 @@
  * under the License.
  */
 
-export * from './feature_catalogue';
-export * from './environment';
-export * from './tutorials';
+import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feature_catalogue_registry.mock';
+import { environmentServiceMock } from '../services/environment/environment.mock';
+import { tutorialServiceMock } from '../services/tutorials/tutorial_service.mock';
+
+const createSetupContract = () => ({
+  featureCatalogue: featureCatalogueRegistryMock.createSetup(),
+  environment: environmentServiceMock.createSetup(),
+  tutorials: tutorialServiceMock.createSetup(),
+});
+
+const createStartContract = () => ({
+  featureCatalogue: featureCatalogueRegistryMock.createStart(),
+  environment: environmentServiceMock.createStart(),
+  tutorials: tutorialServiceMock.createStart(),
+});
+
+export const homePluginMock = {
+  createSetupContract,
+  createStartContract,
+};

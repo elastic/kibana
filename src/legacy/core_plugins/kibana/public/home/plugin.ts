@@ -68,7 +68,7 @@ export class HomePlugin implements Plugin {
   private environment: Environment | null = null;
 
   setup(
-    core: CoreSetup,
+    core: CoreSetup<HomePluginStartDependencies>,
     {
       kibana_legacy,
       __LEGACY: { getAngularDependencies, ...legacyServices },
@@ -79,12 +79,12 @@ export class HomePlugin implements Plugin {
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
         const angularDependencies = await getAngularDependencies();
+        const [, { home: homeStart }] = await core.getStartServices();
         setServices({
           ...legacyServices,
           http: contextCore.http,
           toastNotifications: core.notifications.toasts,
           banners: contextCore.overlays.banners,
-          getInjected: core.injectedMetadata.getInjectedVar,
           docLinks: contextCore.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
           chrome: contextCore.chrome,
@@ -93,6 +93,8 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
+          tutorialVariables: homeStart.tutorials.get,
+          getInjected: core.injectedMetadata.getInjectedVar,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
