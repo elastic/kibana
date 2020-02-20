@@ -948,7 +948,9 @@ tr:hover .c3:focus::before {
                     "register": [MockFunction],
                   },
                   "getSuggestions": [MockFunction],
-                  "indexPatterns": Object {},
+                  "indexPatterns": Object {
+                    "make": [Function],
+                  },
                   "query": Object {
                     "filterManager": [MockFunction],
                     "savedQueries": [MockFunction],
@@ -1096,6 +1098,7 @@ tr:hover .c3:focus::before {
                   "ExpressionRenderHandler": [MockFunction],
                   "ReactExpressionRenderer": [MockFunction],
                   "execute": [MockFunction],
+                  "fork": [MockFunction],
                   "getFunction": [MockFunction],
                   "getFunctions": [MockFunction],
                   "getRenderer": [MockFunction],
