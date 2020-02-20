@@ -64,7 +64,7 @@ export class AsyncDemoStrategy extends React.Component<Props, State> {
 
   renderDemo = () => {
     const request: IAsyncDemoRequest = {
-      fibonacciNumbers: 5,
+      fibonacciNumbers: this.state.fibonacciNumbers,
     };
     return (
       <React.Fragment>
