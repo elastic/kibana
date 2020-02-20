@@ -20,10 +20,19 @@
 export {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
+  EnvironmentSetup,
+  EnvironmentStart,
+  TutorialSetup,
+  TutorialStart,
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
+export {
+  FeatureCatalogueEntry,
+  FeatureCatalogueCategory,
+  Environment,
+  TutorialVariables,
+} from './services';
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = () => new HomePublicPlugin();

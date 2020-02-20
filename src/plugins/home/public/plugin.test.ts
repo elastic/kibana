@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { registryMock, environmentMock } from './plugin.test.mocks';
+import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 
 describe('HomePublicPlugin', () => {
   beforeEach(() => {
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
+    tutorialMock.setup.mockClear();
     environmentMock.setup.mockClear();
     environmentMock.start.mockClear();
+    tutorialMock.start.mockClear();
   });
 
   describe('setup', () => {
@@ -39,6 +41,12 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin().setup();
       expect(setup).toHaveProperty('environment');
       expect(setup.environment).toHaveProperty('update');
+    });
+
+    test('wires up and returns tutorial service', async () => {
+      const setup = await new HomePublicPlugin().setup();
+      expect(setup).toHaveProperty('tutorials');
+      expect(setup.tutorials).toHaveProperty('setVariable');
     });
   });
 
@@ -62,6 +70,15 @@ describe('HomePublicPlugin', () => {
       } as any);
       expect(environmentMock.start).toHaveBeenCalled();
       expect(start.environment.get).toBeDefined();
+    });
+
+    test('wires up and returns tutorial service', async () => {
+      const service = new HomePublicPlugin();
+      await service.setup();
+      const core = { application: { capabilities: { catalogue: {} } } } as any;
+      const start = await service.start(core);
+      expect(tutorialMock.start).toHaveBeenCalled();
+      expect(start.tutorials.get).toBeDefined();
     });
   });
 });
