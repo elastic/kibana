@@ -135,9 +135,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of full screen mode', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await logoButton.moveMouseTo();
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
+      await PageObjects.dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
