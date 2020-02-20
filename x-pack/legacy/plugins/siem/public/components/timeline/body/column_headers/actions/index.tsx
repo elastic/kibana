@@ -7,15 +7,16 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
 import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
-import { ColumnHeader } from '../column_header';
+
 import * as i18n from '../translations';
 
 interface Props {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onColumnRemoved: OnColumnRemoved;
   sort: Sort;
 }

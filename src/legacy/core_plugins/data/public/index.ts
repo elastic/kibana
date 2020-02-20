@@ -81,4 +81,6 @@ export {
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from './search';
