@@ -16,7 +16,12 @@ import { ReportListing } from '../../components/report_listing';
 const management = npSetup.plugins.management;
 // @ts-ignore TS doesn't have types for this due to breaking OS builds
 const licensing = npSetup.plugins.licensing as LicensingPluginSetup;
+
 const title = i18n.translate('xpack.reporting.management.reportingTitle', {
+  defaultMessage: 'Reporting',
+});
+
+const breadcrumbText = i18n.translate('xpack.reporting.breadcrumb', {
   defaultMessage: 'Reporting',
 });
 
@@ -31,7 +36,7 @@ licensing.license$.subscribe(license => {
       title,
       order: 15,
       mount(params) {
-        params.setBreadcrumbs([{ text: title }]);
+        params.setBreadcrumbs([{ text: breadcrumbText }]);
         ReactDOM.render(
           <I18nContext>
             <ReportListing
