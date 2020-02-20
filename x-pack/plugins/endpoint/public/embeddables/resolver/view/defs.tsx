@@ -40,7 +40,7 @@ Or by function like:
 type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning' | 'strokeBehindEmpty';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
-  ok: saturate(0.3, resolverPalette.temperatures[0]),
+  ok: saturate(0.5, resolverPalette.temperatures[0]),
   okdark: darken(0.2, resolverPalette.temperatures[0]),
   empty: euiColorEmptyShade,
   full: euiColorFullShade,
