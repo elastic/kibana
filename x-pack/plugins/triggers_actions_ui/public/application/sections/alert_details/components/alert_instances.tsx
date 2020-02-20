@@ -12,8 +12,7 @@ import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eu
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RawAlertInstance } from '../../../../../../../legacy/plugins/alerting/common';
-import { Alert, AlertTaskState } from '../../../../types';
+import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
