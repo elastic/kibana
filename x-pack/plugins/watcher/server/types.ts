@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, IClusterClient } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
@@ -24,7 +24,6 @@ export interface ServerShim {
 export interface RouteDependencies {
   router: IRouter;
   getLicenseStatus: () => LicenseStatus;
-  elasticsearch: IClusterClient;
 }
 
 export interface LicenseStatus {

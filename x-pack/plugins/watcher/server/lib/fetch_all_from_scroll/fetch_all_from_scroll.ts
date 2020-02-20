@@ -9,12 +9,12 @@ import { get } from 'lodash';
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 
 export function fetchAllFromScroll(
-  response: any,
+  searchResuls: any,
   dataClient: IScopedClusterClient,
   hits: any[] = []
 ): Promise<any> {
-  const newHits = get(response, 'hits.hits', []);
-  const scrollId = get(response, '_scroll_id');
+  const newHits = get(searchResuls, 'hits.hits', []);
+  const scrollId = get(searchResuls, '_scroll_id');
 
   if (newHits.length > 0) {
     hits.push(...newHits);

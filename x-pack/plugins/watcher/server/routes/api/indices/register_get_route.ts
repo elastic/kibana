@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const bodySchema = schema.object({ pattern: schema.string() }, { allowUnknowns: true });
-
-type BodySchema = TypeOf<typeof bodySchema>;
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(
@@ -66,27 +64,6 @@ function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 1
     });
 }
 
-export const handler: RequestHandler<unknown, unknown, BodySchema> = async (
-  ctx,
-  request,
-  response
-) => {
-  const { pattern } = request.body;
-
-  try {
-    const indices = await getIndices(ctx.watcher!.client, pattern);
-    return response.ok({ body: { indices } });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({ statusCode: e.statusCode, body: e });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerGetRoute(deps: RouteDependencies) {
   deps.router.post(
     {
@@ -95,6 +72,21 @@ export function registerGetRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const { pattern } = request.body;
+
+      try {
+        const indices = await getIndices(ctx.watcher!.client, pattern);
+        return response.ok({ body: { indices } });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
 });
-
-type BodySchema = TypeOf<typeof bodySchema>;
 
 function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
   const deletePromises = watchIds.map(watchId => {
@@ -43,15 +41,6 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
   });
 }
 
-const handler: RequestHandler<unknown, unknown, BodySchema> = async (ctx, request, response) => {
-  try {
-    const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
-    return response.ok({ body: { results } });
-  } catch (e) {
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerDeleteRoute(deps: RouteDependencies) {
   deps.router.post(
     {
@@ -60,6 +49,13 @@ export function registerDeleteRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      try {
+        const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
+        return response.ok({ body: { results } });
+      } catch (e) {
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

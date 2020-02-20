@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
@@ -20,8 +20,6 @@ const bodySchema = schema.object({
   options: schema.object({}, { allowUnknowns: true }),
 });
 
-type BodySchema = TypeOf<typeof bodySchema>;
-
 function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
   const params = {
     index,
@@ -33,30 +31,6 @@ function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: 
 
   return dataClient.callAsCurrentUser('search', params);
 }
-const handler: RequestHandler<unknown, unknown, BodySchema> = async (ctx, request, response) => {
-  const watch = Watch.fromDownstreamJson(request.body.watch);
-  const options = VisualizeOptions.fromDownstreamJson(request.body.options);
-  const body = watch.getVisualizeQuery(options);
-
-  try {
-    const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
-    const visualizeData = watch.formatVisualizeData(hits);
-
-    return response.ok({
-      body: {
-        visualizeData,
-      },
-    });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({ statusCode: e.statusCode, body: e });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
 
 export function registerVisualizeRoute(deps: RouteDependencies) {
   deps.router.post(
@@ -66,6 +40,29 @@ export function registerVisualizeRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const watch = Watch.fromDownstreamJson(request.body.watch);
+      const options = VisualizeOptions.fromDownstreamJson(request.body.options);
+      const body = watch.getVisualizeQuery(options);
+
+      try {
+        const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
+        const visualizeData = watch.formatVisualizeData(hits);
+
+        return response.ok({
+          body: {
+            visualizeData,
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

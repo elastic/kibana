@@ -49,10 +49,8 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     { http, elasticsearch: elasticsearchService }: CoreSetup,
     { licensing }: Dependencies
   ) {
-    const elasticsearch = await elasticsearchService.adminClient;
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
       router,
       getLicenseStatus: () => this.licenseStatus,
     };

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { isEsError } from '../../../lib/is_es_error';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
@@ -17,46 +17,11 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-type ParamsSchema = TypeOf<typeof paramsSchema>;
-
 function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
   return dataClient.callAsCurrentUser('watcher.getWatch', {
     id: watchId,
   });
 }
-
-const handler: RequestHandler<ParamsSchema> = async (ctx, request, response) => {
-  const id = request.params.id;
-
-  try {
-    const hit = await fetchWatch(ctx.watcher!.client, id);
-    const watchJson = get(hit, 'watch');
-    const watchStatusJson = get(hit, 'status');
-    const json = {
-      id,
-      watchJson,
-      watchStatusJson,
-    };
-
-    const watch = Watch.fromUpstreamJson(json, {
-      throwExceptions: {
-        Action: false,
-      },
-    });
-    return response.ok({
-      body: { watch: watch.downstreamJson },
-    });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      const body = e.statusCode === 404 ? `Watch with id = ${id} not found` : e;
-      return response.customError({ statusCode: e.statusCode, body });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
 
 export function registerLoadRoute(deps: RouteDependencies) {
   deps.router.get(
@@ -66,6 +31,37 @@ export function registerLoadRoute(deps: RouteDependencies) {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const id = request.params.id;
+
+      try {
+        const hit = await fetchWatch(ctx.watcher!.client, id);
+        const watchJson = get(hit, 'watch');
+        const watchStatusJson = get(hit, 'status');
+        const json = {
+          id,
+          watchJson,
+          watchStatusJson,
+        };
+
+        const watch = Watch.fromUpstreamJson(json, {
+          throwExceptions: {
+            Action: false,
+          },
+        });
+        return response.ok({
+          body: { watch: watch.downstreamJson },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          const body = e.statusCode === 404 ? `Watch with id = ${id} not found` : e;
+          return response.customError({ statusCode: e.statusCode, body });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

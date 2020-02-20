@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
@@ -14,31 +14,11 @@ const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-type ParamsSchema = TypeOf<typeof paramsSchema>;
-
 function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
   return dataClient.callAsCurrentUser('watcher.deleteWatch', {
     id: watchId,
   });
 }
-export const handler: RequestHandler<ParamsSchema> = async (ctx, request, response) => {
-  const { watchId } = request.params;
-
-  try {
-    return response.ok({
-      body: await deleteWatch(ctx.watcher!.client, watchId),
-    });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
-      return response.customError({ statusCode: e.statusCode, body });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
 
 export function registerDeleteRoute(deps: RouteDependencies) {
   deps.router.delete(
@@ -48,6 +28,23 @@ export function registerDeleteRoute(deps: RouteDependencies) {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const { watchId } = request.params;
+
+      try {
+        return response.ok({
+          body: await deleteWatch(ctx.watcher!.client, watchId),
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
+          return response.customError({ statusCode: e.statusCode, body });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

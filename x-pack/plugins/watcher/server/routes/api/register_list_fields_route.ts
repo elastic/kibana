@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../lib/is_es_error';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
@@ -15,8 +15,6 @@ import { RouteDependencies } from '../../types';
 const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),
 });
-
-type BodySchema = TypeOf<typeof bodySchema>;
 
 function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
   const params = {
@@ -30,30 +28,6 @@ function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
   return dataClient.callAsCurrentUser('fieldCaps', params);
 }
 
-const handler: RequestHandler<unknown, unknown, BodySchema> = async (ctx, request, response) => {
-  const { indexes } = request.body;
-
-  try {
-    const fieldsResponse = await fetchFields(ctx.watcher!.client, indexes);
-    const json = fieldsResponse.status === 404 ? { fields: [] } : fieldsResponse;
-    const fields = Fields.fromUpstreamJson(json);
-    return response.ok({ body: fields.downstreamJson });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({
-        statusCode: e.statusCode,
-        body: {
-          message: e.message,
-        },
-      });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerListFieldsRoute(deps: RouteDependencies) {
   deps.router.post(
     {
@@ -62,6 +36,28 @@ export function registerListFieldsRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const { indexes } = request.body;
+
+      try {
+        const fieldsResponse = await fetchFields(ctx.watcher!.client, indexes);
+        const json = fieldsResponse.status === 404 ? { fields: [] } : fieldsResponse;
+        const fields = Fields.fromUpstreamJson(json);
+        return response.ok({ body: fields.downstreamJson });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({
+            statusCode: e.statusCode,
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

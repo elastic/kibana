@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../../lib/is_es_error';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
@@ -18,27 +18,25 @@ function fetchClusterSettings(client: IScopedClusterClient) {
   });
 }
 
-export const handler: RequestHandler = async (ctx, request, response) => {
-  try {
-    const settings = await fetchClusterSettings(ctx.watcher!.client);
-    return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({ statusCode: e.statusCode, body: e });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerLoadRoute(deps: RouteDependencies) {
   deps.router.get(
     {
       path: '/api/watcher/settings',
       validate: false,
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      try {
+        const settings = await fetchClusterSettings(ctx.watcher!.client);
+        return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

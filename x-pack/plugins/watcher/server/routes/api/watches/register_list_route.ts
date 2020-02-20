@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
@@ -29,55 +29,53 @@ function fetchWatches(dataClient: IScopedClusterClient) {
     .then((response: any) => fetchAllFromScroll(response, dataClient));
 }
 
-const handler: RequestHandler = async (ctx, request, response) => {
-  try {
-    const hits = await fetchWatches(ctx.watcher!.client);
-    const watches = hits.map((hit: any) => {
-      const id = get(hit, '_id');
-      const watchJson = get(hit, '_source');
-      const watchStatusJson = get(hit, '_source.status');
-
-      return Watch.fromUpstreamJson(
-        {
-          id,
-          watchJson,
-          watchStatusJson,
-        },
-        {
-          throwExceptions: {
-            Action: false,
-          },
-        }
-      );
-    });
-
-    return response.ok({
-      body: {
-        watches: watches.map((watch: any) => watch.downstreamJson),
-      },
-    });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({
-        statusCode: e.statusCode,
-        body: {
-          message: e.message,
-        },
-      });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerListRoute(deps: RouteDependencies) {
   deps.router.get(
     {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      try {
+        const hits = await fetchWatches(ctx.watcher!.client);
+        const watches = hits.map((hit: any) => {
+          const id = get(hit, '_id');
+          const watchJson = get(hit, '_source');
+          const watchStatusJson = get(hit, '_source.status');
+
+          return Watch.fromUpstreamJson(
+            {
+              id,
+              watchJson,
+              watchStatusJson,
+            },
+            {
+              throwExceptions: {
+                Action: false,
+              },
+            }
+          );
+        });
+
+        return response.ok({
+          body: {
+            watches: watches.map((watch: any) => watch.downstreamJson),
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({
+            statusCode: e.statusCode,
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient, RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../lib/is_es_error';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
@@ -17,8 +17,6 @@ import { WatchHistoryItem } from '../../models/watch_history_item/index';
 const paramsSchema = schema.object({
   id: schema.string(),
 });
-
-type ParamsSchema = TypeOf<typeof paramsSchema>;
 
 function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
   return dataClient.callAsCurrentUser('search', {
@@ -33,39 +31,6 @@ function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: 
   });
 }
 
-const handler: RequestHandler<ParamsSchema> = async (ctx, request, response) => {
-  const id = request.params.id;
-
-  try {
-    const responseFromES = await fetchHistoryItem(ctx.watcher!.client, id);
-    const hit = get(responseFromES, 'hits.hits[0]');
-    if (!hit) {
-      return response.notFound({ body: `Watch History Item with id = ${id} not found` });
-    }
-    const watchHistoryItemJson = get(hit, '_source');
-    const watchId = get(hit, '_source.watch_id');
-    const json = {
-      id,
-      watchId,
-      watchHistoryItemJson,
-      includeDetails: true,
-    };
-
-    const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-    return response.ok({
-      body: { watchHistoryItem: watchHistoryItem.downstreamJson },
-    });
-  } catch (e) {
-    // Case: Error from Elasticsearch JS client
-    if (isEsError(e)) {
-      return response.customError({ statusCode: e.statusCode, body: e });
-    }
-
-    // Case: default
-    return response.internalError({ body: e });
-  }
-};
-
 export function registerLoadHistoryRoute(deps: RouteDependencies) {
   deps.router.get(
     {
@@ -74,6 +39,37 @@ export function registerLoadHistoryRoute(deps: RouteDependencies) {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const id = request.params.id;
+
+      try {
+        const responseFromES = await fetchHistoryItem(ctx.watcher!.client, id);
+        const hit = get(responseFromES, 'hits.hits[0]');
+        if (!hit) {
+          return response.notFound({ body: `Watch History Item with id = ${id} not found` });
+        }
+        const watchHistoryItemJson = get(hit, '_source');
+        const watchId = get(hit, '_source.watch_id');
+        const json = {
+          id,
+          watchId,
+          watchHistoryItemJson,
+          includeDetails: true,
+        };
+
+        const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
+        return response.ok({
+          body: { watchHistoryItem: watchHistoryItem.downstreamJson },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }
