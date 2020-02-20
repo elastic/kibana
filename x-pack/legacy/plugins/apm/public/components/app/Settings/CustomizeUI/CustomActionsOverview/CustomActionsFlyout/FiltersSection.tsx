@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useRef } from 'react';
 
 type Keys = 'key' | 'value';
 export type Filter = {
@@ -47,7 +47,12 @@ export const FiltersSection = ({
   filters: Filter[];
   onChange?: (filters: Filter[]) => void;
 }) => {
+  const filterValueRefs = useRef<HTMLInputElement[]>([]);
+
   const onChangeFilter = (key: Keys, value: string, idx: number) => {
+    if (filterValueRefs.current[idx]) {
+      filterValueRefs.current[idx].focus();
+    }
     const copyOfFilters = [...filters];
     copyOfFilters[idx][key] = value;
     if (typeof onChange === 'function') {
@@ -107,6 +112,7 @@ export const FiltersSection = ({
                 })}
                 value={filter.key}
                 onChange={e => onChangeFilter('key', e.target.value, idx)}
+                isInvalid={isEmpty(filter.key) && !isEmpty(filter.value)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -117,6 +123,14 @@ export const FiltersSection = ({
                 )}
                 onChange={e => onChangeFilter('value', e.target.value, idx)}
                 value={filter.value}
+                isInvalid={!isEmpty(filter.key) && isEmpty(filter.value)}
+                inputRef={ref => {
+                  if (ref) {
+                    filterValueRefs.current.push(ref);
+                  } else {
+                    filterValueRefs.current.splice(idx, 1);
+                  }
+                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
