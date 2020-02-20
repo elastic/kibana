@@ -79,6 +79,7 @@ export async function startApp(
   // expected.
   element.style.height = '100%';
   element.style.display = 'flex';
+  element.style.overflowY = 'hidden'; // Prevent having scroll within a container having scroll. It messes up with drag-n-drop elements
   element.className += ` ${CONTAINER_CLASSNAME}`;
 
   ReactDOM.render(<App />, element);

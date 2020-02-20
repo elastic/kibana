@@ -81,7 +81,7 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Spaces' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
       </div>
     `);
 
@@ -103,7 +103,7 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
       </div>
     `);
 
@@ -126,7 +126,7 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","securityEnabled":true}
       </div>
     `);
 
