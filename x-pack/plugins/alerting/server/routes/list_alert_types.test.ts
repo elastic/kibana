@@ -46,7 +46,7 @@ describe('listAlertTypesRoute', () => {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
       },
     ];
 
@@ -62,7 +62,7 @@ describe('listAlertTypesRoute', () => {
                 "name": "Default",
               },
             ],
-            "defaultActionGroup": "default",
+            "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
           },
@@ -146,7 +146,7 @@ describe('listAlertTypesRoute', () => {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
       },
     ];
 

@@ -33,7 +33,7 @@ describe('has()', () => {
           name: 'Default',
         },
       ],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -51,7 +51,7 @@ describe('register()', () => {
           name: 'Default',
         },
       ],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -82,7 +82,7 @@ describe('register()', () => {
           name: 'Default',
         },
       ],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     expect(() =>
@@ -95,7 +95,7 @@ describe('register()', () => {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -114,7 +114,7 @@ describe('get()', () => {
           name: 'Default',
         },
       ],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
@@ -126,7 +126,7 @@ describe('get()', () => {
             "name": "Default",
           },
         ],
-        "defaultActionGroup": "default",
+        "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
@@ -160,7 +160,7 @@ describe('list()', () => {
           name: 'Test Action Group',
         },
       ],
-      defaultActionGroup: 'testActionGroup',
+      defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
     });
     const result = registry.list();
@@ -173,7 +173,7 @@ describe('list()', () => {
               "name": "Test Action Group",
             },
           ],
-          "defaultActionGroup": "testActionGroup",
+          "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
         },

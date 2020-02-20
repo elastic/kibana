@@ -206,7 +206,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -261,7 +261,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
           const group = 'default';
@@ -289,7 +289,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -315,7 +315,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -339,7 +339,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -404,7 +404,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -416,7 +416,7 @@ export default function(kibana: any) {
         id: 'test.noop',
         name: 'Test: Noop',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);

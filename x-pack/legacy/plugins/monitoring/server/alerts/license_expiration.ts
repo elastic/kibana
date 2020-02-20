@@ -54,7 +54,7 @@ export const getLicenseExpiration = (
         }),
       },
     ],
-    defaultActionGroup: 'default',
+    defaultActionGroupId: 'default',
     async executor({
       services,
       params,

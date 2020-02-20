@@ -222,10 +222,6 @@ describe('alert_form', () => {
         '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
       );
       expect(actionTypeSelectOptions.exists()).toBeTruthy();
-
-      actionTypeSelectOptions.first().simulate('click');
-      const actionTypeForm = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
-      expect(actionTypeForm.exists()).toBeTruthy();
     });
   });
 

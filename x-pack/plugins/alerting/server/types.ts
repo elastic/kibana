@@ -59,7 +59,7 @@ export interface AlertType {
     params?: { validate: (object: any) => any };
   };
   actionGroups: ActionGroup[];
-  defaultActionGroup: ActionGroup['id'];
+  defaultActionGroupId: ActionGroup['id'];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 

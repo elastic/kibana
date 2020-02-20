@@ -40,7 +40,7 @@ describe('loadAlertTypes', () => {
         name: 'Test',
         actionVariables: ['var1'],
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

@@ -70,7 +70,7 @@ export class AlertTypeRegistry {
       id: alertTypeId,
       name: alertType.name,
       actionGroups: alertType.actionGroups,
-      defaultActionGroup: alertType.defaultActionGroup,
+      defaultActionGroupId: alertType.defaultActionGroupId,
     }));
   }
 }

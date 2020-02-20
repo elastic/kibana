@@ -45,7 +45,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -66,7 +66,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -94,7 +94,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -144,7 +144,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
       const actionTypes: ActionType[] = [
@@ -195,7 +195,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -220,7 +220,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -245,7 +245,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
+        defaultActionGroupId: 'default',
         actionVariables: [],
       };
 
@@ -275,7 +275,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -301,7 +301,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -327,7 +327,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -362,7 +362,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -400,7 +400,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -427,7 +427,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -454,7 +454,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -490,7 +490,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 
@@ -526,7 +526,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroup: 'default',
+      defaultActionGroupId: 'default',
       actionVariables: [],
     };
 

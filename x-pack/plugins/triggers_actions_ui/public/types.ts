@@ -76,7 +76,7 @@ export interface AlertType {
   name: string;
   actionGroups: ActionGroup[];
   actionVariables: string[];
-  defaultActionGroup: ActionGroup['id'];
+  defaultActionGroupId: ActionGroup['id'];
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
