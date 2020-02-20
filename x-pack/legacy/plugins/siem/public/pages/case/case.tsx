@@ -7,29 +7,23 @@
 import React from 'react';
 
 import { EuiButton, EuiFlexGroup } from '@elastic/eui';
-import { HeaderPage } from '../../components/header_page';
+import { CaseHeaderPage } from './components/case_header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { AllCases } from './components/all_cases';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 import { getCreateCaseUrl } from '../../components/link_to';
 
-const badgeOptions = {
-  beta: true,
-  text: i18n.PAGE_BADGE_LABEL,
-  tooltip: i18n.PAGE_BADGE_TOOLTIP,
-};
-
 export const CasesPage = React.memo(() => (
   <>
     <WrapperPage>
-      <HeaderPage badgeOptions={badgeOptions} subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
+      <CaseHeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
           <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
             {i18n.CREATE_TITLE}
           </EuiButton>
         </EuiFlexGroup>
-      </HeaderPage>
+      </CaseHeaderPage>
       <AllCases />
     </WrapperPage>
     <SpyRoute />
