@@ -28,6 +28,8 @@ import {
   MachineLearningJobWizardMultiMetricProvider,
   MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
+  MachineLearningSecurityCommonProvider,
+  MachineLearningSecurityUIProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
 } from './machine_learning';
@@ -55,6 +57,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
 
@@ -80,6 +84,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardMultiMetric,
     jobWizardPopulation,
     navigation,
+    securityCommon,
+    securityUI,
     settings,
     singleMetricViewer,
   };

@@ -9,7 +9,7 @@ import 'hapi';
 import { XPackMainPlugin } from '../legacy/plugins/xpack_main/server/xpack_main';
 import { SecurityPlugin } from '../legacy/plugins/security';
 import { ActionsPlugin, ActionsClient } from '../plugins/actions/server';
-import { AlertingPlugin, AlertsClient } from '../legacy/plugins/alerting';
+import { AlertingPlugin, AlertsClient } from '../plugins/alerting/server';
 import { LegacyTaskManagerApi } from '../legacy/plugins/task_manager/server';
 
 declare module 'hapi' {

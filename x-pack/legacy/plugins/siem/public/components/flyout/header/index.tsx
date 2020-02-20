@@ -23,8 +23,9 @@ import { Properties } from '../../timeline/properties';
 import { appActions } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
 import { timelineActions } from '../../../store/actions';
-import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
-import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
+import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/constants';
 import { InputsModelId } from '../../../store/inputs/constants';
 
 interface OwnProps {
