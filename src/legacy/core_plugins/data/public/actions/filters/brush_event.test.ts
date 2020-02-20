@@ -19,19 +19,6 @@
 
 import moment from 'moment';
 
-jest.mock('../../search/aggs', () => ({
-  AggConfigs: function AggConfigs() {
-    return {
-      createAggConfig: ({ params }: Record<string, any>) => ({
-        params,
-        getIndexPattern: () => ({
-          timeFieldName: 'time',
-        }),
-      }),
-    };
-  },
-}));
-
 jest.mock('../../../../../../plugins/data/public/services', () => ({
   getIndexPatterns: () => {
     return {
@@ -46,6 +33,7 @@ jest.mock('../../../../../../plugins/data/public/services', () => ({
 }));
 
 import { onBrushEvent, BrushEvent } from './brush_event';
+import { mockDataServices } from '../../search/aggs/test_helpers';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -59,11 +47,17 @@ describe('brushEvent', () => {
       },
       getIndexPattern: () => ({
         timeFieldName: 'time',
+        fields: {
+          getByName: () => undefined,
+          filter: () => [],
+        },
       }),
     },
   ];
 
   beforeEach(() => {
+    mockDataServices();
+
     baseEvent = {
       data: {
         ordered: {

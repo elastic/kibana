@@ -24,7 +24,7 @@ import { bucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { aggTypesRegistryStartMock } from '../mocks';
+import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 
 jest.mock('../schemas', () => {
   class MockedSchemas {
@@ -35,9 +35,13 @@ jest.mock('../schemas', () => {
   };
 });
 
-jest.mock('ui/new_platform');
-
 describe('sibling pipeline aggs', () => {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
+  const typesRegistry = mockAggTypesRegistry();
+
   const metrics = [
     { name: 'sum_bucket', title: 'Overall Sum', provider: bucketSumMetricAgg },
     { name: 'avg_bucket', title: 'Overall Average', provider: bucketAvgMetricAgg },
@@ -96,7 +100,7 @@ describe('sibling pipeline aggs', () => {
               },
             },
           ],
-          { typesRegistry: aggTypesRegistryStartMock() }
+          { typesRegistry }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

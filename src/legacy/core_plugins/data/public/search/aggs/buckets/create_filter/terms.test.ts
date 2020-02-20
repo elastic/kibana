@@ -17,17 +17,17 @@
  * under the License.
  */
 
+import { termsBucketAgg } from '../terms';
 import { createFilterTerms } from './terms';
 import { AggConfigs } from '../../agg_configs';
-import { aggTypesRegistryStartMock } from '../../mocks';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { Filter, ExistsFilter } from '../../../../../../../../plugins/data/public';
 
-jest.mock('ui/new_platform');
-
 describe('AggConfig Filters', () => {
   describe('terms', () => {
+    const typesRegistry = mockAggTypesRegistry([termsBucketAgg]);
     const getAggConfigs = (aggs: Array<Record<string, any>>) => {
       const indexPattern = {
         id: '1234',
@@ -43,7 +43,7 @@ describe('AggConfig Filters', () => {
         indexPattern,
       };
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry: aggTypesRegistryStartMock() });
+      return new AggConfigs(indexPattern, aggs, { typesRegistry });
     };
 
     it('should return a match_phrase filter for terms', () => {

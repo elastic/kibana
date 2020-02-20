@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { IAggType } from './agg_type';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
@@ -31,6 +30,8 @@ import {
   FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../plugins/data/public/services';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -379,7 +380,8 @@ export class AggConfig {
   }
 
   fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = getFieldFormats();
+
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;

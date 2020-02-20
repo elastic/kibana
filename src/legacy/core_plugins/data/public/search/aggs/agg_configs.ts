@@ -108,7 +108,7 @@ export class AggConfigs {
           const defaults = schema.defaults.slice(0, schema.max);
           _.each(defaults, defaultState => {
             const state = _.defaults({ id: AggConfig.nextId(this.aggs) }, defaultState);
-            this.aggs.push(new AggConfig(this, state as AggConfigOptions));
+            this.createAggConfig(state as AggConfigOptions);
           });
         }
       })
