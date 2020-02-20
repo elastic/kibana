@@ -105,11 +105,6 @@ describe('when on the alerting page', () => {
          * another 'row' which is the alert summary.
          */
         expect(rows).toHaveLength(2);
-
-        /**
-         * Record the markup for the first row, to alert us in case something in the implementation changes.
-         */
-        expect(rows[1]).toMatchSnapshot();
       });
       describe('when the user has clicked the alert type in the grid', () => {
         let renderResult: reactTestingLibrary.RenderResult;
