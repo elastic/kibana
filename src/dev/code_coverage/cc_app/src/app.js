@@ -21,7 +21,7 @@ import React from 'react';
 import Header from './header';
 import HistoricalList from './historical_list';
 // import Footer from './footer';
-import CoverageItem from './coverage_item';
+import CurrentItem from './current_item';
 
 export default function App({ testRunnerTypes, buildStats, historicalItems, currentJobNumber, currentItem }) {
   const { url } = buildStats;
@@ -29,11 +29,11 @@ export default function App({ testRunnerTypes, buildStats, historicalItems, curr
     <div>
       <Header url={url} />
       <div>
-        {/*<CoverageItem*/}
-        {/*  item={currentItem}*/}
-        {/*  currentJobNumber={currentJobNumber}*/}
-        {/*  testRunnerTypes={testRunnerTypes}*/}
-        {/*/>*/}
+        <CurrentItem
+          item={currentItem}
+          currentJobNumber={currentJobNumber}
+          testRunnerTypes={testRunnerTypes}
+        />
         <HistoricalList
           testRunnerTypes={testRunnerTypes}
           historicalItems={historicalItems}

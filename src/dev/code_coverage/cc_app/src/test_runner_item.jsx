@@ -36,3 +36,4 @@ function href(type) {
 function jobNum(historicalItem) {
   return [.../coverage\/(\d*)\/\d*-.*Z/gm.exec(historicalItem)][1];
 }
+
