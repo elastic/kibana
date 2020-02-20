@@ -98,8 +98,6 @@ describe('UiActionsService', () => {
     });
   });
 
-  // describe('.createTriggerContext', () => {});
-
   describe('.getTriggerActions()', () => {
     const action1: Action = {
       id: 'action1',
