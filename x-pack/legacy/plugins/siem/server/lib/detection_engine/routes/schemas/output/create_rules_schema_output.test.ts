@@ -36,14 +36,24 @@ describe('output create_rules_schema', () => {
       created_by: 'elastic',
       description: 'some description',
       extra: 'string',
+      risk_score: 55,
+      references: ['test 1', 'test 2'],
     });
 
     const message = pipe(decoded, foldLeftRight);
+    /*
+    const output = strictExactCheck(message);
+    const defaults = addDefaults(message);
+    const conditionalChecks = doConditionalChecks(message);
+    */
     const expected: CreateRulesSchema = {
       created_at: new Date(ANCHOR_DATE),
       updated_at: new Date(ANCHOR_DATE),
       created_by: 'elastic',
       description: 'some description',
+      risk_score: 55,
+      references: ['test 1', 'test 2'],
+      extra: 'string',
     };
 
     if (message.errors != null) {
@@ -53,3 +63,18 @@ describe('output create_rules_schema', () => {
     }
   });
 });
+
+// a unique brand for positive numbers
+interface PositiveBrand {
+  readonly Positive: unique symbol; // use `unique symbol` here to ensure uniqueness across modules / packages
+}
+
+const Positive = t.brand(
+  t.number, // a codec representing the type to be refined
+  (n): n is t.Branded<number, PositiveBrand> => n >= 0, // a custom type guard using the build-in helper `Branded`
+  'Positive' // the name must match the readonly field in the brand
+);
+
+type Positive = t.TypeOf<typeof Positive>;
+const PositiveInt = t.intersection([t.Int, Positive]);
+type PositiveInt = number & t.Brand<t.IntBrand> & t.Brand<PositiveBrand>;

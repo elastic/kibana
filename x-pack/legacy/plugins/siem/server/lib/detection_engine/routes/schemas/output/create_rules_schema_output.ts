@@ -12,12 +12,46 @@ export const User = t.type({
   name: t.string,
 });
 
-export const createRulesSchema = t.type({
-  created_at: DateFromISOString,
-  updated_at: DateFromISOString,
-  created_by: t.string,
-  description: t.string,
-});
+// example risk score
+export const riskScore = new t.Type<number, number, unknown>(
+  'riskScore',
+  t.number.is,
+  (input, context) => {
+    return typeof input === 'number' && Number.isSafeInteger(input) && input >= 0 && input <= 100
+      ? t.success(input)
+      : t.failure(input, context);
+  },
+  t.identity
+);
+
+// default values test and it should all be strings
+export const references = new t.Type<string[], string[], unknown>(
+  'references',
+  (input: unknown): input is string[] => Array.isArray(input),
+  (input, context) => {
+    if (input == null) {
+      return t.success([]);
+    } else if (Array.isArray(input)) {
+      const everythingIsAString = input.every(element => typeof element === 'string');
+      if (everythingIsAString) {
+        return t.success(input);
+      }
+    }
+    return t.failure(input, context);
+  },
+  t.identity
+);
+
+export const createRulesSchema = t.intersection([
+  t.type({
+    created_at: DateFromISOString,
+    updated_at: DateFromISOString,
+    created_by: t.string,
+    description: t.string,
+    risk_score: riskScore,
+  }),
+  t.partial({ references }),
+]);
 
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
 
