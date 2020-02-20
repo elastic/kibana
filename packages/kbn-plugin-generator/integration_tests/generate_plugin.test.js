@@ -79,7 +79,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     it(`'yarn test:server' should exit 0`, async () => {
-      await execa('yarn', ['test:server'], {
+      await execa('yarn', ['test:mocha'], {
         cwd: generatedPath,
         env: {
           DISABLE_JUNIT_REPORTER: '1',
