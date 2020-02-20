@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { mockAuthenticationProviderOptions, mockScopedClusterClient } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { BasicAuthenticationProvider } from './basic';
 
@@ -30,14 +28,21 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.login(
-        httpServerMock.createKibanaRequest(),
+        httpServerMock.createKibanaRequest({ headers: {} }),
         credentials
       );
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
@@ -46,16 +51,23 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('fails if user cannot be retrieved during login attempt', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
       const authenticationError = new Error('Some error');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(authenticationError);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.login(request, credentials);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -97,36 +109,45 @@ describe('BasicAuthenticationProvider', () => {
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
-    it('succeeds if only `authorization` header is available.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: generateAuthorizationHeader('user', 'password') },
-      });
-      const user = mockAuthenticatedUser();
-
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: request.headers }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+    it('does not handle authentication via `authorization` header.', async () => {
+      const authorization = generateAuthorizationHeader('user', 'password');
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       const authenticationResult = await provider.authenticate(request);
 
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe(authorization);
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
 
-      // Session state and authHeaders aren't returned for header-based auth.
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.authHeaders).toBeUndefined();
+    it('does not handle authentication via `authorization` header even if state contains valid credentials.', async () => {
+      const authorization = generateAuthorizationHeader('user', 'password');
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+
+      const authenticationResult = await provider.authenticate(request, { authorization });
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe(authorization);
+      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('succeeds if only state is available.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
@@ -134,29 +155,23 @@ describe('BasicAuthenticationProvider', () => {
       expect(authenticationResult.authHeaders).toEqual({ authorization });
     });
 
-    it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer ***' },
-      });
-      const authorization = generateAuthorizationHeader('user', 'password');
-
-      const authenticationResult = await provider.authenticate(request, { authorization });
-
-      sinon.assert.notCalled(mockOptions.client.asScoped);
-      expect(request.headers.authorization).toBe('Bearer ***');
-      expect(authenticationResult.notHandled()).toBe(true);
-    });
-
     it('fails if state contains invalid credentials.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationError = new Error('Forbidden');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(authenticationError);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -164,27 +179,6 @@ describe('BasicAuthenticationProvider', () => {
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.error).toBe(authenticationError);
-    });
-
-    it('authenticates only via `authorization` header even if state is available.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: generateAuthorizationHeader('user', 'password') },
-      });
-      const user = mockAuthenticatedUser();
-
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: request.headers }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
-
-      const authorizationInState = generateAuthorizationHeader('user1', 'password2');
-      const authenticationResult = await provider.authenticate(request, {
-        authorization: authorizationInState,
-      });
-
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
-      expect(authenticationResult.state).toBeUndefined();
-      expect(authenticationResult.authHeaders).toBeUndefined();
     });
   });
 

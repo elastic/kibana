@@ -12,16 +12,10 @@ import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import {
-  MockAuthenticationProviderOptionsWithJest,
-  mockAuthenticationProviderOptionsWithJest,
-} from './base.mock';
+import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import { PKIAuthenticationProvider } from './pki';
-import {
-  ElasticsearchErrorHelpers,
-  ScopedClusterClient,
-} from '../../../../../../src/core/server/elasticsearch';
+import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server';
 import { Socket } from 'net';
 import { getErrorStatusCode } from '../../errors';
 
@@ -64,18 +58,31 @@ function getMockSocket({
 
 describe('PKIAuthenticationProvider', () => {
   let provider: PKIAuthenticationProvider;
-  let mockOptions: MockAuthenticationProviderOptionsWithJest;
+  let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptionsWithJest();
+    mockOptions = mockAuthenticationProviderOptions();
     provider = new PKIAuthenticationProvider(mockOptions);
   });
 
   afterEach(() => jest.clearAllMocks());
 
   describe('`authenticate` method', () => {
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+    it('does not handle authentication via `authorization` header.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Basic some:credentials' },
+        headers: { authorization: 'Bearer some-token' },
+      });
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer some-token');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle authentication via `authorization` header even if state contains a valid token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-token' },
       });
       const state = {
         accessToken: 'some-valid-token',
@@ -86,7 +93,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(request.headers.authorization).toBe('Bearer some-token');
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
@@ -174,9 +181,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
 
       const authenticationResult = await provider.authenticate(request);
@@ -221,9 +226,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
 
       const authenticationResult = await provider.authenticate(request);
@@ -263,9 +266,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
 
       const authenticationResult = await provider.authenticate(request, state);
@@ -312,9 +313,7 @@ describe('PKIAuthenticationProvider', () => {
         .mockRejectedValueOnce(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()))
         // In response to a call with a new token.
         .mockResolvedValueOnce(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
 
       const authenticationResult = await provider.authenticate(request, state);
@@ -348,9 +347,7 @@ describe('PKIAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, state);
 
@@ -398,9 +395,7 @@ describe('PKIAuthenticationProvider', () => {
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
       mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
 
       const authenticationResult = await provider.authenticate(request);
@@ -435,9 +430,7 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, state);
 
@@ -463,82 +456,13 @@ describe('PKIAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(new errors.ServiceUnavailable());
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, state);
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('status', 503);
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
-    });
-
-    it('succeeds if `authorization` contains a valid token.', async () => {
-      const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer some-valid-token' },
-      });
-
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(request.headers.authorization).toBe('Bearer some-valid-token');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
-      expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('fails if token from `authorization` header is rejected.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer some-invalid-token' },
-      });
-
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-    });
-
-    it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
-      const user = mockAuthenticatedUser();
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer some-invalid-token' },
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(state.peerCertificateFingerprint256),
-        }),
-      });
-
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser
-        // In response to call with a token from header.
-        .mockRejectedValueOnce(failureReason)
-        // In response to a call with a token from session (not expected to be called).
-        .mockResolvedValueOnce(user);
-      mockOptions.client.asScoped.mockReturnValue(
-        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-      );
-
-      const authenticationResult = await provider.authenticate(request, state);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
   });
 

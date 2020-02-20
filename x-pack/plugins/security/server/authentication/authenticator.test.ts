@@ -5,6 +5,7 @@
  */
 
 jest.mock('./providers/basic');
+jest.mock('./providers/saml');
 
 import Boom from 'boom';
 import { duration, Duration } from 'moment';
@@ -23,15 +24,25 @@ import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenti
 import { DeauthenticationResult } from './deauthentication_result';
 import { BasicAuthenticationProvider } from './providers';
 
-function getMockOptions(config: Partial<AuthenticatorOptions['config']> = {}) {
+function getMockOptions({
+  session,
+  providers,
+}: {
+  session?: AuthenticatorOptions['config']['session'];
+  providers?: string[];
+} = {}) {
   return {
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     loggers: loggingServiceMock.create(),
     config: {
-      session: { idleTimeout: null, lifespan: null },
-      authc: { providers: [], oidc: {}, saml: {} },
-      ...config,
+      session: { idleTimeout: null, lifespan: null, ...(session || {}) },
+      authc: {
+        providers: providers || [],
+        oidc: {},
+        saml: {},
+        http: { enabled: true, autoSchemesEnabled: true, schemes: [] },
+      },
     },
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
   };
@@ -55,20 +66,13 @@ describe('Authenticator', () => {
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', () => {
-      const mockOptions = getMockOptions({
-        authc: { providers: [], oidc: {}, saml: {} },
-      });
-      expect(() => new Authenticator(mockOptions)).toThrowError(
+      expect(() => new Authenticator(getMockOptions())).toThrowError(
         'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     });
 
     it('fails if configured authentication provider is not known.', () => {
-      const mockOptions = getMockOptions({
-        authc: { providers: ['super-basic'], oidc: {}, saml: {} },
-      });
-
-      expect(() => new Authenticator(mockOptions)).toThrowError(
+      expect(() => new Authenticator(getMockOptions({ providers: ['super-basic'] }))).toThrowError(
         'Unsupported authentication provider name: super-basic.'
       );
     });
@@ -80,9 +84,7 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
-      });
+      mockOptions = getMockOptions({ providers: ['basic'] });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
@@ -232,9 +234,7 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
-      });
+      mockOptions = getMockOptions({ providers: ['basic'] });
       mockSessionStorage = sessionStorageMock.create<ProviderSession>();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
@@ -377,7 +377,7 @@ describe('Authenticator', () => {
           idleTimeout: duration(3600 * 24),
           lifespan: null,
         },
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
+        providers: ['basic'],
       });
 
       mockSessionStorage = sessionStorageMock.create();
@@ -416,7 +416,7 @@ describe('Authenticator', () => {
           idleTimeout: duration(hr * 2),
           lifespan: duration(hr * 8),
         },
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
+        providers: ['basic'],
       });
 
       mockSessionStorage = sessionStorageMock.create();
@@ -468,7 +468,7 @@ describe('Authenticator', () => {
             idleTimeout: null,
             lifespan,
           },
-          authc: { providers: ['basic'], oidc: {}, saml: {} },
+          providers: ['basic'],
         });
 
         mockSessionStorage = sessionStorageMock.create();
@@ -718,9 +718,7 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
-      });
+      mockOptions = getMockOptions({ providers: ['basic'] });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
@@ -809,9 +807,7 @@ describe('Authenticator', () => {
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     beforeEach(() => {
-      mockOptions = getMockOptions({
-        authc: { providers: ['basic'], oidc: {}, saml: {} },
-      });
+      mockOptions = getMockOptions({ providers: ['basic'] });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 
@@ -849,6 +845,18 @@ describe('Authenticator', () => {
       const sessionInfo = await authenticator.getSessionInfo(request);
 
       expect(sessionInfo).toBe(null);
+    });
+  });
+
+  describe('`isProviderEnabled` method', () => {
+    it('returns `true` only if specified provider is enabled', () => {
+      let authenticator = new Authenticator(getMockOptions({ providers: ['basic'] }));
+      expect(authenticator.isProviderEnabled('basic')).toBe(true);
+      expect(authenticator.isProviderEnabled('saml')).toBe(false);
+
+      authenticator = new Authenticator(getMockOptions({ providers: ['basic', 'saml'] }));
+      expect(authenticator.isProviderEnabled('basic')).toBe(true);
+      expect(authenticator.isProviderEnabled('saml')).toBe(true);
     });
   });
 });

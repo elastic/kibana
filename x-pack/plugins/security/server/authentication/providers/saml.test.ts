@@ -5,18 +5,14 @@
  */
 
 import Boom from 'boom';
-import sinon from 'sinon';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import {
-  MockAuthenticationProviderOptions,
-  mockAuthenticationProviderOptions,
-  mockScopedClusterClient,
-} from './base.mock';
+import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import { SAMLAuthenticationProvider, SAMLLoginStep } from './saml';
+import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
@@ -63,7 +59,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('gets token and redirects user to requested URL if SAML Response is valid.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         username: 'user',
         access_token: 'some-token',
         refresh_token: 'some-refresh-token',
@@ -75,8 +71,7 @@ describe('SAMLAuthenticationProvider', () => {
         { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path#some-app' }
       );
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
         { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
@@ -99,7 +94,7 @@ describe('SAMLAuthenticationProvider', () => {
         {}
       );
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
@@ -110,7 +105,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to the default location if state contains empty redirect URL.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         access_token: 'user-initiated-login-token',
         refresh_token: 'user-initiated-login-refresh-token',
       });
@@ -121,8 +116,7 @@ describe('SAMLAuthenticationProvider', () => {
         { requestId: 'some-request-id', redirectURL: '' }
       );
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
         { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
@@ -138,7 +132,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to the default location if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         access_token: 'idp-initiated-login-token',
         refresh_token: 'idp-initiated-login-refresh-token',
       });
@@ -148,8 +142,7 @@ describe('SAMLAuthenticationProvider', () => {
         samlResponse: 'saml-response-xml',
       });
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
         { body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' } }
       );
@@ -166,9 +159,7 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const failureReason = new Error('SAML response is stale!');
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlAuthenticate')
-        .rejects(failureReason);
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.login(
         request,
@@ -176,8 +167,7 @@ describe('SAMLAuthenticationProvider', () => {
         { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path' }
       );
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
         { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
@@ -188,17 +178,16 @@ describe('SAMLAuthenticationProvider', () => {
 
     describe('IdP initiated login with existing session', () => {
       it('fails if new SAML Response is rejected.', async () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
+        const authorization = 'Bearer some-valid-token';
 
         const user = mockAuthenticatedUser();
-        mockScopedClusterClient(mockOptions.client)
-          .callAsCurrentUser.withArgs('shield.authenticate')
-          .resolves(user);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
         const failureReason = new Error('SAML response is invalid!');
-        mockOptions.client.callAsInternalUser
-          .withArgs('shield.samlAuthenticate')
-          .rejects(failureReason);
+        mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
         const authenticationResult = await provider.login(
           request,
@@ -210,10 +199,20 @@ describe('SAMLAuthenticationProvider', () => {
           }
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
+        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization },
+        });
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+          'shield.authenticate'
+        );
+
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.samlAuthenticate',
-          { body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' } }
+          {
+            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+          }
         );
 
         expect(authenticationResult.failed()).toBe(true);
@@ -221,26 +220,27 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       it('fails if fails to invalidate existing access/refresh tokens.', async () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
         const state = {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
         };
+        const authorization = `Bearer ${state.accessToken}`;
 
         const user = mockAuthenticatedUser();
-        mockScopedClusterClient(mockOptions.client)
-          .callAsCurrentUser.withArgs('shield.authenticate')
-          .resolves(user);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           username: 'user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
         });
 
         const failureReason = new Error('Failed to invalidate token!');
-        mockOptions.tokens.invalidate.rejects(failureReason);
+        mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
         const authenticationResult = await provider.login(
           request,
@@ -248,14 +248,24 @@ describe('SAMLAuthenticationProvider', () => {
           state
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlAuthenticate',
-          { body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' } }
+        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization },
+        });
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+          'shield.authenticate'
         );
 
-        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
-        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, {
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.samlAuthenticate',
+          {
+            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+          }
+        );
+
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
           accessToken: state.accessToken,
           refreshToken: state.refreshToken,
         });
@@ -265,25 +275,26 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       it('redirects to the home page if new SAML Response is for the same user.', async () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
         const state = {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
         };
+        const authorization = `Bearer ${state.accessToken}`;
 
         const user = { username: 'user' };
-        mockScopedClusterClient(mockOptions.client)
-          .callAsCurrentUser.withArgs('shield.authenticate')
-          .resolves(user);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           username: 'user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
         });
 
-        mockOptions.tokens.invalidate.resolves();
+        mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
         const authenticationResult = await provider.login(
           request,
@@ -291,14 +302,24 @@ describe('SAMLAuthenticationProvider', () => {
           state
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlAuthenticate',
-          { body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' } }
+        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization },
+        });
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+          'shield.authenticate'
         );
 
-        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
-        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, {
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.samlAuthenticate',
+          {
+            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+          }
+        );
+
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
           accessToken: state.accessToken,
           refreshToken: state.refreshToken,
         });
@@ -308,28 +329,26 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       it('redirects to `overwritten_session` if new SAML Response is for the another user.', async () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
         const state = {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
         };
+        const authorization = `Bearer ${state.accessToken}`;
 
         const existingUser = { username: 'user' };
-        mockScopedClusterClient(
-          mockOptions.client,
-          sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-        )
-          .callAsCurrentUser.withArgs('shield.authenticate')
-          .resolves(existingUser);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(existingUser);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           username: 'new-user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
         });
 
-        mockOptions.tokens.invalidate.resolves();
+        mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
         const authenticationResult = await provider.login(
           request,
@@ -337,14 +356,24 @@ describe('SAMLAuthenticationProvider', () => {
           state
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlAuthenticate',
-          { body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' } }
+        expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization },
+        });
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+          'shield.authenticate'
         );
 
-        sinon.assert.calledOnce(mockOptions.tokens.invalidate);
-        sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, {
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.samlAuthenticate',
+          {
+            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+          }
+        );
+
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
           accessToken: state.accessToken,
           refreshToken: state.refreshToken,
         });
@@ -363,7 +392,7 @@ describe('SAMLAuthenticationProvider', () => {
           redirectURLFragment: '#some-fragment',
         });
 
-        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
         expect(authenticationResult.failed()).toBe(true);
         expect(authenticationResult.error).toEqual(
@@ -383,7 +412,7 @@ describe('SAMLAuthenticationProvider', () => {
           { redirectURL: '/test-base-path/some-path' }
         );
 
-        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
         expect(authenticationResult.notHandled()).toBe(true);
       });
@@ -391,7 +420,7 @@ describe('SAMLAuthenticationProvider', () => {
       it('redirects non-AJAX requests to the IdP remembering combined redirect URL.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
         });
@@ -405,11 +434,9 @@ describe('SAMLAuthenticationProvider', () => {
           { redirectURL: '/test-base-path/some-path' }
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlPrepare',
-          { body: { realm: 'test-realm' } }
-        );
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: { realm: 'test-realm' },
+        });
 
         expect(mockOptions.logger.warn).not.toHaveBeenCalled();
 
@@ -426,7 +453,7 @@ describe('SAMLAuthenticationProvider', () => {
       it('prepends redirect URL fragment with `#` if it does not have one.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
         });
@@ -440,11 +467,9 @@ describe('SAMLAuthenticationProvider', () => {
           { redirectURL: '/test-base-path/some-path' }
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlPrepare',
-          { body: { realm: 'test-realm' } }
-        );
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: { realm: 'test-realm' },
+        });
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
         expect(mockOptions.logger.warn).toHaveBeenCalledWith(
@@ -464,7 +489,7 @@ describe('SAMLAuthenticationProvider', () => {
       it('redirects non-AJAX requests to the IdP remembering only redirect URL path if fragment is too large.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
         });
@@ -478,11 +503,9 @@ describe('SAMLAuthenticationProvider', () => {
           { redirectURL: '/test-base-path/some-path' }
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlPrepare',
-          { body: { realm: 'test-realm' } }
-        );
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: { realm: 'test-realm' },
+        });
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
         expect(mockOptions.logger.warn).toHaveBeenCalledWith(
@@ -503,7 +526,7 @@ describe('SAMLAuthenticationProvider', () => {
         const request = httpServerMock.createKibanaRequest();
 
         const failureReason = new Error('Realm is misconfigured!');
-        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
+        mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
         const authenticationResult = await provider.login(
           request,
@@ -514,11 +537,9 @@ describe('SAMLAuthenticationProvider', () => {
           { redirectURL: '/test-base-path/some-path' }
         );
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
-          'shield.samlPrepare',
-          { body: { realm: 'test-realm' } }
-        );
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: { realm: 'test-realm' },
+        });
 
         expect(authenticationResult.failed()).toBe(true);
         expect(authenticationResult.error).toBe(failureReason);
@@ -535,9 +556,21 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+    it('does not handle authentication via `authorization` header.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Basic some:credentials' },
+        headers: { authorization: 'Bearer some-token' },
+      });
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer some-token');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle authentication via `authorization` header even if state contains a valid token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-token' },
       });
 
       const authenticationResult = await provider.authenticate(request, {
@@ -546,22 +579,22 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken: 'some-valid-refresh-token',
       });
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
-      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer some-token');
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('redirects non-AJAX request that can not be authenticated to the "capture fragment" page.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
       const authenticationResult = await provider.authenticate(request);
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
@@ -575,14 +608,14 @@ describe('SAMLAuthenticationProvider', () => {
         path: `/s/foo/${'some-path'.repeat(10)}`,
       });
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
       const authenticationResult = await provider.authenticate(request);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -604,11 +637,11 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       const failureReason = new Error('Realm is misconfigured!');
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -618,7 +651,7 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const state = {
         username: 'user',
         accessToken: 'some-valid-token',
@@ -626,11 +659,18 @@ describe('SAMLAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${state.accessToken}`;
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, state);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -640,22 +680,27 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const state = {
         username: 'user',
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
       };
+      const authorization = `Bearer ${state.accessToken}`;
 
       const failureReason = { statusCode: 500, message: 'Token is not valid!' };
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, state);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -671,25 +716,33 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken: 'valid-refresh-token',
       };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+        if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+            ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+          );
+          return mockScopedClusterClient;
+        }
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer new-access-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+        if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          return mockScopedClusterClient;
+        }
 
-      mockOptions.tokens.refresh
-        .withArgs(state.refreshToken)
-        .resolves({ accessToken: 'new-access-token', refreshToken: 'new-refresh-token' });
+        throw new Error('Unexpected call');
+      });
+
+      mockOptions.tokens.refresh.mockResolvedValue({
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      });
 
       const authenticationResult = await provider.authenticate(request, state);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -705,27 +758,37 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is expired and refresh attempt failed with unknown reason too.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'invalid-refresh-token',
       };
+      const authorization = `Bearer ${state.accessToken}`;
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const refreshFailureReason = {
         statusCode: 500,
         message: 'Something is wrong with refresh token.',
       };
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).rejects(refreshFailureReason);
+      mockOptions.tokens.refresh.mockRejectedValue(refreshFailureReason);
 
       const authenticationResult = await provider.authenticate(request, state);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -739,17 +802,27 @@ describe('SAMLAuthenticationProvider', () => {
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
       };
+      const authorization = `Bearer ${state.accessToken}`;
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.mockResolvedValue(null);
 
       const authenticationResult = await provider.authenticate(request, state);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { 'kbn-xsrf': 'xsrf', authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -759,25 +832,35 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
       };
+      const authorization = `Bearer ${state.accessToken}`;
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.mockResolvedValue(null);
 
       const authenticationResult = await provider.authenticate(request, state);
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
@@ -789,30 +872,41 @@ describe('SAMLAuthenticationProvider', () => {
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired and request path is too large.', async () => {
       const request = httpServerMock.createKibanaRequest({
         path: `/s/foo/${'some-path'.repeat(10)}`,
+        headers: {},
       });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
       };
+      const authorization = `Bearer ${state.accessToken}`;
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.mockResolvedValue(null);
 
       const authenticationResult = await provider.authenticate(request, state);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
@@ -826,65 +920,6 @@ describe('SAMLAuthenticationProvider', () => {
         'https://idp-host/path/login?SAMLRequest=some%20request%20'
       );
       expect(authenticationResult.state).toEqual({ requestId: 'some-request-id', redirectURL: '' });
-    });
-
-    it('succeeds if `authorization` contains a valid token.', async () => {
-      const user = mockAuthenticatedUser();
-      const authorization = 'Bearer some-valid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(request.headers.authorization).toBe('Bearer some-valid-token');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
-      expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('fails if token from `authorization` header is rejected.', async () => {
-      const authorization = 'Bearer some-invalid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      const failureReason = { statusCode: 401 };
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-    });
-
-    it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
-      const user = mockAuthenticatedUser();
-      const authorization = 'Bearer some-invalid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      const failureReason = { statusCode: 401 };
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-valid-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
   });
 
@@ -901,7 +936,7 @@ describe('SAMLAuthenticationProvider', () => {
       deauthenticateResult = await provider.logout(request, { somethingElse: 'x' } as any);
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('fails if SAML logout call fails.', async () => {
@@ -910,7 +945,7 @@ describe('SAMLAuthenticationProvider', () => {
       const refreshToken = 'x-saml-refresh-token';
 
       const failureReason = new Error('Realm is misconfigured!');
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlLogout').rejects(failureReason);
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -918,8 +953,8 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -931,18 +966,14 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
       const failureReason = new Error('Realm is misconfigured!');
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlInvalidate')
-        .rejects(failureReason);
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.samlInvalidate',
-        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
-      );
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+      });
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -953,9 +984,7 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlLogout')
-        .resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -963,8 +992,8 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -977,9 +1006,7 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlLogout')
-        .resolves({ redirect: undefined });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -987,8 +1014,8 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -1003,9 +1030,7 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlLogout')
-        .resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -1013,8 +1038,8 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -1025,9 +1050,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlInvalidate')
-        .resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -1035,12 +1058,10 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken: 'x-saml-refresh-token',
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.samlInvalidate',
-        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
-      );
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
@@ -1049,18 +1070,14 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlInvalidate')
-        .resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.samlInvalidate',
-        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
-      );
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
@@ -1069,18 +1086,14 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlInvalidate')
-        .resolves({ redirect: undefined });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       const authenticationResult = await provider.logout(request);
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.samlInvalidate',
-        { body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' } }
-      );
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
@@ -1091,9 +1104,9 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlLogout')
-        .resolves({ redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H',
+      });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -1101,7 +1114,7 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('http://fake-idp/SLO?SAMLRequest=7zlH37H');
     });
@@ -1109,9 +1122,9 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects user to the IdP if SLO is supported by IdP in case of IdP initiated logout.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.samlInvalidate')
-        .resolves({ redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H',
+      });
 
       const authenticationResult = await provider.logout(request, {
         username: 'user',
@@ -1119,7 +1132,7 @@ describe('SAMLAuthenticationProvider', () => {
         refreshToken: 'x-saml-refresh-token',
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('http://fake-idp/SLO?SAMLRequest=7zlH37H');
     });

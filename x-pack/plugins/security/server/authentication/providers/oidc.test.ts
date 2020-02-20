@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
 import Boom from 'boom';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import {
-  MockAuthenticationProviderOptions,
-  mockAuthenticationProviderOptions,
-  mockScopedClusterClient,
-} from './base.mock';
+import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { ElasticsearchErrorHelpers, KibanaRequest } from '../../../../../../src/core/server';
 import { OIDCAuthenticationProvider, OIDCAuthenticationFlow, ProviderLoginAttempt } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
@@ -44,7 +39,7 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects third party initiated login attempts to the OpenId Connect Provider.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/api/security/oidc/callback' });
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
         redirect:
@@ -62,7 +57,7 @@ describe('OIDCAuthenticationProvider', () => {
         loginHint: 'loginhint',
       });
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcPrepare', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { iss: 'theissuer', login_hint: 'loginhint' },
       });
 
@@ -92,9 +87,10 @@ describe('OIDCAuthenticationProvider', () => {
       it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
         const { request, attempt, expectedRedirectURI } = getMocks();
 
-        mockOptions.client.callAsInternalUser
-          .withArgs('shield.oidcAuthenticate')
-          .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
+          access_token: 'some-token',
+          refresh_token: 'some-refresh-token',
+        });
 
         const authenticationResult = await provider.login(request, attempt, {
           state: 'statevalue',
@@ -102,8 +98,7 @@ describe('OIDCAuthenticationProvider', () => {
           nextURL: '/base-path/some-path',
         });
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.oidcAuthenticate',
           {
             body: {
@@ -130,7 +125,7 @@ describe('OIDCAuthenticationProvider', () => {
           nextURL: '/base-path/some-path',
         });
 
-        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
         expect(authenticationResult.failed()).toBe(true);
         expect(authenticationResult.error).toEqual(
@@ -148,7 +143,7 @@ describe('OIDCAuthenticationProvider', () => {
           nonce: 'noncevalue',
         });
 
-        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
         expect(authenticationResult.failed()).toBe(true);
         expect(authenticationResult.error).toEqual(
@@ -163,7 +158,7 @@ describe('OIDCAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(request, attempt, {});
 
-        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
 
         expect(authenticationResult.failed()).toBe(true);
       });
@@ -174,9 +169,7 @@ describe('OIDCAuthenticationProvider', () => {
         const failureReason = new Error(
           'Failed to exchange code for Id Token using the Token Endpoint.'
         );
-        mockOptions.client.callAsInternalUser
-          .withArgs('shield.oidcAuthenticate')
-          .returns(Promise.reject(failureReason));
+        mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
         const authenticationResult = await provider.login(request, attempt, {
           state: 'statevalue',
@@ -184,8 +177,7 @@ describe('OIDCAuthenticationProvider', () => {
           nextURL: '/base-path/some-path',
         });
 
-        sinon.assert.calledWithExactly(
-          mockOptions.client.callAsInternalUser,
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.oidcAuthenticate',
           {
             body: {
@@ -243,7 +235,7 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects non-AJAX request that can not be authenticated to the OpenId Connect Provider.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
         redirect:
@@ -256,7 +248,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcPrepare', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
       });
 
@@ -279,13 +271,11 @@ describe('OIDCAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
 
       const failureReason = new Error('Realm is misconfigured!');
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcPrepare')
-        .returns(Promise.reject(failureReason));
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcPrepare', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
       });
 
@@ -295,18 +285,25 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
       };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -315,9 +312,21 @@ describe('OIDCAuthenticationProvider', () => {
       expect(authenticationResult.state).toBeUndefined();
     });
 
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+    it('does not handle authentication via `authorization` header.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Basic some:credentials' },
+        headers: { authorization: 'Bearer some-token' },
+      });
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer some-token');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle authentication via `authorization` header even if state contains a valid token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-token' },
       });
 
       const authenticationResult = await provider.authenticate(request, {
@@ -325,13 +334,13 @@ describe('OIDCAuthenticationProvider', () => {
         refreshToken: 'some-valid-refresh-token',
       });
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
-      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer some-token');
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const tokenPair = {
         accessToken: 'some-invalid-token',
         refreshToken: 'some-invalid-refresh-token',
@@ -339,11 +348,18 @@ describe('OIDCAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       const failureReason = new Error('Token is not valid!');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -355,25 +371,33 @@ describe('OIDCAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+        if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+            ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+          );
+          return mockScopedClusterClient;
+        }
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer new-access-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
+        if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          return mockScopedClusterClient;
+        }
 
-      mockOptions.tokens.refresh
-        .withArgs(tokenPair.refreshToken)
-        .resolves({ accessToken: 'new-access-token', refreshToken: 'new-refresh-token' });
+        throw new Error('Unexpected call');
+      });
+
+      mockOptions.tokens.refresh.mockResolvedValue({
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      });
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
@@ -388,23 +412,33 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is expired and refresh attempt failed too.', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const refreshFailureReason = {
         statusCode: 500,
         message: 'Something is wrong with refresh token.',
       };
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).rejects(refreshFailureReason);
+      mockOptions.tokens.refresh.mockRejectedValue(refreshFailureReason);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -412,10 +446,11 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
         redirect:
@@ -426,18 +461,27 @@ describe('OIDCAuthenticationProvider', () => {
           '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
       });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.mockResolvedValue(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcPrepare', {
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
         body: { realm: `oidc1` },
       });
 
@@ -459,82 +503,33 @@ describe('OIDCAuthenticationProvider', () => {
     it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({ statusCode: 401 });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
+      mockOptions.tokens.refresh.mockResolvedValue(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { 'kbn-xsrf': 'xsrf', authorization },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
         Boom.badRequest('Both access and refresh tokens are expired.')
       );
-    });
-
-    it('succeeds if `authorization` contains a valid token.', async () => {
-      const user = mockAuthenticatedUser();
-      const authorization = 'Bearer some-valid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(request.headers.authorization).toBe('Bearer some-valid-token');
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
-      expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('fails if token from `authorization` header is rejected.', async () => {
-      const authorization = 'Bearer some-invalid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      const failureReason = { statusCode: 401 };
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
-
-      const authenticationResult = await provider.authenticate(request);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
-    });
-
-    it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
-      const user = mockAuthenticatedUser();
-      const authorization = 'Bearer some-invalid-token';
-      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
-
-      const failureReason = { statusCode: 401 };
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(failureReason);
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-valid-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .resolves(user);
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
     });
   });
 
@@ -551,7 +546,7 @@ describe('OIDCAuthenticationProvider', () => {
       deauthenticateResult = await provider.logout(request, { nonce: 'x' });
       expect(deauthenticateResult.notHandled()).toBe(true);
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('fails if OpenID Connect logout call fails.', async () => {
@@ -560,17 +555,15 @@ describe('OIDCAuthenticationProvider', () => {
       const refreshToken = 'x-oidc-refresh-token';
 
       const failureReason = new Error('Realm is misconfigured!');
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcLogout')
-        .returns(Promise.reject(failureReason));
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -583,17 +576,15 @@ describe('OIDCAuthenticationProvider', () => {
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcLogout')
-        .resolves({ redirect: null });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.oidcLogout', {
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
         body: { token: accessToken, refresh_token: refreshToken },
       });
 
@@ -606,16 +597,19 @@ describe('OIDCAuthenticationProvider', () => {
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcLogout')
-        .resolves({ redirect: 'http://fake-idp/logout&id_token_hint=thehint' });
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        redirect: 'http://fake-idp/logout&id_token_hint=thehint',
+      });
 
       const authenticationResult = await provider.logout(request, {
         accessToken,
         refreshToken,
       });
 
-      sinon.assert.calledOnce(mockOptions.client.callAsInternalUser);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
+        body: { token: accessToken, refresh_token: refreshToken },
+      });
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('http://fake-idp/logout&id_token_hint=thehint');
     });

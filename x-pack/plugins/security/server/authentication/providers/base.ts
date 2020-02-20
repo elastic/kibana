@@ -25,6 +25,7 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  isProviderEnabled: (provider: string) => boolean;
 }
 
 /**

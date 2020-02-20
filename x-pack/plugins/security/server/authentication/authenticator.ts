@@ -27,6 +27,7 @@ import {
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
+  HTTPAuthenticationProvider,
   isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
@@ -105,6 +106,7 @@ const providerMap = new Map<
   [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
   [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
   [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
+  [HTTPAuthenticationProvider.type, HTTPAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {
@@ -191,6 +193,7 @@ export class Authenticator {
         client: this.options.clusterClient,
         logger: this.options.loggers.get('tokens'),
       }),
+      isProviderEnabled: this.isProviderEnabled.bind(this),
     };
 
     const authProviders = this.options.config.authc.providers;
@@ -205,6 +208,8 @@ export class Authenticator {
         const providerSpecificOptions = this.options.config.authc.hasOwnProperty(providerType)
           ? (this.options.config.authc as Record<string, any>)[providerType]
           : undefined;
+
+        this.logger.debug(`Enabling "${providerType}" authentication provider.`);
 
         return [
           providerType,
@@ -383,6 +388,14 @@ export class Authenticator {
       };
     }
     return null;
+  }
+
+  /**
+   * Checks whether specified provider type is currently enabled.
+   * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
+   */
+  isProviderEnabled(providerType: string) {
+    return this.providers.has(providerType);
   }
 
   /**
