@@ -114,11 +114,9 @@ export const AlertIndex = memo(() => {
 
   const handleAlertClick = useMemo(() => {
     return (event: React.MouseEvent<HTMLElement>) => {
-      if (event.target instanceof HTMLElement) {
-        const alertId: string | undefined = event.target.dataset.alertId;
-        if (alertId !== undefined) {
-          history.push(urlWithSelectedAlert(alertId));
-        }
+      const alertId: string | undefined = event.currentTarget.dataset.alertId;
+      if (alertId !== undefined) {
+        history.push(urlWithSelectedAlert(alertId));
       }
     };
   }, [history, urlWithSelectedAlert]);
