@@ -50,15 +50,13 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
       const updateCase: UpdateCase = request.body.case;
       const currentCase = theCase.attributes;
       Object.keys(updateCase).forEach(key => {
-        if (key === 'tags' && updateCase.tags) {
-          const isSame =
-            updateCase.tags.length === currentCase.tags.length &&
-            updateCase.tags.every(function(element, index) {
-              return element === currentCase.tags[index];
-            });
-          if (isSame) {
-            delete updateCase.tags;
-          }
+        if (
+          key === 'tags' &&
+          updateCase.tags &&
+          updateCase.tags.length === currentCase.tags.length &&
+          updateCase.tags.every((element, index) => element === currentCase.tags[index])
+        ) {
+          delete updateCase.tags;
         } else if (updateCase[key] === currentCase[key]) {
           delete updateCase[key];
         }
