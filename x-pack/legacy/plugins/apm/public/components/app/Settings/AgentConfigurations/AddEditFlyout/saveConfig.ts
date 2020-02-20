@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
-import { isRumAgentName } from '../../../../../../common/agent_name';
+import { isRumAgentName } from '../../../../../../../../../plugins/apm/common/agent_name';
 import {
   getOptionLabel,
   omitAllOption
-} from '../../../../../../common/agent_configuration_constants';
+} from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { UiTracker } from '../../../../../../../../../plugins/observability/public';
 
 interface Settings {

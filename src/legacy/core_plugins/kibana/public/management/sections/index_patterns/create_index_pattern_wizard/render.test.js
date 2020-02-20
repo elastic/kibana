@@ -50,6 +50,7 @@ describe('CreateIndexPatternWizardRender', () => {
       config: {},
       changeUrl: () => {},
       indexPatternCreationType: {},
+      openConfirm: jest.fn(),
     });
 
     expect(render.mock.calls.length).toBe(1);
