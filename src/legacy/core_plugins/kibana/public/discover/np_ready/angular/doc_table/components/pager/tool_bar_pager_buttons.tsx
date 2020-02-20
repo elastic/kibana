@@ -49,7 +49,7 @@ export function ToolBarPagerButtons(props: Props) {
         disabled={!props.hasNextPage}
         data-test-subj="btnNextPage"
         aria-label={i18n.translate(
-          'kbn.dddiscover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
+          'kbn.ddiscover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
           {
             defaultMessage: 'next page button',
           }
