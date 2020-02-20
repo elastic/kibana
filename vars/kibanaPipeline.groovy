@@ -221,6 +221,9 @@ def withGcsArtifactUpload(workerName, closure) {
   if (env.CODE_COVERAGE) {
     sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
     uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
+    ARTIFACT_PATTERNS.each { pattern ->
+      uploadGcsArtifact(uploadPrefix, "../**/${pattern}")
+    }
   }
 }
 

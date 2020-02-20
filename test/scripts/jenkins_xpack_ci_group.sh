@@ -31,18 +31,5 @@ else
     echo " -> copying coverage to the original folder"
     mkdir -p ../../kibana/target/kibana-coverage/functional
     mv ../target/kibana-coverage/functional/* ../../kibana/target/kibana-coverage/functional/
-    echo " -> copying screenshots, html and report to the original folder"
-    for i in functional; do
-      if [[ -d test/${i}/screenshots ]]; then
-        mkdir -p ../../kibana/x-pack/test/${i}/screenshots
-        cp -R test/${i}/screenshots/. ../../kibana/x-pack/test/${i}/screenshots/
-      fi
-    done
-    mkdir -p ../../kibana/target/junit
-    cp -R ../target/junit/. ../../kibana/target/junit/
-    if [[ -d test/functional/failure_debug/html ]]; then
-      mkdir -p ../../kibana/x-pack/test/functional/failure_debug/html
-      cp -R test/functional/failure_debug/html/. ../../kibana/x-pack/test/functional/failure_debug/html/
-    fi
   fi
 fi
