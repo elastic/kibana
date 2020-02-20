@@ -27,4 +27,4 @@ export {
 } from '../../../ui/public/agg_types';
 import '../../../ui/public/directives/bind';
 export { SavedObject } from 'ui/saved_objects/types'; // https://github.com/elastic/kibana/pull/57452
-export { createSavedSearchesLoader } from '../../kibana/public/discover';
+export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';
