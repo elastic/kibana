@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
@@ -27,7 +27,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 export function createTheme(
   euiTheme: typeof darkTheme | typeof lightTheme,
   selectionBackgroundColor: string
-): monacoEditor.editor.IStandaloneThemeData {
+): monaco.editor.IStandaloneThemeData {
   return {
     base: 'vs',
     inherit: true,
