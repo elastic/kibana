@@ -3,10 +3,12 @@
 exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
 <ForwardRef(navDrawerRenderer)
   basePath={
-    Object {
+    BasePath {
+      "basePath": "/app",
       "get": [Function],
       "prepend": [Function],
       "remove": [Function],
+      "serverBasePath": "/app",
     }
   }
   chromeNavLinks={
@@ -1229,10 +1231,12 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
 exports[`NavDrawer Advanced setting set to grouped renders individual items if there are less than 7 1`] = `
 <ForwardRef(navDrawerRenderer)
   basePath={
-    Object {
+    BasePath {
+      "basePath": "/app",
       "get": [Function],
       "prepend": [Function],
       "remove": [Function],
+      "serverBasePath": "/app",
     }
   }
   chromeNavLinks={
@@ -2303,10 +2307,12 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
 exports[`NavDrawer Advanced setting set to grouped renders individual items if there is only 1 category 1`] = `
 <ForwardRef(navDrawerRenderer)
   basePath={
-    Object {
+    BasePath {
+      "basePath": "/app",
       "get": [Function],
       "prepend": [Function],
       "remove": [Function],
+      "serverBasePath": "/app",
     }
   }
   chromeNavLinks={
@@ -3788,10 +3794,12 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
 exports[`NavDrawer Advanced setting set to individual renders individual items 1`] = `
 <ForwardRef(navDrawerRenderer)
   basePath={
-    Object {
+    BasePath {
+      "basePath": "/app",
       "get": [Function],
       "prepend": [Function],
       "remove": [Function],
+      "serverBasePath": "/app",
     }
   }
   chromeNavLinks={

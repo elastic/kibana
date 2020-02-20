@@ -26,13 +26,10 @@ import { AppCategory } from 'src/core/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../utils';
 import { NavDrawer } from './nav_drawer';
 import { euiNavLink } from './nav_link';
+import { BasePath } from '../../../http/base_path';
 
 const { analyze, management, observability, security } = DEFAULT_APP_CATEGORIES;
-const mockIBasePath = {
-  get: () => '/app',
-  prepend: () => '/app',
-  remove: () => '/app',
-};
+const mockIBasePath = new BasePath('/app');
 
 const getMockProps = (chromeNavLinks: ChromeNavLink[], navSetting: NavSetting = 'grouped') => ({
   navSetting,
