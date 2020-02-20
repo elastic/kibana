@@ -6,12 +6,12 @@
 
 import { HOSTS_PAGE_TAB_URLS } from '../../../urls/navigation';
 import { loginAndWaitForPage } from '../../../tasks/login';
-import { refreshPage } from '../../../tasks/header';
+import { refreshPage } from '../../../tasks/siem_header';
 import { goToFirstPage, goToThirdPage } from '../../../tasks/pagination';
 import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../../../screens/pagination';
-import { PROCESS_NAME_FIELD } from '../../../screens/uncommon_processes';
-import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/uncommon_processes';
-import { waitForAuthenticationsToBeLoaded } from '../../../tasks/authentications';
+import { PROCESS_NAME_FIELD } from '../../../screens/hosts/uncommon_processes';
+import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
+import { waitForAuthenticationsToBeLoaded } from '../../../tasks/hosts/authentications';
 import { openAuthentications, openUncommonProcesses } from '../../../tasks/hosts/main';
 
 describe('Pagination', () => {

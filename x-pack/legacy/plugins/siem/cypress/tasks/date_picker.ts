@@ -13,7 +13,7 @@ import {
   DATE_PICKER_ABSOLUTE_INPUT,
   DATE_PICKER_APPLY_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
-} from '../screens/calendar';
+} from '../screens/date_picker';
 
 import { DEFAULT_TIMEOUT } from '../tasks/login';
 

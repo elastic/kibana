@@ -58,3 +58,7 @@ export const FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX =
 
 export const FIELDS_BROWSER_RESET_FIELDS =
   '[data-test-subj="timeline"] [data-test-subj="reset-fields"]';
+
+export const FIELDS_BROWSER_CHECKBOX = (id: string) => {
+  return `[data-test-subj="field-${id}-checkbox`;
+};

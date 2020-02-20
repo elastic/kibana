@@ -13,14 +13,14 @@ import {
   uncheckTimestampToggleField,
   checkIdToggleField,
   dragAndDropIdToggleFieldToTimeline,
-} from '../../../tasks/timeline/main';
+} from '../../../tasks/timeline';
 import { openTimeline } from '../../../tasks/siem_main';
 import {
   TIMESTAMP_TOGGLE_FIELD,
   ID_TOGGLE_FIELD,
   TIMESTAMP_HEADER_FIELD,
   ID_HEADER_FIELD,
-} from '../../../screens/timeline/main';
+} from '../../../screens/timeline';
 
 describe('toggle column in timeline', () => {
   before(() => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
+import { DEFAULT_TIMEOUT } from '../tasks/login';
 
 import {
   SEARCH_OR_FILTER_CONTAINER,
@@ -20,9 +20,9 @@ import {
   ID_HEADER_FIELD,
   ID_FIELD,
   TIMELINE_TITLE,
-} from '../../screens/timeline/main';
+} from '../screens/timeline';
 
-import { drag, drop } from '../../tasks/common';
+import { drag, drop } from '../tasks/common';
 
 export const hostExistsQuery = 'host.name: *';
 

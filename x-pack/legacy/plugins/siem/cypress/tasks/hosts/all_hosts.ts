@@ -5,10 +5,7 @@
  */
 
 import { ALL_HOSTS_TABLE, HOSTS_NAMES_DRAGGABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
-import {
-  TIMELINE_DATA_PROVIDERS,
-  TIMELINE_DATA_PROVIDERS_EMPTY,
-} from '../../screens/timeline/main';
+import { TIMELINE_DATA_PROVIDERS, TIMELINE_DATA_PROVIDERS_EMPTY } from '../../screens/timeline';
 import { DEFAULT_TIMEOUT } from '../../tasks/login';
 import { drag, drop, dragWithoutDrop } from '../../tasks/common';
 

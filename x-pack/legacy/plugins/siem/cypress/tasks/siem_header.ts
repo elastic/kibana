@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_TIMEOUT } from '../tasks/login';
-import { KQL_INPUT, REFRESH_BUTTON } from '../screens/header';
+import { KQL_INPUT, REFRESH_BUTTON } from '../screens/siem_header';
 
 export const navigateFromHeaderTo = (page: string) => {
   cy.get(page).click({ force: true });

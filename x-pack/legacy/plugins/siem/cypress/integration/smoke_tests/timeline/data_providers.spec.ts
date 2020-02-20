@@ -13,13 +13,13 @@ import {
 } from '../../../tasks/hosts/all_hosts';
 import { HOSTS_NAMES_DRAGGABLE } from '../../../screens/hosts/all_hosts';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
-import { createNewTimeline } from '../../../tasks/timeline/main';
+import { createNewTimeline } from '../../../tasks/timeline';
 import { openTimeline } from '../../../tasks/siem_main';
 import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DROPPED_DATA_PROVIDERS,
-} from '../../../screens/timeline/main';
+} from '../../../screens/timeline';
 
 describe('timeline data providers', () => {
   before(() => {

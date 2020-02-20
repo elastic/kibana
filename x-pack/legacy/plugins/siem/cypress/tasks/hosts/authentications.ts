@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 import { DEFAULT_TIMEOUT } from '../../tasks/login';
-import { KQL_SEARCH_BAR } from '../../screens/hosts/main';
 
-export const closeFieldsBrowser = () => {
-  cy.get(KQL_SEARCH_BAR, { timeout: DEFAULT_TIMEOUT }).click();
+export const waitForAuthenticationsToBeLoaded = () => {
+  cy.get(AUTHENTICATIONS_TABLE, { timeout: DEFAULT_TIMEOUT }).should('exist');
 };

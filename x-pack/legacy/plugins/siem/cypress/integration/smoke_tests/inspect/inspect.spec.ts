@@ -14,7 +14,7 @@ import {
   executeTimelineKQL,
   openTimelineSettings,
   openTimelineInspectButton,
-} from '../../../tasks/timeline/main';
+} from '../../../tasks/timeline';
 import { openTimeline } from '../../../tasks/siem_main';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../../tasks/login';
 import { closesModal, openStatsAndTables } from '../../../tasks/inspect';

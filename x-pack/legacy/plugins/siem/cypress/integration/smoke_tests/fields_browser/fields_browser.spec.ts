@@ -20,9 +20,9 @@ import {
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
   FIELDS_BROWSER_HOST_GEO_COUNTRY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
-} from '../../../screens/timeline/fields_browser';
+} from '../../../screens/fields_browser';
 
-import { populateTimeline, openTimelineFieldsBrowser } from '../../../tasks/timeline/main';
+import { populateTimeline, openTimelineFieldsBrowser } from '../../../tasks/timeline';
 
 import { openTimeline } from '../../../tasks/siem_main';
 
@@ -35,7 +35,7 @@ import {
   addsHostGeoCountryNameToTimelineDraggingIt,
   addsHostGeoContinentNameToTimeline,
   resetFields,
-} from '../../../tasks/timeline/fields_browser';
+} from '../../../tasks/fields_browser';
 
 const defaultHeaders = [
   { id: '@timestamp' },

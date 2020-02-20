@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filterFieldsBrowser } from '../../../tasks/timeline/fields_browser';
+import { filterFieldsBrowser, closeFieldsBrowser } from '../../../tasks/fields_browser';
 import {
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
   FIELDS_BROWSER_CHECKBOX,
-} from '../../../screens/hosts/fields_browser';
+} from '../../../screens/fields_browser';
 import { HOSTS_PAGE } from '../../../urls/navigation';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
-import { closeFieldsBrowser } from '../../../tasks/hosts/fields_browsers';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   closeModal,
@@ -32,7 +31,7 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
 } from '../../../screens/hosts/events';
-import { clearSearchBar, kqlSearch } from '../../../tasks/header';
+import { clearSearchBar, kqlSearch } from '../../../tasks/siem_header';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },

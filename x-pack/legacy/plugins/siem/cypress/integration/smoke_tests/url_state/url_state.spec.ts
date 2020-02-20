@@ -14,7 +14,7 @@ import {
   setTimelineStartDate,
   setTimelineEndDate,
   updateTimelineDates,
-} from '../../../tasks/calendar';
+} from '../../../tasks/date_picker';
 import { waitForIpsTableToBeLoaded } from '../../../tasks/network/flows';
 import { openTimeline } from '../../../tasks/siem_main';
 import {
@@ -22,15 +22,15 @@ import {
   DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
-} from '../../../screens/calendar';
-import { kqlSearch, navigateFromHeaderTo, clearSearchBar } from '../../../tasks/header';
-import { HOSTS, NETWORK, KQL_INPUT, BREADCRUMBS } from '../../../screens/header';
+} from '../../../screens/date_picker';
+import { kqlSearch, navigateFromHeaderTo, clearSearchBar } from '../../../tasks/siem_header';
+import { HOSTS, NETWORK, KQL_INPUT, BREADCRUMBS } from '../../../screens/siem_header';
 import { openAllHosts } from '../../../tasks/hosts/main';
 import { ANOMALIES_TAB } from '../../../screens/hosts/main';
 import { waitForAllHostsToBeLoaded, openFirstHostDetails } from '../../../tasks/hosts/all_hosts';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
-import { executeTimelineKQL, addNameToTimeline } from '../../../tasks/timeline/main';
-import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../../../screens/timeline/main';
+import { executeTimelineKQL, addNameToTimeline } from '../../../tasks/timeline';
+import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../../../screens/timeline';
 
 const ABSOLUTE_DATE = {
   endTime: '1564691609186',
