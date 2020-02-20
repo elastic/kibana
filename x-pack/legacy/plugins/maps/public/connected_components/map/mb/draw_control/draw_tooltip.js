@@ -43,13 +43,14 @@ export class DrawTooltip extends Component {
 
   render() {
     let instructions;
-    if(this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
       instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
-        defaultMessage: 'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
+        defaultMessage:
+          'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
       });
     } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
       instructions = i18n.translate('xpack.maps.drawTooltip.distanceInstructions', {
-        defaultMessage: 'Click to set location. Move mouse to adjust distance. Click to finish.',
+        defaultMessage: 'Click to set point. Move mouse to adjust distance. Click to finish.',
       });
     } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
       instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {

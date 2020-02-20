@@ -30,6 +30,14 @@ export const DrawCircle = {
       circle,
     };
   },
+  onKeyUp: function(state, e) {
+    if (e.keyCode === 27) {
+      // clear point when user hits escape
+      state.circle.properties.center = null;
+      state.circle.properties.radiusKm = 0;
+      state.circle.incomingCoords([[]]);
+    }
+  },
   onClick: function(state, e) {
     if (!state.circle.properties.center) {
       // first click, start circle
