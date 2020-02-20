@@ -61,7 +61,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     // @ts-ignore
     vis = new visualizationsStart.Vis(stubIndexPattern, {
       type: 'metric',
-      aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+      aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }] as any,
     });
 
     vis.params.dimensions = {

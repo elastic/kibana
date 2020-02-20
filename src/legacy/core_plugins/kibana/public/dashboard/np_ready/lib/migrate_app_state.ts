@@ -38,7 +38,7 @@ import { migratePanelsTo730 } from '../../migrations/migrate_to_730_panels';
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: unknown } & DashboardAppState,
+  appState: { [key: string]: any } & DashboardAppState,
   kibanaVersion: string
 ): DashboardAppState {
   if (!appState.panels) {
