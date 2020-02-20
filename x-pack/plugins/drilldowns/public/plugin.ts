@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DrilldownService } from './service';
 
@@ -30,8 +30,6 @@ export class DrilldownsPlugin
       DrilldownsStartDependencies
     > {
   private readonly service = new DrilldownService();
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DrilldownsSetupDependencies): DrilldownsSetupContract {
     this.service.bootstrap(core, plugins);

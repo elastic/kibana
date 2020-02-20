@@ -22,7 +22,7 @@ export class DrilldownService {
    * Convenience method to register a drilldown. (It should set-up all the
    * necessary triggers and actions.)
    */
-  registerDrilldown = () => {
+  registerDrilldown = (): void => {
     throw new Error('not implemented');
   };
 }

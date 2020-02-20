@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { DrilldownsPlugin } from './plugin';
 
 export {
@@ -14,6 +13,6 @@ export {
   DrilldownsStartDependencies,
 } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DrilldownsPlugin(initializerContext);
+export function plugin() {
+  return new DrilldownsPlugin();
 }
