@@ -35,7 +35,6 @@ import {
   APPLY_FILTER_TRIGGER,
   Container,
   Embeddable,
-  VALUE_CLICK_TRIGGER,
 } from '../../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import { SavedSearch } from '../types';
