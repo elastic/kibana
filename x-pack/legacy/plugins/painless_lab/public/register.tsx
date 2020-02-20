@@ -15,15 +15,15 @@ import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public
 import { ADVANCED_SETTINGS_FLAG_NAME } from '../common/constants';
 
 npSetup.plugins.home.featureCatalogue.register({
-  id: 'painless_playground',
-  title: i18n.translate('xpack.painless_playground.registryProviderTitle', {
-    defaultMessage: 'Painless Playground (beta)',
+  id: 'painlessLab',
+  title: i18n.translate('xpack.painlessLab.registryProviderTitle', {
+    defaultMessage: 'Painless Lab (beta)',
   }),
-  description: i18n.translate('xpack.painless_playground.registryProviderDescription', {
+  description: i18n.translate('xpack.painlessLab.registryProviderDescription', {
     defaultMessage: 'Simulate and debug painless code',
   }),
   icon: '',
-  path: '/app/kibana#/dev_tools/painless_playground',
+  path: '/app/kibana#/dev_tools/painless_lab',
   showOnHomePage: false,
   category: FeatureCatalogueCategory.ADMIN,
 });
@@ -38,17 +38,17 @@ npSetup.plugins.devTools.register({
   title: (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.painless_playground.displayName', {
-          defaultMessage: 'Painless Playground',
+        {i18n.translate('xpack.painlessLab.displayName', {
+          defaultMessage: 'Painless Lab',
         })}
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} className="painlessPlayground__betaLabelContainer">
+      <EuiFlexItem grow={false} className="painlessLab__betaLabelContainer">
         <EuiBetaBadge
-          label={i18n.translate('xpack.painless_playground.displayNameBetaLabel', {
+          label={i18n.translate('xpack.painlessLab.displayNameBetaLabel', {
             defaultMessage: 'Beta',
           })}
-          tooltipContent={i18n.translate('xpack.painless_playground.displayNameBetaTooltipText', {
+          tooltipContent={i18n.translate('xpack.painlessLab.displayNameBetaTooltipText', {
             defaultMessage: 'This feature might change drastically in future releases',
           })}
         />
@@ -57,13 +57,13 @@ npSetup.plugins.devTools.register({
   ),
   enableRouting: false,
   disabled: false,
-  tooltipContent: xpackInfo.get('features.painlessPlayground.message'),
+  tooltipContent: xpackInfo.get('features.painlessLab.message'),
   async mount(context, { element }) {
     registerPainless();
 
     const licenseCheck = {
-      showPage: xpackInfo.get('features.painlessPlayground.enableLink'),
-      message: xpackInfo.get('features.painlessPlayground.message'),
+      showPage: xpackInfo.get('features.painlessLab.enableLink'),
+      message: xpackInfo.get('features.painlessLab.message'),
     };
 
     if (!licenseCheck.showPage) {

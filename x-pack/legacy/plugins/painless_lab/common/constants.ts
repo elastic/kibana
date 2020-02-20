@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'painless_playground';
+export const PLUGIN_ID = 'painlessLab';
 
-export const API_ROUTE_EXECUTE = '/api/painless_playground/execute';
+export const API_ROUTE_EXECUTE = '/api/painless_lab/execute';
 
-export const ADVANCED_SETTINGS_FLAG_NAME = 'devTools:enablePainlessPlayground';
+export const ADVANCED_SETTINGS_FLAG_NAME = 'devTools:enablePainlessLab';

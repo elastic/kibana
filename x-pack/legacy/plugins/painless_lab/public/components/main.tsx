@@ -33,9 +33,9 @@ const submit = async (code, context, contextSetup, executeCode, setResponse, set
   setIsLoading(true);
 
   try {
-    localStorage.setItem('painlessPlaygroundCode', code);
-    localStorage.setItem('painlessPlaygroundContext', context);
-    localStorage.setItem('painlessPlaygroundContextSetup', JSON.stringify(contextSetup));
+    localStorage.setItem('painlessLabCode', code);
+    localStorage.setItem('painlessLabContext', context);
+    localStorage.setItem('painlessLabContextSetup', JSON.stringify(contextSetup));
     const response = await executeCode(buildRequestPayload(code, context, contextSetup));
 
     if (_mostRecentRequestId === requestId) {
@@ -118,22 +118,18 @@ for (int y = 0; y < height; y++) {
 return result;
 `;
 
-export function PainlessPlayground({
-  executeCode,
-}: {
-  executeCode: (payload: Request) => Promise<Response>;
-}) {
-  const [code, setCode] = useState(getFromLocalStorage('painlessPlaygroundCode', exampleScript));
+export function Main({ executeCode }: { executeCode: (payload: Request) => Promise<Response> }) {
+  const [code, setCode] = useState(getFromLocalStorage('painlessLabCode', exampleScript));
   const [response, setResponse] = useState<Response>({ error: undefined, success: undefined });
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [context, setContext] = useState(
-    getFromLocalStorage('painlessPlaygroundContext', 'painless_test_without_params')
+    getFromLocalStorage('painlessLabContext', 'painless_test_without_params')
   );
 
   const [contextSetup, setContextSetup] = useState(
-    getFromLocalStorage('painlessPlaygroundContextSetup', {}, true)
+    getFromLocalStorage('painlessLabContextSetup', {}, true)
   );
 
   // Live-update the output as the user changes the input code.
@@ -151,8 +147,8 @@ export function PainlessPlayground({
         <EuiFlexItem>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
-              {i18n.translate('xpack.painless_playground.title', {
-                defaultMessage: 'Painless Playground',
+              {i18n.translate('xpack.painlessLab.title', {
+                defaultMessage: 'Painless Lab',
               })}
             </h1>
           </EuiTitle>

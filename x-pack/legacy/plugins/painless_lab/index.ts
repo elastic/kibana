@@ -11,12 +11,12 @@ import { registerLicenseChecker } from './server/register_license_checker';
 import { registerExecuteRoute } from './server/register_execute_route';
 import { Legacy } from '../../../../kibana';
 
-export const painlessPlayground = (kibana: any) =>
+export const painlessLab = (kibana: any) =>
   new kibana.Plugin({
     id: PLUGIN_ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    configPrefix: 'xpack.painless_playground',
+    configPrefix: 'xpack.painless_lab',
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -30,15 +30,12 @@ export const painlessPlayground = (kibana: any) =>
       // Register feature flag
       server.newPlatform.setup.core.uiSettings.register({
         [ADVANCED_SETTINGS_FLAG_NAME]: {
-          name: i18n.translate('xpack.painless_playground.devTools.painlessPlaygroundTitle', {
-            defaultMessage: 'Painless Playground',
+          name: i18n.translate('xpack.painlessLab.devTools.painlessLabTitle', {
+            defaultMessage: 'Painless Lab',
           }),
-          description: i18n.translate(
-            'xpack.painless_playground.devTools.painlessPlaygroundDescription',
-            {
-              defaultMessage: 'Enable experimental Painless Playground.',
-            }
-          ),
+          description: i18n.translate('xpack.painlessLab.devTools.painlessLabDescription', {
+            defaultMessage: 'Enable experimental Painless Lab.',
+          }),
           value: false,
           category: ['Dev Tools'],
         },

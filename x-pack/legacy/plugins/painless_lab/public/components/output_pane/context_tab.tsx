@@ -37,13 +37,13 @@ export function ContextTab({ context, contextSetup, setContext, setContextSetup 
       <EuiFormRow
         label={
           <EuiToolTip
-            content={i18n.translate('xpack.painless_playground.contextFieldTooltipText', {
+            content={i18n.translate('xpack.painlessLab.contextFieldTooltipText', {
               defaultMessage: 'Different contexts provide different functions on the ctx object',
             })}
           >
             <span>
               <FormattedMessage
-                id="xpack.painless_playground.contextFieldLabel"
+                id="xpack.painlessLab.contextFieldLabel"
                 defaultMessage="Execution context"
               />{' '}
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -56,7 +56,7 @@ export function ContextTab({ context, contextSetup, setContext, setContextSetup 
               href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-execute-api.html"
               target="_blank"
             >
-              {i18n.translate('xpack.painless_playground.contextFieldDocLinkText', {
+              {i18n.translate('xpack.painlessLab.contextFieldDocLinkText', {
                 defaultMessage: 'Context docs',
               })}
             </EuiLink>
@@ -78,16 +78,13 @@ export function ContextTab({ context, contextSetup, setContext, setContextSetup 
         <EuiFormRow
           label={
             <EuiToolTip
-              content={i18n.translate('xpack.painless_playground.indexFieldTooltipText', {
+              content={i18n.translate('xpack.painlessLab.indexFieldTooltipText', {
                 defaultMessage:
                   "Index mappings must be compatible with the sample document's fields",
               })}
             >
               <span>
-                <FormattedMessage
-                  id="xpack.painless_playground.indexFieldLabel"
-                  defaultMessage="Index"
-                />{' '}
+                <FormattedMessage id="xpack.painlessLab.indexFieldLabel" defaultMessage="Index" />{' '}
                 <EuiIcon type="questionInCircle" color="subdued" />
               </span>
             </EuiToolTip>
@@ -107,13 +104,13 @@ export function ContextTab({ context, contextSetup, setContext, setContextSetup 
         <EuiFormRow
           label={
             <EuiToolTip
-              content={i18n.translate('xpack.painless_playground.documentFieldTooltipText', {
+              content={i18n.translate('xpack.painlessLab.documentFieldTooltipText', {
                 defaultMessage: "Your script can access this document's fields",
               })}
             >
               <span>
                 <FormattedMessage
-                  id="xpack.painless_playground.documentFieldLabel"
+                  id="xpack.painlessLab.documentFieldLabel"
                   defaultMessage="Sample document"
                 />{' '}
                 <EuiIcon type="questionInCircle" color="subdued" />
