@@ -258,12 +258,12 @@ describe('Custom Links', () => {
         { url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}' },
       ];
       const mockInvalidLinksNoUrl = [{ name: 'Link 1' }];
-      const mockInvalidUrl = [{ name: 'Link 1', url_template: 'mockUrl' }];
+      const mockInvalidUrl = [{ name: 'Link 1', url_template: "<script>alert('XSS')</script>" }];
       afterEach(() => {
         (useUiSetting$ as jest.Mock).mockClear();
       });
 
-      test('it filters out of empty object is given', () => {
+      test('it filters empty object', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksEmptyObj]);
 
@@ -273,7 +273,7 @@ describe('Custom Links', () => {
         expect(wrapper.find('EuiLink')).toHaveLength(0);
       });
 
-      test('it filters out of object without name property', () => {
+      test('it filters object without name property', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoName]);
 
@@ -283,7 +283,7 @@ describe('Custom Links', () => {
         expect(wrapper.find('EuiLink')).toHaveLength(0);
       });
 
-      test('it filters out of object without url_template property', () => {
+      test('it filters object without url_template property', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoUrl]);
 
@@ -293,7 +293,7 @@ describe('Custom Links', () => {
         expect(wrapper.find('EuiLink')).toHaveLength(0);
       });
 
-      test('it filters out of object with invalid url', () => {
+      test('it filters object with invalid url', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidUrl]);
 
