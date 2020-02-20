@@ -28,6 +28,7 @@ $ node replay.js --server-url http://localhost:8200 --secret-token abcd --events
 4. Start Kibana
 
 ```shell
+$ yarn kbn bootstrap
 $ yarn start --no-base-path --csp.strict=false
 ```
 
