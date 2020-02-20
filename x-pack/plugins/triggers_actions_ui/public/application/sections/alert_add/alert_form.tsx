@@ -118,7 +118,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<string>('default');
+  const [defaultActionGroup, setDefaultActionGroup] = useState<string | undefined>(undefined);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
@@ -251,6 +251,14 @@ export const AlertForm = ({
     : null;
 
   function addActionType(actionTypeModel: ActionTypeModel) {
+    if (!defaultActionGroup) {
+      toastNotifications!.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+          defaultMessage: 'Unable to add action, because default action group is not defined',
+        }),
+      });
+      return;
+    }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id

@@ -40,16 +40,7 @@ export class AlertTypeRegistry {
         })
       );
     }
-    // set default value for actionGroups if it is empty
-    if (alertType.actionGroups.length === 0) {
-      this.alertTypes.set(alertType.id, {
-        ...alertType,
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroup: 'default',
-      });
-    } else {
-      this.alertTypes.set(alertType.id, alertType);
-    }
+    this.alertTypes.set(alertType.id, alertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,

@@ -40,7 +40,13 @@ describe('listAlertTypesRoute', () => {
       {
         id: '1',
         name: 'name',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroup: 'default',
       },
     ];
 
@@ -50,7 +56,13 @@ describe('listAlertTypesRoute', () => {
       Object {
         "body": Array [
           Object {
-            "actionGroups": Array [],
+            "actionGroups": Array [
+              Object {
+                "id": "default",
+                "name": "Default",
+              },
+            ],
+            "defaultActionGroup": "default",
             "id": "1",
             "name": "name",
           },
@@ -128,7 +140,13 @@ describe('listAlertTypesRoute', () => {
       {
         id: '1',
         name: 'name',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroup: 'default',
       },
     ];
 

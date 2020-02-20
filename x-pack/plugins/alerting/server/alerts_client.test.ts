@@ -523,8 +523,13 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: [],
-      defaultActionGroup: '',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroup: 'default',
       validate: {
         params: schema.object({
           param1: schema.string(),
