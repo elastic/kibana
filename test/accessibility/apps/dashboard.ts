@@ -22,25 +22,25 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const listingTable = getService('listingTable');
 
   describe('Dashboard', () => {
-    const dashboardName = 'Dashboard Listing A11y';
+    const dashboardName = 'Dashboard Listing A11y 3';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
-      // await esArchiver.loadIfNeeded('logstash_functional');
-      // await kibanaServer.uiSettings.update({
-      //   defaultIndex: 'logstash-*',
-      // });
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.home.addSampleDataSet('flights');
+    });
+
+    after(async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await listingTable.searchForItemWithName(dashboardName);
+      await listingTable.checkListingSelectAllCheckbox();
+      await listingTable.clickDeleteSelected();
+      await PageObjects.common.clickConfirmOnModal();
     });
 
     it('dashboard', async () => {
@@ -119,12 +119,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickCancelOutOfEditMode(dashboardName);
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
       await a11y.testAppSnapshot();
     });
 
     it('Discard changes', async () => {
       await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.dashboard.getIsInViewMode();
       await a11y.testAppSnapshot();
     });
 
