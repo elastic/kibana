@@ -122,10 +122,10 @@ export const CustomMetricForm = withTheme(
     const isSubmitDisabled = !field || !aggregation;
 
     const title = metric
-      ? i18n.translate('xpack.waffle.customMetricPanelLabel.edit', {
+      ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.edit', {
           defaultMessage: 'Edit custom metric',
         })
-      : i18n.translate('xpack.waffle.customMetricPanelLabel.add', {
+      : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.add', {
           defaultMessage: 'Add custom metric',
         });
 
@@ -151,7 +151,7 @@ export const CustomMetricForm = withTheme(
             }}
           >
             <EuiFormRow
-              label={i18n.translate('xpack.waffle.customMetrics.metricLabel', {
+              label={i18n.translate('xpack.infra.waffle.customMetrics.metricLabel', {
                 defaultMessage: 'Metric',
               })}
               display="rowCompressed"
@@ -190,7 +190,7 @@ export const CustomMetricForm = withTheme(
               </EuiFlexGroup>
             </EuiFormRow>
             <EuiFormRow
-              label={i18n.translate('xpack.waffle.customMetrics.labelLabel', {
+              label={i18n.translate('xpack.infra.waffle.customMetrics.labelLabel', {
                 defaultMessage: 'Label (optional)',
               })}
               display="rowCompressed"
@@ -198,7 +198,7 @@ export const CustomMetricForm = withTheme(
             >
               <EuiFieldText
                 name="label"
-                placeholder={i18n.translate('xpack.waffle.customMetrics.labelPlaceholder', {
+                placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
                   defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
                 })}
                 value={label}
