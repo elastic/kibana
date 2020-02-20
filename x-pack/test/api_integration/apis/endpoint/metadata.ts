@@ -172,7 +172,9 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(1);
-        const resultIp: string = body.endpoints[0].host.ip.filter(ip => ip === targetEndpointIp);
+        const resultIp: string = body.endpoints[0].host.ip.filter(
+          (ip: string) => ip === targetEndpointIp
+        );
         expect(resultIp).to.eql([targetEndpointIp]);
         expect(body.endpoints[0].event.created).to.eql('2020-01-24T16:06:09.541Z');
         expect(body.endpoints.length).to.eql(1);
@@ -180,7 +182,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('metadata api should return the all endpoints when filter is empty string', async () => {
+      it('metadata api should return  all endpoints when filter is empty string', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
