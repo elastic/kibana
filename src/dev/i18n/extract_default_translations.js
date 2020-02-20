@@ -63,6 +63,9 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
   const ignore = [
     '**/node_modules/**',
     '**/__tests__/**',
+    '**/dist/**',
+    '**/target/**',
+    '**/vendor/**',
     '**/*.test.{js,jsx,ts,tsx}',
     '**/*.d.ts',
   ].concat(additionalIgnore);

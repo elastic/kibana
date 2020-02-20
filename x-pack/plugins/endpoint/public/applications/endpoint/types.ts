@@ -8,7 +8,7 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
-import { AlertResultList } from '../../../common/types';
+import { AlertResultList, Immutable } from '../../../common/types';
 
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
@@ -63,8 +63,6 @@ export interface GlobalState {
   readonly policyList: PolicyListState;
 }
 
-export type AlertListData = AlertResultList;
-export type AlertListState = AlertResultList;
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
@@ -73,4 +71,17 @@ export type CreateStructuredSelector = <
   state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
+};
+
+export interface EndpointAppLocation {
+  pathname: string;
+  search: string;
+  state: never;
+  hash: string;
+  key?: string;
+}
+
+export type AlertListData = AlertResultList;
+export type AlertListState = Immutable<AlertResultList> & {
+  readonly location?: Immutable<EndpointAppLocation>;
 };
