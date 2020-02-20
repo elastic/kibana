@@ -5,6 +5,7 @@
  */
 
 import { first, map } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -35,6 +36,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
 import { createExecuteFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { registerActionsUsageCollector } from './usage';
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
@@ -71,6 +73,7 @@ export interface ActionsPluginsSetup {
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   eventLog: IEventLogService;
+  usageCollection: UsageCollectionSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -160,6 +163,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
+    });
+
+    registerActionsUsageCollector(plugins.usageCollection, core.savedObjects, actionTypeRegistry, {
+      isActionsEnabled: (await this.config).enabled,
     });
 
     core.http.registerRouteHandlerContext(

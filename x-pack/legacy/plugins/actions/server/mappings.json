@@ -29,5 +29,13 @@
         "type": "binary"
       }
     }
+  },
+  "actions-telemetry": {
+    "properties": {
+      "excutions_count_by_type": {
+          "enabled": false,
+          "type": "object"
+      }
+    }
   }
 }
