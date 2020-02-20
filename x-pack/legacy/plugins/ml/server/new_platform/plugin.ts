@@ -46,7 +46,6 @@ import { fieldsService } from '../routes/fields_service';
 import { filtersRoutes } from '../routes/filters';
 import { resultsServiceRoutes } from '../routes/results_service';
 import { jobServiceRoutes } from '../routes/job_service';
-// @ts-ignore: could not find declaration file for module
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';

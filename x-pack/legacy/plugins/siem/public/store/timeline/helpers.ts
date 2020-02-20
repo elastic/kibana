@@ -1161,11 +1161,22 @@ export const setDeletedTimelineEvents = ({
     ? union(timeline.deletedEventIds, eventIds)
     : timeline.deletedEventIds.filter(currentEventId => !eventIds.includes(currentEventId));
 
+  const selectedEventIds = Object.fromEntries(
+    Object.entries(timeline.selectedEventIds).filter(
+      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
+    )
+  );
+
+  const isSelectAllChecked =
+    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
       deletedEventIds,
+      selectedEventIds,
+      isSelectAllChecked,
     },
   };
 };

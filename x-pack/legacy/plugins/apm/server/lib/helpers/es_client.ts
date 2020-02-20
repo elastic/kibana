@@ -6,25 +6,37 @@
 
 /* eslint-disable no-console */
 import {
-  SearchParams,
   IndexDocumentParams,
+  IndicesCreateParams,
   IndicesDeleteParams,
-  IndicesCreateParams
+  SearchParams
 } from 'elasticsearch';
-import { merge, uniqueId } from 'lodash';
-import { cloneDeep, isString } from 'lodash';
+import { cloneDeep, isString, merge, uniqueId } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import {
-  ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
+  ESSearchResponse
 } from '../../../../../../plugins/apm/typings/elasticsearch';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../public/utils/pickKeys';
+import { APMRequestHandlerContext } from '../../routes/typings';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
+
+interface IndexPrivileges {
+  has_all_requested: boolean;
+  username: string;
+  index: Record<string, { read: boolean }>;
+}
+
+interface IndexPrivilegesParams {
+  index: Array<{
+    names: string[] | string;
+    privileges: string[];
+  }>;
+}
 
 export function isApmIndex(
   apmIndices: string[],
@@ -181,6 +193,17 @@ export function getESClient(
     },
     indicesCreate: (params: IndicesCreateParams) => {
       return withTime(() => callMethod('indices.create', params));
+    },
+    hasPrivileges: (
+      params: IndexPrivilegesParams
+    ): Promise<IndexPrivileges> => {
+      return withTime(() =>
+        callMethod('transport.request', {
+          method: 'POST',
+          path: '/_security/user/_has_privileges',
+          body: params
+        })
+      );
     }
   };
 }

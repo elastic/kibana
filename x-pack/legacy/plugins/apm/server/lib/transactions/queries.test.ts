@@ -99,7 +99,7 @@ describe('transaction queries', () => {
 
   it('fetches a transaction', async () => {
     mock = await inspectSearchParams(setup =>
-      getTransaction('foo', 'bar', setup)
+      getTransaction({ transactionId: 'foo', traceId: 'bar', setup })
     );
 
     expect(mock.params).toMatchSnapshot();

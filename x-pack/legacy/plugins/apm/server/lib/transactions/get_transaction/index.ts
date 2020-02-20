@@ -18,12 +18,16 @@ import {
 } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
-export async function getTransaction(
-  transactionId: string,
-  traceId: string,
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+export async function getTransaction({
+  transactionId,
+  traceId,
+  setup
+}: {
+  transactionId: string;
+  traceId: string;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const { start, end, client, indices } = setup;
 
   const params = {
     index: indices['apm_oss.transactionIndices'],
@@ -35,8 +39,7 @@ export async function getTransaction(
             { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
+            { range: rangeFilter(start, end) }
           ]
         }
       }

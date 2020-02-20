@@ -151,23 +151,10 @@ export async function inspectSearchParams(
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
-    client: {
-      search: spy
-    } as any,
-    internalClient: {
-      search: spy
-    } as any,
-    config: new Proxy(
-      {},
-      {
-        get: () => 'myIndex'
-      }
-    ) as APMConfig,
-    uiFiltersES: [
-      {
-        term: { 'service.environment': 'prod' }
-      }
-    ],
+    client: { search: spy } as any,
+    internalClient: { search: spy } as any,
+    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
+    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
       'apm_oss.sourcemapIndices': 'myIndex',
       'apm_oss.errorIndices': 'myIndex',
