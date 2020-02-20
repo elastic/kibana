@@ -21,6 +21,7 @@ import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
+import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -256,6 +257,7 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
   savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
+  savedObjectsManagement: SavedObjectsManagementDefinition;
 }
 
 /**

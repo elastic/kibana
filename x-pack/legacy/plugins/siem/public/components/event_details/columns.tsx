@@ -22,6 +22,7 @@ import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
 import { ToStringArray } from '../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
@@ -29,9 +30,8 @@ import { DraggableFieldBadge } from '../draggables/field_badge';
 import { FieldName } from '../fields_browser/field_name';
 import { SelectableText } from '../selectable_text';
 import { OverflowField } from '../tables/helpers';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 import { OnUpdateColumns } from '../timeline/events';
@@ -63,11 +63,11 @@ export const getColumns = ({
   toggleColumn,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 }) => [
   {
     field: 'field',
