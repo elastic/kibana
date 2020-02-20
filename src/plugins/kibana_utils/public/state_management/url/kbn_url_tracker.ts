@@ -148,7 +148,11 @@ export function createKbnUrlTracker({
     unsubscribe();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
-      setActiveUrl(location.pathname + location.search);
+      const currentAppName = defaultSubUrl.slice(2); // cut hash and slash
+      const targetAppName = location.pathname.split('/')[1];
+      if (currentAppName === targetAppName || currentAppName.startsWith(targetAppName)) {
+        setActiveUrl(location.pathname + location.search);
+      }
     });
   }
 
@@ -189,9 +193,7 @@ export function createKbnUrlTracker({
     appUnMounted() {
       onUnmountApp();
 
-      if (activeUrl.startsWith(defaultSubUrl)) {
-        setNavLink(activeUrl);
-      }
+      setNavLink(activeUrl);
     },
     stop() {
       unsubscribe();
