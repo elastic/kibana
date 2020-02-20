@@ -17,5 +17,8 @@
  * under the License.
  */
 
+import chalk from 'chalk';
+
 export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));;
 export const noop = () => {};
+export const green = x => chalk.greenBright.bold(x);

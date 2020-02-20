@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { left, right } from './either';
 
 const XPACK = 'x-pack';
@@ -60,9 +59,9 @@ export const truncate = text => obj => {
   return obj;
 };
 
-export const timeStamp = obj => ({
+export const addTimeStamp = ts => obj => ({
   ...obj,
-  '@timestamp': process.env.TIME_STAMP || moment.utc().format(),
+  '@timestamp': ts,
 });
 
 export const distro = obj => {

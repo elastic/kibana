@@ -20,29 +20,56 @@
 import { fromEventPattern, of } from 'rxjs';
 import { concatMap, delay, map } from 'rxjs/operators';
 import jsonStream from './json_stream';
-import { pipe, noop } from './utils';
+import { pipe, noop, green } from './utils';
 import { ingest } from './ingest';
+import chalk from 'chalk';
+import * as fs from 'fs';
 import {
   staticSite,
   statsAndCoveredFilePath,
   addPath,
   testRunner,
-  timeStamp,
+  addTimeStamp,
   distro,
   buildId,
   maybeDropCoveredFilePath,
-} from './conversions';
+} from './transforms';
+import moment from 'moment';
+import { resolve } from "path";
+
+const KIBANA_ROOT_PATH = '../../../..';
+const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
 
+const ts = log => {
+  const timestamp = process.env.TIME_STAMP || moment.utc().format();
+  const outFileDir = 'src/dev/code_coverage';
+  const timeStampDatFileName = 'current_build_timestamp.dat';
+  const fullTimeStampPath = resolve(KIBANA_ROOT, outFileDir, timeStampDatFileName);
+
+  log.debug(`\n### Flushing timestamp ${green(timestamp)}, to ${green(fullTimeStampPath)}`);
+
+  flushTimeStamp(fullTimeStampPath)(timestamp);
+
+  return timestamp;
+};
+
+const flushTimeStamp = filePath => x =>
+  fs.writeFileSync(resolve(filePath), x, { encoding: 'utf8' });
+
+
 export default ({ coveragePath }, log) => {
-  log.debug(`### Code coverage ingestion set to delay for: ${ms} ms\n`);
+  log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
+  log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
+  validateRoot(KIBANA_ROOT, log);
+  const addPrePopulatedTimeStamp = addTimeStamp(ts(log));
 
   const prokStatsTimeStampBuildIdCoveredFilePath = pipe(
     statsAndCoveredFilePath,
     buildId,
-    timeStamp,
+    addPrePopulatedTimeStamp,
     staticSite(staticSiteUrlBase)
   );
   const addPathTestRunnerAndDistro = pipe(addPath(coveragePath), testRunner, distro);
@@ -58,3 +85,7 @@ export default ({ coveragePath }, log) => {
     )
     .subscribe(ingest(log));
 };
+
+function validateRoot(x, log) {
+  return /kibana$/.test(x) ? noop() : log.warning(`!!! 'kibana' NOT FOUND in ROOT: ${x}\n`);
+}
