@@ -70,11 +70,11 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           .kibanaWelcomeLogo {
             width: 60px;
             height: 60px;
-            margin: 10px 0 10px 20px;
+            margin: 10px;
             background-repeat: no-repeat;
             background-size: contain;
             /* SVG optimized according to http://codepen.io/tigt/post/optimizing-svgs-in-data-uris */
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzOSIgdmlld0JveD0iMCAwIDMwIDM5Ij4gIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+ICAgIDxwb2x5Z29uIGZpbGw9IiNGMDRFOTgiIHBvaW50cz0iMCAwIDAgMzQuNTQ3IDI5LjkyMiAuMDIiLz4gICAgPHBhdGggZmlsbD0iIzM0Mzc0MSIgZD0iTTAsMTQuNCBMMCwzNC41NDY4IEwxNC4yODcyLDE4LjA2MTIgQzEwLjA0MTYsMTUuNzM4IDUuMTgwNCwxNC40IDAsMTQuNCIvPiAgICA8cGF0aCBmaWxsPSIjMDBCRkIzIiBkPSJNMTcuMzc0MiwxOS45OTY4IEwyLjcyMSwzNi45MDQ4IEwxLjQzMzQsMzguMzg5MiBMMjkuMjYzOCwzOC4zODkyIEMyNy43NjE0LDMwLjgzODggMjMuNDA0MiwyNC4zMjY0IDE3LjM3NDIsMTkuOTk2OCIvPiAgPC9nPjwvc3ZnPg==');
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIj4KICAgIDxwYXRoIGZpbGw9IiNGREQwMDkiIGQ9Ik0xMS45MzM4MTcxLDEzLjE1MjI3NjEgTDE5LjI4NzIzNTMsMTYuNTA4MDk3MiBMMjYuNzA2NTY2NCwxMC4wMDA1MTQ3IEMyNi44MTM5NTkyLDkuNDYzODQ0OTUgMjYuODY2Mzc3LDguOTI4NTk3MjUgMjYuODY2Mzc3LDguMzY4NDY0MjIgQzI2Ljg2NjM3NywzLjc4OTg0OTU0IDIzLjE0NTk4NjQsMC4wNjQ3MzAyNzUyIDE4LjU3MTk5NDEsMC4wNjQ3MzAyNzUyIEMxNS44MzU3NTI2LDAuMDY0NzMwMjc1MiAxMy4yODM2MTI5LDEuNDEzMzcyNDggMTEuNzMyMzg0NywzLjY3NDgwODI2IEwxMC40OTgzNjI4LDEwLjA4Mzk4NzIgTDExLjkzMzgxNzEsMTMuMTUyMjc2MSBaIi8+CiAgICA8cGF0aCBmaWxsPSIjMjNCQUIxIiBkPSJNNC4zMjIxNDUwMSwyMC45NDczMzk5IEM0LjIxNDc1MjI5LDIxLjQ4NDE1MTggNC4xNTk2MzU0LDIyLjA0MTAxNDIgNC4xNTk2MzU0LDIyLjYwNDQxNzkgQzQuMTU5NjM1NCwyNy4xOTQ4MzUzIDcuODkwOTY0MTksMzAuOTMwMDUwOSAxMi40Nzc0NTcyLDMwLjkzMDA1MDkgQzE1LjIzNjE0MzIsMzAuOTMwMDUwOSAxNy44MDA3ODM3LDI5LjU2ODc1MjggMTkuMzQ5NTk2OSwyNy4yODQxMzgxIEwyMC41NzQzODUzLDIwLjg5NjU3MzkgTDE4LjkzOTkxMzYsMTcuNzY5ODM5OSBMMTEuNTU3Mzc0NCwxNC40MDE1MDUgTDQuMzIyMTQ1MDEsMjAuOTQ3MzM5OSBaIi8+CiAgICA8cGF0aCBmaWxsPSIjRUU1MDk3IiBkPSJNNC4yNzU1MzcxNCw4LjIwODQ3Mjk0IEw5LjMxNTAzOTk1LDkuMzk5NTU1NSBMMTAuNDE5MDgyNiwzLjY2Mzk4NjcgQzkuNzMwNDA1NDUsMy4xMzcxMjg5IDguODgwMzU1MTMsMi44NDg3NDM1OCA4LjAwNjAxMzYxLDIuODQ4NzQzNTggQzUuODE1OTY5MjIsMi44NDg3NDM1OCA0LjAzNDg5NzksNC42MzI1MjMzOSA0LjAzNDg5NzksNi44MjQ4NDkwOCBDNC4wMzQ4OTc5LDcuMzA5MDQ2MzMgNC4xMTU3MjY1NSw3Ljc3MzMzNTMyIDQuMjc1NTM3MTQsOC4yMDg0NzI5NCIvPgogICAgPHBhdGggZmlsbD0iIzE3QTdFMCIgZD0iTTMuODM4MDY4MDcsOS40MDk5NjQ2OCBDMS41ODY1MTQzNSwxMC4xNTY4MDg3IDAuMDIxMDgwNzkzMSwxMi4zMTcyODEyIDAuMDIxMDgwNzkzMSwxNC42OTM3NTgzIEMwLjAyMTA4MDc5MzEsMTcuMDA3ODA4NyAxLjQ1MDcxMDg2LDE5LjA3NDE0MzYgMy41OTY1NzY1LDE5Ljg5MTgwNDEgTDEwLjY2Njg4MTMsMTMuNDk0NDI4IEw5LjM2ODc5MzEzLDEwLjcxNzc5NSBMMy44MzgwNjgwNyw5LjQwOTk2NDY4IFoiLz4KICAgIDxwYXRoIGZpbGw9IiM5MkM3M0QiIGQ9Ik0yMC42NDIxNzM0LDI3LjI4Mzg1MzcgQzIxLjMzMzQwNzUsMjcuODE1Njg4NSAyMi4xNzkzMzgzLDI4LjEwNTc4MDMgMjMuMDQyODgzNywyOC4xMDU3ODAzIEMyNS4yMzI3ODYsMjguMTA1NzgwMyAyNy4wMTM4NTc0LDI2LjMyMjg1MzcgMjcuMDEzODU3NCwyNC4xMzA1MjggQzI3LjAxMzg1NzQsMjMuNjQ3MDQxNyAyNi45MzMxNzA4LDIzLjE4Mjc1MjggMjYuNzczMjE4MSwyMi43NDc3NTczIEwyMS43Mzc5NzY5LDIxLjU2ODE5MzEgTDIwLjY0MjE3MzQsMjcuMjgzODUzNyBaIi8+CiAgICA8cGF0aCBmaWxsPSIjMDY3OEEwIiBkPSJNMjEuNjY2NzIyNywyMC4yNDY5NTMyIEwyNy4yMDk5NDg1LDIxLjU0NDY4NzIgQzI5LjQ2MjM1NDUsMjAuNzk5NTQ5NSAzMS4wMjc3ODgxLDE4LjYzODIyMzkgMzEuMDI3Nzg4MSwxNi4yNjA4OTM2IEMzMS4wMjc3ODgxLDEzLjk1MTEwOTIgMjkuNTk0NzQ4NywxMS44ODcxOTE3IDI3LjQ0NDc2MzUsMTEuMDcxOTQ4NiBMMjAuMTk0NjE4NSwxNy40MzAzNjE1IEwyMS42NjY3MjI3LDIwLjI0Njk1MzIgWiIvPgogIDwvZz4KPC9zdmc+Cg==")
           }
 
           .kibanaWelcomeTitle {
@@ -102,36 +102,15 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             height: 128px;
             width: 128px;
             position: relative;
-            margin-top: 40px;
-          }
-
-          .kibanaLoaderWrap + * {
-            margin-top: 24px;
-          }
-
-          .kibanaLoader {
-            height: 128px;
-            width: 128px;
-            margin: 0 auto;
-            position: relative;
-            border: 2px solid transparent;
-            border-top: 2px solid #017d73;
-            border-radius: 100%;
-            display: block;
-            opacity: 0;
-            animation: rotation .75s .5s infinite linear, fadeIn 1s .5s ease-in-out forwards;
           }
 
           .kibanaWelcomeLogoCircle {
-            position: absolute;
-            left: 4px;
-            top: 4px;
+            margin: 10px;
             width: 120px;
             height: 120px;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 50%;
-            animation: bounceIn .5s ease-in-out;
+            transform: scale(1);
+            animation: pulse 1s infinite;
           }
 
           @keyframes rotation {
@@ -150,18 +129,17 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
               opacity: 1;
             }
           }
-          @keyframes bounceIn {
+          @keyframes pulse {
             0% {
-              opacity: 0;
-              transform: scale(.1);
+              transform: scale(0.9);
             }
-            80% {
-              opacity: .5;
-              transform: scale(1.2);
-            }
-            100% {
-              opacity: 1;
+
+            70% {
               transform: scale(1);
+            }
+
+            100% {
+              transform: scale(0.9);
             }
           }
         `,

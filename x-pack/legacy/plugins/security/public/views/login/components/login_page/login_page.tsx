@@ -52,7 +52,7 @@ export class LoginPage extends Component<Props, {}> {
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
             <span className="loginWelcome__logo">
-              <EuiIcon type="logoKibana" size="xxl" />
+              <EuiIcon type="logoElastic" size="xxl" />
             </span>
             <EuiTitle size="l" className="loginWelcome__title">
               <h1>
