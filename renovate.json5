@@ -1018,14 +1018,6 @@
         ],
       },
       {
-        groupSlug: 'yauzl',
-        groupName: 'yauzl related packages',
-        packageNames: [
-          'yauzl',
-          '@types/yauzl',
-        ],
-      },
-      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
