@@ -87,6 +87,7 @@ describe('create()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroup: 'default',
       async executor() {},
     });
   });
@@ -523,6 +524,7 @@ describe('create()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [],
+      defaultActionGroup: '',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -1885,6 +1887,7 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroup: 'default',
       async executor() {},
     });
   });
@@ -2415,6 +2418,7 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroup: 'default',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -2647,6 +2651,7 @@ describe('update()', () => {
         id: '123',
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroup: 'default',
         async executor() {},
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({

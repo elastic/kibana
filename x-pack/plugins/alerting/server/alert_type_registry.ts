@@ -40,7 +40,16 @@ export class AlertTypeRegistry {
         })
       );
     }
-    this.alertTypes.set(alertType.id, alertType);
+    // set default value for actionGroups if it is empty
+    if (alertType.actionGroups.length === 0) {
+      this.alertTypes.set(alertType.id, {
+        ...alertType,
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroup: 'default',
+      });
+    } else {
+      this.alertTypes.set(alertType.id, alertType);
+    }
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
@@ -70,6 +79,7 @@ export class AlertTypeRegistry {
       id: alertTypeId,
       name: alertType.name,
       actionGroups: alertType.actionGroups,
+      defaultActionGroup: alertType.defaultActionGroup,
     }));
   }
 }

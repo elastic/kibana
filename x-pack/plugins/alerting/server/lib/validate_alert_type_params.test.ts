@@ -13,6 +13,7 @@ test('should return passed in params when validation not defined', () => {
       id: 'my-alert-type',
       name: 'My description',
       actionGroups: [],
+      defaultActionGroup: '',
       async executor() {},
     },
     {
@@ -28,6 +29,7 @@ test('should validate and apply defaults when params is valid', () => {
       id: 'my-alert-type',
       name: 'My description',
       actionGroups: [],
+      defaultActionGroup: '',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -51,6 +53,7 @@ test('should validate and throw error when params is invalid', () => {
         id: 'my-alert-type',
         name: 'My description',
         actionGroups: [],
+        defaultActionGroup: '',
         validate: {
           params: schema.object({
             param1: schema.string(),

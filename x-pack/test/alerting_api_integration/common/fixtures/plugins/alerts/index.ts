@@ -206,6 +206,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
+        defaultActionGroup: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -260,6 +261,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
+        defaultActionGroup: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
           const group = 'default';
@@ -282,6 +284,7 @@ export default function(kibana: any) {
         id: 'test.never-firing',
         name: 'Test: Never firing',
         actionGroups: [],
+        defaultActionGroup: '',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -315,11 +318,13 @@ export default function(kibana: any) {
           });
           throw new Error('Failed to execute alert type');
         },
+        defaultActionGroup: 'default',
       };
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
         actionGroups: [],
+        defaultActionGroup: '',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -379,6 +384,7 @@ export default function(kibana: any) {
         id: 'test.validation',
         name: 'Test: Validation',
         actionGroups: [],
+        defaultActionGroup: '',
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -390,6 +396,7 @@ export default function(kibana: any) {
         id: 'test.noop',
         name: 'Test: Noop',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroup: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);

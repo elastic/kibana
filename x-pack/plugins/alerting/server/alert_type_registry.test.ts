@@ -28,6 +28,7 @@ describe('has()', () => {
       id: 'foo',
       name: 'Foo',
       actionGroups: [],
+      defaultActionGroup: '',
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -40,6 +41,7 @@ describe('register()', () => {
       id: 'test',
       name: 'Test',
       actionGroups: [],
+      defaultActionGroup: '',
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -65,6 +67,7 @@ describe('register()', () => {
       id: 'test',
       name: 'Test',
       actionGroups: [],
+      defaultActionGroup: '',
       executor: jest.fn(),
     });
     expect(() =>
@@ -72,6 +75,7 @@ describe('register()', () => {
         id: 'test',
         name: 'Test',
         actionGroups: [],
+        defaultActionGroup: '',
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -85,12 +89,19 @@ describe('get()', () => {
       id: 'test',
       name: 'Test',
       actionGroups: [],
+      defaultActionGroup: '',
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
       Object {
-        "actionGroups": Array [],
+        "actionGroups": Array [
+          Object {
+            "id": "default",
+            "name": "Default",
+          },
+        ],
+        "defaultActionGroup": "default",
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
@@ -124,6 +135,7 @@ describe('list()', () => {
           name: 'Test Action Group',
         },
       ],
+      defaultActionGroup: 'testActionGroup',
       executor: jest.fn(),
     });
     const result = registry.list();
@@ -136,6 +148,7 @@ describe('list()', () => {
               "name": "Test Action Group",
             },
           ],
+          "defaultActionGroup": "testActionGroup",
           "id": "test",
           "name": "Test",
         },

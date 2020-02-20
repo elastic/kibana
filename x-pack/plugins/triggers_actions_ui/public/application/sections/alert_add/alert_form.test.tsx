@@ -28,7 +28,6 @@ describe('alert_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
-    defaultActionGroup: 'testDefaultActionGroup',
   };
 
   const actionType = {
@@ -225,9 +224,7 @@ describe('alert_form', () => {
       expect(actionTypeSelectOptions.exists()).toBeTruthy();
 
       actionTypeSelectOptions.first().simulate('click');
-      const actionTypeForm = wrapper.find(
-        '[data-test-subj="alertActionAccordion-testDefaultActionGroup"]'
-      );
+      const actionTypeForm = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
       expect(actionTypeForm.exists()).toBeTruthy();
     });
   });
