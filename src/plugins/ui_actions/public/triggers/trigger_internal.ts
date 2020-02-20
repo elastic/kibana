@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AnyTrigger, TriggerContext, TriggerContextParams } from './trigger';
+import { AnyTrigger, TriggerContext } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 import { Action } from '../actions';
@@ -32,13 +32,7 @@ export class TriggerInternal<T extends AnyTrigger> {
 
   constructor(public readonly service: UiActionsService, public readonly trigger: T) {}
 
-  public createContext(params: TriggerContextParams<T>): TriggerContext<T> {
-    if (!this.trigger.createContext) return (params as unknown) as TriggerContext<T>;
-    return this.trigger.createContext(params);
-  }
-
-  public async execute(params: TriggerContextParams<T>) {
-    const context = this.createContext(params);
+  public async execute(context: TriggerContext<T>) {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 

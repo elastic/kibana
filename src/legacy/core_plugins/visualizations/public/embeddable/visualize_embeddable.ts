@@ -304,12 +304,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         if (!this.input.disableTriggers) {
           const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
             event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
-          const params: EmbeddableVisTriggerContext = {
+          const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
           };
-          npStart.plugins.uiActions.getTrigger(triggerId).exec(params);
+          npStart.plugins.uiActions.getTrigger(triggerId).exec(context);
         }
       })
     );

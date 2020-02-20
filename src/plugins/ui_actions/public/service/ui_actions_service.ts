@@ -24,7 +24,7 @@ import {
   TriggerContextMapping,
 } from '../types';
 import { Action } from '../actions';
-import { TriggerContextParams, AnyTrigger } from '../triggers/trigger';
+import { AnyTrigger, Trigger } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 
@@ -66,7 +66,7 @@ export class UiActionsService {
 
   public readonly getTrigger = <T extends keyof TriggerContextMapping>(
     triggerId: T
-  ): TriggerContract<TriggerContextMapping[T]> => {
+  ): TriggerContract<Trigger<T extends string ? T : never>> => {
     const trigger = this.triggers.get(triggerId as string);
 
     if (!trigger) {
@@ -145,10 +145,10 @@ export class UiActionsService {
    */
   public readonly executeTriggerActions = async <T extends AnyTrigger>(
     triggerId: string,
-    params: TriggerContextParams<T>
+    context: TriggerContextMapping[T['id']]
   ) => {
     const trigger = this.getTrigger<any>(triggerId);
-    await trigger.exec(params);
+    await trigger.exec(context);
   };
 
   /**

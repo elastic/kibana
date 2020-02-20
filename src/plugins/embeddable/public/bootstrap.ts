@@ -18,7 +18,6 @@
  */
 
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { Trigger } from '../../ui_actions/public';
 import {
   applyFilterTrigger,
   contextMenuTrigger,
@@ -26,16 +25,16 @@ import {
   panelBadgeTrigger,
   selectRangeTrigger,
   valueClickTrigger,
-  EmbeddableVisTrigger,
+  EmbeddableVisTriggerContext,
 } from './lib';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    SELECT_RANGE_TRIGGER: EmbeddableVisTrigger<'SELECT_RANGE_TRIGGER'>;
-    VALUE_CLICK_TRIGGER: EmbeddableVisTrigger<'VALUE_CLICK_TRIGGER'>;
-    CONTEXT_MENU_TRIGGER: Trigger;
-    APPLY_FILTER_TRIGGER: Trigger;
-    PANEL_BADGE_TRIGGER: Trigger;
+    SELECT_RANGE_TRIGGER: EmbeddableVisTriggerContext;
+    VALUE_CLICK_TRIGGER: EmbeddableVisTriggerContext;
+    CONTEXT_MENU_TRIGGER: object;
+    APPLY_FILTER_TRIGGER: object;
+    PANEL_BADGE_TRIGGER: object;
   }
 }
 

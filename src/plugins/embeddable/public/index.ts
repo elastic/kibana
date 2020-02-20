@@ -47,7 +47,6 @@ export {
   EmbeddableOutput,
   EmbeddablePanel,
   EmbeddableRoot,
-  EmbeddableVisTrigger,
   EmbeddableVisTriggerContext,
   ErrorEmbeddable,
   GetEmbeddableFactories,

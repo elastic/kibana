@@ -29,42 +29,36 @@ export interface EmbeddableVisTriggerContext {
   };
 }
 
-export type EmbeddableVisTrigger<ID extends string> = Trigger<
-  ID,
-  EmbeddableVisTriggerContext,
-  EmbeddableVisTriggerContext
->;
-
 export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: EmbeddableVisTrigger<'SELECT_RANGE_TRIGGER'> = {
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
   id: SELECT_RANGE_TRIGGER,
   title: 'Select range',
   description: 'Applies a range filter',
 };
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const valueClickTrigger: EmbeddableVisTrigger<'VALUE_CLICK_TRIGGER'> = {
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
   title: 'Value clicked',
   description: 'Value was clicked',
 };
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const contextMenuTrigger: Trigger = {
+export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   id: CONTEXT_MENU_TRIGGER,
   title: 'Context menu',
   description: 'Triggered on top-right corner context-menu select.',
 };
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
-export const applyFilterTrigger: Trigger = {
+export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
   id: APPLY_FILTER_TRIGGER,
   title: 'Filter click',
   description: 'Triggered when user applies filter to an embeddable.',
 };
 
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger = {
+export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
   title: 'Panel badges',
   description: 'Actions appear in title bar when an embeddable loads in a panel',

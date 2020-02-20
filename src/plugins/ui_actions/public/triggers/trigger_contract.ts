@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AnyTrigger, TriggerContextParams } from './trigger';
+import { AnyTrigger, TriggerContext } from './trigger';
 import { TriggerInternal } from './trigger_internal';
 
 /**
@@ -49,7 +49,7 @@ export class TriggerContract<T extends AnyTrigger> {
   /**
    * Use this method to execute action attached to this trigger.
    */
-  public readonly exec = async (params: TriggerContextParams<T>) => {
-    await this.internal.execute(params);
+  public readonly exec = async (context: TriggerContext<T>) => {
+    await this.internal.execute(context);
   };
 }
