@@ -94,9 +94,12 @@ export const TITLE_REQUIRED = i18n.translate('xpack.siem.case.createCase.titleFi
   defaultMessage: 'A title is required.',
 });
 
-export const CONFIGURE_CASES = i18n.translate('xpack.siem.case.configureCases.headerTitle', {
-  defaultMessage: 'Configure cases',
-});
+export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.headerTitle',
+  {
+    defaultMessage: 'Configure cases',
+  }
+);
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
   defaultMessage: 'Configure cases',
