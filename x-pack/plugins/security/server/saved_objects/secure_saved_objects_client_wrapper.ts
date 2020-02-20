@@ -145,12 +145,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsAddNamespacesOptions = {}
   ) {
     const savedObject = await this.baseClient.get(type, id);
-    const existing = savedObject.namespaces;
-    if (!existing) {
-      throw this.errors.decorateForbiddenError(
-        new Error('Unable to addNamespaces: saved object has no namespaces')
-      );
-    }
+    const existing = savedObject.namespaces || [];
 
     const args = { type, id, namespaces, options };
     // to share an object, the user must have the "update" permission in one or more of the source namespaces
@@ -189,23 +184,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.filterSavedObjectsNamespaces(response);
   }
 
-  /**
-   * Check privileges for a non-multi-namespace operation (either namespace-agnostic or single-namespace)
-   */
-  private async checkPrivileges(actions: string | string[], namespace?: string) {
+  private async checkPrivileges(
+    actions: string | string[],
+    namespaceOrNamespaces?: string | string[]
+  ) {
     try {
-      return await this.checkSavedObjectsPrivilegesAsCurrentUser.dynamically(actions, namespace);
-    } catch (error) {
-      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
-    }
-  }
-
-  /**
-   * Check privileges for a multi-namespace operation
-   */
-  private async checkMultiNamespacePrivileges(actions: string | string[], namespaces: string[]) {
-    try {
-      return await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(actions, namespaces);
+      return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespaceOrNamespaces);
     } catch (error) {
       throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
@@ -224,12 +208,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       types.map(type => [this.actions.savedObject.get(type, action), type])
     );
     const actions = Array.from(actionsToTypesMap.keys());
-    let result: CheckPrivilegesResponse;
-    if (Array.isArray(namespaceOrNamespaces)) {
-      result = await this.checkMultiNamespacePrivileges(actions, namespaceOrNamespaces);
-    } else {
-      result = await this.checkPrivileges(actions, namespaceOrNamespaces);
-    }
+    const result = await this.checkPrivileges(actions, namespaceOrNamespaces);
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
@@ -277,10 +256,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async getNamespacesPrivilegeMap(namespaces: string[]) {
     const action = this.actions.login;
-    const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
-      action,
-      namespaces
-    );
+    const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
     // check if the user can log into each namespace
     const map = checkPrivilegesResult.privileges.reduce(
       (acc: Record<string, boolean>, { spaceId, authorized }) => {

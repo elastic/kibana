@@ -12,37 +12,38 @@ export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest
 ) => CheckSavedObjectsPrivileges;
 
-export interface CheckSavedObjectsPrivileges {
-  dynamically: (actions: string | string[], namespace?: string) => Promise<CheckPrivilegesResponse>;
-  atNamespaces: (
-    actions: string | string[],
-    namespaces: string[]
-  ) => Promise<CheckPrivilegesResponse>;
-}
+export type CheckSavedObjectsPrivileges = (
+  actions: string | string[],
+  namespaceOrNamespaces?: string | string[]
+) => Promise<CheckPrivilegesResponse>;
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   getSpacesService: () => SpacesService | undefined
 ): CheckSavedObjectsPrivilegesWithRequest => {
-  return function checkSavedObjectsPrivilegesWithRequest(request: KibanaRequest) {
-    return {
-      async atNamespaces(actions: string | string[], namespaces: string[]) {
-        const spacesService = getSpacesService();
+  return function checkSavedObjectsPrivilegesWithRequest(
+    request: KibanaRequest
+  ): CheckSavedObjectsPrivileges {
+    return async function checkSavedObjectsPrivileges(
+      actions: string | string[],
+      namespaceOrNamespaces?: string | string[]
+    ) {
+      const spacesService = getSpacesService();
+      if (Array.isArray(namespaceOrNamespaces)) {
         if (spacesService === undefined) {
-          throw new Error(`Can't check saved object privileges at spaces if spaces is disabled`);
+          throw new Error(
+            `Can't check saved object privileges for multiple namespaces if Spaces is disabled`
+          );
+        } else if (!namespaceOrNamespaces.length) {
+          throw new Error(`Can't check saved object privileges for 0 namespaces`);
         }
-        const spaceIds = namespaces.map(x => spacesService.namespaceToSpaceId(x));
+        const spaceIds = namespaceOrNamespaces.map(x => spacesService.namespaceToSpaceId(x));
         return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
-      },
-      async dynamically(actions: string | string[], namespace?: string) {
-        const spacesService = getSpacesService();
-        return spacesService
-          ? await checkPrivilegesWithRequest(request).atSpace(
-              spacesService.namespaceToSpaceId(namespace),
-              actions
-            )
-          : await checkPrivilegesWithRequest(request).globally(actions);
-      },
+      } else if (spacesService) {
+        const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
+        return await checkPrivilegesWithRequest(request).atSpace(spaceId, actions);
+      }
+      return await checkPrivilegesWithRequest(request).globally(actions);
     };
   };
 };

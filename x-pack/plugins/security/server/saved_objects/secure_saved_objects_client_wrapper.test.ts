@@ -33,10 +33,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   return {
     actions,
     baseClient: savedObjectsClientMock.create(),
-    checkSavedObjectsPrivilegesAsCurrentUser: {
-      atNamespaces: jest.fn(),
-      dynamically: jest.fn(),
-    },
+    checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
     auditLogger: securityAuditLoggerMock.create(),
@@ -48,8 +45,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
 const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
   // mock the checkPrivileges.globally rejection
   const rejection = new Error('An actual error would happen here');
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockRejectedValue(rejection);
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockRejectedValue(rejection);
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(rejection);
 
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
     clientOpts.generalError
@@ -65,10 +61,7 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
  * The argument properties must be in the correct order to be spread properly
  */
 const expectForbiddenError = async (fn: Function, args: Record<string, any>) => {
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockImplementation(
-    getMockCheckPrivilegesFailure
-  );
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
   );
 
@@ -78,7 +71,7 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>) => 
   const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
     SavedObjectActions['get']
   >).mock.calls;
-  const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mock.calls[0][0];
+  const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
   const spaceId = args.options?.namespace || 'default';
 
   const ACTION = getCalls[0][1];
@@ -121,7 +114,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>) => {
 };
 
 const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => {
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockImplementation(
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
   );
 
@@ -131,16 +124,19 @@ const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => 
   >).mock.results;
   const actions = getResults.map(x => x.value);
 
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically).toHaveBeenCalledTimes(1);
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically).toHaveBeenCalledWith(
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
     actions,
     args.options?.namespace
   );
 };
 
 const expectObjectNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
-    getMockCheckPrivilegesFailure
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+    getMockCheckPrivilegesSuccess // privilege check for authorization
+  );
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+    getMockCheckPrivilegesFailure // privilege check for namespace filtering
   );
 
   const authorizedNamespace = args.options.namespace || 'default';
@@ -154,16 +150,19 @@ const expectObjectNamespaceFiltering = async (fn: Function, args: Record<string,
   const result = await fn.bind(client)(...Object.values(args));
   expect(result).toEqual(expect.objectContaining({ namespaces: [authorizedNamespace, '?'] }));
 
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(1);
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledWith(
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
     'login:',
     namespaces
   );
 };
 
 const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
-    getMockCheckPrivilegesFailure
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+    getMockCheckPrivilegesSuccess // privilege check for authorization
+  );
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+    getMockCheckPrivilegesFailure // privilege check for namespace filtering
   );
 
   const authorizedNamespace = args.options.namespace || 'default';
@@ -192,10 +191,11 @@ const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string
     })
   );
 
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(1);
-  expect(
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces
-  ).toHaveBeenCalledWith('login:', ['foo', authorizedNamespace]);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith('login:', [
+    'foo',
+    authorizedNamespace,
+  ]);
 };
 
 function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: string | string[]) {
@@ -248,10 +248,7 @@ beforeEach(() => {
   client = new SecureSavedObjectsClientWrapper(clientOpts);
 
   // succeed privilege checks by default
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.dynamically.mockImplementation(
-    getMockCheckPrivilegesSuccess
-  );
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesSuccess
   );
 });
@@ -276,7 +273,7 @@ describe('#addNamespaces', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized to update in existing space`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure
     );
 
@@ -298,10 +295,10 @@ describe('#addNamespaces', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized to create in new space`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementationOnce(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
       getMockCheckPrivilegesSuccess // update
     );
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure // create
     );
 
@@ -358,24 +355,26 @@ describe('#addNamespaces', () => {
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementationOnce(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
       getMockCheckPrivilegesSuccess // update
     );
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure // create
     );
 
     await expect(client.addNamespaces(type, id, namespaces)).rejects.toThrow(); // test is simpler with error case
 
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(
-      2
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
+      1,
+      [privilege1],
+      [existingNs]
     );
-    expect(
-      clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces
-    ).toHaveBeenNthCalledWith(1, [privilege1], [existingNs]);
-    expect(
-      clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces
-    ).toHaveBeenNthCalledWith(2, [privilege2], namespaces);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
+      2,
+      [privilege2],
+      namespaces
+    );
   });
 });
 
@@ -622,7 +621,7 @@ describe('#removeNamespaces', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure
     );
 
@@ -662,16 +661,14 @@ describe('#removeNamespaces', () => {
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces.mockImplementation(
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure
     );
 
     await expect(client.removeNamespaces(type, id, namespaces)).rejects.toThrow(); // test is simpler with error case
 
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledTimes(
-      1
-    );
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces).toHaveBeenCalledWith(
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
       [privilege],
       namespaces
     );

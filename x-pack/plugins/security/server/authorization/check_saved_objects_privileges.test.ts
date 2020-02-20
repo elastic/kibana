@@ -35,72 +35,85 @@ beforeEach(() => {
   };
 });
 
-describe('#atNamespaces', () => {
-  test(`uses checkPrivileges.atSpaces when spaces is enabled`, async () => {
-    const actions = ['foo', 'bar'];
-    const namespaces = ['baz', 'qux'];
-    const expectedResult = Symbol();
-    mockCheckPrivileges.atSpaces.mockReturnValue(expectedResult as any);
-    const checkSavedObjectsPrivileges = createFactory();
-
-    const result = await checkSavedObjectsPrivileges.atNamespaces(actions, namespaces);
-
-    expect(result).toBe(expectedResult);
-    expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledTimes(2);
-    expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenNthCalledWith(1, namespaces[0]);
-    expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenNthCalledWith(2, namespaces[1]);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledTimes(1);
-    const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map(x => x.value);
-    expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, actions);
-  });
-
-  test(`throws an error when spaces is disabled`, async () => {
-    mockSpacesService = undefined;
-    const checkSavedObjectsPrivileges = createFactory();
-
-    await expect(
-      checkSavedObjectsPrivileges.atNamespaces('some action', ['some namespace'])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Can't check saved object privileges at spaces if spaces is disabled"`
-    );
-  });
-});
-
-describe('#dynamically', () => {
+describe('#checkSavedObjectsPrivileges', () => {
   const actions = ['foo', 'bar'];
-  const namespace = 'baz';
+  const namespace1 = 'baz';
+  const namespace2 = 'qux';
 
-  test(`uses checkPrivileges.atSpace when spaces is enabled`, async () => {
-    const expectedResult = Symbol();
-    mockCheckPrivileges.atSpace.mockReturnValue(expectedResult as any);
-    const checkSavedObjectsPrivileges = createFactory();
+  describe('when checking multiple namespaces', () => {
+    const namespaces = [namespace1, namespace2];
 
-    const result = await checkSavedObjectsPrivileges.dynamically(actions, namespace);
+    test(`throws an error when Spaces is disabled`, async () => {
+      mockSpacesService = undefined;
+      const checkSavedObjectsPrivileges = createFactory();
 
-    expect(result).toBe(expectedResult);
-    expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledTimes(1);
-    expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledWith(namespace);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    expect(mockCheckPrivileges.atSpace).toHaveBeenCalledTimes(1);
-    const spaceId = mockSpacesService!.namespaceToSpaceId.mock.results[0].value;
-    expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, actions);
+      await expect(
+        checkSavedObjectsPrivileges(actions, namespaces)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Can't check saved object privileges for multiple namespaces if Spaces is disabled"`
+      );
+    });
+
+    test(`throws an error when using an empty namespaces array`, async () => {
+      const checkSavedObjectsPrivileges = createFactory();
+
+      await expect(
+        checkSavedObjectsPrivileges(actions, [])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Can't check saved object privileges for 0 namespaces"`
+      );
+    });
+
+    test(`uses checkPrivileges.atSpaces when spaces is enabled`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.atSpaces.mockReturnValue(expectedResult as any);
+      const checkSavedObjectsPrivileges = createFactory();
+
+      const result = await checkSavedObjectsPrivileges(actions, namespaces);
+
+      expect(result).toBe(expectedResult);
+      expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledTimes(2);
+      expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenNthCalledWith(1, namespace1);
+      expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenNthCalledWith(2, namespace2);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledTimes(1);
+      const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map(x => x.value);
+      expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, actions);
+    });
   });
 
-  test(`uses checkPrivileges.globally when spaces is disabled`, async () => {
-    const expectedResult = Symbol();
-    mockCheckPrivileges.globally.mockReturnValue(expectedResult as any);
-    mockSpacesService = undefined;
-    const checkSavedObjectsPrivileges = createFactory();
+  describe('when checking a single namespace', () => {
+    test(`uses checkPrivileges.atSpace when Spaces is enabled`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.atSpace.mockReturnValue(expectedResult as any);
+      const checkSavedObjectsPrivileges = createFactory();
 
-    const result = await checkSavedObjectsPrivileges.dynamically(actions, namespace);
+      const result = await checkSavedObjectsPrivileges(actions, namespace1);
 
-    expect(result).toBe(expectedResult);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-    expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(actions);
+      expect(result).toBe(expectedResult);
+      expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledTimes(1);
+      expect(mockSpacesService!.namespaceToSpaceId).toHaveBeenCalledWith(namespace1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledTimes(1);
+      const spaceId = mockSpacesService!.namespaceToSpaceId.mock.results[0].value;
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, actions);
+    });
+
+    test(`uses checkPrivileges.globally when Spaces is disabled`, async () => {
+      const expectedResult = Symbol();
+      mockCheckPrivileges.globally.mockReturnValue(expectedResult as any);
+      mockSpacesService = undefined;
+      const checkSavedObjectsPrivileges = createFactory();
+
+      const result = await checkSavedObjectsPrivileges(actions, namespace1);
+
+      expect(result).toBe(expectedResult);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(actions);
+    });
   });
 });
