@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
-import { Query, Filter } from 'src/plugins/data/public';
 
-import { isEmpty } from 'lodash/fp';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+
 import { SiemPageName } from '../../pages/home/types';
 import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
@@ -20,11 +23,8 @@ import {
   LocationTypes,
   UrlStateContainerPropTypes,
   ReplaceStateInLocation,
-  Timeline,
   UpdateUrlStateString,
 } from './types';
-
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -257,7 +257,7 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.timeline) {
-    const queryState = decodeRisonUrlState<Timeline>(newUrlStateString);
+    const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (queryState != null && queryState.id === '') {
       return replaceStateInLocation({
         history,

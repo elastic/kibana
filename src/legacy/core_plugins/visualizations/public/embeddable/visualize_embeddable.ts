@@ -34,6 +34,7 @@ import {
   esFilters,
   Filter,
   ISearchSource,
+  TimefilterContract,
 } from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -106,8 +107,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+  private autoRefreshFetchSubscription: Subscription;
 
   constructor(
+    timefilter: TimefilterContract,
     {
       savedVisualization,
       editUrl,
@@ -150,6 +153,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     this.vis._setUiState(this.uiState);
+
+    this.autoRefreshFetchSubscription = timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -294,13 +301,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
+        if (!this.input.disableTriggers) {
+          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
-        npStart.plugins.uiActions.executeTriggerActions(eventName, {
-          embeddable: this,
-          timeFieldName: this.vis.indexPattern.timeFieldName,
-          data: event.data,
-        });
+          npStart.plugins.uiActions.executeTriggerActions(eventName, {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          });
+        }
       })
     );
 
@@ -345,6 +354,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.handler.destroy();
       this.handler.getElement().remove();
     }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {

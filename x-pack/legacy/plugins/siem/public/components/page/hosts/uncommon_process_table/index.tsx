@@ -7,8 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions } from '../../../../store/actions';
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
@@ -33,24 +32,6 @@ interface OwnProps {
   type: hostsModel.HostsType;
 }
 
-interface UncommonProcessTableReduxProps {
-  activePage: number;
-  limit: number;
-}
-
-interface UncommonProcessTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-}
-
 export type UncommonProcessTableColumns = [
   Columns<UncommonProcessesEdges>,
   Columns<UncommonProcessesEdges>,
@@ -60,9 +41,7 @@ export type UncommonProcessTableColumns = [
   Columns<UncommonProcessesEdges>
 ];
 
-type UncommonProcessTableProps = OwnProps &
-  UncommonProcessTableReduxProps &
-  UncommonProcessTableDispatchProps;
+type UncommonProcessTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -150,10 +129,16 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
-export const UncommonProcessTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(UncommonProcessTableComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const UncommonProcessTable = connector(UncommonProcessTableComponent);
 
 UncommonProcessTable.displayName = 'UncommonProcessTable';
 

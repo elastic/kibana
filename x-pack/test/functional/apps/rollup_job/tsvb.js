@@ -21,7 +21,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  // https://github.com/elastic/kibana/issues/56816
+  // FLAKY: https://github.com/elastic/kibana/issues/56816
   describe.skip('tsvb integration', function() {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.

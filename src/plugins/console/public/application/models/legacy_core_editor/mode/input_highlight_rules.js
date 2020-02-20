@@ -18,7 +18,7 @@
  */
 
 const ace = require('brace');
-import { addToRules } from './x_json_highlight_rules';
+import { addXJsonToRules } from '../../../../../../es_ui_shared/console_lang';
 
 export function addEOL(tokens, reg, nextIfEOL, normalNext) {
   if (typeof reg === 'object') {
@@ -101,7 +101,7 @@ export function InputHighlightRules() {
     ),
   };
 
-  addToRules(this);
+  addXJsonToRules(this);
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();
