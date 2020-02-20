@@ -62,6 +62,9 @@ export interface DashboardPluginSetupDependencies {
   data: DataPublicPluginSetup;
 }
 
+const DASHBOARD = 'dashboard';
+const DASHBOARDS = 'dashboards';
+
 export class DashboardPlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
@@ -83,7 +86,11 @@ export class DashboardPlugin implements Plugin {
     );
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/dashboards',
+      defaultSubUrl: `#/${DASHBOARDS}`,
+      isUrlBelongsToApp: pathname => {
+        const targetAppName = pathname.split('/')[1];
+        return targetAppName === DASHBOARD || targetAppName === DASHBOARDS;
+      },
       storageKey: 'lastUrl:dashboard',
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -150,15 +157,15 @@ export class DashboardPlugin implements Plugin {
     };
     kibanaLegacy.registerLegacyApp({
       ...app,
-      id: 'dashboard',
+      id: DASHBOARD,
       // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:dashboard',
     });
-    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboards' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: DASHBOARDS });
 
     home.featureCatalogue.register({
-      id: 'dashboard',
+      id: DASHBOARD,
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
         defaultMessage: 'Dashboard',
       }),
