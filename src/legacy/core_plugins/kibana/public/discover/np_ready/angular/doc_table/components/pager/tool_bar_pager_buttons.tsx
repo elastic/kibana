@@ -35,7 +35,7 @@ export function ToolBarPagerButtons(props: Props) {
         disabled={!props.hasPreviousPage}
         data-test-subj="btnPrevPage"
         aria-label={i18n.translate(
-          'discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
+          'kbn.discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
           {
             defaultMessage: 'previous page button',
           }
@@ -49,7 +49,7 @@ export function ToolBarPagerButtons(props: Props) {
         disabled={!props.hasNextPage}
         data-test-subj="btnNextPage"
         aria-label={i18n.translate(
-          'discover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
+          'kbn.discover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
           {
             defaultMessage: 'next page button',
           }

@@ -178,7 +178,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
 
             <EuiFieldText
               autoFocus
-              aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
+              aria-label={i18n.translate('kbn.dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
                 defaultMessage: 'Cloned Dashboard Title',
               })}
               data-test-subj="clonedDashboardTitle"
