@@ -18,15 +18,17 @@
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
-import { ActionDefinition } from './action_definition';
+
+export type Action = ActionDefinition;
 
 /**
- * @deprecated
- *
- * Use `ActionDefinition` instead.
+ * A convenience interface used to register an action.
  */
-export interface Action<Context extends {} = {}, Return = Promise<void>>
-  extends ActionDefinition<Context, Return> {
+export interface ActionDefinition<
+  Context extends object = object,
+  Return = Promise<void>,
+  Config extends object | undefined = undefined
+> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -38,18 +40,25 @@ export interface Action<Context extends {} = {}, Return = Promise<void>>
    */
   readonly id: string;
 
-  readonly type: string;
+  readonly type?: string;
 
   /**
-   * Optional EUI icon type that can be displayed along with the title.
+   * ID of the `FactoryAction` that can be used to construct instances of
+   * this dynamic action.
    */
-  getIconType(context: Context): string | undefined;
+  readonly factoryId?: string;
 
   /**
-   * Returns a title to be displayed to the user.
-   * @param context
+   * Default config for this action, used when action is created for the first
+   * time.
    */
-  getDisplayName(context: Context): string;
+  readonly defaultConfig?: Config;
+
+  /**
+   * `UiComponent` to be rendered when collecting configuration for this dynamic
+   * action.
+   */
+  readonly CollectConfig?: UiComponent<CollectConfigProps<Context, Config>>;
 
   /**
    * `UiComponent` to render when displaying this action as a context menu item.
@@ -58,10 +67,20 @@ export interface Action<Context extends {} = {}, Return = Promise<void>>
   readonly MenuItem?: UiComponent<{ context: Context }>;
 
   /**
+   * Optional EUI icon type that can be displayed along with the title.
+   */
+  getIconType?(context: Context): string | undefined;
+
+  /**
+   * Returns a title to be displayed to the user.
+   */
+  getDisplayName?(context: Context): string;
+
+  /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: Context): Promise<boolean>;
+  isCompatible?(context: Context): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
@@ -71,5 +90,62 @@ export interface Action<Context extends {} = {}, Return = Promise<void>>
   /**
    * Executes the action.
    */
-  execute(context: Context): Return;
+  execute(context: Context, config: Config): Return;
+}
+
+export type AnyActionDefinition = ActionDefinition<any, any, any>;
+export type ActionContext<A> = A extends ActionDefinition<infer Context, any, any>
+  ? Context
+  : never;
+export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config> ? Config : never;
+
+/**
+ * Props provided to `CollectConfig` component on every re-render.
+ */
+export interface CollectConfigProps<Context, Config> {
+  /**
+   * Context which represents environment where component is being rendered.
+   */
+  context: Context;
+
+  /**
+   * Current config of the dynamic action.
+   */
+  config: Config;
+
+  /**
+   * Callback called when user updates the config in UI.
+   */
+  onConfig: (config: Config) => void;
+}
+
+/**
+ * A convenience interface used to register a dynamic action.
+ *
+ * A dynamic action is one that can be create by user and registered into the
+ * actions registry at runtime. User can also provide custom config for this
+ * action. And dynamic actions can be serialized for storage and deserialized
+ * back.
+ */
+export type DynamicActionDefinition<
+  Context extends object = object,
+  Return = Promise<void>,
+  Config extends object | undefined = undefined
+> = ActionDefinition<Context, Return, Config> &
+  Required<
+    Pick<ActionDefinition<Context, Return, Config>, 'CollectConfig' | 'defaultConfig' | 'factoryId'>
+  >;
+
+/**
+ * Factory actions are actions used to create dynamic actions - their `execute`
+ * method returns a dynamic
+ */
+export interface FactoryActionDefinition<
+  Context extends object,
+  DAD extends DynamicActionDefinition<any, any, any>
+> extends ActionDefinition<Context, DAD> {
+  /**
+   * Returns an instance of a dynamic action definition.
+   */
+  execute(context: Context): DAD;
 }

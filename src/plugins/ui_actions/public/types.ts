@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Action } from './actions/action';
+import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
 export type TriggerRegistry = Map<string, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, Action>;
+export type ActionRegistry = Map<string, ActionInternal<any>>;
 export type TriggerToActionsRegistry = Map<string, string[]>;
 
 export type TriggerId = string;

@@ -22,21 +22,21 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { Action } from '../actions';
+import { ActionInternal, ActionDefinition } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
-export async function buildContextMenuForActions<A>({
+export async function buildContextMenuForActions<Context extends object>({
   actions,
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
-  actionContext: A;
+  actions: Array<ActionInternal<ActionDefinition<Context>>>;
+  actionContext: Context;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
-  const menuItems = await buildEuiContextMenuPanelItems<A>({
+  const menuItems = await buildEuiContextMenuPanelItems<Context>({
     actions,
     actionContext,
     closeMenu,
@@ -54,13 +54,13 @@ export async function buildContextMenuForActions<A>({
 /**
  * Transform an array of Actions into the shape needed to build an EUIContextMenu
  */
-async function buildEuiContextMenuPanelItems<A>({
+async function buildEuiContextMenuPanelItems<Context extends object>({
   actions,
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<A>>;
-  actionContext: A;
+  actions: Array<ActionInternal<ActionDefinition<Context>>>;
+  actionContext: Context;
   closeMenu: () => void;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = [];
@@ -90,13 +90,13 @@ async function buildEuiContextMenuPanelItems<A>({
  * @param {Embeddable} embeddable
  * @return {EuiContextMenuPanelItemDescriptor}
  */
-function convertPanelActionToContextMenuItem<A>({
+function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
   closeMenu,
 }: {
-  action: Action<A>;
-  actionContext: A;
+  action: ActionInternal<ActionDefinition<Context>>;
+  actionContext: Context;
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {

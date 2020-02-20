@@ -20,57 +20,64 @@
 /* eslint-disable max-classes-per-file */
 
 import { Mutable } from '@kbn/utility-types';
-import {
-  ActionDefinition,
-  DynamicActionDefinition,
-  FactoryActionDefinition,
-  DynamicActionConfig,
-  ActionContext,
-} from './action_definition';
+import { ActionContext, AnyActionDefinition, ActionConfig } from './action';
 
-export interface SerializedDynamicAction<Config extends object = object> {
+export class ActionInternal<A extends AnyActionDefinition> {
+  constructor(public readonly definition: A) {}
+
+  public readonly id: string = this.definition.id;
+  public readonly order: number = this.definition.order || 0;
+  public readonly type: string = this.definition.type || '';
+  public readonly factoryId: string = this.definition.factoryId || '';
+  public readonly MenuItem? = this.definition.MenuItem;
+  public config: ActionConfig<A> = this.definition.defaultConfig || undefined;
+
+  public execute(context: ActionContext<A>) {
+    return this.definition.execute(context, this.config);
+  }
+
+  public getIconType(context: ActionContext<A>): string | undefined {
+    if (!this.definition.getIconType) return undefined;
+    return this.definition.getIconType(context);
+  }
+
+  public getDisplayName(context: ActionContext<A>): string {
+    if (!this.definition.getDisplayName) return '';
+    return this.definition.getDisplayName(context);
+  }
+
+  public async isCompatible(context: ActionContext<A>): Promise<boolean> {
+    if (!this.definition.isCompatible) return true;
+    return await this.definition.isCompatible(context);
+  }
+
+  public getHref(context: ActionContext<A>): string | undefined {
+    if (!this.definition.getHref) return undefined;
+    return this.definition.getHref(context);
+  }
+
+  serialize(): SerializedAction {
+    const serialized: Mutable<SerializedAction> = {
+      factoryId: this.factoryId,
+      id: this.id,
+      type: this.type || '',
+      config: this.config,
+    };
+
+    if (typeof this.definition.order !== 'undefined') {
+      serialized.order = this.order;
+    }
+
+    return serialized;
+  }
+}
+
+export type AnyActionInternal = ActionInternal<any>;
+
+export interface SerializedAction<Config extends object = object> {
   readonly factoryId: string;
   readonly id: string;
   readonly type: string;
   readonly order?: number;
   readonly config: Config;
-}
-
-export class ActionInternal<
-  A extends
-    | ActionDefinition<any, any>
-    | DynamicActionDefinition<any, any, any>
-    | FactoryActionDefinition<any>
-> {
-  constructor(public readonly action: A) {}
-
-  execute(context: ActionContext<A>) {
-    return this.action.execute(context);
-  }
-}
-
-export class DynamicActionInternal<
-  A extends DynamicActionDefinition<any, any, any>
-> extends ActionInternal<A> {
-  config: DynamicActionConfig<A>;
-
-  constructor(definition: A) {
-    super(definition);
-    this.config = definition.defaultConfig;
-  }
-
-  serialize(): SerializedDynamicAction {
-    const serialized: Mutable<SerializedDynamicAction> = {
-      factoryId: this.action.factoryId,
-      id: this.action.id,
-      type: this.action.type || '',
-      config: this.config,
-    };
-
-    if (typeof this.action.order !== 'undefined') {
-      serialized.order = this.action.order;
-    }
-
-    return serialized;
-  }
 }

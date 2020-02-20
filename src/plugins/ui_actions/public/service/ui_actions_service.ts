@@ -18,7 +18,7 @@
  */
 
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
-import { Action } from '../actions';
+import { ActionDefinition, ActionInternal, AnyActionInternal } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -69,12 +69,12 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = (action: Action) => {
-    if (this.actions.has(action.id)) {
-      throw new Error(`Action [action.id = ${action.id}] already registered.`);
+  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A) => {
+    if (this.actions.has(definition.id)) {
+      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    this.actions.set(action.id, action);
+    this.actions.set(definition.id, new ActionInternal(definition));
   };
 
   public readonly attachAction = (triggerId: string, actionId: string): void => {
@@ -110,22 +110,27 @@ export class UiActionsService {
     );
   };
 
-  public readonly getTriggerActions = (triggerId: string) => {
+  public readonly getTriggerActions = (triggerId: string): AnyActionInternal[] => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId))
-      .filter(Boolean) as Action[];
+      .filter(Boolean) as AnyActionInternal[];
 
     return actions;
   };
 
-  public readonly getTriggerCompatibleActions = async <C>(triggerId: string, context: C) => {
+  public readonly getTriggerCompatibleActions = async <C>(
+    triggerId: string,
+    context: C
+  ): Promise<AnyActionInternal[]> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
-    return actions.reduce<Action[]>(
+    const isCompatibles = await Promise.all(
+      actions.map(action => action.isCompatible(context as any))
+    );
+    return actions.reduce<AnyActionInternal[]>(
       (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
       []
     );
