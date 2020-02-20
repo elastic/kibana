@@ -66,12 +66,3 @@ $ docker run --rm -t --user "$(id -u):$(id -g)" \
     -v `pwd`:/app --network="host" \
     --name cypress cypress
 ```
-
-## Connect to Elasticsearch on Cloud (internal devs only)
-
-Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#e2e-cluster). The cloud instance contains the static data set
-
-The above setting is required to prevent the _Please upgrade
-your browser_ / _This Kibana installation has strict security requirements
-enabled that your current browser does not meet._ warning that's displayed for
-unsupported user agents, like the one reported by Cypress when running tests.
