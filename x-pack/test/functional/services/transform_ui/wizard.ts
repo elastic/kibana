@@ -85,7 +85,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
         rows.push(
           $(tr)
-            .find('.euiTableCellContent')
+            .find('.euiDataGridRowCell__truncate')
             .toArray()
             .map(cell =>
               $(cell)
@@ -98,7 +98,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       return rows;
     },
 
-    async assertEuiInMemoryTableColumnValues(
+    async assertEuiDataGridColumnValues(
       tableSubj: string,
       column: number,
       expectedColumnValues: string[]
@@ -143,11 +143,11 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertSourceIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiInMemoryTableColumnValues('transformSourceIndexPreview', column, values);
+      await this.assertEuiDataGridColumnValues('transformSourceIndexPreview', column, values);
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiInMemoryTableColumnValues('transformPivotPreview', column, values);
+      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
     },
 
     async assertPivotPreviewLoaded() {
