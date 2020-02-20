@@ -79,9 +79,9 @@ export interface ActionDefinition<Context extends {} = {}, Return = Promise<void
  * back.
  */
 export interface DynamicActionDefinition<
-  Config extends object = object,
   Context extends object = object,
-  Return = Promise<void>
+  Return = Promise<void>,
+  Config extends object = object
 > extends ActionDefinition<Context, Return> {
   /**
    * ID of the `FactoryAction` that can be used to construct instances of
@@ -138,3 +138,5 @@ export interface FactoryActionDefinition<
    */
   execute(context: Context): DA;
 }
+
+export type ActionContext<A> = A extends ActionDefinition<infer Context, any> ? Context : never;

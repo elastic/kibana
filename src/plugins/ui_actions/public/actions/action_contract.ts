@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { ActionDefinition } from './action_definition';
+import { ActionDefinition, ActionContext } from './action_definition';
 import { ActionInternal } from './action_internal';
 
+/**
+ * A public interface that represents an action. This interface is returned
+ * for consumption to other plugins.
+ */
 export class ActionContract<A extends ActionDefinition<any, any>> {
-  public get id() {
-    return this.internal.action.id;
-  }
-
   constructor(private readonly internal: ActionInternal<A>) {}
+
+  /**
+   * ID of the action as specified in action definition.
+   */
+  public readonly id = this.internal.action.id;
+
+  /**
+   * Executes action.
+   */
+  public readonly execute = (context: ActionContext<A>) => this.internal.execute(context);
 }

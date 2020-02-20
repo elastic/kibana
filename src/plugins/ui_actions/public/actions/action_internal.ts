@@ -25,6 +25,7 @@ import {
   DynamicActionDefinition,
   FactoryActionDefinition,
   DynamicActionConfig,
+  ActionContext,
 } from './action_definition';
 
 export interface SerializedDynamicAction<Config extends object = object> {
@@ -42,6 +43,10 @@ export class ActionInternal<
     | FactoryActionDefinition<any>
 > {
   constructor(public readonly action: A) {}
+
+  execute(context: ActionContext<A>) {
+    return this.action.execute(context);
+  }
 }
 
 export class DynamicActionInternal<
