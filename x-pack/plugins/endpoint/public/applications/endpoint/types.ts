@@ -66,7 +66,6 @@ export interface GlobalState {
 
 /**
  * A better type for createStructuredSelector. This doesn't support the options object.
- * TODO
  */
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
