@@ -30,7 +30,7 @@ export class OpenFlyoutAddDrilldown implements Action<ActionContext> {
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.panel.openFlyoutAddDrilldown.displayName', {
+    return i18n.translate('xpack.drilldowns.panel.openFlyoutAddDrilldown.displayName', {
       defaultMessage: 'Add drilldown',
     });
   }
