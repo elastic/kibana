@@ -23,7 +23,7 @@
     "eslint-plugin-ban": "^1.4.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-jest": "^23.3.0",
+    "eslint-plugin-jest": "^23.7.0",
     "eslint-plugin-mocha": "^6.2.2",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",

@@ -9,7 +9,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   />
   <EuiAccordion
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         data-test-subj="network-stat-group-auditbeat"
         justifyContent="spaceBetween"
       >
@@ -34,7 +34,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             max={13748195}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-groupauditbeat"
@@ -81,7 +81,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   />
   <EuiAccordion
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         data-test-subj="network-stat-group-filebeat"
         justifyContent="spaceBetween"
       >
@@ -106,7 +106,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             max={13748195}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-groupfilebeat"
@@ -281,7 +281,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   />
   <EuiAccordion
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         data-test-subj="network-stat-group-packetbeat"
         justifyContent="spaceBetween"
       >
@@ -306,7 +306,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             max={13748195}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="network-stat-accordion-grouppacketbeat"
