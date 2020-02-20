@@ -27,5 +27,4 @@ export {
 } from '../../../ui/public/agg_types';
 import '../../../ui/public/directives/bind';
 export { SavedObject } from 'ui/saved_objects/types'; // https://github.com/elastic/kibana/pull/57452
-export { AppState } from 'ui/state_management/app_state'; // https://github.com/elastic/kibana/pull/57330
 export { SavedSearch } from '../../kibana/public/discover/np_ready/types';
