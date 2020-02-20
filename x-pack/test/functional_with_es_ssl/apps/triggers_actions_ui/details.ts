@@ -148,7 +148,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instances', function() {
+    // FLAKY: https://github.com/elastic/kibana/issues/57426
+    describe.skip('Alert Instances', function() {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -204,8 +205,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/57426
-      it.skip('renders the active alert instances', async () => {
+      it('renders the active alert instances', async () => {
         const testBeganAt = moment().utc();
 
         // Verify content
