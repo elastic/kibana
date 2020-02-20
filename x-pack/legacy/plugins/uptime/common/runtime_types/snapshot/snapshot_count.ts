@@ -10,6 +10,7 @@ export const SnapshotType = t.type({
   down: t.number,
   total: t.number,
   up: t.number,
+  method: t.string,
 });
 
 export type Snapshot = t.TypeOf<typeof SnapshotType>;

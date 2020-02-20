@@ -66,23 +66,41 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     );
 
     // Calculate the total, up, and down counts.
-    const counts = await fastStatusCount(context);
+    let counts = await countDirect(context);
 
-    // Check if the last count was accurate, if not, we need to perform a slower count with the
-    // MonitorGroupsIterator.
-    if (!(await context.hasTimespan())) {
+    const tooManyForExact = Math.min(counts.down, counts.up) > 1000;
+
+    const method = (await context.hasTimespan()) && tooManyForExact ? 'timeslice' : 'iterator';
+
+    if (method === 'iterator') {
       // Figure out whether 'up' or 'down' is more common. It's faster to count the lower cardinality
       // one then use subtraction to figure out its opposite.
       const [leastCommonStatus, mostCommonStatus]: Array<'up' | 'down'> =
         counts.up > counts.down ? ['down', 'up'] : ['up', 'down'];
-      counts[leastCommonStatus] = await slowStatusCount(context, leastCommonStatus);
+      counts[leastCommonStatus] = await iteratorCountForStatus(context, leastCommonStatus);
       counts[mostCommonStatus] = counts.total - counts[leastCommonStatus];
+    } else {
+      // If we are here we have the monitor.timespan field available.
+      // To approximate our status counts we'll want to look at a smaller slice in time.
+      // 30s should give us enough time to handle most delays in ingest. While we do use 5m as a value in other cases
+      // that's too long to be useful for this type of snapshot.
+      // TODO: In a future version of this code when we support 'stale' monitors let's count some monitors
+      // as stale instead
+      const timespanSlice = new Date().getTime() - 30000;
+      const extraFilters = [
+        {
+          range: { 'monitor.timespan': { gte: timespanSlice, relation: 'intersects' } },
+        },
+      ];
+
+      counts = await countDirect(context, extraFilters);
     }
 
     return {
       total: statusFilter ? counts[statusFilter] : counts.total,
       up: statusFilter === 'down' ? 0 : counts.up,
       down: statusFilter === 'up' ? 0 : counts.down,
+      method,
     };
   },
 
@@ -110,12 +128,17 @@ const jsonifyPagination = (p: any): string | null => {
   return JSON.stringify(p);
 };
 
-const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
+const countDirect = async (context: QueryContext, extraFilters: any[] = []): Promise<Snapshot> => {
+  const filter = await context.dateAndCustomFilters();
+  extraFilters.forEach(f => filter.push(f));
+
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
     body: {
       size: 0,
-      query: { bool: { filter: await context.dateAndCustomFilters() } },
+      query: {
+        bool: { filter },
+      },
       aggs: {
         unique: {
           // We set the precision threshold to 40k which is the max precision supported by cardinality
@@ -139,10 +162,11 @@ const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
     total,
     down,
     up: total - down,
+    method: 'approximate',
   };
 };
 
-const slowStatusCount = async (context: QueryContext, status: string): Promise<number> => {
+const iteratorCountForStatus = async (context: QueryContext, status: string): Promise<number> => {
   const downContext = context.clone();
   downContext.statusFilter = status;
   const iterator = new MonitorGroupIterator(downContext);
