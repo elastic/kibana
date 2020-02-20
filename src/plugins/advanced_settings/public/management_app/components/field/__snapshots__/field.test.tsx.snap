@@ -2,7 +2,6 @@
 
 exports[`Field for array setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -16,14 +15,12 @@ exports[`Field for array setting should render as read only if saving is disable
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -50,7 +47,6 @@ exports[`Field for array setting should render as read only if saving is disable
 
 exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -86,14 +82,12 @@ exports[`Field for array setting should render as read only with help text if ov
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -130,7 +124,6 @@ exports[`Field for array setting should render as read only with help text if ov
 
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -144,7 +137,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
@@ -162,7 +154,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -189,7 +180,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
 
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -203,14 +193,12 @@ exports[`Field for array setting should render default value if there is no user
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -251,7 +239,6 @@ exports[`Field for array setting should render unsaved value if there are unsave
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
@@ -269,7 +256,6 @@ exports[`Field for array setting should render unsaved value if there are unsave
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -300,7 +286,6 @@ exports[`Field for array setting should render unsaved value if there are unsave
 
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -336,14 +321,12 @@ exports[`Field for array setting should render user value if there is user value
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Array test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -387,7 +370,6 @@ exports[`Field for array setting should render user value if there is user value
 
 exports[`Field for boolean setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -401,14 +383,12 @@ exports[`Field for boolean setting should render as read only if saving is disab
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -441,7 +421,6 @@ exports[`Field for boolean setting should render as read only if saving is disab
 
 exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -477,14 +456,12 @@ exports[`Field for boolean setting should render as read only with help text if 
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -527,7 +504,6 @@ exports[`Field for boolean setting should render as read only with help text if 
 
 exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -541,7 +517,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
@@ -559,7 +534,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -592,7 +566,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -606,14 +579,12 @@ exports[`Field for boolean setting should render default value if there is no us
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -660,7 +631,6 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
@@ -678,7 +648,6 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -711,7 +680,6 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
 
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -747,14 +715,12 @@ exports[`Field for boolean setting should render user value if there is user val
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Boolean test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -804,7 +770,6 @@ exports[`Field for boolean setting should render user value if there is user val
 
 exports[`Field for image setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -818,14 +783,12 @@ exports[`Field for image setting should render as read only if saving is disable
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -854,7 +817,6 @@ exports[`Field for image setting should render as read only if saving is disable
 
 exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -890,14 +852,12 @@ exports[`Field for image setting should render as read only with help text if ov
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -932,7 +892,6 @@ exports[`Field for image setting should render as read only with help text if ov
 
 exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -946,7 +905,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
@@ -964,7 +922,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -993,7 +950,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
 
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1007,14 +963,12 @@ exports[`Field for image setting should render default value if there is no user
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1057,7 +1011,6 @@ exports[`Field for image setting should render unsaved value if there are unsave
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
@@ -1075,7 +1028,6 @@ exports[`Field for image setting should render unsaved value if there are unsave
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1104,7 +1056,6 @@ exports[`Field for image setting should render unsaved value if there are unsave
 
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1140,14 +1091,12 @@ exports[`Field for image setting should render user value if there is user value
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Image test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1202,7 +1151,6 @@ exports[`Field for image setting should render user value if there is user value
 
 exports[`Field for json setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1241,14 +1189,12 @@ exports[`Field for json setting should render as read only if saving is disabled
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1296,7 +1242,6 @@ exports[`Field for json setting should render as read only if saving is disabled
 
 exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1335,14 +1280,12 @@ exports[`Field for json setting should render as read only with help text if ove
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1400,7 +1343,6 @@ exports[`Field for json setting should render as read only with help text if ove
 
 exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1414,7 +1356,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
@@ -1432,7 +1373,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1480,7 +1420,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
 
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1519,14 +1458,12 @@ exports[`Field for json setting should render default value if there is no user 
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1605,7 +1542,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
@@ -1623,7 +1559,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1675,7 +1610,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1714,14 +1648,12 @@ exports[`Field for json setting should render user value if there is user value 
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Json test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1786,7 +1718,6 @@ exports[`Field for json setting should render user value if there is user value 
 
 exports[`Field for markdown setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1800,14 +1731,12 @@ exports[`Field for markdown setting should render as read only if saving is disa
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1855,7 +1784,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
 
 exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1891,14 +1819,12 @@ exports[`Field for markdown setting should render as read only with help text if
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -1956,7 +1882,6 @@ exports[`Field for markdown setting should render as read only with help text if
 
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -1970,7 +1895,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
@@ -1988,7 +1912,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2036,7 +1959,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2050,14 +1972,12 @@ exports[`Field for markdown setting should render default value if there is no u
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2119,7 +2039,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
@@ -2137,7 +2056,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2185,7 +2103,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
 
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2221,14 +2138,12 @@ exports[`Field for markdown setting should render user value if there is user va
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Markdown test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2293,7 +2208,6 @@ exports[`Field for markdown setting should render user value if there is user va
 
 exports[`Field for number setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2307,14 +2221,12 @@ exports[`Field for number setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2341,7 +2253,6 @@ exports[`Field for number setting should render as read only if saving is disabl
 
 exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2377,14 +2288,12 @@ exports[`Field for number setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2421,7 +2330,6 @@ exports[`Field for number setting should render as read only with help text if o
 
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2435,7 +2343,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
@@ -2453,7 +2360,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2480,7 +2386,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
 
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2494,14 +2399,12 @@ exports[`Field for number setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2542,7 +2445,6 @@ exports[`Field for number setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
@@ -2560,7 +2462,6 @@ exports[`Field for number setting should render unsaved value if there are unsav
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2587,7 +2488,6 @@ exports[`Field for number setting should render unsaved value if there are unsav
 
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2623,14 +2523,12 @@ exports[`Field for number setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Number test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2674,7 +2572,6 @@ exports[`Field for number setting should render user value if there is user valu
 
 exports[`Field for select setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2688,14 +2585,12 @@ exports[`Field for select setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2738,7 +2633,6 @@ exports[`Field for select setting should render as read only if saving is disabl
 
 exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2774,14 +2668,12 @@ exports[`Field for select setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2834,7 +2726,6 @@ exports[`Field for select setting should render as read only with help text if o
 
 exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2848,7 +2739,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
@@ -2866,7 +2756,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2909,7 +2798,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
 
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -2923,14 +2811,12 @@ exports[`Field for select setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -2987,7 +2873,6 @@ exports[`Field for select setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
@@ -3005,7 +2890,6 @@ exports[`Field for select setting should render unsaved value if there are unsav
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3048,7 +2932,6 @@ exports[`Field for select setting should render unsaved value if there are unsav
 
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3084,14 +2967,12 @@ exports[`Field for select setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       Select test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3151,7 +3032,6 @@ exports[`Field for select setting should render user value if there is user valu
 
 exports[`Field for string setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3165,14 +3045,12 @@ exports[`Field for string setting should render as read only if saving is disabl
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3199,7 +3077,6 @@ exports[`Field for string setting should render as read only if saving is disabl
 
 exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3235,14 +3112,12 @@ exports[`Field for string setting should render as read only with help text if o
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3279,7 +3154,6 @@ exports[`Field for string setting should render as read only with help text if o
 
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3293,7 +3167,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
@@ -3311,7 +3184,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3338,7 +3210,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
 
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3352,14 +3223,12 @@ exports[`Field for string setting should render default value if there is no use
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3400,7 +3269,6 @@ exports[`Field for string setting should render unsaved value if there are unsav
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
@@ -3418,7 +3286,6 @@ exports[`Field for string setting should render unsaved value if there are unsav
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3445,7 +3312,6 @@ exports[`Field for string setting should render unsaved value if there are unsav
 
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3481,14 +3347,12 @@ exports[`Field for string setting should render user value if there is user valu
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3532,7 +3396,6 @@ exports[`Field for string setting should render user value if there is user valu
 
 exports[`Field for stringWithValidation setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3546,14 +3409,12 @@ exports[`Field for stringWithValidation setting should render as read only if sa
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3580,7 +3441,6 @@ exports[`Field for stringWithValidation setting should render as read only if sa
 
 exports[`Field for stringWithValidation setting should render as read only with help text if overridden 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3616,14 +3476,12 @@ exports[`Field for stringWithValidation setting should render as read only with 
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3660,7 +3518,6 @@ exports[`Field for stringWithValidation setting should render as read only with 
 
 exports[`Field for stringWithValidation setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3674,7 +3531,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
@@ -3692,7 +3548,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3719,7 +3574,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
 
 exports[`Field for stringWithValidation setting should render default value if there is no user value set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3733,14 +3587,12 @@ exports[`Field for stringWithValidation setting should render default value if t
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3781,7 +3633,6 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
@@ -3799,7 +3650,6 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
       />
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
@@ -3826,7 +3676,6 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
 
 exports[`Field for stringWithValidation setting should render user value if there is user value is set 1`] = `
 <EuiDescribedFormGroup
-  aria-describedby={null}
   className="mgtAdvancedSettings__field"
   description={
     <React.Fragment>
@@ -3862,14 +3711,12 @@ exports[`Field for stringWithValidation setting should render user value if ther
     </React.Fragment>
   }
   fullWidth={true}
-  gutterSize="l"
   title={
     <h3>
       String test validation setting
       
     </h3>
   }
-  titleSize="xs"
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"

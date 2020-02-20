@@ -22,7 +22,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
+import { start as visualizationsStart } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('tabifyAggResponse Integration', function() {
@@ -42,7 +42,7 @@ describe('tabifyAggResponse Integration', function() {
   }
 
   it('transforms a simple response properly', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'histogram',
       aggs: [],
     });
@@ -73,7 +73,7 @@ describe('tabifyAggResponse Integration', function() {
     let esResp;
 
     beforeEach(function() {
-      vis = new Vis(indexPattern, {
+      vis = new visualizationsStart.Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

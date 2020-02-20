@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
+import { start as visualizationsStart } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function() {
   let indexPattern;
@@ -33,7 +33,7 @@ describe('get columns', function() {
   );
 
   it('should inject a count metric if no aggs exist', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
     });
     while (vis.aggs.length) vis.aggs.pop();
@@ -49,7 +49,7 @@ describe('get columns', function() {
   });
 
   it('should inject a count metric if only buckets exist', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -68,7 +68,7 @@ describe('get columns', function() {
   });
 
   it('should inject the metric after each bucket if the vis is hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -104,7 +104,7 @@ describe('get columns', function() {
   });
 
   it('should inject the multiple metrics after each bucket if the vis is hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -156,7 +156,7 @@ describe('get columns', function() {
   });
 
   it('should put all metrics at the end of the columns if the vis is not hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const vis = new visualizationsStart.Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         {

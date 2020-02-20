@@ -27,7 +27,7 @@ describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
 
   beforeEach(() => {
-    searchService = new SearchService(coreMock.createPluginInitializerContext());
+    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
   });
 
@@ -36,7 +36,6 @@ describe('Search service', () => {
       const setup = searchService.setup(mockCoreSetup, {
         version: '8',
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
     });
   });

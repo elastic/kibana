@@ -29,7 +29,6 @@ import {
   EuiCodeBlock,
   // @ts-ignore
   EuiCodeEditor,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -641,7 +640,7 @@ export class Field extends PureComponent<FieldProps> {
             ? i18n.translate('advancedSettings.field.settingIsUnsaved', {
                 defaultMessage: 'Setting is currently not saved.',
               })
-            : null
+            : undefined
         }
         className={className}
         title={this.renderTitle(setting)}

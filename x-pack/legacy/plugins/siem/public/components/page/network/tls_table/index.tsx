@@ -6,9 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsSortField, TlsFields, Direction } from '../../../../graphql/types';
@@ -29,21 +27,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface TlsTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: TlsSortField;
-}
-
-interface TlsTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type TlsTableProps = OwnProps & TlsTableReduxProps & TlsTableDispatchProps;
+type TlsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -152,11 +136,15 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getTlsSelector(state, type);
 };
 
-export const TlsTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(TlsTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const TlsTable = connector(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
   field: `node.${sortField.field}`,

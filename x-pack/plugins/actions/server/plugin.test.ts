@@ -27,7 +27,7 @@ describe('Actions Plugin', () => {
         taskManager: taskManagerMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
-        event_log: eventLogMock.createSetup(),
+        eventLog: eventLogMock.createSetup(),
       };
     });
 
@@ -107,7 +107,7 @@ describe('Actions Plugin', () => {
         taskManager: taskManagerMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
-        event_log: eventLogMock.createSetup(),
+        eventLog: eventLogMock.createSetup(),
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),

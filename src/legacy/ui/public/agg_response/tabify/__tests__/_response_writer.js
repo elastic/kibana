@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
+import { start as visualizationsStart } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('TabbedAggResponseWriter class', function() {
@@ -61,7 +61,7 @@ describe('TabbedAggResponseWriter class', function() {
   ];
 
   const createResponseWritter = (aggs = [], opts = {}) => {
-    const vis = new Vis(indexPattern, { type: 'histogram', aggs: aggs });
+    const vis = new visualizationsStart.Vis(indexPattern, { type: 'histogram', aggs: aggs });
     return new TabbedAggResponseWriter(vis.getAggConfig(), opts);
   };
 
@@ -88,7 +88,7 @@ describe('TabbedAggResponseWriter class', function() {
 
     describe('sets timeRange', function() {
       it("to the first nested object's range", function() {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        const vis = new visualizationsStart.Vis(indexPattern, { type: 'histogram', aggs: [] });
         const range = {
           gte: 0,
           lte: 100,
@@ -106,7 +106,7 @@ describe('TabbedAggResponseWriter class', function() {
       });
 
       it('to undefined if no nested object', function() {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        const vis = new visualizationsStart.Vis(indexPattern, { type: 'histogram', aggs: [] });
 
         const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           timeRange: {},
