@@ -145,7 +145,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => void;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 

@@ -386,20 +386,22 @@ function LayerPanel(
                         })
                       }
                       onDrop={droppedItem => {
-                        layerDatasource.onDrop({
+                        const dropSuccess = layerDatasource.onDrop({
                           ...layerDatasourceDropProps,
                           droppedItem,
                           columnId: newId,
                           filterOperations: dimension.filterOperations,
                         });
-                        props.updateVisualization(
-                          activeVisualization.setDimension({
-                            layerId,
-                            dimensionId: dimension.dimensionId,
-                            columnId: newId,
-                            prevState: props.visualizationState,
-                          })
-                        );
+                        if (dropSuccess) {
+                          props.updateVisualization(
+                            activeVisualization.setDimension({
+                              layerId,
+                              dimensionId: dimension.dimensionId,
+                              columnId: newId,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }}
                     >
                       {wrapInPopover(

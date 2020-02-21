@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, FramePublicAPI } from '../types';
+import { Visualization, FramePublicAPI, OperationMetadata } from '../types';
 import { State, PersistableState } from './types';
 import chartMetricSVG from '../assets/chart_metric.svg';
 
@@ -95,7 +95,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
           layerId: props.state.layerId,
           accessors: props.state.accessor ? [props.state.accessor] : [],
           supportsMoreColumns: false,
-          filterOperations: () => true,
+          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
         },
       ],
     };
@@ -108,6 +108,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
   },
+
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined };
   },

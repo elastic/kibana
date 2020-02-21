@@ -145,17 +145,15 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  setDimension({ dimensionId, layerId, columnId, prevState }) {
+  setDimension({ layerId, columnId, prevState }) {
     return {
       ...prevState,
-      layers: prevState.layers.map(l =>
-        l.layerId === layerId
-          ? {
-              ...l,
-              columns: l.columns.filter(c => c !== columnId),
-            }
-          : l
-      ),
+      layers: prevState.layers.map(l => {
+        if (l.layerId !== layerId || l.columns.includes(columnId)) {
+          return l;
+        }
+        return { ...l, columns: [...l.columns, columnId] };
+      }),
     };
   },
   removeDimension({ prevState, columnId, layerId }) {

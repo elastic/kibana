@@ -50,49 +50,44 @@ type Props = Pick<
   DatasourceDimensionDropProps<IndexPatternPrivateState>,
   'layerId' | 'columnId' | 'state' | 'filterOperations'
 >;
-let memoizedFieldSupportFn: (props: Props) => OperationFieldSupportMatrix;
-function getOperationFieldSupportMatrix(props: Props): OperationFieldSupportMatrix {
-  const layerId = props.layerId;
-  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
+const getOperationFieldSupportMatrix = _.memoize(
+  (props: Props): OperationFieldSupportMatrix => {
+    const layerId = props.layerId;
+    const currentIndexPattern =
+      props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
-  if (!memoizedFieldSupportFn) {
-    memoizedFieldSupportFn = _.memoize(
-      () => {
-        const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
-          currentIndexPattern
-        ).filter(operation => props.filterOperations(operation.operationMetaData));
+    const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
+      currentIndexPattern
+    ).filter(operation => props.filterOperations(operation.operationMetaData));
 
-        const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
-        const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
+    const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+    const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
-        filteredOperationsByMetadata.forEach(({ operations }) => {
-          operations.forEach(operation => {
-            if (supportedOperationsByField[operation.field]) {
-              supportedOperationsByField[operation.field]!.push(operation.operationType);
-            } else {
-              supportedOperationsByField[operation.field] = [operation.operationType];
-            }
+    filteredOperationsByMetadata.forEach(({ operations }) => {
+      operations.forEach(operation => {
+        if (supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field]!.push(operation.operationType);
+        } else {
+          supportedOperationsByField[operation.field] = [operation.operationType];
+        }
 
-            if (supportedFieldsByOperation[operation.operationType]) {
-              supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-            } else {
-              supportedFieldsByOperation[operation.operationType] = [operation.field];
-            }
-          });
-        });
-        return {
-          operationByField: _.mapValues(supportedOperationsByField, _.uniq),
-          fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
-        };
-      },
-      () => {
-        return `${currentIndexPattern.id} ${props.columnId}`;
-      }
-    );
+        if (supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+        } else {
+          supportedFieldsByOperation[operation.operationType] = [operation.field];
+        }
+      });
+    });
+    return {
+      operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+      fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
+    };
+  },
+
+  (props: Props) => {
+    return props.layerId + ' ' + props.columnId;
   }
-
-  return memoizedFieldSupportFn(props);
-}
+);
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
@@ -111,7 +106,9 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
   );
 }
 
-export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
+export function onDrop(
+  props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>
+): boolean {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
@@ -121,7 +118,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
     // TODO: What do we do if we couldn't find a column?
-    return;
+    return false;
   }
 
   const operationsForNewField =
@@ -171,6 +168,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       keepParams: !hasFieldChanged,
     })
   );
+
+  return true;
 }
 
 export const IndexPatternDimensionTriggerComponent = function IndexPatternDimensionTrigger(
