@@ -263,6 +263,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /*
