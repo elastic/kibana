@@ -143,16 +143,14 @@ export interface FindRuleParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesRequest extends Omit<LegacyRequest, 'query'> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    sort_field?: string;
-    filter?: string;
-    fields?: string[];
-    sort_order?: 'asc' | 'desc';
-  };
+export interface FindRulesRequestParams {
+  per_page: number;
+  page: number;
+  search?: string;
+  sort_field?: string;
+  filter?: string;
+  fields?: string[];
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface FindRulesStatusesRequest extends Omit<LegacyRequest, 'query'> {

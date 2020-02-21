@@ -4,36 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyServices, LegacyRequest } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
-import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  FindRulesRequestParams,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
 import { transformFindAlerts } from './utils';
-import { transformError } from '../utils';
+import { transformError, buildRouteValidation } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
-    options: {
-      tags: ['access:siem'],
+export const findRulesRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_find`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        query: findRulesSchema,
+        query: buildRouteValidation<FindRulesRequestParams>(findRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: FindRulesRequest & LegacyRequest, headers) {
-      const { query } = request;
+    async (context, request, response) => {
       try {
-        const { alertsClient, savedObjectsClient } = await getClients(request);
+        const { query } = request;
+        const alertsClient = context.alerting.getAlertsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+
         if (!alertsClient) {
-          return headers.response().code(404);
+          return response.notFound();
         }
 
         const rules = await findRules({
@@ -61,28 +62,20 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
         );
         const transformed = transformFindAlerts(rules, ruleStatuses);
         if (transformed == null) {
-          return headers
-            .response({
-              message: 'unknown data type, error transforming alert',
-              status_code: 500,
-            })
-            .code(500);
+          return response.internalError({
+            body: 'unknown data type, error transforming alert',
+          });
         } else {
-          return transformed;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return response.ok({ body: transformed as any });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return response.customError({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const findRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
-  route(createFindRulesRoute(getClients));
+    }
+  );
 };
