@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { RequestHandler, Logger } from 'kibana/server';
+import { RequestHandler, Logger, IKibanaResponse, ResponseError } from 'kibana/server';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedAlertsQuery } from './queries/related_alerts';
-import { ResolverCursorPaginatedQueryParams, ResolverPathParams } from '../../../common/types';
+import {
+  ResolverCursorPaginatedQueryParams,
+  ResolverPathParams,
+  ResolverAlertResults,
+} from '../../../common/types';
 
 export const validateRelatedAlerts = {
   params: schema.object({ id: schema.string() }),
@@ -40,7 +44,7 @@ export function handleRelatedAlerts(
         body: {
           alerts,
           pagination: { total, next: nextCursor, limit },
-        },
+        } as ResolverAlertResults,
       });
     } catch (err) {
       log.warn(err);

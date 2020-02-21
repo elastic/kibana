@@ -11,7 +11,11 @@ import { extractEntityID } from './utils/normalize';
 import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
-import { ResolverCursorPaginatedQueryParams, ResolverPathParams } from '../../../common/types';
+import {
+  ResolverCursorPaginatedQueryParams,
+  ResolverPathParams,
+  ResolverChildrenResults,
+} from '../../../common/types';
 
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),
@@ -58,7 +62,7 @@ export function handleChildren(
             next: nextCursor,
             limit,
           },
-        },
+        } as ResolverChildrenResults,
       });
     } catch (err) {
       log.warn(err);

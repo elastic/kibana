@@ -213,6 +213,82 @@ export interface ResolverCursorPaginatedQueryParams extends LegacyEndpointID {
   limit: number;
 }
 
+interface ResolverPagination {
+  /**
+   * This object holds a response's pagination information.
+   */
+  pagination: {
+    /**
+     * a number indicating the total number of documents found.
+     * This is not the total of documents returned in a single request to the route but instead the total that the
+     * client can expect to receive.
+     */
+    total: number;
+    /**
+     * a cursor that can be passed back to the route to receive the next set of documents.
+     */
+    next: string;
+    /**
+     * the echoed limit that the client requested (or the default).
+     */
+    limit: number;
+  };
+}
+
+/**
+ * This interface defines the response for the resolver related alerts route. This route returns alerts that are tied
+ * to a specific process event.
+ */
+export interface ResolverAlertResults extends ResolverPagination {
+  /**
+   * an array of alerts.
+   */
+  alerts: ResolverEvent[];
+}
+
+interface Lifecycle {
+  /**
+   * an array of events describing the lifecycle for a process.
+   */
+  lifecycle: ResolverEvent[];
+}
+
+/**
+ * This interface defines the response for the resolver lifecycle route. This route returns the lifecycle events for the
+ * specified process event and the requested ancestors.
+ */
+export interface ResolverLifecycleResults extends Lifecycle {
+  /**
+   * an array holding each ancestor's lifecycle events.
+   */
+  ancestors: Lifecycle[];
+  /**
+   * pagination information.
+   */
+  pagination: {
+    /**
+     * either a string representing the `id` path param for the next lifecycle route request to retrieve the next set
+     * of ancestors. Or null indicating there are not more ancestors to retrieve.
+     */
+    next: string | null;
+    /**
+     * echoed back ancestors query param in the request.
+     */
+    ancestors: number;
+  };
+}
+
+/**
+ * This interface defines the response for the resolver children route. This route returns the lifecycle events for the
+ * children of a process event.
+ */
+export interface ResolverChildrenResults extends ResolverPagination {
+  /**
+   * an array holding each child's lifecycle events.
+   */
+  children: Lifecycle[];
+}
+
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */

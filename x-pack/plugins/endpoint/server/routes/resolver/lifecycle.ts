@@ -13,6 +13,7 @@ import {
   ResolverEvent,
   ResolverLifecycleQueryParams,
   ResolverPathParams,
+  ResolverLifecycleResults,
 } from '../../../common/types';
 
 export const validateLifecycle = {
@@ -66,7 +67,7 @@ export function handleLifecycle(
             next: nextParentID || null,
             ancestors,
           },
-        },
+        } as ResolverLifecycleResults,
       });
     } catch (err) {
       log.warn(err);
