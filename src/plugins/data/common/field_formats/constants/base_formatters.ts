@@ -28,10 +28,10 @@ import {
   PercentFormat,
   StringFormat,
   SourceFormat,
-  ColorFormat,
-  TruncateFormat,
-  BoolFormat,
-  StaticLookupFormat,
+  // ColorFormat,
+  // TruncateFormat,
+  // BoolFormat,
+  // StaticLookupFormat,
 } from '../converters';
 
 export const baseFormatters = [
@@ -45,8 +45,8 @@ export const baseFormatters = [
   PercentFormat,
   StringFormat,
   SourceFormat,
-  ColorFormat,
-  TruncateFormat,
-  BoolFormat,
-  StaticLookupFormat,
+  // ColorFormat,
+  // TruncateFormat,
+  // BoolFormat,
+  // StaticLookupFormat,
 ];
