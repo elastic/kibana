@@ -132,8 +132,9 @@ const statusCountBody = (filters: any): any => {
 
           // One concern here is memory since we could build pretty gigantic maps. I've opted to
           // stick to a simple <String,String> map to reduce memory overhead. This means we do
-          // a little string parsing to treat these strings as records.
-          // We encode the ID and location as $id.len}:$id$loc
+          // a little string parsing to treat these strings as records that stay lexicographically
+          // sortable (which is important later).
+          // We encode the ID and location as $id.len:$id$loc
           String id = doc["monitor.id"][0];
           String idLenDelim = Integer.toHexString(id.length()) + ":" + id;
           String idLoc = loc == null ? idLenDelim : idLenDelim + loc;
@@ -163,10 +164,14 @@ const statusCountBody = (filters: any): any => {
           int down = 0;
           String curId = "";
           boolean curIdDown = false;
+          // We now iterate through our tree map in order, which means records for a given ID
+          // always are encountered one after the other. This saves us having to make an intermediate
+          // map.
           for (entry in locStatus.entrySet()) {
             String idLoc = entry.getKey();
             String timeStatus = entry.getValue();
 
+            // Parse the length delimited id/location strings described in the map section
             int colonIndex = idLoc.indexOf(":");
             int idEnd = Integer.parseInt(idLoc.substring(0, colonIndex), 16) + colonIndex + 1;
             String id = idLoc.substring(colonIndex+1, idEnd);
