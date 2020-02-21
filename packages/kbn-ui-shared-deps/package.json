@@ -22,7 +22,7 @@
     "custom-event-polyfill": "^0.3.0",
     "del": "^5.1.0",
     "jquery": "^3.4.1",
-    "mini-css-extract-plugin": "0.8.0",
+    "mini-css-extract-plugin": "0.9.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "react": "^16.12.0",
@@ -31,7 +31,7 @@
     "read-pkg": "^5.2.0",
     "regenerator-runtime": "^0.13.3",
     "symbol-observable": "^1.2.0",
-    "webpack": "^4.41.5",
+    "webpack": "^4.41.6",
     "whatwg-fetch": "^3.0.0"
   }
 }

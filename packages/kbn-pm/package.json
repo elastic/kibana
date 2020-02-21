@@ -63,8 +63,8 @@
     "tempy": "^0.3.0",
     "typescript": "3.7.2",
     "unlazy-loader": "^0.1.3",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^4.0.0"
   },
