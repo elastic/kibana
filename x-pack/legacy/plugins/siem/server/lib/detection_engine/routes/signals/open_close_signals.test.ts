@@ -26,7 +26,6 @@ describe('set signal status', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
 
     server = createMockServer();
     config = createMockConfig();
@@ -43,7 +42,6 @@ describe('set signal status', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
       const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
       expect(statusCode).toBe(200);
-      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {

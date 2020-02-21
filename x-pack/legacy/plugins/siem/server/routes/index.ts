@@ -6,7 +6,6 @@
 
 import { IRouter } from '../../../../../../src/core/server';
 import { LegacyServices } from '../types';
-import { GetScopedClients } from '../services';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -31,14 +30,11 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 
-export type LegacyInitRoutes = (getClients: GetScopedClients) => void;
-
 export const initRoutes = (
   router: IRouter,
-  route: LegacyServices['route'],
   config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean
-) => (getClients: GetScopedClients): void => {
+) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(router);

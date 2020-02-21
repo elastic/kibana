@@ -7,7 +7,6 @@
 import { ServerInjectOptions } from 'hapi';
 
 import { querySignalsRoute } from './query_signals_route';
-import * as myUtils from '../utils';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
@@ -25,7 +24,6 @@ describe('query for signal', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
 
     server = createMockServer();
     config = createMockConfig();
@@ -47,7 +45,6 @@ describe('query for signal', () => {
         'search',
         expect.objectContaining({ body: typicalSignalsQuery() })
       );
-      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using single agg', async () => {
@@ -58,7 +55,6 @@ describe('query for signal', () => {
         'search',
         expect.objectContaining({ body: typicalSignalsQueryAggs() })
       );
-      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using aggs and query together', async () => {
@@ -76,7 +72,6 @@ describe('query for signal', () => {
           },
         })
       );
-      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 400 when missing aggs and query', async () => {

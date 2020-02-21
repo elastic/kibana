@@ -8,8 +8,6 @@ import Boom from 'boom';
 import Joi from 'joi';
 
 import { RouteValidationFunction } from '../../../../../../../../src/core/server';
-import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { LegacyServices } from '../../../types';
 
 export interface OutputError {
   message: string;
@@ -206,13 +204,6 @@ export const transformBulkError = (
       message: err.message,
     });
   }
-};
-
-export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
-  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  const spaceId = getSpaceId();
-
-  return `${signalsIndex}-${spaceId}`;
 };
 
 export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidationFunction<T> => (

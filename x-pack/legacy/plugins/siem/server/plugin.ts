@@ -24,7 +24,7 @@ import { PluginStartContract as ActionsStart } from '../../../../plugins/actions
 import { LegacyServices } from './types';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { initRoutes, LegacyInitRoutes } from './routes';
+import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import {
@@ -33,7 +33,6 @@ import {
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
 } from './saved_objects';
-import { ClientsService } from './services';
 import { SiemClientFactory } from './client';
 
 export { CoreSetup, CoreStart };
@@ -56,14 +55,11 @@ export class Plugin {
   private readonly logger: Logger;
   private context: PluginInitializerContext;
   private siemClientFactory: SiemClientFactory;
-  private clients: ClientsService;
-  private legacyInitRoutes?: LegacyInitRoutes;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', this.name);
     this.siemClientFactory = new SiemClientFactory();
-    this.clients = new ClientsService();
 
     this.logger.debug('Shim plugin initialized');
   }
@@ -80,11 +76,9 @@ export class Plugin {
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
       config: __legacy.config,
     });
-    this.clients.setup(core.elasticsearch.dataClient, plugins.spaces?.spacesService);
 
-    this.legacyInitRoutes = initRoutes(
+    initRoutes(
       router,
-      __legacy.route,
       __legacy.config,
       plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
     );
@@ -163,9 +157,5 @@ export class Plugin {
     initServer(libs);
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
-    this.clients.start(core.savedObjects, plugins.actions, plugins.alerting);
-
-    this.legacyInitRoutes!(this.clients.createGetScoped());
-  }
+  public start(core: CoreStart, plugins: StartPlugins) {}
 }
