@@ -26,21 +26,18 @@ import {
 } from './direct_access_link_generator_spec';
 import { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
 
-const noMigrationFnProvidedWarningText = i18n.translate(
-  'directAccessLinks.error.noMigrationFnProvided',
-  {
-    defaultMessage:
-      'If the access link generator is marked as deprecated, you must provide a migration function.',
-  }
-);
-
 export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGeneratorId> {
   constructor(
     private spec: DirectAccessLinkSpec<Id>,
     private getGenerator: DirectAccessLinksStart['getAccessLinkGenerator']
   ) {
     if (spec.isDeprecated && !spec.migrate) {
-      throw new Error(noMigrationFnProvidedWarningText);
+      throw new Error(
+        i18n.translate('directAccessLinks.error.noMigrationFnProvided', {
+          defaultMessage:
+            'If the access link generator is marked as deprecated, you must provide a migration function.',
+        })
+      );
     }
 
     if (!spec.isDeprecated && spec.migrate) {
@@ -95,11 +92,7 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
           );
         }
 
-        if (!this.spec.migrate) {
-          throw new Error(noMigrationFnProvidedWarningText);
-        }
-
-        return this.spec.migrate(state);
+        return this.spec.migrate!(state);
       },
     };
   }

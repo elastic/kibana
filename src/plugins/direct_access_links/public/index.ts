@@ -32,3 +32,5 @@ export {
   DirectAccessLinkGeneratorStateMapping,
   DirectAccessLinkSpec,
 } from './direct_access_link_generator_spec';
+
+export { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
