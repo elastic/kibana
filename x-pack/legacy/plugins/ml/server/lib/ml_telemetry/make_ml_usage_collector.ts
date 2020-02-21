@@ -26,9 +26,9 @@ export function makeMlUsageCollector(
     isReady: () => true,
     fetch: async (): Promise<MlTelemetry> => {
       try {
-        const mlTelemetrySavedObject = ((await savedObjects
+        const mlTelemetrySavedObject: MlTelemetrySavedObject = await savedObjects
           .createInternalRepository()
-          .get('ml-telemetry', ML_TELEMETRY_DOC_ID)) as unknown) as MlTelemetrySavedObject;
+          .get('ml-telemetry', ML_TELEMETRY_DOC_ID);
 
         return mlTelemetrySavedObject.attributes;
       } catch (err) {

@@ -6,9 +6,10 @@
 
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
+import { SavedObjectAttributes } from 'src/core/server';
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 
-export interface MlTelemetry {
+export interface MlTelemetry extends SavedObjectAttributes {
   file_data_visualizer: {
     index_creation_count: number;
   };
