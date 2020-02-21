@@ -105,12 +105,7 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          sh '''
-            jobs -l
-            docker build --tag cypress ${CYPRESS_DIR}/ci
-            docker run --rm -t --user "$(id -u):$(id -g)" \
-                    -v `pwd`:/app --network="host" \
-                    --name cypress cypress'''
+          sh "${CYPRESS_DIR}/ci/run-test.sh"
         }
       }
       post {
