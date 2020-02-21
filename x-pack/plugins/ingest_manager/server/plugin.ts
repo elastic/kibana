@@ -115,17 +115,22 @@ export class IngestManagerPlugin implements Plugin {
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
-    registerAgentRoutes(router);
-    registerEnrollmentApiKeyRoutes(router);
-    registerInstallScriptRoutes({
-      router,
-      serverInfo: core.http.getServerInfo(),
-      basePath: core.http.basePath,
-    });
 
     // Conditional routes
-    if (config.epm.enabled) registerEPMRoutes(router);
-    if (config.fleet.enabled) registerFleetSetupRoutes(router);
+    if (config.epm.enabled) {
+      registerEPMRoutes(router);
+    }
+
+    if (config.fleet.enabled) {
+      registerFleetSetupRoutes(router);
+      registerAgentRoutes(router);
+      registerEnrollmentApiKeyRoutes(router);
+      registerInstallScriptRoutes({
+        router,
+        serverInfo: core.http.getServerInfo(),
+        basePath: core.http.basePath,
+      });
+    }
   }
 
   public async start(
