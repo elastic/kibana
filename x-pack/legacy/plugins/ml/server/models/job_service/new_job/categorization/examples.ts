@@ -17,7 +17,10 @@ import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
 
-export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
+export function categorizationExamplesProvider(
+  callWithRequest: callWithRequestType,
+  callWithInternalUser: callWithRequestType
+) {
   const validationResults = new ValidationResults();
 
   async function categorizationExamples(
@@ -109,7 +112,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
+    const { tokens }: { tokens: Token[] } = await callWithInternalUser('indices.analyze', {
       body: {
         ...getAnalyzer(analyzer),
         text: examples,

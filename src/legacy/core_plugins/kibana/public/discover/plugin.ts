@@ -16,11 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  getQueryStateContainer,
+} from '../../../../../plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
@@ -30,12 +36,20 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../p
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import {
+  KibanaLegacySetup,
+  AngularRenderedAppUpdater,
+} from '../../../../../plugins/kibana_legacy/public';
 import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_types';
 import { DocViewTable } from './np_ready/components/table/table';
 import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
+import {
+  VisualizationsStart,
+  VisualizationsSetup,
+} from '../../../visualizations/public/np_ready/public';
+import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -51,6 +65,8 @@ export interface DiscoverSetupPlugins {
   embeddable: IEmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
+  data: DataPublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: UiActionsStart;
@@ -60,6 +76,7 @@ export interface DiscoverStartPlugins {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
+  visualizations: VisualizationsStart;
 }
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
@@ -75,6 +92,9 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private docViewsRegistry: DocViewsRegistry | null = null;
   private embeddableInjector: auto.IInjectorService | null = null;
   private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
+  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private stopUrlTracking: (() => void) | undefined = undefined;
+
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
@@ -83,6 +103,27 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
+    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
+      plugins.data.query
+    );
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/kibana'),
+      defaultSubUrl: '#/discover',
+      storageKey: 'lastUrl:discover',
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          kbnUrlKey: '_g',
+          stateUpdate$: querySyncStateContainer.state$,
+        },
+      ],
+    });
+    this.stopUrlTracking = () => {
+      stopQuerySyncStateContainer();
+      stopUrlTracker();
+    };
+
     this.getEmbeddableInjector = this.getInjector.bind(this);
     this.docViewsRegistry = new DocViewsRegistry(this.getEmbeddableInjector);
     this.docViewsRegistry.addDocView({
@@ -102,6 +143,8 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
+      updater$: this.appStateUpdater.asObservable(),
+      navLinkId: 'kibana:discover',
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (params: AppMountParameters) => {
@@ -111,11 +154,16 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         if (!this.initializeInnerAngular) {
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
+        appMounted();
         await this.initializeServices();
         await this.initializeInnerAngular();
 
         const { renderApp } = await import('./np_ready/application');
-        return renderApp(innerAngularName, params.element);
+        const unmount = await renderApp(innerAngularName, params.element);
+        return () => {
+          unmount();
+          appUnMounted();
+        };
       },
     });
     registerFeature(plugins.home);
@@ -152,6 +200,12 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
 
     this.registerEmbeddable(core, plugins);
+  }
+
+  stop() {
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
   }
 
   /**

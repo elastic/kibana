@@ -7,9 +7,9 @@
 import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import signalsPolicy from './signals_policy.json';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
@@ -17,8 +17,12 @@ import { setTemplate } from '../../index/set_template';
 import { getSignalsTemplate } from './get_signals_template';
 import { getTemplateExists } from '../../index/get_template_exists';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
+import signalsPolicy from './signals_policy.json';
 
-export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createCreateIndexRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -30,11 +34,13 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         },
       },
     },
-    async handler(request: RequestFacade, headers) {
+    async handler(request: LegacyRequest, headers) {
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const { clusterClient, spacesClient } = await getClients(request);
+        const callCluster = clusterClient.callAsCurrentUser;
+
+        const index = getIndex(spacesClient.getSpaceId, config);
+        const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
           return headers
             .response({
@@ -43,16 +49,16 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
             })
             .code(409);
         } else {
-          const policyExists = await getPolicyExists(callWithRequest, index);
+          const policyExists = await getPolicyExists(callCluster, index);
           if (!policyExists) {
-            await setPolicy(callWithRequest, index, signalsPolicy);
+            await setPolicy(callCluster, index, signalsPolicy);
           }
-          const templateExists = await getTemplateExists(callWithRequest, index);
+          const templateExists = await getTemplateExists(callCluster, index);
           if (!templateExists) {
             const template = getSignalsTemplate(index);
-            await setTemplate(callWithRequest, index, template);
+            await setTemplate(callCluster, index, template);
           }
-          await createBootstrapIndex(callWithRequest, index);
+          await createBootstrapIndex(callCluster, index);
           return { acknowledged: true };
         }
       } catch (err) {
@@ -68,6 +74,10 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createIndexRoute = (server: ServerFacade) => {
-  server.route(createCreateIndexRoute(server));
+export const createIndexRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(createCreateIndexRoute(config, getClients));
 };

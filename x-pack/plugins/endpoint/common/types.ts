@@ -26,6 +26,11 @@ export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
+  static EVENT_INDEX_NAME = 'endpoint-events-*';
+  /**
+   * Legacy events are stored in indices with endgame-* prefix
+   */
+  static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
 }
 
 export interface AlertResultList {
@@ -117,6 +122,7 @@ export interface EndpointMetadata {
   agent: {
     version: string;
     id: string;
+    name: string;
   };
   host: {
     id: string;
@@ -127,6 +133,7 @@ export interface EndpointMetadata {
       name: string;
       full: string;
       version: string;
+      variant: string;
     };
   };
 }
@@ -143,7 +150,44 @@ export interface AlertDataWrapper {
 
 export type AlertHits = AlertDataWrapper[];
 
+export interface LegacyEndpointEvent {
+  '@timestamp': Date;
+  endgame: {
+    event_type_full: string;
+    event_subtype_full: string;
+    unique_pid: number;
+    unique_ppid: number;
+    serial_event_id: number;
+  };
+  agent: {
+    id: string;
+    type: string;
+  };
+}
+
+export interface EndpointEvent {
+  '@timestamp': Date;
+  event: {
+    category: string;
+    type: string;
+    id: string;
+  };
+  endpoint: {
+    process: {
+      entity_id: string;
+      parent: {
+        entity_id: string;
+      };
+    };
+  };
+  agent: {
+    type: string;
+  };
+}
+
+export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'endpointListPage';
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';

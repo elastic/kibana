@@ -79,8 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
-      // TODO: This is a valid issue and will be fixed in an upcoming PR and then enabled once that PR is merged
-      it.skip('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
+      it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
           .set('kbn-xsrf', 'true')
@@ -89,9 +88,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql([
           {
-            error: 'Conflict',
-            message: 'rule_id: "rule-1" already exists',
-            statusCode: 409,
+            error: {
+              message: 'rule_id: "rule-1" already exists',
+              status_code: 409,
+            },
+            rule_id: 'rule-1',
           },
         ]);
       });

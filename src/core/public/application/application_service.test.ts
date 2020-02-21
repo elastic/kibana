@@ -580,13 +580,22 @@ describe('#start()', () => {
 
     it('creates URLs with path parameter', async () => {
       service.setup(setupDeps);
-
       const { getUrlForApp } = await service.start(startDeps);
 
       expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/base-path/app/app1/deep/link');
       expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
+    });
+
+    it('creates absolute URLs when `absolute` parameter is true', async () => {
+      service.setup(setupDeps);
+      const { getUrlForApp } = await service.start(startDeps);
+
+      expect(getUrlForApp('app1', { absolute: true })).toBe('http://localhost/base-path/app/app1');
+      expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
+        'http://localhost/base-path/app/app2/deep/link'
+      );
     });
   });
 
