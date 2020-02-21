@@ -179,7 +179,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.ms"
-          defaultMessage="Extend timeframe {amount} milliseconds"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {millisecond} other {miliseconds}}"
           values={{ amount }}
         />
       );
@@ -187,7 +187,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.s"
-          defaultMessage="Extend timeframe {amount} seconds"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {second} other {seconds}}"
           values={{ amount }}
         />
       );
@@ -195,7 +195,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.m"
-          defaultMessage="Extend timeframe {amount} minutes"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {minute} other {minutes}}"
           values={{ amount }}
         />
       );
@@ -203,7 +203,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.h"
-          defaultMessage="Extend timeframe {amount} hours"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {hour} other {hours}}"
           values={{ amount }}
         />
       );
@@ -211,7 +211,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.d"
-          defaultMessage="Extend timeframe {amount} days"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {day} other {days}}"
           values={{ amount }}
         />
       );
@@ -219,7 +219,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.w"
-          defaultMessage="Extend timeframe {amount} weeks"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {week} other {weeks}}"
           values={{ amount }}
         />
       );
@@ -227,7 +227,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.M"
-          defaultMessage="Extend timeframe {amount} months"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {month} other {months}}"
           values={{ amount }}
         />
       );
@@ -235,7 +235,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
       return (
         <FormattedMessage
           id="xpack.infra.logs.extendTimeframe.y"
-          defaultMessage="Extend timeframe {amount} years"
+          defaultMessage="Extend timeframe {amount, number} {amount, plural, one {year} other {years}}"
           values={{ amount }}
         />
       );
