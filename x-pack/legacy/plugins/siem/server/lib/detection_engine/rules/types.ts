@@ -99,10 +99,6 @@ export interface IRuleStatusFindType {
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
 
-export interface RulesRequest extends LegacyRequest {
-  payload: RuleAlertParamsRest;
-}
-
 export interface BulkRulesRequest extends LegacyRequest {
   payload: RuleAlertParamsRest[];
 }
@@ -125,12 +121,13 @@ export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
   };
 }
 
-export type QueryRequest = Omit<LegacyRequest, 'query'> & {
-  query: { id: string | undefined; rule_id: string | undefined };
-};
+export interface ReadRuleQuery {
+  id: string | undefined;
+  rule_id: string | undefined;
+}
 
 export interface QueryBulkRequest extends LegacyRequest {
-  payload: Array<QueryRequest['query']>;
+  payload: ReadRuleQuery[];
 }
 
 export interface FindRuleParams {

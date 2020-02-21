@@ -42,7 +42,7 @@ export const initRoutes = (
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(router);
-  readRulesRoute(route, getClients);
+  readRulesRoute(router);
   updateRulesRoute(route, config, getClients);
   patchRulesRoute(route, getClients);
   deleteRulesRoute(route, getClients);
