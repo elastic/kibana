@@ -28,6 +28,7 @@ import {
   EMPTY_STRING,
   getRange,
   validateOrder,
+  validateUniqueness,
   validateValue,
   getNextModel,
   getInitModelList,
@@ -41,6 +42,7 @@ export interface NumberListProps {
   numberArray: Array<number | undefined>;
   range?: string;
   showValidation: boolean;
+  disallowDuplicates?: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
   onChange(list: Array<number | undefined>): void;
@@ -55,6 +57,7 @@ function NumberList({
   showValidation,
   unitName,
   validateAscendingOrder = true,
+  disallowDuplicates = false,
   onChange,
   setTouched,
   setValidity,
@@ -65,10 +68,11 @@ function NumberList({
 
   // set up validity for each model
   useEffect(() => {
-    let id: number | undefined;
+    let invalidModelIndex: number | number[] | undefined;
+    let individualModelErrorMessage: string;
     if (validateAscendingOrder) {
       const { isValidOrder, modelIndex } = validateOrder(numberArray);
-      id = isValidOrder ? undefined : modelIndex;
+      invalidModelIndex = isValidOrder ? undefined : modelIndex;
       setAscendingError(
         isValidOrder
           ? EMPTY_STRING
@@ -77,8 +81,28 @@ function NumberList({
             })
       );
     }
-    setModels(state => getUpdatedModels(numberArray, state, numberRange, id));
-  }, [numberArray, numberRange, validateAscendingOrder]);
+    if (disallowDuplicates) {
+      const duplicateModelIndices = validateUniqueness(numberArray);
+      if (duplicateModelIndices.length) {
+        individualModelErrorMessage = i18n.translate(
+          'visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage',
+          {
+            defaultMessage: 'The value should not be duplicated.',
+          }
+        );
+        invalidModelIndex = duplicateModelIndices;
+      }
+    }
+    setModels(state =>
+      getUpdatedModels(
+        numberArray,
+        state,
+        numberRange,
+        invalidModelIndex,
+        individualModelErrorMessage
+      )
+    );
+  }, [numberArray, numberRange, validateAscendingOrder, disallowDuplicates]);
 
   // responsible for setting up an initial value ([0]) when there is no default value
   useEffect(() => {

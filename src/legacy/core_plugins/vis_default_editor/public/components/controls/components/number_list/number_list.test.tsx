@@ -69,6 +69,24 @@ describe('NumberList', () => {
     expect(comp.find('EuiFormErrorText').length).toBe(1);
   });
 
+  test('should show a duplicate error', () => {
+    defaultProps.numberArray = [3, 1, 3];
+    defaultProps.disallowDuplicates = true;
+    defaultProps.showValidation = true;
+    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+
+    expect(comp.find('EuiFormErrorText').length).toBeGreaterThan(0);
+  });
+
+  test('should show many duplicate errors', () => {
+    defaultProps.numberArray = [3, 1, 3, 1, 3, 1, 3, 1];
+    defaultProps.disallowDuplicates = true;
+    defaultProps.showValidation = true;
+    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+
+    expect(comp.find('EuiFormErrorText').length).toBe(7);
+  });
+
   test('should set validity as true', () => {
     mountWithIntl(<NumberList {...defaultProps} />);
 

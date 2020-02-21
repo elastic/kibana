@@ -26,6 +26,7 @@ import {
   validateValue,
   getNextModel,
   getRange,
+  validateUniqueness,
 } from './utils';
 import { NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
@@ -111,6 +112,20 @@ describe('NumberList utils', () => {
         { ...modelList[1], value: 3 },
         { value: 2, id: expect.any(String), isInvalid: true },
       ]);
+    });
+  });
+
+  describe('validateUniqueness', () => {
+    test('should return empty array when there are no duplicates', () => {
+      expect(validateUniqueness([1, 2, 3])).toEqual([]);
+    });
+
+    test('should identify a duplicate', () => {
+      expect(validateUniqueness([1, 2, 3, 6, 2])).toEqual([4]);
+    });
+
+    test('should identify many duplicates', () => {
+      expect(validateUniqueness([2, 2, 2, 3, 4, 5, 2, 2, 3])).toEqual([1, 2, 6, 7, 8]);
     });
   });
 

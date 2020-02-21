@@ -76,6 +76,16 @@ function validateOrder(list: Array<number | undefined>) {
   return result;
 }
 
+function validateUniqueness(list: Array<number | undefined>): number[] {
+  const duplicateModelIndices: number[] = [];
+  list.forEach((value, index) => {
+    if (list.indexOf(value) !== index) {
+      duplicateModelIndices.push(index);
+    }
+  });
+  return duplicateModelIndices;
+}
+
 function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRowModel {
   const lastValue = last(list).value;
   let next = Number(lastValue) ? Number(lastValue) + 1 : 1;
@@ -105,7 +115,8 @@ function getUpdatedModels(
   numberList: Array<number | undefined>,
   modelList: NumberRowModel[],
   numberRange: NumberListRange,
-  invalidOrderModelIndex?: number
+  invalidModelIndex?: number | number[],
+  individualModelErrorMessage?: string
 ): NumberRowModel[] {
   if (!numberList.length) {
     return [defaultModel];
@@ -114,11 +125,14 @@ function getUpdatedModels(
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
     const { isInvalid, error } = validateValue(newValue, numberRange);
+    const currentModelInvalid = Array.isArray(invalidModelIndex)
+      ? invalidModelIndex.includes(index)
+      : invalidModelIndex === index;
     return {
       ...model,
       value: newValue,
-      isInvalid: invalidOrderModelIndex === index ? true : isInvalid,
-      error,
+      isInvalid: currentModelInvalid ? true : isInvalid,
+      error: error ? error : individualModelErrorMessage,
     };
   });
 }
@@ -133,6 +147,7 @@ export {
   getRange,
   validateValue,
   validateOrder,
+  validateUniqueness,
   getNextModel,
   getInitModelList,
   getUpdatedModels,

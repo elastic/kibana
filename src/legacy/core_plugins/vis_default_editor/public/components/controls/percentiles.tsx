@@ -59,6 +59,7 @@ function PercentilesEditor({
         numberArray={value}
         range="[0,100]"
         validateAscendingOrder={false}
+        disallowDuplicates={true}
         unitName={i18n.translate('visDefaultEditor.controls.percentileRanks.percentUnitNameText', {
           defaultMessage: 'percent',
         })}
