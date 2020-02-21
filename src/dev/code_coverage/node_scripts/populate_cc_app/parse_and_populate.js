@@ -52,16 +52,27 @@ function onComplete (initData) {
     initData.historicalItems = normalize(xs);
     initData.currentJobNumber = currentJobNumber;
 
-    const constructCurrentFrom = currentItem(currentJobNumber);
-    initData.currentItem = constructCurrentFrom('gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/');
+    const constructCurrentFrom = currentItem(currentJobNumber, log);
+    const prefix = 'gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/';
+
+    initData.currentItem = `${constructCurrentFrom(prefix)}`;
+
 
     prettyFlush(initData)(destFile);
     log.debug('### Completed');
   };
 }
 
-function currentItem(currentBuildNumber) {
-  return prefix => `${prefix}${currentBuildNumber}`
+function currentItem(currentBuildNumber, log) {
+  const HARD_CODED_TS = '2020-01-28T23-15-17Z'
+  if (process.env.TIME_STAMP)
+    log.debug(`\n### Using TIME_STAMP from env: ${process.env.TIME_STAMP}`);
+  else
+    log.debug(`\n### Using HARDCODED TIME_STAMP: ${HARD_CODED_TS}`);
+
+  const timeStamp = process.env.TIME_STAMP || HARD_CODED_TS;
+
+  return prefix => `${prefix}${currentBuildNumber}/${timeStamp}/`;
 }
 
 function normalize(xs) {
