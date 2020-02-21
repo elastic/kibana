@@ -69,6 +69,23 @@ export default ({ getService }: FtrProviderContext) => {
         responseBody: { name: '3h', ms: 10800000 },
       },
     },
+    {
+      testTitleSuffix: 'with 1 field, 1 agg, no split, and empty filters',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        aggTypes: ['avg'],
+        duration: { start: 1560297859000, end: 1562975136000 },
+        fields: ['taxless_total_price'],
+        filters: [],
+        index: 'ecommerce',
+        query: { bool: { must: [{ match_all: {} }] } },
+        timeField: 'order_date',
+      },
+      expected: {
+        responseCode: 200,
+        responseBody: { name: '15m', ms: 900000 },
+      },
+    },
   ];
 
   describe('bucket span estimator', function() {

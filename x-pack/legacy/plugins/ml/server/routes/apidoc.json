@@ -94,6 +94,17 @@
     "ValidateCardinality",
     "ValidateJob",
     "NotificationSettings",
-    "GetNotificationSettings"
+    "GetNotificationSettings",
+    "DatafeedService",
+    "GetDatafeeds",
+    "GetDatafeed",
+    "GetDatafeedsStats",
+    "GetDatafeedStats",
+    "CreateDatafeed",
+    "UpdateDatafeed",
+    "DeleteDatafeed",
+    "StartDatafeed",
+    "StopDatafeed",
+    "PreviewDatafeed"
   ]
 }
