@@ -73,13 +73,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('displays no items found', async () => {
       // clear out the data and reload the page
-      await esArchiver.unload('endpoint/endpoints/api_feature');
+      await esArchiver.unload('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management');
       // get the table data and verify no entries appear
       const tableData = await pageObjects.endpoint.getEndpointAppTableData('managementListTable');
       expect(tableData[1][0]).to.equal('No items found');
       // reload the data so the other tests continue to pass
-      await esArchiver.load('endpoint/endpoints/api_feature');
+      await esArchiver.load('endpoint/metadata/api_feature');
     });
 
     after(async () => {
