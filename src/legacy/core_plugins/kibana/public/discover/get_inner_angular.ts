@@ -22,6 +22,7 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
+import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
@@ -37,8 +38,6 @@ import { GlobalStateProvider } from 'ui/state_management/global_state';
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -63,7 +62,6 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { initAngularBootstrap } from '../../../../../plugins/kibana_legacy/public';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
@@ -71,6 +69,7 @@ import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll'
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
+  initAngularBootstrap,
   configureAppAngularModule,
   IPrivate,
   KbnAccessibleClickProvider,
@@ -78,6 +77,8 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
+  createTopNavDirective,
+  createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**
@@ -244,7 +245,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('discoverTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
 }
 
 function createLocalI18nModule() {

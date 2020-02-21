@@ -23,8 +23,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
   EventsProvider,
   GlobalStateProvider,
   KbnUrlProvider,
@@ -34,8 +32,13 @@ import {
   PrivateProvider,
   PromiseServiceCreator,
   StateManagementConfigProvider,
+  wrapInI18nContext,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
@@ -164,7 +167,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/visualize/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
 }
 
 function createLocalI18nModule() {

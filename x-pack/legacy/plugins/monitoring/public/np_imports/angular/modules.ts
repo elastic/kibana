@@ -9,6 +9,10 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../../src/plugins/kibana_legacy/public';
 
 import {
   GlobalStateProvider,
@@ -16,11 +20,10 @@ import {
   AppStateProvider,
   EventsProvider,
   PersistedState,
-  createTopNavDirective,
-  createTopNavHelper,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   npStart,
+  wrapInI18nContext,
 } from '../legacy_imports';
 
 // @ts-ignore
@@ -132,7 +135,7 @@ function createLocalTopNavModule({ ui }: any) {
   angular
     .module('monitoring/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(ui, wrapInI18nContext));
 }
 
 function createLocalI18nModule() {

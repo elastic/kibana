@@ -31,13 +31,12 @@ import {
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
   IPrivate,
   KbnUrlProvider,
   PrivateProvider,
   PromiseServiceCreator,
   RedirectWhenMissingProvider,
+  wrapInI18nContext,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -45,7 +44,11 @@ import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
-import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import {
+  KibanaLegacyStart,
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 import { SavedObjectLoader } from '../../../../../../plugins/saved_objects/public';
 
 export interface RenderDeps {
@@ -166,7 +169,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
 }
 
 function createLocalI18nModule() {

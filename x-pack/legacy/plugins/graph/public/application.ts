@@ -22,9 +22,8 @@ import {
 } from 'kibana/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
   addAppRedirectMessageToUrl,
+  wrapInI18nContext,
 } from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -37,6 +36,10 @@ import { checkLicense } from '../../../../plugins/graph/common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../src/plugins/kibana_legacy/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -132,7 +135,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('graphTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
 }
 
 function createLocalI18nModule() {

@@ -34,8 +34,6 @@ export { PersistedState } from 'ui/persisted_state';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
-// @ts-ignore
-export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
