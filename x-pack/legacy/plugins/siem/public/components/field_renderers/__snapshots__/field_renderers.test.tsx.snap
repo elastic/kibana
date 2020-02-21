@@ -129,17 +129,9 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
 `;
 
 exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
-<EuiToolTip
-  content="https://www.iana.org/whois?q=10.10.10.10"
-  delay="regular"
-  position="top"
+<ExternalLink
+  url="https://www.iana.org/whois?q=10.10.10.10"
 >
-  <EuiLink
-    href="https://www.iana.org/whois?q=10.10.10.10"
-    target="_blank"
-  >
-    iana.org
-    <ExternalLinkIcon />
-  </EuiLink>
-</EuiToolTip>
+  iana.org
+</ExternalLink>
 `;

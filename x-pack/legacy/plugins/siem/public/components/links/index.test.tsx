@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow, ShallowWrapper, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -13,7 +13,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 
 jest.mock('.', () => {
   return {
-    Comma: jest.fn().mockReturnValue(', '),
+    Comma: () => ', ',
   };
 });
 
@@ -27,6 +27,7 @@ const {
   Ja3FingerprintLink,
   PortOrServiceNameLink,
   DEFAULT_NUMBER_OF_REPUTATION_LINK,
+  ExternalLink,
 } = jest.requireActual('.');
 
 jest.mock('../../lib/kibana', () => {
@@ -114,6 +115,50 @@ describe('Custom Links', () => {
     });
   });
 
+  describe('External Link', () => {
+    const mockLink = 'https://www.virustotal.com/gui/search/';
+    const mockLinkName = 'Link';
+    let wrapper: ReactWrapper;
+    beforeAll(() => {
+      wrapper = mount(
+        <ExternalLink url={mockLink} idx={0} allItemsLimit={5} overflowIndexStart={5}>
+          {mockLinkName}
+        </ExternalLink>
+      );
+    });
+
+    test('it renders tooltip', () => {
+      expect(wrapper.find('EuiToolTip').exists()).toBeTruthy();
+    });
+
+    test('it renders ExternalLinkIcon', () => {
+      expect(wrapper.find('ExternalLinkIcon').exists()).toBeTruthy();
+    });
+
+    test('it renders correct url', () => {
+      expect(
+        wrapper
+          .find('EuiLink')
+          .at(0)
+          .prop('href')
+      ).toEqual(mockLink);
+    });
+
+    test('it renders correct comma', () => {
+      expect(wrapper.find('Comma')).toBeTruthy();
+    });
+
+    test('it renders correct comma for the last item', () => {
+      wrapper = mount(
+        <ExternalLink url={mockLink} idx={4} allItemsLimit={5} overflowIndexStart={5}>
+          {mockLinkName}
+        </ExternalLink>
+      );
+      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('Comma').exists()).toBeFalsy();
+    });
+  });
+
   describe('ReputationLink', () => {
     const mockCustomizedReputationLinks = [
       { name: 'Link 1', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
@@ -144,67 +189,70 @@ describe('Custom Links', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(0)
             .text()
-        ).toEqual('Link 1, ');
+        ).toEqual('Link 1');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(1)
             .text()
         ).toEqual('Link 2');
+        expect(wrapper.find('Comma')).toHaveLength(1);
       });
 
       test('it renders customized link text', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper).toMatchSnapshot();
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(0)
             .text()
-        ).toEqual('Link 1, ');
+        ).toEqual('Link 1');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(1)
             .text()
-        ).toEqual('Link 2, ');
+        ).toEqual('Link 2');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(2)
             .text()
-        ).toEqual('Link 3, ');
+        ).toEqual('Link 3');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(3)
             .text()
-        ).toEqual('Link 4, ');
+        ).toEqual('Link 4');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(4)
             .text()
         ).toEqual('Link 5');
+        expect(wrapper.find('Comma')).toHaveLength(4);
       });
 
       test('it renders correct href', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(0)
-            .prop('urlTemplate')
+            .prop('url')
         ).toEqual('https://www.virustotal.com/gui/search/192.0.2.0');
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(1)
-            .prop('urlTemplate')
+            .prop('url')
         ).toEqual('https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0');
       });
 
@@ -213,15 +261,15 @@ describe('Custom Links', () => {
 
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(0)
-            .prop('urlTemplate')
+            .prop('url')
         ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
         expect(
           wrapper
-            .find('ReputationLinkTemplate')
+            .find('ExternalLink')
             .at(1)
-            .prop('urlTemplate')
+            .prop('url')
         ).toEqual(
           "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
         );
@@ -240,9 +288,7 @@ describe('Custom Links', () => {
 
       test('it renders correct number of links by default', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-        expect(wrapper.find('ReputationLinkTemplate')).toHaveLength(
-          DEFAULT_NUMBER_OF_REPUTATION_LINK
-        );
+        expect(wrapper.find('ExternalLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
       });
 
       test('it renders correct number of tooltips by default', () => {
@@ -257,7 +303,7 @@ describe('Custom Links', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
-        expect(wrapper.find('ReputationLinkTemplate')).toHaveLength(1);
+        expect(wrapper.find('ExternalLink')).toHaveLength(1);
       });
 
       test('it renders correct number of tooltips if overflow index is provided', () => {

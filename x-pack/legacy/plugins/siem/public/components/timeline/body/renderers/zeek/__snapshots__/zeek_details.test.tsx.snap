@@ -957,12 +957,14 @@ tr:hover .c3:focus::before {
                     "getInstance": [MockFunction],
                     "getType": [MockFunction],
                     "getTypeNameByEsTypes": [MockFunction],
+                    "getTypeWithoutMetaParams": [MockFunction],
                     "init": [MockFunction],
                     "parseDefaultTypeMap": [MockFunction],
                     "register": [MockFunction],
                   },
                   "getSuggestions": [MockFunction],
                   "indexPatterns": Object {
+                    "get": [MockFunction],
                     "make": [Function],
                   },
                   "query": Object {
@@ -1138,6 +1140,7 @@ tr:hover .c3:focus::before {
                     "get": [Function],
                     "prepend": [Function],
                     "remove": [Function],
+                    "serverBasePath": "",
                   },
                   "delete": [MockFunction],
                   "fetch": [MockFunction],

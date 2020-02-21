@@ -26,6 +26,9 @@ import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
 import * as i18n from '../page/network/ip_overview/translations';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
+
+export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
+
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
   children,
@@ -35,6 +38,40 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     {children ? children : hostName}
   </EuiLink>
 );
+
+export const ExternalLink = React.memo<{
+  url: string;
+  children?: React.ReactNode;
+  idx?: number;
+  overflowIndexStart?: number;
+  allItemsLimit?: number;
+}>(
+  ({
+    url,
+    children,
+    idx,
+    overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+    allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+  }) => {
+    const lastIndexToShow = useMemo(
+      () => Math.max(0, Math.min(overflowIndexStart - 1, allItemsLimit - 1)),
+      [overflowIndexStart]
+    );
+    return url && children ? (
+      <EuiToolTip content={url} position="top">
+        <>
+          <EuiLink href={url} target="_blank" rel="noopener">
+            {children}
+            <ExternalLinkIcon />
+          </EuiLink>
+          {!isNil(idx) && idx < lastIndexToShow && <Comma />}
+        </>
+      </EuiToolTip>
+    ) : null;
+  }
+);
+
+ExternalLink.displayName = 'ExternalLink';
 
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
@@ -70,9 +107,9 @@ CreateCaseLink.displayName = 'CreateCaseLink';
 // External Links
 export const GoogleLink = React.memo<{ children?: React.ReactNode; link: string }>(
   ({ children, link }) => (
-    <EuiLink href={`https://www.google.com/search?q=${encodeURIComponent(link)}`} target="_blank">
+    <ExternalLink url={`https://www.google.com/search?q=${encodeURIComponent(link)}`}>
       {children ? children : link}
-    </EuiLink>
+    </ExternalLink>
   )
 );
 
@@ -149,9 +186,7 @@ const isReputationLink = (
   (rowItem as ReputationLinkSetting).url_template !== undefined &&
   (rowItem as ReputationLinkSetting).name !== undefined;
 
-export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
-
-export const Comma = styled(EuiLink)`
+export const Comma = styled('span')`
   margin-right: 5px;
   margin-left: 5px;
   &::after {
@@ -168,32 +203,6 @@ const AlignedFlexItem = styled(EuiFlexItem)`
 `;
 
 AlignedFlexItem.displayName = 'AlignedFlexItem';
-
-const ReputationLinkTemplate = React.memo<{
-  name: string;
-  urlTemplate: string;
-  domain: string;
-  overflowIndexStart: number;
-  ipReputationLinks: Array<string | ReputationLinkSetting>;
-  id?: number;
-  showDomain?: boolean;
-}>(({ name, urlTemplate, domain, overflowIndexStart, ipReputationLinks, showDomain, id }) => {
-  const lastIndexToShow = useMemo(
-    () => Math.max(0, Math.min(overflowIndexStart - 1, ipReputationLinks.length - 1)),
-    [overflowIndexStart]
-  );
-  return (
-    <EuiToolTip content={urlTemplate} position="top">
-      <EuiLink href={urlTemplate} target="_blank" rel="noopener">
-        {showDomain ? domain : name ?? domain}
-        <ExternalLinkIcon />
-        {!isNil(id) && id < lastIndexToShow && <Comma />}
-      </EuiLink>
-    </EuiToolTip>
-  );
-});
-
-ReputationLinkTemplate.displayName = 'ReputationLinkTemplate';
 
 const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
@@ -239,16 +248,15 @@ const ReputationLinkComponent: React.FC<{
         {ipReputationLinks
           ?.slice(0, overflowIndexStart)
           .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-            <ReputationLinkTemplate
-              domain={domain}
-              id={id}
-              ipReputationLinks={ipReputationLinks}
-              key={`reputationLink-${id}`}
-              name={name}
+            <ExternalLink
+              url={urlTemplate}
               overflowIndexStart={overflowIndexStart}
-              urlTemplate={urlTemplate}
-              showDomain={showDomain}
-            />
+              allItemsLimit={ipReputationLinks.length}
+              idx={id}
+              key={`reputationLink-${id}`}
+            >
+              <>{showDomain ? domain : name ?? domain}</>
+            </ExternalLink>
           ))}
       </AlignedFlexItem>
       <AlignedFlexItem grow={false}>
@@ -258,14 +266,13 @@ const ReputationLinkComponent: React.FC<{
           render={rowItem => {
             return (
               isReputationLink(rowItem) && (
-                <ReputationLinkTemplate
-                  domain={domain}
-                  ipReputationLinks={ipReputationLinks}
-                  name={rowItem.name}
+                <ExternalLink
+                  url={rowItem.url_template}
                   overflowIndexStart={overflowIndexStart}
-                  urlTemplate={rowItem.url_template}
-                  showDomain={false}
-                />
+                  allItemsLimit={allItemsLimit}
+                >
+                  <>{rowItem.name ?? domain}</>
+                </ExternalLink>
               )
             );
           }}
@@ -282,17 +289,11 @@ ReputationLinkComponent.displayName = 'ReputationLinkComponent';
 export const ReputationLink = React.memo(ReputationLinkComponent);
 
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
-  ({ children, domain }) => {
-    const link = `https://www.iana.org/whois?q=${encodeURIComponent(domain)}`;
-    return (
-      <EuiToolTip content={link} position="top">
-        <EuiLink href={link} target="_blank">
-          {children ? children : domain}
-          <ExternalLinkIcon />
-        </EuiLink>
-      </EuiToolTip>
-    );
-  }
+  ({ children, domain }) => (
+    <ExternalLink url={`https://www.iana.org/whois?q=${encodeURIComponent(domain)}`}>
+      {children ? children : domain}
+    </ExternalLink>
+  )
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
