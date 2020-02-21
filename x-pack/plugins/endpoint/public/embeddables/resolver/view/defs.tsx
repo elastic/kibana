@@ -39,7 +39,14 @@ const resolverPalette: Record<string, string | string[]> = {
  * Or by function like:
  * `colorBlindBackground`, `subMenuForeground`
  */
-type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning' | 'strokeBehindEmpty';
+type ResolverColorNames =
+  | 'ok'
+  | 'okdark'
+  | 'empty'
+  | 'full'
+  | 'warning'
+  | 'strokeBehindEmpty'
+  | 'resolverBackground';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
@@ -48,6 +55,7 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   full: euiColorFullShade,
   strokeBehindEmpty: euiColor85Shade,
   warning: resolverPalette.statii[3],
+  resolverBackground: euiColor85Shade,
 };
 
 const idGenerator = htmlIdGenerator();

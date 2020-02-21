@@ -13,7 +13,7 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions } from './defs';
+import { SymbolDefinitions, NamedColors } from './defs';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -25,7 +25,7 @@ const StyledPanel = styled(Panel)`
   max-width: 50%;
 `;
 
-const bgColor = '#222222';
+const bgColor = NamedColors.resolverBackground;
 
 const Resolver = styled(
   React.memo(({ className }: { className?: string }) => {
