@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer, EuiPageContent } from '@elastic/eui';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {

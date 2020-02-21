@@ -57,7 +57,8 @@ export function OutputPane({ response, context, contextSetup, onContextChange, i
         tabs={[
           {
             id: 'output',
-            name: outputTabLabel,
+            // TODO: Currently this causes an Eui prop error because it is expecting string, but we give it React.ReactNode - should fix.
+            name: outputTabLabel as any,
             content: <OutputTab response={response} />,
           },
           {
