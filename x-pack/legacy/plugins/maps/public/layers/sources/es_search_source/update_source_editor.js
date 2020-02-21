@@ -26,7 +26,7 @@ import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadIndexSettings } from './load_index_settings';
-import { isNestedField } from '../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -104,7 +104,9 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
-      sortFields: indexPattern.fields.filter(field => field.sortable && !isNestedField(field)), //todo change sort fields to use fields
+      sortFields: indexPattern.fields.filter(
+        field => field.sortable && !indexPatterns.isNestedField(field)
+      ), //todo change sort fields to use fields
     });
   }
   _onTooltipPropertiesChange = propertyNames => {

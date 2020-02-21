@@ -18,7 +18,7 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;
@@ -30,7 +30,7 @@ export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, para
     const phraseFilter = esFilters.buildPhrasesFilter(field, terms, indexPattern);
     phraseFilter.meta.negate = true;
 
-    const filters: esFilters.Filter[] = [phraseFilter];
+    const filters: Filter[] = [phraseFilter];
 
     if (terms.some((term: string) => term === '__missing__')) {
       filters.push(esFilters.buildExistsFilter(field, indexPattern));

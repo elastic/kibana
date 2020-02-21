@@ -23,6 +23,8 @@ export function getXPackLicense(callCluster) {
     query: {
       // Fetching the local license is cheaper than getting it from the master and good enough
       local: 'true',
+      // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
+      accept_enterprise: 'true',
     },
   }).then(({ license }) => license);
 }

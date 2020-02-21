@@ -24,7 +24,7 @@ import {
   HostAlertsQueryTabBody,
 } from '../navigation';
 
-const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
+export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     pageFilters,
     deleteQuery,
@@ -93,7 +93,7 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
-          render={() => <EventsQueryTabBody {...tabProps} />}
+          render={() => <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />}
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
@@ -105,5 +105,3 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 );
 
 HostDetailsTabs.displayName = 'HostDetailsTabs';
-
-export { HostDetailsTabs };

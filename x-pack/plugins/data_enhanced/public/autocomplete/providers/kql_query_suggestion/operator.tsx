@@ -10,7 +10,7 @@ import { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
 
 import { KqlQuerySuggestionProvider } from './types';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionTypes } from '../../../../../../../src/plugins/data/public';
 
 const equalsText = (
   <FormattedMessage
@@ -163,7 +163,7 @@ export const setupGetOperatorSuggestions: KqlQuerySuggestionProvider = () => {
         });
 
         const suggestions = matchingOperators.map(operator => ({
-          type: autocomplete.QuerySuggestionsTypes.Operator,
+          type: QuerySuggestionTypes.Operator,
           text: operator + ' ',
           description: getDescription(operator),
           start: end,

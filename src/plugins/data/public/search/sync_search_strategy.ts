@@ -19,9 +19,8 @@
 
 import { BehaviorSubject, from } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
-import { ISearchContext } from './i_search_context';
 import { ISearch, ISearchOptions } from './i_search';
-import { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
+import { TSearchStrategyProvider, ISearchStrategy, ISearchContext } from './types';
 
 export const SYNC_SEARCH_STRATEGY = 'SYNC_SEARCH_STRATEGY';
 

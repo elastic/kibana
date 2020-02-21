@@ -7,7 +7,7 @@ import { ReactNode } from 'react';
 
 import {
   IIndexPattern,
-  esFilters,
+  Filter,
   FilterManager,
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
@@ -20,7 +20,7 @@ export interface ListItems {
 
 export interface BuildQueryBarDescription {
   field: string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   filterManager: FilterManager;
   query: Query;
   savedId: string;

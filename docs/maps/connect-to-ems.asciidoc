@@ -8,7 +8,6 @@ If you are using Kibana's out-of-the-box settings, **Elastic Maps** is already c
 
 EMS requests are made to the following domains:
 
-* catalogue.maps.elastic.co
 * tiles.maps.elastic.co
 * vector.maps.elastic.co
 

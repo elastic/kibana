@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertServices } from '../../../../../alerting/server/types';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
+  Filter,
   Query,
   esQuery,
   esFilters,
@@ -33,7 +34,7 @@ export const getQueryFilter = (
     dateFormatTZ: 'Zulu',
   };
 
-  const enabledFilters = ((filters as unknown) as esFilters.Filter[]).filter(
+  const enabledFilters = ((filters as unknown) as Filter[]).filter(
     f => f && !esFilters.isFilterDisabled(f)
   );
 

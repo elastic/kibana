@@ -21,27 +21,26 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
+import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
 import {
-  SavedObjectFinderUi,
-  SavedObjectFinderProps,
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type Setup = void;
@@ -61,16 +60,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder: React.FC<Exclude<
-      SavedObjectFinderProps,
-      'savedObjects' | 'uiSettings'
-    >> = props => (
-      <SavedObjectFinderUi
-        {...props}
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-      />
-    );
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
     const useHideChrome = () => {
       React.useEffect(() => {

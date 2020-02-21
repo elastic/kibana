@@ -18,7 +18,7 @@
  */
 import { IScope } from 'angular';
 
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
@@ -39,10 +39,12 @@ import {
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -52,14 +54,16 @@ export interface PluginsSetup {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   navigation: NavigationPublicPluginSetup;
-  dev_tools: DevToolsSetup;
-  kibana_legacy: KibanaLegacySetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
+  visTypeVega: VisTypeVegaSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface PluginsStart {
@@ -70,13 +74,14 @@ export interface PluginsStart {
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
   inspector: InspectorStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  dev_tools: DevToolsStart;
-  kibana_legacy: KibanaLegacyStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export const npSetup = {

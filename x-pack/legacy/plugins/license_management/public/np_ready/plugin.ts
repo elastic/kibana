@@ -5,11 +5,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { PLUGIN } from '../../common/constants';
 import { Breadcrumb } from './application/breadcrumbs';
-
 export interface Plugins {
+  telemetry: TelemetryPluginSetup;
   __LEGACY: {
     xpackInfo: XPackMainPlugin;
     refreshXpack: () => void;
@@ -18,7 +19,7 @@ export interface Plugins {
 }
 
 export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
-  setup({ application, notifications, http }: CoreSetup, { __LEGACY }: Plugins) {
+  setup({ application, notifications, http }: CoreSetup, { __LEGACY, telemetry }: Plugins) {
     application.register({
       id: PLUGIN.ID,
       title: PLUGIN.TITLE,
@@ -41,6 +42,7 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
           http,
           element,
           chrome,
+          telemetry,
         });
       },
     });

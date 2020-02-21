@@ -8,7 +8,6 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
 import {
-  chromeServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
@@ -31,8 +30,7 @@ class MockTimeBuckets {
 export const mockContextValue = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
-  chrome: chromeServiceMock.createStartContract(),
-  MANAGEMENT_BREADCRUMB: { text: 'test' },
+  setBreadcrumbs: jest.fn(),
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,

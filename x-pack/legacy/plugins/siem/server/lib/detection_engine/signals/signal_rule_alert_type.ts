@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
@@ -32,7 +33,14 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: ['default'],
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
     validate: {
       params: schema.object({
         description: schema.string(),

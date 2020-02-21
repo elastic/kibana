@@ -21,21 +21,26 @@ import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
 import 'angular-mocks';
 import 'angular-sanitize';
 import $ from 'jquery';
-import './table_vis.mock';
 
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { npStart, IAggConfig, tabifyAggResponse } from './legacy_imports';
 import { tableVisTypeDefinition } from './table_vis_type';
 import { Vis } from '../../visualizations/public';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
-import { setFieldFormats } from '../../../../plugins/data/public/services';
 import { tableVisResponseHandler } from './table_vis_response_handler';
+import { coreMock } from '../../../../core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigs } from 'ui/agg_types';
+import { tabifyAggResponse, IAggConfig } from './legacy_imports';
+
+jest.mock('ui/new_platform');
+jest.mock('../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
+  configureAppAngularModule: () => {},
+}));
 
 interface TableVisScope extends IScope {
   [key: string]: any;
@@ -79,14 +84,11 @@ describe('Table Vis - Controller', () => {
   let stubIndexPattern: any;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getAngularModule('kibana/table_vis', coreMock.createStart());
     initTableVisLegacyModule(tableVisModule);
   };
 
   beforeEach(initLocalAngular);
-  beforeAll(() => {
-    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
-  });
   beforeEach(angular.mock.module('kibana/table_vis'));
 
   beforeEach(
@@ -98,38 +100,38 @@ describe('Table Vis - Controller', () => {
   );
 
   beforeEach(() => {
-    setFieldFormats(({
-      getDefaultInstance: jest.fn(),
-    } as unknown) as any);
     stubIndexPattern = new StubIndexPattern(
       'logstash-*',
       (cfg: any) => cfg,
       'time',
       stubFields,
-      npStart.core
+      coreMock.createStart()
     );
   });
 
   function getRangeVis(params?: object) {
-    // @ts-ignore
-    return new Vis(stubIndexPattern, {
-      type: 'table',
-      params: params || {},
-      aggs: [
-        { type: 'count', schema: 'metric' },
-        {
-          type: 'range',
-          schema: 'bucket',
-          params: {
-            field: 'bytes',
-            ranges: [
-              { from: 0, to: 1000 },
-              { from: 1000, to: 2000 },
-            ],
+    return ({
+      type: tableVisTypeDefinition,
+      params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
+      aggs: new AggConfigs(
+        stubIndexPattern,
+        [
+          { type: 'count', schema: 'metric' },
+          {
+            type: 'range',
+            schema: 'bucket',
+            params: {
+              field: 'bytes',
+              ranges: [
+                { from: 0, to: 1000 },
+                { from: 1000, to: 2000 },
+              ],
+            },
           },
-        },
-      ],
-    });
+        ],
+        tableVisTypeDefinition.editorConfig.schemas.all
+      ),
+    } as unknown) as Vis;
   }
 
   const dimensions = {
@@ -241,13 +243,13 @@ describe('Table Vis - Controller', () => {
     const vis = getRangeVis({ showPartialRows: true });
     initController(vis);
 
-    expect(vis.isHierarchical()).toEqual(true);
+    expect(vis.type.hierarchicalData(vis)).toEqual(true);
   });
 
   test('passes partialRows:false to tabify based on the vis params', () => {
     const vis = getRangeVis({ showPartialRows: false });
     initController(vis);
 
-    expect(vis.isHierarchical()).toEqual(false);
+    expect(vis.type.hierarchicalData(vis)).toEqual(false);
   });
 });

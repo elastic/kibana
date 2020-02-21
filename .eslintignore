@@ -11,7 +11,6 @@ bower_components
 /src/plugins/data/common/es_query/kuery/ast/_generated_/**
 /src/legacy/core_plugins/vis_type_timelion/public/_generated_/**
 src/legacy/core_plugins/vis_type_vislib/public/vislib/__tests__/lib/fixtures/mock_data
-/src/legacy/ui/public/angular-bootstrap
 /src/legacy/ui/public/flot-charts
 /test/fixtures/scenarios
 /src/legacy/core_plugins/console/public/webpackShims

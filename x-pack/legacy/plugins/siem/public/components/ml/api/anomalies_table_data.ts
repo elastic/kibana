@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { throwIfNotOk } from '../../../hooks/api/api';
+import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
   jobIds: string[];
@@ -22,7 +22,7 @@ export interface Body {
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
-  const response = await npStart.core.http.fetch<Anomalies>(
+  const response = await KibanaServices.get().http.fetch<Anomalies>(
     '/api/ml/results/anomalies_table_data',
     {
       method: 'POST',

@@ -17,6 +17,7 @@ function mockGetXPackLicense(callCluster, license, req) {
       path: '/_license',
       query: {
         local: 'true',
+        accept_enterprise: 'true',
       },
     })
     .returns(
@@ -32,6 +33,7 @@ function mockGetXPackLicense(callCluster, license, req) {
       path: '/_license',
       query: {
         local: 'true',
+        accept_enterprise: 'true',
       },
     })
     // conveniently wraps the passed in license object as { license: response }, like it really is

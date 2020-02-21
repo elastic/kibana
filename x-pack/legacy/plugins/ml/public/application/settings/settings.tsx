@@ -35,12 +35,12 @@ export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
           <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
             <EuiPageContentHeader>
               <EuiTitle>
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.ml.settings.jobManagementTitle"
                     defaultMessage="Job Management"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiPageContentHeader>
 

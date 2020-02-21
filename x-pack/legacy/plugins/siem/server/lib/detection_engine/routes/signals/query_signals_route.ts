@@ -6,12 +6,16 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { SignalsQueryRequest } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
-import { ServerFacade } from '../../../../types';
 import { transformError, getIndex } from '../utils';
 
-export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
+export const querySignalsRouteDef = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -26,13 +30,15 @@ export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => 
     },
     async handler(request: SignalsQueryRequest) {
       const { query, aggs, _source, track_total_hits, size } = request.payload;
-      const index = getIndex(request, server);
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const { clusterClient, spacesClient } = await getClients(request);
+
+      const index = getIndex(spacesClient.getSpaceId, config);
 
       try {
-        return callWithRequest(request, 'search', {
+        return clusterClient.callAsCurrentUser('search', {
           index,
           body: { query, aggs, _source, track_total_hits, size },
+          ignoreUnavailable: true,
         });
       } catch (exc) {
         // error while getting or updating signal with id: id in signal index .siem-signals
@@ -42,6 +48,10 @@ export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => 
   };
 };
 
-export const querySignalsRoute = (server: ServerFacade) => {
-  server.route(querySignalsRouteDef(server));
+export const querySignalsRoute = (
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+) => {
+  route(querySignalsRouteDef(config, getClients));
 };

@@ -1,0 +1,3912 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field for array setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="array:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="default_value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        default_value
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="array:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="user, value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Array test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="array:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="default_value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="array:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="default_value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        default_value
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset array test setting to default"
+                data-test-subj="advancedSetting-resetField-array:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="array:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="user, value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="boolean:test:setting"
+        labelType="label"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={true}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={true}
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="advancedSettings.field.onLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        true
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="boolean:test:setting"
+        labelType="label"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={false}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={true}
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="advancedSettings.field.offLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Boolean test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="boolean:test:setting"
+        labelType="label"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={true}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="advancedSettings.field.onLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="boolean:test:setting"
+        labelType="label"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={true}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label={
+            <FormattedMessage
+              defaultMessage="On"
+              id="advancedSettings.field.onLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        true
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset boolean test setting to default"
+                data-test-subj="advancedSetting-resetField-boolean:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="boolean:test:setting"
+        labelType="label"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={false}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Off"
+              id="advancedSettings.field.offLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="image:test:setting"
+        labelType="label"
+      >
+        <EuiFilePicker
+          accept=".jpg,.jpeg,.png"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-image:test:setting"
+          disabled={true}
+          display="large"
+          initialPromptText="Select or drag and drop a file"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="image:test:setting"
+        labelType="label"
+      >
+        <EuiImage
+          allowFullScreen={true}
+          alt="image:test:setting"
+          aria-label="image test setting"
+          url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Image test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="image:test:setting"
+        labelType="label"
+      >
+        <EuiFilePicker
+          accept=".jpg,.jpeg,.png"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-image:test:setting"
+          disabled={false}
+          display="large"
+          initialPromptText="Select or drag and drop a file"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="image:test:setting"
+        labelType="label"
+      >
+        <EuiFilePicker
+          accept=".jpg,.jpeg,.png"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-image:test:setting"
+          disabled={false}
+          display="large"
+          initialPromptText="Select or drag and drop a file"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset image test setting to default"
+                data-test-subj="advancedSetting-resetField-image:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+            <span>
+              <ForwardRef
+                aria-label="Change image test setting"
+                data-test-subj="advancedSetting-changeImage-image:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Change image"
+                  id="advancedSettings.field.changeImageLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="image:test:setting"
+        labelType="label"
+      >
+        <EuiImage
+          allowFullScreen={true}
+          alt="image:test:setting"
+          aria-label="image test setting"
+          url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="json:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="json:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="{\\"hello\\": \\"world\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Json test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="json:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset json test setting to default"
+                data-test-subj="advancedSetting-resetField-json:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="json:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset json test setting to default"
+                data-test-subj="advancedSetting-resetField-json:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="json:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="{\\"hello\\": \\"world\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="markdown:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="markdown:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="**bold**"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Markdown test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="markdown:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="markdown:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset markdown test setting to default"
+                data-test-subj="advancedSetting-resetField-markdown:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="markdown:test:setting"
+        labelType="label"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={false}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            showGutter={false}
+            theme="textmate"
+            value="**bold**"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="number:test:setting"
+        labelType="label"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={5}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        5
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="number:test:setting"
+        labelType="label"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={10}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Number test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="number:test:setting"
+        labelType="label"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={5}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="number:test:setting"
+        labelType="label"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={5}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        5
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset number test setting to default"
+                data-test-subj="advancedSetting-resetField-number:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="number:test:setting"
+        labelType="label"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={10}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="select:test:setting"
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "Apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "Orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="orange"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        Orange
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="select:test:setting"
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "Apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "Orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="banana"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Select test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="select:test:setting"
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "Apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "Orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="orange"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="select:test:setting"
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "Apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "Orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="orange"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        Orange
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset select test setting to default"
+                data-test-subj="advancedSetting-resetField-select:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="select:test:setting"
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "Apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "Orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="banana"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="string:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset string test setting to default"
+                data-test-subj="advancedSetting-resetField-string:test:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="string:test:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="advancedSettings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test validation setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="advancedSettings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="advancedSettings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset string test validation setting to default"
+                data-test-subj="advancedSetting-resetField-string:test-validation:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="advancedSettings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;

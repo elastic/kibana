@@ -27,8 +27,8 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
     return (
       monitoringClusters(clusterUuid, undefined, codePaths)
         // Set the clusters collection and current cluster in globalState
-        .then(async clusters => {
-          const inSetupMode = await isInSetupMode();
+        .then(clusters => {
+          const inSetupMode = isInSetupMode();
           const cluster = getClusterFromClusters(clusters, globalState);
           if (!cluster && !inSetupMode) {
             return kbnUrl.redirect('/no-data');

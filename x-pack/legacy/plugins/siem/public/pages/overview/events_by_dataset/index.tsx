@@ -6,22 +6,18 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import {
-  ERROR_FETCHING_EVENTS_DATA,
-  SHOWING,
-  UNIT,
-} from '../../../components/events_viewer/translations';
+import { Position } from '@elastic/charts';
+import { SHOWING, UNIT } from '../../../components/events_viewer/translations';
 import { convertToBuildEsQuery } from '../../../lib/keury';
-import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
+import { histogramConfigs } from '../../../pages/hosts/navigation/events_query_tab_body';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { eventsStackByOptions } from '../../hosts/navigation';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import {
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
   Query,
@@ -31,8 +27,9 @@ import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
+import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
 
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -40,11 +37,10 @@ const ID = 'eventsByDatasetOverview';
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   indexPattern: IIndexPattern;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setQuery: (params: {
     id: string;
     inspect: inputsModel.InspectQuery | null;
@@ -60,7 +56,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   indexPattern,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setQuery,
   to,
 }) => {
@@ -70,30 +65,15 @@ const EventsByDatasetComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
-      setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
-    },
-    [setAbsoluteRangeDatePicker]
-  );
   const eventsCountViewEventsButton = useMemo(
     () => <EuiButton href={getTabsOnHostsUrl(HostsTableType.events)}>{i18n.VIEW_EVENTS}</EuiButton>,
     []
   );
-
-  const getSubtitle = useCallback(
-    (totalCount: number) =>
-      `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
-    []
-  );
-
-  const defaultStackByOption =
-    eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0];
 
   const filterQuery = useMemo(
     () =>
@@ -106,26 +86,29 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [kibana, indexPattern, query, filters]
   );
 
+  const eventsByDatasetHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      defaultStackByOption:
+        eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
+      legendPosition: Position.Right,
+      subtitle: (totalCount: number) =>
+        `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
+    }),
+    []
+  );
+
   return (
     <MatrixHistogramContainer
-      dataKey="EventsHistogram"
-      defaultStackByOption={defaultStackByOption}
       endDate={to}
-      errorMessage={ERROR_FETCHING_EVENTS_DATA}
       filterQuery={filterQuery}
       headerChildren={eventsCountViewEventsButton}
       id={ID}
-      isEventsHistogram={true}
-      legendPosition={'right'}
-      query={MatrixHistogramGqlQuery}
       setQuery={setQuery}
       sourceId="default"
-      stackByOptions={eventsStackByOptions}
       startDate={from}
-      title={i18n.EVENTS}
-      subtitle={getSubtitle}
       type={HostsType.page}
-      updateDateRange={updateDateRangeCallback}
+      {...eventsByDatasetHistogramConfigs}
     />
   );
 };

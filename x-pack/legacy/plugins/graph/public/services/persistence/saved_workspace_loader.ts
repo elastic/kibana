@@ -7,8 +7,8 @@
 import { IBasePath } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 
+import { SavedObjectKibanaServices } from '../../../../../../../src/plugins/saved_objects/public';
 import { createSavedWorkspaceClass } from './saved_workspace';
-import { SavedObjectKibanaServices } from '../../legacy_imports';
 
 export function createSavedWorkspacesLoader(
   services: SavedObjectKibanaServices & { basePath: IBasePath }

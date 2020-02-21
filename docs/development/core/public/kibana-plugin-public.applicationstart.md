@@ -16,12 +16,13 @@ export interface ApplicationStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [capabilities](./kibana-plugin-public.applicationstart.capabilities.md) | <code>RecursiveReadonly&lt;Capabilities&gt;</code> | Gets the read-only capabilities. |
+|  [currentAppId$](./kibana-plugin-public.applicationstart.currentappid_.md) | <code>Observable&lt;string &#124; undefined&gt;</code> | An observable that emits the current application id and each subsequent id update. |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [getUrlForApp(appId, options)](./kibana-plugin-public.applicationstart.geturlforapp.md) | Returns a relative URL to a given app, including the global base path. |
+|  [getUrlForApp(appId, options)](./kibana-plugin-public.applicationstart.geturlforapp.md) | Returns an URL to a given app, including the global base path. By default, the URL is relative (/basePath/app/my-app). Use the <code>absolute</code> option to generate an absolute url (http://host:port/basePath/app/my-app)<!-- -->Note that when generating absolute urls, the protocol, host and port are determined from the browser location. |
 |  [navigateToApp(appId, options)](./kibana-plugin-public.applicationstart.navigatetoapp.md) | Navigate to a given app |
 |  [registerMountContext(contextName, provider)](./kibana-plugin-public.applicationstart.registermountcontext.md) | Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->. |
 

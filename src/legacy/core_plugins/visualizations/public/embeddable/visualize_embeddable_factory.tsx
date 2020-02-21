@@ -20,31 +20,25 @@
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from 'kibana/public';
 import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
   Container,
+  EmbeddableFactory,
   EmbeddableOutput,
+  ErrorEmbeddable,
 } from '../../../../../plugins/embeddable/public';
-import { showNewVisModal } from '../../../kibana/public/visualize';
 import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import {
+  VisSavedObject,
   VisualizeEmbeddable,
   VisualizeInput,
   VisualizeOutput,
-  VisSavedObject,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
-import {
-  getUISettings,
-  getCapabilities,
-  getHttp,
-  getTypes,
-  getSavedObjects,
-  getUsageCollector,
-} from '../np_ready/public/services';
+import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
+import { showNewVisModal } from '../np_ready/public/wizard';
+import { TimefilterContract } from '../../../../../plugins/data/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -58,7 +52,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor(private getSavedVisualizationsLoader: () => SavedVisualizations) {
+  constructor(
+    private timefilter: TimefilterContract,
+    private getSavedVisualizationsLoader: () => SavedVisualizations
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -121,6 +118,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
       return new VisualizeEmbeddable(
+        this.timefilter,
         {
           savedVisualization: savedObject,
           indexPatterns,
@@ -157,16 +155,9 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    showNewVisModal(
-      getTypes(),
-      {
-        editorParams: ['addToDashboard'],
-      },
-      getHttp().basePath.prepend,
-      getUISettings(),
-      getSavedObjects(),
-      getUsageCollector()
-    );
+    showNewVisModal({
+      editorParams: ['addToDashboard'],
+    });
     return undefined;
   }
 }

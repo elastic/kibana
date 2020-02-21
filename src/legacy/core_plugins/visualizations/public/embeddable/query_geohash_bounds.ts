@@ -24,10 +24,10 @@ import { toastNotifications } from 'ui/notify';
 import { IAggConfig } from 'ui/agg_types';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../np_ready/public';
-import { esFilters, Query, SearchSource, ISearchSource } from '../../../../../plugins/data/public';
+import { Filter, Query, SearchSource, ISearchSource } from '../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   query?: Query;
   searchSource?: ISearchSource;
 }
@@ -78,7 +78,7 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
         const useTimeFilter = !!indexPattern.timeFieldName;
         if (useTimeFilter) {
           const filter = timefilter.createFilter(indexPattern);
-          if (filter) activeFilters.push((filter as any) as esFilters.Filter);
+          if (filter) activeFilters.push((filter as any) as Filter);
         }
         return activeFilters;
       });
