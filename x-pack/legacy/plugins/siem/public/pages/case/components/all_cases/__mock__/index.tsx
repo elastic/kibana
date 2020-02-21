@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryParams, SortFieldCase } from '../../../../../containers/case/types';
+import { SortFieldCase } from '../../../../../containers/case/types';
+import { UseGetCasesState } from '../../../../../containers/case/use_get_cases';
 
-export const useGetCasesMockState = {
+export const useGetCasesMockState: UseGetCasesState = {
   data: {
     cases: [
       {
@@ -70,7 +71,7 @@ export const useGetCasesMockState = {
     page: 1,
     perPage: 5,
     sortField: SortFieldCase.createdAt,
-    sortOrder: 'desc' as QueryParams['sortOrder'],
+    sortOrder: 'desc',
   },
   filterOptions: { search: '', tags: [] },
 };
