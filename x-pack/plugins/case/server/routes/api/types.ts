@@ -20,6 +20,7 @@ import {
   UpdatedCaseSchema,
   UpdatedCommentSchema,
   UserSchema,
+  NewActionSchema,
 } from './schema';
 
 import { CaseServiceSetup } from '../../services';
@@ -33,6 +34,7 @@ export type SavedObjectsFindOptionsType = TypeOf<typeof SavedObjectsFindOptionsS
 export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
 export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;
+export type NewActionType = TypeOf<typeof NewActionSchema>;
 
 export interface CaseAttributes extends NewCaseType, SavedObjectAttributes {
   created_at: string;
