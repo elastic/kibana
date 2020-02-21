@@ -224,6 +224,7 @@ export class CreateIndexPatternWizard extends Component {
           savedObjectsClient={services.savedObjectsClient}
           indexPatternCreationType={this.indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
+          uiSettings={services.uiSettings}
         />
       );
     }

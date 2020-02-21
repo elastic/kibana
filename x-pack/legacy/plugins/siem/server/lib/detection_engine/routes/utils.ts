@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
+import { LegacyServices } from '../../../types';
 
 export interface OutputError {
   message: string;
@@ -44,7 +44,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
 };
 
 export interface BulkError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: {
     status_code: number;
     message: string;
@@ -53,24 +54,54 @@ export interface BulkError {
 
 export const createBulkErrorObject = ({
   ruleId,
+  id,
   statusCode,
   message,
 }: {
-  ruleId: string;
+  ruleId?: string;
+  id?: string;
   statusCode: number;
   message: string;
 }): BulkError => {
-  return {
-    rule_id: ruleId,
-    error: {
-      status_code: statusCode,
-      message,
-    },
-  };
+  if (id != null && ruleId != null) {
+    return {
+      id,
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (id != null) {
+    return {
+      id,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else if (ruleId != null) {
+    return {
+      rule_id: ruleId,
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  } else {
+    return {
+      rule_id: '(unknown id)',
+      error: {
+        status_code: statusCode,
+        message,
+      },
+    };
+  }
 };
 
 export interface ImportRuleResponse {
-  rule_id: string;
+  rule_id?: string;
+  id?: string;
   status_code?: number;
   message?: string;
   error?: {
@@ -174,21 +205,9 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-): string => {
-  const spaceId = server.plugins.spaces?.getSpaceId?.(request) ?? 'default';
-  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  return `${signalsIndex}-${spaceId}`;
-};
+export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
+  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  const spaceId = getSpaceId();
 
-export const callWithRequestFactory = (
-  request: RequestFacade | Omit<RequestFacade, 'query'>,
-  server: ServerFacade
-) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  return <T, U>(endpoint: string, params: T, options?: U) => {
-    return callWithRequest(request, endpoint, params, options);
-  };
+  return `${signalsIndex}-${spaceId}`;
 };

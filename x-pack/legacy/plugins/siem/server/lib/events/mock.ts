@@ -189,8 +189,7 @@ export const mockOptions: RequestDetailsOptions = {
 };
 
 export const mockRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       indexName: 'auditbeat-8.0.0-2019.03.29-000003',

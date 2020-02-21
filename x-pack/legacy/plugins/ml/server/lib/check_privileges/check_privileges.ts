@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
 import { XPackMainPlugin } from '../../../../xpack_main/server/xpack_main';
-import { callWithRequestType } from '../../../common/types/kibana';
 import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';
 import { checkLicense } from '../check_license';
@@ -24,12 +24,12 @@ interface Response {
 }
 
 export function privilegesProvider(
-  callWithRequest: callWithRequestType,
+  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
   xpackMainPlugin: XPackMainPlugin,
   isMlEnabledInSpace: () => Promise<boolean>,
   ignoreSpaces: boolean = false
 ) {
-  const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
+  const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
   async function getPrivileges(): Promise<Response> {
     // get the default privileges, forced to be false.
     const privileges = getDefaultPrivileges();
@@ -74,7 +74,7 @@ export function privilegesProvider(
     } else {
       // security enabled
       // load all ml privileges for this user.
-      const { cluster } = await callWithRequest('ml.privilegeCheck', { body: mlPrivileges });
+      const { cluster } = await callAsCurrentUser('ml.privilegeCheck', { body: mlPrivileges });
       setGettingPrivileges(cluster, privileges);
       if (upgradeInProgress === false) {
         // if an upgrade is in progress, don't apply the "setting"

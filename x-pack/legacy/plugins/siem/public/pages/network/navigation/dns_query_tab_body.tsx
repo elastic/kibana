@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
@@ -14,10 +14,13 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import {
+  MatrixHistogramOption,
+  MatrixHisrogramConfigs,
+} from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { HistogramType } from '../../../graphql/types';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -28,6 +31,17 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 
+const DEFAULT_STACK_BY = 'dns.question.registered_domain';
+
+export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
+  defaultStackByOption:
+    dnsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
+  errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
+  histogramType: HistogramType.dns,
+  stackByOptions: dnsStackByOptions,
+  subtitle: undefined,
+};
+
 export const DnsQueryTabBody = ({
   deleteQuery,
   endDate,
@@ -36,7 +50,6 @@ export const DnsQueryTabBody = ({
   startDate,
   setQuery,
   type,
-  updateDateRange = () => {},
 }: NetworkComponentQueryProps) => {
   useEffect(() => {
     return () => {
@@ -51,24 +64,26 @@ export const DnsQueryTabBody = ({
     []
   );
 
+  const dnsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      title: getTitle,
+    }),
+    [getTitle]
+  );
+
   return (
     <>
       <MatrixHistogramContainer
-        dataKey={['NetworkDnsHistogram', 'matrixHistogramData']}
-        defaultStackByOption={dnsStackByOptions[0]}
         endDate={endDate}
-        errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
         filterQuery={filterQuery}
         id={HISTOGRAM_ID}
-        isDnsHistogram={true}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
+        showLegend={true}
         sourceId="default"
         startDate={startDate}
-        stackByOptions={dnsStackByOptions}
-        title={getTitle}
         type={networkModel.NetworkType.page}
-        updateDateRange={updateDateRange}
+        {...dnsHistogramConfigs}
       />
       <NetworkDnsQuery
         endDate={endDate}

@@ -11,8 +11,10 @@ import {
   mockCaseComments,
 } from '../__fixtures__';
 import { initGetCommentApi } from '../get_comment';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
+import { flattenCommentSavedObject } from '../utils';
+import { CommentAttributes } from '../types';
 
 describe('GET comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -32,7 +34,11 @@ describe('GET comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(mockCaseComments.find(s => s.id === 'mock-comment-1'));
+    expect(response.payload).toEqual(
+      flattenCommentSavedObject(
+        mockCaseComments.find(s => s.id === 'mock-comment-1') as SavedObject<CommentAttributes>
+      )
+    );
   });
   it(`returns an error when getComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
