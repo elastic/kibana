@@ -28,12 +28,7 @@ const redacted = redact(node);
 const client = new Client({ node });
 
 export const ingest = log => async body => {
-  let index = '';
-  if (!body.coveredFilePath) {
-    index = TOTALS_INDEX;
-  } else {
-    index = COVERAGE_INDEX;
-  }
+  const  index = (!body.coveredFilePath) ? TOTALS_INDEX : COVERAGE_INDEX;
 
   try {
     await client.index({ index, body });

@@ -37,7 +37,7 @@ export const staticSite = urlBase => obj => {
 
   return maybeTotal
     .map(coveredFilePath => trimLeftFrom('kibana', coveredFilePath))
-    .map(trimmed => `${urlBase}${BUILD_ID}/${ts}/${trimmed}`)
+    .map(trimmed => `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`)
     .fold(assignAndReturn, assignAndReturn);
 };
 export const statsAndCoveredFilePath = (...xs) => {
