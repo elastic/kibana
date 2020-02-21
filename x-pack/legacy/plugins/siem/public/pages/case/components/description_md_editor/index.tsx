@@ -43,69 +43,79 @@ export const DescriptionMarkdown = React.memo<{
   descriptionInputHeight: number;
   initialDescription: string;
   isLoading: boolean;
+  fieldName: string;
   formHook?: boolean;
   onChange: (description: string) => void;
-}>(({ initialDescription, isLoading, descriptionInputHeight, onChange, formHook = false }) => {
-  const [description, setDescription] = useState(initialDescription);
-  const tabs = [
-    {
-      id: 'description',
-      name: i18n.DESCRIPTION,
-      content: formHook ? (
-        <CommonUseField
-          path="description"
-          onChange={e => {
-            setDescription(e as string);
-            onChange(e as string);
-          }}
-          componentProps={{
-            idAria: 'caseDescription',
-            'data-test-subj': 'caseDescription',
-            isDisabled: isLoading,
-            spellcheck: false,
-          }}
+}>(
+  ({
+    fieldName,
+    initialDescription,
+    isLoading,
+    descriptionInputHeight,
+    onChange,
+    formHook = false,
+  }) => {
+    const [description, setDescription] = useState(initialDescription);
+    const tabs = [
+      {
+        id: fieldName,
+        name: i18n.MARKDOWN,
+        content: formHook ? (
+          <CommonUseField
+            path={fieldName}
+            onChange={e => {
+              setDescription(e as string);
+              onChange(e as string);
+            }}
+            componentProps={{
+              idAria: `case${fieldName}`,
+              'data-test-subj': `case${fieldName}`,
+              isDisabled: isLoading,
+              spellcheck: false,
+            }}
+          />
+        ) : (
+          <TextArea
+            onChange={e => {
+              setDescription(e.target.value);
+              onChange(e.target.value);
+            }}
+            fullWidth={true}
+            height={descriptionInputHeight}
+            aria-label={`case${fieldName}`}
+            disabled={isLoading}
+            spellCheck={false}
+            value={description}
+          />
+        ),
+      },
+      {
+        id: 'preview',
+        name: i18n.PREVIEW,
+        content: (
+          <MarkdownContainer
+            data-test-subj="markdown-container"
+            height={descriptionInputHeight}
+            paddingSize="s"
+          >
+            <Markdown raw={description} />
+          </MarkdownContainer>
+        ),
+      },
+    ];
+    return (
+      <DescriptionContainer>
+        <DescriptionMarkdownTabs
+          data-test-subj={`new-${fieldName}-tabs`}
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
         />
-      ) : (
-        <TextArea
-          onChange={e => {
-            setDescription(e.target.value);
-            onChange(e.target.value);
-          }}
-          fullWidth={true}
-          height={descriptionInputHeight}
-          aria-label={i18n.DESCRIPTION}
-          disabled={isLoading}
-          spellCheck={false}
-          value={description}
-        />
-      ),
-    },
-    {
-      id: 'preview',
-      name: i18n.PREVIEW,
-      content: (
-        <MarkdownContainer
-          data-test-subj="markdown-container"
-          height={descriptionInputHeight}
-          paddingSize="s"
-        >
-          <Markdown raw={description} />
-        </MarkdownContainer>
-      ),
-    },
-  ];
-  return (
-    <DescriptionContainer>
-      <DescriptionMarkdownTabs
-        data-test-subj="new-description-tabs"
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-      />
-      <EuiFlexItem grow={true}>
-        <MarkdownHint show={description.trim().length > 0} />
-      </EuiFlexItem>
-    </DescriptionContainer>
-  );
-});
+        <EuiFlexItem grow={true}>
+          <MarkdownHint show={description.trim().length > 0} />
+        </EuiFlexItem>
+      </DescriptionContainer>
+    );
+  }
+);
 
 DescriptionMarkdown.displayName = 'DescriptionMarkdown';

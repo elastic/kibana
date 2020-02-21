@@ -5,11 +5,11 @@
  */
 
 import { KibanaServices } from '../../lib/kibana';
-import { FetchCasesProps, Case, NewCase, SortFieldCase, AllCases } from './types';
+import { NewComment, FetchCasesProps, Case, NewCase, SortFieldCase, AllCases } from './types';
 import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
-import { convertCaseToCamel, convertAllCasesToCamel, convertUpdateCaseToCamel } from './utils';
+import { convertCaseToCamel, convertAllCasesToCamel, convertUpdateCaseToCamel, convertCommentToCamel } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
@@ -72,4 +72,14 @@ export const updateCaseProperty = async (
   });
   await throwIfNotOk(response.response);
   return convertUpdateCaseToCamel(response.body!);
+};
+
+export const createComment = async (newComment: NewComment, caseId: string): Promise<Comment> => {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}/comments`, {
+    method: 'POST',
+    asResponse: true,
+    body: JSON.stringify(newComment),
+  });
+  await throwIfNotOk(response.response);
+  return convertCommentToCamel(response.body!);
 };

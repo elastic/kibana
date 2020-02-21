@@ -11,7 +11,7 @@ import styled, { css } from 'styled-components';
 export interface UserActionItem {
   avatarName: string;
   children?: ReactNode;
-  title: ReactNode;
+  title?: ReactNode;
 }
 
 export interface UserActionTreeProps {
@@ -81,9 +81,11 @@ const renderUserActions = (userActions: UserActionItem[]) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel className="userAction__panel" paddingSize="none">
-          <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
-            {title}
-          </EuiText>
+          {title && (
+            <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
+              {title}
+            </EuiText>
+          )}
           {children && (
             <div className="userAction__content" data-test-subj={`user-action-content`}>
               {children}

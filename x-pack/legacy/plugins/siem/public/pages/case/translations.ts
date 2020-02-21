@@ -38,6 +38,10 @@ export const DESCRIPTION = i18n.translate('xpack.siem.case.caseView.description'
   defaultMessage: 'Description',
 });
 
+export const MARKDOWN = i18n.translate('xpack.siem.case.caseView.description', {
+  defaultMessage: 'Markdown',
+});
+
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.siem.case.createCase.descriptionFieldRequiredError',
   {

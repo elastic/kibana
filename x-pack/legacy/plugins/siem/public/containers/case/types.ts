@@ -16,6 +16,10 @@ export interface NewCase extends FormData {
   title: string;
 }
 
+export interface NewComment extends FormData {
+  comment: string;
+}
+
 export interface CommentSnake {
   comment_id: string;
   created_at: string;
