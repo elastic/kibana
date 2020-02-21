@@ -10,6 +10,7 @@ import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
   try {
+    fetchGet(`/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`);
     return await fetchGet(url);
   } catch (error) {
     if (error.response.status === 404) {

@@ -111,10 +111,3 @@
 # Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"
 
-
-xpack.lens.enabled: false
-xpack.graph.enabled: false
-xpack.maps.enabled: false
-xpack.canvas.enabled: false
-xpack.cloud.enabled: false
-

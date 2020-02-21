@@ -5,7 +5,7 @@
  */
 
 import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -63,15 +63,25 @@ export const DurationChart = ({
   return (
     <>
       <EuiPanel paddingSize="m">
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-              defaultMessage="Monitor duration"
-              description="The 'ms' is an abbreviation for milliseconds."
-            />
-          </h4>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                  defaultMessage="Monitor duration"
+                  description="The 'ms' is an abbreviation for milliseconds."
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill={true} size="s">
+              Analyze in ML
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <ChartWrapper height="400px" loading={loading}>
           {hasLines ? (
             <Chart>

@@ -50,7 +50,7 @@ export const MLFlyoutContainer: Component<Props> = ({
         </p>
       ),
     });
-    onClose();
+    // onClose();
   }, [hasMLJob, notifications, onClose]);
 
   useEffect(() => {
