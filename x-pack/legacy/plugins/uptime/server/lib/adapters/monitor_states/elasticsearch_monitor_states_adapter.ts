@@ -147,13 +147,15 @@ const statusCountBody = (filters: any): any => {
           return state;
         `,
           reduce_script: `
-          // Use a treemap since it's later traversable in sorted order
+          // Use a treemap since it's traversable in sorted order.
+          // This is important later.
           TreeMap locStatus = new TreeMap();
           long totalDocs = 0;
           int uniqueIds = 0;
           for (state in states) {
             totalDocs += state.totalDocs;
             for (entry in state.locStatus.entrySet()) {
+              // Update the value for the given key if we have a more recent check from this location.
               locStatus.merge(entry.getKey(), entry.getValue(), (a,b) -> a.compareTo(b) > 0 ? a : b)
             }
           }
@@ -173,10 +175,13 @@ const statusCountBody = (filters: any): any => {
             // Parse the length delimited id/location strings described in the map section
             int colonIndex = idLoc.indexOf(":");
             int idEnd = Integer.parseInt(idLoc.substring(0, colonIndex), 16) + colonIndex + 1;
-            String id = idLoc.substring(colonIndex+1, idEnd);
+            String id = idLoc.substring(colonIndex + 1, idEnd);
             String loc = idLoc.substring(idEnd, idLoc.length());
             String status = timeStatus.substring(timeStatus.length() - 1);
             
+            // Here we increment counters for the up/down key per location
+            // We also create a new hashmap in locTotals if we've never seen this location
+            // before.
             locTotals.compute(loc, (k,v) -> {
               HashMap res = v;
               if (v == null) {
@@ -218,7 +223,7 @@ const statusCountBody = (filters: any): any => {
           Map result = new HashMap();
           result.total = total;
           result.location_totals = locTotals;
-          result.up = total-down;
+          result.up = total - down;
           result.down = down;
           result.totalDocs = totalDocs;
           return result;
