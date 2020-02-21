@@ -55,7 +55,7 @@ export default function({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const gridExampleRequestNames = await inspector.getRequestNames();
       await inspector.close();
-      expect(gridExampleRequestNames).to.equal('logstash-*');
+      expect(gridExampleRequestNames).to.equal('logstash-* (1)');
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
