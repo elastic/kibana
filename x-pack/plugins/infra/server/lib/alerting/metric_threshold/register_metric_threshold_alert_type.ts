@@ -133,6 +133,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         });
       }
 
+      // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
         alertState: isValueInAlertState ? AlertStates.ALERT : AlertStates.OK,
       });
