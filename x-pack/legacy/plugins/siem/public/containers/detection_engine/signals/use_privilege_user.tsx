@@ -11,7 +11,7 @@ import { useStateToaster } from '../../../components/toasters';
 import { getUserPrivilege } from './api';
 import * as i18n from './translations';
 
-interface Return {
+export interface ReturnPrivilegeUser {
   loading: boolean;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
@@ -23,11 +23,11 @@ interface Return {
  * Hook to get user privilege from
  *
  */
-export const usePrivilegeUser = (): Return => {
+export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [loading, setLoading] = useState(true);
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
-      Return,
+      ReturnPrivilegeUser,
       | 'isAuthenticated'
       | 'hasEncryptionKey'
       | 'hasIndexManage'
