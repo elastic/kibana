@@ -13,15 +13,16 @@
     "es": "node ../../scripts/es",
     "lint": "eslint .",
     "start": "plugin-helpers start",
-    "test:server": "plugin-helpers test:server",
-    "test:browser": "plugin-helpers test:browser",
+    "test:mocha": "plugin-helpers test:mocha",
+    "test:karma": "plugin-helpers test:karma",
     "build": "plugin-helpers build"
   },
   <%_ if (generateTranslations) { _%>
   "dependencies": {
-    "@kbn/i18n": "link:../../packages/kbn-i18n"
-  },
-  <%_ } _%>
+      "@kbn/i18n": "link:../../packages/kbn-i18n"
+    },
+  <%_
+  } _%>
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "link:../../packages/kbn-eslint-import-resolver-kibana",

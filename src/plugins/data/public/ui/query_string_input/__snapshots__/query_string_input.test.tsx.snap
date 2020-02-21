@@ -191,6 +191,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {
+                "get": [MockFunction],
                 "make": [Function],
               },
               "query": Object {
@@ -848,6 +849,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {
+                        "get": [MockFunction],
                         "make": [Function],
                       },
                       "query": Object {
@@ -1487,6 +1489,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {
+                "get": [MockFunction],
                 "make": [Function],
               },
               "query": Object {
@@ -2141,6 +2144,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {
+                        "get": [MockFunction],
                         "make": [Function],
                       },
                       "query": Object {
@@ -2780,6 +2784,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "getSuggestions": [MockFunction],
               "indexPatterns": Object {
+                "get": [MockFunction],
                 "make": [Function],
               },
               "query": Object {
@@ -3434,6 +3439,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "getSuggestions": [MockFunction],
                       "indexPatterns": Object {
+                        "get": [MockFunction],
                         "make": [Function],
                       },
                       "query": Object {

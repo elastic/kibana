@@ -5,8 +5,7 @@
  */
 
 import { IPS_TABLE_LOADED } from '../../screens/network/flows';
-import { DEFAULT_TIMEOUT } from '../../tasks/login';
 
 export const waitForIpsTableToBeLoaded = () => {
-  cy.get(IPS_TABLE_LOADED, { timeout: DEFAULT_TIMEOUT }).should('exist');
+  cy.get(IPS_TABLE_LOADED).should('exist');
 };
