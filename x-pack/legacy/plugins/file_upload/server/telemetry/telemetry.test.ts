@@ -6,8 +6,6 @@
 
 import { getTelemetry, updateTelemetry } from './telemetry';
 
-const elasticsearchPlugin: any = null;
-const getSavedObjectsRepository: any = null;
 const internalRepository = () => ({
   get: jest.fn(() => null),
   create: jest.fn(() => ({ attributes: 'test' })),
