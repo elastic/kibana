@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PROCESS_NAME_FIELD = '[data-test-subj="draggable-content-process.name"]';
+import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 
-export const UNCOMMON_PROCESSES_TABLE = '[data-test-subj="table-uncommonProcesses-loading-false"]';
+export const waitForAuthenticationsToBeLoaded = () => {
+  cy.get(AUTHENTICATIONS_TABLE).should('exist');
+};
