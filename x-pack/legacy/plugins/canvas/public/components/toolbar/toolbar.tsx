@@ -40,6 +40,7 @@ enum TrayType {
 interface Props {
   workpadName: string;
   isWriteable: boolean;
+  canUserWrite: boolean;
   tray: TrayType | null;
   setTray: (tray: TrayType | null) => void;
 
@@ -67,11 +68,16 @@ export const Toolbar = (props: Props) => {
     showWorkpadManager,
     setShowWorkpadManager,
     isWriteable,
+    canUserWrite,
   } = props;
 
   const elementIsSelected = Boolean(selectedElement);
 
   const done = () => setTray(null);
+
+  if (!isWriteable && canUserWrite && tray === TrayType.expression) {
+    done();
+  }
 
   const showHideTray = (exp: TrayType) => {
     if (tray && tray === exp) {
@@ -103,7 +109,7 @@ export const Toolbar = (props: Props) => {
 
   return (
     <div className="canvasToolbar hide-for-sharing">
-      {tray !== null && isWriteable && <Tray done={done}>{trays[tray]}</Tray>}
+      {tray !== null && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
@@ -136,7 +142,7 @@ export const Toolbar = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem />
-          {elementIsSelected && isWriteable && (
+          {elementIsSelected && isWriteable && canUserWrite && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 color="text"
@@ -168,4 +174,5 @@ Toolbar.propTypes = {
   showWorkpadManager: PropTypes.bool.isRequired,
   setShowWorkpadManager: PropTypes.func.isRequired,
   isWriteable: PropTypes.bool.isRequired,
+  canUserWrite: PropTypes.bool.isRequired,
 };

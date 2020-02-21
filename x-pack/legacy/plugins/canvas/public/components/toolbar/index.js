@@ -7,6 +7,7 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { pure, compose, withState, getContext, withHandlers } from 'recompose';
+import { canUserWrite } from '../../state/selectors/app';
 
 import {
   getWorkpad,
@@ -25,6 +26,7 @@ const mapStateToProps = state => ({
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   selectedElement: getSelectedElement(state),
   isWriteable: isWriteable(state),
+  canUserWrite: canUserWrite(state),
 });
 
 export const Toolbar = compose(
