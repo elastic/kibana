@@ -18,5 +18,5 @@ echo "3/3 Start Kibana ..."
 popd
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
 export NODE_OPTIONS="--max-old-space-size=4096"
-nohup node scripts/kibana --config=${CYPRESS_DIR}/ci/kibana.yml --no-base-path --csp.strict=false --optimize.watch=false> kibana.log 2>&1 &
+nohup node scripts/kibana --config=${CYPRESS_DIR}/ci/kibana.dev.yml --no-base-path --csp.strict=false --optimize.watch=false> kibana.log 2>&1 &
 echo $! > ${CYPRESS_DIR}/kibana_pid.txt

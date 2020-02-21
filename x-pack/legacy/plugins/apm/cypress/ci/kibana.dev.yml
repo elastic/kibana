@@ -2,6 +2,6 @@
 # Disabled plugins
 ########################
 logging.verbose: true
-elasticsearch.username: "kibana_system_user"
+elasticsearch.username: "admin"
 elasticsearch.password: "changeme"
 xpack.security.encryptionKey: "something_at_least_32_characters"
