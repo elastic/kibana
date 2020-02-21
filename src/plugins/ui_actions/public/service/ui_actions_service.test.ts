@@ -18,12 +18,12 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action } from '../actions';
+import { ActionDefinition, ActionInternal } from '../actions';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry } from '../types';
 import { Trigger } from '../triggers';
 
-const testAction1: Action = {
+const testAction1: ActionDefinition = {
   id: 'action1',
   order: 1,
   type: 'type1',
@@ -33,7 +33,7 @@ const testAction1: Action = {
   isCompatible: async () => true,
 };
 
-const testAction2: Action = {
+const testAction2: ActionDefinition = {
   id: 'action2',
   order: 2,
   type: 'type2',
@@ -99,7 +99,7 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerActions()', () => {
-    const action1: Action = {
+    const action1: ActionDefinition = {
       id: 'action1',
       order: 1,
       type: 'type1',
@@ -108,7 +108,7 @@ describe('UiActionsService', () => {
       getIconType: () => '',
       isCompatible: async () => true,
     };
-    const action2: Action = {
+    const action2: ActionDefinition = {
       id: 'action2',
       order: 2,
       type: 'type2',
@@ -137,7 +137,8 @@ describe('UiActionsService', () => {
       const list1 = service.getTriggerActions('trigger');
 
       expect(list1).toHaveLength(1);
-      expect(list1).toEqual([action1]);
+      expect(list1[0]).toBeInstanceOf(ActionInternal);
+      expect(list1[0].id).toBe(action1.id);
 
       service.attachAction('trigger', 'action2');
       const list2 = service.getTriggerActions('trigger');
@@ -158,7 +159,7 @@ describe('UiActionsService', () => {
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
-      expect(actions.get(helloWorldAction.id)).toBe(helloWorldAction);
+      expect((actions.get(helloWorldAction.id) as any).id).toBe(helloWorldAction.id);
     });
 
     test('getTriggerCompatibleActions returns attached actions', async () => {

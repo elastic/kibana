@@ -34,10 +34,11 @@ export interface SerializedEvent {
  * Embeddables, however one can use the dynamic actions without Embeddables,
  * in that case they have to implement this interface.
  */
-export interface DynamicActionStorage {
+export interface ActionStorage {
   create(event: SerializedEvent): Promise<void>;
   update(event: SerializedEvent): Promise<void>;
   remove(eventId: string): Promise<void>;
   read(eventId: string): Promise<SerializedEvent>;
+  count(): Promise<number>;
   list(): Promise<SerializedEvent[]>;
 }

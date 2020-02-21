@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { Action } from '../actions';
+import { ActionDefinition, ActionInternal } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
-const action1: Action = {
+const action1: ActionDefinition = {
   id: 'action1',
   order: 1,
   type: 'type1',
 } as any;
-const action2: Action = {
+const action2: ActionDefinition = {
   id: 'action2',
   order: 2,
   type: 'type2',
@@ -46,13 +46,14 @@ test('returns actions set on trigger', () => {
 
   expect(list0).toHaveLength(0);
 
-  setup.attachAction('trigger', 'action1');
+  start.attachAction('trigger', 'action1');
   const list1 = start.getTriggerActions('trigger');
 
   expect(list1).toHaveLength(1);
-  expect(list1).toEqual([action1]);
+  expect(list1[0]).toBeInstanceOf(ActionInternal);
+  expect(list1[0].id).toBe(action1.id);
 
-  setup.attachAction('trigger', 'action2');
+  start.attachAction('trigger', 'action2');
   const list2 = start.getTriggerActions('trigger');
 
   expect(list2).toHaveLength(2);
