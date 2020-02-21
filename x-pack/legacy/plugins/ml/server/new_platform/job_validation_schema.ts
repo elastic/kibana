@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
+import { datafeedConfigSchema } from './datafeeds_schema';
 
 export const estimateBucketSpanSchema = schema.object({
   aggTypes: schema.arrayOf(schema.nullable(schema.string())),
@@ -36,22 +37,6 @@ export const validateJobSchema = schema.object({
   }),
   fields: schema.maybe(schema.any()),
   job: schema.object(anomalyDetectionJobSchema),
-});
-
-const datafeedConfigSchema = schema.object({
-  datafeed_id: schema.string(),
-  aggregations: schema.maybe(schema.any()),
-  aggs: schema.maybe(schema.any()),
-  chunking_config: schema.maybe(schema.any()),
-  frequency: schema.maybe(schema.string()),
-  indices: schema.arrayOf(schema.string()),
-  indexes: schema.maybe(schema.arrayOf(schema.string())),
-  job_id: schema.string(),
-  query: schema.any(),
-  query_delay: schema.maybe(schema.string()),
-  script_fields: schema.maybe(schema.any()),
-  scroll_size: schema.maybe(schema.number()),
-  delayed_data_check_config: schema.maybe(schema.any()),
 });
 
 export const validateCardinalitySchema = {
