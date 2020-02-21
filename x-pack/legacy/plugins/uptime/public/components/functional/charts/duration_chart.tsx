@@ -24,14 +24,6 @@ interface DurationChartProps {
    * on the duration chart. One entry per location
    */
   locationDurationLines: LocationDurationLine[];
-  /**
-   * The color to be used for the average duration series.
-   */
-  meanColor: string;
-  /**
-   * The color to be used for the range duration series.
-   */
-  rangeColor: string;
 
   /**
    * To represent the loading spinner on chart
@@ -45,11 +37,7 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChart = ({
-  locationDurationLines,
-  meanColor,
-  loading,
-}: DurationChartProps) => {
+export const DurationChart = ({ locationDurationLines, loading }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
@@ -99,7 +87,7 @@ export const DurationChart = ({
                   defaultMessage: 'Duration ms',
                 })}
               />
-              <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+              <DurationLineSeriesList lines={locationDurationLines} />
             </Chart>
           ) : (
             <DurationChartEmptyState />

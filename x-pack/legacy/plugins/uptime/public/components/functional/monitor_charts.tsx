@@ -19,15 +19,11 @@ interface MonitorChartsQueryResult {
 
 interface MonitorChartsProps {
   monitorId: string;
-  danger: string;
-  mean: string;
-  range: string;
-  success: string;
 }
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = ({ data, mean, range, monitorId, loading }: Props) => {
+export const MonitorChartsComponent = ({ data, monitorId, loading }: Props) => {
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
@@ -36,12 +32,7 @@ export const MonitorChartsComponent = ({ data, mean, range, monitorId, loading }
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <DurationChart
-            locationDurationLines={locationDurationLines}
-            meanColor={mean}
-            rangeColor={range}
-            loading={loading}
-          />
+          <DurationChart locationDurationLines={locationDurationLines} loading={loading} />
         </EuiFlexItem>
         <EuiFlexItem>
           <PingHistogram height="400px" isResponsive={false} monitorId={monitorId} />

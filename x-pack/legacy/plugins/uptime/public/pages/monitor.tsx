@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
-import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
+import { UptimeRefreshContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
@@ -19,7 +19,6 @@ export const MonitorPage = () => {
   monitorId = atob(monitorId || '');
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { colors } = useContext(UptimeThemeContext);
   const { refreshApp } = useContext(UptimeRefreshContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -44,7 +43,7 @@ export const MonitorPage = () => {
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} monitorId={monitorId} variables={sharedVariables} />
+      <MonitorCharts monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
       <PingList
         onPageCountChange={setPingListPageCount}

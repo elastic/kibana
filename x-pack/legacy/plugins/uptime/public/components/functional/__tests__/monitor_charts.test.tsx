@@ -64,12 +64,8 @@ describe('MonitorCharts component', () => {
   it('renders the component without errors', () => {
     const component = shallowWithRouter(
       <MonitorChartsComponent
-        danger="dangerColor"
         data={{ monitorChartsData: chartResponse.monitorChartsData }}
         loading={false}
-        mean="mean"
-        range="range"
-        success="success"
         monitorId="something"
       />
     );
