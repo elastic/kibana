@@ -63,6 +63,7 @@ export const Resolver = styled(
         </div>
         <StyledPanel />
         <StyledGraphControls />
+        <SymbolDefinitions />
       </div>
     );
   })
