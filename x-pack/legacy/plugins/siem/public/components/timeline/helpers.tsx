@@ -14,8 +14,8 @@ import { BrowserFields } from '../../containers/source';
 import {
   IIndexPattern,
   Query,
-  esQuery,
-  esFilters,
+  EsQueryConfig,
+  Filter,
 } from '../../../../../../../src/plugins/data/public';
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
@@ -105,11 +105,11 @@ export const combineQueries = ({
   end,
   isEventViewer,
 }: {
-  config: esQuery.EsQueryConfig;
+  config: EsQueryConfig;
   dataProviders: DataProvider[];
   indexPattern: IIndexPattern;
   browserFields: BrowserFields;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
   start: number;

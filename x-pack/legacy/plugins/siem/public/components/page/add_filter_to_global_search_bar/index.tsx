@@ -8,7 +8,7 @@ import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { WithHoverActions } from '../../with_hover_actions';
 import { useKibana } from '../../../lib/kibana';
 
@@ -18,7 +18,7 @@ export * from './helpers';
 
 interface OwnProps {
   children: JSX.Element;
-  filter: esFilters.Filter;
+  filter: Filter;
   onFilterAdded?: () => void;
 }
 

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { PageLoading } from 'plugins/monitoring/components';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { CODE_PATH_LICENSE } from '../../../common/constants';

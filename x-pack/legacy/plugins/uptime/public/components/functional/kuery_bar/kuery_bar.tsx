@@ -15,7 +15,7 @@ import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
-  DataPublicPluginStart,
+  DataPublicPluginSetup,
 } from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
@@ -33,7 +33,7 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 interface Props {
-  autocomplete: DataPublicPluginStart['autocomplete'];
+  autocomplete: DataPublicPluginSetup['autocomplete'];
   loadIndexPattern: any;
   indexPattern: any;
 }

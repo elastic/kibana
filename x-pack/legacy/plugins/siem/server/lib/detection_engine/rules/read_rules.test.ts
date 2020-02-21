@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
 import { readRules } from './read_rules';
-import { AlertsClient } from '../../../../../alerting';
+import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
 import { getResult, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 
 describe('read_rules', () => {
@@ -15,9 +14,8 @@ describe('read_rules', () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
       });
@@ -28,9 +26,8 @@ describe('read_rules', () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: null,
       });
@@ -42,9 +39,8 @@ describe('read_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: undefined,
         ruleId: 'rule-1',
       });
@@ -56,9 +52,8 @@ describe('read_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: null,
         ruleId: 'rule-1',
       });
@@ -70,9 +65,8 @@ describe('read_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: null,
         ruleId: null,
       });
@@ -84,9 +78,8 @@ describe('read_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const rule = await readRules({
-        alertsClient: unsafeCast,
+        alertsClient,
         id: undefined,
         ruleId: undefined,
       });

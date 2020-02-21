@@ -54,7 +54,12 @@ module.exports = (_, options = {}) => {
           // on their own
           useBuiltIns: 'entry',
           modules: 'cjs',
-          corejs: 3,
+          // right now when using `corejs: 3` babel does not use the latest available
+          // core-js version due to a bug: https://github.com/babel/babel/issues/10816
+          // Because of that we should use for that value the same version we install
+          // in the package.json in order to have the same polyfills between the environment
+          // and the tests
+          corejs: '3.2.1',
 
           ...(options['@babel/preset-env'] || {}),
         },

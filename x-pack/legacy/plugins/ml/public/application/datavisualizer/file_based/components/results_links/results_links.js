@@ -10,15 +10,16 @@ import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 
 import moment from 'moment';
-import uiChrome from 'ui/chrome';
+
 import { ml } from '../../../../services/ml_api_service';
 import { isFullLicense } from '../../../../license/check_license';
 import { checkPermission } from '../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 const RECHECK_DELAY_MS = 3000;
 
-export class ResultsLinks extends Component {
+class ResultsLinksUI extends Component {
   constructor(props) {
     super(props);
 
@@ -76,6 +77,7 @@ export class ResultsLinks extends Component {
         ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))`
         : '';
 
+    const { basePath } = this.props.kibana.services.http;
     return (
       <EuiFlexGroup gutterSize="l">
         {createIndexPattern && (
@@ -89,7 +91,7 @@ export class ResultsLinks extends Component {
                 />
               }
               description=""
-              href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
+              href={`${basePath.get()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
             />
           </EuiFlexItem>
         )}
@@ -139,7 +141,7 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/indices/filter/${index}`}
+            href={`${basePath.get()}/app/kibana#/management/elasticsearch/index_management/indices/filter/${index}`}
           />
         </EuiFlexItem>
 
@@ -153,7 +155,7 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/kibana/index_patterns/${
+            href={`${basePath.get()}/app/kibana#/management/kibana/index_patterns/${
               createIndexPattern ? indexPatternId : ''
             }`}
           />
@@ -162,6 +164,8 @@ export class ResultsLinks extends Component {
     );
   }
 }
+
+export const ResultsLinks = withKibana(ResultsLinksUI);
 
 async function getFullTimeRange(index, timeFieldName) {
   const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };

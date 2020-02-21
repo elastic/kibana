@@ -22,10 +22,7 @@ import 'uiExports/interpreter';
 import { register, registryFactory } from '@kbn/interpreter/common';
 import { npSetup } from 'ui/new_platform';
 import { registries } from './registries';
-import {
-  ExpressionInterpretWithHandlers,
-  ExpressionExecutor,
-} from '../../../../plugins/expressions/public';
+import { Executor, ExpressionExecutor } from '../../../../plugins/expressions/public';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -46,7 +43,7 @@ export const getInterpreter = async () => {
 };
 
 // TODO: This function will be left behind in the legacy platform.
-export const interpretAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
+export const interpretAst: Executor['run'] = async (ast, context, handlers) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(ast, context, handlers);
 };

@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import {
   IIndexPattern,
   Query,
+  Filter,
   esFilters,
   FilterManager,
   SavedQuery,
@@ -32,7 +33,7 @@ export interface QueryBarTimelineComponentProps {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
@@ -42,7 +43,7 @@ export interface QueryBarTimelineComponentProps {
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
-  setFilters: (filters: esFilters.Filter[]) => void;
+  setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
@@ -88,7 +89,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<esFilters.Filter[]>([]);
+    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>([]);
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
@@ -108,7 +109,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             if (isSubscribed) {
               const filterWithoutDropArea = filterManager
                 .getFilters()
-                .filter((f: esFilters.Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+                .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
               setFilters(filterWithoutDropArea);
               setQueryBarFilters(filterWithoutDropArea);
             }
@@ -125,7 +126,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     useEffect(() => {
       const filterWithoutDropArea = filterManager
         .getFilters()
-        .filter((f: esFilters.Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+        .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
       if (!isEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
@@ -298,7 +299,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   }
 );
 
-export const getDataProviderFilter = (dataProviderDsl: string): esFilters.Filter => {
+export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
   const dslObject = JSON.parse(dataProviderDsl);
   const key = Object.keys(dslObject);
   return {

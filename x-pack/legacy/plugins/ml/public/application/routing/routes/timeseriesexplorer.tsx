@@ -8,12 +8,8 @@ import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { usePrevious } from 'react-use';
 import moment from 'moment';
-// @ts-ignore
-import queryString from 'query-string';
 
 import { i18n } from '@kbn/i18n';
-
-import { timefilter } from 'ui/timefilter';
 
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
@@ -39,10 +35,11 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useTimefilter } from '../../contexts/kibana';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     ML_BREADCRUMB,
     ANOMALY_DETECTION_BREADCRUMB,
@@ -55,8 +52,8 @@ export const timeSeriesExplorerRoute: MlRoute = {
   ],
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context, results } = useResolver('', undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context, results } = useResolver('', undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
@@ -65,7 +62,7 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   return (
     <PageLoader context={context}>
       <TimeSeriesExplorerUrlStateManager
-        config={config}
+        config={deps.config}
         jobsWithTimeRange={results.jobsWithTimeRange.jobs}
       />
     </PageLoader>
@@ -91,6 +88,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -106,11 +104,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       }
     }
   }, [refresh?.lastRefresh]);
-
-  useEffect(() => {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-  }, []);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.

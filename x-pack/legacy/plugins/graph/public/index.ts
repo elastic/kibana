@@ -7,9 +7,11 @@
 import { npSetup, npStart } from 'ui/new_platform';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { GraphPlugin } from './plugin';
+import { GraphSetup } from '../../../../plugins/graph/public';
 
 type XpackNpSetupDeps = typeof npSetup.plugins & {
   licensing: LicensingPluginSetup;
+  graph: GraphSetup;
 };
 
 (async () => {

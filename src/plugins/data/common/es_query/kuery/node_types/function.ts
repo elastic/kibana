@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { functions } from '../functions';
 import { IIndexPattern } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
-import { JsonValue } from '..';
+import { JsonValue } from '../../../../../kibana_utils/public';
 
 export function buildNode(functionName: FunctionName, ...args: any[]) {
   const kueryFunction = functions[functionName];

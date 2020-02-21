@@ -5,19 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { deleteRules } from '../../rules/delete_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: ['POST', 'DELETE'], // allow both POST and DELETE in case their client does not support bodies in DELETE
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
@@ -31,17 +30,12 @@ export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       },
     },
     async handler(request: QueryBulkRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const { id, rule_id: ruleId } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -78,6 +72,9 @@ export const createDeleteRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const deleteRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesBulkRoute(server));
+export const deleteRulesBulkRoute = (
+  route: LegacyServices['route'],
+  getClients: GetScopedClients
+): void => {
+  route(createDeleteRulesBulkRoute(getClients));
 };

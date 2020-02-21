@@ -19,6 +19,8 @@ import {
   EuiPageContentBody,
   EuiButtonEmpty,
   EuiSwitch,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
@@ -28,11 +30,13 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { AlertInstancesRouteWithApi } from './alert_instances_route';
 
 type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
   actionTypes: ActionType[];
+  requestRefresh: () => Promise<void>;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -43,6 +47,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   enableAlert,
   unmuteAlert,
   muteAlert,
+  requestRefresh,
 }) => {
   const { capabilities } = useAppDependencies();
 
@@ -131,10 +136,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           setIsEnabled(true);
                           await enableAlert(alert);
                         }
+                        requestRefresh();
                       }}
                       label={
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
                           defaultMessage="Enable"
                         />
                       }
@@ -154,16 +160,34 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           setIsMuted(true);
                           await muteAlert(alert);
                         }
+                        requestRefresh();
                       }}
                       label={
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
                           defaultMessage="Mute"
                         />
                       }
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexItem>
+                {alert.enabled ? (
+                  <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
+                ) : (
+                  <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
+                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>

@@ -25,7 +25,11 @@ import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/p
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
-import { Field, isNestedField, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import {
+  IndexPatternField,
+  indexPatterns,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
@@ -72,7 +76,7 @@ export class FieldParamType extends BaseParamType {
       };
     }
 
-    this.serialize = (field: Field) => {
+    this.serialize = (field: IndexPatternField) => {
       return field.name;
     };
 
@@ -112,11 +116,11 @@ export class FieldParamType extends BaseParamType {
    */
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
-    const filteredFields = fields.filter((field: Field) => {
+    const filteredFields = fields.filter((field: IndexPatternField) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (
-        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
+        (onlyAggregatable && (!field.aggregatable || indexPatterns.isNestedField(field))) ||
         (!scriptable && field.scripted)
       ) {
         return false;

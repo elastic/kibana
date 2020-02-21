@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import { stringify } from 'query-string';
 import { getApiPath } from '../../lib/helper';
 import { APIFn } from './types';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
@@ -25,7 +25,7 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
     ...(statusFilter && { statusFilter }),
     ...(filters && { filters }),
   };
-  const urlParams = qs.stringify(params).toString();
+  const urlParams = stringify(params, { sort: false });
   const response = await fetch(`${url}?${urlParams}`);
   if (!response.ok) {
     throw new Error(response.statusText);

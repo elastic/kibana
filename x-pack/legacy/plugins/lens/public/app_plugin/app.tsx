@@ -21,6 +21,7 @@ import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  Filter,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
@@ -39,7 +40,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 }
 
@@ -335,8 +336,22 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModal
             onSave={props => {
+              const [pinnedFilters, appFilters] = _.partition(
+                lastKnownDoc.state?.filters,
+                esFilters.isFilterPinned
+              );
+              const lastDocWithoutPinned = pinnedFilters?.length
+                ? {
+                    ...lastKnownDoc,
+                    state: {
+                      ...lastKnownDoc.state,
+                      filters: appFilters,
+                    },
+                  }
+                : lastKnownDoc;
+
               const doc = {
-                ...lastKnownDoc,
+                ...lastDocWithoutPinned,
                 id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
               };

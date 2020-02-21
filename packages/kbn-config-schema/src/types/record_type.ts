@@ -40,6 +40,8 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
       case 'any.required':
       case 'record.base':
         return `expected value of type [object] but got [${typeDetect(value)}]`;
+      case 'record.parse':
+        return `could not parse record value from [${value}]`;
       case 'record.key':
       case 'record.value':
         const childPathWithIndex = path.slice();
