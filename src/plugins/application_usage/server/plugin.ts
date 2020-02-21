@@ -134,7 +134,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
       () => this.esClient && this.rollTotals(this.esClient, savedObjectsClient),
       ROLL_INDICES_INTERVAL
     );
-    this.rollTotals(this.esClient!, savedObjectsClient);
+    await this.rollTotals(this.esClient!, savedObjectsClient);
   }
 
   public stop() {

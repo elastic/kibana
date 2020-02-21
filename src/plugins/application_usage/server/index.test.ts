@@ -164,12 +164,7 @@ describe('ApplicationUsagePlugin/server', () => {
       const appPlugin = plugin(coreMock.createPluginInitializerContext());
 
       const coreSetup = coreMock.createSetup();
-      coreSetup.elasticsearch.createClient.mockImplementation(
-        () =>
-          ({
-            callAsInternalUser: esClient,
-          } as any)
-      );
+      (coreSetup.elasticsearch.adminClient.callAsInternalUser as any).mockImplementation(esClient);
 
       await appPlugin.setup(coreSetup, { usageCollection: localUsageCollection });
 
