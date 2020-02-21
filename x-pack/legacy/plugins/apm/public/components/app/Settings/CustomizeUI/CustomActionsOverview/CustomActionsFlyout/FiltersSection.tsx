@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
+import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 
 type Keys = 'key' | 'value';
 export type Filter = {
@@ -42,6 +43,88 @@ const filterOptions = [
 
 export const FiltersSection = ({
   filters = [{ key: '', value: '' }],
+  onChange,
+  customAction
+}: {
+  filters: Filter[];
+  onChange?: (filters: Filter[]) => void;
+  customAction?: CustomAction;
+}) => {
+  const handleAddFilter = () => {
+    if (typeof onChange === 'function') {
+      onChange([...filters, { key: '', value: '' }]);
+    }
+  };
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.apm.settings.customizeUI.customActions.flyout.filters.title',
+            {
+              defaultMessage: 'Filters'
+            }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="xs">
+        {i18n.translate(
+          'xpack.apm.settings.customizeUI.customActions.flyout.filters.subtitle',
+          {
+            defaultMessage:
+              'Add additional values within the same field by comma separating values.'
+          }
+        )}
+      </EuiText>
+
+      <Filters filters={filters} onChange={onChange} />
+
+      <EuiSpacer size="xs" />
+
+      <AddFilterButton
+        onClick={handleAddFilter}
+        // Disable button when user has already added all items available
+        isDisabled={filters.length === filterOptions.length - 1}
+      />
+    </>
+  );
+};
+
+const AddFilterButton = ({
+  onClick,
+  isDisabled
+}: {
+  onClick: () => void;
+  isDisabled: boolean;
+}) => (
+  <EuiButtonEmpty
+    iconType="plusInCircle"
+    onClick={onClick}
+    disabled={isDisabled}
+  >
+    {i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.flyout.filters.addAnotherFilter',
+      {
+        defaultMessage: 'Add another filter'
+      }
+    )}
+  </EuiButtonEmpty>
+);
+
+const getSelectOptions = (filters: Filter[], idx: number) => {
+  return filterOptions.filter(option => {
+    const indexUsedFilter = filters.findIndex(
+      _filter => _filter.key === option.value
+    );
+    // Filter out all items already added, besides the one selected in the current filter.
+    return indexUsedFilter === -1 || idx === indexUsedFilter;
+  });
+};
+
+const Filters = ({
+  filters,
   onChange
 }: {
   filters: Filter[];
@@ -75,41 +158,16 @@ export const FiltersSection = ({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.flyout.filters.title',
-            {
-              defaultMessage: 'Filters'
-            }
-          )}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="xs">
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customActions.flyout.filters.subtitle',
-          {
-            defaultMessage:
-              'Add additional values within the same field by comma separating values.'
-          }
-        )}
-      </EuiText>
-      {filters.map((filter, idx) => {
+      {filters.map((filter: Filter, idx: number) => {
         const filterId = `filter-${idx}`;
+        const selectOptions = getSelectOptions(filters, idx);
         return (
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiSelect
                 id={filterId}
                 fullWidth
-                options={filterOptions.filter(option => {
-                  const indexUsedFilter = filters.findIndex(
-                    _filter => _filter.key === option.value
-                  );
-                  // Filter out all items already added, besides the one selected in the current filter.
-                  return indexUsedFilter === -1 || idx === indexUsedFilter;
-                })}
+                options={selectOptions}
                 value={filter.key}
                 onChange={e => onChangeFilter('key', e.target.value, idx)}
                 isInvalid={isEmpty(filter.key) && !isEmpty(filter.value)}
@@ -143,24 +201,6 @@ export const FiltersSection = ({
           </EuiFlexGroup>
         );
       })}
-      <EuiSpacer size="xs" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        onClick={() => {
-          if (typeof onChange === 'function') {
-            onChange([...filters, { key: '', value: '' }]);
-          }
-        }}
-        // Disable button when user has already added all items available
-        disabled={filters.length === filterOptions.length - 1}
-      >
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customActions.flyout.filters.addAnotherFilter',
-          {
-            defaultMessage: 'Add another filter'
-          }
-        )}
-      </EuiButtonEmpty>
     </>
   );
 };

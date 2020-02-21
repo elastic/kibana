@@ -6,6 +6,7 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CreateCustomActionButton } from './CreateCustomActionButton';
 
 export const EmptyPrompt = ({
   onCreateCustomActionClick
@@ -39,14 +40,7 @@ export const EmptyPrompt = ({
           </p>
         </>
       }
-      actions={
-        <EuiButton color="primary" fill onClick={onCreateCustomActionClick}>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customActions.createCustomAction',
-            { defaultMessage: 'Create custom action' }
-          )}
-        </EuiButton>
-      }
+      actions={<CreateCustomActionButton onClick={onCreateCustomActionClick} />}
     />
   );
 };

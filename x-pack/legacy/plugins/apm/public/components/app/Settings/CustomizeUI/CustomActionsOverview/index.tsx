@@ -4,46 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
-import { ManagedTable } from '../../../../shared/ManagedTable';
-import { Title } from './Title';
-import { EmptyPrompt } from './EmptyPrompt';
+import React, { useEffect, useState } from 'react';
+import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { useFetcher } from '../../../../../hooks/useFetcher';
 import { CustomActionsFlyout } from './CustomActionsFlyout';
+import { CustomActionsTable } from './CustomActionsTable';
+import { EmptyPrompt } from './EmptyPrompt';
+import { Title } from './Title';
+import { CreateCustomActionButton } from './CreateCustomActionButton';
 
 export const CustomActionsOverview = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [customActionSelected, setCustomActionSelected] = useState<
+    CustomAction | undefined
+  >();
 
-  // TODO: change it to correct fields fetched from ES
-  const columns = [
-    {
-      field: 'actionName',
-      name: 'Action Name',
-      truncateText: true
-    },
-    {
-      field: 'serviceName',
-      name: 'Service Name'
-    },
-    {
-      field: 'environment',
-      name: 'Environment'
-    },
-    {
-      field: 'lastUpdate',
-      name: 'Last update'
-    },
-    {
-      field: 'actions',
-      name: 'Actions'
+  const { data: customActions } = useFetcher(
+    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-actions' }),
+    []
+  );
+
+  useEffect(() => {
+    if (customActionSelected) {
+      setIsFlyoutOpen(true);
     }
-  ];
-
-  // TODO: change to items fetched from ES.
-  const items: object[] = [];
+  }, [customActionSelected]);
 
   const onCloseFlyout = () => {
+    setCustomActionSelected(undefined);
     setIsFlyoutOpen(false);
   };
 
@@ -51,23 +41,43 @@ export const CustomActionsOverview = () => {
     setIsFlyoutOpen(true);
   };
 
+  const hasCustomActions = !isEmpty(customActions);
+
   return (
     <>
+      {isFlyoutOpen && (
+        <CustomActionsFlyout
+          onClose={onCloseFlyout}
+          customActionSelected={customActionSelected}
+        />
+      )}
       <EuiPanel>
-        <Title />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <Title />
+          </EuiFlexItem>
+          {hasCustomActions && (
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <CreateCustomActionButton
+                    onClick={onCreateCustomActionClick}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+
         <EuiSpacer size="m" />
-        {isFlyoutOpen && <CustomActionsFlyout onClose={onCloseFlyout} />}
-        {isEmpty(items) ? (
-          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
-        ) : (
-          <ManagedTable
-            items={items}
-            columns={columns}
-            initialPageSize={25}
-            initialSortField="occurrenceCount"
-            initialSortDirection="desc"
-            sortItems={false}
+
+        {hasCustomActions ? (
+          <CustomActionsTable
+            items={customActions}
+            onCustomActionSelected={setCustomActionSelected}
           />
+        ) : (
+          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
         )}
       </EuiPanel>
     </>

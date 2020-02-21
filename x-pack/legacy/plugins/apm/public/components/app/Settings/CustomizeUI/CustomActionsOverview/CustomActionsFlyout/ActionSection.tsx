@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import React from 'react';
+import {
+  ValidationOptions,
+  FormContextValues,
+  NestDataObject
+} from 'react-hook-form';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+  EuiFieldText,
+  EuiFormRow
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
+import { FormData } from './';
+
+interface ActionField {
+  name: keyof Omit<FormData, 'filters'>;
+  label: string;
+  helpText: string;
+  placeholder: string;
+  register: ValidationOptions;
+}
+
+const actionFields: ActionField[] = [
+  {
+    name: 'label',
+    label: 'Label',
+    helpText: 'Labels can be a maximum of 128 characters',
+    placeholder: 'e.g. Support tickets',
+    register: { required: true, maxLength: 128 }
+  },
+  {
+    name: 'url',
+    label: 'URL',
+    helpText:
+      'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
+    placeholder: 'e.g. https://www.elastic.co/',
+    register: { required: true }
+  }
+];
+
+interface ActionSectionProps {
+  register: FormContextValues['register'];
+  errors: NestDataObject<FormData>;
+  customAction?: CustomAction;
+}
+
+export const ActionSection = ({
+  register,
+  errors,
+  customAction
+}: ActionSectionProps) => {
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.apm.settings.customizeUI.customActions.flyout.action.title',
+            {
+              defaultMessage: 'Action'
+            }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      {actionFields.map((field: ActionField) => {
+        const value = (customAction && customAction[field.name]) || '';
+        return (
+          <EuiFormRow
+            key={field.name}
+            label={field.label}
+            helpText={field.helpText}
+            labelAppend={<EuiText size="xs">Required</EuiText>}
+          >
+            <EuiFieldText
+              inputRef={register(field.register)}
+              placeholder={field.placeholder}
+              name={field.name}
+              fullWidth
+              isInvalid={!isEmpty(errors[field.name])}
+              value={value}
+            />
+          </EuiFormRow>
+        );
+      })}
+    </>
+  );
+};

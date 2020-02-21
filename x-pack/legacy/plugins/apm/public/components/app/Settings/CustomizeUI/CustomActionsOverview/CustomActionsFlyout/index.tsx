@@ -4,91 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React from 'react';
-import { Controller, useForm, ValidationOptions } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
+import { ActionSection } from './ActionSection';
 import { Filter, FiltersSection } from './FiltersSection';
-import { saveCustomAction } from './saveCustomAction';
+import { FlyoutFooter } from './Flyoutfooter';
 
 interface Props {
   onClose: () => void;
+  customActionSelected?: CustomAction;
 }
 
-export interface CustomAction {
+export interface FormData {
   label: string;
   url: string;
   filters: Filter[];
 }
 
-interface ActionField {
-  name: keyof CustomAction;
-  label: string;
-  helpText: string;
-  placeholder: string;
-  register: ValidationOptions;
-}
-
-const actionFields: ActionField[] = [
-  {
-    name: 'label',
-    label: 'Label',
-    helpText: 'Labels can be a maximum of 128 characters',
-    placeholder: 'e.g. Support tickets',
-    register: { required: true, maxLength: 128 }
-  },
-  {
-    name: 'url',
-    label: 'URL',
-    helpText:
-      'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
-    placeholder: 'e.g. https://www.elastic.co/',
-    register: { required: true }
-  }
-];
-
-export const CustomActionsFlyout = ({ onClose }: Props) => {
+export const CustomActionsFlyout = ({
+  onClose,
+  customActionSelected
+}: Props) => {
   const callApmApiFromHook = useCallApmApi();
   const { toasts } = useApmPluginContext().core.notifications;
-
   const { register, handleSubmit, errors, control, watch } = useForm<
-    CustomAction
+    FormData
   >();
 
-  const onSubmit = (customAction: CustomAction) => {
-    saveCustomAction({ callApmApi: callApmApiFromHook, customAction, toasts });
-  };
+  const onSubmit = handleSubmit((customAction: FormData) => {
+    console.log('### caue: onSubmit -> customAction', customAction);
+    // saveCustomAction({ callApmApi: callApmApiFromHook, customAction, toasts });
+  });
 
+  // Watch for any change on filters to render the component
   const filters = watch('filters');
 
   return (
     <EuiPortal>
       <EuiFlyout ownFocus onClose={onClose} size="m">
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={onSubmit}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2>
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyout.title',
                   {
-                    defaultMessage: 'Create custom action'
+                    defaultMessage: 'Create action'
                   }
                 )}
               </h2>
@@ -101,75 +74,36 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
                   'xpack.apm.settings.customizeUI.customActions.flyout.label',
                   {
                     defaultMessage:
-                      "This action will be shown in the 'Actions' context menu for the trace and error detail components. You can specify any number of links, but only the first three will be shown, in alphabetical order."
+                      'Actions will be shown in the context of trace and error details througout the APM app. You can specify an unlimited amount of links, but we will opt to only show the first 3 alphabetically.'
                   }
                 )}
               </p>
             </EuiText>
 
             <EuiSpacer size="l" />
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customActions.flyout.action.title',
-                  {
-                    defaultMessage: 'Action'
-                  }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="l" />
-            {actionFields.map((field: ActionField) => {
-              return (
-                <EuiFormRow
-                  key={field.name}
-                  label={field.label}
-                  helpText={field.helpText}
-                  labelAppend={<EuiText size="xs">Required</EuiText>}
-                >
-                  <EuiFieldText
-                    inputRef={register(field.register)}
-                    placeholder={field.placeholder}
-                    name={field.name}
-                    fullWidth
-                    isInvalid={!isEmpty(errors[field.name])}
-                  />
-                </EuiFormRow>
-              );
-            })}
+
+            <ActionSection
+              register={register}
+              errors={errors}
+              customAction={customActionSelected}
+            />
+
             <EuiSpacer size="l" />
 
             <Controller
-              as={<FiltersSection filters={filters} />}
+              as={
+                <FiltersSection
+                  filters={filters}
+                  customAction={customActionSelected}
+                />
+              }
               name="filters"
               control={control}
               defaultValue={filters}
             />
           </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                  {i18n.translate(
-                    'xpack.apm.settings.customizeUI.customActions.flyout.close',
-                    {
-                      defaultMessage: 'Close'
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill type="submit">
-                  {i18n.translate(
-                    'xpack.apm.settings.customizeUI.customActions.flyout.save',
-                    {
-                      defaultMessage: 'Save'
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
+
+          <FlyoutFooter onClose={onClose} />
         </form>
       </EuiFlyout>
     </EuiPortal>
