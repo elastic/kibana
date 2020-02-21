@@ -48,7 +48,7 @@ export const initRoutes = (
   deleteRulesRoute(router);
   findRulesRoute(router);
 
-  addPrepackedRulesRoute(route, config, getClients);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(route, getClients);
   createRulesBulkRoute(route, config, getClients);
   updateRulesBulkRoute(route, config, getClients);
