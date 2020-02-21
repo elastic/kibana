@@ -8,10 +8,12 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, Switch, BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { Store } from 'redux';
 import { RouteCapture } from './view/route_capture';
+import { Route, Switch, BrowserRouter, useLocation, Link } from 'react-router-dom';
+import { Provider, useDispatch } from 'react-redux';
+import { Store } from 'redux';
+import { memo } from 'react';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
@@ -40,6 +42,17 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
   <Provider store={store}>
     <I18nProvider>
       <BrowserRouter basename={basename}>
+        <div>
+          <Link data-testid="homeLink" to="/">
+            Home
+          </Link>
+          <Link data-testid="managementLink" to="/management">
+            Management
+          </Link>
+          <Link data-testid="alertsLink" to="/alerts">
+            Alerts
+          </Link>
+        </div>
         <RouteCapture>
           <Switch>
             <Route
