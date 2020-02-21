@@ -4,32 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { patchRules } from '../../rules/patch_rules';
-import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  PatchRuleAlertParamsRest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
 import { getIdError, transform } from './utils';
-import { transformError } from '../utils';
+import { buildRouteValidation, transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
-  return {
-    method: 'PATCH',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const patchRulesRoute = (router: IRouter) => {
+  router.patch(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: patchRulesSchema,
+        body: buildRouteValidation<PatchRuleAlertParamsRest>(patchRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: PatchRulesRequest, headers) {
+    async (context, request, response) => {
       const {
         description,
         enabled,
@@ -57,13 +55,15 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
         threat,
         references,
         version,
-      } = request.payload;
+      } = request.body;
 
       try {
-        const { alertsClient, actionsClient, savedObjectsClient } = await getClients(request);
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
-          return headers.response().code(404);
+          return response.notFound();
         }
 
         const rule = await patchRules({
@@ -110,37 +110,26 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
           });
           const transformed = transform(rule, ruleStatuses.saved_objects[0]);
           if (transformed == null) {
-            return headers
-              .response({
-                message: 'Internal error transforming rules',
-                status_code: 500,
-              })
-              .code(500);
+            return response.internalError({
+              body: 'Internal error transforming rules',
+            });
           } else {
-            return transformed;
+            return response.ok({ body: transformed });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return headers
-            .response({
-              message: error.message,
-              status_code: error.statusCode,
-            })
-            .code(error.statusCode);
+          return response.customError({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return response.customError({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const patchRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
-  route(createPatchRulesRoute(getClients));
+    }
+  );
 };
