@@ -83,7 +83,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -101,13 +100,10 @@ import {
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-
   serializeFieldFormat,
-
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
