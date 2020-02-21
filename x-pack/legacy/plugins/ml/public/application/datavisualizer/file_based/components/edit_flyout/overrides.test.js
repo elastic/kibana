@@ -9,6 +9,12 @@ import React from 'react';
 
 import { Overrides } from './overrides';
 
+jest.mock('../../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
+  },
+}));
+
 function getProps() {
   return {
     setOverrides: () => {},
@@ -17,6 +23,14 @@ function getProps() {
     defaultSettings: {},
     setApplyOverrides: () => {},
     fields: [],
+    kibana: {
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        },
+      },
+    },
   };
 }
 

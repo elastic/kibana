@@ -19,8 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
@@ -55,7 +54,8 @@ function createKibanaRequestMock({
   socket = new Socket(),
   routeTags,
 }: RequestFixtureOptions = {}) {
-  const queryString = querystring.stringify(query);
+  const queryString = stringify(query, { sort: false });
+
   return KibanaRequest.from(
     createRawRequestMock({
       headers,

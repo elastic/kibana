@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
-import { esFilters } from '../../../common';
+import { Filter } from '../../../common';
 import { FilterManager } from '../filter_manager';
 import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
 
@@ -31,7 +31,7 @@ import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
  */
 export function syncAppFilters(
   filterManager: FilterManager,
-  appState: BaseStateContainer<esFilters.Filter[]>
+  appState: BaseStateContainer<Filter[]>
 ) {
   // make sure initial app filters are picked by filterManager
   filterManager.setAppFilters(_.cloneDeep(appState.get()));

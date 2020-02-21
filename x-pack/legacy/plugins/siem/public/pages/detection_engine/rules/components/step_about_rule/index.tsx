@@ -23,7 +23,14 @@ import * as RuleI18n from '../../translations';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreThreat } from '../mitre';
-import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
+import {
+  Field,
+  Form,
+  FormDataProvider,
+  getUseField,
+  UseField,
+  useForm,
+} from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
 import { stepAboutDefaultValue } from './default_value';

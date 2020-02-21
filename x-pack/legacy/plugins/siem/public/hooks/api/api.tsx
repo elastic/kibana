@@ -36,6 +36,8 @@ export const throwIfNotOk = async (response?: Response): Promise<void> => {
     if (body != null && body.message) {
       if (body.statusCode != null) {
         throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
+      } else if (body.status_code != null) {
+        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.status_code}`]);
       } else {
         throw new ToasterErrors([body.message]);
       }

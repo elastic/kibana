@@ -5,10 +5,9 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useCallback } from 'react';
-import { connect } from 'react-redux';
+import React, { useContext, useEffect, useCallback, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
@@ -34,18 +33,19 @@ import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsComponentProps, HostDetailsProps } from './types';
+import { HostDetailsProps } from './types';
 import { type } from './utils';
+import { getHostDetailsPageFilters } from './helpers';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
-const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
+const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
     filters,
     from,
@@ -60,33 +60,13 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     hostDetailsPagePath,
   }) => {
     useEffect(() => {
-      setHostDetailsTablesActivePageToZero(null);
+      setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const kibana = useKibana();
-    const hostDetailsPageFilters: esFilters.Filter[] = [
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'host.name',
-          value: detailName,
-          params: {
-            query: detailName,
-          },
-        },
-        query: {
-          match: {
-            'host.name': {
-              query: detailName,
-              type: 'phrase',
-            },
-          },
-        },
-      },
-    ];
+    const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
+      detailName,
+    ]);
     const getFilters = () => [...hostDetailsPageFilters, ...filters];
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
@@ -237,9 +217,13 @@ export const makeMapStateToProps = () => {
   });
 };
 
-export const HostDetails = compose<React.ComponentClass<HostDetailsProps>>(
-  connect(makeMapStateToProps, {
-    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-    setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-  })
-)(HostDetailsComponent);
+const mapDispatchToProps = {
+  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const HostDetails = connector(HostDetailsComponent);

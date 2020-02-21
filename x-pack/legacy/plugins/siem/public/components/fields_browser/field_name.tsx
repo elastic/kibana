@@ -18,7 +18,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../with_hover_actions';
@@ -107,7 +107,7 @@ ViewCategoryIcon.displayName = 'ViewCategoryIcon';
 interface ToolTipProps {
   categoryId: string;
   onUpdateColumns: OnUpdateColumns;
-  categoryColumns: ColumnHeader[];
+  categoryColumns: ColumnHeaderOptions[];
 }
 
 const ViewCategory = React.memo<ToolTipProps>(
@@ -138,7 +138,7 @@ ViewCategory.displayName = 'ViewCategory';
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
   categoryId: string;
-  categoryColumns: ColumnHeader[];
+  categoryColumns: ColumnHeaderOptions[];
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;

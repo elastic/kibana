@@ -16,12 +16,15 @@ import {
   enableAlert,
   loadAlert,
   loadAlerts,
+  loadAlertState,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
   muteAlert,
   unmuteAlert,
   updateAlert,
+  muteAlertInstance,
+  unmuteAlertInstance,
 } from './alert_api';
 import uuid from 'uuid';
 
@@ -36,7 +39,7 @@ describe('loadAlertTypes', () => {
         id: 'test',
         name: 'Test',
         actionVariables: ['var1'],
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -73,6 +76,70 @@ describe('loadAlert', () => {
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
     expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
+  });
+});
+
+describe('loadAlertState', () => {
+  test('should call get API with base parameters', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      alertTypeState: {
+        some: 'value',
+      },
+      alertInstances: {
+        first_instance: {},
+        second_instance: {},
+      },
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+  });
+
+  test('should parse AlertInstances', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      alertTypeState: {
+        some: 'value',
+      },
+      alertInstances: {
+        first_instance: {
+          state: {},
+          meta: {
+            lastScheduledActions: {
+              group: 'first_group',
+              date: '2020-02-09T23:15:41.941Z',
+            },
+          },
+        },
+      },
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlertState({ http, alertId })).toEqual({
+      ...resolvedValue,
+      alertInstances: {
+        first_instance: {
+          state: {},
+          meta: {
+            lastScheduledActions: {
+              group: 'first_group',
+              date: new Date('2020-02-09T23:15:41.941Z'),
+            },
+          },
+        },
+      },
+    });
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+  });
+
+  test('should handle empty response from api', async () => {
+    const alertId = uuid.v4();
+    http.get.mockResolvedValueOnce('');
+
+    expect(await loadAlertState({ http, alertId })).toEqual({});
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
   });
 });
 
@@ -404,6 +471,34 @@ describe('disableAlert', () => {
       Array [
         Array [
           "/api/alert/1/_disable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('muteAlertInstance', () => {
+  test('should call mute instance alert API', async () => {
+    const result = await muteAlertInstance({ http, id: '1', instanceId: '123' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/alert_instance/123/_mute",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('unmuteAlertInstance', () => {
+  test('should call mute instance alert API', async () => {
+    const result = await unmuteAlertInstance({ http, id: '1', instanceId: '123' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/alert_instance/123/_unmute",
         ],
       ]
     `);

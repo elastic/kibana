@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
+import { RequestHandlerContext } from 'src/core/server';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
@@ -67,7 +68,8 @@ export type callWithRequestType = (
   params: annotationProviderParams
 ) => Promise<any>;
 
-export function annotationProvider(callWithRequest: callWithRequestType) {
+export function annotationProvider(context: RequestHandlerContext) {
+  const callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -94,7 +96,7 @@ export function annotationProvider(callWithRequest: callWithRequestType) {
       delete params.body.key;
     }
 
-    return await callWithRequest('index', params);
+    return await callAsCurrentUser('index', params);
   }
 
   async function getAnnotations({
@@ -213,7 +215,7 @@ export function annotationProvider(callWithRequest: callWithRequestType) {
     };
 
     try {
-      const resp = await callWithRequest('search', params);
+      const resp = await callAsCurrentUser('search', params);
 
       if (resp.error !== undefined && resp.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
@@ -252,7 +254,7 @@ export function annotationProvider(callWithRequest: callWithRequestType) {
       refresh: 'wait_for',
     };
 
-    return await callWithRequest('delete', param);
+    return await callAsCurrentUser('delete', param);
   }
 
   return {

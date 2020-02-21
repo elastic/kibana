@@ -21,7 +21,7 @@ import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { esFilters } from '../../../common';
+import { Filter, FilterStateStore } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createKbnUrlStateStorage,
@@ -59,8 +59,8 @@ describe('sync_query', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
 
-  let gF: esFilters.Filter;
-  let aF: esFilters.Filter;
+  let gF: Filter;
+  let aF: Filter;
 
   const pathWithFilter =
     "/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))";
@@ -82,8 +82,8 @@ describe('sync_query', () => {
     history = createBrowserHistory();
     kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-    gF = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    aF = getFilter(esFilters.FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+    gF = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+    aF = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
   });
   afterEach(() => {
     filterManagerChangeSub.unsubscribe();

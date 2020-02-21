@@ -20,7 +20,7 @@
 import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { esFilters } from '../../../common';
+import { Filter, FilterStateStore } from '../../../common';
 import { syncAppFilters } from './sync_app_filters';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer } from '../../../../kibana_utils/public';
@@ -33,30 +33,30 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
 
 describe('sync_app_filters', () => {
   let filterManager: FilterManager;
-  let appState: BaseStateContainer<esFilters.Filter[]>;
+  let appState: BaseStateContainer<Filter[]>;
   let appStateSub: Subscription;
   let appStateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
 
-  let gF1: esFilters.Filter;
-  let gF2: esFilters.Filter;
-  let aF1: esFilters.Filter;
-  let aF2: esFilters.Filter;
+  let gF1: Filter;
+  let gF2: Filter;
+  let aF1: Filter;
+  let aF2: Filter;
 
   beforeEach(() => {
     filterManager = new FilterManager(setupMock.uiSettings);
-    appState = createStateContainer([] as esFilters.Filter[]);
+    appState = createStateContainer([] as Filter[]);
     appStateChangeTriggered = jest.fn();
     appStateSub = appState.state$.subscribe(appStateChangeTriggered);
 
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    gF1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    gF2 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'key2', 'value2');
-    aF1 = getFilter(esFilters.FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
-    aF2 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'key4', 'value4');
+    gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+    gF2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'key2', 'value2');
+    aF1 = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+    aF2 = getFilter(FilterStateStore.APP_STATE, false, false, 'key4', 'value4');
   });
   afterEach(() => {
     appStateSub.unsubscribe();

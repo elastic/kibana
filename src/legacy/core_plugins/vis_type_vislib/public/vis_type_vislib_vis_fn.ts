@@ -18,18 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
-
-const name = 'vislib';
-
-type Context = KibanaDatatable;
 
 interface Arguments {
   type: string;
@@ -43,19 +38,15 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Render<RenderValue>;
-
-export const createVisTypeVislibVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
+export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
+  'vislib',
+  KibanaDatatable,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
   name: 'vislib',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),

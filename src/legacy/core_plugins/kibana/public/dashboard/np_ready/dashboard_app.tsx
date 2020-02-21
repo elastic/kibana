@@ -30,7 +30,7 @@ import {
   IIndexPattern,
   TimeRange,
   Query,
-  esFilters,
+  Filter,
   SavedQuery,
 } from '../../../../../../plugins/data/public';
 
@@ -44,7 +44,7 @@ export interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query;
-    filters: esFilters.Filter[];
+    filters: Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -69,9 +69,9 @@ export interface DashboardAppScope extends ng.IScope {
     isPaused: boolean;
     refreshInterval: any;
   }) => void;
-  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
+  onFiltersUpdated: (filters: Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: esFilters.Filter[]) => void;
+  onApplyFilters: (filters: Filter[]) => void;
   onQuerySaved: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
@@ -103,7 +103,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $route,
           $scope,
           $routeParams,
-          indexPatterns: deps.npDataStart.indexPatterns,
+          indexPatterns: deps.data.indexPatterns,
           kbnUrlStateStorage,
           history,
           ...deps,

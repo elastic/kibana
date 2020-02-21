@@ -15,7 +15,7 @@ import {
   IIndexPattern,
   Query,
   EsQueryConfig,
-  esFilters,
+  Filter,
 } from '../../../../../../../src/plugins/data/public';
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
@@ -109,7 +109,7 @@ export const combineQueries = ({
   dataProviders: DataProvider[];
   indexPattern: IIndexPattern;
   browserFields: BrowserFields;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
   start: number;

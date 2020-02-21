@@ -73,10 +73,9 @@ You can also use the Agent's public API to manually set a name for the transacti
 
 ==== Fields are not searchable
 
-In Elasticsearch, index patterns are used to define settings and mappings that determine how fields should be analyzed.
-The recommended index template file for APM Server is installed when Kibana starts.
-This template defines which fields are available in Kibana for features like the Kuery bar,
-or for linking to other plugins like Logs, Uptime, and Discover.
+In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
+The recommended index template file for APM Server is installed by the APM Server packages.
+This template, by default, enables and disables indexing on certain fields.
 
 As an example, some agents store cookie values in `http.request.cookies`.
 Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,

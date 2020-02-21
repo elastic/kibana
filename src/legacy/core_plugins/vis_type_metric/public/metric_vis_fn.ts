@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Range,
   Render,
@@ -30,9 +30,7 @@ import { ColorModes } from '../../vis_type_vislib/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
 import { ColorSchemas, vislibColorMaps } from '../../../../plugins/charts/public';
 
-export type Context = KibanaDatatable;
-
-const name = 'metricVis';
+export type Input = KibanaDatatable;
 
 interface Arguments {
   percentageMode: boolean;
@@ -51,24 +49,20 @@ interface Arguments {
 
 interface RenderValue {
   visType: typeof visType;
-  visData: Context;
+  visData: Input;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
   params: any;
 }
 
-type Return = Render<RenderValue>;
-
-export const createMetricVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
+export const createMetricVisFn = (): ExpressionFunctionDefinition<
+  'metricVis',
+  Input,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
-  name,
+  name: 'metricVis',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeMetric.function.help', {
     defaultMessage: 'Metric visualization',
   }),
@@ -165,7 +159,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       }),
     },
   },
-  fn(context: Context, args: Arguments) {
+  fn(input, args) {
     const dimensions: DimensionsVisParam = {
       metrics: args.metric,
     };
@@ -184,7 +178,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
+        visData: input,
         visType,
         visConfig: {
           metric: {

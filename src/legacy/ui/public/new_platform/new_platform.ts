@@ -39,10 +39,12 @@ import {
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -60,6 +62,8 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
+  visTypeVega: VisTypeVegaSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface PluginsStart {
@@ -77,6 +81,7 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export const npSetup = {

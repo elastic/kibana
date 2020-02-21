@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 import { TimelionFunctionArgs } from '../../../../../plugins/timelion/common/types';
-import { isNestedField } from '../../../../../plugins/data/public';
+import { indexPatterns as indexPatternsUtils } from '../../../../../plugins/data/public';
 
 export interface Location {
   min: number;
@@ -122,7 +122,7 @@ export function getArgValueSuggestions() {
               field.aggregatable &&
               'number' === field.type &&
               containsFieldName(valueSplit[1], field) &&
-              !isNestedField(field)
+              !indexPatternsUtils.isNestedField(field)
             );
           })
           .map(field => {
@@ -141,7 +141,7 @@ export function getArgValueSuggestions() {
               field.aggregatable &&
               ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
               containsFieldName(partial, field) &&
-              !isNestedField(field)
+              !indexPatternsUtils.isNestedField(field)
             );
           })
           .map(field => {
@@ -157,7 +157,9 @@ export function getArgValueSuggestions() {
         return indexPattern.fields
           .filter(field => {
             return (
-              'date' === field.type && containsFieldName(partial, field) && !isNestedField(field)
+              'date' === field.type &&
+              containsFieldName(partial, field) &&
+              !indexPatternsUtils.isNestedField(field)
             );
           })
           .map(field => {

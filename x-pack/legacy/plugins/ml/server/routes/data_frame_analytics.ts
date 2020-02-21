@@ -40,7 +40,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -71,7 +71,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           analyticsId,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -97,7 +97,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           'ml.getDataFrameAnalyticsStats'
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -131,7 +131,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           }
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -170,7 +170,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           }
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -201,7 +201,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           }
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -241,7 +241,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           }
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -277,7 +277,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           }
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -310,7 +310,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           analyticsId,
         });
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -353,7 +353,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           options
         );
         return response.ok({
-          body: { ...results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));

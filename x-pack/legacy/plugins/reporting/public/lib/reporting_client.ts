@@ -3,16 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { stringify } from 'query-string';
 import { npStart } from 'ui/new_platform';
-import querystring from 'querystring';
-
-const { core } = npStart;
-
 // @ts-ignore
 import rison from 'rison-node';
 import { add } from './job_completion_notifications';
 
+const { core } = npStart;
 const API_BASE_URL = '/api/reporting/generate';
 
 interface JobParams {
@@ -20,7 +17,7 @@ interface JobParams {
 }
 
 export const getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-  const params = querystring.stringify({ jobParams: rison.encode(jobParams) });
+  const params = stringify({ jobParams: rison.encode(jobParams) });
 
   return `${core.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
 };

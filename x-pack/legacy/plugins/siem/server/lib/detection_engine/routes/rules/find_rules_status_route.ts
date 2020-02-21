@@ -5,10 +5,11 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction, snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices, LegacyRequest } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
@@ -29,7 +30,7 @@ const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> |
   }, {});
 };
 
-export const createFindRulesStatusRoute: Hapi.ServerRoute = {
+export const createFindRulesStatusRoute = (getClients: GetScopedClients): Hapi.ServerRoute => ({
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
   options: {
@@ -41,19 +42,17 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
       query: findRulesStatusesSchema,
     },
   },
-  async handler(request: FindRulesStatusesRequest, headers) {
+  async handler(request: FindRulesStatusesRequest & LegacyRequest, headers) {
     const { query } = request;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-      ? request.getSavedObjectsClient()
-      : null;
-    if (!alertsClient || !savedObjectsClient) {
+    const { alertsClient, savedObjectsClient } = await getClients(request);
+
+    if (!alertsClient) {
       return headers.response().code(404);
     }
 
     // build return object with ids as keys and errors as values.
     /* looks like this
-        { 
+        {
             "someAlertId": [{"myerrorobject": "some error value"}, etc..],
             "anotherAlertId": ...
         }
@@ -86,8 +85,11 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
     }, Promise.resolve<RuleStatusResponse>({}));
     return statuses;
   },
-};
+});
 
-export const findRulesStatusesRoute = (server: ServerFacade): void => {
-  server.route(createFindRulesStatusRoute);
+export const findRulesStatusesRoute = (
+  route: LegacyServices['route'],
+  getClients: GetScopedClients
+): void => {
+  route(createFindRulesStatusRoute(getClients));
 };
