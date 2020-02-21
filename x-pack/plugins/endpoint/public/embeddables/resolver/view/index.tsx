@@ -15,7 +15,7 @@ import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 import { ProcessEventDot } from './process_event_dot';
 import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
-import { SymbolDefinitions } from './defs';
+import { SymbolDefinitions, NamedColors } from './defs';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -25,7 +25,7 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
-const bgColor = '#222222';
+const bgColor = NamedColors.resolverBackground;
 
 const Resolver = styled(
   React.memo(({ className }: { className?: string }) => {
