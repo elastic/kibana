@@ -214,17 +214,20 @@ def withGcsArtifactUpload(workerName, closure) {
     } finally {
       catchError {
         if (env.CODE_COVERAGE) {
-          sh "echo 'current path' && pwd && echo 'navigating back' && cd .."
-          sh "echo 'print content' && ls"
+          sh "echo 'current path' && pwd && echo 'navigating back' && cd .. && echo 'print content' && ls"
           WORKERS.each { worker ->
-            ARTIFACT_PATTERNS.each { pattern ->
-              uploadGcsArtifact(uploadPrefix, "kibana${worker}/${pattern}")
-            }
+              bash(
+                """
+                  if [[ -d ../kibana${worker}/target/junit ]]; then
+                    mkdir -p target/junit
+                    cp -R ../kibana${worker}/target/junit/. target/junit/
+                  fi
+                """,
+                "Copy junit reports"
+              )
           }
-        } else {
-          ARTIFACT_PATTERNS.each { pattern ->
-            uploadGcsArtifact(uploadPrefix, pattern)
-          }
+        ARTIFACT_PATTERNS.each { pattern ->
+          uploadGcsArtifact(uploadPrefix, pattern)
         }
       }
     }
