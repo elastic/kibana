@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { EmbeddablePanel } from '..';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-storiesOf('components/EmbeddablePanel', module).add('default', () => <EmbeddablePanel />);
+import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
+import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
+
+import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
+import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
+
+import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
+import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
+import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
+
+export { monaco };
