@@ -71,11 +71,9 @@ export class WorkpadApp extends React.PureComponent {
             )}
           </div>
 
-          {isWriteable && (
-            <div className="canvasLayout__footer hide-for-sharing">
-              <Toolbar />
-            </div>
-          )}
+          <div className="canvasLayout__footer hide-for-sharing">
+            <Toolbar />
+          </div>
         </div>
       </div>
     );

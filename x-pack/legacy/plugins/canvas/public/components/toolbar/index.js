@@ -13,6 +13,7 @@ import {
   getWorkpadName,
   getSelectedPageIndex,
   getSelectedElement,
+  isWriteable,
 } from '../../state/selectors/workpad';
 
 import { Toolbar as Component } from './toolbar';
@@ -23,6 +24,7 @@ const mapStateToProps = state => ({
   totalPages: getWorkpad(state).pages.length,
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   selectedElement: getSelectedElement(state),
+  isWriteable: isWriteable(state),
 });
 
 export const Toolbar = compose(
