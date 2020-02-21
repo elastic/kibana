@@ -5,7 +5,7 @@
  */
 
 /*
- TODO: uncomment and fix this test to address storybook errors as a result of nested component dependencies
+ TODO: uncomment and fix this test to address storybook errors as a result of nested component dependencies - https://github.com/elastic/kibana/issues/58289
  */
 
 /*
