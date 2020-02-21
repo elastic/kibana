@@ -92,7 +92,7 @@ export interface RouteInitialization {
   route(route: ServerRoute | ServerRoute[]): void;
   router: IRouter;
   xpackMainPlugin: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsLegacyService;
+  savedObjects?: SavedObjectsServiceStart;
   spacesPlugin: any;
   securityPlugin: any;
   cloud?: CloudSetup;
@@ -203,7 +203,7 @@ export class Plugin {
     const extendedRouteInitializationDeps: RouteInitialization = {
       ...routeInitializationDeps,
       config: this.config,
-      savedObjects: core.savedObjects,
+      savedObjects: coreSavedObjects,
       spacesPlugin: plugins.spaces,
       cloud: plugins.cloud,
     };
