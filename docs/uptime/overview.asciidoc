@@ -36,6 +36,11 @@ for each monitor.
 Next to the counts, there is a histogram displaying the change over time throughout the
 selected date range.
 
+The counts for this view reflect data in realtime except in certain cases where computing
+the counts efficiently in an exact manner is not possible. This only happens when there are 
+more than 1000 monitors up and down at the same time. In these cases results will be delayed
+by up to 30 seconds.
+
 [float]
 === Monitor list
 
