@@ -43,10 +43,6 @@ export interface PatchRulesRequest extends LegacyRequest {
   payload: PatchRuleAlertParamsRest;
 }
 
-export interface BulkPatchRulesRequest extends LegacyRequest {
-  payload: PatchRuleAlertParamsRest[];
-}
-
 export interface UpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest;
 }
