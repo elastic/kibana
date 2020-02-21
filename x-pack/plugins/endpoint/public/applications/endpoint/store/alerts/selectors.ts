@@ -9,13 +9,13 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import { Immutable } from '../../../../../common/types';
 import {
   AlertListState,
   AlertingIndexUIQueryParams,
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
+import { Immutable, ImmutableObject, AlertData } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
@@ -92,4 +92,14 @@ export const apiQueryParams: (
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
+);
+
+export const selectedEvent: (
+  state: AlertListState
+) => ImmutableObject<AlertData> | undefined = createSelector(
+  uiQueryParams,
+  alertListData,
+  ({ selected_alert: selectedAlert }, alertList) => {
+    return alertList.find(alert => alert.event.id === selectedAlert);
+  }
 );

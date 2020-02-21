@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProcessEvent } from '../types';
 import { CameraAction } from './camera';
 import { DataAction } from './data';
+import { EndpointEvent } from '../../../../common/types';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
@@ -16,7 +16,7 @@ interface UserBroughtProcessIntoView {
     /**
      * Used to identify the process node that should be brought into view.
      */
-    readonly process: ProcessEvent;
+    readonly process: EndpointEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -24,4 +24,20 @@ interface UserBroughtProcessIntoView {
   };
 }
 
-export type ResolverAction = CameraAction | DataAction | UserBroughtProcessIntoView;
+interface UserChangedSelectedEvent {
+  readonly type: 'userChangedSelectedEvent';
+  readonly payload: {
+    selectedEvent?: EndpointEvent;
+  };
+}
+
+interface AppRequestedResolverData {
+  readonly type: 'appRequestedResolverData';
+}
+
+export type ResolverAction =
+  | CameraAction
+  | DataAction
+  | UserBroughtProcessIntoView
+  | UserChangedSelectedEvent
+  | AppRequestedResolverData;

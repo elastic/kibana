@@ -21,12 +21,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
 import { FormattedDate } from 'react-intl';
+import { CoreStart } from 'kibana/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
+import { AlertDetailResolver } from './resolver';
 
-export const AlertIndex = memo(() => {
+export const AlertIndex = memo((coreStart: CoreStart) => {
   const history = useHistory();
 
   const columns = useMemo((): EuiDataGridColumn[] => {
@@ -86,6 +88,7 @@ export const AlertIndex = memo(() => {
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
+  const selectedEvent = useAlertListSelector(selectors.selectedEvent);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -132,12 +135,11 @@ export const AlertIndex = memo(() => {
       }
 
       const row = alertListData[rowIndex % pageSize];
-
       if (columnId === 'alert_type') {
         return (
           <Link
             data-testid="alertTypeCellLink"
-            to={urlFromQueryParams({ ...queryParams, selected_alert: 'TODO' })}
+            to={urlFromQueryParams({ ...queryParams, selected_alert: row.event.id })}
           >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
@@ -213,7 +215,9 @@ export const AlertIndex = memo(() => {
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody />
+          <EuiFlyoutBody>
+            <AlertDetailResolver selectedEvent={selectedEvent} coreStart={coreStart} />
+          </EuiFlyoutBody>
         </EuiFlyout>
       )}
       <EuiPage data-test-subj="alertListPage" data-testid="alertListPage">

@@ -78,11 +78,15 @@ export interface AlertData {
   };
   event: {
     action: string;
+    id: string;
   };
   file_classification: {
     malware_classification: {
       score: number;
     };
+  };
+  process: {
+    unique_pid: number;
   };
   host: {
     hostname: string;
@@ -138,7 +142,7 @@ export interface LegacyEndpointEvent {
 }
 
 export interface EndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': string;
   event: {
     category: string;
     type: string;
@@ -154,6 +158,20 @@ export interface EndpointEvent {
   };
   agent: {
     type: string;
+  };
+  endgame: {
+    pid: number;
+    ppid: number;
+    node_id: number;
+    event_type_full: string;
+    event_subtype_full: string;
+    event_timestamp: number;
+    event_type: number;
+    unique_pid: number;
+    machine_id: string;
+    process_name: string;
+    process_path: string;
+    timestamp_utc: string;
   };
 }
 

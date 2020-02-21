@@ -11,7 +11,7 @@ import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
-import { ProcessEvent } from '../types';
+import { EndpointEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -38,7 +38,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   interface ProcessTableView {
     name: string;
     timestamp?: Date;
-    event: ProcessEvent;
+    event: EndpointEvent;
   }
 
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
@@ -47,10 +47,9 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map(processEvent => {
-        const { data_buffer } = processEvent;
-        const date = new Date(data_buffer.timestamp_utc);
+        const date = new Date(processEvent.endgame.timestamp_utc);
         return {
-          name: data_buffer.process_name,
+          name: processEvent.endgame.process_name,
           timestamp: isFinite(date.getTime()) ? date : undefined,
           event: processEvent,
         };

@@ -23,8 +23,7 @@ import { PolicyList } from './view/policy';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory(coreStart);
-
-  ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
+  ReactDOM.render(<AppRoot basename={appBasePath} store={store} coreStart={coreStart} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -36,32 +35,37 @@ interface RouterProps {
   store: Store;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
-  <Provider store={store}>
-    <I18nProvider>
-      <BrowserRouter basename={basename}>
-        <RouteCapture>
-          <Switch>
-            <Route
-              exact
-              path="/"
-              render={() => (
-                <h1 data-test-subj="welcomeTitle">
-                  <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-                </h1>
-              )}
-            />
-            <Route path="/management" component={ManagementList} />
-            <Route path="/alerts" render={() => <AlertIndex />} />
-            <Route path="/policy" exact component={PolicyList} />
-            <Route
-              render={() => (
-                <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-              )}
-            />
-          </Switch>
-        </RouteCapture>
-      </BrowserRouter>
-    </I18nProvider>
-  </Provider>
-));
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
+  ({ basename, store, coreStart }) => (
+    <Provider store={store}>
+      <I18nProvider>
+        <BrowserRouter basename={basename}>
+          <RouteCapture>
+            <Switch>
+              <Route
+                exact
+                path="/"
+                render={() => (
+                  <h1 data-test-subj="welcomeTitle">
+                    <FormattedMessage
+                      id="xpack.endpoint.welcomeTitle"
+                      defaultMessage="Hello World"
+                    />
+                  </h1>
+                )}
+              />
+              <Route path="/management" component={ManagementList} />
+              <Route path="/alerts" render={() => <AlertIndex coreStart={coreStart} />} />
+              <Route path="/policy" exact component={PolicyList} />
+              <Route
+                render={() => (
+                  <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+                )}
+              />
+            </Switch>
+          </RouteCapture>
+        </BrowserRouter>
+      </I18nProvider>
+    </Provider>
+  )
+);
