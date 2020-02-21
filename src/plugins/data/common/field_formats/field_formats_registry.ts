@@ -95,6 +95,10 @@ export class FieldFormatsRegistry {
     return undefined;
   };
 
+  getTypeWithoutMetaParams = (formatId: FieldFormatId): IFieldFormatType | undefined => {
+    return this.fieldFormats.get(formatId);
+  };
+
   /**
    * Get the default FieldFormat type (class) for
    * a field type, using the format:defaultTypeMap.
