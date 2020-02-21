@@ -51,10 +51,6 @@ export interface UpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest;
 }
 
-export interface BulkUpdateRulesRequest extends LegacyRequest {
-  payload: UpdateRuleAlertParamsRest[];
-}
-
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
