@@ -6,6 +6,13 @@ These patterns express common number formats in a concise way, similar
 to date formatting. While these patterns are originally based on Numeral.js,
 they are now maintained by {kib}.
 
+Numeral formatting patterns are used in multiple places in {kib}, including:
+
+* <<advanced-options, Advanced settings>>
+* <<field-formatters-numeric, Index pattern formatters>>
+* <<TSVB, TSVB>>
+* <<canvas, Canvas>>
+
 The simplest pattern format is `0`, and the default {kib} pattern is `0,0.[000]`.
 The numeral pattern syntax expresses:
 
