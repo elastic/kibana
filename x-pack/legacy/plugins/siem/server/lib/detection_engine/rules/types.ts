@@ -197,10 +197,6 @@ export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
 };
 
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
-};
-
 export const isRuleStatusSavedObjectType = (
   obj: unknown
 ): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
