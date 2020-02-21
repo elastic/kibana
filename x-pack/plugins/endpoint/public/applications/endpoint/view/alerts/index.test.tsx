@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { AlertIndex } from './index';
 import { appStoreFactory } from '../../store';
 import { coreMock } from 'src/core/public/mocks';
-import { fireEvent, waitForElement } from '@testing-library/react';
+import { fireEvent, waitForElement, act } from '@testing-library/react';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
@@ -68,7 +68,10 @@ describe('when on the alerting page', () => {
     };
     queryByTestSubjId = async (renderResult, testSubjId) => {
       return await waitForElement(
-        () => renderResult.container.querySelector(`[data-test-subj="${testSubjId}"]`),
+        /**
+         * Use document.body instead of container because EUI renders things like popover out of the DOM heirarchy.
+         */
+        () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
         {
           container: renderResult.container,
         }
@@ -102,7 +105,7 @@ describe('when on the alerting page', () => {
 
         /**
          * There should be a 'row' which is the header, and
-         * another 'row' which is the alert summary.
+         * row which is the alert item.
          */
         expect(rows).toHaveLength(2);
       });
@@ -147,6 +150,39 @@ describe('when on the alerting page', () => {
       });
       it('should no longer show the flyout', () => {
         expect(render().queryByTestId('alertDetailFlyout')).toBeNull();
+      });
+    });
+  });
+  describe('when the url has page_size=1 and a page_index=1', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        history.push({
+          ...history.location,
+          search: '?page_size=1&page_index=1',
+        });
+      });
+    });
+    describe('when the user changes page size to 10', () => {
+      beforeEach(async () => {
+        const renderResult = render();
+        const paginationButton = await queryByTestSubjId(
+          renderResult,
+          'tablePaginationPopoverButton'
+        );
+        if (paginationButton) {
+          act(() => {
+            fireEvent.click(paginationButton);
+          });
+        }
+        const show10RowsButton = await queryByTestSubjId(renderResult, 'tablePagination-10-rows');
+        if (show10RowsButton) {
+          act(() => {
+            fireEvent.click(show10RowsButton);
+          });
+        }
+      });
+      it('should have a page_index of 0', () => {
+        expect(history.location.search).toBe('?page_size=10');
       });
     });
   });

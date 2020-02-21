@@ -80,20 +80,6 @@ describe('alert list pagination', () => {
           }
         `);
       });
-
-      // TODO, move this test to react land, since thats where this logic lives now. is that good?
-      xdescribe('and then a new page size is passed', () => {
-        beforeEach(() => {
-          historyPush({ ...queryParams(), page_size: '1' });
-        });
-        it('should modify the url correctly and reset index to `0`', () => {
-          expect(queryParams()).toMatchInlineSnapshot(`
-            Object {
-              "page_size": "1",
-            }
-          `);
-        });
-      });
     });
   });
 });
