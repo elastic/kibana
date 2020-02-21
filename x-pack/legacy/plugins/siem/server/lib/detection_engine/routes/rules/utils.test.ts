@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Readable } from 'stream';
 import {
   transformAlertToRule,
   getIdError,
@@ -16,12 +16,18 @@ import {
   transformAlertsToRules,
   transformOrImportError,
   getDuplicates,
+  getTupleDuplicateErrorsAndUniqueRules,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { OutputRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
+import { getSimpleRule } from '../__mocks__/utils';
+import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
+import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
+
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
@@ -788,10 +794,20 @@ describe('utils', () => {
   });
 
   describe('getIdBulkError', () => {
+    test('outputs message about id and rule_id not being found if both are not null', () => {
+      const error = getIdBulkError({ id: '123', ruleId: '456' });
+      const expected: BulkError = {
+        id: '123',
+        rule_id: '456',
+        error: { message: 'id: "123" and rule_id: "456" not found', status_code: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
     test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
       const error = getIdBulkError({ id: '123', ruleId: undefined });
       const expected: BulkError = {
-        rule_id: '123',
+        id: '123',
         error: { message: 'id: "123" not found', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -800,7 +816,7 @@ describe('utils', () => {
     test('outputs message about id not being found if only id is defined and ruleId is null', () => {
       const error = getIdBulkError({ id: '123', ruleId: null });
       const expected: BulkError = {
-        rule_id: '123',
+        id: '123',
         error: { message: 'id: "123" not found', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -1222,6 +1238,97 @@ describe('utils', () => {
       });
       const expected: string[] = [];
       expect(output).toEqual(expected);
+    });
+  });
+
+  describe('getTupleDuplicateErrorsAndUniqueRules', () => {
+    test('returns tuple of empty duplicate errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      const multipartPayload =
+        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(multipartPayload);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        rulesObjectsStream,
+      ]);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const isInstanceOfError = output[0] instanceof Error;
+
+      expect(isInstanceOfError).toEqual(true);
+      expect(errors.length).toEqual(0);
+    });
+
+    test('returns tuple of duplicate conflict error and single rule when rules with matching rule-ids passed in and `overwrite` is false', async () => {
+      const rule = getSimpleRule('rule-1');
+      const rule2 = getSimpleRule('rule-1');
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        rulesObjectsStream,
+      ]);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      expect(output.length).toEqual(1);
+      expect(errors).toEqual([
+        {
+          error: {
+            message: 'More than one rule with rule-id: "rule-1" found',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    test('returns tuple of empty duplicate errors array and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
+      const rule = getSimpleRule('rule-1');
+      const rule2 = getSimpleRule('rule-1');
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        rulesObjectsStream,
+      ]);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
+
+      expect(output.length).toEqual(1);
+      expect(errors.length).toEqual(0);
+    });
+
+    test('returns tuple of empty duplicate errors array and single rule when rules without a rule-id is passed in', async () => {
+      const simpleRule = getSimpleRule();
+      delete simpleRule.rule_id;
+      const multipartPayload = `${JSON.stringify(simpleRule)}\n`;
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(multipartPayload);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        rulesObjectsStream,
+      ]);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const isInstanceOfError = output[0] instanceof Error;
+
+      expect(isInstanceOfError).toEqual(true);
+      expect(errors.length).toEqual(0);
     });
   });
 });

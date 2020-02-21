@@ -17,7 +17,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../plugins/apm/common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';

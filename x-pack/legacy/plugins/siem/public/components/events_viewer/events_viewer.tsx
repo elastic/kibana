@@ -9,7 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -157,7 +157,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                 totalCountMinusDeleted
               ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
-              // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
               return (
                 <>
                   <HeaderSection
