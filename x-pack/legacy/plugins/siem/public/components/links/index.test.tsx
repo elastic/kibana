@@ -333,13 +333,6 @@ describe('Custom Links', () => {
         (useUiSetting$ as jest.Mock).mockClear();
       });
 
-      test('it renders external icons', () => {
-        const wrapper = mountWithIntl(
-          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
-        );
-        expect(wrapper.find('ExternalLinkIcon').exists()).toBeTruthy();
-      });
-
       test('it renders correct number of external icons by default', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
         expect(wrapper.find('ExternalLinkIcon')).toHaveLength(5);
