@@ -174,6 +174,8 @@ export interface ProcessEvent {
     source_id?: number;
     process_name: string;
     process_path: string;
+    signature_status?: string;
+    depth?: number;
   };
 }
 

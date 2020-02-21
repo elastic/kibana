@@ -16,6 +16,7 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../../common/types';
+import { SymbolDefinitions, NamedColors } from './defs';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -26,6 +27,8 @@ const StyledPanel = styled(Panel)`
   width: 25em;
   max-width: 50%;
 `;
+
+const bgColor = NamedColors.resolverBackground;
 
 const StyledGraphControls = styled(GraphControls)`
   position: absolute;
@@ -57,34 +60,26 @@ export const Resolver = styled(
     }, [dispatch, selectedEvent]);
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
-        {isLoading ? (
-          <div className="loading-container">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        ) : (
-          <>
-            <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
-              {Array.from(processNodePositions).map(([processEvent, position], index) => (
-                <ProcessEventDot
-                  key={index}
-                  position={position}
-                  projectionMatrix={projectionMatrix}
-                  event={processEvent}
-                />
-              ))}
-              {edgeLineSegments.map(([startPosition, endPosition], index) => (
-                <EdgeLine
-                  key={index}
-                  startPosition={startPosition}
-                  endPosition={endPosition}
-                  projectionMatrix={projectionMatrix}
-                />
-              ))}
-            </div>
-            <StyledPanel />
-            <StyledGraphControls />
-          </>
-        )}
+        <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
+          {edgeLineSegments.map(([startPosition, endPosition], index) => (
+            <EdgeLine
+              key={index}
+              startPosition={startPosition}
+              endPosition={endPosition}
+              projectionMatrix={projectionMatrix}
+            />
+          ))}
+          {Array.from(processNodePositions).map(([processEvent, position], index) => (
+            <ProcessEventDot
+              key={index}
+              position={position}
+              projectionMatrix={projectionMatrix}
+              event={processEvent}
+            />
+          ))}
+        </div>
+        <StyledPanel />
+        <StyledGraphControls />
       </div>
     );
   })
@@ -111,4 +106,11 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
+
+  background-color: ${bgColor};
+
+  .resolver-graph {
+    display: flex;
+    flex-grow: 1;
+  }
 `;
