@@ -2,33 +2,33 @@ import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
 import { left, right } from './utils/either';
 
-export default function CoverageItem({item, currentJobNumber, testRunnerTypes}) {
+export default function CoverageItem({item, currentJobNumber, testRunnerTypes, isCurrent}) {
 
+  const classes = 'max-w-sm rounded overflow-hidden shadow-lg';
   return (
-    <>
-      <div className="max-w-sm rounded overflow-hidden shadow-lg">
-        {/*<img className="w-full" src="/img/card-top.jpg" alt="Sunset in the mountains"></img>*/}
+    <div className="flex-horizontal-center">
+      <div className={(isCurrent) ? `${classes} App-current` : classes}>
           <div className="px-6 py-4">
             <div className="font-bold text-xl mb-2">
-              {anchor(item)}
+              {anchor(isCurrent, item)}
             </div>
             <div className="text-gray-700 text-base">
               <TestRunnerItemList historicalItem={item} testRunnerTypes={testRunnerTypes} />
             </div>
           </div>
       </div>
-    </>
+    </div>
   );
 }
 
-function anchor(item) {
+function anchor(isCurrent, item) {
   return (<a
     className="App-link"
     href={href(item)}
     target="_blank"
     rel="noopener noreferrer"
   >
-    Job - {title(item)}
+    {isCurrent ? 'Current Job' : 'Job'} - {title(item)}
   </a>);
 }
 
