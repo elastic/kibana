@@ -10,7 +10,9 @@ import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
   try {
-    fetchGet(`/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`);
+    fetchPost(`/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`, {
+      expand: true,
+    });
     return await fetchGet(url);
   } catch (error) {
     if (error.response.status === 404) {
@@ -48,4 +50,11 @@ export const getIndexDateRange = async () => {
 
   const result = await fetchPost(url, data);
   return [result.start.epoch, result.end.epoch];
+};
+
+export const fetchAnomalyRecords = async () => {
+  const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`;
+  return await fetchPost(url, {
+    expand: true,
+  });
 };
