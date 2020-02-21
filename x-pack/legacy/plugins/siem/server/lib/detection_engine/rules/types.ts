@@ -99,10 +99,6 @@ export interface IRuleStatusFindType {
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
 
-export interface BulkRulesRequest extends LegacyRequest {
-  payload: RuleAlertParamsRest[];
-}
-
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
