@@ -121,13 +121,16 @@ export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
   };
 }
 
-export interface RuleQuery {
+export interface RuleRequestParams {
   id: string | undefined;
   rule_id: string | undefined;
 }
 
+export type ReadRuleRequestParams = RuleRequestParams;
+export type DeleteRuleRequestParams = RuleRequestParams;
+
 export interface QueryBulkRequest extends LegacyRequest {
-  payload: ReadRuleQuery[];
+  payload: RuleRequestParams[];
 }
 
 export interface FindRuleParams {

@@ -10,7 +10,10 @@ import { deleteRules } from '../../rules/delete_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transform } from './utils';
 import { buildRouteValidation, transformError } from '../utils';
-import { RuleQuery, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  DeleteRuleRequestParams,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const deleteRulesRoute = (router: IRouter) => {
@@ -18,7 +21,7 @@ export const deleteRulesRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation<RuleQuery>(queryRulesSchema),
+        query: buildRouteValidation<DeleteRuleRequestParams>(queryRulesSchema),
       },
       options: {
         tags: ['access:siem'],
