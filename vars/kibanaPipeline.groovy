@@ -216,15 +216,12 @@ def uploadCoverageStaticSite_PROD(timestamp) {
     'target/kibana-coverage/mocha-combined'
   ]
 
-  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
+  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}/"
+
   ARTIFACT_PATTERNS.each { pattern ->
-    withVaultSecret(secret: 'secret/gce/elastic-bekitzur/service-account/kibana', secret_field: 'value', variable_name: 'GCE_ACCOUNT') {
+    withGcpServiceAccount.fromVaultSecret('secret/gce/elastic-bekitzur/service-account/kibana', 'value') {
       sh """
-        if [[ -z "${GCE_ACCOUNT}" ]]; then
-          echo "### Warning: GCE_ACCOUNT is not set."
-        else
-          gsutil -m cp -r -a public-read -z js,css,html ${pattern} '${uploadPrefix}'
-        fi
+        gsutil -m cp -r -a public-read -z js,css,html ${pattern} '${uploadPrefix}'
       """
     }
   }
