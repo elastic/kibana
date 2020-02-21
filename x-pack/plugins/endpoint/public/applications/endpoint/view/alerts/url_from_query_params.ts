@@ -5,7 +5,7 @@
  */
 
 import querystring from 'querystring';
-import { AlertingIndexUIQueryParams } from '../../types';
+import { AlertingIndexUIQueryParams, EndpointAppLocation } from '../../types';
 
 /**
  * Return a relative URL for `AlertingIndexUIQueryParams`.
@@ -21,7 +21,11 @@ import { AlertingIndexUIQueryParams } from '../../types';
  * // now use relativeURL in the 'href' of a link, the 'to' of a react-router-dom 'Link' or history.push, history.replace
  * ```
  */
-export function urlFromQueryParams(queryParams: AlertingIndexUIQueryParams): string {
+export function urlFromQueryParams(
+  queryParams: AlertingIndexUIQueryParams
+): Partial<EndpointAppLocation> {
   const search = querystring.stringify(queryParams);
-  return search === '' ? '' : '?' + search;
+  return {
+    search,
+  };
 }
