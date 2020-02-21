@@ -5,6 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -15,10 +16,12 @@ class AppContextService {
   private security: SecurityPluginSetup | undefined;
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
+  private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
+    this.internalSavedObjectsClient = appContext.internalSavedObjectsClient;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -44,6 +47,13 @@ class AppContextService {
 
   public getConfig$() {
     return this.config$;
+  }
+
+  public getInternalSavedObjectsClient() {
+    if (!this.internalSavedObjectsClient) {
+      throw new Error('No internal savedObjectsClient');
+    }
+    return this.internalSavedObjectsClient;
   }
 }
 

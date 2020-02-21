@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   SavedObjectsLegacyService,
 } from 'kibana/server';
-
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -55,6 +55,7 @@ export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
+  internalSavedObjectsClient: SavedObjectsClient;
 }
 
 export class IngestManagerPlugin implements Plugin {
@@ -133,10 +134,14 @@ export class IngestManagerPlugin implements Plugin {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
+    const internalSavedObjectsClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository()
+    );
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
+      internalSavedObjectsClient,
     });
   }
 

@@ -24,6 +24,7 @@ import {
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
+import { appContextService } from '../../services/app_context';
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -162,7 +163,7 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
+    const soClient = appContextService.getInternalSavedObjectsClient();
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
     if (!res.valid) {
@@ -211,7 +212,7 @@ export const postAgentAcksHandler: RequestHandler<
   TypeOf<typeof PostAgentAcksRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
+    const soClient = appContextService.getInternalSavedObjectsClient();
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await APIKeyService.verifyAccessApiKey({ headers: request.headers, callCluster });
     if (!res.valid) {
@@ -253,7 +254,7 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
+    const soClient = appContextService.getInternalSavedObjectsClient();
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await APIKeyService.verifyEnrollmentAPIKey({
       soClient,
