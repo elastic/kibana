@@ -5,16 +5,13 @@
  */
 
 import {
-  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
@@ -78,34 +75,28 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  public async find<T = unknown>(
-    options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponse<T>> {
+  public async find<T = unknown>(options: SavedObjectsFindOptions) {
     await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
-    return this.baseClient.find(options);
+    return this.baseClient.find<T>(options);
   }
 
   public async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObjectsBulkResponse<T>> {
+  ) {
     await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_get', options.namespace, {
       objects,
       options,
     });
 
-    return await this.baseClient.bulkGet(objects, options);
+    return await this.baseClient.bulkGet<T>(objects, options);
   }
 
-  public async get<T = unknown>(
-    type: string,
-    id: string,
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObject<T>> {
+  public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
-    return await this.baseClient.get(type, id, options);
+    return await this.baseClient.get<T>(type, id, options);
   }
 
   public async update<T = unknown>(
@@ -135,7 +126,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       { objects, options }
     );
 
-    return await this.baseClient.bulkUpdate(objects, options);
+    return await this.baseClient.bulkUpdate<T>(objects, options);
   }
 
   private async checkPrivileges(actions: string | string[], namespace?: string) {

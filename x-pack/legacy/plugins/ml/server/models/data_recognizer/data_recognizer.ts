@@ -624,6 +624,7 @@ export class DataRecognizer {
 
   // find all existing savedObjects for a given type
   loadExistingSavedObjects(type: string) {
+    // TODO: define saved object type
     return this.savedObjectsClient.find<any>({ type, perPage: 1000 });
   }
 

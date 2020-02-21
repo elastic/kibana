@@ -19,6 +19,7 @@ export interface Route {
 }
 
 export type IndexPatternSavedObject = SimpleSavedObject<IndexPatternAttributes>;
+// TODO define saved object type
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
 export function isSavedSearchSavedObject(

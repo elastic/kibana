@@ -20,6 +20,7 @@ import { SavedObject } from '../types';
 import { SavedObjectsImportError } from './types';
 
 export function extractErrors(
+  // TODO: define saved object type
   savedObjectResults: Array<SavedObject<any>>,
   savedObjectsToImport: Array<SavedObject<any>>
 ) {

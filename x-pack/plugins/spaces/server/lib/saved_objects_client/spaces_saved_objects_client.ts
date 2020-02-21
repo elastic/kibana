@@ -5,16 +5,13 @@
  */
 
 import {
-  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
@@ -74,7 +71,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.create(type, attributes, {
+    return await this.client.create<T>(type, attributes, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
@@ -135,12 +132,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find<T = unknown>(
-    options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponse<T>> {
+  public async find<T = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.find({
+    return await this.client.find<T>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         type => type !== 'space'
@@ -166,10 +161,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   public async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObjectsBulkResponse<T>> {
+  ) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.bulkGet(objects, {
+    return await this.client.bulkGet<T>(objects, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
@@ -184,14 +179,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async get<T = unknown>(
-    type: string,
-    id: string,
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObject<T>> {
+  public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.get(type, id, {
+    return await this.client.get<T>(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

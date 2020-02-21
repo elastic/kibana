@@ -10,6 +10,7 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useBulkGetSavedObject = (type: string) => {
   const kibana = useKibana();
+  // TODO: define saved object type
   const [data, setData] = useState<SavedObjectsBatchResponse<any> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
