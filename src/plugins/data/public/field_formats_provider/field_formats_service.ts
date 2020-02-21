@@ -19,7 +19,6 @@
 
 import { CoreSetup } from 'src/core/public';
 import { FieldFormatRegisty } from './field_formats';
-// import { baseFormattersPublic } from '../field_formats/constants';
 
 import {
   BoolFormat,

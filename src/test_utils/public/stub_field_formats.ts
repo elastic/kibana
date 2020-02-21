@@ -18,8 +18,6 @@
  */
 import { CoreSetup } from 'kibana/public';
 
-// import { FieldFormatRegisty } from '../../plugins/data/public/';
-
 import {
   FieldFormatRegisty,
   BoolFormat,
