@@ -50,9 +50,6 @@ class NewCalendarUI extends Component {
   }
 
   componentDidMount() {
-    const { timefilter } = this.props.kibana.services.data.query.timefilter;
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
     this.formSetup();
   }
 

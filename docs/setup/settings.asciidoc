@@ -447,7 +447,7 @@ us improve your user experience. Your data is never shared with anyone. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through the *Advanced Settings* in {kib}.
 
-`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+`vis_type_vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.

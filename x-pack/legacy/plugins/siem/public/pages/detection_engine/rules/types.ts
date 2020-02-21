@@ -7,7 +7,7 @@
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from './components/shared_imports';
+import { FormData, FormHook } from '../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {

@@ -79,6 +79,7 @@ export class EditorFrameService {
     plugins.embeddable.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
+        plugins.data.query.timefilter.timefilter,
         core.http,
         core.application.capabilities,
         core.savedObjects.client,

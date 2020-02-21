@@ -25,6 +25,7 @@ export function mockProcessEvent(
     machine_id: '',
     ...parts,
     data_buffer: {
+      timestamp_utc: '2019-09-24 01:47:47Z',
       event_subtype_full: 'creation_event',
       event_type_full: 'process_event',
       process_name: '',

@@ -25,3 +25,7 @@ export const DETECTION_ENGINE = i18n.translate('xpack.siem.navigation.detectionE
 export const TIMELINES = i18n.translate('xpack.siem.navigation.timelines', {
   defaultMessage: 'Timelines',
 });
+
+export const CASE = i18n.translate('xpack.siem.navigation.case', {
+  defaultMessage: 'Case',
+});

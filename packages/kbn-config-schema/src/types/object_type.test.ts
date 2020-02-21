@@ -30,6 +30,11 @@ test('returns value by default', () => {
   expect(type.validate(value)).toEqual({ name: 'test' });
 });
 
+test('returns empty object if undefined', () => {
+  const type = schema.object({});
+  expect(type.validate(undefined)).toEqual({});
+});
+
 test('properly parse the value if input is a string', () => {
   const type = schema.object({
     name: schema.string(),
@@ -112,14 +117,26 @@ test('undefined object within object', () => {
     }),
   });
 
+  expect(type.validate(undefined)).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
+
   expect(type.validate({})).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
+
+  expect(type.validate({ foo: {} })).toEqual({
     foo: {
       bar: 'hello world',
     },
   });
 });
 
-test('object within object with required', () => {
+test('object within object with key without defaultValue', () => {
   const type = schema.object({
     foo: schema.object({
       bar: schema.string(),
@@ -127,6 +144,9 @@ test('object within object with required', () => {
   });
   const value = { foo: {} };
 
+  expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+  );
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
     `"[foo.bar]: expected value of type [string] but got [undefined]"`
   );

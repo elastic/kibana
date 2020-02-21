@@ -6,5 +6,5 @@
   "configPath": ["xpack", "apm"],
   "ui": false,
   "requiredPlugins": ["apm_oss", "data", "home"],
-  "optionalPlugins": ["cloud"]
+  "optionalPlugins": ["cloud", "usageCollection"]
 }

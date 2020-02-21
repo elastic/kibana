@@ -17,8 +17,10 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
+import { ShardsResponse } from '../../../types';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { TEST_BOUNDARY } from './utils';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -223,6 +225,24 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
+export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
+export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
   url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
@@ -412,4 +432,12 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
   per_page: 1,
   total: 0,
   saved_objects: [],
+});
+
+export const getIndexName = () => 'index-name';
+export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
+  _shards: { total: 0 },
+});
+export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
+  _shards: { total: 1 },
 });
