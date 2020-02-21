@@ -44,7 +44,7 @@ const AgentEventBase = {
   timestamp: schema.string(),
   message: schema.string(),
   payload: schema.maybe(schema.any()),
-  data: schema.maybe(schema.string()),
+  agent_id: schema.string(),
   action_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
   stream_id: schema.maybe(schema.string()),
