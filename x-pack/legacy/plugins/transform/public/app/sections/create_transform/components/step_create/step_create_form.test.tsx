@@ -19,6 +19,8 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     const props = {
