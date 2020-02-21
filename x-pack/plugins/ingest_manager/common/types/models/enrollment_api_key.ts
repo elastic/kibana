@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SavedObjectAttributes } from '../../../../../../src/core/public';
 
 export interface EnrollmentAPIKey {
   id: string;
@@ -13,11 +14,10 @@ export interface EnrollmentAPIKey {
   policy_id?: string;
 }
 
-export interface EnrollmentAPIKeySOAttributes {
+export interface EnrollmentAPIKeySOAttributes extends SavedObjectAttributes {
   api_key_id: string;
   api_key: string;
   name?: string;
   active: boolean;
   policy_id?: string;
-  [k: string]: any; // allow to use it as saved object attributes type
 }
