@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectKibanaServices } from '../types';
+import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { findObjectByTitle } from './find_object_by_title';
-import { SAVE_DUPLICATE_REJECTED } from '../constants';
+import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**

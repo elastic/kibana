@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from 'ui/saved_objects/types';
 import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 
 /**

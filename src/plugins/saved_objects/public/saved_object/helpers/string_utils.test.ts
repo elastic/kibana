@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { StringUtils } from './string_utils';
 
 describe('StringUtils class', () => {
