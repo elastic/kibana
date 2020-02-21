@@ -56,8 +56,6 @@ The following Agent configuration APIs are available:
 `agent_name`::
 (optional) The agent name is used by the UI to determine which settings to display.
 
-[[apm-update-config-body]]
-===== Response body
 
 [[apm-update-config-example]]
 ===== Example
@@ -134,7 +132,6 @@ DELETE /api/apm/settings/agent-configuration
 
 [[apm-list-config-body]]
 ===== Response body
-
 
 [source,js]
 --------------------------------------------------
