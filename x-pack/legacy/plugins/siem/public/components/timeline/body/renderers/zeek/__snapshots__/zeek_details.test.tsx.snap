@@ -598,15 +598,29 @@ tr:hover .c3:focus::before {
   display: block;
 }
 
-.c8 {
+.c6 {
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c9 {
   margin: 0 2px;
 }
 
-.c7 {
+.c8 {
   margin-top: 3px;
 }
 
-.c6 {
+.c7 {
   margin-right: 10px;
 }
 
@@ -3360,20 +3374,53 @@ tr:hover .c3:focus::before {
                                                   overflowIndexStart={1}
                                                   showDomain={true}
                                                 >
-                                                  <DefaultFieldRendererOverflow
-                                                    idPrefix="moreReputationLink"
-                                                    moreMaxHeight="200px"
-                                                    overflowIndexStart={1}
-                                                    render={[Function]}
+                                                  <EuiFlexGroup
+                                                    gutterSize="none"
                                                   >
-                                                    <EuiFlexItem
-                                                      grow={false}
+                                                    <div
+                                                      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                                                     >
-                                                      <div
-                                                        className="euiFlexItem euiFlexItem--flexGrowZero"
-                                                      />
-                                                    </EuiFlexItem>
-                                                  </DefaultFieldRendererOverflow>
+                                                      <AlignedFlexItem
+                                                        grow={true}
+                                                      >
+                                                        <EuiFlexItem
+                                                          className="c6"
+                                                          grow={true}
+                                                        >
+                                                          <div
+                                                            className="euiFlexItem c6"
+                                                          />
+                                                        </EuiFlexItem>
+                                                      </AlignedFlexItem>
+                                                      <AlignedFlexItem
+                                                        grow={false}
+                                                      >
+                                                        <EuiFlexItem
+                                                          className="c6"
+                                                          grow={false}
+                                                        >
+                                                          <div
+                                                            className="euiFlexItem euiFlexItem--flexGrowZero c6"
+                                                          >
+                                                            <DefaultFieldRendererOverflow
+                                                              idPrefix="moreReputationLink"
+                                                              moreMaxHeight="200px"
+                                                              overflowIndexStart={1}
+                                                              render={[Function]}
+                                                            >
+                                                              <EuiFlexItem
+                                                                grow={false}
+                                                              >
+                                                                <div
+                                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                                />
+                                                              </EuiFlexItem>
+                                                            </DefaultFieldRendererOverflow>
+                                                          </div>
+                                                        </EuiFlexItem>
+                                                      </AlignedFlexItem>
+                                                    </div>
+                                                  </EuiFlexGroup>
                                                 </Memo(ReputationLinkComponent)>
                                               </div>
                                             </div>
@@ -3538,11 +3585,11 @@ tr:hover .c3:focus::before {
                                                     grow={false}
                                                   >
                                                     <EuiFlexItem
-                                                      className="c6"
+                                                      className="c7"
                                                       grow={false}
                                                     >
                                                       <div
-                                                        className="euiFlexItem euiFlexItem--flexGrowZero c6"
+                                                        className="euiFlexItem euiFlexItem--flexGrowZero c7"
                                                       >
                                                         <UserProcess
                                                           contextId="netflow-renderer-test-19"
@@ -3568,11 +3615,11 @@ tr:hover .c3:focus::before {
                                                     grow={false}
                                                   >
                                                     <EuiFlexItem
-                                                      className="c6"
+                                                      className="c7"
                                                       grow={false}
                                                     >
                                                       <div
-                                                        className="euiFlexItem euiFlexItem--flexGrowZero c6"
+                                                        className="euiFlexItem euiFlexItem--flexGrowZero c7"
                                                       >
                                                         <DurationEventStartEnd
                                                           contextId="netflow-renderer-test-19"
@@ -3639,11 +3686,11 @@ tr:hover .c3:focus::before {
                                                               grow={false}
                                                             >
                                                               <EuiFlexItem
-                                                                className="c7"
+                                                                className="c8"
                                                                 grow={false}
                                                               >
                                                                 <div
-                                                                  className="euiFlexItem euiFlexItem--flexGrowZero c7"
+                                                                  className="euiFlexItem euiFlexItem--flexGrowZero c8"
                                                                 >
                                                                   <SourceDestinationWithArrows
                                                                     contextId="netflow-renderer-test-19"
@@ -3682,14 +3729,14 @@ tr:hover .c3:focus::before {
                                                                           >
                                                                             <EuiFlexGroup
                                                                               alignItems="center"
-                                                                              className="c8"
+                                                                              className="c9"
                                                                               data-test-subj="source-destination-arrows-container"
                                                                               direction="column"
                                                                               gutterSize="none"
                                                                               justifyContent="center"
                                                                             >
                                                                               <div
-                                                                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c8"
+                                                                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c9"
                                                                                 data-test-subj="source-destination-arrows-container"
                                                                               />
                                                                             </EuiFlexGroup>

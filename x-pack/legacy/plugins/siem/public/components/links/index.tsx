@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { isNil } from 'lodash/fp';
@@ -151,7 +151,7 @@ const isReputationLink = (
 
 export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
 
-const Comma = styled(EuiLink)`
+export const Comma = styled(EuiLink)`
   margin-right: 5px;
   margin-left: 5px;
   &::after {
@@ -160,6 +160,14 @@ const Comma = styled(EuiLink)`
 `;
 
 Comma.displayName = 'Comma';
+
+const AlignedFlexItem = styled(EuiFlexItem)`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+AlignedFlexItem.displayName = 'AlignedFlexItem';
 
 const ReputationLinkTemplate = React.memo<{
   name: string;
@@ -226,42 +234,46 @@ const ReputationLinkComponent: React.FC<{
   );
 
   return (
-    <>
-      {ipReputationLinks
-        ?.slice(0, overflowIndexStart)
-        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-          <ReputationLinkTemplate
-            domain={domain}
-            id={id}
-            ipReputationLinks={ipReputationLinks}
-            key={`reputationLink-${id}`}
-            name={name}
-            overflowIndexStart={overflowIndexStart}
-            urlTemplate={urlTemplate}
-            showDomain={showDomain}
-          />
-        ))}
-      <DefaultFieldRendererOverflow
-        rowItems={ipReputationLinks}
-        idPrefix="moreReputationLink"
-        render={rowItem => {
-          return (
-            isReputationLink(rowItem) && (
-              <ReputationLinkTemplate
-                domain={domain}
-                ipReputationLinks={ipReputationLinks}
-                name={rowItem.name}
-                overflowIndexStart={overflowIndexStart}
-                urlTemplate={rowItem.url_template}
-                showDomain={false}
-              />
-            )
-          );
-        }}
-        moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-        overflowIndexStart={overflowIndexStart}
-      />
-    </>
+    <EuiFlexGroup gutterSize="none">
+      <AlignedFlexItem grow={true}>
+        {ipReputationLinks
+          ?.slice(0, overflowIndexStart)
+          .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+            <ReputationLinkTemplate
+              domain={domain}
+              id={id}
+              ipReputationLinks={ipReputationLinks}
+              key={`reputationLink-${id}`}
+              name={name}
+              overflowIndexStart={overflowIndexStart}
+              urlTemplate={urlTemplate}
+              showDomain={showDomain}
+            />
+          ))}
+      </AlignedFlexItem>
+      <AlignedFlexItem grow={false}>
+        <DefaultFieldRendererOverflow
+          rowItems={ipReputationLinks}
+          idPrefix="moreReputationLink"
+          render={rowItem => {
+            return (
+              isReputationLink(rowItem) && (
+                <ReputationLinkTemplate
+                  domain={domain}
+                  ipReputationLinks={ipReputationLinks}
+                  name={rowItem.name}
+                  overflowIndexStart={overflowIndexStart}
+                  urlTemplate={rowItem.url_template}
+                  showDomain={false}
+                />
+              )
+            );
+          }}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={overflowIndexStart}
+        />
+      </AlignedFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -10,7 +10,14 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';
-import {
+
+jest.mock('.', () => {
+  return {
+    Comma: jest.fn().mockReturnValue(', '),
+  };
+});
+
+const {
   GoogleLink,
   HostDetailsLink,
   IPDetailsLink,
@@ -20,7 +27,7 @@ import {
   Ja3FingerprintLink,
   PortOrServiceNameLink,
   DEFAULT_NUMBER_OF_REPUTATION_LINK,
-} from '.';
+} = jest.requireActual('.');
 
 jest.mock('../../lib/kibana', () => {
   return {
@@ -238,7 +245,12 @@ describe('Custom Links', () => {
         );
       });
 
-      test('it renders correct number of links if given overflow index', () => {
+      test('it renders correct number of tooltips by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('EuiToolTip')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
+      });
+
+      test('it renders correct number of links if overflow index is provided', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
 
@@ -246,6 +258,16 @@ describe('Custom Links', () => {
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
         expect(wrapper.find('ReputationLinkTemplate')).toHaveLength(1);
+      });
+
+      test('it renders correct number of tooltips if overflow index is provided', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('EuiToolTip')).toHaveLength(1);
       });
     });
 
@@ -311,11 +333,23 @@ describe('Custom Links', () => {
         (useUiSetting$ as jest.Mock).mockClear();
       });
 
-      test('it renders external icon', () => {
+      test('it renders external icons', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
         expect(wrapper.find('ExternalLinkIcon').exists()).toBeTruthy();
+      });
+
+      test('it renders correct number of external icons by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('ExternalLinkIcon')).toHaveLength(5);
+      });
+
+      test('it renders correct number of external icons', () => {
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('ExternalLinkIcon')).toHaveLength(1);
       });
     });
   });
