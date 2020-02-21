@@ -212,9 +212,12 @@ def withGcsArtifactUpload(workerName, closure) {
     } finally {
       catchError {
         if (env.CODE_COVERAGE) {
+          sh "echo 'navigating back'"
+          sh 'cd ..'
           ARTIFACT_PATTERNS.each { pattern ->
-            uploadGcsArtifact(uploadPrefix, "../**/${pattern}")
+            uploadGcsArtifact(uploadPrefix, "kibana*/${pattern}")
           }
+          sh 'cd kibana'
         } else {
           ARTIFACT_PATTERNS.each { pattern ->
             uploadGcsArtifact(uploadPrefix, pattern)
