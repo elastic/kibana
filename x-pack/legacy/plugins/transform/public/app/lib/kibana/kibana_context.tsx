@@ -6,13 +6,13 @@
 
 import React, { createContext, useContext, FC } from 'react';
 
+import { IUiSettingsClient } from 'kibana/public';
+
 import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import {
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../../src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IUiSettingsClient } from '../../../../../../../../src/core/public/ui_settings';
 
 interface UninitializedKibanaContextValue {
   initialized: false;

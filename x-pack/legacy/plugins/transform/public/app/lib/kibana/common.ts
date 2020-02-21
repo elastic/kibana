@@ -11,6 +11,8 @@ import {
   IndexPatternsContract,
 } from '../../../../../../../../src/plugins/data/public';
 
+import { matchAllQuery } from '../../common';
+
 type IndexPatternId = string;
 type SavedSearchId = string;
 
@@ -98,11 +100,7 @@ export function createSearchItems(
 
   let combinedQuery: CombinedQuery = {
     bool: {
-      must: [
-        {
-          match_all: {},
-        },
-      ],
+      must: [matchAllQuery],
     },
   };
 
@@ -120,7 +118,7 @@ export function createSearchItems(
   }
 
   if (!isIndexPattern(indexPattern)) {
-    throw new Error('Index Pattern not defined');
+    throw new Error('Index Pattern is not defined.');
   }
 
   return {

@@ -45,10 +45,12 @@ import {
 } from '../../../../lib/kibana';
 
 import {
-  AggName,
-  DropDownLabel,
   getPivotQuery,
   getPreviewRequestBody,
+  isMatchAllQuery,
+  matchAllQuery,
+  AggName,
+  DropDownLabel,
   PivotAggDict,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -104,10 +106,10 @@ export function applyTransformConfigToDefineState(
       const aggConfig = transformConfig.pivot.aggregations[aggName] as Dictionary<any>;
       const agg = Object.keys(aggConfig)[0];
       aggList[aggName] = {
+        ...aggConfig[agg],
         agg: agg as PIVOT_SUPPORTED_AGGS,
         aggName,
         dropDownName: aggName,
-        ...aggConfig[agg],
       } as PivotAggsConfig;
       return aggList;
     }, {} as PivotAggsConfigDict);
@@ -130,7 +132,7 @@ export function applyTransformConfigToDefineState(
 
     // only apply the query from the transform config to wizard state if it's not the default query
     const query = transformConfig.source.query;
-    if (query !== undefined && !isEqual(query, { match_all: {} })) {
+    if (query !== undefined && !isEqual(query, matchAllQuery)) {
       state.isAdvancedSourceEditorEnabled = true;
       state.searchString = '';
       state.searchQuery = query;
@@ -263,10 +265,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const searchHandler = (d: Record<string, any>) => {
     const { filterQuery, queryString } = d;
     const newSearch = queryString === emptySearch ? defaultSearch : queryString;
-    const newSearchQuery =
-      filterQuery.match_all && Object.keys(filterQuery.match_all).length === 0
-        ? defaultSearch
-        : filterQuery;
+    const newSearchQuery = isMatchAllQuery(filterQuery) ? defaultSearch : filterQuery;
     setSearchString(newSearch);
     setSearchQuery(newSearchQuery);
   };
@@ -418,10 +417,10 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         const aggConfigKeys = Object.keys(aggConfig);
         const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
         newGroupByList[aggName] = {
+          ...aggConfig[agg],
           agg,
           aggName,
           dropDownName: '',
-          ...aggConfig[agg],
         };
       });
     }
@@ -435,10 +434,10 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         const aggConfigKeys = Object.keys(aggConfig);
         const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
         newAggList[aggName] = {
+          ...aggConfig[agg],
           agg,
           aggName,
           dropDownName: '',
-          ...aggConfig[agg],
         };
       });
     }
