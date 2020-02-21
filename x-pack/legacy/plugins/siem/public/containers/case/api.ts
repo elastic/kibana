@@ -5,11 +5,19 @@
  */
 
 import { KibanaServices } from '../../lib/kibana';
-import { NewComment, FetchCasesProps, Case, NewCase, SortFieldCase, AllCases } from './types';
-import { Direction } from '../../graphql/types';
+import {
+  AllCases,
+  Case,
+  CaseSnake,
+  CommentSnake,
+  FetchCasesProps,
+  NewCase,
+  NewComment,
+  SortFieldCase,
+} from './types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
-import { convertCaseToCamel, convertAllCasesToCamel, convertUpdateCaseToCamel, convertCommentToCamel } from './utils';
+import { convertToCamelCase, convertAllCasesToCamel } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
@@ -20,7 +28,7 @@ export const getCase = async (caseId: string, includeComments: boolean): Promise
     },
   });
   await throwIfNotOk(response.response);
-  return convertCaseToCamel(response.body!);
+  return convertToCamelCase(response.body!);
 };
 
 export const getCases = async ({
@@ -32,7 +40,7 @@ export const getCases = async ({
     page: 1,
     perPage: 20,
     sortField: SortFieldCase.createdAt,
-    sortOrder: Direction.desc,
+    sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
   const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
@@ -57,7 +65,7 @@ export const createCase = async (newCase: NewCase): Promise<Case> => {
     body: JSON.stringify(newCase),
   });
   await throwIfNotOk(response.response);
-  return convertCaseToCamel(response.body!);
+  return convertToCamelCase<CaseSnake, Case>(response.body!);
 };
 
 export const updateCaseProperty = async (
@@ -71,7 +79,7 @@ export const updateCaseProperty = async (
     body: JSON.stringify({ case: updatedCase, version }),
   });
   await throwIfNotOk(response.response);
-  return convertUpdateCaseToCamel(response.body!);
+  return convertToCamelCase<Partial<CaseSnake>, Partial<Case>>(response.body!);
 };
 
 export const createComment = async (newComment: NewComment, caseId: string): Promise<Comment> => {
@@ -81,5 +89,5 @@ export const createComment = async (newComment: NewComment, caseId: string): Pro
     body: JSON.stringify(newComment),
   });
   await throwIfNotOk(response.response);
-  return convertCommentToCamel(response.body!);
+  return convertToCamelCase<CommentSnake, Comment>(response.body!);
 };

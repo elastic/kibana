@@ -50,7 +50,7 @@ const renderUsers = (users: ElasticUser[]) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          onClick={() => window.alert('Email clicked')}
+          onClick={() => {}} // TO DO
           iconType="email"
           aria-label="email"
         />
