@@ -39,10 +39,6 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 
 export type SignalsQueryRestParams = SignalQueryParams;
 
-export interface SignalsStatusRequest extends LegacyRequest {
-  payload: SignalsStatusRestParams;
-}
-
 export interface SignalsQueryRequest extends LegacyRequest {
   payload: SignalsQueryRestParams;
 }
