@@ -138,11 +138,12 @@ export class AggConfigs {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
-    const aggConfigs = new AggConfigs(
-      this.indexPattern,
-      this.aggs.filter(filterAggs),
-      this.schemas
-    );
+
+    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
+      schemas: this.schemas,
+      typesRegistry: this.typesRegistry,
+    });
+
     return aggConfigs;
   }
 
@@ -151,10 +152,17 @@ export class AggConfigs {
     { addToAggConfigs = true } = {}
   ) => {
     const { type } = params;
-    const aggConfig = new AggConfig(this, {
-      ...params,
-      type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
-    });
+    let aggConfig;
+
+    if (params instanceof AggConfig) {
+      aggConfig = params;
+      params.parent = this;
+    } else {
+      aggConfig = new AggConfig(this, {
+        ...params,
+        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
+      });
+    }
 
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
