@@ -28,7 +28,7 @@ export const getCase = async (caseId: string, includeComments: boolean): Promise
     },
   });
   await throwIfNotOk(response.response);
-  return convertToCamelCase(response.body!);
+  return convertToCamelCase<CaseSnake, Case>(response.body!);
 };
 
 export const getCases = async ({

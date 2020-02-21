@@ -99,8 +99,8 @@ export const useGetCases = (): [
       sortOrder: 'desc',
     },
   });
-  const [queryParams, setQueryParams] = useState(state.queryParams as Partial<QueryParams>);
-  const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
+  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
+  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -124,7 +124,6 @@ export const useGetCases = (): [
           filterOptions: state.filterOptions,
           queryParams: state.queryParams,
         });
-        console.log('res', response);
         if (!didCancel) {
           dispatch({
             type: FETCH_SUCCESS,

@@ -9,17 +9,15 @@ import { AllCases, AllCasesSnake, Case, CaseSnake } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U => {
-  console.log('snakeCase', snakeCase);
-  return Object.entries(snakeCase).reduce((acc, [key, value]) => {
+export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
+  Object.entries(snakeCase).reduce((acc, [key, value]) => {
     if (isObject(value)) {
-      set(camelCase(key), convertToCamelCase(value), acc);
+      set(acc, camelCase(key), convertToCamelCase(value));
     } else {
-      set(camelCase(key), value, acc);
+      set(acc, camelCase(key), value);
     }
     return acc;
   }, {} as U);
-};
 
 export const convertAllCasesToCamel = (snakeCases: AllCasesSnake): AllCases => ({
   cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseSnake, Case>(snakeCase)),
