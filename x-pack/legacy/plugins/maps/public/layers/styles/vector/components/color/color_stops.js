@@ -11,6 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiColorPicker, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 function getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd }) {
+  const colorPickerButtons = (
+    <div className="mapColorStop__icons">
+      {deleteButton}
+      <EuiButtonIcon
+        iconType="plusInCircle"
+        color="primary"
+        aria-label="Add"
+        title="Add"
+        onClick={onAdd}
+      />
+    </div>
+  );
   return (
     <EuiFormRow
       key={index}
@@ -19,22 +31,19 @@ function getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, o
       error={errors}
       display="rowCompressed"
     >
-      <div>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiFlexItem>{stopInput}</EuiFlexItem>
-          <EuiFlexItem>{colorInput}</EuiFlexItem>
-        </EuiFlexGroup>
-        <div className="mapColorStop__icons">
-          {deleteButton}
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            color="primary"
-            aria-label="Add"
-            title="Add"
-            onClick={onAdd}
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+          {stopInput}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiColorPicker
+            onChange={colorInput.onColorChange}
+            color={colorInput.color}
+            compressed
+            append={colorPickerButtons}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 }
@@ -87,7 +96,10 @@ export const ColorStops = ({
             defaultMessage: 'Color must provide a valid hex value',
           })
         : undefined,
-      colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
+      colorInput: {
+        onColorChange: onColorChange,
+        color: color,
+      },
     };
   }
 
