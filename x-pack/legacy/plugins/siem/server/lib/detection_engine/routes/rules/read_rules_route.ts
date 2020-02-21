@@ -11,7 +11,7 @@ import { buildRouteValidation, transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { ReadRuleQuery, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { RuleQuery, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const readRulesRoute = (router: IRouter) => {
@@ -19,7 +19,7 @@ export const readRulesRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation<ReadRuleQuery>(queryRulesSchema),
+        query: buildRouteValidation<RuleQuery>(queryRulesSchema),
       },
       options: {
         tags: ['access:siem'],

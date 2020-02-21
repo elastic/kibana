@@ -121,7 +121,7 @@ export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
   };
 }
 
-export interface ReadRuleQuery {
+export interface RuleQuery {
   id: string | undefined;
   rule_id: string | undefined;
 }
