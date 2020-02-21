@@ -21,7 +21,7 @@ import { first } from 'rxjs/operators';
 
 import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
@@ -32,13 +32,6 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { duration } from 'moment';
-import { TestScheduler } from 'rxjs/testing';
-import { pollEsNodesVersion } from './version_check/ensure_es_version';
-
-const getTestScheduler = () =>
-  new TestScheduler((actual, expected) => {
-    expect(actual).toEqual(expected);
-  });
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
