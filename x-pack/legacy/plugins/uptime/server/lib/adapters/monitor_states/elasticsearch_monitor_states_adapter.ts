@@ -66,18 +66,7 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     );
 
     // Calculate the total, up, and down counts.
-    const counts = await fastStatusCount(context);
-
-    // Check if the last count was accurate, if not, we need to perform a slower count with the
-    // MonitorGroupsIterator.
-    if (!(await context.hasTimespan())) {
-      // Figure out whether 'up' or 'down' is more common. It's faster to count the lower cardinality
-      // one then use subtraction to figure out its opposite.
-      const [leastCommonStatus, mostCommonStatus]: Array<'up' | 'down'> =
-        counts.up > counts.down ? ['down', 'up'] : ['up', 'down'];
-      counts[leastCommonStatus] = await slowStatusCount(context, leastCommonStatus);
-      counts[mostCommonStatus] = counts.total - counts[leastCommonStatus];
-    }
+    const counts = await statusCount(context);
 
     return {
       total: statusFilter ? counts[statusFilter] : counts.total,
@@ -110,45 +99,122 @@ const jsonifyPagination = (p: any): string | null => {
   return JSON.stringify(p);
 };
 
-const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const params = {
+const statusCount = async (context: QueryContext): Promise<Snapshot> => {
+  const res = await context.search({
     index: INDEX_NAMES.HEARTBEAT,
-    body: {
-      size: 0,
-      query: { bool: { filter: await context.dateAndCustomFilters() } },
-      aggs: {
-        unique: {
-          // We set the precision threshold to 40k which is the max precision supported by cardinality
-          cardinality: { field: 'monitor.id', precision_threshold: 40000 },
-        },
-        down: {
-          filter: { range: { 'summary.down': { gt: 0 } } },
-          aggs: {
-            unique: { cardinality: { field: 'monitor.id', precision_threshold: 40000 } },
-          },
-        },
-      },
-    },
-  };
+    body: statusCountBody(await context.dateAndCustomFilters()),
+  })
 
-  const statistics = await context.search(params);
-  const total = statistics.aggregations.unique.value;
-  const down = statistics.aggregations.down.unique.value;
+  console.log("RES", res);
 
+  return res.aggregations.counts.value;
+}
+
+const statusCountBody = (filters: any): any => {
   return {
-    total,
-    down,
-    up: total - down,
-  };
-};
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            exists: {
+              field: "summary"
+            }
+          },
+          filters,
+        ]
+      }
+    },
+    aggs: {
+      counts: {
+        scripted_metric: {
+          init_script: "state.locStatus = new HashMap(); state.totalDocs = 0;",
+          map_script: `
+          def loc = doc["observer.geo.name"];
+          String idLoc = loc == null ? doc["monitor.id"][0] + "$" : doc["monitor.id"][0] + "$" + loc[0];
+          
+          String status = doc["summary.down"][0] > 0 ? "d" : "u";
+          String timeAndStatus = doc["@timestamp"][0].toInstant().toEpochMilli().toString() + status;
+          state.locStatus[idLoc] = timeAndStatus;
+          state.totalDocs++;
+        `,
+          combine_script: `
+          return state;
+        `,
+          reduce_script: `
+          // Use a treemap since it's later traversable in sorted order
+          TreeMap locStatus = new TreeMap();
+          long totalDocs = 0;
+          int uniqueIds = 0;
+          for (state in states) {
+            totalDocs += state.totalDocs;
+            for (entry in state.locStatus.entrySet()) {
+              locStatus.merge(entry.getKey(), entry.getValue(), (a,b) -> a.compareTo(b) > 0 ? a : b)
+            }
+          }
+          
+          
+          HashMap locTotals = new HashMap();
+          int total = 0;
+          int down = 0;
+          String curId = "";
+          boolean curIdDown = false;
+          for (entry in locStatus.entrySet()) {
+            String idLoc = entry.getKey();
+            String timeStatus = entry.getValue();
+            int splitAt = idLoc.lastIndexOf("$");
+            String id = idLoc.substring(0, splitAt);
+            String loc = idLoc.substring(splitAt+1);
+            String status = timeStatus.substring(timeStatus.length() - 1);
+            
+            locTotals.compute(loc, (k,v) -> {
+              HashMap res = v;
+              if (v == null) {
+                res = new HashMap();
+                res.put('up', 0);
+                res.put('down', 0);
+              }
+              
+              if (status == 'u') {
+                res.up++;
+              } else {
+                res.down++;
+              }
 
-const slowStatusCount = async (context: QueryContext, status: string): Promise<number> => {
-  const downContext = context.clone();
-  downContext.statusFilter = status;
-  const iterator = new MonitorGroupIterator(downContext);
-  let count = 0;
-  while (await iterator.next()) {
-    count++;
+              return res;
+            });
+            
+            
+            // We've encountered a new ID
+            if (curId != id) {
+              total++;
+              curId = id;
+              if (status == "d") {
+                curIdDown = true;
+                down++;
+              } else {
+                curIdDown = false;
+              }
+            } else if (!curIdDown) {
+              if (status == "d") {
+                curIdDown = true;
+                down++;
+              } else {
+                curIdDown = false;
+              }
+            }
+          }
+          
+          Map result = new HashMap();
+          result.total = total;
+          result.location_totals = locTotals;
+          result.up = total-down;
+          result.down = down;
+          result.totalDocs = totalDocs;
+          return result;
+        `
+        }
+      }
+    }
   }
-  return count;
-};
+}
