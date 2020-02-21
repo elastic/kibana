@@ -29,7 +29,7 @@ import { Loading } from '../../../../components';
 import { ConnectedLink } from '../../components';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 
-const Item: React.FC<{ label: string }> = ({ label, children }) => {
+const Item: React.FunctionComponent<{ label: string }> = ({ label, children }) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiDescriptionList compressed>
@@ -52,7 +52,7 @@ function useFlyout() {
 interface Props {
   agent: Agent;
 }
-export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
+export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 

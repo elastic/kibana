@@ -34,7 +34,11 @@ interface Props {
   validation: ValidationResults;
 }
 
-export const PolicyForm: React.FC<Props> = ({ policy, updatePolicy, validation }) => {
+export const PolicyForm: React.FunctionComponent<Props> = ({
+  policy,
+  updatePolicy,
+  validation,
+}) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const fields: Array<{ name: 'name' | 'description' | 'namespace'; label: JSX.Element }> = [
     {

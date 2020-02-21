@@ -33,7 +33,7 @@ import { SearchBar } from '../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 
-export const AgentListPage: React.FC<{}> = () => {
+export const AgentListPage: React.FunctionComponent<{}> = () => {
   const core = useCore();
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);

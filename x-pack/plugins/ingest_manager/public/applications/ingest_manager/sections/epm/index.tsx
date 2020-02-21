@@ -11,7 +11,7 @@ import { useConfig } from '../../hooks';
 import { Home } from './screens/home';
 import { Detail } from './screens/detail';
 
-export const EPMApp: React.FC = () => {
+export const EPMApp: React.FunctionComponent = () => {
   const { epm } = useConfig();
 
   return epm.enabled ? (

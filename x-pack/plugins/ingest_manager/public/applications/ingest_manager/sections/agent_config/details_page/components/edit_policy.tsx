@@ -27,7 +27,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const EditPolicyFlyout: React.FC<Props> = ({
+export const EditPolicyFlyout: React.FunctionComponent<Props> = ({
   agentConfig: originalAgentConfig,
   onClose,
 }) => {

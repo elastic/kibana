@@ -13,13 +13,13 @@ import { AgentRefreshContext } from './hooks';
 import { Loading } from '../../../components';
 import { useGetOneAgent } from '../../../hooks';
 
-export const Layout: React.FC = ({ children }) => (
+export const Layout: React.FunctionComponent = ({ children }) => (
   <EuiPageBody>
     <EuiPageContent>{children}</EuiPageContent>
   </EuiPageBody>
 );
 
-export const AgentDetailsPage: React.FC = () => {
+export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId },
   } = useRouteMatch();

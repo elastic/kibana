@@ -20,7 +20,7 @@ import {
 import { sendRequest, useInput, useCore } from '../../../hooks';
 import { fleetSetupRouteService } from '../../../services';
 
-export const SetupPage: React.FC<{
+export const SetupPage: React.FunctionComponent<{
   refresh: () => Promise<void>;
 }> = ({ refresh }) => {
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);

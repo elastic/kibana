@@ -36,12 +36,12 @@ import { ConnectedLink } from '../../fleet/components';
 import { AgentConfigDeleteProvider } from '../components';
 import { DEFAULT_AGENT_CONFIG_ID } from '../../../constants';
 
-export const Layout: React.FC = ({ children }) => (
+export const Layout: React.FunctionComponent = ({ children }) => (
   <EuiPageBody>
     <EuiPageContent>{children}</EuiPageContent>
   </EuiPageBody>
 );
-export const AgentConfigDetailsPage: React.FC = () => {
+export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId },
   } = useRouteMatch<{ configId: string }>();

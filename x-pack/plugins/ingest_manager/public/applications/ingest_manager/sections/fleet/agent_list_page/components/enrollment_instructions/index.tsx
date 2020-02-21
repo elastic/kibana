@@ -17,9 +17,9 @@ export type ManualEnrollmentInstructions = Array<{
   commandsLang?: 'bash' | 'yaml';
 }>;
 
-export const ManualEnrollmentSteps: React.FC<{ instructions: ManualEnrollmentInstructions }> = ({
-  instructions,
-}) => (
+export const ManualEnrollmentSteps: React.FunctionComponent<{
+  instructions: ManualEnrollmentInstructions;
+}> = ({ instructions }) => (
   <EuiSteps
     steps={instructions.map(({ title, textPre, commands, commandsLang }) => ({
       title,

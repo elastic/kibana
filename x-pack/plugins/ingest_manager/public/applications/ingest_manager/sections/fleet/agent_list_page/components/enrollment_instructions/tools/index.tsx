@@ -5,6 +5,6 @@
  */
 import React from 'react';
 
-export const ToolsEnrollmentInstructions: React.FC = () => {
+export const ToolsEnrollmentInstructions: React.FunctionComponent = () => {
   return <div>Tools instructions</div>;
 };

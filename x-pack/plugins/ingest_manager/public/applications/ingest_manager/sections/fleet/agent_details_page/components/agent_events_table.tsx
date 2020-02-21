@@ -37,7 +37,7 @@ function useSearch() {
   };
 }
 
-export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
+export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 

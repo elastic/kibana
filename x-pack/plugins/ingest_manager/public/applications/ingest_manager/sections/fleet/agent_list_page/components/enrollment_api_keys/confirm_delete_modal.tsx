@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ConfirmDeleteModal: React.FC<{
+export const ConfirmDeleteModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   apiKeyId: string;

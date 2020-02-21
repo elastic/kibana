@@ -93,7 +93,7 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
   };
 }
 
-export const MetadataForm: React.FC<{ agent: Agent }> = ({ agent }) => {
+export const MetadataForm: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const [isOpen, setOpen] = useState(false);
 
   const form = useAddMetadataForm(agent, () => {

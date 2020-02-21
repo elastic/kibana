@@ -14,21 +14,22 @@ interface LayoutProps {
   modalClosePath?: string;
 }
 
-export const NoDataLayout: React.FC<LayoutProps> = withRouter<any, React.FC<LayoutProps>>(
-  ({ actionSection, title, modalClosePath, children }) => {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiPageContent>
-            <EuiEmptyPrompt
-              iconType="logoBeats"
-              title={<h2>{title}</h2>}
-              body={children}
-              actions={actionSection}
-            />
-          </EuiPageContent>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-) as any;
+export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
+  any,
+  React.FunctionComponent<LayoutProps>
+>(({ actionSection, title, modalClosePath, children }) => {
+  return (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiPageContent>
+          <EuiEmptyPrompt
+            iconType="logoBeats"
+            title={<h2>{title}</h2>}
+            body={children}
+            actions={actionSection}
+          />
+        </EuiPageContent>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}) as any;

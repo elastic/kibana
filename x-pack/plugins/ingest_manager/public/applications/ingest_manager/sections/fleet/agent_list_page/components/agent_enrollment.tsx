@@ -41,7 +41,10 @@ interface RouterProps {
   policies: AgentConfig[];
 }
 
-export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies }) => {
+export const AgentEnrollmentFlyout: React.FunctionComponent<RouterProps> = ({
+  onClose,
+  policies,
+}) => {
   const core = useCore();
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'

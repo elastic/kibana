@@ -29,7 +29,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const AssignDatasourcesFlyout: React.FC<Props> = ({
+export const AssignDatasourcesFlyout: React.FunctionComponent<Props> = ({
   policyId,
   existingDatasources,
   onClose,

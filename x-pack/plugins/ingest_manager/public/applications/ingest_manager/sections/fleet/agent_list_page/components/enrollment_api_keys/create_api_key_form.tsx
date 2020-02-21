@@ -19,7 +19,9 @@ import { useInput, sendRequest } from '../../../../../hooks';
 import { usePolicies } from './hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../../services';
 
-export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange }) => {
+export const CreateApiKeyForm: React.FunctionComponent<{ onChange: () => void }> = ({
+  onChange,
+}) => {
   const { data: policies } = usePolicies();
   const { inputs, onSubmit, submitted } = useCreateApiKey(() => onChange());
 

@@ -33,7 +33,7 @@ interface Props {
   isSelectable?: EuiInMemoryTableProps<InMemoryDatasource>['isSelectable'];
 }
 
-export const DatasourcesTable: React.FC<Props> = (
+export const DatasourcesTable: React.FunctionComponent<Props> = (
   { datasources: originalDatasources, withPoliciesCount, ...rest } = {
     datasources: [],
     withPoliciesCount: false,

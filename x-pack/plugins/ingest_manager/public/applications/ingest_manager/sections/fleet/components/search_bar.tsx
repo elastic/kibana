@@ -33,7 +33,7 @@ interface Props {
   onChange: (newValue: string) => void;
 }
 
-export const SearchBar: React.FC<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: React.FunctionComponent<Props> = ({ value, fieldPrefix, onChange }) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   // TODO fix type when correctly typed in EUI

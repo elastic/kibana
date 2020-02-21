@@ -15,7 +15,7 @@ import { EnrollmentAPIKey } from '../../../../../types';
 import { enrollmentAPIKeyRouteService } from '../../../../../services';
 export { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 
-export const EnrollmentApiKeysTable: React.FC<{
+export const EnrollmentApiKeysTable: React.FunctionComponent<{
   onChange: () => void;
 }> = ({ onChange }) => {
   const [confirmDeleteApiKeyId, setConfirmDeleteApiKeyId] = useState<string | null>(null);
@@ -95,7 +95,7 @@ export const EnrollmentApiKeysTable: React.FC<{
   );
 };
 
-const CreateApiKeyButton: React.FC<{ onChange: () => void }> = ({ onChange }) => {
+const CreateApiKeyButton: React.FunctionComponent<{ onChange: () => void }> = ({ onChange }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -128,7 +128,7 @@ const CreateApiKeyButton: React.FC<{ onChange: () => void }> = ({ onChange }) =>
   return <></>;
 };
 
-const ApiKeyField: React.FC<{ apiKeyId: string }> = ({ apiKeyId }) => {
+const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
   const [visible, setVisible] = useState(false);
   const { data } = useEnrollmentApiKey(apiKeyId);
 

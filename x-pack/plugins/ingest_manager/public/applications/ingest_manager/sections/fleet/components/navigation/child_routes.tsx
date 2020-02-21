@@ -12,7 +12,7 @@ interface RouteConfig {
   routes?: RouteConfig[];
 }
 
-export const ChildRoutes: React.FC<{
+export const ChildRoutes: React.FunctionComponent<{
   routes?: RouteConfig[];
   useSwitch?: boolean;
   [other: string]: any;

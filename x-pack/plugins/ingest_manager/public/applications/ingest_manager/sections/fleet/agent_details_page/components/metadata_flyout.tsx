@@ -22,7 +22,7 @@ interface Props {
   agent: Agent;
   flyout: { hide: () => void };
 }
-export const AgentMetadataFlyout: React.FC<Props> = ({ agent, flyout }) => {
+export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, flyout }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
     return Object.keys(obj || {}).map(key => ({
       title: key,
