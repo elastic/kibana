@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import src from '!!raw-loader!./worker.js';
-
-export const workerModule = {
-  id: 'ace/mode/json_worker',
-  src,
-};
+export function XJsonMode() {}
+export function setDependencyCache() {}
+export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
+export const SORT_DIRECTION = { ASC: 'asc' };
