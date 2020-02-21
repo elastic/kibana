@@ -56,10 +56,16 @@ export function getPaginationParams(limit: number, after?: string): PaginationPa
   return { size: limit };
 }
 
-export function paginate(pagination: PaginationParams, field: string, query: JsonObject) {
+export function paginate(
+  pagination: PaginationParams,
+  tiebreaker: string,
+  aggregator: string,
+  query: JsonObject
+) {
   const { size, timestamp, eventID } = pagination;
-  query.sort = [{ '@timestamp': 'asc' }, { [field]: 'asc' }];
-  query.aggs = { total: { value_count: { field } } };
+  query.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+  query.aggs = query.aggs || {};
+  query.aggs = Object.assign({}, query.aggs, { totals: { terms: { field: aggregator, size } } });
   query.size = size;
   if (timestamp && eventID) {
     query.search_after = [timestamp.getTime(), eventID] as Array<number | string>;
@@ -67,25 +73,31 @@ export function paginate(pagination: PaginationParams, field: string, query: Jso
   return query;
 }
 
+// this assumes sorted results
+export function buildPaginationCursor(total: number, results: ResolverEvent[]): string | null {
+  if (total > results.length && results.length > 0) {
+    const lastResult = results[results.length - 1];
+    const cursor = {
+      timestamp: lastResult['@timestamp'],
+      eventID: extractEventID(lastResult),
+    };
+    return urlEncodeCursor(cursor);
+  }
+  return null;
+}
+
 export function paginatedResults(
   response: SearchResponse<ResolverEvent>
-): { total: number; results: ResolverEvent[]; nextCursor: string | null } {
-  const total = response.aggregations?.total?.value || 0;
+): { totals: Record<string, number>; results: ResolverEvent[] } {
   if (response.hits.hits.length === 0) {
-    return { total, results: [], nextCursor: null };
+    return { totals: {}, results: [] };
   }
 
-  const results: ResolverEvent[] = [];
-  for (const hit of response.hits.hits) {
-    results.push(hit._source);
-  }
+  const totals = response.aggregations?.totals?.buckets?.reduce(
+    (cummulative: any, bucket: any) => ({ ...cummulative, [bucket.key]: bucket.doc_count }),
+    {}
+  );
 
-  // results will be at least 1 because of length check at the top of the function
-  const next = results[results.length - 1];
-  const cursor = {
-    timestamp: next['@timestamp'],
-    eventID: extractEventID(next),
-  };
-
-  return { total, results, nextCursor: urlEncodeCursor(cursor) };
+  const results = response.hits.hits.map(hit => hit._source);
+  return { totals, results };
 }

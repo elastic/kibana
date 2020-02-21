@@ -31,7 +31,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.events.length).to.eql(1);
-        expect(body.pagination.next).to.eql(cursor);
+        expect(body.pagination.next).to.eql(null);
         expect(body.pagination.total).to.eql(1);
         // default limit
         expect(body.pagination.limit).to.eql(100);
@@ -47,7 +47,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .expect(200);
         expect(body.events).be.empty();
         expect(body.pagination.next).to.eql(null);
-        expect(body.pagination.total).to.eql(1);
+        expect(body.pagination.total).to.eql(0);
       });
 
       it('should return the first page of information when the cursor is invalid', async () => {
@@ -58,7 +58,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
-        expect(body.pagination.next).to.not.eql(null);
+        expect(body.pagination.next).to.eql(null);
       });
 
       it('should error on invalid pagination values', async () => {
@@ -159,7 +159,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
-        expect(body.pagination.next).to.eql(cursor);
         // default limit
         expect(body.pagination.limit).to.eql(10);
 
@@ -168,19 +167,15 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.children[0].lifecycle[0].endgame.unique_pid).to.eql(94042);
       });
 
-      it('dangerously returns multiple levels of child process lifecycle events', async () => {
+      it('returns multiple levels of child process lifecycle events', async () => {
         const { body } = await supertest
           .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&levels=3`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(8);
-        expect(body.pagination.next).to.eql(
-          'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MSJ9'
-        );
+        expect(body.pagination.next).to.be(null);
         expect(body.children[0].pagination.total).to.eql(1);
-        expect(body.children[0].pagination.next).to.eql(
-          'eyJ0aW1lc3RhbXAiOjE1ODE0NTU5MzkwMDAsImV2ZW50SUQiOiI5MzkzMyJ9'
-        );
+        expect(body.children[0].pagination.next).to.be(null);
         // default limit
         expect(body.pagination.limit).to.eql(10);
 
@@ -199,7 +194,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .expect(200);
         expect(body.children).be.empty();
         expect(body.pagination.next).to.eql(null);
-        expect(body.pagination.total).to.eql(1);
+        expect(body.pagination.total).to.eql(0);
       });
 
       it('returns the first page of information when the cursor is invalid', async () => {
@@ -210,7 +205,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
-        expect(body.pagination.next).to.not.eql(null);
+        expect(body.pagination.next).to.be(null);
       });
 
       it('errors on invalid pagination values', async () => {
@@ -246,6 +241,26 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.pagination.total).to.eql(0);
         expect(body.pagination.next).to.eql(null);
         expect(body.children).to.be.empty();
+      });
+    });
+
+    describe('tree endpoint', () => {
+      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+
+      it('returns ancestors, events, children, and current process lifecycle', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/resolver/93933/tree?legacyEndpointID=${endpointID}`)
+          .set(commonHeaders)
+          .expect(200);
+        expect(body.pagination.totalChildren).to.equal(0);
+        expect(body.pagination.totalEvents).to.equal(0);
+        expect(body.pagination.nextAncestor).to.equal(null);
+        expect(body.pagination.nextEvent).to.equal(null);
+        expect(body.pagination.nextChild).to.equal(null);
+        expect(body.ancestors.length).to.equal(1);
+        expect(body.children.length).to.equal(0);
+        expect(body.events.length).to.equal(0);
+        expect(body.lifecycle.length).to.equal(2);
       });
     });
   });

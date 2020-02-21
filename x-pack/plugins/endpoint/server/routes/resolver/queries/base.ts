@@ -15,11 +15,14 @@ export abstract class ResolverQuery {
     private readonly pagination?: PaginationParams
   ) {}
 
-  protected paginateBy(field: string, query: JsonObject) {
-    if (!this.pagination) {
-      return query;
-    }
-    return paginate(this.pagination, field, query);
+  protected paginateBy(tiebreaker: string, aggregator: string) {
+    const self = this;
+    return (query: JsonObject) => {
+      if (!self.pagination) {
+        return query;
+      }
+      return paginate(self.pagination, tiebreaker, aggregator, query);
+    };
   }
 
   build(...ids: string[]) {

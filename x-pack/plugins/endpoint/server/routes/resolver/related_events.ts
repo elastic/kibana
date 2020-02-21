@@ -6,8 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { getPaginationParams } from './utils/pagination';
-import { RelatedEventsQuery } from './queries/related_events';
+import { getRelated } from './shared';
 
 interface RelatedEventsQueryParams {
   after?: string;
@@ -50,19 +49,12 @@ export function handleRelatedEvents(
       query: { limit, after, legacyEndpointID },
     } = req;
     try {
-      const pagination = getPaginationParams(limit, after);
-
       const client = context.core.elasticsearch.dataClient;
-      // Retrieve the related non-process events for a given process
-      const relatedEventsQuery = new RelatedEventsQuery(legacyEndpointID, pagination);
-      const relatedEvents = await relatedEventsQuery.search(client, id);
-
-      const { total, results: events, nextCursor } = relatedEvents;
-
+      const [total, events, next] = await getRelated(client, id, limit, legacyEndpointID, after);
       return res.ok({
         body: {
           events,
-          pagination: { total, next: nextCursor, limit },
+          pagination: { total, next, limit },
         },
       });
     } catch (err) {

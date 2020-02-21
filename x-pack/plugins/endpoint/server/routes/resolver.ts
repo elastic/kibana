@@ -9,6 +9,7 @@ import { EndpointAppContext } from '../types';
 import { handleRelatedEvents, validateRelatedEvents } from './resolver/related_events';
 import { handleChildren, validateChildren } from './resolver/children';
 import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
+import { handleTree, validateTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
@@ -38,5 +39,14 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     handleLifecycle(log)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}/tree',
+      validate: validateTree,
+      options: { authRequired: true },
+    },
+    handleTree(log)
   );
 }

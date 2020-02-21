@@ -7,9 +7,7 @@
 import _ from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { extractParentEntityID } from './utils/normalize';
-import { LifecycleQuery } from './queries/lifecycle';
-import { ResolverEvent } from '../../../common/types';
+import { getAncestors } from './shared';
 
 interface LifecycleQueryParams {
   ancestors: number;
@@ -41,50 +39,28 @@ export const validateLifecycle = {
   }),
 };
 
-function getParentEntityID(results: ResolverEvent[]) {
-  return results.length === 0 ? undefined : extractParentEntityID(results[0]);
-}
-
 export function handleLifecycle(
   log: Logger
 ): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { ancestors, legacyEndpointID },
+      query: { ancestors: levels, legacyEndpointID },
     } = req;
     try {
-      const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
 
-      const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
-      const { results: processLifecycle } = await lifecycleQuery.search(client, id);
-      let nextParentID = getParentEntityID(processLifecycle);
-
-      if (nextParentID) {
-        for (let i = 0; i < ancestors; i++) {
-          const { results: lifecycle } = await lifecycleQuery.search(client, nextParentID);
-          nextParentID = getParentEntityID(lifecycle);
-
-          if (!nextParentID) {
-            break;
-          }
-
-          ancestorLifecycles.push({
-            lifecycle,
-          });
-        }
-      }
+      const [ancestors, next] = await getAncestors(client, levels + 1, id, legacyEndpointID);
+      const root = ancestors.shift();
 
       return res.ok({
-        body: {
-          lifecycle: processLifecycle,
-          ancestors: ancestorLifecycles,
+        body: Object.assign({ lifecycle: [] }, root, {
+          ancestors,
           pagination: {
-            next: nextParentID || null,
-            ancestors,
+            next,
+            ancestors: levels,
           },
-        },
+        }),
       });
     } catch (err) {
       log.warn(err);

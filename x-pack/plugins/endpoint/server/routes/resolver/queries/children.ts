@@ -7,8 +7,9 @@ import { ResolverQuery } from './base';
 
 export class ChildrenQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
+    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
     return {
-      body: this.paginateBy('endgame.serial_event_id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
@@ -46,22 +47,14 @@ export class ChildrenQuery extends ResolverQuery {
   }
 
   protected query(entityIDs: string[], index: string) {
+    const paginator = this.paginateBy('event.id', 'process.parent.entity_id');
     return {
-      body: this.paginateBy('event.id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.parent.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.parent.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.parent.entity_id': entityIDs },
               },
               {
                 term: { 'event.category': 'process' },
