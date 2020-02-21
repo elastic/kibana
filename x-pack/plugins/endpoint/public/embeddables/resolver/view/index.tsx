@@ -63,6 +63,14 @@ export const Resolver = styled(
               event={processEvent}
             />
           ))}
+          {Array.from(processNodePositions).map(([processEvent, position], index) => (
+            <ProcessEventDot
+              key={index}
+              position={position}
+              event={processEvent}
+              bgColor={bgColor}
+            />
+          ))}
         </div>
         <StyledPanel />
         <StyledGraphControls />
