@@ -49,7 +49,7 @@ export const initRoutes = (
   findRulesRoute(router);
 
   addPrepackedRulesRoute(router);
-  getPrepackagedRulesStatusRoute(route, getClients);
+  getPrepackagedRulesStatusRoute(router);
   createRulesBulkRoute(route, config, getClients);
   updateRulesBulkRoute(route, config, getClients);
   patchRulesBulkRoute(route, getClients);
