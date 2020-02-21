@@ -52,11 +52,11 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
       Object.keys(updateCase).forEach(key => {
         if (
           key === 'tags' &&
-          updateCase.tags &&
-          updateCase.tags.length === currentCase.tags.length &&
-          updateCase.tags.every((element, index) => element === currentCase.tags[index])
+          updateCase[key] &&
+          updateCase[key].length === currentCase[key].length &&
+          updateCase[key].every((element, index) => element === currentCase[key][index])
         ) {
-          delete updateCase.tags;
+          delete updateCase[key];
         } else if (updateCase[key] === currentCase[key]) {
           delete updateCase[key];
         }

@@ -31,16 +31,9 @@ export interface UseGetCasesState {
   filterOptions: FilterOptions;
 }
 
-export interface QueryArgs {
-  page?: number;
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: Direction;
-}
-
 export interface Action {
   type: string;
-  payload?: AllCases | QueryArgs | FilterOptions;
+  payload?: AllCases | Partial<QueryParams> | FilterOptions;
 }
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
   switch (action.type) {
@@ -89,7 +82,7 @@ const initialData: AllCases = {
 };
 export const useGetCases = (): [
   UseGetCasesState,
-  Dispatch<SetStateAction<QueryArgs>>,
+  Dispatch<SetStateAction<Partial<QueryParams>>>,
   Dispatch<SetStateAction<FilterOptions>>
 ] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -107,7 +100,7 @@ export const useGetCases = (): [
       sortOrder: Direction.desc,
     },
   });
-  const [queryParams, setQueryParams] = useState(state.queryParams as QueryArgs);
+  const [queryParams, setQueryParams] = useState(state.queryParams as Partial<QueryParams>);
   const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
