@@ -69,14 +69,14 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       const replaceSpy = jest.spyOn(gh, 'replace');
-      const h = new ScopedHistory(gh, '/app/wow');
-      h.push('/first-page');
-      h.push('/second-page');
-      h.goBack();
-      h.replace('/first-page-replacement', { some: 'state' });
+      const h = new ScopedHistory(gh, '/app/wow'); // ['']
+      h.push('/first-page'); // ['', '/first-page']
+      h.push('/second-page'); // ['', '/first-page', '/second-page']
+      h.goBack(); // ['', '/first-page', '/second-page']
+      h.replace('/first-page-replacement', { some: 'state' }); // ['', '/first-page-replacement', '/second-page']
       expect(replaceSpy).toHaveBeenCalledWith('/app/wow/first-page-replacement', { some: 'state' });
-      expect(gh.length).toBe(4); // ['', '/app/wow', '/first-page-replacement', '/second-page]
       expect(h.length).toBe(3);
+      expect(gh.length).toBe(4); // ['', '/app/wow', '/app/wow/first-page-replacement', '/app/wow/second-page']
     });
 
     it('hides previous stack', () => {
@@ -87,9 +87,6 @@ describe('ScopedHistory', () => {
       const h = new ScopedHistory(gh, '/app/wow');
       expect(h.length).toBe(1);
       expect(h.location.pathname).toEqual('');
-      h.push('/new-page');
-      expect(gh.location.pathname).toEqual('/app/wow/new-page');
-      expect(h.location.pathname).toEqual('/new-page');
     });
 
     it('cannot go back further than local stack', () => {
@@ -278,10 +275,8 @@ describe('ScopedHistory', () => {
     });
   });
 
-  // TODO: this is the current behavior, but what should the behavior here be?
   describe('action', () => {
-    // TODO: terrible test name until we know what it should actually do. test here for demo purposes
-    it('works', () => {
+    it('provides last history action', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       gh.push('/alpha');

@@ -47,7 +47,7 @@ export renderApp = ({ element, history }: AppMountParameters) => {
     // pass `appBasePath` to `basename`
     <Router history={history}>
       <Route path="/" exact component={HomePage} />
-    </BrowserRouter>,
+    </Router>,
     element
   );
 

@@ -191,7 +191,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    *
    * @remarks
    * We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers
-   * a modal when possible, falling back to a confim dialog box in the beforeunload case.
+   * a modal when possible, falling back to a confirm dialog box in the beforeunload case.
    */
   public block = (
     prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>

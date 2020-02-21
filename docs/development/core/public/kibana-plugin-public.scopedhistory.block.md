@@ -14,5 +14,5 @@ block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocation
 
 ## Remarks
 
-We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers a modal when possible, falling back to a confim dialog box in the beforeunload case.
+We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers a modal when possible, falling back to a confirm dialog box in the beforeunload case.
 

@@ -350,7 +350,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *     // pass `appBasePath` to `basename`
    *     <Router history={history}>
    *       <Route path="/" exact component={HomePage} />
-   *     </BrowserRouter>,
+   *     </Router>,
    *     element
    *   );
    *
