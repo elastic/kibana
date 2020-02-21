@@ -17,18 +17,36 @@
  * under the License.
  */
 
-import { FieldFormatsService } from './field_formats_service';
-import { DateFormat } from './converters/date_server';
-import { coreMock } from '../../../../core/server/mocks';
+import {
+  UrlFormat,
+  BytesFormat,
+  DateNanosFormat,
+  RelativeDateFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  StringFormat,
+  SourceFormat,
+  ColorFormat,
+  TruncateFormat,
+  BoolFormat,
+  StaticLookupFormat,
+} from '../converters';
 
-describe('FieldFormatService', () => {
-  test('DateFormat is server version', async () => {
-    const service = new FieldFormatsService();
-    const fieldFormatsService = await service.start();
-    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
-    const fieldFormatsRegistry = await fieldFormatsService.fieldFormatServiceFactory(uiSettings);
-    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
-
-    expect(DateFormatFromRegsitry).toEqual(DateFormat);
-  });
-});
+export const baseFormatters = [
+  UrlFormat,
+  BytesFormat,
+  DateNanosFormat,
+  RelativeDateFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  StringFormat,
+  SourceFormat,
+  ColorFormat,
+  TruncateFormat,
+  BoolFormat,
+  StaticLookupFormat,
+];

@@ -49,7 +49,7 @@ export {
   TimeRange,
 } from '../common';
 
-export { DateFormat } from './field_formats';
+export { DateFormat } from './field_formats/converters';
 export { baseFormattersPublic } from './field_formats/constants';
 
 /**
