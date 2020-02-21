@@ -193,7 +193,7 @@ export const transformOrBulkError = (
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
       return transformAlertToRule(alert);
