@@ -64,7 +64,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in siem/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router);
-  querySignalsRoute(route, config, getClients);
+  querySignalsRoute(router);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
