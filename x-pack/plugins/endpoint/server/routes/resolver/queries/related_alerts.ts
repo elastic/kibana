@@ -9,7 +9,7 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 export class RelatedAlertsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     return {
-      body: this.paginateBy('endgame.metadata.message_id', {
+      body: this.paginateBy('endgame.serial_event_id', {
         query: {
           bool: {
             filter: [
