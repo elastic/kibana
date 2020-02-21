@@ -47,9 +47,3 @@ export default function HistoricalList({testRunnerTypes, historicalItems, curren
      );
 }
 
-// function href(currentJobNumber) {
-//   const prefix = `
-// https://console.cloud.google.com/storage/browser/kibana-ci-artifacts/jobs/elastic+kibana+code-coverage
-// `;
-//   return `${prefix}/${currentJobNumber}`;
-// }

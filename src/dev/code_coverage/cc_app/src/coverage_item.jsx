@@ -2,11 +2,14 @@ import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
 import { left, right } from './utils/either';
 
-export default function CoverageItem({item, currentJobNumber, testRunnerTypes, isCurrent}) {
-
+export default function CoverageItem({item, currentJobNumber, currentJobTimeStamp, testRunnerTypes, isCurrent}) {
+  if (isCurrent) {
+    console.log(`\n### currentJobNumber: \n\t${currentJobNumber}`);
+    console.log(`\n### currentJobTimeStamp: \n\t${currentJobTimeStamp}`);
+  }
   const classes = 'max-w-sm rounded overflow-hidden shadow-lg';
   return (
-    <div className="flex-horizontal-center">
+    <div className="flex-horizontal-center font-bold text-xl mb-2 ">
       <div className={(isCurrent) ? `${classes} App-current` : classes}>
           <div className="px-6 py-4">
             <div className="font-bold text-xl mb-2">
@@ -28,7 +31,7 @@ function anchor(isCurrent, item) {
     target="_blank"
     rel="noopener noreferrer"
   >
-    {isCurrent ? 'Current Job' : 'Job'} - {title(item)}
+    {isCurrent ? 'Current Job' : 'Past Job'} - {title(item)}
   </a>);
 }
 

@@ -23,7 +23,14 @@ import HistoricalList from './historical_list';
 // import Footer from './footer';
 import CoverageItem from './coverage_item';
 
-export default function App({ testRunnerTypes, buildStats, historicalItems, currentJobNumber, currentItem }) {
+export default function App({
+  testRunnerTypes,
+  buildStats,
+  historicalItems,
+  currentJobTimeStamp,
+  currentJobNumber,
+  currentItem,
+}) {
   const { url } = buildStats;
   return (
     <div>
@@ -35,6 +42,7 @@ export default function App({ testRunnerTypes, buildStats, historicalItems, curr
             currentJobNumber={currentJobNumber}
             testRunnerTypes={testRunnerTypes}
             isCurrent={true}
+            currentJobTimeStamp={currentJobTimeStamp}
           />
         </div>
         <HistoricalList

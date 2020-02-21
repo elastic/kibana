@@ -35,7 +35,7 @@ tryInit()
   .map(boot);
 
 function boot(testRunnerTypes) {
-  const { buildStats, historicalItems, currentJobNumber, currentItem } = initialData;
+  const { buildStats, historicalItems, currentJobNumber, currentJobTimeStamp, currentItem } = initialData;
   initPrint(initialData);
   ReactDOM.render(
     <App
@@ -43,6 +43,7 @@ function boot(testRunnerTypes) {
       buildStats={buildStats}
       historicalItems={historicalItems}
       currentJobNumber={currentJobNumber}
+      currentJobTimeStamp={currentJobTimeStamp}
       currentItem={currentItem}
     />,
     rootEl()
