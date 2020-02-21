@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const EVENT_LOG_NAME_SUFFIX = '-event-log';
+import xPackage from '../../../../package.json';
+
+const EVENT_LOG_NAME_SUFFIX = `-event-log`;
+const EVENT_LOG_VERSION_SUFFIX = `-${xPackage.version}`;
 
 export interface EsNames {
   base: string;
@@ -17,12 +20,13 @@ export interface EsNames {
 
 export function getEsNames(baseName: string): EsNames {
   const eventLogName = `${baseName}${EVENT_LOG_NAME_SUFFIX}`;
+  const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;
   return {
     base: baseName,
-    alias: eventLogName,
-    ilmPolicy: `${eventLogName}-policy`,
+    alias: eventLogNameWithVersion,
+    ilmPolicy: `${eventLogNameWithVersion}-policy`,
     indexPattern: `${eventLogName}-*`,
-    initialIndex: `${eventLogName}-000001`,
-    indexTemplate: `${eventLogName}-template`,
+    initialIndex: `${eventLogNameWithVersion}-000001`,
+    indexTemplate: `${eventLogNameWithVersion}-template`,
   };
 }

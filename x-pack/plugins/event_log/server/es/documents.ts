@@ -6,7 +6,6 @@
 
 import { EsNames } from './names';
 import mappings from '../../generated/mappings.json';
-import { getCurrentVersionAsInteger } from '../lib/get_current_version_as_integer';
 
 // returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames) {
@@ -19,7 +18,6 @@ export function getIndexTemplate(esNames: EsNames) {
       'index.lifecycle.rollover_alias': esNames.alias,
     },
     mappings,
-    version: getCurrentVersionAsInteger(),
   };
 
   return indexTemplateBody;

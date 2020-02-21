@@ -84,19 +84,6 @@ export class ClusterClientAdapter {
     }
   }
 
-  public async updateIndexTemplate(name: string, template: any): Promise<void> {
-    const updateTemplateParams = {
-      name,
-      body: template,
-    };
-    await this.callEs('indices.putTemplate', updateTemplateParams);
-  }
-
-  public async getIndexTemplate(name: string): Promise<any> {
-    const response = await this.callEs('indices.getTemplate', { name });
-    return response[name];
-  }
-
   public async doesAliasExist(name: string): Promise<boolean> {
     let result;
     try {
@@ -118,10 +105,6 @@ export class ClusterClientAdapter {
         throw new Error(`error creating initial index: ${err.message}`);
       }
     }
-  }
-
-  public async rolloverIndex(body: any): Promise<void> {
-    await this.callEs('indices.rollover', body);
   }
 
   private async callEs(operation: string, body?: any): Promise<any> {

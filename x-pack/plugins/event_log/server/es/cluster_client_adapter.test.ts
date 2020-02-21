@@ -140,43 +140,6 @@ describe('createIndexTemplate', () => {
   });
 });
 
-describe('updateIndexTemplate', () => {
-  test('should call cluster with given template', async () => {
-    await clusterClientAdapter.updateIndexTemplate('foo', { args: true });
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.putTemplate', {
-      name: 'foo',
-      body: { args: true },
-    });
-  });
-
-  test('should throw error when call cluster throws', async () => {
-    clusterClient.callAsInternalUser.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.updateIndexTemplate('foo', { args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-  });
-});
-
-describe('getIndexTemplate', () => {
-  beforeEach(() => {
-    clusterClient.callAsInternalUser.mockResolvedValue({});
-  });
-
-  test('should call cluster with given name', async () => {
-    await clusterClientAdapter.getIndexTemplate('foo');
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.getTemplate', {
-      name: 'foo',
-    });
-  });
-
-  test('should throw error if call cluster trows', async () => {
-    clusterClient.callAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.getIndexTemplate('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-  });
-});
-
 describe('doesAliasExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesAliasExist('foo');
@@ -230,21 +193,5 @@ describe('createIndex', () => {
     };
     clusterClient.callAsInternalUser.mockRejectedValue(err);
     await clusterClientAdapter.createIndex('foo');
-  });
-});
-
-describe('rolloverIndex', () => {
-  test('should call cluster with given body', async () => {
-    await clusterClientAdapter.rolloverIndex({ args: true });
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.rollover', {
-      args: true,
-    });
-  });
-
-  test('should throw error when call cluster throws', async () => {
-    clusterClient.callAsInternalUser.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.rolloverIndex({ args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

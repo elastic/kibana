@@ -9,11 +9,11 @@ import { EsNames } from './names';
 const createNamesMock = () => {
   const mock: jest.Mocked<EsNames> = {
     base: '.kibana',
-    alias: '.kibana-event-log',
-    ilmPolicy: '.kibana-event-log-policy',
+    alias: '.kibana-event-log-8.0.0',
+    ilmPolicy: '.kibana-event-log-8.0.0-policy',
     indexPattern: '.kibana-event-log-*',
-    initialIndex: '.kibana-event-log-000001',
-    indexTemplate: '.kibana-event-log-template',
+    initialIndex: '.kibana-event-log-8.0.0-000001',
+    indexTemplate: '.kibana-event-log-8.0.0-template',
   };
   return mock;
 };

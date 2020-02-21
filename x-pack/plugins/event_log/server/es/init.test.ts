@@ -7,10 +7,6 @@
 import { contextMock } from './context.mock';
 import { initializeEs } from './init';
 
-jest.mock('../lib/get_current_version_as_integer', () => ({
-  getCurrentVersionAsInteger: () => 1,
-}));
-
 describe('initializeEs', () => {
   let esContext = contextMock.create();
 
@@ -64,38 +60,5 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndex).not.toHaveBeenCalled();
-  });
-
-  test('should migrate index template when kibana version is more recent', async () => {
-    esContext.esAdapter.getIndexTemplate.mockResolvedValue({
-      version: 0,
-    });
-
-    await initializeEs(esContext);
-    expect(esContext.esAdapter.getIndexTemplate).toHaveBeenCalled();
-    expect(esContext.esAdapter.updateIndexTemplate).toHaveBeenCalled();
-    expect(esContext.esAdapter.rolloverIndex).toHaveBeenCalled();
-  });
-
-  test(`shouldn't migrate index template when kibana version is the same`, async () => {
-    esContext.esAdapter.getIndexTemplate.mockResolvedValue({
-      version: 1,
-    });
-
-    await initializeEs(esContext);
-    expect(esContext.esAdapter.getIndexTemplate).toHaveBeenCalled();
-    expect(esContext.esAdapter.updateIndexTemplate).not.toHaveBeenCalled();
-    expect(esContext.esAdapter.rolloverIndex).not.toHaveBeenCalled();
-  });
-
-  test('should log error if template version in Elasticsearch is more recent', async () => {
-    esContext.esAdapter.getIndexTemplate.mockResolvedValue({
-      version: 2,
-    });
-
-    await initializeEs(esContext);
-    expect(esContext.logger.error).toHaveBeenLastCalledWith(
-      'error initializing elasticsearch resources: Index template belongs to a more recent version of Kibana (2)'
-    );
   });
 });

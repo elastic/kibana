@@ -27,7 +27,6 @@ async function initializeEsResources(esContext: EsContext) {
   await steps.createIlmPolicyIfNotExists();
   await steps.createIndexTemplateIfNotExists();
   await steps.createInitialIndexIfNotExists();
-  await steps.migrateIndexTemplate();
 }
 
 class EsInitializationSteps {
@@ -70,32 +69,6 @@ class EsInitializationSteps {
           },
         },
       });
-    }
-  }
-
-  async migrateIndexTemplate() {
-    const updatedTemplateBody = getIndexTemplate(this.esContext.esNames);
-    const existingTemplate = await this.esContext.esAdapter.getIndexTemplate(
-      this.esContext.esNames.indexTemplate
-    );
-
-    if (updatedTemplateBody.version > existingTemplate.version) {
-      await this.esContext.esAdapter.updateIndexTemplate(
-        this.esContext.esNames.indexTemplate,
-        updatedTemplateBody
-      );
-      await this.esContext.esAdapter.rolloverIndex({
-        alias: this.esContext.esNames.alias,
-        body: {
-          conditions: {
-            max_age: '0d',
-          },
-        },
-      });
-    } else if (updatedTemplateBody.version < existingTemplate.version) {
-      throw new Error(
-        `Index template belongs to a more recent version of Kibana (${existingTemplate.version})`
-      );
     }
   }
 }

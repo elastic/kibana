@@ -28,6 +28,5 @@ describe('getIndexTemplate()', () => {
     expect(indexTemplate.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBe(esNames.alias);
     expect(indexTemplate.mappings).toMatchObject({});
-    expect(indexTemplate.version).toBeGreaterThanOrEqual(0);
   });
 });
