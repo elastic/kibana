@@ -80,13 +80,13 @@ Consumers of this service can use the ids and state to create URL strings:
   if (generator.isDeprecated) {
     // Consumers have a few options here.
 
-    //  If the consumer constrols the persisted data, they can migrate this data and
-    //  update it. Something like this:
+    // If the consumer constrols the persisted data, they can migrate this data and
+    // update it. Something like this:
     const { id: newId, state: newState } = await generator.migrate(state);
     replaceLegacyData({ oldId: id, newId, newState });
 
-    //  If the consumer does not control the persisted data store, they can warn the
-    //  user that they are using a deprecated id and should update the data on their
+    // If the consumer does not control the persisted data store, they can warn the
+    // user that they are using a deprecated id and should update the data on their
     // own.
     alert(`This data is deprecated, please generate new URL data.`);
 
