@@ -179,7 +179,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
 
   private async ensureIndex(elasticsearch: ICustomClusterClient) {
     // Skip if already done
-    if (this.indexTemplateInitialised === false) return;
+    if (this.indexTemplateInitialised === true) return;
 
     const mappings = {
       properties: {
