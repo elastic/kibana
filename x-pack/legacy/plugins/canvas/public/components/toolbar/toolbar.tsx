@@ -68,14 +68,13 @@ export const Toolbar = (props: Props) => {
     showWorkpadManager,
     setShowWorkpadManager,
     isWriteable,
-    canUserWrite,
   } = props;
 
   const elementIsSelected = Boolean(selectedElement);
 
   const done = () => setTray(null);
 
-  if (!isWriteable && canUserWrite && tray === TrayType.expression) {
+  if (!isWriteable && tray === TrayType.expression) {
     done();
   }
 
@@ -142,7 +141,7 @@ export const Toolbar = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem />
-          {elementIsSelected && isWriteable && canUserWrite && (
+          {elementIsSelected && isWriteable && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 color="text"
@@ -174,5 +173,4 @@ Toolbar.propTypes = {
   showWorkpadManager: PropTypes.bool.isRequired,
   setShowWorkpadManager: PropTypes.func.isRequired,
   isWriteable: PropTypes.bool.isRequired,
-  canUserWrite: PropTypes.bool.isRequired,
 };

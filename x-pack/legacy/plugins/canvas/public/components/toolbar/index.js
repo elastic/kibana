@@ -25,8 +25,7 @@ const mapStateToProps = state => ({
   totalPages: getWorkpad(state).pages.length,
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   selectedElement: getSelectedElement(state),
-  isWriteable: isWriteable(state),
-  canUserWrite: canUserWrite(state),
+  isWriteable: isWriteable(state) && canUserWrite(state),
 });
 
 export const Toolbar = compose(
