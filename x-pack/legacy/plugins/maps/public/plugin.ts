@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-nocheck
 import { Plugin, CoreStart } from 'src/core/public';
-// @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
 import { MapListing } from './components/map_listing';
-// @ts-ignore
-import { setLicenseId, setInspector, setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+import { setLicenseId, setInspector } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -31,24 +31,26 @@ interface MapsPluginSetupDependencies {
   };
 }
 
+// This function will grow as more pieces are migrated to NP
+function initializeNewPlatformCode(getInjectedVar: any) {
+  setInjectedVarFunc(getInjectedVar);
+}
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup(
-    core: any,
-    { __LEGACY: { uiModules }, np: { licensing, home } }: MapsPluginSetupDependencies
-  ) {
+  public setup(core: any, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
       .directive('mapListing', function(reactDirective: any) {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-    if (licensing) {
-      licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
+    if (np.licensing) {
+      np.licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
     }
+    np.home.featureCatalogue.register(featureCatalogueEntry);
 
-    home.featureCatalogue.register(featureCatalogueEntry);
+    initializeNewPlatformCode(core.injectedMetadata.getInjectedVar);
   }
 
   public start(core: CoreStart, plugins: any) {

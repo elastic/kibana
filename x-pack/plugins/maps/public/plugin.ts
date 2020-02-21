@@ -8,14 +8,13 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 // @ts-ignore
-import { initKibanaServices, setInspector, setInjectedVarFunc } from './kibana_services';
+import { setInjectedVarFunc } from './kibana_services';
 
-// eslint-disable-line @typescript-eslint/no-empty-interface
 export interface MapsPluginSetupDependencies {
   data: DataPublicPluginSetup;
   inspector: InspectorSetupContract;
 }
-// eslint-disable-line @typescript-eslint/no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
 
 /**
@@ -36,23 +35,7 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    initKibanaServices(core, plugins);
-    setInspector(plugins.inspector);
     setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-    // core.application.register({
-    //   id: 'maps',
-    //   title: i18n.translate('xpack.maps.pluginTitle', {
-    //     defaultMessage: 'Maps',
-    //   }),
-    //   async mount(params: AppMountParameters) {
-    //     const [coreStart] = await core.getStartServices();
-    //     const { renderApp } = await import('./applications/maps');
-    //     return renderApp(coreStart, params);
-    //   },
-    // });
-    return {
-      maps: 'testing',
-    };
   }
 
   public start(core: CoreStart, plugins: any) {}
