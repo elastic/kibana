@@ -13,7 +13,7 @@ import { buildRouteValidation, transformError } from '../utils';
 import { RuleQuery, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesRoute = (router: IRouter) => {
+export const deleteRulesRoute = (router: IRouter) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,

@@ -16,7 +16,7 @@ import { buildRouteValidation, transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesRoute = (router: IRouter) => {
+export const updateRulesRoute = (router: IRouter) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
