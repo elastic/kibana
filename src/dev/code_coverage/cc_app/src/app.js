@@ -20,7 +20,7 @@
 import React from 'react';
 import Header from './header';
 import HistoricalList from './historical_list';
-// import Footer from './footer';
+import Footer from './footer';
 import CoverageItem from './coverage_item';
 
 export default function App({
@@ -35,7 +35,7 @@ export default function App({
   return (
     <div>
       <Header url={url} />
-      <div>
+      <div className="bg-gray-400">
         <div>
           <CoverageItem
             item={currentItem}
@@ -51,7 +51,7 @@ export default function App({
           currentJobNumber={currentJobNumber}
         />
       </div>
-      {/*<Footer />*/}
+      <Footer />
     </div>
   );
 }

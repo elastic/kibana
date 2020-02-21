@@ -23,14 +23,13 @@ import React from "react";
 export default function Footer () {
   return (
     <header className="App-footer">
-      {/*<img src={logo} className="App-logo" alt="logo"/>*/}
       <a
         className="App-link"
         href={gcpLink()}
         target="_blank"
         rel="noopener noreferrer"
       >
-        Footer
+       Contact the Kibana QA Team on <span className="font-bold">Slack</span> @ #kibana-qa
       </a>
     </header>
   );
