@@ -24,6 +24,7 @@ import {
   moduleStringRenderer,
   defaultStringRenderer,
 } from './zeek_signature';
+import { ReputationLink } from '../../../../links';
 
 describe('ZeekSignature', () => {
   const mount = useMountAppended();
@@ -81,7 +82,7 @@ describe('ZeekSignature', () => {
 
     test('should render', () => {
       const wrapper = shallow(<TotalVirusLinkSha value={'abc'} />);
-      expect(wrapper.find('ReputationLink').exists()).toBeTruthy();
+      expect(wrapper.find(ReputationLink).exists()).toBeTruthy();
     });
   });
 

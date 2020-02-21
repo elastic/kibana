@@ -5,9 +5,10 @@
  */
 
 import { EuiLink, EuiToolTip } from '@elastic/eui';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { isNil } from 'lodash/fp';
+import styled from 'styled-components';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -150,13 +151,23 @@ const isReputationLink = (
 
 export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
 
+const Comma = styled(EuiLink)`
+  margin-right: 5px;
+  margin-left: 5px;
+  &::after {
+    content: ' ,';
+  }
+`;
+
+Comma.displayName = 'Comma';
+
 const ReputationLinkTemplate = React.memo<{
   name: string;
   urlTemplate: string;
   domain: string;
   overflowIndexStart: number;
   ipReputationLinks: Array<string | ReputationLinkSetting>;
-  id: number;
+  id?: number;
   showDomain?: boolean;
 }>(({ name, urlTemplate, domain, overflowIndexStart, ipReputationLinks, showDomain, id }) => {
   const lastIndexToShow = useMemo(
@@ -164,10 +175,13 @@ const ReputationLinkTemplate = React.memo<{
     [overflowIndexStart]
   );
   return (
-    <EuiLink href={urlTemplate} target="_blank" rel="noopener">
-      {showDomain ? domain : name ?? domain}
-      {id < lastIndexToShow && ', '}
-    </EuiLink>
+    <EuiToolTip content={urlTemplate} position="top">
+      <EuiLink href={urlTemplate} target="_blank" rel="noopener">
+        {showDomain ? domain : name ?? domain}
+        <ExternalLinkIcon />
+        {!isNil(id) && id < lastIndexToShow && <Comma />}
+      </EuiLink>
+    </EuiToolTip>
   );
 });
 
@@ -177,22 +191,15 @@ const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
   showDomain?: boolean;
-  showTooltip?: boolean;
-  showExternalIcon?: boolean;
   domain: string;
 }> = ({
   overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
   showDomain = false,
-  showTooltip = false,
-  showExternalIcon = false,
   domain,
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
     IP_REPUTATION_LINKS_SETTING
-  );
-  const [ipReputationLinks, setIpReputationLinks] = useState<ReputationLinkSetting[]>(
-    ipReputationLinksSetting
   );
 
   const defaultNameMapping: Record<DefaultReputationLink, string> = useMemo(
@@ -203,63 +210,51 @@ const ReputationLinkComponent: React.FC<{
     []
   );
 
-  useEffect(() => {
-    setIpReputationLinks(
-      ipReputationLinks
+  const ipReputationLinks: ReputationLinkSetting[] = useMemo(
+    () =>
+      ipReputationLinksSetting
         ?.slice(0, allItemsLimit)
         .filter(
           ({ url_template, name }) =>
             !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
         )
-        .map(({ name, url_template }: { name: string; url_template: string }) => {
-          return {
-            name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
-            url_template: url_template?.replace(`{{ip}}`, encodeURIComponent(domain)) ?? '',
-          };
-        })
-    );
-  }, [allItemsLimit, domain, overflowIndexStart, setIpReputationLinks, defaultNameMapping]);
+        .map(({ name, url_template }: { name: string; url_template: string }) => ({
+          name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
+          url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
+        })),
+    [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
+  );
 
   return (
     <>
       {ipReputationLinks
         ?.slice(0, overflowIndexStart)
-        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) =>
-          showTooltip ? (
-            <EuiToolTip content={urlTemplate} position="top" key={`reputationLink-${id}`}>
-              <ReputationLinkTemplate
-                name={name}
-                urlTemplate={urlTemplate}
-                domain={domain}
-                overflowIndexStart={overflowIndexStart}
-                ipReputationLinks={ipReputationLinks}
-                showDomain={showDomain}
-                id={id}
-              />
-            </EuiToolTip>
-          ) : (
-            <ReputationLinkTemplate
-              name={name}
-              urlTemplate={urlTemplate}
-              domain={domain}
-              overflowIndexStart={overflowIndexStart}
-              ipReputationLinks={ipReputationLinks}
-              showDomain={showDomain}
-              id={id}
-              key={`reputationLink-${id}`}
-            />
-          )
-        )}
-      {showExternalIcon && ipReputationLinks?.length && <ExternalLinkIcon />}
+        .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+          <ReputationLinkTemplate
+            domain={domain}
+            id={id}
+            ipReputationLinks={ipReputationLinks}
+            key={`reputationLink-${id}`}
+            name={name}
+            overflowIndexStart={overflowIndexStart}
+            urlTemplate={urlTemplate}
+            showDomain={showDomain}
+          />
+        ))}
       <DefaultFieldRendererOverflow
         rowItems={ipReputationLinks}
         idPrefix="moreReputationLink"
         render={rowItem => {
           return (
             isReputationLink(rowItem) && (
-              <EuiLink href={rowItem.url_template} target="_blank" rel="noopener">
-                {rowItem.name ?? domain}
-              </EuiLink>
+              <ReputationLinkTemplate
+                domain={domain}
+                ipReputationLinks={ipReputationLinks}
+                name={rowItem.name}
+                overflowIndexStart={overflowIndexStart}
+                urlTemplate={rowItem.url_template}
+                showDomain={false}
+              />
             )
           );
         }}
@@ -270,16 +265,22 @@ const ReputationLinkComponent: React.FC<{
   );
 };
 
+ReputationLinkComponent.displayName = 'ReputationLinkComponent';
+
 export const ReputationLink = React.memo(ReputationLinkComponent);
 
-ReputationLink.displayName = 'ReputationLink';
-
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
-  ({ children, domain }) => (
-    <EuiLink href={`https://www.iana.org/whois?q=${encodeURIComponent(domain)}`} target="_blank">
-      {children ? children : domain}
-    </EuiLink>
-  )
+  ({ children, domain }) => {
+    const link = `https://www.iana.org/whois?q=${encodeURIComponent(domain)}`;
+    return (
+      <EuiToolTip content={link} position="top">
+        <EuiLink href={link} target="_blank">
+          {children ? children : domain}
+          <ExternalLinkIcon />
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
 );
 
 WhoIsLink.displayName = 'WhoIsLink';

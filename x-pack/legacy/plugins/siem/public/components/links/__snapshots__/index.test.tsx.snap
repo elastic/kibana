@@ -1,0 +1,341 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Custom Links ReputationLink links property it renders correct href 1`] = `
+.c0 {
+  position: relative;
+  top: -2px;
+  margin-left: 5px;
+}
+
+.c1 {
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.c1::after {
+  content: ' ,';
+}
+
+<Memo(ReputationLinkComponent)
+  domain="192.0.2.0"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <ReputationLinkTemplate
+    domain="192.0.2.0"
+    id={0}
+    ipReputationLinks={
+      Array [
+        Object {
+          "name": "Link 1",
+          "url_template": "https://www.virustotal.com/gui/search/192.0.2.0",
+        },
+        Object {
+          "name": "Link 2",
+          "url_template": "https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0",
+        },
+      ]
+    }
+    key="reputationLink-0"
+    name="Link 1"
+    overflowIndexStart={5}
+    showDomain={false}
+    urlTemplate="https://www.virustotal.com/gui/search/192.0.2.0"
+  >
+    <EuiToolTip
+      content="https://www.virustotal.com/gui/search/192.0.2.0"
+      delay="regular"
+      position="top"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <EuiLink
+          href="https://www.virustotal.com/gui/search/192.0.2.0"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          rel="noopener"
+          target="_blank"
+        >
+          <a
+            className="euiLink euiLink--primary"
+            href="https://www.virustotal.com/gui/search/192.0.2.0"
+            onBlur={[Function]}
+            onFocus={[Function]}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Link 1
+            <ExternalLinkIcon>
+              <LinkIconWithMargin
+                color="subdued"
+                data-test-subj="external-link-icon"
+                size="s"
+                type="popout"
+              >
+                <EuiIcon
+                  className="sc-fzXfMz c0"
+                  color="subdued"
+                  data-test-subj="external-link-icon"
+                  size="s"
+                  type="popout"
+                >
+                  <EuiIconEmpty
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfMz c0"
+                    data-test-subj="external-link-icon"
+                    focusable="false"
+                    role="img"
+                    style={null}
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfMz c0"
+                      data-test-subj="external-link-icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </EuiIconEmpty>
+                </EuiIcon>
+              </LinkIconWithMargin>
+            </ExternalLinkIcon>
+            <Comma>
+              <EuiLink
+                className="c1"
+              >
+                <button
+                  className="euiLink euiLink--primary c1"
+                  type="button"
+                />
+              </EuiLink>
+            </Comma>
+          </a>
+        </EuiLink>
+      </span>
+    </EuiToolTip>
+  </ReputationLinkTemplate>
+  <ReputationLinkTemplate
+    domain="192.0.2.0"
+    id={1}
+    ipReputationLinks={
+      Array [
+        Object {
+          "name": "Link 1",
+          "url_template": "https://www.virustotal.com/gui/search/192.0.2.0",
+        },
+        Object {
+          "name": "Link 2",
+          "url_template": "https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0",
+        },
+      ]
+    }
+    key="reputationLink-1"
+    name="Link 2"
+    overflowIndexStart={5}
+    showDomain={false}
+    urlTemplate="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
+  >
+    <EuiToolTip
+      content="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
+      delay="regular"
+      position="top"
+    >
+      <span
+        className="euiToolTipAnchor"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <EuiLink
+          href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          rel="noopener"
+          target="_blank"
+        >
+          <a
+            className="euiLink euiLink--primary"
+            href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
+            onBlur={[Function]}
+            onFocus={[Function]}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Link 2
+            <ExternalLinkIcon>
+              <LinkIconWithMargin
+                color="subdued"
+                data-test-subj="external-link-icon"
+                size="s"
+                type="popout"
+              >
+                <EuiIcon
+                  className="sc-fzXfMz c0"
+                  color="subdued"
+                  data-test-subj="external-link-icon"
+                  size="s"
+                  type="popout"
+                >
+                  <EuiIconEmpty
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfMz c0"
+                    data-test-subj="external-link-icon"
+                    focusable="false"
+                    role="img"
+                    style={null}
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--small euiIcon--subdued euiIcon-isLoading sc-fzXfMz c0"
+                      data-test-subj="external-link-icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </EuiIconEmpty>
+                </EuiIcon>
+              </LinkIconWithMargin>
+            </ExternalLinkIcon>
+          </a>
+        </EuiLink>
+      </span>
+    </EuiToolTip>
+  </ReputationLinkTemplate>
+  <DefaultFieldRendererOverflow
+    idPrefix="moreReputationLink"
+    moreMaxHeight="200px"
+    overflowIndexStart={5}
+    render={[Function]}
+    rowItems={
+      Array [
+        Object {
+          "name": "Link 1",
+          "url_template": "https://www.virustotal.com/gui/search/192.0.2.0",
+        },
+        Object {
+          "name": "Link 2",
+          "url_template": "https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0",
+        },
+      ]
+    }
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+    </EuiFlexItem>
+  </DefaultFieldRendererOverflow>
+</Memo(ReputationLinkComponent)>
+`;

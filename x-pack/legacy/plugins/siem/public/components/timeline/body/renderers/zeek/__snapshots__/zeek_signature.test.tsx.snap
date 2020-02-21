@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ZeekSignature #TotalVirusLinkSha should render 1`] = `
+<LinkFlexItem
+  grow={false}
+>
+  <div>
+    <Memo(ReputationLinkComponent)
+      domain="abc"
+      overflowIndexStart={1}
+      showDomain={true}
+    />
+  </div>
+</LinkFlexItem>
+`;
+
 exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
 <Fragment>
   <EuiFlexGroup

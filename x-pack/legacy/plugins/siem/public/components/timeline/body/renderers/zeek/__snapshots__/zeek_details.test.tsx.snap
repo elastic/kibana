@@ -3355,12 +3355,10 @@ tr:hover .c3:focus::before {
                                               className="euiFlexItem euiFlexItem--flexGrowZero c5"
                                             >
                                               <div>
-                                                <ReputationLink
+                                                <Memo(ReputationLinkComponent)
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   overflowIndexStart={1}
                                                   showDomain={true}
-                                                  showExternalIcon={true}
-                                                  showTooltip={true}
                                                 >
                                                   <DefaultFieldRendererOverflow
                                                     idPrefix="moreReputationLink"
@@ -3376,7 +3374,7 @@ tr:hover .c3:focus::before {
                                                       />
                                                     </EuiFlexItem>
                                                   </DefaultFieldRendererOverflow>
-                                                </ReputationLink>
+                                                </Memo(ReputationLinkComponent)>
                                               </div>
                                             </div>
                                           </EuiFlexItem>

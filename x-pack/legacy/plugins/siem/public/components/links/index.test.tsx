@@ -133,21 +133,17 @@ describe('Custom Links', () => {
         (useUiSetting$ as jest.Mock).mockReturnValue([mockDefaultReputationLinks]);
       });
 
-      afterEach(() => {
-        (useUiSetting$ as jest.Mock).mockClear();
-      });
-
       test('it renders default link text', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(0)
             .text()
         ).toEqual('Link 1, ');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(1)
             .text()
         ).toEqual('Link 2');
@@ -159,31 +155,31 @@ describe('Custom Links', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(0)
             .text()
         ).toEqual('Link 1, ');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(1)
             .text()
         ).toEqual('Link 2, ');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(2)
             .text()
         ).toEqual('Link 3, ');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(3)
             .text()
         ).toEqual('Link 4, ');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(4)
             .text()
         ).toEqual('Link 5');
@@ -191,18 +187,17 @@ describe('Custom Links', () => {
 
       test('it renders correct href', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(0)
-            .prop('href')
+            .prop('urlTemplate')
         ).toEqual('https://www.virustotal.com/gui/search/192.0.2.0');
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(1)
-            .prop('href')
+            .prop('urlTemplate')
         ).toEqual('https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0');
       });
 
@@ -211,15 +206,15 @@ describe('Custom Links', () => {
 
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(0)
-            .prop('href')
+            .prop('urlTemplate')
         ).toEqual("https://www.virustotal.com/gui/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E");
         expect(
           wrapper
-            .find('EuiLink')
+            .find('ReputationLinkTemplate')
             .at(1)
-            .prop('href')
+            .prop('urlTemplate')
         ).toEqual(
           "https://talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
         );
@@ -238,7 +233,9 @@ describe('Custom Links', () => {
 
       test('it renders correct number of links by default', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-        expect(wrapper.find('EuiLink')).toHaveLength(DEFAULT_NUMBER_OF_REPUTATION_LINK);
+        expect(wrapper.find('ReputationLinkTemplate')).toHaveLength(
+          DEFAULT_NUMBER_OF_REPUTATION_LINK
+        );
       });
 
       test('it renders correct number of links if given overflow index', () => {
@@ -248,7 +245,7 @@ describe('Custom Links', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
-        expect(wrapper.find('EuiLink')).toHaveLength(1);
+        expect(wrapper.find('ReputationLinkTemplate')).toHaveLength(1);
       });
     });
 
@@ -314,28 +311,11 @@ describe('Custom Links', () => {
         (useUiSetting$ as jest.Mock).mockClear();
       });
 
-      test('it renders no external icon by default', () => {
+      test('it renders external icon', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
-        expect(wrapper.find('ExternalLinkIcon').exists()).toBeFalsy();
-      });
-
-      test('it renders external icon if enabled', () => {
-        const wrapper = mountWithIntl(
-          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} showExternalIcon={true} />
-        );
         expect(wrapper.find('ExternalLinkIcon').exists()).toBeTruthy();
-      });
-
-      test('it renders no external icon if ipReputationLinks is empty', () => {
-        (useUiSetting$ as jest.Mock).mockReset();
-        (useUiSetting$ as jest.Mock).mockReturnValue([[]]);
-
-        const wrapper = mountWithIntl(
-          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} showExternalIcon={true} />
-        );
-        expect(wrapper.find('ExternalLinkIcon').exists()).toBeFalsy();
       });
     });
   });
