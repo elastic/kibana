@@ -6,7 +6,6 @@
 
 export default ({ getService, getPageObjects }) => {
   describe('monitoring app', () => {
-    // const provisionedEnv = getService('provisionedEnv');
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const log = getService('log');

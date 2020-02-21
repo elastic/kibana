@@ -35,7 +35,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['shield']);
-  const screenshot = getService('screenshots');
+  // const screenshot = getService('screenshots');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -101,7 +101,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      // await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -150,22 +150,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
       });
-    }
-
-    async createErrorHandler(testObj: any) {
-      const testName = testObj.parent
-        ? [testObj.parent.name, testObj.name].join('_')
-        : testObj.name;
-
-      const errHandler = async (error: any) => {
-        const now = Date.now();
-        const fileName = `failure_${now}_${testName}`;
-
-        await screenshot.take(fileName, true);
-        throw error;
-      };
-
-      return errHandler;
     }
 
     /**
@@ -288,10 +272,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
             ? await this.loginIfPrompted(appUrl)
             : await browser.getCurrentUrl();
 
-          // TODO-TRE: Uncomment
-          // if (currentUrl.includes('app/kibana')) {
-          //   await testSubjects.find('kibanaChrome');
-          // }
+          if (currentUrl.includes('app/kibana')) {
+            await testSubjects.find('kibanaChrome');
+          }
 
           currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
           const maxAdditionalLengthOnNavUrl = 230;

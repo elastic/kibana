@@ -37,36 +37,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector("input[ng-model='state.query']");
     }
 
-    async getTimespanText() {
-      await find
-        .byCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
-        .getVisibleText();
-    }
-
-    async getNoResultsTimepicker() {
-      await testSubjects.find('discoverNoResultsTimefilter');
-    }
-
-    async clickShare() {
-      await find.clickByCssSelector('button[aria-label="Share Search"]');
-    }
-
-    async getShareCaption() {
-      return find.byCssSelector('.vis-share label').getVisibleText();
-    }
-
-    async clickCopyToClipboard() {
-      await find.clickDisplayedByCssSelector('button.clipboard-button');
-    }
-
-    async clickShortenUrl() {
-      await find.clickByCssSelector('button.shorten-button');
-    }
-
-    async getShortenedUrl() {
-      return find.byCssSelector('.url').getProperty('value');
-    }
-
     async getQuerySearchButton() {
       return await find.byCssSelector("button[aria-label='Search']");
     }
@@ -204,7 +174,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const yLabel = await y.getVisibleText();
       yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
-      // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
       const svg = await find.byCssSelector('div.chart > svg');
       const $ = await svg.parseDomContent();
       const yAxisHeight = $('rect.background').attr('height');

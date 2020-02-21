@@ -14,7 +14,6 @@ const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
-// const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,

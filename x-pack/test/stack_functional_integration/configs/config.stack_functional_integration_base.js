@@ -38,12 +38,6 @@ export default async ({ readConfigFile }) => {
     },
     servers,
     apps,
-    // screenshots: {
-    //   directory: resolve(__dirname, 'screenshots'),
-    // },
-    // esIndexDump: {
-    //   dataDir: resolve(__dirname, 'fixtures/dump_data'),
-    // },
     stackFunctionalIntegrationTests: {
       envObj: provisionedConfigs,
     },

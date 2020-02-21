@@ -23,15 +23,10 @@ import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig, kibanaServerTestUser 
 import { services } from './services';
 
 export default function() {
-  console.log(`----------------------- calling getUrlParts`);
-  console.log(`----------------------- process.env.TEST_KIBANA_URL=${process.env.TEST_KIBANA_URL}`);
-  console.log(`----------------------- process.env.VM=${process.env.VM}`);
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
   };
-  console.log(`----------------------- servers=${JSON.stringify(servers)}`);
-  console.log(`----------------------- process.env.TEST_KIBANA_URL=${process.env.TEST_KIBANA_URL}`);
 
   return {
     servers,

@@ -29,7 +29,6 @@ export const kbnTestConfig = new (class KbnTestConfig {
     // allow setting one complete TEST_KIBANA_URL for ES like https://elastic:changeme@example.com:9200
     if (process.env.TEST_KIBANA_URL) {
       const testKibanaUrl = url.parse(process.env.TEST_KIBANA_URL);
-      console.log(`++++++++++++++++++++++ testKibanaUrl=${JSON.stringify(testKibanaUrl)}`);
       return {
         protocol: testKibanaUrl.protocol.slice(0, -1),
         hostname: testKibanaUrl.hostname,
@@ -38,8 +37,6 @@ export const kbnTestConfig = new (class KbnTestConfig {
         username: testKibanaUrl.auth.split(':')[0],
         password: testKibanaUrl.auth.split(':')[1],
       };
-    } else {
-      console.log(`++++++++++++++++++++++ didn't find testKibanaUrl`);
     }
 
     const username = process.env.TEST_KIBANA_USERNAME || kibanaTestUser.username;

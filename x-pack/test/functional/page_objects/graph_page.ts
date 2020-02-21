@@ -25,7 +25,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
   const retry = getService('retry');
-  const getCircleText = (circle: any) => circle.getVisibleText();
+  const getCircleText = (circle: WebElementWrapper) => circle.getVisibleText();
 
   class GraphPage {
     async selectIndexPattern(pattern: string) {
