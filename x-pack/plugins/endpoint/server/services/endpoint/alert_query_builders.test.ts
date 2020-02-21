@@ -16,26 +16,36 @@ describe('test query builder', () => {
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       };
       const queryParams = await getPagingProperties(mockRequest, mockCtx);
-      const query = await buildAlertListESQuery(queryParams);
+      const query = buildAlertListESQuery(queryParams);
 
-      expect(query).toEqual({
-        body: {
-          query: {
-            match_all: {},
-          },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "query": Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "match": Object {
+                      "event.kind": "alert",
+                    },
+                  },
+                ],
               },
             },
-          ],
-          track_total_hits: 10000,
-        },
-        from: 0,
-        size: 10,
-        index: 'my-index',
-      } as Record<string, any>);
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+            "track_total_hits": 10000,
+          },
+          "from": 0,
+          "index": "my-index",
+          "size": 10,
+        }
+      `);
     });
     it('should adjust track_total_hits for deep pagination', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -49,26 +59,36 @@ describe('test query builder', () => {
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       };
       const queryParams = await getPagingProperties(mockRequest, mockCtx);
-      const query = await buildAlertListESQuery(queryParams);
+      const query = buildAlertListESQuery(queryParams);
 
-      expect(query).toEqual({
-        body: {
-          query: {
-            match_all: {},
-          },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "query": Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "match": Object {
+                      "event.kind": "alert",
+                    },
+                  },
+                ],
               },
             },
-          ],
-          track_total_hits: 12000,
-        },
-        from: 10000,
-        size: 1000,
-        index: 'my-index',
-      } as Record<string, any>);
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+            "track_total_hits": 12000,
+          },
+          "from": 10000,
+          "index": "my-index",
+          "size": 1000,
+        }
+      `);
     });
   });
 });

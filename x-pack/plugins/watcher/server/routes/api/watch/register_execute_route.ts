@@ -5,9 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -19,60 +18,63 @@ import { Watch } from '../../../models/watch/index';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
-function executeWatch(callWithRequest: any, executeDetails: any, watchJson: any) {
+const bodySchema = schema.object({
+  executeDetails: schema.object({}, { allowUnknowns: true }),
+  watch: schema.object({}, { allowUnknowns: true }),
+});
+
+function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {
   const body = executeDetails;
   body.watch = watchJson;
 
-  return callWithRequest('watcher.executeWatch', {
+  return dataClient.callAsCurrentUser('watcher.executeWatch', {
     body,
   });
 }
 
 export function registerExecuteRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-    const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
-    const watch = Watch.fromDownstreamJson(request.body.watch);
-
-    try {
-      const hit = await executeWatch(callWithRequest, executeDetails.upstreamJson, watch.watchJson);
-      const id = get(hit, '_id');
-      const watchHistoryItemJson = get(hit, 'watch_record');
-      const watchId = get(hit, 'watch_record.watch_id');
-      const json = {
-        id,
-        watchId,
-        watchHistoryItemJson,
-        includeDetails: true,
-      };
-
-      const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-      return response.ok({
-        body: {
-          watchHistoryItem: watchHistoryItem.downstreamJson,
-        },
-      });
-    } catch (e) {
-      // Case: Error from Elasticsearch JS client
-      if (isEsError(e)) {
-        return response.customError({ statusCode: e.statusCode, body: e });
-      }
-
-      // Case: default
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.put(
     {
       path: '/api/watcher/watch/execute',
       validate: {
-        body: schema.object({
-          executeDetails: schema.object({}, { allowUnknowns: true }),
-          watch: schema.object({}, { allowUnknowns: true }),
-        }),
+        body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
+      const watch = Watch.fromDownstreamJson(request.body.watch);
+
+      try {
+        const hit = await executeWatch(
+          ctx.watcher!.client,
+          executeDetails.upstreamJson,
+          watch.watchJson
+        );
+        const id = get(hit, '_id');
+        const watchHistoryItemJson = get(hit, 'watch_record');
+        const watchId = get(hit, 'watch_record.watch_id');
+        const json = {
+          id,
+          watchId,
+          watchHistoryItemJson,
+          includeDetails: true,
+        };
+
+        const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
+        return response.ok({
+          body: {
+            watchHistoryItem: watchHistoryItem.downstreamJson,
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }
