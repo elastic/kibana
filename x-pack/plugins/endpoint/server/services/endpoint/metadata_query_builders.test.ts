@@ -6,17 +6,18 @@
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
 import {
-  kibanaRequestToEndpointListQuery,
-  kibanaRequestToEndpointFetchQuery,
-} from './endpoint_query_builders';
+  kibanaRequestToMetadataListESQuery,
+  kibanaRequestToMetadataGetESQuery,
+} from './metadata_query_builders';
+import { EndpointAppConstants } from '../../../common/types';
 
 describe('query builder', () => {
-  describe('EndpointListQuery', () => {
-    it('test default query params for all endpoints when no params or body is provided', async () => {
+  describe('MetadataListESQuery', () => {
+    it('test default query params for all endpoints metadata when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });
-      const query = await kibanaRequestToEndpointListQuery(mockRequest, {
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
         logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
@@ -50,19 +51,19 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: 'endpoint-agent*',
+        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
       } as Record<string, any>);
     });
   });
 
   describe('test query builder with kql filter', () => {
-    it('test default query params for all endpoints when no params or body is provided', async () => {
+    it('test default query params for all endpoints metadata when body filter is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
           filter: 'not host.ip:10.140.73.246',
         },
       });
-      const query = await kibanaRequestToEndpointListQuery(mockRequest, {
+      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
         logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
@@ -109,12 +110,12 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: 'endpoint-agent*',
+        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
       } as Record<string, any>);
     });
   });
 
-  describe('EndpointFetchQuery', () => {
+  describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -122,7 +123,7 @@ describe('query builder', () => {
           id: mockID,
         },
       });
-      const query = kibanaRequestToEndpointFetchQuery(mockRequest, {
+      const query = kibanaRequestToMetadataGetESQuery(mockRequest, {
         logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
@@ -132,7 +133,7 @@ describe('query builder', () => {
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
-        index: 'endpoint-agent*',
+        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
       });
     });
   });

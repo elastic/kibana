@@ -105,6 +105,9 @@
     "DeleteDatafeed",
     "StartDatafeed",
     "StopDatafeed",
-    "PreviewDatafeed"
+    "PreviewDatafeed",
+    "FieldsService",
+    "GetCardinalityOfFields",
+    "GetTimeFieldRange"
   ]
 }
