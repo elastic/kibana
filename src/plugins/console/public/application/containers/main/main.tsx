@@ -23,6 +23,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eu
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
+import { FileTree } from '../file_tree';
 
 import {
   TopNavMenu,
@@ -56,6 +57,7 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showFileTree, setShowFileTree] = useState(false);
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -93,6 +95,7 @@ export function Main() {
               <TopNavMenu
                 disabled={!done}
                 items={getTopNavConfig({
+                  onClickFiles: () => setShowFileTree(!showFileTree),
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
@@ -119,7 +122,16 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <EuiFlexGroup style={{ height: '100%' }} direction="row" gutterSize="none">
+            {showFileTree && (
+              <EuiFlexItem grow={false}>
+                <FileTree />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <Editor loading={!done} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 

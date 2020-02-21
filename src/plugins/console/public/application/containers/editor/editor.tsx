@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import React, { useCallback, memo, useState } from 'react';
+import React, { useCallback, memo } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 
-import { EditorContentSpinner, VerticalDrawer } from '../../components';
+import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
-import { FileTree } from './file_tree/file_tree';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 
@@ -40,7 +39,6 @@ export const Editor = memo(({ loading }: Props) => {
     services: { storage },
   } = useServicesContext();
 
-  const [isFileTreeOpen, setIsFileTreeOpen] = useState(false);
   const { currentTextObjectId, textObjects } = useEditorReadContext();
   const { requestInFlight } = useRequestReadContext();
   const currentTextObject = textObjects[currentTextObjectId];
@@ -64,39 +62,24 @@ export const Editor = memo(({ loading }: Props) => {
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>
       ) : null}
-      <EuiFlexGroup style={{ height: '100%' }} direction="row" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <VerticalDrawer
-            onVerticalMarkerClick={() => setIsFileTreeOpen(!isFileTreeOpen)}
-            isOpen={isFileTreeOpen}
-          >
-            <FileTree />
-          </VerticalDrawer>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ height: '100%' }}>
-          <PanelsContainer
-            onPanelWidthChange={onPanelWidthChange}
-            resizerClassName="conApp__resizer"
-          >
-            <Panel
-              style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-              initialWidth={firstPanelWidth}
-            >
-              {loading ? (
-                <EditorContentSpinner />
-              ) : (
-                currentTextObject && <EditorUI textObject={currentTextObject} />
-              )}
-            </Panel>
-            <Panel
-              style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-              initialWidth={secondPanelWidth}
-            >
-              {loading ? <EditorContentSpinner /> : <EditorOutput />}
-            </Panel>
-          </PanelsContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
+        <Panel
+          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+          initialWidth={firstPanelWidth}
+        >
+          {loading ? (
+            <EditorContentSpinner />
+          ) : (
+            currentTextObject && <EditorUI textObject={currentTextObject} />
+          )}
+        </Panel>
+        <Panel
+          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+          initialWidth={secondPanelWidth}
+        >
+          {loading ? <EditorContentSpinner /> : <EditorOutput />}
+        </Panel>
+      </PanelsContainer>
     </>
   );
 });

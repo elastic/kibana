@@ -136,7 +136,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
           aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
             defaultMessage: 'Toggle file filter',
           })}
-          iconType="filter"
+          iconType="search"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

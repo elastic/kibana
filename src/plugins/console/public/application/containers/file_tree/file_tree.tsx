@@ -21,9 +21,9 @@ import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useEditorReadContext, useEditorActionContext } from '../../../contexts';
-import { useTextObjectsCRUD } from '../../../hooks/text_objects';
-import { FileActionsBar, FileSearchBar, DeleteFileModal } from '../../../components';
+import { useEditorReadContext, useEditorActionContext } from '../../contexts';
+import { useTextObjectsCRUD } from '../../hooks/text_objects';
+import { FileActionsBar, FileSearchBar, DeleteFileModal } from '../../components';
 
 import { filterTextObjects } from './filter_text_objects';
 

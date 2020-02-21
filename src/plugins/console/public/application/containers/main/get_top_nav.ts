@@ -20,13 +20,32 @@
 import { i18n } from '@kbn/i18n';
 
 interface Props {
+  onClickFiles: () => void;
   onClickHistory: () => void;
   onClickSettings: () => void;
   onClickHelp: () => void;
 }
 
-export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }: Props) {
+export function getTopNavConfig({
+  onClickFiles,
+  onClickHistory,
+  onClickSettings,
+  onClickHelp,
+}: Props) {
   return [
+    {
+      id: 'files',
+      label: i18n.translate('console.topNav.filesTabLabel', {
+        defaultMessage: 'Files',
+      }),
+      description: i18n.translate('console.topNav.filesTabDescription', {
+        defaultMessage: 'Files',
+      }),
+      onClick: () => {
+        onClickFiles();
+      },
+      testId: 'consoleHistoryButton',
+    },
     {
       id: 'history',
       label: i18n.translate('console.topNav.historyTabLabel', {

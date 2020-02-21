@@ -25,5 +25,4 @@ export { WelcomePanel } from './welcome_panel';
 export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
 export { HelpPanel } from './help_panel';
 export { EditorContentSpinner } from './editor_content_spinner';
-export { VerticalDrawer } from './vertical_drawer';
 export * from './file_tree';
