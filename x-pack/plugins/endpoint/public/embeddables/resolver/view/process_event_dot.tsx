@@ -8,7 +8,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
-import * as selectors from '../store/selectors';
 import { SymbolIds, NamedColors } from './defs';
 
 /**

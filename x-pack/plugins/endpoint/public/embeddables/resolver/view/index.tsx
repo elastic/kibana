@@ -27,10 +27,6 @@ const StyledPanel = styled(Panel)`
 
 const bgColor = NamedColors.resolverBackground;
 
-const Resolver = styled(
-  React.memo(({ className }: { className?: string }) => {
-    const dispatch: (action: ResolverAction) => unknown = useDispatch();
-
 const StyledGraphControls = styled(GraphControls)`
   position: absolute;
   top: 5px;
@@ -61,18 +57,10 @@ export const Resolver = styled(
           ))}
           {Array.from(processNodePositions).map(([processEvent, position], index) => (
             <ProcessEventDot
-            key={index}
-            position={position}
-            projectionMatrix={projectionMatrix}
-            event={processEvent}
-          />
-          ))}
-          {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot
               key={index}
               position={position}
+              projectionMatrix={projectionMatrix}
               event={processEvent}
-              bgColor={bgColor}
             />
           ))}
         </div>
