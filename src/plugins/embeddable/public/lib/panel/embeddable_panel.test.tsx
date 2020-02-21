@@ -227,14 +227,14 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
     {
       firstName: 'Bob',
     },
-    getActions
+    getActions as any
   );
   const { component: component2 } = await renderInEditModeAndOpenContextMenu(
     {
       firstName: 'Bob',
       disabledActions: ['FOO'],
     },
-    getActions
+    getActions as any
   );
 
   const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
@@ -259,14 +259,14 @@ test('HelloWorldContainer hides disabled badges', async () => {
     {
       firstName: 'Bob',
     },
-    getActions
+    getActions as any
   );
   const { component: component2 } = await renderInEditModeAndOpenContextMenu(
     {
       firstName: 'Bob',
       disabledActions: ['BAR'],
     },
-    getActions
+    getActions as any
   );
 
   expect(component1.find(EuiBadge).length).toBe(1);

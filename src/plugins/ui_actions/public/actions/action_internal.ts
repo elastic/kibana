@@ -20,9 +20,9 @@
 /* eslint-disable max-classes-per-file */
 
 import { Mutable } from '@kbn/utility-types';
-import { ActionContext, AnyActionDefinition, ActionConfig } from './action';
+import { Action, ActionContext, AnyActionDefinition, ActionConfig } from './action';
 
-export class ActionInternal<A extends AnyActionDefinition> {
+export class ActionInternal<A extends AnyActionDefinition> implements Action<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;

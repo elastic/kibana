@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SerializedDynamicAction } from './action_internal';
+import { SerializedAction } from './action_internal';
 
 /**
  * Serialized representation of event-action pair, used to persist in storage.
@@ -25,7 +25,7 @@ import { SerializedDynamicAction } from './action_internal';
 export interface SerializedEvent {
   eventId: string;
   triggerId: string;
-  action: SerializedDynamicAction;
+  action: SerializedAction;
 }
 
 /**

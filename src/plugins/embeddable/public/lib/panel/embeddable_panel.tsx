@@ -245,11 +245,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
-      const bOrder = b.order || 0;
-      const aOrder = a.order || 0;
-      return bOrder - aOrder;
-    });
+    const sorted = (actions as Array<Action<{ embeddable: IEmbeddable }>>)
+      .concat(extraActions)
+      .sort((a: Action<{ embeddable: IEmbeddable }>, b: Action<{ embeddable: IEmbeddable }>) => {
+        const bOrder = b.order || 0;
+        const aOrder = a.order || 0;
+        return bOrder - aOrder;
+      });
 
     return await buildContextMenuForActions({
       actions: sorted,

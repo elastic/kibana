@@ -27,7 +27,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { UiActionsSetup, UiActionsStart } from './plugin';
 export { UiActionsServiceParams, UiActionsService } from './service';
-export { Action, createAction, IncompatibleActionError } from './actions';
+export {
+  Action,
+  createAction,
+  IncompatibleActionError,
+  ActionDefinition as UiActionsActionDefinition,
+  ActionInternal as UiActionsActionInternal,
+} from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping } from './types';

@@ -22,7 +22,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { ActionInternal, ActionDefinition } from '../actions';
+import { Action } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -32,7 +32,7 @@ export async function buildContextMenuForActions<Context extends object>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<ActionInternal<ActionDefinition<Context>>>;
+  actions: Array<Action<Context>>;
   actionContext: Context;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
@@ -59,7 +59,7 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
   actionContext,
   closeMenu,
 }: {
-  actions: Array<ActionInternal<ActionDefinition<Context>>>;
+  actions: Array<Action<Context>>;
   actionContext: Context;
   closeMenu: () => void;
 }) {
@@ -95,7 +95,7 @@ function convertPanelActionToContextMenuItem<Context extends object>({
   actionContext,
   closeMenu,
 }: {
-  action: ActionInternal<ActionDefinition<Context>>;
+  action: Action<Context>;
   actionContext: Context;
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
