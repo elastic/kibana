@@ -28,7 +28,7 @@ export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey
         const index = siemClient.signalsIndex;
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
         const privileges = merge(clusterPrivileges, {
-          is_authenticated: request.auth?.isAuthenticated ?? false,
+          is_authenticated: true, // until we support optional auth: https://github.com/elastic/kibana/pull/55327#issuecomment-577159911
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
 
