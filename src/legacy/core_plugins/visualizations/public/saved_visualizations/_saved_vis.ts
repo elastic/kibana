@@ -24,8 +24,11 @@
  *
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
-import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
-import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+import {
+  createSavedObjectClass,
+  SavedObject,
+  SavedObjectKibanaServices,
+} from '../../../../../plugins/saved_objects/public';
 import { updateOldState } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../plugins/data/public';
