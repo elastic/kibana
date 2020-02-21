@@ -242,11 +242,11 @@ describe('url state', () => {
       .invoke('text')
       .should('be.above', 0);
 
-    const timelineName = 'My Timeline';
+    const timelineName = 'SIEM UI';
     addNameToTimeline(timelineName);
-    addDescriptionToTimeline('This is the best timeline of the world{enter}');
+    addDescriptionToTimeline('This is the best timeline of the world');
 
-    cy.url().should('match', /\w*-\w*-\w*-\w*-\w*/);
+    cy.url({ timeout: 30000 }).should('match', /\w*-\w*-\w*-\w*-\w*/);
     cy.url().then(url => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';

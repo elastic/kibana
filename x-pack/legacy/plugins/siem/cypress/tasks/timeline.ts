@@ -26,17 +26,16 @@ import { drag, drop } from '../tasks/common';
 export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
-  cy.get(TIMELINE_DESCRIPTION).type(description, {
-    delay: 100,
-  });
+  cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
 };
 
 export const addNameToTimeline = (name: string) => {
-  cy.get(TIMELINE_TITLE).type(name, { delay: 100 });
+  cy.get(TIMELINE_TITLE).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
 };
 
 export const checkIdToggleField = () => {
-  cy.get(ID_TOGGLE_FIELD).should('not.exist');
+  cy.get(ID_HEADER_FIELD).should('not.exist');
 
   cy.get(ID_TOGGLE_FIELD).check({
     force: true,
