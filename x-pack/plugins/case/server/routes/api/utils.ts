@@ -81,7 +81,7 @@ export const flattenCaseSavedObject = (
   comments: Array<SavedObject<CommentAttributes>>
 ): FlattenedCaseSavedObject => ({
   case_id: savedObject.id,
-  version: savedObject.version,
+  version: savedObject.version ? savedObject.version : '0',
   comments: flattenCommentSavedObjects(comments),
   ...savedObject.attributes,
 });
@@ -109,7 +109,7 @@ export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
 ): FlattenedCommentSavedObject => ({
   comment_id: savedObject.id,
-  version: savedObject.version,
+  version: savedObject.version ? savedObject.version : '0',
   ...savedObject.attributes,
 });
 
