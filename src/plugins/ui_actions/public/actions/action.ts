@@ -18,19 +18,14 @@
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { AbstractPresentable } from '../util/abstract_presentable';
 
 /**
  * Legacy action interface, do not user.
  *
  * @deprecated
  */
-export interface Action<ActionContext extends {} = {}> {
-  /**
-   * Determined the order when there is more than one action matched to a trigger.
-   * Higher numbers are displayed first.
-   */
-  order?: number;
-
+export interface Action<Context extends {} = {}> extends Partial<AbstractPresentable<Context>> {
   id: string;
 
   readonly type: string;
@@ -38,35 +33,29 @@ export interface Action<ActionContext extends {} = {}> {
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionContext): string | undefined;
+  getIconType(context: Context): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    * @param context
    */
-  getDisplayName(context: ActionContext): string;
-
-  /**
-   * `UiComponent` to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  MenuItem?: UiComponent<{ context: ActionContext }>;
+  getDisplayName(context: Context): string;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: ActionContext): Promise<boolean>;
+  isCompatible(context: Context): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  getHref?(context: ActionContext): string | undefined;
+  getHref?(context: Context): string | undefined;
 
   /**
    * Executes the action.
    */
-  execute(context: ActionContext): Promise<void>;
+  execute(context: Context): Promise<void>;
 }
 
 /**
@@ -76,13 +65,7 @@ export interface ActionDefinition<
   Context extends object = object,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> {
-  /**
-   * Determined the order when there is more than one action matched to a trigger.
-   * Higher numbers are displayed first.
-   */
-  readonly order?: number;
-
+> extends Partial<AbstractPresentable<Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -107,28 +90,6 @@ export interface ActionDefinition<
    * action.
    */
   readonly CollectConfig?: UiComponent<CollectConfigProps<Context, Config>>;
-
-  /**
-   * `UiComponent` to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  readonly MenuItem?: UiComponent<{ context: Context }>;
-
-  /**
-   * Optional EUI icon type that can be displayed along with the title.
-   */
-  getIconType?(context: Context): string | undefined;
-
-  /**
-   * Returns a title to be displayed to the user.
-   */
-  getDisplayName?(context: Context): string;
-
-  /**
-   * Returns a promise that resolves to true if this action is compatible given the context,
-   * otherwise resolves to false.
-   */
-  isCompatible?(context: Context): Promise<boolean>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
