@@ -28,13 +28,13 @@ import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectKibanaServices,
-} from '../../../../../plugins/saved_objects/public';
-import { updateOldState } from '../index';
+} from '../../../../../../../plugins/saved_objects/public';
+import { updateOldState } from '../../../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern } from '../../../../../plugins/data/public';
-import { VisSavedObject } from '../np_ready/public/embeddable';
-import { VisImpl } from '../np_ready/public/vis_impl';
-import { createSavedSearchesLoader } from '../legacy_imports';
+import { IIndexPattern } from '../../../../../../../plugins/data/public';
+import { VisSavedObject } from '../types';
+import { VisImpl } from '../vis_impl';
+import { createSavedSearchesLoader } from '../../../legacy_imports';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
-import { VisSavedObject } from '../np_ready/public';
+import { VisSavedObject } from '../types';
 
 export function extractReferences({
   attributes,

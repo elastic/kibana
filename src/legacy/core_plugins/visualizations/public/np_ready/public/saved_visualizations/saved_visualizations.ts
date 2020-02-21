@@ -19,10 +19,10 @@
 import {
   SavedObjectLoader,
   SavedObjectKibanaServices,
-} from '../../../../../plugins/saved_objects/public';
+} from '../../../../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
-import { TypesStart } from '../np_ready/public/types';
+import { TypesStart } from '../vis_types';
 
 export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
   visualizationTypes: TypesStart;

@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { TypesService, TypesSetup, TypesStart } from './types';
+import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
@@ -44,7 +44,7 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from '../../saved_visualizations';
+import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { VisImpl, VisImplConstructor } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';

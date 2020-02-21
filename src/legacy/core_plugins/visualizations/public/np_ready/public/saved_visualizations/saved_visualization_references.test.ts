@@ -18,7 +18,7 @@
  */
 
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { VisSavedObject } from '../np_ready/public';
+import { VisSavedObject, VisState } from '../types';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {
@@ -128,7 +128,7 @@ Object {
       id: '1',
       title: 'test',
       savedSearchRefName: 'search_0',
-      visState: {
+      visState: ({
         params: {
           controls: [
             {
@@ -140,7 +140,7 @@ Object {
             },
           ],
         },
-      },
+      } as unknown) as VisState,
     } as VisSavedObject;
     const references = [
       {
@@ -192,7 +192,7 @@ Object {
     const context = {
       id: '1',
       title: 'test',
-      visState: {
+      visState: ({
         params: {
           controls: [
             {
@@ -201,7 +201,7 @@ Object {
             },
           ],
         },
-      },
+      } as unknown) as VisState,
     } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find index pattern reference \\"control_0_index_pattern\\""`

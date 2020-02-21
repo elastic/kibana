@@ -16,7 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
-export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+
+import { SavedObject } from '../../../../../../plugins/saved_objects/public';
+import { Vis, VisState, VisParams, VisualizationController } from './vis';
+import { ISearchSource } from '../../../../../../plugins/data/public/';
+import { SavedSearch } from '../../../../kibana/public/discover/np_ready/types';
+
+export { Vis, VisState, VisParams, VisualizationController };
+
+export interface VisSavedObject extends SavedObject {
+  vis: Vis;
+  description?: string;
+  searchSource: ISearchSource;
+  title: string;
+  uiStateJSON?: string;
+  destroy: () => void;
+  savedSearchRefName?: string;
+  savedSearchId?: string;
+  savedSearch?: SavedSearch;
+  visState: VisState;
+}

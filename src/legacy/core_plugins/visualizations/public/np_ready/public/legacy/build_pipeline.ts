@@ -22,7 +22,7 @@ import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
 import { fieldFormats, ISearchSource } from '../../../../../../../plugins/data/public';
 import { IAggConfig, setBounds, isDateHistogramBucketAggConfig } from '../../../legacy_imports';
-import { Vis, VisParams } from '..';
+import { Vis, VisParams } from '../types';
 
 interface SchemaConfigParams {
   precision?: number;

@@ -27,12 +27,8 @@ import {
 } from '../../../../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
-import {
-  VisSavedObject,
-  VisualizeEmbeddable,
-  VisualizeInput,
-  VisualizeOutput,
-} from './visualize_embeddable';
+import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import { VisSavedObject } from '../types';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   getCapabilities,

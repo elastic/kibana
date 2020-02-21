@@ -37,8 +37,8 @@ import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from '
 export { VisualizationsSetup, VisualizationsStart };
 
 /** @public types */
-export { VisTypeAlias, VisType } from './types';
-export { VisSavedObject } from './embeddable';
+export { VisTypeAlias, VisType } from './vis_types';
+export { VisSavedObject } from './types';
 export { Vis, VisParams, VisState } from './vis';
 import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
@@ -49,7 +49,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 /** @public static code */
-export { TypesService } from './types/types_service';
+export { TypesService } from './vis_types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
 
 export { Status } from './legacy/update_status';
@@ -58,4 +58,4 @@ export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/bui
 // @ts-ignore
 export { updateOldState } from './legacy/vis_update_state';
 export { calculateObjectHash } from './legacy/calculate_object_hash';
-export { createSavedVisLoader } from '../../saved_visualizations/saved_visualizations';
+export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';

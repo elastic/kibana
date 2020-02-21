@@ -24,7 +24,7 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
 } from 'src/core/public';
-import { TypesStart } from './types';
+import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import {
   FilterManager,
@@ -34,7 +34,7 @@ import {
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
-import { SavedVisualizationsLoader } from '../../saved_visualizations';
+import { SavedVisualizationsLoader } from './saved_visualizations';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

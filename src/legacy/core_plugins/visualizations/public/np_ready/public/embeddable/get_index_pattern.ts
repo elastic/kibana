@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisSavedObject } from './visualize_embeddable';
+import { VisSavedObject } from '../types';
 import { indexPatterns, IIndexPattern } from '../../../../../../../plugins/data/public';
 import { getUISettings, getSavedObjects } from '../services';
 
