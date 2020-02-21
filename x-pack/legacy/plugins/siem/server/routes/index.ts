@@ -43,7 +43,7 @@ export const initRoutes = (
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(router);
   readRulesRoute(router);
-  updateRulesRoute(route, config, getClients);
+  updateRulesRoute(router);
   patchRulesRoute(route, getClients);
   deleteRulesRoute(router);
   findRulesRoute(route, getClients);
