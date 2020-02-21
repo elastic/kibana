@@ -32,9 +32,11 @@ export type TableItem = Record<string, any>;
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;
+  rowCount: number;
   sortField: EsFieldName;
   sortDirection: SortDirection;
   status: INDEX_STATUS;
+  tableFields: string[];
   tableItems: TableItem[];
 }
 
@@ -45,7 +47,9 @@ export const useExploreData = (
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
+  const [tableFields, setTableFields] = useState<string[]>([]);
   const [tableItems, setTableItems] = useState<TableItem[]>([]);
+  const [rowCount, setRowCount] = useState(0);
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
@@ -54,6 +58,8 @@ export const useExploreData = (
     direction,
     searchQuery,
     requiresKeyword,
+    pageIndex = 0,
+    pageSize = 25,
   }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
@@ -78,10 +84,12 @@ export const useExploreData = (
 
         const resp: SearchResponse<any> = await ml.esSearch({
           index: jobConfig.dest.index,
-          size: SEARCH_SIZE,
+          from: pageIndex * pageSize,
+          size: pageSize,
           body,
         });
 
+        setRowCount(resp.hits.total.value);
         setSortField(field);
         setSortDirection(direction);
 
@@ -125,6 +133,7 @@ export const useExploreData = (
           return item;
         });
 
+        setTableFields(flattenedFields);
         setTableItems(transformedTableItems);
         setStatus(INDEX_STATUS.LOADED);
       } catch (e) {
@@ -149,5 +158,14 @@ export const useExploreData = (
     }
   }, [jobConfig && jobConfig.id]);
 
-  return { errorMessage, loadExploreData, sortField, sortDirection, status, tableItems };
+  return {
+    errorMessage,
+    loadExploreData,
+    rowCount,
+    sortField,
+    sortDirection,
+    status,
+    tableFields,
+    tableItems,
+  };
 };

@@ -362,18 +362,16 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
   }
 
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
-  return newDocFields
-    .filter(k => {
-      if (k === `${resultsField}.outlier_score`) {
-        return true;
-      }
-      if (k.split('.')[0] === resultsField) {
-        return false;
-      }
+  return newDocFields.filter(k => {
+    if (k === `${resultsField}.outlier_score`) {
+      return true;
+    }
+    if (k.split('.')[0] === resultsField) {
+      return false;
+    }
 
-      return docs.some(row => row._source[k] !== null);
-    })
-    .slice(0, MAX_COLUMNS);
+    return docs.some(row => row._source[k] !== null);
+  });
 };
 
 export const toggleSelectedFieldSimple = (

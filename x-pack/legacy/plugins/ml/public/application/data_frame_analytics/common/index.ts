@@ -46,3 +46,5 @@ export {
   EsFieldName,
   MAX_COLUMNS,
 } from './fields';
+
+export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
