@@ -27,7 +27,7 @@ initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
 initUiMetric(() => () => {});
 
 jest.mock('ui/new_platform');
-jest.mock('../../index_management/public', async () => {
+jest.mock('../../../../plugins/index_management/public', async () => {
   const { indexManagementMock } = await import(
     '../../../../plugins/index_management/public/mocks.ts'
   );
