@@ -25,14 +25,27 @@ import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { reformatJestDiff, getOptimizerCacheKey, diffCacheKey } from './cache_keys';
 import { OptimizerConfig } from './optimizer_config';
 
-jest.mock('./get_changes.ts');
-jest.mock('./get_mtimes.ts');
+jest.mock('./get_changes.ts', () => ({
+  getChanges: async () =>
+    new Map([
+      ['/foo/bar/a', 'modified'],
+      ['/foo/bar/b', 'modified'],
+      ['/foo/bar/c', 'deleted'],
+    ]),
+}));
+
+jest.mock('./get_mtimes.ts', () => ({
+  getMtimes: async (paths: string[]) => new Map(paths.map(path => [path, 12345])),
+}));
+
 jest.mock('execa');
+
 jest.mock('fs', () => {
   const realFs = jest.requireActual('fs');
   jest.spyOn(realFs, 'readFile');
   return realFs;
 });
+
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 jest.requireMock('execa').mockImplementation(async (cmd: string, args: string[], opts: object) => {
@@ -53,21 +66,6 @@ jest.requireMock('execa').mockImplementation(async (cmd: string, args: string[],
     stdout: '<last commit sha>',
   };
 });
-
-jest
-  .requireMock('./get_mtimes.ts')
-  .getMtimes.mockImplementation(
-    async (paths: string[]) => new Map(paths.map(path => [path, 12345]))
-  );
-
-jest.requireMock('./get_changes.ts').getChanges.mockImplementation(
-  async () =>
-    new Map([
-      ['/foo/bar/a', 'modified'],
-      ['/foo/bar/b', 'modified'],
-      ['/foo/bar/c', 'deleted'],
-    ])
-);
 
 describe('getOptimizerCacheKey()', () => {
   it('uses latest commit, bootstrap cache, and changed files to create unique value', async () => {
