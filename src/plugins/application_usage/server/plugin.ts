@@ -22,7 +22,7 @@ import {
   CoreSetup,
   CoreStart,
   IRouter,
-  ICustomClusterClient,
+  IClusterClient,
   ISavedObjectsRepository,
   PluginInitializerContext,
   Logger,
@@ -93,7 +93,7 @@ interface SearchAggregationResult extends SearchResponse<void> {
 export class ApplicationUsagePlugin implements Plugin<void, void> {
   private readonly log: Logger;
   private intervalId?: NodeJS.Timer;
-  private esClient?: ICustomClusterClient;
+  private esClient?: IClusterClient;
   private savedObjectsClient?: ISavedObjectsRepository;
   private indexTemplateInitialised = false;
 
@@ -108,7 +108,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     const router = http.createRouter();
     this.registerIndexRoute(router);
 
-    this.esClient = elasticsearch.createClient('application-usage');
+    this.esClient = elasticsearch.adminClient;
     try {
       await this.ensureIndex(this.esClient);
     } catch (err) {
@@ -177,7 +177,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     );
   }
 
-  private async ensureIndex(elasticsearch: ICustomClusterClient) {
+  private async ensureIndex(elasticsearch: IClusterClient) {
     // Skip if already done
     if (this.indexTemplateInitialised === true) return;
 
@@ -238,7 +238,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
   }
 
   private async rollTotals(
-    elasticsearch: ICustomClusterClient,
+    elasticsearch: IClusterClient,
     savedObjectsClient: ISavedObjectsRepository
   ) {
     try {
@@ -281,7 +281,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
   }
 
   private async fetchAggregation(
-    callCluster: ICustomClusterClient['callAsInternalUser'],
+    callCluster: IClusterClient['callAsInternalUser'],
     query: object = { match_all: {} }
   ): Promise<SearchAggregationResult> {
     const lastNDays = (numberOfDays: number) => ({
@@ -333,7 +333,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     return response || {};
   }
 
-  private async fetchUsage(callCluster: ICustomClusterClient['callAsInternalUser']) {
+  private async fetchUsage(callCluster: IClusterClient['callAsInternalUser']) {
     const response = await this.fetchAggregation(callCluster);
     const totals = await this.getSavedObjectTotals();
 
