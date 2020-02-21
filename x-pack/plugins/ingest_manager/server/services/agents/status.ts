@@ -14,7 +14,7 @@ import {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   AGENT_TYPE_EPHEMERAL,
-} from '../../types';
+} from '../../constants';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { type, last_checkin: lastCheckIn } = agent;

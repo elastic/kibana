@@ -5,12 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { DatasourceSchema } from './datasource';
-export { AgentConfig, NewAgentConfig } from '../../../common';
-
-export enum AgentConfigStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
+import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string(),

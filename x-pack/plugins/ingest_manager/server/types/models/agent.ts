@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-export { Agent, AgentAction, AgentEvent, AgentStatus } from '../../../common/types';
 
-export const AGENT_TYPE_PERMANENT = 'PERMANENT';
-export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
-export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
-
-export const AGENT_POLLING_THRESHOLD_MS = 30000;
-export const AGENT_POLLING_INTERVAL = 1000;
+import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../../common';
 
 export const AgentTypeSchema = schema.oneOf([
   schema.literal(AGENT_TYPE_EPHEMERAL),

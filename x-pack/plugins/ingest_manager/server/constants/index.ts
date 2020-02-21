@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_POLLING_THRESHOLD_MS,
+  AGENT_POLLING_INTERVAL,
   // Routes
   PLUGIN_ID,
   EPM_API_ROUTES,

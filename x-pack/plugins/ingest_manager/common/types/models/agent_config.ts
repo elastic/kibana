@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectAttributes } from '../../../../../../src/core/public';
 import { Datasource } from './datasource';
 
 export enum AgentConfigStatus {
@@ -17,10 +18,10 @@ export interface NewAgentConfig {
   description?: string;
 }
 
-export type AgentConfig = NewAgentConfig & {
+export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
   id: string;
   status: AgentConfigStatus;
   datasources: string[] | Datasource[];
   updated_on: string;
   updated_by: string;
-};
+}

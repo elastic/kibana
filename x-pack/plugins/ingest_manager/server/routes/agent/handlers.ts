@@ -7,22 +7,24 @@
 import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
+  GetAgentsResponse,
+  GetOneAgentResponse,
+  GetOneAgentEventsResponse,
+  PostAgentCheckinResponse,
+  PostAgentEnrollResponse,
+  PostAgentUnenrollResponse,
+} from '../../../common/types';
+import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
-  PostAgentCheckinResponse,
   PostAgentEnrollRequestSchema,
-  PostAgentEnrollResponse,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusForPolicySchema,
-  GetAgentsResponse,
-  PostAgentUnenrollResponse,
-  GetOneAgentResponse,
-  GetOneAgentEventsResponse,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';

@@ -5,18 +5,14 @@
  */
 
 import { SavedObjectAttributes } from '../../../../../../src/core/public';
-
-export const AGENT_TYPE_PERMANENT = 'PERMANENT';
-export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
-export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
-
-export const AGENT_POLLING_THRESHOLD_MS = 30000;
-export const AGENT_POLLING_INTERVAL = 1000;
+import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
+
+export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
 export interface AgentAction extends SavedObjectAttributes {
   type: 'POLICY_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
@@ -79,5 +75,3 @@ export interface AgentSOAttributes extends AgentBase, SavedObjectAttributes {
   local_metadata: string;
   current_error_events?: string;
 }
-
-export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';

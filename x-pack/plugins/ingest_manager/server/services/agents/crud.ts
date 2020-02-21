@@ -6,14 +6,13 @@
 
 import Boom from 'boom';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import {
-  AgentSOAttributes,
-  Agent,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_TYPE_EPHEMERAL,
   AGENT_POLLING_THRESHOLD_MS,
-  AgentEventSOAttributes,
-} from '../../types';
+} from '../../constants';
+import { AgentSOAttributes, Agent, AgentEventSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 
 export async function listAgents(
