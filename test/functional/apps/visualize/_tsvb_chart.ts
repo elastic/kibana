@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
+  // const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
@@ -107,6 +108,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
+        // await security.testUser.setRoles(['kibana_user', 'kibana_sample_admin']);
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
