@@ -36,11 +36,22 @@ const formatBuckets = async (
     .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
 };
 
+const getLocationClause = (locations: string[]) => ({
+  bool: {
+    should: [
+      ...locations.map(location => ({
+        term: {
+          'observer.geo.name': location,
+        },
+      })),
+    ],
+  },
+});
+
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
-  console.log('filters', JSON.stringify(filters, null, 2));
+> = async ({ callES, filters, locations, numTimes, timerange: { from: gte, to: lte } }) => {
   const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
@@ -62,8 +73,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
               {
                 range: {
                   '@timestamp': {
-                    gte: from,
-                    lte: to,
+                    gte,
+                    lte,
                   },
                 },
               },
@@ -104,6 +115,15 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
         },
       },
     };
+    if (filters) {
+      // console.log(JSON.stringify(JSON.parse(filters), null, 2));
+      const parsedFilters = JSON.parse(filters);
+      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
+    }
+    if (locations.length) {
+      // @ts-ignore this type of addition does not work with TS's type inference
+      esParams.body.query.bool.filter.push(getLocationClause(locations));
+    }
     if (afterKey) {
       // @ts-ignore the `after` defined here is not available
       // on the inferred type, so TS says it's an error
