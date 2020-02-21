@@ -21,7 +21,7 @@ import { AbstractPresentable } from '../util/abstract_presentable';
 import { AbstractConfigurable } from '../util/abstract_configurable';
 
 /**
- * Legacy action interface, do not user.
+ * Legacy action interface, do not use.
  *
  * @deprecated
  */

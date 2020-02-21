@@ -33,7 +33,7 @@ export interface AbstractPresentable<Context extends object = object> {
    * `UiComponent` to render when displaying this entity as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  readonly MenuItem: UiComponent<{ context: Context }>;
+  readonly MenuItem?: UiComponent<{ context: Context }>;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.

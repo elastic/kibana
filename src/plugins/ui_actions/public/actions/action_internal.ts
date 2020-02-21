@@ -21,8 +21,10 @@
 
 import { Mutable } from '@kbn/utility-types';
 import { Action, ActionContext, AnyActionDefinition, ActionConfig } from './action';
+import { AbstractPresentable } from '../util/abstract_presentable';
 
-export class ActionInternal<A extends AnyActionDefinition> implements Action<ActionContext<A>> {
+export class ActionInternal<A extends AnyActionDefinition>
+  implements Action<ActionContext<A>>, AbstractPresentable<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
@@ -30,6 +32,10 @@ export class ActionInternal<A extends AnyActionDefinition> implements Action<Act
   public readonly type: string = this.definition.type || '';
   public readonly factoryId: string = this.definition.factoryId || '';
   public readonly MenuItem? = this.definition.MenuItem;
+
+  /**
+   * Current config of the dynamic action.
+   */
   public config: ActionConfig<A> = this.definition.defaultConfig || undefined;
 
   public execute(context: ActionContext<A>) {
