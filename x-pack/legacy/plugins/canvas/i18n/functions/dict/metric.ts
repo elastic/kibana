@@ -9,7 +9,6 @@ import { metric } from '../../../canvas_plugin_src/functions/common/metric';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../../constants';
-// import { getDocumentationLinks } from '../../../public/lib/documentation_links';
 
 export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {
@@ -37,6 +36,7 @@ export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
         FONT_WEIGHT,
       },
     }),
+    // TODO: Find a way to generate the docs URL here
     metricFormat: i18n.translate('xpack.canvas.functions.metric.args.metricFormatHelpText', {
       defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {

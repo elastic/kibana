@@ -9,7 +9,6 @@ import { formatnumber } from '../../../canvas_plugin_src/functions/common/format
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { NUMERALJS } from '../../constants';
-// import { getDocumentationLinks } from '../../../public/lib/documentation_links';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
   help: i18n.translate('xpack.canvas.functions.formatnumberHelpText', {
@@ -19,6 +18,7 @@ export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
     },
   }),
   args: {
+    // TODO: Find a way to generate the docs URL here
     format: i18n.translate('xpack.canvas.functions.formatnumber.args.formatHelpText', {
       defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {
