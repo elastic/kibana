@@ -49,6 +49,22 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
   };
 }
 
+export function applyTransformConfigToDetailsState(
+  state: StepDetailsExposedState,
+  transformConfig?: TransformPivotConfig
+): StepDetailsExposedState {
+  // apply the transform configuration to wizard DETAILS state
+  if (transformConfig !== undefined) {
+    const time = transformConfig.sync?.time;
+    if (time !== undefined) {
+      state.continuousModeDateField = time.field;
+      state.continuousModeDelay = time.delay;
+      state.isContinuousModeEnabled = true;
+    }
+  }
+  return state;
+}
+
 interface Props {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
