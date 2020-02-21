@@ -34,6 +34,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
+import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -163,7 +164,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     );
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this._makeSearchSource(searchFilters, 0);
 
@@ -174,7 +175,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
         bucketsPerGrid++;
       }
     });
-    const gridsPerRequest = DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid;
+    const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs = {
       compositeSplit: {
         composite: {
@@ -205,6 +206,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
     let requestCount = 0;
     let afterKey = null;
     while (true) {
+      if (!isRequestStillActive()) {
+        // Stop paging through results if request is obsolete
+        throw new DataRequestAbortError();
+      }
+
       requestCount++;
 
       // circuit breaker to ensure reasonable number of requests
