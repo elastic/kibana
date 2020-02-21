@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Endpoint Management List', function() {
     this.tags('ciGroup7');
     before(async () => {
-      await esArchiver.load('endpoint/endpoints/api_feature');
+      await esArchiver.load('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management');
     });
 
@@ -83,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('endpoint/endpoints/api_feature');
+      await esArchiver.unload('endpoint/metadata/api_feature');
     });
   });
 };
