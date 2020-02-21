@@ -93,4 +93,6 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export { DateFormat } from './field_formats/converters';
+
 export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };

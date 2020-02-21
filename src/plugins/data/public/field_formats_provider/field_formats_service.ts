@@ -19,7 +19,26 @@
 
 import { CoreSetup } from 'src/core/public';
 import { FieldFormatRegisty } from './field_formats';
-import { baseFormattersPublic } from '../field_formats/constants';
+// import { baseFormattersPublic } from '../field_formats/constants';
+
+import {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+} from '../../common/';
+
+import { DateFormat } from '../field_formats/converters';
 
 export class FieldFormatsService {
   private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
@@ -27,7 +46,23 @@ export class FieldFormatsService {
   public setup(core: CoreSetup) {
     this.fieldFormats.init(core);
 
-    this.fieldFormats.register(baseFormattersPublic);
+    this.fieldFormats.register([
+      BoolFormat,
+      BytesFormat,
+      ColorFormat,
+      DateFormat,
+      DateNanosFormat,
+      DurationFormat,
+      IpFormat,
+      NumberFormat,
+      PercentFormat,
+      RelativeDateFormat,
+      SourceFormat,
+      StaticLookupFormat,
+      StringFormat,
+      TruncateFormat,
+      UrlFormat,
+    ]);
 
     return this.fieldFormats as FieldFormatsSetup;
   }
