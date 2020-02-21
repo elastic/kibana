@@ -33,13 +33,10 @@ The following Agent configuration APIs are available:
 [[apm-update-config]]
 ==== Create or update configuration
 
-[[apm-update-config-req]]
-===== Request
-
-`PUT /api/apm/settings/agent-configuration`
-
-[[apm-update-config-query]]
-===== Query parameters
+[source,console]
+--------------------------------------------------
+PUT /api/apm/settings/agent-configuration
+--------------------------------------------------
 
 [[apm-update-config-req-body]]
 ===== Request body
@@ -63,7 +60,6 @@ The following Agent configuration APIs are available:
 --------------------------------------------------
 PUT /api/apm/settings/agent-configuration
 {
-    "agent_name": "nodejs"
     "service" : {
         "name" : "frontend",
         "environment" : "production"
@@ -72,7 +68,8 @@ PUT /api/apm/settings/agent-configuration
         "transaction_sample_rate" : 0.4,
         "capture_body" : "off",
         "transaction_max_spans" : 500
-    }
+    },
+    "agent_name": "nodejs"
 }
 --------------------------------------------------
 
@@ -86,14 +83,8 @@ PUT /api/apm/settings/agent-configuration
 
 [source,console]
 --------------------------------------------------
-POST  /api/apm/settings/agent-configuration
+DELETE /api/apm/settings/agent-configuration
 --------------------------------------------------
-
-[[apm-delete-config-req]]
-===== Request
-
-`DELETE /api/apm/settings/agent-configuration`
-
 
 [[apm-delete-config-req-body]]
 ===== Request body
@@ -133,15 +124,12 @@ DELETE /api/apm/settings/agent-configuration
 GET  /api/apm/settings/agent-configuration
 --------------------------------------------------
 
-[[apm-list-config-req]]
-===== Request
-
-`GET /api/apm/settings/agent-configuration`
-
 [[apm-list-config-body]]
 ===== Response body
 
-```
+
+[source,js]
+--------------------------------------------------
 [
   {
     "agent_name": "go",
@@ -185,7 +173,7 @@ GET  /api/apm/settings/agent-configuration
     "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
   }
 ]
-```
+--------------------------------------------------
 
 ////
 *******************************************************
@@ -212,7 +200,8 @@ GET  /api/apm/settings/agent-configuration
 [[apm-search-config-body]]
 ===== Response body
 
-```
+[source,js]
+--------------------------------------------------
 {
   "_index": ".apm-agent-configuration",
   "_id": "CIaqXXABmQCdPphWj8EJ",
@@ -230,7 +219,7 @@ GET  /api/apm/settings/agent-configuration
     "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
   }
 }
-```
+--------------------------------------------------
 
 [[apm-search-config-example]]
 ===== Example
