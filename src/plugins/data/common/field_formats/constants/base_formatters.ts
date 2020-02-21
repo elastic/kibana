@@ -18,6 +18,7 @@
  */
 
 import {
+  // BoolFormat,
   UrlFormat,
   BytesFormat,
   DateNanosFormat,
@@ -30,11 +31,17 @@ import {
   SourceFormat,
   // ColorFormat,
   // TruncateFormat,
-  // BoolFormat,
+  // ,
   // StaticLookupFormat,
 } from '../converters';
 
+import { BoolFormat } from '../converters/boolean';
+import { ColorFormat } from '../converters/color';
+import { TruncateFormat } from '../converters/truncate';
+import { StaticLookupFormat } from '../converters/static_lookup';
+
 export const baseFormatters = [
+  BoolFormat,
   UrlFormat,
   BytesFormat,
   DateNanosFormat,
@@ -45,8 +52,8 @@ export const baseFormatters = [
   PercentFormat,
   StringFormat,
   SourceFormat,
-  // ColorFormat,
-  // TruncateFormat,
+  ColorFormat,
+  TruncateFormat,
   // BoolFormat,
-  // StaticLookupFormat,
+  StaticLookupFormat,
 ];
