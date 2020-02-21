@@ -26,7 +26,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     if (!enabled) {
       return;
     }
-    const appRegistrar = management.sections.getSection('kibana')!;
+    const appRegistrar = management.sections.getSection('elasticsearch')!;
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     appRegistrar.registerApp({
@@ -35,7 +35,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         defaultMessage: '{version} Upgrade Assistant',
         values: { version: `${NEXT_MAJOR_VERSION}.0` },
       }),
-      order: 100,
+      order: 1000,
       async mount({ element }) {
         const [{ i18n: i18nDep }] = await getStartServices();
         return renderApp({ element, isCloudEnabled, http, i18n: i18nDep });
