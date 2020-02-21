@@ -117,6 +117,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
+      previousColumn?: C;
     }
   ) => C;
   /**

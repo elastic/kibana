@@ -130,6 +130,7 @@ export const IndexPatternDimensionPanelComponent = function IndexPatternDimensio
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
+                previousColumn: selectedColumn,
               });
 
           trackUiEvent('drop_onto_dimension');

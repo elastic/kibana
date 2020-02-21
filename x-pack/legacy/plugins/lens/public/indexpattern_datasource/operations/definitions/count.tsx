@@ -39,7 +39,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ suggestedPriority, field, previousColumn }) {
     return {
       label: countLabel,
       dataType: 'number',
@@ -48,6 +48,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
+      params:
+        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

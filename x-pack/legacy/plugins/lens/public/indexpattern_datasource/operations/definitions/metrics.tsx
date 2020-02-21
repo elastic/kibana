@@ -50,7 +50,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field }) => ({
+    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
       label: ofName(field.name),
       dataType: 'number',
       operationType: type,
@@ -58,6 +58,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      params:
+        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {

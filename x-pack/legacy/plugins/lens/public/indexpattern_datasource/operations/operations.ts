@@ -243,13 +243,6 @@ export function buildColumn({
     field,
   });
 
-  if (
-    newColumn.dataType === 'number' &&
-    previousColumn?.params &&
-    'format' in previousColumn.params
-  ) {
-    newColumn.params = { format: previousColumn.params.format };
-  }
   return newColumn;
 }
 
