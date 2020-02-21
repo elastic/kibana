@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
 import { AbstractPresentable } from '../util/abstract_presentable';
+import { AbstractConfigurable } from '../util/abstract_configurable';
 
 /**
  * Legacy action interface, do not user.
@@ -65,7 +65,7 @@ export interface ActionDefinition<
   Context extends object = object,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> extends Partial<AbstractPresentable<Context>> {
+> extends Partial<AbstractPresentable<Context>>, Partial<AbstractConfigurable<Config, Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -78,18 +78,6 @@ export interface ActionDefinition<
    * this dynamic action.
    */
   readonly factoryId?: string;
-
-  /**
-   * Default config for this action, used when action is created for the first
-   * time.
-   */
-  readonly defaultConfig?: Config;
-
-  /**
-   * `UiComponent` to be rendered when collecting configuration for this dynamic
-   * action.
-   */
-  readonly CollectConfig?: UiComponent<CollectConfigProps<Context, Config>>;
 
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
@@ -107,26 +95,6 @@ export type ActionContext<A> = A extends ActionDefinition<infer Context, any, an
   ? Context
   : never;
 export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config> ? Config : never;
-
-/**
- * Props provided to `CollectConfig` component on every re-render.
- */
-export interface CollectConfigProps<Context, Config> {
-  /**
-   * Context which represents environment where component is being rendered.
-   */
-  context: Context;
-
-  /**
-   * Current config of the dynamic action.
-   */
-  config: Config;
-
-  /**
-   * Callback called when user updates the config in UI.
-   */
-  onConfig: (config: Config) => void;
-}
 
 /**
  * A convenience interface used to register a dynamic action.
