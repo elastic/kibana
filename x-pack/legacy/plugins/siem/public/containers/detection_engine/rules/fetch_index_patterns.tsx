@@ -29,7 +29,7 @@ interface FetchIndexPatternReturn {
   indexPatterns: IIndexPattern;
 }
 
-type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
+export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();

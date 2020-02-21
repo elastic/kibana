@@ -102,6 +102,7 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) =>
       storage: new Storage(localStorage),
       ...core,
       ...plugins,
+      savedObjects: core.savedObjects,
     }}
   >
     <StartApp {...compose(core)} />
