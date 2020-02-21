@@ -26,10 +26,11 @@ export class DocViewsPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { discover }: { discover: DiscoverSetup }) {
     discover.docViews.addDocView({
       directive: {
-        controller($scope: AngularScope) {
+        controller: function MyController($scope: AngularScope, $injector: any) {
+          debugger;
           ($scope as any).abc = 123;
         },
-        template: `<h1>{{abc}}</h1>`,
+        template: `<h1>{{hit._id}} {{abc}}</h1>`,
       },
       order: 10,
       title: 'Angular doc view',

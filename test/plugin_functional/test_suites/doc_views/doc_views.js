@@ -16,20 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { wrapInI18nContext } from '../../../kibana_services';
 
-export function FieldNameDirectiveProvider(config, reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: config.get('shortDots:enable'),
-    }
-  );
+import expect from '@kbn/expect';
+
+export default function({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+
+  async function getCounterValue() {
+    return await testSubjects.getVisibleText('counter');
+  }
+
+  async function getEditorValue() {
+    return await testSubjects.getAttribute('counterEditor', 'value');
+  }
+
+  describe('custom doc views', function() {
+    before(async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    it('should show custom doc views', async () => {
+
+    });
+  });
 }

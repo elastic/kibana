@@ -232,9 +232,9 @@ export const npSetup = {
     discover: {
       docViews: {
         addDocView: sinon.fake(),
-        setAngularInjector: sinon.fake(),
+        setAngularInjectorGetter: sinon.fake(),
       },
-    }
+    },
   },
 };
 

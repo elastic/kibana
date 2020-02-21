@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
 import { auto } from 'angular';
 import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
-  private angularInjectorGetter: Subject<() => Promise<auto.IInjectorService>> = new Subject<
-    () => Promise<auto.IInjectorService>
-  >();
+  private angularInjectorGetter: (() => Promise<auto.IInjectorService>) | null = null;
 
   setAngularInjectorGetter(injectorGetter: () => Promise<auto.IInjectorService>) {
-    this.angularInjectorGetter.next(injectorGetter);
+    this.angularInjectorGetter = injectorGetter;
   }
 
   /**
@@ -39,12 +36,12 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, () =>
-        this.angularInjectorGetter
-          .asObservable()
-          .toPromise()
-          .then(getter => getter())
-      );
+      docView.render = convertDirectiveToRenderFn(docView.directive, () => {
+        if (!this.angularInjectorGetter) {
+          throw new Error('Angular was not initialized');
+        }
+        return this.angularInjectorGetter();
+      });
     }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;
