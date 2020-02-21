@@ -7,7 +7,6 @@
 import { UMMonitorStatesAdapter } from './adapter_types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
-import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
 import { QueryContext } from './search/query_context';
 
