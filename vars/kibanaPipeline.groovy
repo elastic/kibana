@@ -213,7 +213,8 @@ def uploadCoverageStaticSite_PROD(timestamp) {
   def ARTIFACT_PATTERNS = [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined'
+    'target/kibana-coverage/mocha-combined',
+    'src/dev/code_coverage/live_coverage_app'
   ]
 
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}/"
