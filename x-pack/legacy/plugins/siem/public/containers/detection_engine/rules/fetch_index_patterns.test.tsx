@@ -5,9 +5,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { useApolloClient } from '@apollo/client';
 
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { useApolloClient } from '../../../utils/apollo_context';
 import { mocksSource } from '../../source/mock';
 
 import { useFetchIndexPatterns, Return } from './fetch_index_patterns';

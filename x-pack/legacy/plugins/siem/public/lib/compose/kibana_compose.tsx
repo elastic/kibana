@@ -15,7 +15,20 @@ export function compose(core: CoreStart): AppFrontendLibs {
 
   const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',
-    cache: new InMemoryCache(),
+    // https://www.apollographql.com/docs/react/v3.0-beta/caching/cache-field-behavior/#the-merge-function
+    cache: new InMemoryCache({
+      typePolicies: {
+        TimelineItem: {
+          fields: {
+            data: {
+              merge(existing = [], incoming: []) {
+                return [...existing, ...incoming];
+              },
+            },
+          },
+        },
+      },
+    }),
     link: ApolloLink.from(getLinks(basePath)),
   });
 

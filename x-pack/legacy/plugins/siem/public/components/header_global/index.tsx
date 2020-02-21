@@ -16,7 +16,6 @@ import { getOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
-import { useWithSource } from '../../containers/source';
 
 const Wrapper = styled.header`
   ${({ theme }) => css`
@@ -34,12 +33,11 @@ const FlexItem = styled(EuiFlexItem)`
 FlexItem.displayName = 'FlexItem';
 
 interface HeaderGlobalProps {
+  contentAvailable: boolean;
   hideDetectionEngine?: boolean;
 }
-export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
-  const { contentAvailable } = useWithSource();
-
-  return (
+export const HeaderGlobal = React.memo<HeaderGlobalProps>(
+  ({ contentAvailable, hideDetectionEngine = false }) => (
     <Wrapper className="siemHeaderGlobal">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
         <>
@@ -93,6 +91,6 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
         </>
       </EuiFlexGroup>
     </Wrapper>
-  );
-});
+  )
+);
 HeaderGlobal.displayName = 'HeaderGlobal';

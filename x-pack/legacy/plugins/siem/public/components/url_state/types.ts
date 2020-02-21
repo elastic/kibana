@@ -88,9 +88,6 @@ export type KeyUrlState = keyof UrlState;
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
   indexPattern?: IIndexPattern;
-  mapToUrlState?: (value: string) => UrlState;
-  onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
-  onInitialize?: (urlState: UrlState) => void;
 }
 
 export interface UrlStateStateToPropsType {

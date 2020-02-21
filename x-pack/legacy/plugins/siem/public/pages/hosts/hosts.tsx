@@ -134,7 +134,6 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 setQuery={setQuery}
                 from={from}
                 type={hostsModel.HostsType.page}
-                indexPattern={indexPattern}
                 hostsPagePath={hostsPagePath}
               />
             </WrapperPage>

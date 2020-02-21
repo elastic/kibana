@@ -25,7 +25,7 @@ jest.mock('../../containers/source', () => ({
 
 describe('HeaderGlobal', () => {
   test('it renders', () => {
-    const wrapper = shallow(<HeaderGlobal />);
+    const wrapper = shallow(<HeaderGlobal contentAvailable />);
 
     expect(wrapper).toMatchSnapshot();
   });

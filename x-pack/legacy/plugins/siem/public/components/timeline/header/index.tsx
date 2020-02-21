@@ -97,9 +97,9 @@ TimelineHeaderComponent.displayName = 'TimelineHeaderComponent';
 export const TimelineHeader = React.memo(
   TimelineHeaderComponent,
   (prevProps, nextProps) =>
-    prevProps.browserFields === nextProps.browserFields &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.id === nextProps.id &&
-    prevProps.indexPattern === nextProps.indexPattern &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.onChangeDataProviderKqlQuery === nextProps.onChangeDataProviderKqlQuery &&
     prevProps.onChangeDroppableAndProvider === nextProps.onChangeDroppableAndProvider &&

@@ -61,7 +61,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = React.memo(() => {
+export const HomePageComponent = () => {
   const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
   const flyoutHeight = useMemo(
     () =>
@@ -76,7 +76,7 @@ export const HomePage = React.memo(() => {
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
-      <HeaderGlobal />
+      <HeaderGlobal contentAvailable />
 
       <Main data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
@@ -151,6 +151,8 @@ export const HomePage = React.memo(() => {
       <SpyRoute />
     </WrappedByAutoSizer>
   );
-});
+};
+
+export const HomePage = React.memo(HomePageComponent);
 
 HomePage.displayName = 'HomePage';
