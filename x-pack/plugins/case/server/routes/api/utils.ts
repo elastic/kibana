@@ -10,7 +10,9 @@ import {
   ResponseError,
   SavedObject,
   SavedObjectsFindResponse,
+  RequestHandler,
 } from 'kibana/server';
+
 import {
   AllComments,
   CaseAttributes,
@@ -22,7 +24,10 @@ import {
   NewCommentType,
   SortFieldCase,
   UserType,
+  CaseRequestHandler,
 } from './types';
+
+import { CaseServiceSetup } from '../../services';
 
 export const formatNewCase = (
   newCase: NewCaseType,
@@ -126,4 +131,18 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
     default:
       return SortFieldCase.createdAt;
   }
+};
+
+export const createRequestHandler = (
+  service: CaseServiceSetup,
+  handler: CaseRequestHandler
+): RequestHandler => {
+  return async (context, request, response) => {
+    try {
+      const res = await handler(service, context, request, response);
+      return res;
+    } catch (error) {
+      return response.customError(wrapError(error));
+    }
+  };
 };
