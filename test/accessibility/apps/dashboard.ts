@@ -35,10 +35,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
-      // await esArchiver.loadIfNeeded('logstash_functional');
-      // await kibanaServer.uiSettings.update({
-      //   defaultIndex: 'logstash-*',
-      // });
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.home.addSampleDataSet('flights');
     });
@@ -134,9 +130,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of full screen mode', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await logoButton.moveMouseTo();
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
+      await PageObjects.dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });
 

@@ -95,6 +95,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await this.waitForRenderComplete();
     }
 
+    public async exitFullScreenMode() {
+      const logoButton = await this.getExitFullScreenLogoButton();
+      await logoButton.moveMouseTo();
+      await this.clickExitFullScreenTextButton();
+    }
+
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
       const urlSubstring = 'kibana#/dashboard/';
