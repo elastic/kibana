@@ -287,7 +287,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   };
 
-  renderField(setting: FieldSetting) {
+  renderField(id: string, setting: FieldSetting) {
     const { enableSaving, unsavedChanges, loading } = this.props;
     const {
       name,
@@ -296,9 +296,13 @@ export class Field extends PureComponent<FieldProps> {
       options,
       optionLabels = {},
       isOverridden,
-      ariaName,
       defVal,
+      ariaName,
     } = setting;
+    const a11yProps: { [key: string]: string } = {
+      ['aria-label']: ariaName,
+      ['aria-describedby']: id,
+    };
     const currentValue = unsavedChanges
       ? unsavedChanges.value
       : getEditableValue(type, value, defVal);
@@ -318,7 +322,7 @@ export class Field extends PureComponent<FieldProps> {
             onChange={this.onFieldChangeSwitch}
             disabled={loading || isOverridden || !enableSaving}
             data-test-subj={`advancedSetting-editField-${name}`}
-            aria-label={ariaName}
+            {...a11yProps}
           />
         );
       case 'markdown':
@@ -326,7 +330,7 @@ export class Field extends PureComponent<FieldProps> {
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
-              aria-label={ariaName}
+              {...a11yProps}
               mode={type}
               theme="textmate"
               value={currentValue}
@@ -351,9 +355,7 @@ export class Field extends PureComponent<FieldProps> {
       case 'image':
         const changeImage = unsavedChanges?.changeImage;
         if (!isDefaultValue(setting) && !changeImage) {
-          return (
-            <EuiImage aria-label={ariaName} allowFullScreen url={value as string} alt={name} />
-          );
+          return <EuiImage {...a11yProps} allowFullScreen url={value as string} alt={name} />;
         } else {
           return (
             <EuiFilePicker
@@ -369,7 +371,7 @@ export class Field extends PureComponent<FieldProps> {
       case 'select':
         return (
           <EuiSelect
-            aria-label={ariaName}
+            {...a11yProps}
             value={currentValue}
             options={(options as string[]).map(option => {
               return {
@@ -387,7 +389,7 @@ export class Field extends PureComponent<FieldProps> {
       case 'number':
         return (
           <EuiFieldNumber
-            aria-label={ariaName}
+            {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
@@ -399,7 +401,7 @@ export class Field extends PureComponent<FieldProps> {
       default:
         return (
           <EuiFieldText
-            aria-label={ariaName}
+            {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
@@ -443,7 +445,7 @@ export class Field extends PureComponent<FieldProps> {
     return null;
   }
 
-  renderTitle(setting: FieldSetting, unsavedChanges: FieldState | undefined) {
+  renderTitle(setting: FieldSetting) {
     return (
       <h3>
         {setting.displayName || setting.name}
@@ -463,17 +465,6 @@ export class Field extends PureComponent<FieldProps> {
           />
         ) : (
           ''
-        )}
-        {unsavedChanges && (
-          <EuiScreenReaderOnly>
-            <p>
-              {unsavedChanges.error
-                ? unsavedChanges.error
-                : i18n.translate('advancedSettings.field.settingIsUnsaved', {
-                    defaultMessage: 'Setting is currently not saved.',
-                  })}
-            </p>
-          </EuiScreenReaderOnly>
         )}
       </h3>
     );
@@ -644,11 +635,12 @@ export class Field extends PureComponent<FieldProps> {
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
+    const id = setting.name;
 
     return (
       <EuiDescribedFormGroup
         className={className}
-        title={this.renderTitle(setting, unsavedChanges)}
+        title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}
         fullWidth
       >
@@ -661,7 +653,20 @@ export class Field extends PureComponent<FieldProps> {
           hasChildLabel={setting.type !== 'boolean'}
           fullWidth
         >
-          {this.renderField(setting)}
+          <>
+            {this.renderField(id, setting)}
+            {unsavedChanges && (
+              <EuiScreenReaderOnly>
+                <p id={id}>
+                  {unsavedChanges.error
+                    ? unsavedChanges.error
+                    : i18n.translate('advancedSettings.field.settingIsUnsaved', {
+                        defaultMessage: 'Setting is currently not saved.',
+                      })}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
