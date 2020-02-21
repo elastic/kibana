@@ -31,4 +31,4 @@ export {
   DirectAccessLinkGeneratorState,
   DirectAccessLinkGeneratorStateMapping,
   DirectAccessLinkSpec,
-} from './direct_access_link_generator';
+} from './direct_access_link_generator_spec';

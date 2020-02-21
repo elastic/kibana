@@ -71,8 +71,8 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
+
     directAccessLinks.registerAccessLinkGenerator(
-      DASHBOARD_APP_LINK_GENERATOR,
       createDirectAccessDashboardLinkGenerator(async () => ({
         appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
         useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),

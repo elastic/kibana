@@ -51,16 +51,12 @@ const APP_ID = 'accessLinksExamples';
 export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { directAccessLinks }: SetupDeps) {
     directAccessLinks.registerAccessLinkGenerator(
-      HELLO_LINK_GENERATOR,
       createHelloPageLinkGenerator(async () => ({
         appBasePath: (await core.getStartServices())[0].application.getUrlForApp(APP_ID),
       }))
     );
 
-    directAccessLinks.registerAccessLinkGenerator(
-      HELLO_LINK_GENERATOR_V1,
-      helloPageLinkGeneratorV1
-    );
+    directAccessLinks.registerAccessLinkGenerator(helloPageLinkGeneratorV1);
 
     core.application.register({
       id: APP_ID,

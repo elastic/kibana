@@ -34,28 +34,26 @@ export interface DirectAccessLinksStart {
 
 export interface DirectAccessLinksSetup {
   registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
-    id: Id,
     generator: DirectAccessLinkSpec<Id>
   ) => void;
 }
 
 export class DirectAccessLinksPlugin
   implements Plugin<DirectAccessLinksSetup, DirectAccessLinksStart> {
-  private accessLinkGenerators: {
-    [Id in DirectAccessLinkGeneratorId]?: DirectAccessLinkGeneratorInternal<any>;
-  } = {};
+  // Unfortunate use of any here, but I haven't figured out how to type this any better without
+  // getting warnings.
+  private accessLinkGenerators: Map<string, DirectAccessLinkGeneratorInternal<any>> = new Map();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const setup: DirectAccessLinksSetup = {
       registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
-        id: Id,
         generatorOptions: DirectAccessLinkSpec<Id>
       ) => {
-        this.accessLinkGenerators[id] = new DirectAccessLinkGeneratorInternal<Id>(
-          generatorOptions,
-          this.getAccessLinkGenerator
+        this.accessLinkGenerators.set(
+          generatorOptions.id,
+          new DirectAccessLinkGeneratorInternal<Id>(generatorOptions, this.getAccessLinkGenerator)
         );
       },
     };
@@ -72,7 +70,7 @@ export class DirectAccessLinksPlugin
   public stop() {}
 
   private readonly getAccessLinkGenerator = (id: DirectAccessLinkGeneratorId) => {
-    const generator = this.accessLinkGenerators[id];
+    const generator = this.accessLinkGenerators.get(id);
     if (!generator) {
       throw new Error(
         i18n.translate('directAccessLinks.errors.noGeneratorWithId', {

@@ -74,50 +74,16 @@ export class DirectAccessLinkGeneratorInternal<Id extends DirectAccessLinkGenera
     return {
       id: this.spec.id,
       createUrl: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {
-        if (this.spec.createUrl && this.spec.isDeprecated) {
-          throw new Error(
-            i18n.translate('directAccessLinks.error.createUrlFnProvided', {
-              defaultMessage:
-                'This generator is marked as deprecated. Do not supply a createUrl fn.',
-            })
-          );
-        }
-
-        if (!this.spec.createUrl && !this.spec.isDeprecated) {
-          throw new Error(
-            i18n.translate('directAccessLinks.error.noCreateUrlFnProvided', {
-              defaultMessage:
-                'This generator is not marked as deprecated. Please provide a createUrl fn.',
-            })
-          );
-        }
-
         if (this.spec.migrate && !this.spec.createUrl) {
           const { id, state: newState } = await this.spec.migrate(state);
 
           // eslint-disable-next-line
-        console.warn(`URL generator is deprecated and may not work in future versions. Please migrate your data.`);
-
-          if (!id || !newState) {
-            throw new Error(
-              i18n.translate('directAccessLinks.error.idStateUndefined', {
-                defaultMessage: 'Generator id and/or state undefined when attempting to migrate',
-              })
-            );
-          }
+          console.warn(`URL generator is deprecated and may not work in future versions. Please migrate your data.`);
 
           return this.getGenerator(id!).createUrl(newState!);
         }
 
-        if (!this.spec.createUrl) {
-          throw new Error(
-            i18n.translate('directAccessLinks.error.invalidGenerator', {
-              defaultMessage: 'Invalid generator',
-            })
-          );
-        }
-
-        return this.spec.createUrl(state);
+        return this.spec.createUrl!(state);
       },
       isDeprecated: !!this.spec.isDeprecated,
       migrate: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {

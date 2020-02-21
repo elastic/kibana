@@ -75,15 +75,15 @@ yarn start --run-examples
 Consumers of this service can use the ids and state to create URL strings:
 
 ```ts
-  const { DirectAccessLinkGeneratorId, state } = getLinkData();
-  const generator = directAccessLinkPluginStart.getLinkGenerator(DirectAccessLinkGeneratorId);
+  const { id, state } = getLinkData();
+  const generator = directAccessLinkPluginStart.getLinkGenerator(id);
   if (generator.isDeprecated) {
     // Consumers have a few options here.
 
     //  If the consumer constrols the persisted data, they can migrate this data and
     //  update it. Something like this:
-    const { id, state: newState } = await generator.migrate(state);
-    replaceLegacyData({ oldId: DirectAccessLinkGeneratorId, newId: id, newState });
+    const { id: newId, state: newState } = await generator.migrate(state);
+    replaceLegacyData({ oldId: id, newId, newState });
 
     //  If the consumer does not control the persisted data store, they can warn the
     //  user that they are using a deprecated id and should update the data on their
