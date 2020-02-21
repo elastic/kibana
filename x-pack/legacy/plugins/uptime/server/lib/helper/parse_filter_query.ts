@@ -5,9 +5,5 @@
  */
 
 export const parseFilterQuery = (query?: string | null) => {
-  try {
-    return query ? JSON.parse(query) : null;
-  } catch {
-    return null;
-  }
+  return query ? JSON.parse(query) : null;
 };
