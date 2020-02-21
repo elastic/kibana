@@ -5,6 +5,9 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
+
+import { RouteValidationFunction } from '../../../../../../../../src/core/server';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacyServices } from '../../../types';
 
@@ -210,4 +213,15 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
   const spaceId = getSpaceId();
 
   return `${signalsIndex}-${spaceId}`;
+};
+
+export const buildRouteValidation = <T = {}>(schema: Joi.Schema): RouteValidationFunction<T> => (
+  payload: T,
+  { ok, badRequest }
+) => {
+  const { value, error } = schema.validate(payload);
+  if (error) {
+    return badRequest(error.message);
+  }
+  return ok(value as T); // TODO: infer type from our schema
 };

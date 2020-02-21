@@ -15,7 +15,7 @@ import { RuleAlertParamsRest } from '../../types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { transformError } from '../utils';
+import { buildRouteValidation, transformError } from '../utils';
 import { transform } from './utils';
 
 export const createRulesRoute = (router: IRouter): void => {
@@ -23,13 +23,7 @@ export const createRulesRoute = (router: IRouter): void => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: (body, { ok, badRequest }) => {
-          const { value, error } = createRulesSchema.validate(body);
-          if (error) {
-            return badRequest(error.message);
-          }
-          return ok(value as RuleAlertParamsRest); // TODO replace this assertion with
-        },
+        body: buildRouteValidation<RuleAlertParamsRest>(createRulesSchema),
       },
       options: {
         tags: ['access:siem'],
