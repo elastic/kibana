@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
 import { VisTypeAlias } from '../np_ready/public/types';
 import { VisualizationsAppExtension } from '../np_ready/public/types/vis_type_alias_registry';
 

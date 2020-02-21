@@ -48,7 +48,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { PersistedState } from '../../../legacy_imports';
-import { SavedObject } from '../../../../../plugins/saved_objects/public';
+import { SavedObject } from '../../../../../../../plugins/saved_objects/public';
 // TODO: can't re-export this type from legacy_imports. Build fails. probably because it is in types.d.ts
 import { SavedSearch } from '../../../../../kibana/public/discover/np_ready/types';
 
