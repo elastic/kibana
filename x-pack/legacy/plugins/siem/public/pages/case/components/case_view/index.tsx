@@ -164,6 +164,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
     },
   ];
   const renderUserActions = useMemo(() => {
+    debugger;
     const userActions = data.comments.reduce(
       (acc, comment, key) => {
         return [
