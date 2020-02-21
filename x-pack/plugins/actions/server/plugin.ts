@@ -18,6 +18,8 @@ import {
   RequestHandler,
   IContextProvider,
   SavedObjectsServiceStart,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from '../../../../src/core/server';
 
 import {
@@ -51,6 +53,7 @@ import {
 } from './routes';
 import { LicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { getInternalSavedObjectsClient } from './lib/get_internal_saved_objects_client';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -143,6 +146,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const actionExecutor = new ActionExecutor({
       isESOUsingEphemeralEncryptionKey: this.isESOUsingEphemeralEncryptionKey,
     });
+
+    // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(
       (await this.config) as ActionsConfig
@@ -165,9 +170,18 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionsConfigUtils,
     });
 
-    registerActionsUsageCollector(plugins.usageCollection, core.savedObjects, actionTypeRegistry, {
-      isActionsEnabled: (await this.config).enabled,
-    });
+    getInternalSavedObjectsClient(core)
+      .then((savedObjectsClient: ISavedObjectsRepository) => {
+        registerActionsUsageCollector(
+          plugins.usageCollection,
+          savedObjectsClient,
+          actionTypeRegistry
+        );
+      })
+      .catch(error => {
+        this.logger.error('Unable to initialize use collection');
+        this.logger.error(error.message);
+      });
 
     core.http.registerRouteHandlerContext(
       'actions',

@@ -5,23 +5,14 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import { ISavedObjectsRepository } from 'kibana/server';
 import { ActionsUsage, ActionsTelemetrySavedObject } from './types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { createActionsTelemetry } from './actions_telemetry';
 
 export const ACTIONS_TELEMETRY_DOC_ID = 'actions-telemetry';
 
-interface Config {
-  isActionsEnabled: boolean;
-}
-
-function getSavedObjectsClient(callCluster: CallCluster, savedObjects: SavedObjectsServiceSetup) {
-  return savedObjects.setClientFactoryProvider;
-}
-
-async function getTotalCount(savedObjectsClient: any) {
+async function getTotalCount(savedObjectsClient: ISavedObjectsRepository) {
   const findResult = await savedObjectsClient.find({
     type: 'action',
   });
@@ -29,7 +20,7 @@ async function getTotalCount(savedObjectsClient: any) {
   return findResult.total;
 }
 
-async function getInUseTotalCount(savedObjectsClient: any) {
+async function getInUseTotalCount(savedObjectsClient: ISavedObjectsRepository) {
   const findResult = await savedObjectsClient.find({
     type: 'alert',
     fields: ['actions'],
@@ -53,7 +44,7 @@ async function getInUseTotalCount(savedObjectsClient: any) {
 }
 
 async function getTotalCountByActionTypes(
-  savedObjectsClient: any,
+  savedObjectsClient: ISavedObjectsRepository,
   actionTypeRegistry: ActionTypeRegistry
 ) {
   const totalByActionType = actionTypeRegistry
@@ -67,27 +58,30 @@ async function getTotalCountByActionTypes(
   return totalByActionType;
 }
 
-async function getExecutions(savedObjectsClient: any) {
+async function getExecutions(savedObjectsClient: ISavedObjectsRepository) {
   try {
-    const actionsTelemetrySavedObject = (await savedObjectsClient.get(
+    const actionsTelemetrySavedObject = ((await savedObjectsClient.get(
       'actions-telemetry',
       ACTIONS_TELEMETRY_DOC_ID
-    )) as ActionsTelemetrySavedObject;
+    )) as unknown) as ActionsTelemetrySavedObject;
     return actionsTelemetrySavedObject.attributes;
   } catch (err) {
     return createActionsTelemetry();
   }
 }
 
-async function getExecutionsCount(savedObjectsClient: any) {
+async function getExecutionsCount(savedObjectsClient: ISavedObjectsRepository) {
   const actionExecutions = await getExecutions(savedObjectsClient);
   return Object.entries(actionExecutions.excutions_count_by_type).reduce(
-    (sum, [key, value]) => sum + value,
+    (sum, [, value]) => sum + value,
     0
   );
 }
 
-async function getTotalCountByActionType(savedObjectsClient: any, actionTypeId: string) {
+async function getTotalCountByActionType(
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeId: string
+) {
   const findResult = await savedObjectsClient.find({
     type: 'action',
     searchFields: ['actionTypeId'],
@@ -112,7 +106,10 @@ async function getTotalInUseCountByActionTypes(
   return totalByActionType;
 }
 
-async function getTotalInUseCountByActionType(savedObjectsClient: any, actionTypeId: string) {
+async function getTotalInUseCountByActionType(
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeId: string
+) {
   const findResult = await savedObjectsClient.find({
     type: 'alert',
     fields: ['actions'],
@@ -136,7 +133,7 @@ async function getTotalInUseCountByActionType(savedObjectsClient: any, actionTyp
 }
 
 async function getExecutionsCountByActionTypes(
-  savedObjectsClient: any,
+  savedObjectsClient: ISavedObjectsRepository,
   actionTypeRegistry: ActionTypeRegistry
 ) {
   const actionExecutions = await getExecutions(savedObjectsClient);
@@ -152,18 +149,14 @@ async function getExecutionsCountByActionTypes(
 
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  savedObjects: any,
-  actionTypeRegistry: ActionTypeRegistry,
-  config: Config
+  savedObjectsClient: ISavedObjectsRepository,
+  actionTypeRegistry: ActionTypeRegistry
 ) {
-  const { isActionsEnabled } = config;
   return usageCollection.makeUsageCollector({
     type: 'actions',
     isReady: () => true,
-    fetch: async (callCluster: CallCluster): Promise<ActionsUsage> => {
-      const savedObjectsClient = getSavedObjectsClient(callCluster, savedObjects);
+    fetch: async (): Promise<ActionsUsage> => {
       return {
-        enabled: isActionsEnabled,
         count_total: await getTotalCount(savedObjectsClient),
         count_active_total: await getInUseTotalCount(savedObjectsClient),
         executions_total: await getExecutionsCount(savedObjectsClient),
@@ -183,19 +176,13 @@ export function createActionsUsageCollector(
 
 export function registerActionsUsageCollector(
   usageCollection: UsageCollectionSetup | undefined,
-  savedObjects: SavedObjectsServiceSetup,
-  actionTypeRegistry: ActionTypeRegistry,
-  config: Config
+  savedObjects: ISavedObjectsRepository,
+  actionTypeRegistry: ActionTypeRegistry
 ) {
   if (!usageCollection) {
     return;
   }
 
-  const collector = createActionsUsageCollector(
-    usageCollection,
-    savedObjects,
-    actionTypeRegistry,
-    config
-  );
+  const collector = createActionsUsageCollector(usageCollection, savedObjects, actionTypeRegistry);
   usageCollection.registerCollector(collector);
 }
