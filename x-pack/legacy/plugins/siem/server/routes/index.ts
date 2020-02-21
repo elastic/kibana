@@ -73,7 +73,7 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(route, getClients);
+  readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(route, config, usingEphemeralEncryptionKey, getClients);
