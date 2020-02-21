@@ -25,16 +25,12 @@ exports[`Custom Links External Link it renders correct comma for the last item 1
     >
       <EuiLink
         href="https://www.virustotal.com/gui/search/"
-        onBlur={[Function]}
-        onFocus={[Function]}
         rel="noopener"
         target="_blank"
       >
         <a
           className="euiLink euiLink--primary"
           href="https://www.virustotal.com/gui/search/"
-          onBlur={[Function]}
-          onFocus={[Function]}
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -254,16 +250,12 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                 >
                   <EuiLink
                     href="https://www.virustotal.com/gui/search/192.0.2.0"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
                     rel="noopener"
                     target="_blank"
                   >
                     <a
                       className="euiLink euiLink--primary"
                       href="https://www.virustotal.com/gui/search/192.0.2.0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -306,13 +298,13 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                           </EuiIcon>
                         </LinkIconWithMargin>
                       </ExternalLinkIcon>
-                      <Comma>
-                        <span
-                          className="c2"
-                        />
-                      </Comma>
                     </a>
                   </EuiLink>
+                  <Comma>
+                    <span
+                      className="c2"
+                    />
+                  </Comma>
                 </span>
               </EuiToolTip>
             </ExternalLink>
@@ -335,16 +327,12 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                 >
                   <EuiLink
                     href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
                     rel="noopener"
                     target="_blank"
                   >
                     <a
                       className="euiLink euiLink--primary"
                       href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -387,13 +375,13 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                           </EuiIcon>
                         </LinkIconWithMargin>
                       </ExternalLinkIcon>
-                      <Comma>
-                        <span
-                          className="c2"
-                        />
-                      </Comma>
                     </a>
                   </EuiLink>
+                  <Comma>
+                    <span
+                      className="c2"
+                    />
+                  </Comma>
                 </span>
               </EuiToolTip>
             </ExternalLink>
@@ -416,16 +404,12 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                 >
                   <EuiLink
                     href="https://www.virustotal.com/gui/search/192.0.2.0"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
                     rel="noopener"
                     target="_blank"
                   >
                     <a
                       className="euiLink euiLink--primary"
                       href="https://www.virustotal.com/gui/search/192.0.2.0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -468,13 +452,13 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                           </EuiIcon>
                         </LinkIconWithMargin>
                       </ExternalLinkIcon>
-                      <Comma>
-                        <span
-                          className="c2"
-                        />
-                      </Comma>
                     </a>
                   </EuiLink>
+                  <Comma>
+                    <span
+                      className="c2"
+                    />
+                  </Comma>
                 </span>
               </EuiToolTip>
             </ExternalLink>
@@ -497,16 +481,12 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                 >
                   <EuiLink
                     href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
                     rel="noopener"
                     target="_blank"
                   >
                     <a
                       className="euiLink euiLink--primary"
                       href="https://talosintelligence.com/reputation_center/lookup?search=192.0.2.0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
@@ -549,13 +529,13 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                           </EuiIcon>
                         </LinkIconWithMargin>
                       </ExternalLinkIcon>
-                      <Comma>
-                        <span
-                          className="c2"
-                        />
-                      </Comma>
                     </a>
                   </EuiLink>
+                  <Comma>
+                    <span
+                      className="c2"
+                    />
+                  </Comma>
                 </span>
               </EuiToolTip>
             </ExternalLink>
@@ -578,16 +558,12 @@ exports[`Custom Links ReputationLink links property it renders customized link t
                 >
                   <EuiLink
                     href="https://www.virustotal.com/gui/search/192.0.2.0"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
                     rel="noopener"
                     target="_blank"
                   >
                     <a
                       className="euiLink euiLink--primary"
                       href="https://www.virustotal.com/gui/search/192.0.2.0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noopener noreferrer"
                       target="_blank"
                     >

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow, ShallowWrapper, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -154,7 +154,6 @@ describe('Custom Links', () => {
           {mockLinkName}
         </ExternalLink>
       );
-      expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('Comma').exists()).toBeFalsy();
     });
   });
@@ -206,7 +205,6 @@ describe('Custom Links', () => {
         (useUiSetting$ as jest.Mock).mockReset();
         (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-        expect(wrapper).toMatchSnapshot();
         expect(
           wrapper
             .find('ExternalLink')
