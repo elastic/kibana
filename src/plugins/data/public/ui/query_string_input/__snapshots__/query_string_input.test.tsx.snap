@@ -2632,7 +2632,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "getInstance": [MockFunction],
                 "getType": [MockFunction],
                 "getTypeNameByEsTypes": [MockFunction],
-                "getTypeWithoutMetaParams": [MockFunction],
                 "init": [MockFunction],
                 "parseDefaultTypeMap": [MockFunction],
                 "register": [MockFunction],

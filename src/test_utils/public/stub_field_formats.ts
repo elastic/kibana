@@ -57,6 +57,7 @@ export const getFieldFormatsRegistry = (core: CoreSetup) => {
     TruncateFormat,
     UrlFormat,
   ]);
+
   fieldFormats.init(core);
 
   return fieldFormats;
