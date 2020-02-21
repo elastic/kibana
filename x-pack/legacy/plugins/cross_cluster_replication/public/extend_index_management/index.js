@@ -8,7 +8,8 @@ import { npSetup } from 'ui/new_platform';
 import { get } from 'lodash';
 
 const propertyPath = 'isFollowerIndex';
-export const followerBadgeExtension = {
+
+const followerBadgeExtension = {
   matchIndex: index => {
     return get(index, propertyPath);
   },
@@ -19,4 +20,6 @@ export const followerBadgeExtension = {
   filterExpression: 'isFollowerIndex:true',
 };
 
-npSetup.plugins.indexManagement.extensionsService.addBadge(followerBadgeExtension);
+if (npSetup.plugins.indexManagement) {
+  npSetup.plugins.indexManagement.extensionsService.addBadge(followerBadgeExtension);
+}

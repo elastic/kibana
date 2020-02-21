@@ -39,30 +39,28 @@ export interface RollupPluginSetupDependencies {
     aggTypeFieldFilters: AggTypeFieldFilters;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
-    indexManagementExtensions: IndexMgmtSetup['extensionsService'];
   };
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
+  indexManagement?: IndexMgmtSetup;
 }
 
 export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: {
-        aggTypeFilters,
-        aggTypeFieldFilters,
-        addSearchStrategy,
-        managementLegacy,
-        indexManagementExtensions,
-      },
+      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, addSearchStrategy, managementLegacy },
       home,
       management,
+      indexManagement,
     }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
-    indexManagementExtensions.addBadge(rollupBadgeExtension);
-    indexManagementExtensions.addToggle(rollupToggleExtension);
+
+    if (indexManagement) {
+      indexManagement.extensionsService.addBadge(rollupBadgeExtension);
+      indexManagement.extensionsService.addToggle(rollupToggleExtension);
+    }
 
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 

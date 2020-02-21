@@ -19,7 +19,6 @@ export const setup = plugin.setup(npSetup.core, {
     aggTypeFilters,
     aggTypeFieldFilters,
     addSearchStrategy,
-    indexManagementExtensions: (npSetup.plugins as any).indexManagement.extensionsService,
     managementLegacy: management,
   },
 });
