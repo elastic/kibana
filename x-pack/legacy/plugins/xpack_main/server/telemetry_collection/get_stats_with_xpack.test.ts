@@ -79,7 +79,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       usageCollection,
       server,
     } as any);
-    expect(stats[0].license).toBe(undefined);
     expect(stats.map(({ timestamp, ...rest }) => rest)).toMatchSnapshot();
   });
 
@@ -109,7 +108,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       usageCollection,
       server,
     } as any);
-    expect(stats[0].license).toStrictEqual({ type: 'basic' });
     expect(stats.map(({ timestamp, ...rest }) => rest)).toMatchSnapshot();
   });
 });
