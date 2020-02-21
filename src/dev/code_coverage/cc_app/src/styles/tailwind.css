@@ -13311,7 +13311,7 @@ video {
 }
 
 .App-current {
-  border: 4mm ridge rgba(9, 77, 255, 0.6)
+  /*border: 4mm ridge rgba(9, 77, 255, 0.6)*/
 }
 
 @media (min-width: 640px) {
