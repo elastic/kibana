@@ -16,21 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-import { formatMsg, formatStack } from '../../../../kibana_legacy/public';
+import { getServices } from '../../kibana_services';
 
-interface Props {
-  error: Error | string;
-}
-
-export function DocViewerError({ error }: Props) {
-  const errMsg = formatMsg(error);
-  const errStack = typeof error === 'object' ? formatStack(error) : '';
-
-  return (
-    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
-      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
-    </EuiCallOut>
+export function createDocViewerDirective(reactDirective: any) {
+  return reactDirective(
+    (props: any) => {
+      const { DocViewer } = getServices();
+      return <DocViewer {...props} />;
+    },
+    [
+      'hit',
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['filter', { watchDepth: 'reference' }],
+      ['columns', { watchDepth: 'collection' }],
+      ['onAddColumn', { watchDepth: 'reference' }],
+      ['onRemoveColumn', { watchDepth: 'reference' }],
+    ],
+    {
+      restrict: 'E',
+      scope: {
+        hit: '=',
+        indexPattern: '=',
+        filter: '=?',
+        columns: '=?',
+        onAddColumn: '=?',
+        onRemoveColumn: '=?',
+      },
+    }
   );
 }

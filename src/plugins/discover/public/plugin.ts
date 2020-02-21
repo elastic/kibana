@@ -17,24 +17,52 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { auto } from 'angular';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { DocViewInput, DocViewInputFn } from './doc_views/doc_views_types';
+import { DocViewInput, DocViewInputFn, DocViewRenderProps } from './doc_views/doc_views_types';
 import { DocViewsRegistry } from './doc_views/doc_views_registry';
 import { DocViewTable } from './components/table/table';
 import { JsonCodeBlock } from './components/json_code_block/json_code_block';
+import { DocViewer } from './components/doc_viewer/doc_viewer';
+import { setDocViewsRegistry } from './services';
+
+import './_index.scss';
 
 /**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
  * @public
  */
 export interface DiscoverSetup {
-  addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
-  setAngularInjector(injector: auto.IInjectorService): void;
+  docViews: {
+    /**
+     * Add new doc view shown along with table view and json view in the details of each document in Discover.
+     * Both react and angular doc views are supported.
+     * @param docViewRaw
+     */
+    addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+    /**
+     * Set the angular injector for bootstrapping angular doc views. This is only exposed temporarily to aid
+     * migration to the new platform and will be removed soon.
+     * @deprecated
+     * @param injectorGetter
+     */
+    setAngularInjectorGetter(injectorGetter: () => Promise<auto.IInjectorService>): void;
+  };
 }
-export type DiscoverStart = void;
+/**
+ * @public
+ */
+export interface DiscoverStart {
+  docViews: {
+    /**
+     * Component rendering all the doc views for a given document.
+     * This is only exposed temporarily to aid migration to the new platform and will be removed soon.
+     * @deprecated
+     */
+    DocViewer: React.ComponentType<DocViewRenderProps>;
+  };
+}
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -46,6 +74,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
 
   setup(core: CoreSetup): DiscoverSetup {
     this.docViewsRegistry = new DocViewsRegistry();
+    setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
       title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -62,10 +91,20 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     });
 
     return {
-      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
-      setAngularInjector: this.docViewsRegistry.setAngularInjector.bind(this.docViewsRegistry),
+      docViews: {
+        addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+        setAngularInjectorGetter: this.docViewsRegistry.setAngularInjectorGetter.bind(
+          this.docViewsRegistry
+        ),
+      },
     };
   }
 
-  start() {}
+  start() {
+    return {
+      docViews: {
+        DocViewer,
+      },
+    };
+  }
 }

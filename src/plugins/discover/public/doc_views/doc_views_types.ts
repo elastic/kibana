@@ -18,7 +18,7 @@
  */
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
-import { IndexPattern } from '../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
+import { IndexPattern } from '../../../data/public';
 
 export interface AngularDirective {
   controller: (scope: AngularScope) => void;
@@ -51,13 +51,14 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
+export type DocViewerComponent = ComponentType<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps
 ) => () => void;
 
 export interface DocViewInput {
-  component?: ComponentType<DocViewRenderProps>;
+  component?: DocViewerComponent;
   directive?: AngularDirective;
   order: number;
   render?: DocViewRenderFn;

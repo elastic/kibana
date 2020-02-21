@@ -21,10 +21,7 @@ import { mount } from 'enzyme';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
-
-import { IndexPattern, indexPatterns } from '../../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
-
-jest.mock('ui/new_platform');
+import { indexPatterns, IndexPattern } from '../../../../data/public';
 
 const indexPattern = {
   fields: [

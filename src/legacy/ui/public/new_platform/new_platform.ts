@@ -45,6 +45,7 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -63,6 +64,7 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -81,6 +83,7 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
   telemetry?: TelemetryPluginStart;
 }
 

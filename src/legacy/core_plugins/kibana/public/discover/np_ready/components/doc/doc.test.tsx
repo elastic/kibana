@@ -34,9 +34,7 @@ jest.mock('../../../kibana_services', () => {
       metadata: {
         branch: 'test',
       },
-      getDocViewsSorted: () => {
-        return [];
-      },
+      DocViewer: () => null,
     }),
   };
 });

@@ -19,6 +19,12 @@
 
 import { DiscoverPlugin } from './plugin';
 
+export { DiscoverSetup, DiscoverStart } from './plugin';
+export { DocViewTable } from './components/table/table';
+export { JsonCodeBlock } from './components/json_code_block/json_code_block';
+export { DocViewInput, DocViewInputFn, DocViewerComponent } from './doc_views/doc_views_types';
+export { FieldName } from './components/field_name/field_name';
+
 export function plugin() {
   return new DiscoverPlugin();
 }

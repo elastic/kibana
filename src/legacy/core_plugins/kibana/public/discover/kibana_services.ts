@@ -64,8 +64,6 @@ export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   migrateLegacyQuery,
   ensureDefaultIndexPattern,
-  formatMsg,
-  formatStack,
 } from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types

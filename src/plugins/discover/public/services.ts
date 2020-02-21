@@ -17,29 +17,9 @@
  * under the License.
  */
 
-import { DocViewer } from '../../../../../../../plugins/discover/public/components/doc_viewer/doc_viewer';
+import { createGetterSetter } from '../../kibana_utils/common';
+import { DocViewsRegistry } from './doc_views/doc_views_registry';
 
-export function createDocViewerDirective(reactDirective: any) {
-  return reactDirective(
-    DocViewer,
-    [
-      'hit',
-      ['indexPattern', { watchDepth: 'reference' }],
-      ['filter', { watchDepth: 'reference' }],
-      ['columns', { watchDepth: 'collection' }],
-      ['onAddColumn', { watchDepth: 'reference' }],
-      ['onRemoveColumn', { watchDepth: 'reference' }],
-    ],
-    {
-      restrict: 'E',
-      scope: {
-        hit: '=',
-        indexPattern: '=',
-        filter: '=?',
-        columns: '=?',
-        onAddColumn: '=?',
-        onRemoveColumn: '=?',
-      },
-    }
-  );
-}
+export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
+  'DocViewsRegistry'
+);

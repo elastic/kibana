@@ -24,11 +24,12 @@ import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_v
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
-  private angularInjector: Subject<auto.IInjectorService> = new Subject<auto.IInjectorService>();
+  private angularInjectorGetter: Subject<() => Promise<auto.IInjectorService>> = new Subject<
+    () => Promise<auto.IInjectorService>
+  >();
 
-  setAngularInjector(injector: auto.IInjectorService) {
-    this.angularInjector.next(injector);
-    this.angularInjector.complete();
+  setAngularInjectorGetter(injectorGetter: () => Promise<auto.IInjectorService>) {
+    this.angularInjectorGetter.next(injectorGetter);
   }
 
   /**
@@ -39,7 +40,10 @@ export class DocViewsRegistry {
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
       docView.render = convertDirectiveToRenderFn(docView.directive, () =>
-        this.angularInjector.asObservable().toPromise()
+        this.angularInjectorGetter
+          .asObservable()
+          .toPromise()
+          .then(getter => getter())
       );
     }
     if (typeof docView.shouldShow !== 'function') {

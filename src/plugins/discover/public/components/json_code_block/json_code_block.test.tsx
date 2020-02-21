@@ -19,7 +19,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { JsonCodeBlock } from './json_code_block';
-import { IndexPattern } from '../../../../../legacy/core_plugins/kibana/public/discover/kibana_services';
+import { IndexPattern } from '../../../../data/public';
 
 it('returns the `JsonCodeEditor` component', () => {
   const props = {
