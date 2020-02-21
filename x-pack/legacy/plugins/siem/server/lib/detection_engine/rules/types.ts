@@ -101,8 +101,8 @@ export interface ImportRulesRequestParams {
   body: { file: HapiReadableStream };
 }
 
-export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
-  payload: { objects: Array<{ rule_id: string }> | null | undefined };
+export interface ExportRulesRequestParams {
+  body: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {
     file_name: string;
     exclude_export_details: boolean;
