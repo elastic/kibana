@@ -103,12 +103,10 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   const res = await context.search({
     index: INDEX_NAMES.HEARTBEAT,
     body: statusCountBody(await context.dateAndCustomFilters()),
-  })
-
-  console.log("RES", res);
+  });
 
   return res.aggregations.counts.value;
-}
+};
 
 const statusCountBody = (filters: any): any => {
   return {
@@ -118,20 +116,27 @@ const statusCountBody = (filters: any): any => {
         filter: [
           {
             exists: {
-              field: "summary"
-            }
+              field: 'summary',
+            },
           },
           filters,
-        ]
-      }
+        ],
+      },
     },
     aggs: {
       counts: {
         scripted_metric: {
-          init_script: "state.locStatus = new HashMap(); state.totalDocs = 0;",
+          init_script: 'state.locStatus = new HashMap(); state.totalDocs = 0;',
           map_script: `
-          def loc = doc["observer.geo.name"];
-          String idLoc = loc == null ? doc["monitor.id"][0] + "$" : doc["monitor.id"][0] + "$" + loc[0];
+          def loc = doc["observer.geo.name"][0];
+
+          // One concern here is memory since we could build pretty gigantic maps. I've opted to
+          // stick to a simple <String,String> map to reduce memory overhead. This means we do
+          // a little string parsing to treat these strings as records.
+          // We encode the ID and location as $id.len}:$id$loc
+          String id = doc["monitor.id"][0];
+          String idLenDelim = Integer.toHexString(id.length()) + ":" + id;
+          String idLoc = loc == null ? idLenDelim : idLenDelim + loc;
           
           String status = doc["summary.down"][0] > 0 ? "d" : "u";
           String timeAndStatus = doc["@timestamp"][0].toInstant().toEpochMilli().toString() + status;
@@ -153,7 +158,6 @@ const statusCountBody = (filters: any): any => {
             }
           }
           
-          
           HashMap locTotals = new HashMap();
           int total = 0;
           int down = 0;
@@ -162,9 +166,11 @@ const statusCountBody = (filters: any): any => {
           for (entry in locStatus.entrySet()) {
             String idLoc = entry.getKey();
             String timeStatus = entry.getValue();
-            int splitAt = idLoc.lastIndexOf("$");
-            String id = idLoc.substring(0, splitAt);
-            String loc = idLoc.substring(splitAt+1);
+
+            int colonIndex = idLoc.indexOf(":");
+            int idEnd = Integer.parseInt(idLoc.substring(0, colonIndex), 16) + colonIndex + 1;
+            String id = idLoc.substring(colonIndex+1, idEnd);
+            String loc = idLoc.substring(idEnd, idLoc.length());
             String status = timeStatus.substring(timeStatus.length() - 1);
             
             locTotals.compute(loc, (k,v) -> {
@@ -212,9 +218,9 @@ const statusCountBody = (filters: any): any => {
           result.down = down;
           result.totalDocs = totalDocs;
           return result;
-        `
-        }
-      }
-    }
-  }
-}
+        `,
+        },
+      },
+    },
+  };
+};
