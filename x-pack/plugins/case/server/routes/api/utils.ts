@@ -11,7 +11,9 @@ import {
   ResponseError,
   SavedObject,
   SavedObjectsFindResponse,
+  RequestHandler,
 } from 'kibana/server';
+
 import {
   CaseRequest,
   CaseResponse,
@@ -135,3 +137,17 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 };
 
 export const escapeHatch = schema.object({}, { allowUnknowns: true });
+
+export const createRequestHandler = (
+  service: CaseServiceSetup,
+  handler: CaseRequestHandler
+): RequestHandler => {
+  return async (context, request, response) => {
+    try {
+      const res = await handler(service, context, request, response);
+      return res;
+    } catch (error) {
+      return response.customError(wrapError(error));
+    }
+  };
+};
