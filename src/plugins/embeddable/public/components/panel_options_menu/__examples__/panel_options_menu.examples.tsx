@@ -19,6 +19,35 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { EmbeddablePanel } from '..';
+import { action } from '@storybook/addon-actions';
+import { withKnobs, boolean } from '@storybook/addon-knobs';
+import { PanelOptionsMenu } from '..';
 
-storiesOf('components/EmbeddablePanel', module).add('default', () => <EmbeddablePanel />);
+const euiContextDescriptors = {
+  id: 'mainMenu',
+  title: 'Options',
+  items: [
+    {
+      name: 'Inspect',
+      icon: 'inspect',
+      onClick: action('onClick(inspect)'),
+    },
+    {
+      name: 'Full screen',
+      icon: 'expand',
+      onClick: action('onClick(expand)'),
+    },
+  ],
+};
+
+storiesOf('components/PanelOptionsMenu', module)
+  .addDecorator(withKnobs)
+  .add('default', () => {
+    const isViewMode = boolean('isViewMode', false);
+
+    return (
+      <div style={{ height: 150 }}>
+        <PanelOptionsMenu panelDescriptor={euiContextDescriptors} isViewMode={isViewMode} />
+      </div>
+    );
+  });

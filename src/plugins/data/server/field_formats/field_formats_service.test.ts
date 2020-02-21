@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import { FieldFormatsService } from './field_formats_service';
+import { DateFormat } from './converters/date_server';
+import { coreMock } from '../../../../core/server/mocks';
 
-export const EmbeddablePanel = () => {
-  return (
-    <EuiPanel data-test-subj="embeddablePanel" paddingSize="none" role="figure">
-      Hello world
-    </EuiPanel>
-  );
-};
+describe('FieldFormatService', () => {
+  test('DateFormat is server version', async () => {
+    const service = new FieldFormatsService();
+    const fieldFormatsService = await service.start();
+    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
+    const fieldFormatsRegistry = await fieldFormatsService.fieldFormatServiceFactory(uiSettings);
+    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
+
+    expect(DateFormatFromRegsitry).toEqual(DateFormat);
+  });
+});
