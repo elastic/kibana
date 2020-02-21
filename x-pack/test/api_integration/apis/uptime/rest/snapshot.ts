@@ -8,7 +8,7 @@ import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from '../graphql/helpers/make_checks';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot count', () => {
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         describe(`with ${cardinality} cardinality`, async () => {
           const numUpMonitors = 10 * cardMultiplier;
-          const numDownMonitors = 7 & cardMultiplier;
+          const numDownMonitors = 7 * cardMultiplier;
           const numIps = 2;
           const checksPerMonitor = 5;
           const scheduleEvery = 10000; // fake monitor checks every 10s
@@ -91,7 +91,10 @@ export default function ({ getService }: FtrProviderContext) {
                   `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
                 );
 
-                expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_down' + cardSnapshotSuffix);
+                expectFixtureEql(
+                  apiResponse.body,
+                  'snapshot_filtered_by_down' + cardSnapshotSuffix
+                );
               });
 
               it('will fetch a monitor snapshot filtered by up status', async () => {
@@ -104,9 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
           });
         });
-
       });
-
     });
   });
 }
