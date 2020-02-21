@@ -21,10 +21,10 @@ import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableVisTriggerContext {
-  embeddable: IEmbeddable;
-  timeFieldName: string;
+  embeddable?: IEmbeddable;
+  timeFieldName?: string;
   data: {
-    e: MouseEvent;
+    e?: MouseEvent;
     data: unknown;
   };
 }
