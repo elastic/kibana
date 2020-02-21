@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { npSetup } from 'ui/new_platform';
 
 export const LANGUAGE_ID = 'canvas-expression';
