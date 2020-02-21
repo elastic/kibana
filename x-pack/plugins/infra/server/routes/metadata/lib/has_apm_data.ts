@@ -18,9 +18,7 @@ export const hasAPMData = async (
   nodeId: string,
   nodeType: InventoryItemType
 ) => {
-  const apmIndices = await framework.plugins.apm.getApmIndices(
-    requestContext.core.savedObjects.client
-  );
+  const apmIndices = await framework.plugins.apm.getApmIndices();
   const apmIndex = apmIndices['apm_oss.transactionIndices'] || 'apm-*';
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
 
