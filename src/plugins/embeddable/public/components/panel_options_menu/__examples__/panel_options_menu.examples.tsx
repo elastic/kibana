@@ -17,13 +17,37 @@
  * under the License.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
+import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { withKnobs, boolean } from '@storybook/addon-knobs';
+import { PanelOptionsMenu } from '..';
 
-export const EmbeddablePanel = () => {
-  return (
-    <EuiPanel data-test-subj="embeddablePanel" paddingSize="none" role="figure">
-      Hello world
-    </EuiPanel>
-  );
+const euiContextDescriptors = {
+  id: 'mainMenu',
+  title: 'Options',
+  items: [
+    {
+      name: 'Inspect',
+      icon: 'inspect',
+      onClick: action('onClick(inspect)'),
+    },
+    {
+      name: 'Full screen',
+      icon: 'expand',
+      onClick: action('onClick(expand)'),
+    },
+  ],
 };
+
+storiesOf('components/PanelOptionsMenu', module)
+  .addDecorator(withKnobs)
+  .add('default', () => {
+    const isViewMode = boolean('isViewMode', false);
+
+    return (
+      <div style={{ height: 150 }}>
+        <PanelOptionsMenu panelDescriptor={euiContextDescriptors} isViewMode={isViewMode} />
+      </div>
+    );
+  });
