@@ -7,11 +7,19 @@
 import { RouteDeps } from '.';
 import { CASES_API_BASE_URL } from '../../constants';
 import { NewActionSchema } from './schema';
-import { CaseRequestHandler } from './types';
+import { CaseRequestHandler, NewActionType } from './types';
 import { createRequestHandler } from './utils';
 
 const createNewActionHandler: CaseRequestHandler = async (service, context, request, response) => {
-  return response.ok({});
+  const actionsClient = await context.actions.getActionsClient();
+  const { name, actionTypeId, secrets, config } = request.body as NewActionType;
+
+  try {
+    const action = await actionsClient.create({ action: { name, actionTypeId, secrets, config } });
+    return response.ok({ body: { ...action } });
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const createNewAction = ({ caseService, router }: RouteDeps) => {
