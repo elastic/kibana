@@ -95,6 +95,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
   private intervalId?: NodeJS.Timer;
   private esClient?: ICustomClusterClient;
   private savedObjectsClient?: ISavedObjectsRepository;
+  private indexTemplateInitialised = false;
 
   constructor({ logger }: PluginInitializerContext) {
     this.log = logger.get();
@@ -108,7 +109,14 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     this.registerIndexRoute(router);
 
     this.esClient = elasticsearch.createClient('application-usage');
-    await this.ensureIndex(this.esClient);
+    try {
+      await this.ensureIndex(this.esClient);
+    } catch (err) {
+      // If I don't catch this, I'll get errors in core_services.test.ts tests :o
+      this.log.warn(
+        `Failed to ensure the index. I'll try again later when I need to store any info.`
+      );
+    }
 
     if (usageCollection) {
       const usageCollector = usageCollection.makeUsageCollector({
@@ -123,14 +131,10 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
   public async start({ savedObjects }: CoreStart) {
     const savedObjectsClient = (this.savedObjectsClient = savedObjects.createInternalRepository());
     this.intervalId = setInterval(
-      () =>
-        this.esClient &&
-        this.rollTotals(this.esClient, savedObjectsClient).catch(err => {
-          this.log.warn(`Failed to roll totals`, err);
-        }),
+      () => this.esClient && this.rollTotals(this.esClient, savedObjectsClient),
       ROLL_INDICES_INTERVAL
     );
-    await this.rollTotals(this.esClient!, savedObjectsClient);
+    this.rollTotals(this.esClient!, savedObjectsClient);
   }
 
   public stop() {
@@ -157,6 +161,7 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
         const { usage } = req.body;
         const now = new Date().toISOString();
         const _index = INDEX_APP_USAGE;
+        if (this.indexTemplateInitialised === false) await this.ensureIndex(this.esClient!);
         await context.core.elasticsearch.dataClient.callAsInternalUser('bulk', {
           body: usage.reduce(
             (acc, { appId, numberOfClicks, minutesOnScreen }) => [
@@ -173,23 +178,35 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
   }
 
   private async ensureIndex(elasticsearch: ICustomClusterClient) {
-    await elasticsearch.callAsInternalUser('indices.putTemplate', {
-      name: INDEX_APP_USAGE,
-      body: {
-        index_patterns: `${INDEX_APP_USAGE}`,
-        settings: {
-          number_of_shards: 1,
-        },
-        mappings: {
-          properties: {
-            timestamp: { type: 'date' },
-            appId: { type: 'keyword' },
-            numberOfClicks: { type: 'long' },
-            minutesOnScreen: { type: 'float' },
-          },
-        },
+    // Skip if already done
+    if (this.indexTemplateInitialised === false) return;
+
+    const mappings = {
+      properties: {
+        timestamp: { type: 'date' },
+        appId: { type: 'keyword' },
+        numberOfClicks: { type: 'long' },
+        minutesOnScreen: { type: 'float' },
       },
-    });
+    };
+
+    if (await elasticsearch.callAsInternalUser('indices.exists', { index: INDEX_APP_USAGE })) {
+      await elasticsearch.callAsInternalUser('indices.putMapping', {
+        index: INDEX_APP_USAGE,
+        body: mappings,
+      });
+    } else {
+      await elasticsearch.callAsInternalUser('indices.create', {
+        index: INDEX_APP_USAGE,
+        body: {
+          settings: {
+            number_of_shards: 1,
+          },
+          mappings,
+        },
+      });
+    }
+    this.indexTemplateInitialised = true;
   }
 
   private async getSavedObjectTotals() {
@@ -224,39 +241,43 @@ export class ApplicationUsagePlugin implements Plugin<void, void> {
     elasticsearch: ICustomClusterClient,
     savedObjectsClient: ISavedObjectsRepository
   ) {
-    // Query for everything older than 90d
-    const query = { bool: { filter: { range: { timestamp: { lte: 'now-90d' } } } } };
-    const { aggregations } = await this.fetchAggregation(elasticsearch.callAsInternalUser, query);
+    try {
+      // Query for everything older than 90d
+      const query = { bool: { filter: { range: { timestamp: { lte: 'now-90d' } } } } };
+      const { aggregations } = await this.fetchAggregation(elasticsearch.callAsInternalUser, query);
 
-    const attributes = await this.getSavedObjectTotals();
-    const newTotals = (aggregations?.appId.buckets || []).map(({ key, perDay }) => {
-      const { numberOfClicks, minutesOnScreen } = attributes[key] || {
-        numberOfClicks: 0,
-        minutesOnScreen: 0,
-      };
-      return {
-        appId: key,
-        numberOfClicks: numberOfClicks + perDay.buckets.total.numberOfClicks.value,
-        minutesOnScreen: minutesOnScreen + perDay.buckets.total.minutesOnScreen.value,
-      };
-    });
-    if (newTotals.length === 0) {
-      return;
+      const attributes = await this.getSavedObjectTotals();
+      const newTotals = (aggregations?.appId.buckets || []).map(({ key, perDay }) => {
+        const { numberOfClicks, minutesOnScreen } = attributes[key] || {
+          numberOfClicks: 0,
+          minutesOnScreen: 0,
+        };
+        return {
+          appId: key,
+          numberOfClicks: numberOfClicks + perDay.buckets.total.numberOfClicks.value,
+          minutesOnScreen: minutesOnScreen + perDay.buckets.total.minutesOnScreen.value,
+        };
+      });
+      if (newTotals.length === 0) {
+        return;
+      }
+      await savedObjectsClient.bulkCreate<ApplicationUsageSavedObject>(
+        newTotals.map(entry => ({
+          type: PLUGIN_TYPE,
+          id: entry.appId,
+          attributes: entry,
+        })),
+        { overwrite: true }
+      );
+      await elasticsearch.callAsInternalUser('deleteByQuery', {
+        index: INDEX_APP_USAGE,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        body: { query },
+      });
+    } catch (err) {
+      this.log.warn(`Failed to roll totals`, err);
     }
-    await savedObjectsClient.bulkCreate<ApplicationUsageSavedObject>(
-      newTotals.map(entry => ({
-        type: PLUGIN_TYPE,
-        id: entry.appId,
-        attributes: entry,
-      })),
-      { overwrite: true }
-    );
-    await elasticsearch.callAsInternalUser('deleteByQuery', {
-      index: INDEX_APP_USAGE,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      body: { query },
-    });
   }
 
   private async fetchAggregation(

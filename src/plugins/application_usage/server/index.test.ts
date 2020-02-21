@@ -22,6 +22,7 @@ import { coreMock } from '../../../core/server/mocks';
 import { plugin } from './';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { mockRouter } from '../../../core/server/http/router/router.mock';
+import { ApplicationUsagePlugin } from './plugin';
 
 class UsageCollection {
   public usageCollector: any;
@@ -30,7 +31,16 @@ class UsageCollection {
 }
 
 describe('ApplicationUsagePlugin/server', () => {
-  const applicationUsagePlugin = plugin(coreMock.createPluginInitializerContext());
+  let applicationUsagePlugin: ApplicationUsagePlugin;
+  beforeEach(() => {
+    jest.useFakeTimers();
+    applicationUsagePlugin = plugin(coreMock.createPluginInitializerContext());
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.resetAllMocks();
+  });
 
   test('it registers the routes, ensures the index template but does not register the usage collector because it is not initialised', async () => {
     await applicationUsagePlugin.setup(coreMock.createSetup(), {});
@@ -224,6 +234,7 @@ describe('ApplicationUsagePlugin/server', () => {
         },
       });
 
+      jest.runTimersToTime(24 * 60 * 60 * 1000);
       appPlugin.stop();
     });
   });

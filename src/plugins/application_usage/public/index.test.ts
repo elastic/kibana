@@ -28,6 +28,13 @@ function getHandler(spy: jest.SpyInstance, event: string) {
 }
 
 describe('ApplicationUsagePlugin/public', () => {
+  beforeAll(() => jest.useFakeTimers());
+
+  afterAll(() => {
+    jest.clearAllTimers();
+    jest.resetAllMocks();
+  });
+
   const locationSpy = jest.spyOn(window, 'location', 'get');
   const windowAddListenerSpy = jest.spyOn(window, 'addEventListener');
   const documentAddListenerSpy = jest.spyOn(document, 'addEventListener');
