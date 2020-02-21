@@ -18,6 +18,7 @@
  */
 
 import { RangeFilterParams } from '../../../../../../plugins/data/public';
+import { IAggConfig } from '../aggs';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {
@@ -29,4 +30,20 @@ export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   timeRange?: { [key: string]: RangeFilterParams };
+}
+
+/** @public **/
+export interface TabbedAggColumn {
+  aggConfig: IAggConfig;
+  id: string;
+  name: string;
+}
+
+/** @public **/
+export type TabbedAggRow = Record<TabbedAggColumn['id'], string | number>;
+
+/** @public **/
+export interface TabbedTable {
+  columns: TabbedAggColumn[];
+  rows: TabbedAggRow[];
 }
