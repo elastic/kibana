@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { camelCase, isObject, set } from 'lodash';
 import { AllCases, AllCasesSnake, Case, CaseSnake } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const convertCaseToCamel = (snakeCase: CaseSnake): Case => ({
-  caseId: snakeCase.case_id,
-  createdAt: snakeCase.created_at,
-  createdBy: {
-    username: snakeCase.created_by.username,
-    fullName: snakeCase.created_by.full_name,
-  },
-  description: snakeCase.description,
-  state: snakeCase.state,
-  tags: snakeCase.tags,
-  title: snakeCase.title,
-  updatedAt: snakeCase.updated_at,
-  version: snakeCase.version,
-});
+export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U => {
+  return Object.entries(snakeCase).reduce((acc, [key, value]) => {
+    if (isObject(value)) {
+      set(camelCase(key), convertToCamelCase(value), acc);
+    } else {
+      set(camelCase(key), value, acc);
+    }
+    return acc;
+  }, {} as U);
+};
 
 export const convertAllCasesToCamel = (snakeCases: AllCasesSnake): AllCases => ({
-  cases: snakeCases.cases.map(snakeCase => convertCaseToCamel(snakeCase)),
+  cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseSnake, Case>(snakeCase)),
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,

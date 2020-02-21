@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, SortFieldCase } from '../../../../../containers/case/types';
+import { QueryParams, SortFieldCase } from '../../../../../containers/case/types';
 
 export const useGetCasesMockState = {
   data: {
@@ -70,7 +70,7 @@ export const useGetCasesMockState = {
     page: 1,
     perPage: 5,
     sortField: SortFieldCase.createdAt,
-    sortOrder: Direction.desc,
+    sortOrder: 'desc' as QueryParams['sortOrder'],
   },
   filterOptions: { search: '', tags: [] },
 };

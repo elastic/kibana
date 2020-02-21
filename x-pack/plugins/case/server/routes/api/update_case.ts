@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from 'kibana/server';
 import Boom from 'boom';
+import { difference } from 'lodash';
 import { wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdateCaseArguments } from './schema';
@@ -47,20 +48,29 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
           )
         );
       }
-      const updateCase: UpdateCase = request.body.case;
       const currentCase = theCase.attributes;
-      Object.keys(updateCase).forEach(key => {
-        if (
-          key === 'tags' &&
-          updateCase[key] &&
-          updateCase[key].length === currentCase[key].length &&
-          updateCase[key].every((element, index) => element === currentCase[key][index])
-        ) {
-          delete updateCase[key];
-        } else if (updateCase[key] === currentCase[key]) {
-          delete updateCase[key];
-        }
-      });
+      const updateCase: Partial<UpdateCase> = Object.entries(request.body.case).reduce(
+        (acc, [key, value]) => {
+          const currentValue = currentCase[key];
+          if (
+            Array.isArray(value) &&
+            Array.isArray(currentValue) &&
+            difference(value, currentValue).length !== 0
+          ) {
+            return {
+              ...acc,
+              [key]: value,
+            };
+          } else if (value !== currentCase[key]) {
+            return {
+              ...acc,
+              [key]: value,
+            };
+          }
+          return acc;
+        },
+        {}
+      );
       if (Object.keys(updateCase).length > 0) {
         try {
           const updatedCase = await caseService.updateCase({

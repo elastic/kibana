@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction } from '../../graphql/types';
-export { Direction };
 interface FormData {
   isNew?: boolean;
 }
@@ -44,7 +42,7 @@ export interface QueryParams {
   page: number;
   perPage: number;
   sortField: SortFieldCase;
-  sortOrder: Direction;
+  sortOrder: 'asc' | 'desc';
 }
 
 export interface FilterOptions {

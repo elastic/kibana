@@ -17,7 +17,6 @@ import {
 } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
 import { getTypedPayload } from './utils';
-import { Direction } from '../../graphql/types';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
@@ -97,7 +96,7 @@ export const useGetCases = (): [
       page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
       sortField: SortFieldCase.createdAt,
-      sortOrder: Direction.desc,
+      sortOrder: 'desc',
     },
   });
   const [queryParams, setQueryParams] = useState(state.queryParams as Partial<QueryParams>);

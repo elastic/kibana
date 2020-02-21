@@ -18,7 +18,6 @@ import * as i18n from './translations';
 import { getCasesColumns } from './columns';
 import { SortFieldCase, Case, FilterOptions } from '../../../../containers/case/types';
 
-import { Direction } from '../../../../graphql/types';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
@@ -32,7 +31,16 @@ import {
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
 import { getCreateCaseUrl } from '../../../../components/link_to';
-
+const getSortField = (field: string): SortFieldCase => {
+  if (field === SortFieldCase.createdAt) {
+    return SortFieldCase.createdAt;
+  } else if (field === SortFieldCase.state) {
+    return SortFieldCase.state;
+  } else if (field === SortFieldCase.updatedAt) {
+    return SortFieldCase.updatedAt;
+  }
+  return SortFieldCase.createdAt;
+};
 export const AllCases = React.memo(() => {
   const [
     { data, isLoading, queryParams, filterOptions },
@@ -46,8 +54,8 @@ export const AllCases = React.memo(() => {
       if (sort) {
         newQueryParams = {
           ...newQueryParams,
-          sortField: sort.field as SortFieldCase,
-          sortOrder: sort.direction as Direction,
+          sortField: getSortField(sort.field),
+          sortOrder: sort.direction,
         };
       }
       if (page) {
