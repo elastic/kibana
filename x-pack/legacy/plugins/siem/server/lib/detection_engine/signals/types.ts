@@ -6,7 +6,6 @@
 
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { LegacyRequest } from '../../../types';
 import {
   AlertType,
   State,
