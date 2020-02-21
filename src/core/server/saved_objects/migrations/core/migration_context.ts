@@ -44,7 +44,7 @@ export interface MigrationOpts {
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
   convertToAliasScript?: string;
-
+  dryRun: boolean;
   /**
    * If specified, templates matching the specified pattern will be removed
    * prior to running migrations. For example: 'kibana_index_template*'
@@ -72,9 +72,10 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { log, callCluster } = opts;
-  const alias = opts.index;
-  const source = createSourceContext(await fetchInfo(callCluster, alias), alias);
+  const { log, callCluster, index: alias } = opts;
+
+  const indexInfo = await fetchInfo(callCluster, opts.index);
+  const source = createSourceContext(indexInfo, opts.index);
   const dest = createDestContext(source, alias, opts.mappingProperties);
 
   return {

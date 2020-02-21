@@ -39,6 +39,7 @@ describe('coordinateMigration', () => {
     isMigrated.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
     await coordinateMigration({
+      alias: 'index alias',
       log,
       runMigration,
       pollInterval,
@@ -57,6 +58,7 @@ describe('coordinateMigration', () => {
     const isMigrated = jest.fn(() => Promise.resolve(true));
 
     await coordinateMigration({
+      alias: 'index alias',
       log,
       runMigration,
       pollInterval,
@@ -74,9 +76,10 @@ describe('coordinateMigration', () => {
 
     await expect(
       coordinateMigration({
+        alias: 'index alias',
         log,
-        runMigration,
         pollInterval,
+        runMigration,
         isMigrated,
       })
     ).rejects.toThrow(/Doh/);

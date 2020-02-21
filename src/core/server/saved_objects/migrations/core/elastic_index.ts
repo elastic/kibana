@@ -203,10 +203,15 @@ export async function migrationsUpToDate(
 export async function createIndex(
   callCluster: CallCluster,
   index: string,
-  mappings?: IndexMapping
+  mappings?: IndexMapping,
+  alias?: string
 ) {
+  let body: object = { mappings, settings };
+  if (alias != null) {
+    body = { ...body, aliases: { [alias]: {} } };
+  }
   await callCluster('indices.create', {
-    body: { mappings, settings },
+    body,
     index,
   });
 }
@@ -317,7 +322,7 @@ function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
 /**
  * Reindexes from source to dest, polling for the reindex completion.
  */
-async function reindex(
+export async function reindex(
   callCluster: CallCluster,
   source: string,
   dest: string,

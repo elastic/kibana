@@ -44,6 +44,7 @@ export interface CliArgs {
   open: boolean;
   oss: boolean;
   runExamples: boolean;
+  dryRunMigration: boolean;
 }
 
 export class Env {

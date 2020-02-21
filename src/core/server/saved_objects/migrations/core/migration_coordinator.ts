@@ -40,20 +40,21 @@ import { SavedObjectsMigrationLogger } from './migration_logger';
 const DEFAULT_POLL_INTERVAL = 15000;
 
 export type MigrationResult =
-  | { status: 'skipped' }
-  | { status: 'patched' }
+  | { status: 'skipped'; alias: string; reason?: string }
   | {
       status: 'migrated';
+      alias: string;
       destIndex: string;
       sourceIndex: string;
       elapsedMs: number;
     };
 
 interface Opts {
-  runMigration: () => Promise<MigrationResult>;
-  isMigrated: () => Promise<boolean>;
+  alias: string;
   log: SavedObjectsMigrationLogger;
   pollInterval?: number;
+  runMigration: () => Promise<MigrationResult>;
+  isMigrated: () => Promise<boolean>;
 }
 
 /**
@@ -69,40 +70,36 @@ interface Opts {
  * @prop {number} pollInterval - How often, in ms, to check that the index is migrated
  * @returns
  */
-export async function coordinateMigration(opts: Opts): Promise<MigrationResult> {
+export async function coordinateMigration({
+  alias,
+  log,
+  pollInterval,
+  runMigration,
+  isMigrated,
+}: Opts): Promise<MigrationResult> {
   try {
-    return await opts.runMigration();
+    return await runMigration();
   } catch (error) {
-    if (handleIndexExists(error, opts.log)) {
-      await waitForMigration(opts.isMigrated, opts.pollInterval);
-      return { status: 'skipped' };
+    const isIndexExistsError = error?.body?.error?.type === 'resource_already_exists_exception';
+    const index = error?.body?.error?.index;
+
+    /**
+     * An index exists error indicates that another Kibana instance has
+     * acquired a migration "lock" for this alias. Log a warning and then
+     * start polling to wait for the other Kibana instance to complete the
+     * migration.
+     */
+    if (isIndexExistsError) {
+      log.warning(
+        `Another Kibana instance appears to be migrating the alias: '${alias}'. Waiting for ` +
+          `that migration to complete. If no other Kibana instance is attempting ` +
+          `migrations, you can get past this message by deleting index ${index} and ` +
+          `restarting Kibana.`
+      );
+      await waitForMigration(isMigrated, pollInterval);
     }
     throw error;
   }
-}
-
-/**
- * If the specified error is an index exists error, this logs a warning,
- * and is the cue for us to fall into a polling loop, waiting for some
- * other Kibana instance to complete the migration.
- */
-function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
-  const isIndexExistsError =
-    _.get(error, 'body.error.type') === 'resource_already_exists_exception';
-  if (!isIndexExistsError) {
-    return false;
-  }
-
-  const index = _.get(error, 'body.error.index');
-
-  log.warning(
-    `Another Kibana instance appears to be migrating the index. Waiting for ` +
-      `that migration to complete. If no other Kibana instance is attempting ` +
-      `migrations, you can get past this message by deleting index ${index} and ` +
-      `restarting Kibana.`
-  );
-
-  return true;
 }
 
 /**

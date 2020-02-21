@@ -27,7 +27,7 @@ import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
+import { buildActiveMappings, CallCluster, IndexMigrator, MigrationResult } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
@@ -42,6 +42,7 @@ export interface KibanaMigratorOptions {
   kibanaVersion: string;
   logger: Logger;
   savedObjectValidations: PropertyValidators;
+  dryRunMigration: boolean;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -54,11 +55,12 @@ export class KibanaMigrator {
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
+  private readonly dryRunMigration: boolean;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
-  private migrationResult?: Promise<Array<{ status: string }>>;
+  private migrationResult?: Promise<MigrationResult[]>;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -68,6 +70,7 @@ export class KibanaMigrator {
     typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
+    dryRunMigration,
     savedObjectValidations,
     kibanaVersion,
     logger,
@@ -75,6 +78,7 @@ export class KibanaMigrator {
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
+    this.dryRunMigration = dryRunMigration;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
@@ -105,9 +109,7 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
-    Array<{ status: string }>
-  > {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       this.migrationResult = this.runMigrationsInternal();
     }
@@ -122,6 +124,12 @@ export class KibanaMigrator {
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
+
+    this.log.info(
+      `Checking for saved objects migrations on the following aliases: ${Object.keys(indexMap).join(
+        ', '
+      )}`
+    );
 
     const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
@@ -138,6 +146,7 @@ export class KibanaMigrator {
         obsoleteIndexTemplatePattern:
           index === kibanaIndexName ? 'kibana_index_template*' : undefined,
         convertToAliasScript: indexMap[index].script,
+        dryRun: this.dryRunMigration,
       });
     });
 

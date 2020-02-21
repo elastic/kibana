@@ -103,6 +103,9 @@ export async function bootstrap({
   try {
     await root.setup();
     await root.start();
+    if (cliArgs.dryRunMigration) {
+      return await shutdown();
+    }
   } catch (err) {
     await shutdown(err);
   }

@@ -83,6 +83,7 @@ export interface IndexCreationOpts {
       number_of_shards: number;
       auto_expand_replicas: string;
     };
+    aliases?: Record<string, {}>;
   };
 }
 

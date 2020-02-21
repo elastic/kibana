@@ -108,6 +108,7 @@ export default ({ getService }) => {
       );
 
       assert.deepEqual(_.omit(result, 'elapsedMs'), {
+        alias: '.migration-a',
         destIndex: '.migration-a_2',
         sourceIndex: '.migration-a_1',
         status: 'migrated',

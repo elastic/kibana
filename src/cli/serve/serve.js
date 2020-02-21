@@ -193,7 +193,11 @@ export default function(program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Run the legacy plugin optimizer and then stop the server');
+    .option('--optimize', 'Run the legacy plugin optimizer and then stop the server')
+    .option(
+      '--dry-run-migration',
+      'Perform a dry run saved objects migration, report the results and exit'
+    );
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
@@ -252,6 +256,7 @@ export default function(program) {
         // elastic.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
+        dryRunMigration: !!opts.dryRunMigration,
         oss: !!opts.oss,
       },
       features: {

@@ -123,6 +123,7 @@ function mockOptions(): KibanaMigratorOptions {
       scrollDuration: '10m',
       skip: false,
     },
+    dryRunMigration: false,
     callCluster,
   };
 }
