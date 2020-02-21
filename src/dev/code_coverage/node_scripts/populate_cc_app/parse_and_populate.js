@@ -47,7 +47,7 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 };
 
 function onComplete (initData) {
-  const prettyFlush = pipe(pretty, flush);
+  const flushInitData = pipe(pretty, flush);
   return function mutateInitialData (xs, log, destFile, currentJobNumber) {
     initData.historicalItems = normalize(xs);
     initData.currentJobNumber = currentJobNumber;
@@ -55,24 +55,28 @@ function onComplete (initData) {
     const constructCurrentFrom = currentItem(currentJobNumber, log);
     const prefix = 'gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/';
 
+    initData.currentJobTimeStamp = currentJobTimeStamp(log);
     initData.currentItem = `${constructCurrentFrom(prefix)}`;
 
 
-    prettyFlush(initData)(destFile);
+    flushInitData(initData)(destFile);
     log.debug('### Completed');
   };
 }
 
-function currentItem(currentBuildNumber, log) {
+function currentJobTimeStamp(log) {
   const HARD_CODED_TS = '2020-01-28T23-15-17Z'
+
   if (process.env.TIME_STAMP)
     log.debug(`\n### Using TIME_STAMP from env: ${process.env.TIME_STAMP}`);
   else
     log.debug(`\n### Using HARDCODED TIME_STAMP: ${HARD_CODED_TS}`);
 
-  const timeStamp = process.env.TIME_STAMP || HARD_CODED_TS;
+  return process.env.TIME_STAMP || HARD_CODED_TS;
+}
 
-  return prefix => `${prefix}${currentBuildNumber}/${timeStamp}/`;
+function currentItem(currentBuildNumber, log) {
+  return prefix => `${prefix}${currentBuildNumber}/${currentJobTimeStamp(log)}/`;
 }
 
 function normalize(xs) {
