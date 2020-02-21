@@ -37,15 +37,15 @@
  */
 
 import { telemetryCollectionManager } from '../collection_manager';
+import { getLocalStats } from './get_local_stats';
 import { getClusterUuids } from './get_cluster_stats';
-import { getAggregatedStats } from './get_aggregated_stats';
 
 export function registerCollection() {
   telemetryCollectionManager.setCollection({
     esCluster: 'data',
     title: 'local',
     priority: 0,
-    statsGetter: getAggregatedStats,
+    statsGetter: getLocalStats,
     clusterDetailsGetter: getClusterUuids,
   });
 }

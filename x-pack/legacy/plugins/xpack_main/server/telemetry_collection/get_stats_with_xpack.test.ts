@@ -1,23 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAggregatedStats } from './get_aggregated_stats';
+import { getStatsWithXpack } from './get_stats_with_xpack';
 
 const kibana = {
   kibana: {
@@ -69,7 +56,7 @@ const mockUsageCollection = (kibanaUsage = kibana) => ({
 });
 
 describe('Telemetry Collection: Get Aggregated Stats', () => {
-  test('OSS telemetry (no license nor X-Pack telemetry)', async () => {
+  test('OSS-like telemetry (no license nor X-Pack telemetry)', async () => {
     const callCluster = jest.fn(async (method: string, options: { path?: string }) => {
       switch (method) {
         case 'transport.request':
@@ -87,7 +74,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const usageCollection = mockUsageCollection();
     const server = getMockServer();
 
-    const stats = await getAggregatedStats([{ clusterUuid: '1234' }], {
+    const stats = await getStatsWithXpack([{ clusterUuid: '1234' }], {
       callCluster,
       usageCollection,
       server,
@@ -117,7 +104,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const usageCollection = mockUsageCollection();
     const server = getMockServer();
 
-    const stats = await getAggregatedStats([{ clusterUuid: '1234' }], {
+    const stats = await getStatsWithXpack([{ clusterUuid: '1234' }], {
       callCluster,
       usageCollection,
       server,

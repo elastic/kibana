@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Telemetry Collection: Get Aggregated Stats OSS telemetry (no license nor X-Pack telemetry) 1`] = `
+exports[`Telemetry Collection: Get Aggregated Stats OSS-like telemetry (no license nor X-Pack telemetry) 1`] = `
 Array [
   Object {
     "cluster_name": "test",
