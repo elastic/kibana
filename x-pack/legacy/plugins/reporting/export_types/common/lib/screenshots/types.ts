@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementPosition, ConditionalHeaders } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
+import { ReportingConfigType } from '../../../../server/types';
+import { ConditionalHeaders, ElementPosition } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
+
+export type CaptureConfig = ReportingConfigType['capture'];
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;

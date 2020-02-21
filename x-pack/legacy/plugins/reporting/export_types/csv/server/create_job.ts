@@ -11,14 +11,14 @@ import {
   CreateJobFactory,
   ESQueueCreateJobFn,
   RequestFacade,
-  ServerFacade,
 } from '../../../types';
 import { JobParamsDiscoverCsv } from '../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = async function createJobFactoryFn(reporting: ReportingCore) {
+  const config = await reporting.getConfig();
+  const crypto = cryptoFactory(config);
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,

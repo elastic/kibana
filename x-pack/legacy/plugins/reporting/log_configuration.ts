@@ -6,21 +6,19 @@
 
 import getosSync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
-import { ServerFacade, Logger } from './types';
+import { BROWSER_TYPE } from './common/constants';
+import { ReportingConfig } from './server';
+import { Logger } from './types';
 
 const getos = promisify(getosSync);
 
-export async function logConfiguration(server: ServerFacade, logger: Logger) {
-  const config = server.config();
-
-  const browserType = config.get('xpack.reporting.capture.browser.type');
+export async function logConfiguration(config: ReportingConfig, logger: Logger) {
+  const browserType = config.get('capture', 'browser', 'type');
   logger.debug(`Browser type: ${browserType}`);
 
-  if (browserType === 'chromium') {
+  if (browserType === BROWSER_TYPE) {
     logger.debug(
-      `Chromium sandbox disabled: ${config.get(
-        'xpack.reporting.capture.browser.chromium.disableSandbox'
-      )}`
+      `Chromium sandbox disabled: ${config.get('capture', 'browser', 'chromium', 'disableSandbox')}`
     );
   }
 

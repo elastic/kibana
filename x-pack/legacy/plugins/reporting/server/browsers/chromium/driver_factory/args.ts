@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BrowserConfig } from '../../../../types';
+import { ReportingConfigType } from '../../../../server/types';
+
+type ViewportConfig = ReportingConfigType['capture']['viewport'];
+type BrowserConfig = ReportingConfigType['capture']['browser']['chromium'];
 
 interface LaunchArgs {
   userDataDir: BrowserConfig['userDataDir'];
-  viewport: BrowserConfig['viewport'];
+  viewport: ViewportConfig;
   disableSandbox: BrowserConfig['disableSandbox'];
   proxy: BrowserConfig['proxy'];
 }

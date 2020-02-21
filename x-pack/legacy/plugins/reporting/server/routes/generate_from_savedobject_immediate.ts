@@ -16,7 +16,7 @@ import {
   ResponseFacade,
   ServerFacade,
 } from '../../types';
-import { ReportingSetupDeps, ReportingCore } from '../types';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 
@@ -31,12 +31,12 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
+  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
-  const { elasticsearch } = plugins;
+  const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -58,8 +58,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
        *
        * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
-      const createJobFn = createJobFactory(reporting, server, elasticsearch, logger);
-      const executeJobFn = await executeJobFactory(reporting, server, elasticsearch, logger);
+      const createJobFn = await createJobFactory(reporting, logger);
+      const executeJobFn = await executeJobFactory(reporting, logger);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,

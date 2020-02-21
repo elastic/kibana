@@ -5,23 +5,29 @@
  */
 
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { createMockServer } from '../../../test_helpers';
+import { ReportingConfig } from '../../../server/types';
 import { Logger } from '../../../types';
 import { decryptJobHeaders } from './decrypt_job_headers';
 
-let mockServer: any;
-beforeEach(() => {
-  mockServer = createMockServer('');
+const getMockConfig = (mockGet: jest.Mock<any, any>) => ({
+  get: mockGet,
+  kbnConfig: { get: mockGet },
 });
+const mockConfigGet = jest.fn().mockImplementation((key: string) => {
+  if (key === 'encryptionKey') {
+    return 'testencryptionkey';
+  }
+});
+const mockConfig = getMockConfig(mockConfigGet);
 
-const encryptHeaders = async (headers: Record<string, string>) => {
-  const crypto = cryptoFactory(mockServer);
+const encryptHeaders = async (config: ReportingConfig, headers: Record<string, string>) => {
+  const crypto = cryptoFactory(config);
   return await crypto.encrypt(headers);
 };
 
 describe('headers', () => {
   test(`fails if it can't decrypt headers`, async () => {
-    await expect(
+    const getDecryptedHeaders = () =>
       decryptJobHeaders({
         job: {
           headers: 'Q53+9A+zf+Xe+ceR/uB/aR/Sw/8e+M+qR+WiG+8z+EY+mo+HiU/zQL+Xn',
@@ -29,9 +35,9 @@ describe('headers', () => {
         logger: ({
           error: jest.fn(),
         } as unknown) as Logger,
-        server: mockServer,
-      })
-    ).rejects.toMatchInlineSnapshot(
+        config: mockConfig,
+      });
+    await expect(getDecryptedHeaders()).rejects.toMatchInlineSnapshot(
       `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. Error: Invalid IV length]`
     );
   });
@@ -42,7 +48,7 @@ describe('headers', () => {
       baz: 'quix',
     };
 
-    const encryptedHeaders = await encryptHeaders(headers);
+    const encryptedHeaders = await encryptHeaders(mockConfig, headers);
     const decryptedHeaders = await decryptJobHeaders({
       job: {
         title: 'cool-job-bro',
@@ -50,7 +56,7 @@ describe('headers', () => {
         headers: encryptedHeaders,
       },
       logger: {} as Logger,
-      server: mockServer,
+      config: mockConfig,
     });
     expect(decryptedHeaders).toEqual(headers);
   });

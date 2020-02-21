@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, SearchResponse } from 'elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { CancellationToken, ScrollConfig, Logger } from '../../../../types';
+import { SearchParams, SearchResponse } from 'elasticsearch';
+import { ReportingConfigType } from '../../../../server/types';
+import { CancellationToken, Logger } from '../../../../types';
 
 async function parseResponse(request: SearchResponse<any>) {
   const response = await request;
@@ -36,7 +37,7 @@ async function parseResponse(request: SearchResponse<any>) {
 
 export function createHitIterator(logger: Logger) {
   return async function* hitIterator(
-    scrollSettings: ScrollConfig,
+    scrollSettings: ReportingConfigType['csv']['scroll'],
     callEndpoint: Function,
     searchRequest: SearchParams,
     cancellationToken: CancellationToken
