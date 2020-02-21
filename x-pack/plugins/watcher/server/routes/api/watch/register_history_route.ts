@@ -5,9 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { isEsError } from '../../../lib/is_es_error';
@@ -16,7 +15,15 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
-function fetchHistoryItems(callWithRequest: any, watchId: any, startTime: any) {
+const paramsSchema = schema.object({
+  watchId: schema.string(),
+});
+
+const querySchema = schema.object({
+  startTime: schema.string(),
+});
+
+function fetchHistoryItems(dataClient: IScopedClusterClient, watchId: any, startTime: any) {
   const params: any = {
     index: INDEX_NAMES.WATCHER_HISTORY,
     scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
@@ -37,61 +44,57 @@ function fetchHistoryItems(callWithRequest: any, watchId: any, startTime: any) {
     params.body.query.bool.must.push(timeRangeQuery);
   }
 
-  return callWithRequest('search', params).then((response: any) =>
-    fetchAllFromScroll(response, callWithRequest)
-  );
+  return dataClient
+    .callAsCurrentUser('search', params)
+    .then((response: any) => fetchAllFromScroll(response, dataClient));
 }
 
 export function registerHistoryRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-    const { watchId } = request.params;
-    const { startTime } = request.query;
-
-    try {
-      const hits = await fetchHistoryItems(callWithRequest, watchId, startTime);
-      const watchHistoryItems = hits.map((hit: any) => {
-        const id = get(hit, '_id');
-        const watchHistoryItemJson = get(hit, '_source');
-
-        const opts = { includeDetails: false };
-        return WatchHistoryItem.fromUpstreamJson(
-          {
-            id,
-            watchId,
-            watchHistoryItemJson,
-          },
-          opts
-        );
-      });
-
-      return response.ok({
-        body: {
-          watchHistoryItems: watchHistoryItems.map(
-            (watchHistoryItem: any) => watchHistoryItem.downstreamJson
-          ),
-        },
-      });
-    } catch (e) {
-      // Case: Error from Elasticsearch JS client
-      if (isEsError(e)) {
-        return response.customError({ statusCode: e.statusCode, body: e });
-      }
-
-      // Case: default
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.get(
     {
       path: '/api/watcher/watch/{watchId}/history',
       validate: {
-        params: schema.object({
-          watchId: schema.string(),
-        }),
+        params: paramsSchema,
+        query: querySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      const { watchId } = request.params;
+      const { startTime } = request.query;
+
+      try {
+        const hits = await fetchHistoryItems(ctx.watcher!.client, watchId, startTime);
+        const watchHistoryItems = hits.map((hit: any) => {
+          const id = get(hit, '_id');
+          const watchHistoryItemJson = get(hit, '_source');
+
+          const opts = { includeDetails: false };
+          return WatchHistoryItem.fromUpstreamJson(
+            {
+              id,
+              watchId,
+              watchHistoryItemJson,
+            },
+            opts
+          );
+        });
+
+        return response.ok({
+          body: {
+            watchHistoryItems: watchHistoryItems.map(
+              (watchHistoryItem: any) => watchHistoryItem.downstreamJson
+            ),
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({ statusCode: e.statusCode, body: e });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }
