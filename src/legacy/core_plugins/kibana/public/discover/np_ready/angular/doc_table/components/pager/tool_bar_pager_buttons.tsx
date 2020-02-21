@@ -37,7 +37,7 @@ export function ToolBarPagerButtons(props: Props) {
         aria-label={i18n.translate(
           'kbn.discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
           {
-            defaultMessage: 'previous page button',
+            defaultMessage: 'Previous page in table',
           }
         )}
       >
@@ -51,7 +51,7 @@ export function ToolBarPagerButtons(props: Props) {
         aria-label={i18n.translate(
           'kbn.ddiscover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
           {
-            defaultMessage: 'next page button',
+            defaultMessage: 'Next page in table',
           }
         )}
       >
