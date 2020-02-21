@@ -6,18 +6,9 @@
 
 import { omit } from 'lodash/fp';
 
-import {
-  getFindResult,
-  getResult,
-  getFindResultWithSingleHit,
-  getFindResultStatus,
-  getFindRequest,
-} from '../__mocks__/request_responses';
+import { getFindResultStatus } from '../__mocks__/request_responses';
 import { createMockServer } from '../__mocks__';
 import { clientsServiceMock } from '../__mocks__/clients_service_mock';
-
-import * as utils from './utils';
-import * as findRules from '../../rules/find_rules';
 
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { ServerInjectOptions } from 'hapi';

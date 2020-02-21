@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Readable, Transform } from 'stream';
+import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
 import { ImportRuleAlertRest } from '../types';
 import {
