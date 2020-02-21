@@ -14,6 +14,8 @@ jest.mock('ui/timefilter', () => {
   return {};
 });
 
+jest.mock('../../../shared_imports');
+
 describe('Transform: <TransformManagementSection />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<TransformManagementSection />);
