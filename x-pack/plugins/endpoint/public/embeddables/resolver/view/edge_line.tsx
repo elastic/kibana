@@ -66,7 +66,7 @@ export const EdgeLine = styled(
          */
         transform: `translateY(-50%) rotateZ(${angle(screenStart, screenEnd)}rad)`,
       };
-      return <div className={className} style={style} />;
+      return <div role="presentation" className={className} style={style} />;
     }
   )
 )`

@@ -8,6 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
+import { SymbolIds, NamedColors } from './defs';
 
 /**
  * A placeholder view for a process node.
@@ -19,6 +20,7 @@ export const ProcessEventDot = styled(
       position,
       event,
       projectionMatrix,
+      bgColor,
     }: {
       /**
        * A `className` string provided by `styled`
@@ -36,6 +38,11 @@ export const ProcessEventDot = styled(
        * projectionMatrix which can be used to convert `position` to screen coordinates.
        */
       projectionMatrix: Matrix3;
+      /**
+       * A color that the Resolver is using for the background, to
+       * create a "mask" effect for markers on EdgeLines
+       */
+      bgColor?: string;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -43,102 +50,86 @@ export const ProcessEventDot = styled(
       const [left, top] = applyMatrix3(position, projectionMatrix);
 
       const [magFactorX] = projectionMatrix;
+
       const style = {
         left: `${left}px`,
         top: `${top}px`,
         transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
 
-      const maskHref = `${event.data_buffer.node_id}_mask`;
+      const markerSize = (magFactor: number) => {
+        return magFactor >= 1 ? 4 * (1 / magFactor) : 3;
+      };
+
+      const markerPosition = (magFactor: number) => {
+        return magFactor >= 1 ? -2 * (1 / magFactorX) : -1.5;
+      };
 
       return (
         <svg
           className={className}
           style={style}
-          viewBox="-15 -5 30 10"
-          preserveAspectRatio="xMidYMid slice"
+          viewBox="-15 -15 30 30"
+          preserveAspectRatio="xMidYMid meet"
+          role="treeitem"
+          aria-level={event.data_buffer.depth}
         >
-          <use xlinkHref={`#node_icon_curve`} x="-15.5" y="-5" width="31" height="10" opacity="1" />
+          <use
+            role="presentation"
+            xlinkHref={`#${SymbolIds.solidHexagon}`}
+            x={markerPosition(magFactorX)}
+            y={markerPosition(magFactorX)}
+            width={markerSize(magFactorX)}
+            height={markerSize(magFactorX)}
+            opacity="1"
+            style={{ stroke: `${bgColor}`, fill: '#FFFFFF' }}
+          />
+          <use
+            role="presentation"
+            xlinkHref={
+              magFactorX >= 1.75
+                ? `#${SymbolIds.processNodeWithHorizontalRule}`
+                : `#${SymbolIds.processNode}`
+            }
+            x="-15.5"
+            y="-12.5"
+            width="31"
+            height="10"
+            opacity="1"
+          />
           <text
             x="0"
-            y="0"
+            y={magFactorX >= 1.75 ? '-6' : '-7.5'}
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
-            fill="white"
-            stroke="#777"
+            fill={NamedColors.empty}
+            stroke={NamedColors.strokeBehindEmpty}
             strokeWidth=".35"
             paintOrder="stroke"
+            tabIndex={-1}
           >
             {event.data_buffer.process_name}
           </text>
 
           {magFactorX >= 1.75 ? (
             <>
-              <mask id={maskHref}>
-                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
-                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
-                  <animate
-                    attributeName="x"
-                    from="-15"
-                    to="15"
-                    begin="DOMNodeInsertedIntoDocument"
-                    dur="1.5s"
-                    fill="freeze"
-                    repeatCount="1"
-                  />
-                </rect>
-              </mask>
               <text
                 x="0"
-                y="-2.1"
+                y="-9.6"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="1.25"
-                fill="#fff"
-                stroke="#999"
+                fill={NamedColors.empty}
+                stroke={NamedColors.strokeBehindEmpty}
                 strokeWidth=".25"
                 paintOrder="stroke"
-                mask={`url(#${maskHref})`}
+                style={{ textTransform: 'uppercase' }}
               >
-                Process
+                Terminated Process
               </text>
             </>
           ) : null}
-          {magFactorX >= 2.75 && event.data_buffer.signature_status !== 'trusted' ? (
-            <>
-              <mask id={`${maskHref}_trusted`}>
-                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
-                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
-                  <animate
-                    attributeName="x"
-                    from="-15"
-                    to="15"
-                    begin="DOMNodeInsertedIntoDocument"
-                    dur="1.5s"
-                    fill="freeze"
-                    repeatCount="1"
-                  />
-                </rect>
-              </mask>
-              <text
-                x="0"
-                y="2.45"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="1.25"
-                fill="yellow"
-                stroke="#777"
-                strokeWidth=".25"
-                paintOrder="stroke"
-                mask={`url(#${`${maskHref}_trusted`})`}
-              >
-                No Trusted Signature
-              </text>
-            </>
-          ) : (
-            <></>
-          )}
         </svg>
       );
     }
@@ -147,7 +138,7 @@ export const ProcessEventDot = styled(
   position: absolute;
   display: block;
   width: 120px;
-  height: 40px;
+  height: 120px;
   text-align: left;
   font-size: 10px;
   user-select: none;
@@ -155,4 +146,5 @@ export const ProcessEventDot = styled(
   border-radius: 10%;
   padding: 4px;
   white-space: nowrap;
+  contain: strict;
 `;
