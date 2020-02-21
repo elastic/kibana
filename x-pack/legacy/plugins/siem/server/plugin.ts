@@ -71,6 +71,7 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
 
+    const router = core.http.createRouter();
     core.http.registerRouteHandlerContext('siem', (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
@@ -82,6 +83,7 @@ export class Plugin {
     this.clients.setup(core.elasticsearch.dataClient, plugins.spaces?.spacesService);
 
     this.legacyInitRoutes = initRoutes(
+      router,
       __legacy.route,
       __legacy.config,
       plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false

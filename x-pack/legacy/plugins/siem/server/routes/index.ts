@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IRouter } from '../../../../../../src/core/server';
 import { LegacyServices } from '../types';
 import { GetScopedClients } from '../services';
 
@@ -33,13 +34,14 @@ import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/r
 export type LegacyInitRoutes = (getClients: GetScopedClients) => void;
 
 export const initRoutes = (
+  router: IRouter,
   route: LegacyServices['route'],
   config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean
 ) => (getClients: GetScopedClients): void => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(route, config, getClients);
+  createRulesRoute(router);
   readRulesRoute(route, getClients);
   updateRulesRoute(route, config, getClients);
   patchRulesRoute(route, getClients);
