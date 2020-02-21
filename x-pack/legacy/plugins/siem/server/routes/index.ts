@@ -58,7 +58,7 @@ export const initRoutes = (
   importRulesRoute(router, config);
   exportRulesRoute(router, config);
 
-  findRulesStatusesRoute(route, getClients);
+  findRulesStatusesRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

@@ -138,10 +138,8 @@ export interface FindRulesRequestParams {
   sort_order?: 'asc' | 'desc';
 }
 
-export interface FindRulesStatusesRequest extends Omit<LegacyRequest, 'query'> {
-  query: {
-    ids: string[];
-  };
+export interface FindRulesStatusesRequestParams {
+  ids: string[];
 }
 
 export interface Clients {
