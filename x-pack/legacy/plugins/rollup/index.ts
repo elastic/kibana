@@ -54,11 +54,11 @@ export function rollup(kibana: any) {
       rollupPluginInstance.setup(coreSetup, {
         usageCollection,
         metrics,
+        indexManagement,
         __LEGACY: {
           plugins: {
             xpack_main: server.plugins.xpack_main,
             rollup: server.plugins[PLUGIN.ID],
-            indexManagement,
           },
         },
       });
