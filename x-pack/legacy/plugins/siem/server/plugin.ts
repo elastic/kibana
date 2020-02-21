@@ -68,7 +68,7 @@ export class Plugin {
     this.logger.debug('Shim plugin setup');
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext('siem', (context, request, response) => ({
+    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
