@@ -116,10 +116,7 @@ export interface RuleRequestParams {
 
 export type ReadRuleRequestParams = RuleRequestParams;
 export type DeleteRuleRequestParams = RuleRequestParams;
-
-export interface QueryBulkRequest extends LegacyRequest {
-  payload: RuleRequestParams[];
-}
+export type DeleteRulesRequestParams = RuleRequestParams[];
 
 export interface FindRuleParams {
   alertsClient: AlertsClient;

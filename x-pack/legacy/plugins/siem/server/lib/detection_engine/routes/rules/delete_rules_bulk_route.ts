@@ -4,39 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
-import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { transformBulkError, buildRouteValidation } from '../utils';
+import {
+  IRuleSavedAttributesSavedObjectAttributes,
+  DeleteRulesRequestParams,
+} from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
-  return {
-    method: ['POST', 'DELETE'], // allow both POST and DELETE in case their client does not support bodies in DELETE
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    options: {
-      tags: ['access:siem'],
+export const deleteRulesBulkRoute = (router: IRouter) => {
+  router.delete(
+    {
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: queryRulesBulkSchema,
+        body: buildRouteValidation<DeleteRulesRequestParams>(queryRulesBulkSchema),
+      },
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: QueryBulkRequest, headers) {
-      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+    async (context, request, response) => {
+      const alertsClient = context.alerting.getAlertsClient();
+      const actionsClient = context.actions.getActionsClient();
+      const savedObjectsClient = context.core.savedObjects.client;
 
       if (!actionsClient || !alertsClient) {
-        return headers.response().code(404);
+        return response.notFound();
       }
+
       const rules = await Promise.all(
-        request.payload.map(async payloadRule => {
+        request.body.map(async payloadRule => {
           const { id, rule_id: ruleId } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
@@ -67,14 +68,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
           }
         })
       );
-      return rules;
-    },
-  };
-};
-
-export const deleteRulesBulkRoute = (
-  route: LegacyServices['route'],
-  getClients: GetScopedClients
-): void => {
-  route(createDeleteRulesBulkRoute(getClients));
+      return response.ok({ body: rules });
+    }
+  );
 };
