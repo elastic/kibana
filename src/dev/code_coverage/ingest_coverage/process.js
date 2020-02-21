@@ -22,7 +22,6 @@ import { concatMap, delay, map } from 'rxjs/operators';
 import jsonStream from './json_stream';
 import { pipe, noop, green } from './utils';
 import { ingest } from './ingest';
-import chalk from 'chalk';
 import * as fs from 'fs';
 import {
   staticSite,
@@ -49,9 +48,9 @@ const ts = log => {
   const timeStampDatFileName = 'current_build_timestamp.dat';
   const fullTimeStampPath = resolve(KIBANA_ROOT, outFileDir, timeStampDatFileName);
 
-  log.debug(`\n### Flushing timestamp ${green(timestamp)}, to ${green(fullTimeStampPath)}`);
-
-  flushTimeStamp(fullTimeStampPath)(timestamp);
+  // log.debug(`\n### Flushing timestamp ${green(timestamp)}, to ${green(fullTimeStampPath)}`);
+  //
+  // flushTimeStamp(fullTimeStampPath)(timestamp);
 
   return timestamp;
 };
