@@ -20,9 +20,9 @@
 import { i18n } from '@kbn/i18n';
 import { DirectAccessLinksStart } from './plugin';
 
-export type GeneratorId = string;
+export type DirectAccessLinkGeneratorId = string;
 
-export interface GeneratorState<
+export interface DirectAccessLinkGeneratorState<
   S extends {},
   I extends string | undefined = undefined,
   MS extends {} | undefined = undefined
@@ -32,24 +32,24 @@ export interface GeneratorState<
   MigratedState?: MS;
 }
 
-export interface GeneratorStateMapping {
+export interface DirectAccessLinkGeneratorStateMapping {
   // The `any` here is quite unfortunate.  Using `object` actually gives no type errors in my IDE
   // but running `node scripts/type_check` will cause an error:
   // examples/access_links_examples/public/direct_access_link_generator.ts:77:66 -
   // error TS2339: Property 'name' does not exist on type 'object'.  However it's correctly
   // typed when I edit that file.
-  [key: string]: GeneratorState<any, string | undefined, object | undefined>;
+  [key: string]: DirectAccessLinkGeneratorState<any, string | undefined, object | undefined>;
 }
 
-export interface AccessLinkGenerator<Id extends GeneratorId> {
+export interface AccessLinkGenerator<Id extends DirectAccessLinkGeneratorId> {
   id: Id;
-  createUrl(state: GeneratorStateMapping[Id]['State']): Promise<string>;
+  createUrl(state: DirectAccessLinkGeneratorStateMapping[Id]['State']): Promise<string>;
   isDeprecated: boolean;
   migrate(
-    state: GeneratorStateMapping[Id]['State']
+    state: DirectAccessLinkGeneratorStateMapping[Id]['State']
   ): Promise<{
-    state: GeneratorStateMapping[Id]['MigratedState'];
-    id: GeneratorStateMapping[Id]['MigratedId'];
+    state: DirectAccessLinkGeneratorStateMapping[Id]['MigratedState'];
+    id: DirectAccessLinkGeneratorStateMapping[Id]['MigratedId'];
   }>;
 }
 
@@ -61,20 +61,20 @@ const noMigrationFnProvidedWarningText = i18n.translate(
   }
 );
 
-export interface DirectAccessLinkOptions<Id extends GeneratorId> {
+export interface DirectAccessLinkSpec<Id extends DirectAccessLinkGeneratorId> {
   id: Id;
-  createUrl?: (state: GeneratorStateMapping[Id]['State']) => Promise<string>;
+  createUrl?: (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => Promise<string>;
   isDeprecated?: boolean;
   migrate?: (
-    state: GeneratorStateMapping[Id]['State']
+    state: DirectAccessLinkGeneratorStateMapping[Id]['State']
   ) => Promise<{
-    state: GeneratorStateMapping[Id]['MigratedState'];
-    id: GeneratorStateMapping[Id]['MigratedId'];
+    state: DirectAccessLinkGeneratorStateMapping[Id]['MigratedState'];
+    id: DirectAccessLinkGeneratorStateMapping[Id]['MigratedId'];
   }>;
 }
 
-export const createDirectAccessLinkGenerator = <Id extends GeneratorId>(
-  options: DirectAccessLinkOptions<Id>,
+export const createDirectAccessLinkGenerator = <Id extends DirectAccessLinkGeneratorId>(
+  options: DirectAccessLinkSpec<Id>,
   getGenerator: DirectAccessLinksStart['getAccessLinkGenerator']
 ): AccessLinkGenerator<Id> => {
   if (options.isDeprecated && !options.migrate) {
@@ -109,7 +109,7 @@ export const createDirectAccessLinkGenerator = <Id extends GeneratorId>(
 
   return {
     id: options.id,
-    createUrl: async (state: GeneratorStateMapping[Id]['State']) => {
+    createUrl: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {
       if (options.createUrl && options.isDeprecated) {
         throw new Error(
           i18n.translate('directAccessLinks.error.createUrlFnProvided', {
@@ -155,7 +155,7 @@ export const createDirectAccessLinkGenerator = <Id extends GeneratorId>(
       return options.createUrl(state);
     },
     isDeprecated: !!options.isDeprecated,
-    migrate: async (state: GeneratorStateMapping[Id]['State']) => {
+    migrate: async (state: DirectAccessLinkGeneratorStateMapping[Id]['State']) => {
       if (!options.isDeprecated) {
         throw new Error(
           i18n.translate('directAccessLinks.error.migrateCalledNotDeprecated', {

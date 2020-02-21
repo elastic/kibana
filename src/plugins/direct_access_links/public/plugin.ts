@@ -20,40 +20,42 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  AccessLinkGenerator,
-  GeneratorId,
-  DirectAccessLinkOptions,
-  createDirectAccessLinkGenerator,
-} from './direct_access_link_generator';
+  DirectAccessLinkGeneratorId,
+  DirectAccessLinkSpec,
+} from './direct_access_link_generator_spec';
+import { DirectAccessLinkGeneratorInternal } from './direct_access_link_generator_internal';
+import { DirectAccessLinkGeneratorContract } from './direct_access_link_generator_contract';
 
 export interface DirectAccessLinksStart {
-  getAccessLinkGenerator: (urlGeneratorId: GeneratorId) => AccessLinkGenerator<GeneratorId>;
+  getAccessLinkGenerator: (
+    urlGeneratorId: DirectAccessLinkGeneratorId
+  ) => DirectAccessLinkGeneratorContract<DirectAccessLinkGeneratorId>;
 }
 
 export interface DirectAccessLinksSetup {
-  registerAccessLinkGenerator: <Id extends GeneratorId>(
+  registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
     id: Id,
-    generator: DirectAccessLinkOptions<Id>
+    generator: DirectAccessLinkSpec<Id>
   ) => void;
 }
 
 export class DirectAccessLinksPlugin
   implements Plugin<DirectAccessLinksSetup, DirectAccessLinksStart> {
   private accessLinkGenerators: {
-    [Id in GeneratorId]?: AccessLinkGenerator<Id>;
+    [Id in DirectAccessLinkGeneratorId]?: DirectAccessLinkGeneratorInternal<any>;
   } = {};
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const setup: DirectAccessLinksSetup = {
-      registerAccessLinkGenerator: <Id extends GeneratorId>(
+      registerAccessLinkGenerator: <Id extends DirectAccessLinkGeneratorId>(
         id: Id,
-        generatorOptions: DirectAccessLinkOptions<Id>
+        generatorOptions: DirectAccessLinkSpec<Id>
       ) => {
-        this.accessLinkGenerators[id] = createDirectAccessLinkGenerator(
+        this.accessLinkGenerators[id] = new DirectAccessLinkGeneratorInternal<Id>(
           generatorOptions,
-          this.getAccessLinkGenerator.bind(this)
+          this.getAccessLinkGenerator
         );
       },
     };
@@ -62,14 +64,14 @@ export class DirectAccessLinksPlugin
 
   public start(core: CoreStart) {
     const start: DirectAccessLinksStart = {
-      getAccessLinkGenerator: this.getAccessLinkGenerator.bind(this),
+      getAccessLinkGenerator: this.getAccessLinkGenerator,
     };
     return start;
   }
 
   public stop() {}
 
-  private getAccessLinkGenerator(id: GeneratorId) {
+  private readonly getAccessLinkGenerator = (id: DirectAccessLinkGeneratorId) => {
     const generator = this.accessLinkGenerators[id];
     if (!generator) {
       throw new Error(
@@ -79,7 +81,7 @@ export class DirectAccessLinksPlugin
         })
       );
     } else {
-      return generator;
+      return generator.getPublicContract();
     }
-  }
+  };
 }

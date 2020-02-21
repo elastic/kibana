@@ -29,7 +29,9 @@ import { EuiText } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
 
 function useQuery() {
-  return new URLSearchParams(useLocation().search);
+  const { search } = useLocation();
+  const params = React.useMemo(() => new URLSearchParams(search), [search]);
+  return params;
 }
 
 interface HelloPageProps {
@@ -66,9 +68,13 @@ export const Routes: React.FC<{}> = () => {
 export const LinksExample: React.FC<{
   appBasePath: string;
 }> = props => {
-  const history = createBrowserHistory({
-    basename: props.appBasePath,
-  });
+  const history = React.useMemo(
+    () =>
+      createBrowserHistory({
+        basename: props.appBasePath,
+      }),
+    [props.appBasePath]
+  );
   return (
     <Router history={history}>
       <Routes />

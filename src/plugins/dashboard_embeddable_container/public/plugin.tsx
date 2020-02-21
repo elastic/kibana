@@ -39,7 +39,7 @@ import {
 } from './direct_access_link_generator';
 
 declare module '../../direct_access_links/public' {
-  export interface GeneratorStateMapping {
+  export interface DirectAccessLinkGeneratorStateMapping {
     [DASHBOARD_APP_LINK_GENERATOR]: DashboardAppLinkGeneratorState;
   }
 }

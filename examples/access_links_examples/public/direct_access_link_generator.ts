@@ -17,8 +17,8 @@
  * under the License.
  */
 import url from 'url';
-import { GeneratorState } from '../../../src/plugins/direct_access_links/public';
-import { DirectAccessLinkOptions } from '../../../src/plugins/direct_access_links/public';
+import { DirectAccessLinkGeneratorState } from '../../../src/plugins/direct_access_links/public';
+import { DirectAccessLinkSpec } from '../../../src/plugins/direct_access_links/public';
 
 /**
  * The name of the latest variable can always stay the same so code that
@@ -33,11 +33,11 @@ export interface HelloLinkState {
   lastName: string;
 }
 
-export type HelloLinkGeneratorState = GeneratorState<HelloLinkState>;
+export type HelloLinkGeneratorState = DirectAccessLinkGeneratorState<HelloLinkState>;
 
 export const createHelloPageLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string }>
-): DirectAccessLinkOptions<typeof HELLO_LINK_GENERATOR> => ({
+): DirectAccessLinkSpec<typeof HELLO_LINK_GENERATOR> => ({
   id: HELLO_LINK_GENERATOR,
   createUrl: async state => {
     const startServices = await getStartServices();
@@ -64,13 +64,13 @@ export interface HelloLinkStateV1 {
   name: string;
 }
 
-export type LegacyHelloLinkGeneratorState = GeneratorState<
+export type LegacyHelloLinkGeneratorState = DirectAccessLinkGeneratorState<
   HelloLinkStateV1,
   typeof HELLO_LINK_GENERATOR,
   HelloLinkState
 >;
 
-export const helloPageLinkGeneratorV1: DirectAccessLinkOptions<typeof HELLO_LINK_GENERATOR_V1> = {
+export const helloPageLinkGeneratorV1: DirectAccessLinkSpec<typeof HELLO_LINK_GENERATOR_V1> = {
   id: HELLO_LINK_GENERATOR_V1,
   isDeprecated: true,
   migrate: async state => {

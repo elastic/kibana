@@ -20,7 +20,7 @@
 import url from 'url';
 import { TimeRange, Filter, Query } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { DirectAccessLinkOptions } from '../../direct_access_links/public';
+import { DirectAccessLinkSpec } from '../../direct_access_links/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -40,7 +40,7 @@ export interface DashboardAppLinkGeneratorState {
 
 export const createDirectAccessDashboardLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
-): DirectAccessLinkOptions<typeof DASHBOARD_APP_LINK_GENERATOR> => ({
+): DirectAccessLinkSpec<typeof DASHBOARD_APP_LINK_GENERATOR> => ({
   id: DASHBOARD_APP_LINK_GENERATOR,
   createUrl: async state => {
     const startServices = await getStartServices();

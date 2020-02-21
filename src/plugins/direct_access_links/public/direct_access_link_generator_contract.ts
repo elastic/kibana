@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DirectAccessLinksPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DirectAccessLinksPlugin(initializerContext);
-}
-
-export { DirectAccessLinksSetup, DirectAccessLinksStart } from './plugin';
-
-export {
+import {
   DirectAccessLinkGeneratorId,
-  DirectAccessLinkGeneratorState,
   DirectAccessLinkGeneratorStateMapping,
-  DirectAccessLinkSpec,
-} from './direct_access_link_generator';
+} from './direct_access_link_generator_spec';
+
+export interface DirectAccessLinkGeneratorContract<Id extends DirectAccessLinkGeneratorId> {
+  id: Id;
+  createUrl(state: DirectAccessLinkGeneratorStateMapping[Id]['State']): Promise<string>;
+  isDeprecated: boolean;
+  migrate(
+    state: DirectAccessLinkGeneratorStateMapping[Id]['State']
+  ): Promise<{
+    state: DirectAccessLinkGeneratorStateMapping[Id]['MigratedState'];
+    id: DirectAccessLinkGeneratorStateMapping[Id]['MigratedId'];
+  }>;
+}

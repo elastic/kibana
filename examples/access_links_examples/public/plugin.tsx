@@ -32,7 +32,7 @@ import {
 } from './direct_access_link_generator';
 
 declare module '../../../src/plugins/direct_access_links/public' {
-  export interface GeneratorStateMapping {
+  export interface DirectAccessLinkGeneratorStateMapping {
     [HELLO_LINK_GENERATOR_V1]: LegacyHelloLinkGeneratorState;
     [HELLO_LINK_GENERATOR]: HelloLinkGeneratorState;
   }

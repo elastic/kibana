@@ -53,6 +53,9 @@
 /src/plugins/navigation/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
+/src/plugins/direct_access_links/ @elastic/kibana-app-arch
+/src/exampls/access_links_examples/ @elastic/kibana-app-arch
+/src/exampls/access_links_explorer/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 
 # APM
