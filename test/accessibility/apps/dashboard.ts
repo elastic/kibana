@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
 
   describe('Dashboard', () => {
-    const dashboardName = 'Dashboard Listing A11y 3';
+    const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
