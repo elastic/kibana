@@ -1251,9 +1251,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -1272,9 +1273,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
 
@@ -1302,9 +1304,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -1323,9 +1326,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
 
@@ -1343,9 +1347,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;

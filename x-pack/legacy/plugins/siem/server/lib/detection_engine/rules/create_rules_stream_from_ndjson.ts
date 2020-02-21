@@ -74,15 +74,13 @@ export const createLimitStream = (limit: number): Transform => {
  * Inspiration and the pattern of code followed is from:
  * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
  */
-export const createRulesStreamFromNdJson = (
-  ndJsonStream: Readable,
-  ruleLimit: number
-): Transform => {
-  return ndJsonStream
-    .pipe(createSplitStream('\n'))
-    .pipe(parseNdjsonStrings())
-    .pipe(filterExportedCounts())
-    .pipe(validateRules())
-    .pipe(createLimitStream(ruleLimit))
-    .pipe(createConcatStream([]));
+export const createRulesStreamFromNdJson = (ruleLimit: number) => {
+  return [
+    createSplitStream('\n'),
+    parseNdjsonStrings(),
+    filterExportedCounts(),
+    validateRules(),
+    createLimitStream(ruleLimit),
+    createConcatStream([]),
+  ];
 };

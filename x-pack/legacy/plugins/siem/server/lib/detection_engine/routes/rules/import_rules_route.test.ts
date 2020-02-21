@@ -25,6 +25,7 @@ import {
 import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
+import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 
 describe('import_rules_route', () => {
   let server = createMockServer();
@@ -33,8 +34,12 @@ describe('import_rules_route', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     config = () => ({
@@ -93,6 +98,21 @@ describe('import_rules_route', () => {
       const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
       const { statusCode } = await inject(getImportRulesRequest(requestPayload));
       expect(statusCode).toEqual(404);
+    });
+
+    test('returns error if createPromiseFromStreams throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      jest
+        .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
+        .mockImplementation(() => {
+          throw new Error('Test error');
+        });
+      const requestPayload = getSimpleRuleAsMultipartContent(['rule-1']);
+      const { payload, statusCode } = await server.inject(getImportRulesRequest(requestPayload));
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
