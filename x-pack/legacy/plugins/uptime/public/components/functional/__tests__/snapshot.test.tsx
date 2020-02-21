@@ -14,6 +14,7 @@ describe('Snapshot component', () => {
     up: 8,
     down: 2,
     total: 10,
+    method: 'iterator',
   };
 
   it('renders without errors', () => {

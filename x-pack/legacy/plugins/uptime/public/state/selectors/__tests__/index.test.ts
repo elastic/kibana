@@ -30,6 +30,7 @@ describe('state selectors', () => {
         up: 2,
         down: 0,
         total: 2,
+        method: 'iterator',
       },
       errors: [],
       loading: false,

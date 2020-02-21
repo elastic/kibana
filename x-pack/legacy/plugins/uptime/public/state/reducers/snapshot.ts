@@ -23,6 +23,7 @@ const initialState: SnapshotState = {
     down: 0,
     total: 0,
     up: 0,
+    method: 'unknown',
   },
   errors: [],
   loading: false,
