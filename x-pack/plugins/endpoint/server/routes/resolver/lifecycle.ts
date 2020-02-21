@@ -9,29 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
-import { ResolverEvent } from '../../../common/types';
-
-interface LifecycleQueryParams {
-  ancestors: number;
-  /**
-   * legacyEndpointID is optional because there are two different types of identifiers:
-   *
-   * Legacy
-   * A legacy Entity ID is made up of the agent.id and unique_pid fields. The client will need to identify if
-   * it's looking at a legacy event and use those fields when making requests to the backend. The
-   * request would be /resolver/{id}?legacyEndpointID=<some uuid>and the {id} would be the unique_pid.
-   *
-   * Elastic Endpoint
-   * When interacting with the new form of data the client doesn't need the legacyEndpointID because it's already a
-   * part of the entityID in the new type of event. So for the same request the client would just hit resolver/{id}
-   * and the {id} would be entityID stored in the event's process.entity_id field.
-   */
-  legacyEndpointID?: string;
-}
-
-interface LifecyclePathParams {
-  id: string;
-}
+import {
+  ResolverEvent,
+  ResolverLifecycleQueryParams,
+  ResolverPathParams,
+} from '../../../common/types';
 
 export const validateLifecycle = {
   params: schema.object({ id: schema.string() }),
@@ -47,7 +29,7 @@ function getParentEntityID(results: ResolverEvent[]) {
 
 export function handleLifecycle(
   log: Logger
-): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
+): RequestHandler<ResolverPathParams, ResolverLifecycleQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },

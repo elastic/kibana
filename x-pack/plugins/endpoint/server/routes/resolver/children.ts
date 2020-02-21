@@ -11,29 +11,7 @@ import { extractEntityID } from './utils/normalize';
 import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
-
-interface ChildrenQueryParams {
-  after?: string;
-  limit: number;
-  /**
-   * legacyEndpointID is optional because there are two different types of identifiers:
-   *
-   * Legacy
-   * A legacy Entity ID is made up of the agent.id and unique_pid fields. The client will need to identify if
-   * it's looking at a legacy event and use those fields when making requests to the backend. The
-   * request would be /resolver/{id}?legacyEndpointID=<some uuid>and the {id} would be the unique_pid.
-   *
-   * Elastic Endpoint
-   * When interacting with the new form of data the client doesn't need the legacyEndpointID because it's already a
-   * part of the entityID in the new type of event. So for the same request the client would just hit resolver/{id}
-   * and the {id} would be entityID stored in the event's process.entity_id field.
-   */
-  legacyEndpointID?: string;
-}
-
-interface ChildrenPathParams {
-  id: string;
-}
+import { ResolverCursorPaginatedQueryParams, ResolverPathParams } from '../../../common/types';
 
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),
@@ -46,7 +24,7 @@ export const validateChildren = {
 
 export function handleChildren(
   log: Logger
-): RequestHandler<ChildrenPathParams, ChildrenQueryParams> {
+): RequestHandler<ResolverPathParams, ResolverCursorPaginatedQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
