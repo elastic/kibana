@@ -204,6 +204,8 @@ def withGcsArtifactUpload(workerName, closure) {
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
   ]
 
+  def WORKERS = [1,2,3,4,5,6,7,8,9,10,11,12]
+
   withEnv([
     "GCS_UPLOAD_PREFIX=${uploadPrefix}"
   ], {
@@ -213,11 +215,12 @@ def withGcsArtifactUpload(workerName, closure) {
       catchError {
         if (env.CODE_COVERAGE) {
           sh "echo 'current path' && pwd && echo 'navigating back' && cd .."
-          echo 'print content' && ls
-          ARTIFACT_PATTERNS.each { pattern ->
-            uploadGcsArtifact(uploadPrefix, "kibana*/${pattern}")
+          sh "echo 'print content' && ls"
+          WORKERS.each { worker ->
+            ARTIFACT_PATTERNS.each { pattern ->
+              uploadGcsArtifact(uploadPrefix, "kibana${worker}/${pattern}")
+            }
           }
-          sh 'cd kibana'
         } else {
           ARTIFACT_PATTERNS.each { pattern ->
             uploadGcsArtifact(uploadPrefix, pattern)
