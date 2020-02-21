@@ -24,8 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
-import './_index.scss';
-
 export const renderApp = async (element: HTMLElement) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome } = getServices();
