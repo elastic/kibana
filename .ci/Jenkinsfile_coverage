@@ -55,8 +55,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             ])
             kibanaPipeline.jobRunner('tests-l', false) {
               kibanaPipeline.downloadCoverageArtifacts()
-              kibanaPipeline.bash(
-                """
+
+              def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+              withEnv(["TIME_STAMP=${timestamp}"]) {
+                kibanaPipeline.bash(
+                  """
                   source src/dev/ci_setup/setup_env.sh
 
                   # bootstrap from x-pack folder
@@ -74,11 +77,15 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
 
+                  echo "### TIME_STAMP: ${TIME_STAMP}"
+
                   . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER}
 
                 """,
-                "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
-              )
+                  "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
+                )
+              }
+
               kibanaPipeline.uploadCoverageStaticSite(new Date().format("yyyy-MM-dd'T'HH-mm-ss'Z'") )
               kibanaPipeline.uploadCoverageStaticSite_PROD(new Date().format("yyyy-MM-dd'T'H-mm-ss'Z'") )
 //              sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
