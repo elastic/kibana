@@ -7,13 +7,17 @@
 import { createFlagError, run, ToolingLog } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
 import os from 'os';
+import {
+  Agent as _Agent,
+  PostAgentCheckinRequest,
+  PostAgentCheckinResponse,
+  PostAgentEnrollRequest,
+  PostAgentEnrollResponse,
+} from '../../common/types';
 
 const CHECKIN_INTERVAL = 3000; // 3 seconds
 
-interface Agent {
-  id: string;
-  access_api_key: string;
-}
+type Agent = Pick<_Agent, 'id' | 'access_api_key'>;
 
 let closing = false;
 
@@ -30,8 +34,8 @@ run(
     if (!flags.enrollmentApiKey || typeof flags.enrollmentApiKey !== 'string') {
       throw createFlagError('please provide a single --enrollmentApiKey flag');
     }
-    const kibanaUrl: string = (flags.kibanaUrl as string) || 'http://localhost:5601';
-    const agent = await enroll(kibanaUrl, flags.enrollmentApiKey as string, log);
+    const kibanaUrl = flags.kibanaUrl || 'http://localhost:5601';
+    const agent = await enroll(kibanaUrl, flags.enrollmentApiKey, log);
 
     log.info('Enrolled with sucess', agent);
 
@@ -56,24 +60,25 @@ run(
 );
 
 async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
+  const body: PostAgentCheckinRequest['body'] = {
+    events: [
+      {
+        type: 'STATE',
+        subtype: 'RUNNING',
+        message: 'state changed from STOPPED to RUNNING',
+        timestamp: new Date().toISOString(),
+        payload: {
+          random: 'data',
+          state: 'RUNNING',
+          previous_state: 'STOPPED',
+        },
+        agent_id: agent.id,
+      },
+    ],
+  };
   const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/${agent.id}/checkin`, {
     method: 'POST',
-    body: JSON.stringify({
-      events: [
-        {
-          type: 'STATE',
-          subtype: 'RUNNING',
-          message: 'state changed from STOPPED to RUNNING',
-          timestamp: new Date().toISOString(),
-          payload: {
-            random: 'data',
-            state: 'RUNNING',
-            previous_state: 'STOPPED',
-          },
-          agent_id: agent.id,
-        },
-      ],
-    }),
+    body: JSON.stringify(body),
     headers: {
       'kbn-xsrf': 'xxx',
       Authorization: `ApiKey ${agent.access_api_key}`,
@@ -87,43 +92,44 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
     return;
   }
 
-  const json = await res.json();
-  log.info('checkin', json);
+  const obj: PostAgentCheckinResponse = await res.json();
+  log.info('checkin', obj);
 }
 
 async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promise<Agent> {
+  const body: PostAgentEnrollRequest['body'] = {
+    type: 'PERMANENT',
+    metadata: {
+      local: {
+        host: 'localhost',
+        ip: '127.0.0.1',
+        system: `${os.type()} ${os.release()}`,
+        memory: os.totalmem(),
+      },
+      user_provided: {
+        dev_agent_version: '0.0.1',
+        region: 'us-east',
+      },
+    },
+  };
   const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/enroll`, {
     method: 'POST',
-    body: JSON.stringify({
-      type: 'PERMANENT',
-      metadata: {
-        local: {
-          host: 'localhost',
-          ip: '127.0.0.1',
-          system: `${os.type()} ${os.release()}`,
-          memory: os.totalmem(),
-        },
-        user_provided: {
-          dev_agent_version: '0.0.1',
-          region: 'us-east',
-        },
-      },
-    }),
+    body: JSON.stringify(body),
     headers: {
       'kbn-xsrf': 'xxx',
       Authorization: `ApiKey ${apiKey}`,
       'Content-Type': 'application/json',
     },
   });
-  const json = await res.json();
+  const obj: PostAgentEnrollResponse = await res.json();
 
-  if (!json.success) {
-    log.error(JSON.stringify(json, null, 2));
+  if (!obj.success) {
+    log.error(JSON.stringify(obj, null, 2));
     throw new Error('unable to enroll');
   }
 
   return {
-    id: json.item.id,
-    access_api_key: json.item.access_api_key,
+    id: obj.item.id,
+    access_api_key: obj.item.access_api_key,
   };
 }

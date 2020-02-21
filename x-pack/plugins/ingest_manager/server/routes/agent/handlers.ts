@@ -13,7 +13,9 @@ import {
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
+  PostAgentCheckinResponse,
   PostAgentEnrollRequestSchema,
+  PostAgentEnrollResponse,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusForPolicySchema,
@@ -181,13 +183,14 @@ export const postAgentCheckinHandler: RequestHandler<
       request.body.events || [],
       request.body.local_metadata
     );
-    const body = {
+    const body: PostAgentCheckinResponse = {
       action: 'checkin',
       success: true,
       actions: actions.map(a => ({
         type: a.type,
         data: a.data ? JSON.parse(a.data) : a.data,
         id: a.id,
+        created_at: a.created_at,
       })),
     };
 
@@ -276,7 +279,7 @@ export const postAgentEnrollHandler: RequestHandler<
       },
       request.body.shared_id
     );
-    const body = {
+    const body: PostAgentEnrollResponse = {
       action: 'created',
       success: true,
       item: {
