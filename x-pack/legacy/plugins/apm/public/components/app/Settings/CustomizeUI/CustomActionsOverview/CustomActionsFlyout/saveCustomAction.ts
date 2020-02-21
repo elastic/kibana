@@ -5,15 +5,19 @@
  */
 
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'kibana/public';
 import { APMClient } from '../../../../../../services/rest/createCallApmApi';
 import { CustomAction } from './';
 
-export const saveCustomAction = ({
+export const saveCustomAction = async ({
   callApmApi,
-  customAction
+  customAction,
+  toasts
 }: {
   callApmApi: APMClient;
   customAction: CustomAction;
+  toasts: NotificationsStart['toasts'];
 }) => {
   const { label, url, filters } = customAction;
   const customActionBody = {
@@ -26,5 +30,26 @@ export const saveCustomAction = ({
         return acc;
       }, {})
   };
-  console.log('### caue: customAction', customActionBody);
+
+  await callApmApi({
+    pathname: '/api/apm/settings/custom-actions',
+    method: 'POST',
+    params: {
+      body: customActionBody
+    }
+  });
+
+  // TODO: caue change the toast messages
+  toasts.addSuccess({
+    title: i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.succeeded.title',
+      { defaultMessage: 'Created a new custom action!' }
+    ),
+    text: i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.succeeded.text',
+      {
+        defaultMessage: 'We have succesfully created a custom action.'
+      }
+    )
+  });
 };

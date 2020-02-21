@@ -8,7 +8,7 @@ export interface CustomAction {
   '@timestamp': number;
   label: string;
   url: string;
-  actionId: 'TRACE';
+  actionId: 'trace';
   filters?: {
     service?: { name?: string; environment?: string };
     transaction?: { type?: string; name?: string };

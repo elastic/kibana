@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { Controller, useForm, ValidationOptions } from 'react-hook-form';
+import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { Filter, FiltersSection } from './FiltersSection';
 import { saveCustomAction } from './saveCustomAction';
@@ -65,12 +66,14 @@ const actionFields: ActionField[] = [
 
 export const CustomActionsFlyout = ({ onClose }: Props) => {
   const callApmApiFromHook = useCallApmApi();
+  const { toasts } = useApmPluginContext().core.notifications;
+
   const { register, handleSubmit, errors, control, watch } = useForm<
     CustomAction
   >();
 
   const onSubmit = (customAction: CustomAction) => {
-    saveCustomAction({ callApmApi: callApmApiFromHook, customAction });
+    saveCustomAction({ callApmApi: callApmApiFromHook, customAction, toasts });
   };
 
   const filters = watch('filters');

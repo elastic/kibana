@@ -59,6 +59,12 @@ import {
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import { indicesPrivilegesRoute } from './security';
+import {
+  createCustomActionRoute,
+  updateCustomActionRoute,
+  deleteCustomActionRoute,
+  listCustomActionsRoute
+} from './settings/custom_actions';
 
 const createApmApi = () => {
   const api = createApi()
@@ -126,7 +132,13 @@ const createApmApi = () => {
     .add(serviceMapServiceNodeRoute)
 
     // security
-    .add(indicesPrivilegesRoute);
+    .add(indicesPrivilegesRoute)
+
+    // Custom actions
+    .add(createCustomActionRoute)
+    .add(updateCustomActionRoute)
+    .add(deleteCustomActionRoute)
+    .add(listCustomActionsRoute);
 
   return api;
 };
