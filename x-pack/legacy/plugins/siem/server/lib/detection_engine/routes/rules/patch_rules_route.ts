@@ -5,18 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { patchRules } from '../../rules/patch_rules';
 import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'PATCH',
     path: DETECTION_ENGINE_RULES_URL,
@@ -59,21 +59,16 @@ export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute =>
         version,
       } = request.payload;
 
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
+        const { alertsClient, actionsClient, savedObjectsClient } = await getClients(request);
+
+        if (!actionsClient || !alertsClient) {
+          return headers.response().code(404);
+        }
+
         const rule = await patchRules({
-          alertsClient,
           actionsClient,
+          alertsClient,
           description,
           enabled,
           falsePositives,
@@ -146,6 +141,6 @@ export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute =>
   };
 };
 
-export const patchRulesRoute = (server: ServerFacade) => {
-  server.route(createPatchRulesRoute(server));
+export const patchRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
+  route(createPatchRulesRoute(getClients));
 };

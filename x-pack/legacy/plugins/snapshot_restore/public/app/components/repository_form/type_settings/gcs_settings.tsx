@@ -64,7 +64,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the Google Cloud Storage client."
           />
         }
-        idAria="gcsRepositoryClientDescription"
         fullWidth
       >
         <EuiFormRow
@@ -75,7 +74,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryClientDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
@@ -110,7 +108,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the Google Cloud Storage bucket to use for snapshots."
           />
         }
-        idAria="gcsRepositoryBucketDescription"
         fullWidth
       >
         <EuiFormRow
@@ -121,7 +118,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryBucketDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
         >
@@ -156,7 +152,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The bucket path to the repository data."
           />
         }
-        idAria="gcsRepositoryBasePathDescription"
         fullWidth
       >
         <EuiFormRow
@@ -167,7 +162,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryBasePathDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
@@ -202,13 +196,11 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
-        idAria="gcsRepositoryCompressDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['gcsRepositoryCompressDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
         >
@@ -248,7 +240,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
-        idAria="gcsRepositoryChunkSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -259,7 +250,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -295,7 +285,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The rate for creating snapshots for each node."
           />
         }
-        idAria="gcsRepositoryMaxSnapshotBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -306,7 +295,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -342,7 +330,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The snapshot restore rate for each node."
           />
         }
-        idAria="gcsRepositoryMaxRestoreBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -353,7 +340,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['gcsRepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -389,13 +375,11 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
-        idAria="gcsRepositoryReadonlyDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['gcsRepositoryReadonlyDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >

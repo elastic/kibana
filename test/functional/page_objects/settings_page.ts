@@ -19,7 +19,6 @@
 
 import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
-import { NavSetting } from '../../../src/core/public/chrome/ui/header/';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -732,12 +731,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
       await checkBox.click();
       return await this.canSavedObjectsBeDeleted();
-    }
-
-    async setNavType(navType: NavSetting) {
-      await PageObjects.common.navigateToApp('settings');
-      await this.clickKibanaSettings();
-      await this.setAdvancedSettingsSelect('pageNavigation', navType);
     }
   }
 

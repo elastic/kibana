@@ -25,5 +25,5 @@ export { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 
 // Core will be looking for this when loading our plugin in the new platform
 export const plugin = (context: PluginInitializerContext) => {
-  return new DashboardPlugin();
+  return new DashboardPlugin(context);
 };

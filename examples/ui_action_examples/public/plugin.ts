@@ -19,7 +19,7 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction } from './hello_world_action';
+import { createHelloWorldAction, HELLO_WORLD_ACTION_TYPE } from './hello_world_action';
 import { helloWorldTrigger } from './hello_world_trigger';
 
 interface UiActionExamplesSetupDependencies {
@@ -33,8 +33,9 @@ interface UiActionExamplesStartDependencies {
 export class UiActionExamplesPlugin
   implements
     Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
-  public setup(core: CoreSetup, deps: UiActionExamplesSetupDependencies) {
-    deps.uiActions.registerTrigger(helloWorldTrigger);
+  public setup(core: CoreSetup, { uiActions }: UiActionExamplesSetupDependencies) {
+    uiActions.registerTrigger(helloWorldTrigger);
+    uiActions.attachAction(helloWorldTrigger.id, HELLO_WORLD_ACTION_TYPE);
   }
 
   public start(coreStart: CoreStart, deps: UiActionExamplesStartDependencies) {

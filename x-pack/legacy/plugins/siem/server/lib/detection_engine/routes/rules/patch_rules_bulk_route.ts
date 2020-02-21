@@ -5,21 +5,21 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   BulkPatchRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'PATCH',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -33,14 +33,9 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
       },
     },
     async handler(request: BulkPatchRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
@@ -132,6 +127,9 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
   };
 };
 
-export const patchRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createPatchRulesBulkRoute(server));
+export const patchRulesBulkRoute = (
+  route: LegacyServices['route'],
+  getClients: GetScopedClients
+): void => {
+  route(createPatchRulesBulkRoute(getClients));
 };

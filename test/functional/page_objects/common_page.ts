@@ -115,7 +115,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         );
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          2 * defaultFindTimeout
+          6 * defaultFindTimeout
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
@@ -193,6 +193,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async navigateToUrlWithBrowserHistory(
       appName: string,
       subUrl?: string,
+      search?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
@@ -204,6 +205,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const appConfig = {
         // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
         pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
+        search,
       };
 
       await this.navigate({

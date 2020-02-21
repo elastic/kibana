@@ -99,7 +99,7 @@ export function initDashboardApp(app, deps) {
 
           // syncs `_g` portion of url with query services
           const { stop: stopSyncingGlobalStateWithUrl } = syncQuery(
-            deps.npDataStart.query,
+            deps.data.query,
             kbnUrlStateStorage
           );
 
@@ -137,36 +137,31 @@ export function initDashboardApp(app, deps) {
         },
         resolve: {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl).then(
-              () => {
-                const savedObjectsClient = deps.savedObjectsClient;
-                const title = $route.current.params.title;
-                if (title) {
-                  return savedObjectsClient
-                    .find({
-                      search: `"${title}"`,
-                      search_fields: 'title',
-                      type: 'dashboard',
-                    })
-                    .then(results => {
-                      // The search isn't an exact match, lets see if we can find a single exact match to use
-                      const matchingDashboards = results.savedObjects.filter(
-                        dashboard =>
-                          dashboard.attributes.title.toLowerCase() === title.toLowerCase()
-                      );
-                      if (matchingDashboards.length === 1) {
-                        history.replace(createDashboardEditUrl(matchingDashboards[0].id));
-                      } else {
-                        history.replace(
-                          `${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`
-                        );
-                        $route.reload();
-                      }
-                      return new Promise(() => {});
-                    });
-                }
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl).then(() => {
+              const savedObjectsClient = deps.savedObjectsClient;
+              const title = $route.current.params.title;
+              if (title) {
+                return savedObjectsClient
+                  .find({
+                    search: `"${title}"`,
+                    search_fields: 'title',
+                    type: 'dashboard',
+                  })
+                  .then(results => {
+                    // The search isn't an exact match, lets see if we can find a single exact match to use
+                    const matchingDashboards = results.savedObjects.filter(
+                      dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+                    );
+                    if (matchingDashboards.length === 1) {
+                      history.replace(createDashboardEditUrl(matchingDashboards[0].id));
+                    } else {
+                      history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+                      $route.reload();
+                    }
+                    return new Promise(() => {});
+                  });
               }
-            );
+            });
           },
         },
       })
@@ -177,7 +172,7 @@ export function initDashboardApp(app, deps) {
         requireUICapability: 'dashboard.createNew',
         resolve: {
           dash: function(redirectWhenMissing, $rootScope, kbnUrl) {
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get();
               })
@@ -197,7 +192,7 @@ export function initDashboardApp(app, deps) {
           dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get(id);
               })
