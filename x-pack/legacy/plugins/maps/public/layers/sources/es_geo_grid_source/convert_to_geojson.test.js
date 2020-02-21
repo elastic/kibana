@@ -9,10 +9,13 @@ import { RENDER_AS } from './render_as';
 
 const esResponse = {
   aggregations: {
-    gridSplit: {
+    compositeSplit: {
+      after_key: {
+        gridSplit: '10/327/460',
+      },
       buckets: [
         {
-          key: '4/4/6',
+          key: { gridSplit: '4/4/6' },
           doc_count: 65,
           avg_of_bytes: { value: 5359.2307692307695 },
           'terms_of_machine.os.keyword': {
@@ -34,9 +37,9 @@ const esResponse = {
 };
 
 it('Should convert elasticsearch aggregation response into feature collection of points', () => {
-  const geoJson = convertToGeoJson(esResponse, RENDER_AS.POINT);
-  expect(geoJson.featureCollection.features.length).toBe(1);
-  expect(geoJson.featureCollection.features[0]).toEqual({
+  const features = convertToGeoJson(esResponse, RENDER_AS.POINT);
+  expect(features.length).toBe(1);
+  expect(features[0]).toEqual({
     geometry: {
       coordinates: [-81.94552666092149, 36.62813963153614],
       type: 'Point',
@@ -52,9 +55,9 @@ it('Should convert elasticsearch aggregation response into feature collection of
 });
 
 it('Should convert elasticsearch aggregation response into feature collection of Polygons', () => {
-  const geoJson = convertToGeoJson(esResponse, RENDER_AS.GRID);
-  expect(geoJson.featureCollection.features.length).toBe(1);
-  expect(geoJson.featureCollection.features[0]).toEqual({
+  const features = convertToGeoJson(esResponse, RENDER_AS.GRID);
+  expect(features.length).toBe(1);
+  expect(features[0]).toEqual({
     geometry: {
       coordinates: [
         [

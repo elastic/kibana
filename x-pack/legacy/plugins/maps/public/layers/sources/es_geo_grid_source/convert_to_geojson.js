@@ -14,27 +14,23 @@ const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
 export function convertToGeoJson(esResponse, renderAs) {
   const features = [];
 
-  const gridBuckets = _.get(esResponse, 'aggregations.gridSplit.buckets', []);
+  const gridBuckets = _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
   for (let i = 0; i < gridBuckets.length; i++) {
     const gridBucket = gridBuckets[i];
+    const gridKey = gridBucket.key.gridSplit;
     features.push({
       type: 'Feature',
       geometry: rowToGeometry({
-        gridKey: gridBucket.key,
+        gridKey,
         gridCentroid: gridBucket.gridCentroid,
         renderAs,
       }),
-      id: gridBucket.key,
+      id: gridKey,
       properties: extractPropertiesFromBucket(gridBucket, GRID_BUCKET_KEYS_TO_IGNORE),
     });
   }
 
-  return {
-    featureCollection: {
-      type: 'FeatureCollection',
-      features: features,
-    },
-  };
+  return features;
 }
 
 function rowToGeometry({ gridKey, gridCentroid, renderAs }) {

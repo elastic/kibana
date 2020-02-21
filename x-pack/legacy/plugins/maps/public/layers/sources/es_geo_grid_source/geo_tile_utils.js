@@ -87,7 +87,13 @@ function sec(value) {
 }
 
 function latitudeToTile(lat, tileCount) {
-  const radians = (lat * Math.PI) / 180;
+  let boundedLat = lat;
+  if (lat >= 90) {
+    boundedLat = 89.9;
+  } else if (lat <= -90) {
+    boundedLat = -89.9;
+  }
+  const radians = (boundedLat * Math.PI) / 180;
   const y = ((1 - Math.log(Math.tan(radians) + sec(radians)) / Math.PI) / 2) * tileCount;
   return Math.floor(y);
 }
@@ -111,4 +117,18 @@ export function expandToTileBoundaries(extent, zoom) {
     maxLon: tileToLongitude(lowerRightX + 1, tileCount),
     maxLat: tileToLatitude(upperLeftY, tileCount),
   };
+}
+
+export function getTileCountInExtent(extent, zoom) {
+  const tileCount = getTileCount(zoom);
+
+  const upperLeftX = longitudeToTile(extent.minLon, tileCount);
+  const upperLeftY = latitudeToTile(Math.min(extent.maxLat, 90), tileCount);
+  const lowerRightX = longitudeToTile(extent.maxLon, tileCount);
+  const lowerRightY = latitudeToTile(Math.max(extent.minLat, -90), tileCount);
+
+  const tilesY = Math.abs(upperLeftY - lowerRightY);
+  const tilesX = Math.abs(upperLeftX - lowerRightX);
+
+  return tilesX * tilesY;
 }

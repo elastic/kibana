@@ -66,7 +66,7 @@ export class ESAggMetricField extends AbstractField {
   getValueAggDsl(indexPattern) {
     const field = getField(indexPattern, this.getESDocFieldName());
     const aggType = this.getAggType();
-    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1 } : {};
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };

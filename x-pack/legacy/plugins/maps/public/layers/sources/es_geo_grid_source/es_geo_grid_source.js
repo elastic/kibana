@@ -22,6 +22,8 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
 import {
+  AGG_TYPE,
+  DEFAULT_MAX_BUCKETS_LIMIT,
   SOURCE_DATA_ID_ORIGIN,
   ES_GEO_GRID,
   COUNT_PROP_NAME,
@@ -164,11 +166,29 @@ export class ESGeoGridSource extends AbstractESAggSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    searchSource.setField('aggs', {
-      gridSplit: {
-        geotile_grid: {
-          field: this._descriptor.geoField,
-          precision: searchFilters.geogridPrecision,
+
+    let bucketsPerGrid = 1;
+    this.getMetricFields().forEach(metricField => {
+      if (metricField.getAggType() === AGG_TYPE.TERMS) {
+        // each terms aggregation increases the overall number of buckets per grid
+        bucketsPerGrid++;
+      }
+    });
+    const gridsPerRequest = DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid;
+    const aggs = {
+      compositeSplit: {
+        composite: {
+          size: gridsPerRequest,
+          sources: [
+            {
+              gridSplit: {
+                geotile_grid: {
+                  field: this._descriptor.geoField,
+                  precision: searchFilters.geogridPrecision,
+                },
+              },
+            },
+          ],
         },
         aggs: {
           gridCentroid: {
@@ -179,21 +199,54 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ...this.getValueAggsDsl(indexPattern),
         },
       },
-    });
+    };
 
-    const esResponse = await this._runEsQuery({
-      requestId: this.getId(),
-      requestName: layerName,
-      searchSource,
-      registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-        defaultMessage: 'Elasticsearch geo grid aggregation request',
-      }),
-    });
+    const features = [];
+    let requestCount = 0;
+    let afterKey = null;
+    while (true) {
+      requestCount++;
 
-    const { featureCollection } = convertToGeoJson(esResponse, this._descriptor.requestType);
+      // circuit breaker to ensure reasonable number of requests
+      if (requestCount > 5) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esGrid.compositePaginationErrorMessage', {
+            defaultMessage: `{layerName} is causing too many requests. Reduce "Grid resolution" and/or reduce the number of top term "Metrics".`,
+            values: { layerName },
+          })
+        );
+      }
+
+      if (afterKey) {
+        aggs.compositeSplit.composite.after = afterKey;
+      }
+      searchSource.setField('aggs', aggs);
+      const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
+      const esResponse = await this._runEsQuery({
+        requestId,
+        requestName: `${layerName} (${requestCount})`,
+        searchSource,
+        registerCancelCallback,
+        requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+          defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
+          values: { requestId },
+        }),
+      });
+
+      features.push(...convertToGeoJson(esResponse, this._descriptor.requestType));
+
+      afterKey = esResponse.aggregations.compositeSplit.after_key;
+      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+        // Finished because request did not get full resultset back
+        break;
+      }
+    }
+
     return {
-      data: featureCollection,
+      data: {
+        type: 'FeatureCollection',
+        features: features,
+      },
       meta: {
         areResultsTrimmed: false,
       },
