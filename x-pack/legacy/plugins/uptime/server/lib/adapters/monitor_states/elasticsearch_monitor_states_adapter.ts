@@ -127,7 +127,7 @@ const statusCountBody = (filters: any): any => {
         scripted_metric: {
           init_script: 'state.locStatus = new HashMap(); state.totalDocs = 0;',
           map_script: `
-          def loc = doc["observer.geo.name"][0];
+          def loc = doc["observer.geo.name"].size() == 0 ? "" : doc["observer.geo.name"][0];
 
           // One concern here is memory since we could build pretty gigantic maps. I've opted to
           // stick to a simple <String,String> map to reduce memory overhead. This means we do
