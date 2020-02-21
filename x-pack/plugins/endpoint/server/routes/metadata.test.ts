@@ -20,9 +20,9 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes } from './endpoints';
+import { registerEndpointRoutes } from './metadata';
 import { EndpointConfigSchema } from '../config';
-import * as data from '../test_data/all_endpoints_data.json';
+import * as data from '../test_data/all_metadata_data.json';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -54,7 +54,7 @@ describe('test endpoint route', () => {
     >;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/endpoints')
+      path.startsWith('/api/endpoint/metadata')
     )!;
 
     await routeHandler(
@@ -96,7 +96,7 @@ describe('test endpoint route', () => {
       Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/endpoints')
+      path.startsWith('/api/endpoint/metadata')
     )!;
 
     await routeHandler(
@@ -143,7 +143,7 @@ describe('test endpoint route', () => {
       Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/endpoints')
+      path.startsWith('/api/endpoint/metadata')
     )!;
 
     await routeHandler(
@@ -208,7 +208,7 @@ describe('test endpoint route', () => {
         })
       );
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/endpoints')
+        path.startsWith('/api/endpoint/metadata')
       )!;
 
       await routeHandler(
@@ -239,7 +239,7 @@ describe('test endpoint route', () => {
       >;
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/endpoints')
+        path.startsWith('/api/endpoint/metadata')
       )!;
 
       await routeHandler(
