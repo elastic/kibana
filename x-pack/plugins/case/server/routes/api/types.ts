@@ -6,6 +6,13 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
+  KibanaRequest,
+  IKibanaResponse,
+  RequestHandlerContext,
+  KibanaResponseFactory,
+} from 'kibana/server';
+
+import {
   CommentSchema,
   NewCaseSchema,
   NewCommentSchema,
@@ -14,6 +21,9 @@ import {
   UpdatedCommentSchema,
   UserSchema,
 } from './schema';
+
+import { CaseServiceSetup } from '../../services';
+
 import { SavedObjectAttributes } from '../../../../../../src/core/types';
 
 export type NewCaseType = TypeOf<typeof NewCaseSchema>;
@@ -82,3 +92,10 @@ export enum SortFieldCase {
 export type Writable<T> = {
   -readonly [K in keyof T]: T[K];
 };
+
+export type CaseRequestHandler = (
+  service: CaseServiceSetup,
+  context: RequestHandlerContext,
+  request: KibanaRequest,
+  response: KibanaResponseFactory
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
