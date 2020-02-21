@@ -51,7 +51,7 @@ function IntroductionUI({
         allowFullScreen
         fullScreenIconColor="dark"
         alt={intl.formatMessage({
-          id: 'kbn.home.tutorial.introduction.imageAltDescription',
+          id: 'home.tutorial.introduction.imageAltDescription',
           defaultMessage: 'screenshot of primary dashboard.',
         })}
         url={previewUrl}
@@ -65,7 +65,7 @@ function IntroductionUI({
         <EuiSpacer />
         <EuiButton href={exportedFieldsUrl} target="_blank" rel="noopener">
           <FormattedMessage
-            id="kbn.home.tutorial.introduction.viewButtonLabel"
+            id="home.tutorial.introduction.viewButtonLabel"
             defaultMessage="View exported fields"
           />
         </EuiButton>
@@ -85,7 +85,7 @@ function IntroductionUI({
     betaBadge = (
       <EuiBetaBadge
         label={intl.formatMessage({
-          id: 'kbn.home.tutorial.introduction.betaLabel',
+          id: 'home.tutorial.introduction.betaLabel',
           defaultMessage: 'Beta',
         })}
       />

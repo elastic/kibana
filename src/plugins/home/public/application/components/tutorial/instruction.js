@@ -61,7 +61,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
         {copy => (
           <EuiButton size="s" onClick={copy}>
             <FormattedMessage
-              id="kbn.home.tutorial.instruction.copyButtonLabel"
+              id="home.tutorial.instruction.copyButtonLabel"
               defaultMessage="Copy snippet"
             />
           </EuiButton>

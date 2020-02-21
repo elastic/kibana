@@ -41,7 +41,7 @@ exports[`apmUiEnabled 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Observability"
-                id="kbn.home.addData.title.observability"
+                id="home.addData.title.observability"
                 values={Object {}}
               />
             </h2>
@@ -77,7 +77,7 @@ exports[`apmUiEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add APM"
-                  id="kbn.home.addData.apm.addApmButtonLabel"
+                  id="home.addData.apm.addApmButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -108,7 +108,7 @@ exports[`apmUiEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
-                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  id="home.addData.logging.addLogDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -139,7 +139,7 @@ exports[`apmUiEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
-                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  id="home.addData.metrics.addMetricsDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -178,7 +178,7 @@ exports[`apmUiEnabled 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Security"
-                id="kbn.home.addData.title.security"
+                id="home.addData.title.security"
                 values={Object {}}
               />
             </h2>
@@ -205,7 +205,7 @@ exports[`apmUiEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -235,7 +235,7 @@ exports[`apmUiEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add sample data"
-            id="kbn.home.addData.sampleDataTitle"
+            id="home.addData.sampleDataTitle"
             values={Object {}}
           />
         </strong>
@@ -250,7 +250,7 @@ exports[`apmUiEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
-            id="kbn.home.addData.sampleDataLink"
+            id="home.addData.sampleDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -271,7 +271,7 @@ exports[`apmUiEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Use Elasticsearch data"
-            id="kbn.home.addData.yourDataTitle"
+            id="home.addData.yourDataTitle"
             values={Object {}}
           />
         </strong>
@@ -286,7 +286,7 @@ exports[`apmUiEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
-            id="kbn.home.addData.yourDataLink"
+            id="home.addData.yourDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -337,7 +337,7 @@ exports[`isNewKibanaInstance 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Observability"
-                id="kbn.home.addData.title.observability"
+                id="home.addData.title.observability"
                 values={Object {}}
               />
             </h2>
@@ -373,7 +373,7 @@ exports[`isNewKibanaInstance 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
-                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  id="home.addData.logging.addLogDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -404,7 +404,7 @@ exports[`isNewKibanaInstance 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
-                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  id="home.addData.metrics.addMetricsDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -443,7 +443,7 @@ exports[`isNewKibanaInstance 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Security"
-                id="kbn.home.addData.title.security"
+                id="home.addData.title.security"
                 values={Object {}}
               />
             </h2>
@@ -470,7 +470,7 @@ exports[`isNewKibanaInstance 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -500,7 +500,7 @@ exports[`isNewKibanaInstance 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add sample data"
-            id="kbn.home.addData.sampleDataTitle"
+            id="home.addData.sampleDataTitle"
             values={Object {}}
           />
         </strong>
@@ -515,7 +515,7 @@ exports[`isNewKibanaInstance 1`] = `
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
-            id="kbn.home.addData.sampleDataLink"
+            id="home.addData.sampleDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -536,7 +536,7 @@ exports[`isNewKibanaInstance 1`] = `
         >
           <FormattedMessage
             defaultMessage="Use Elasticsearch data"
-            id="kbn.home.addData.yourDataTitle"
+            id="home.addData.yourDataTitle"
             values={Object {}}
           />
         </strong>
@@ -551,7 +551,7 @@ exports[`isNewKibanaInstance 1`] = `
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
-            id="kbn.home.addData.yourDataLink"
+            id="home.addData.yourDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -602,7 +602,7 @@ exports[`mlEnabled 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Observability"
-                id="kbn.home.addData.title.observability"
+                id="home.addData.title.observability"
                 values={Object {}}
               />
             </h2>
@@ -638,7 +638,7 @@ exports[`mlEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add APM"
-                  id="kbn.home.addData.apm.addApmButtonLabel"
+                  id="home.addData.apm.addApmButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -669,7 +669,7 @@ exports[`mlEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
-                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  id="home.addData.logging.addLogDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -700,7 +700,7 @@ exports[`mlEnabled 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
-                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  id="home.addData.metrics.addMetricsDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -739,7 +739,7 @@ exports[`mlEnabled 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Security"
-                id="kbn.home.addData.title.security"
+                id="home.addData.title.security"
                 values={Object {}}
               />
             </h2>
@@ -766,7 +766,7 @@ exports[`mlEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -796,7 +796,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add sample data"
-            id="kbn.home.addData.sampleDataTitle"
+            id="home.addData.sampleDataTitle"
             values={Object {}}
           />
         </strong>
@@ -811,7 +811,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
-            id="kbn.home.addData.sampleDataLink"
+            id="home.addData.sampleDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -832,7 +832,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Upload data from log file"
-            id="kbn.home.addData.uploadFileTitle"
+            id="home.addData.uploadFileTitle"
             values={Object {}}
           />
         </strong>
@@ -847,7 +847,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Import a CSV, NDJSON, or log file"
-            id="kbn.home.addData.uploadFileLink"
+            id="home.addData.uploadFileLink"
             values={Object {}}
           />
         </EuiLink>
@@ -868,7 +868,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Use Elasticsearch data"
-            id="kbn.home.addData.yourDataTitle"
+            id="home.addData.yourDataTitle"
             values={Object {}}
           />
         </strong>
@@ -883,7 +883,7 @@ exports[`mlEnabled 1`] = `
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
-            id="kbn.home.addData.yourDataLink"
+            id="home.addData.yourDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -934,7 +934,7 @@ exports[`render 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Observability"
-                id="kbn.home.addData.title.observability"
+                id="home.addData.title.observability"
                 values={Object {}}
               />
             </h2>
@@ -970,7 +970,7 @@ exports[`render 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
-                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  id="home.addData.logging.addLogDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -1001,7 +1001,7 @@ exports[`render 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
-                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  id="home.addData.metrics.addMetricsDataButtonLabel"
                   values={Object {}}
                 />
               </EuiButton>
@@ -1040,7 +1040,7 @@ exports[`render 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Security"
-                id="kbn.home.addData.title.security"
+                id="home.addData.title.security"
                 values={Object {}}
               />
             </h2>
@@ -1067,7 +1067,7 @@ exports[`render 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -1097,7 +1097,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add sample data"
-            id="kbn.home.addData.sampleDataTitle"
+            id="home.addData.sampleDataTitle"
             values={Object {}}
           />
         </strong>
@@ -1112,7 +1112,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
-            id="kbn.home.addData.sampleDataLink"
+            id="home.addData.sampleDataLink"
             values={Object {}}
           />
         </EuiLink>
@@ -1133,7 +1133,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Use Elasticsearch data"
-            id="kbn.home.addData.yourDataTitle"
+            id="home.addData.yourDataTitle"
             values={Object {}}
           />
         </strong>
@@ -1148,7 +1148,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
-            id="kbn.home.addData.yourDataLink"
+            id="home.addData.yourDataLink"
             values={Object {}}
           />
         </EuiLink>

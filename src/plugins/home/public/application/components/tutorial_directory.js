@@ -43,8 +43,8 @@ import { i18n } from '@kbn/i18n';
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', {
+const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
   defaultMessage: 'Add data',
 });
 
@@ -56,35 +56,35 @@ class TutorialDirectoryUi extends React.Component {
       {
         id: ALL_TAB_ID,
         name: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.tabs.allTitle',
+          id: 'home.tutorial.tabs.allTitle',
           defaultMessage: 'All',
         }),
       },
       {
         id: 'logging',
         name: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.tabs.loggingTitle',
+          id: 'home.tutorial.tabs.loggingTitle',
           defaultMessage: 'Logs',
         }),
       },
       {
         id: 'metrics',
         name: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.tabs.metricsTitle',
+          id: 'home.tutorial.tabs.metricsTitle',
           defaultMessage: 'Metrics',
         }),
       },
       {
         id: 'siem',
         name: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.tabs.siemTitle',
+          id: 'home.tutorial.tabs.siemTitle',
           defaultMessage: 'SIEM',
         }),
       },
       {
         id: SAMPLE_DATA_TAB_ID,
         name: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.tabs.sampleDataTitle',
+          id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
       },
@@ -148,11 +148,11 @@ class TutorialDirectoryUi extends React.Component {
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
       name: this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.card.sampleDataTitle',
+        id: 'home.tutorial.card.sampleDataTitle',
         defaultMessage: 'Sample Data',
       }),
       description: this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.card.sampleDataDescription',
+        id: 'home.tutorial.card.sampleDataDescription',
         defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
@@ -234,7 +234,7 @@ class TutorialDirectoryUi extends React.Component {
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="kbn.home.tutorial.addDataToKibanaTitle"
+                id="home.tutorial.addDataToKibanaTitle"
                 defaultMessage="Add Data to Kibana"
               />
             </h1>

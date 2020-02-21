@@ -43,11 +43,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const renderCards = () => {
     const apmData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.apm.nameTitle',
+        id: 'home.addData.apm.nameTitle',
         defaultMessage: 'APM',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.apm.nameDescription',
+        id: 'home.addData.apm.nameDescription',
         defaultMessage:
           'APM automatically collects in-depth performance metrics and errors from inside your applications.',
       }),
@@ -55,11 +55,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
     const loggingData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.logging.nameTitle',
+        id: 'home.addData.logging.nameTitle',
         defaultMessage: 'Logs',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.logging.nameDescription',
+        id: 'home.addData.logging.nameDescription',
         defaultMessage:
           'Ingest logs from popular data sources and easily visualize in preconfigured dashboards.',
       }),
@@ -67,11 +67,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
     const metricsData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.metrics.nameTitle',
+        id: 'home.addData.metrics.nameTitle',
         defaultMessage: 'Metrics',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.metrics.nameDescription',
+        id: 'home.addData.metrics.nameDescription',
         defaultMessage:
           'Collect metrics from the operating system and services running on your servers.',
       }),
@@ -79,11 +79,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
     const siemData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.siem.nameTitle',
+        id: 'home.addData.siem.nameTitle',
         defaultMessage: 'SIEM',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.siem.nameDescription',
+        id: 'home.addData.siem.nameDescription',
         defaultMessage:
           'Centralize security events for interactive investigation in ready-to-go visualizations.',
       }),
@@ -104,10 +104,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               href="#/home/tutorial/apm"
               aria-describedby={apmData.ariaDescribedby}
             >
-              <FormattedMessage
-                id="kbn.home.addData.apm.addApmButtonLabel"
-                defaultMessage="Add APM"
-              />
+              <FormattedMessage id="home.addData.apm.addApmButtonLabel" defaultMessage="Add APM" />
             </EuiButton>
           }
         />
@@ -132,7 +129,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               <EuiTitle size="s">
                 <h2>
                   <FormattedMessage
-                    id="kbn.home.addData.title.observability"
+                    id="home.addData.title.observability"
                     defaultMessage="Observability"
                   />
                 </h2>
@@ -165,7 +162,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                     aria-describedby={loggingData.ariaDescribedby}
                   >
                     <FormattedMessage
-                      id="kbn.home.addData.logging.addLogDataButtonLabel"
+                      id="home.addData.logging.addLogDataButtonLabel"
                       defaultMessage="Add log data"
                     />
                   </EuiButton>
@@ -189,7 +186,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                     aria-describedby={metricsData.ariaDescribedby}
                   >
                     <FormattedMessage
-                      id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                      id="home.addData.metrics.addMetricsDataButtonLabel"
                       defaultMessage="Add metric data"
                     />
                   </EuiButton>
@@ -207,10 +204,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <h2>
-                  <FormattedMessage
-                    id="kbn.home.addData.title.security"
-                    defaultMessage="Security"
-                  />
+                  <FormattedMessage id="home.addData.title.security" defaultMessage="Security" />
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -229,7 +223,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+                  id="home.addData.siem.addSiemEventsButtonLabel"
                   defaultMessage="Add events"
                 />
               </EuiButton>
@@ -255,7 +249,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           <EuiText size="s">
             <strong style={{ height: 38 }}>
               <FormattedMessage
-                id="kbn.home.addData.sampleDataTitle"
+                id="home.addData.sampleDataTitle"
                 defaultMessage="Add sample data"
               />
             </strong>
@@ -264,7 +258,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               href="#/home/tutorial_directory/sampleData"
             >
               <FormattedMessage
-                id="kbn.home.addData.sampleDataLink"
+                id="home.addData.sampleDataLink"
                 defaultMessage="Load a data set and a Kibana dashboard"
               />
             </EuiLink>
@@ -275,7 +269,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             <EuiText size="s">
               <strong style={{ height: 38 }}>
                 <FormattedMessage
-                  id="kbn.home.addData.uploadFileTitle"
+                  id="home.addData.uploadFileTitle"
                   defaultMessage="Upload data from log file"
                 />
               </strong>
@@ -284,7 +278,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 href={`${basePath}/app/ml#/filedatavisualizer`}
               >
                 <FormattedMessage
-                  id="kbn.home.addData.uploadFileLink"
+                  id="home.addData.uploadFileLink"
                   defaultMessage="Import a CSV, NDJSON, or log file"
                 />
               </EuiLink>
@@ -295,7 +289,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           <EuiText size="s">
             <strong style={{ height: 38 }}>
               <FormattedMessage
-                id="kbn.home.addData.yourDataTitle"
+                id="home.addData.yourDataTitle"
                 defaultMessage="Use Elasticsearch data"
               />
             </strong>
@@ -304,7 +298,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               href="#/management/kibana/index_pattern"
             >
               <FormattedMessage
-                id="kbn.home.addData.yourDataLink"
+                id="home.addData.yourDataLink"
                 defaultMessage="Connect to your Elasticsearch index"
               />
             </EuiLink>

@@ -99,12 +99,12 @@ export class Welcome extends React.Component<Props> {
       return (
         <Fragment>
           <FormattedMessage
-            id="kbn.home.dataManagementDisableCollection"
+            id="home.dataManagementDisableCollection"
             defaultMessage=" To stop collection, "
           />
           <EuiLink href="#/management/kibana/settings">
             <FormattedMessage
-              id="kbn.home.dataManagementDisableCollectionLink"
+              id="home.dataManagementDisableCollectionLink"
               defaultMessage="disable usage data here."
             />
           </EuiLink>
@@ -114,12 +114,12 @@ export class Welcome extends React.Component<Props> {
       return (
         <Fragment>
           <FormattedMessage
-            id="kbn.home.dataManagementEnableCollection"
+            id="home.dataManagementEnableCollection"
             defaultMessage=" To start collection, "
           />
           <EuiLink href="#/management/kibana/settings">
             <FormattedMessage
-              id="kbn.home.dataManagementEnableCollectionLink"
+              id="home.dataManagementEnableCollectionLink"
               defaultMessage="enable usage data here."
             />
           </EuiLink>
@@ -141,13 +141,13 @@ export class Welcome extends React.Component<Props> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana" />
+                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Kibana" />
                 </h1>
               </EuiTitle>
               <EuiText size="s" color="subdued" className="homWelcome__subtitle">
                 <p>
                   <FormattedMessage
-                    id="kbn.home.welcomeDescription"
+                    id="home.welcomeDescription"
                     defaultMessage="Your window into the Elastic Stack"
                   />
                 </p>
@@ -168,12 +168,12 @@ export class Welcome extends React.Component<Props> {
                   <Fragment>
                     <EuiTextColor className="euiText--small" color="subdued">
                       <FormattedMessage
-                        id="kbn.home.dataManagementDisclaimerPrivacy"
+                        id="home.dataManagementDisclaimerPrivacy"
                         defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
                       />
                       <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
                         <FormattedMessage
-                          id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                          id="home.dataManagementDisclaimerPrivacyLink"
                           defaultMessage="Privacy Statement."
                         />
                       </EuiLink>

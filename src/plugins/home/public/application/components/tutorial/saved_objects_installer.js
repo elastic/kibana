@@ -36,7 +36,7 @@ import {
 
 class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
-    id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
+    id: 'home.tutorial.savedObject.defaultButtonLabel',
     defaultMessage: 'Load Kibana objects',
   });
 
@@ -74,7 +74,7 @@ class SavedObjectsInstallerUi extends React.Component {
         isInstalling: false,
         installStatusMsg: this.props.intl.formatMessage(
           {
-            id: 'kbn.home.tutorial.savedObject.requestFailedErrorMessage',
+            id: 'home.tutorial.savedObject.requestFailedErrorMessage',
             defaultMessage: 'Request failed, Error: {message}',
           },
           { message: error.message }
@@ -102,7 +102,7 @@ class SavedObjectsInstallerUi extends React.Component {
         isInstalling: false,
         installStatusMsg: this.props.intl.formatMessage(
           {
-            id: 'kbn.home.tutorial.savedObject.installStatusLabel',
+            id: 'home.tutorial.savedObject.installStatusLabel',
             defaultMessage:
               "{overwriteErrorsLength} of {savedObjectsLength} objects already exist. \
 Click 'Confirm overwrite' to import and overwrite existing objects. Any changes to the objects will be lost.",
@@ -115,7 +115,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
         isInstalled: false,
         overwrite: true,
         buttonLabel: this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.savedObject.confirmButtonLabel',
+          id: 'home.tutorial.savedObject.confirmButtonLabel',
           defaultMessage: 'Confirm overwrite',
         }),
       });
@@ -126,7 +126,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const statusMsg = hasErrors
       ? this.props.intl.formatMessage(
           {
-            id: 'kbn.home.tutorial.savedObject.unableToAddErrorMessage',
+            id: 'home.tutorial.savedObject.unableToAddErrorMessage',
             defaultMessage:
               'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: {errorMessage}',
           },
@@ -138,7 +138,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
         )
       : this.props.intl.formatMessage(
           {
-            id: 'kbn.home.tutorial.savedObject.addedLabel',
+            id: 'home.tutorial.savedObject.addedLabel',
             defaultMessage: '{savedObjectsLength} saved objects successfully added',
           },
           { savedObjectsLength: this.props.savedObjects.length }
@@ -172,7 +172,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const installMsg = this.props.installMsg
       ? this.props.installMsg
       : this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.savedObject.installLabel',
+          id: 'home.tutorial.savedObject.installLabel',
           defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
         });
     const installStep = (
@@ -203,7 +203,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
 
     return {
       title: this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.savedObject.loadTitle',
+        id: 'home.tutorial.savedObject.loadTitle',
         defaultMessage: 'Load Kibana objects',
       }),
       status: this.state.isInstalled ? 'complete' : 'incomplete',

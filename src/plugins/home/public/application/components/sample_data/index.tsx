@@ -44,10 +44,10 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
     <EuiCard
       image={`${urlBasePath}/plugins/kibana/home/assets/illustration_elastic_heart.png`}
       textAlign="left"
-      title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started" />}
+      title={<FormattedMessage id="home.letsStartTitle" defaultMessage="Let's get started" />}
       description={
         <FormattedMessage
-          id="kbn.home.letsStartDescription"
+          id="home.letsStartDescription"
           defaultMessage="We noticed that you don't have any data in your cluster.
 You can try our sample data and dashboards or jump in with your own data."
         />
@@ -55,14 +55,14 @@ You can try our sample data and dashboards or jump in with your own data."
       footer={
         <footer>
           <EuiButton fill className="homWelcome__footerAction" onClick={onConfirm}>
-            <FormattedMessage id="kbn.home.tryButtonLabel" defaultMessage="Try our sample data" />
+            <FormattedMessage id="home.tryButtonLabel" defaultMessage="Try our sample data" />
           </EuiButton>
           <EuiButtonEmpty
             className="homWelcome__footerAction"
             onClick={onDecline}
             data-test-subj="skipWelcomeScreen"
           >
-            <FormattedMessage id="kbn.home.exploreButtonLabel" defaultMessage="Explore on my own" />
+            <FormattedMessage id="home.exploreButtonLabel" defaultMessage="Explore on my own" />
           </EuiButtonEmpty>
         </footer>
       }

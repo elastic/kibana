@@ -92,7 +92,7 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.success
           ? this.props.statusCheckConfig.success
           : this.props.intl.formatMessage({
-              id: 'kbn.home.tutorial.instructionSet.successLabel',
+              id: 'home.tutorial.instructionSet.successLabel',
               defaultMessage: 'Success',
             });
         color = 'success';
@@ -102,7 +102,7 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.error
           ? this.props.statusCheckConfig.error
           : this.props.intl.formatMessage({
-              id: 'kbn.home.tutorial.instructionSet.noDataLabel',
+              id: 'home.tutorial.instructionSet.noDataLabel',
               defaultMessage: 'No data found',
             });
         color = 'warning';
@@ -127,7 +127,7 @@ class InstructionSetUi extends React.Component {
         throw new Error(
           this.props.intl.formatMessage(
             {
-              id: 'kbn.home.tutorial.unexpectedStatusCheckStateErrorDescription',
+              id: 'home.tutorial.unexpectedStatusCheckStateErrorDescription',
               defaultMessage: 'Unexpected status check state {statusCheckState}',
             },
             {
@@ -154,7 +154,7 @@ class InstructionSetUi extends React.Component {
             >
               {statusCheckConfig.btnLabel || (
                 <FormattedMessage
-                  id="kbn.home.tutorial.instructionSet.checkStatusButtonLabel"
+                  id="home.tutorial.instructionSet.checkStatusButtonLabel"
                   defaultMessage="Check status"
                 />
               )}
@@ -172,7 +172,7 @@ class InstructionSetUi extends React.Component {
       title:
         statusCheckConfig.title ||
         this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.instructionSet.statusCheckTitle',
+          id: 'home.tutorial.instructionSet.statusCheckTitle',
           defaultMessage: 'Status Check',
         }),
       status: this.getStepStatus(statusCheckState),
@@ -217,7 +217,7 @@ class InstructionSetUi extends React.Component {
     let paramsVisibilityToggle;
     if (this.props.params) {
       const ariaLabel = this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.instructionSet.toggleAriaLabel',
+        id: 'home.tutorial.instructionSet.toggleAriaLabel',
         defaultMessage: 'toggle command parameters visibility',
       });
       paramsVisibilityToggle = (
@@ -227,7 +227,7 @@ class InstructionSetUi extends React.Component {
           onClick={this.handleToggleVisibility}
         >
           <FormattedMessage
-            id="kbn.home.tutorial.instructionSet.customizeLabel"
+            id="home.tutorial.instructionSet.customizeLabel"
             defaultMessage="Customize your code snippets"
           />
         </EuiButtonEmpty>

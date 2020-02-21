@@ -29,7 +29,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.home.welcomeTitle"
+              id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -42,7 +42,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.home.welcomeDescription"
+              id="home.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -103,7 +103,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.home.welcomeTitle"
+              id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -116,7 +116,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.home.welcomeDescription"
+              id="home.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -147,7 +147,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
           >
             <FormattedMessage
               defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-              id="kbn.home.dataManagementDisclaimerPrivacy"
+              id="home.dataManagementDisclaimerPrivacy"
               values={Object {}}
             />
             <EuiLink
@@ -157,13 +157,13 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Privacy Statement."
-                id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                id="home.dataManagementDisclaimerPrivacyLink"
                 values={Object {}}
               />
             </EuiLink>
             <FormattedMessage
               defaultMessage=" To stop collection, "
-              id="kbn.home.dataManagementDisableCollection"
+              id="home.dataManagementDisableCollection"
               values={Object {}}
             />
             <EuiLink
@@ -171,7 +171,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
             >
               <FormattedMessage
                 defaultMessage="disable usage data here."
-                id="kbn.home.dataManagementDisableCollectionLink"
+                id="home.dataManagementDisableCollectionLink"
                 values={Object {}}
               />
             </EuiLink>
@@ -215,7 +215,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.home.welcomeTitle"
+              id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -228,7 +228,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.home.welcomeDescription"
+              id="home.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -259,7 +259,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           >
             <FormattedMessage
               defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-              id="kbn.home.dataManagementDisclaimerPrivacy"
+              id="home.dataManagementDisclaimerPrivacy"
               values={Object {}}
             />
             <EuiLink
@@ -269,13 +269,13 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
             >
               <FormattedMessage
                 defaultMessage="Privacy Statement."
-                id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                id="home.dataManagementDisclaimerPrivacyLink"
                 values={Object {}}
               />
             </EuiLink>
             <FormattedMessage
               defaultMessage=" To start collection, "
-              id="kbn.home.dataManagementEnableCollection"
+              id="home.dataManagementEnableCollection"
               values={Object {}}
             />
             <EuiLink
@@ -283,7 +283,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
             >
               <FormattedMessage
                 defaultMessage="enable usage data here."
-                id="kbn.home.dataManagementEnableCollectionLink"
+                id="home.dataManagementEnableCollectionLink"
                 values={Object {}}
               />
             </EuiLink>
@@ -327,7 +327,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.home.welcomeTitle"
+              id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -340,7 +340,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.home.welcomeDescription"
+              id="home.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -371,7 +371,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           >
             <FormattedMessage
               defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-              id="kbn.home.dataManagementDisclaimerPrivacy"
+              id="home.dataManagementDisclaimerPrivacy"
               values={Object {}}
             />
             <EuiLink
@@ -381,13 +381,13 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
             >
               <FormattedMessage
                 defaultMessage="Privacy Statement."
-                id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                id="home.dataManagementDisclaimerPrivacyLink"
                 values={Object {}}
               />
             </EuiLink>
             <FormattedMessage
               defaultMessage=" To stop collection, "
-              id="kbn.home.dataManagementDisableCollection"
+              id="home.dataManagementDisableCollection"
               values={Object {}}
             />
             <EuiLink
@@ -395,7 +395,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
             >
               <FormattedMessage
                 defaultMessage="disable usage data here."
-                id="kbn.home.dataManagementDisableCollectionLink"
+                id="home.dataManagementDisableCollectionLink"
                 values={Object {}}
               />
             </EuiLink>

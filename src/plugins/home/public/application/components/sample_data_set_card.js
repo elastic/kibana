@@ -67,13 +67,13 @@ export class SampleDataSetCard extends React.Component {
                 flush="left"
                 aria-label={
                   this.props.isProcessing
-                    ? i18n.translate('kbn.home.sampleDataSetCard.removingButtonAriaLabel', {
+                    ? i18n.translate('home.sampleDataSetCard.removingButtonAriaLabel', {
                         defaultMessage: 'Removing {datasetName}',
                         values: {
                           datasetName: this.props.name,
                         },
                       })
-                    : i18n.translate('kbn.home.sampleDataSetCard.removeButtonAriaLabel', {
+                    : i18n.translate('home.sampleDataSetCard.removeButtonAriaLabel', {
                         defaultMessage: 'Remove {datasetName}',
                         values: {
                           datasetName: this.props.name,
@@ -83,12 +83,12 @@ export class SampleDataSetCard extends React.Component {
               >
                 {this.props.isProcessing ? (
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.removingButtonLabel"
+                    id="home.sampleDataSetCard.removingButtonLabel"
                     defaultMessage="Removing"
                   />
                 ) : (
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.removeButtonLabel"
+                    id="home.sampleDataSetCard.removeButtonLabel"
                     defaultMessage="Remove"
                   />
                 )}
@@ -115,13 +115,13 @@ export class SampleDataSetCard extends React.Component {
                 data-test-subj={`addSampleDataSet${this.props.id}`}
                 aria-label={
                   this.props.isProcessing
-                    ? i18n.translate('kbn.home.sampleDataSetCard.addingButtonAriaLabel', {
+                    ? i18n.translate('home.sampleDataSetCard.addingButtonAriaLabel', {
                         defaultMessage: 'Adding {datasetName}',
                         values: {
                           datasetName: this.props.name,
                         },
                       })
-                    : i18n.translate('kbn.home.sampleDataSetCard.addButtonAriaLabel', {
+                    : i18n.translate('home.sampleDataSetCard.addButtonAriaLabel', {
                         defaultMessage: 'Add {datasetName}',
                         values: {
                           datasetName: this.props.name,
@@ -131,12 +131,12 @@ export class SampleDataSetCard extends React.Component {
               >
                 {this.props.isProcessing ? (
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.addingButtonLabel"
+                    id="home.sampleDataSetCard.addingButtonLabel"
                     defaultMessage="Adding"
                   />
                 ) : (
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.addButtonLabel"
+                    id="home.sampleDataSetCard.addButtonLabel"
                     defaultMessage="Add data"
                   />
                 )}
@@ -154,7 +154,7 @@ export class SampleDataSetCard extends React.Component {
                 content={
                   <p>
                     <FormattedMessage
-                      id="kbn.home.sampleDataSetCard.default.unableToVerifyErrorMessage"
+                      id="home.sampleDataSetCard.default.unableToVerifyErrorMessage"
                       defaultMessage="Unable to verify dataset status, error: {statusMsg}"
                       values={{ statusMsg: this.props.statusMsg }}
                     />
@@ -164,18 +164,15 @@ export class SampleDataSetCard extends React.Component {
                 <EuiButton
                   isDisabled
                   data-test-subj={`addSampleDataSet${this.props.id}`}
-                  aria-label={i18n.translate(
-                    'kbn.home.sampleDataSetCard.default.addButtonAriaLabel',
-                    {
-                      defaultMessage: 'Add {datasetName}',
-                      values: {
-                        datasetName: this.props.name,
-                      },
-                    }
-                  )}
+                  aria-label={i18n.translate('home.sampleDataSetCard.default.addButtonAriaLabel', {
+                    defaultMessage: 'Add {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    },
+                  })}
                 >
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.default.addButtonLabel"
+                    id="home.sampleDataSetCard.default.addButtonLabel"
                     defaultMessage="Add data"
                   />
                 </EuiButton>

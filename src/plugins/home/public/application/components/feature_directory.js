@@ -53,17 +53,17 @@ export class FeatureDirectory extends React.Component {
     this.tabs = [
       {
         id: ALL_TAB_ID,
-        name: i18n.translate('kbn.home.directory.tabs.allTitle', { defaultMessage: 'All' }),
+        name: i18n.translate('home.directory.tabs.allTitle', { defaultMessage: 'All' }),
       },
       {
         id: FeatureCatalogueCategory.DATA,
-        name: i18n.translate('kbn.home.directory.tabs.dataTitle', {
+        name: i18n.translate('home.directory.tabs.dataTitle', {
           defaultMessage: 'Data Exploration & Visualization',
         }),
       },
       {
         id: FeatureCatalogueCategory.ADMIN,
-        name: i18n.translate('kbn.home.directory.tabs.administrativeTitle', {
+        name: i18n.translate('home.directory.tabs.administrativeTitle', {
           defaultMessage: 'Administrative',
         }),
       },
@@ -71,7 +71,7 @@ export class FeatureDirectory extends React.Component {
     if (props.directories.some(isOtherCategory)) {
       this.tabs.push({
         id: OTHERS_TAB_ID,
-        name: i18n.translate('kbn.home.directory.tabs.otherTitle', { defaultMessage: 'Other' }),
+        name: i18n.translate('home.directory.tabs.otherTitle', { defaultMessage: 'Other' }),
       });
     }
 
@@ -130,7 +130,7 @@ export class FeatureDirectory extends React.Component {
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
-              <FormattedMessage id="kbn.home.directory.directoryTitle" defaultMessage="Directory" />
+              <FormattedMessage id="home.directory.directoryTitle" defaultMessage="Directory" />
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />

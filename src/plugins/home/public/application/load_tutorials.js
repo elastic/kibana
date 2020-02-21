@@ -39,7 +39,7 @@ async function loadTutorials() {
     });
     if (response.status >= 300) {
       throw new Error(
-        i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
+        i18n.translate('home.loadTutorials.requestFailedErrorMessage', {
           defaultMessage: 'Request failed with status code: {status}',
           values: { status: response.status },
         })
@@ -50,7 +50,7 @@ async function loadTutorials() {
     tutorialsLoaded = true;
   } catch (err) {
     getServices().toastNotifications.addDanger({
-      title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
+      title: i18n.translate('home.loadTutorials.unableToLoadErrorMessage', {
         defaultMessage: 'Unable to load tutorials',
       }),
       text: err.message,

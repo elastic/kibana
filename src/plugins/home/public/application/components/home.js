@@ -139,7 +139,7 @@ export class Home extends Component {
         <EuiPageBody className="eui-displayBlock">
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
+              <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 
@@ -157,7 +157,7 @@ export class Home extends Component {
                 <EuiTitle size="s">
                   <h2>
                     <FormattedMessage
-                      id="kbn.home.directories.visualize.nameTitle"
+                      id="home.directories.visualize.nameTitle"
                       defaultMessage="Visualize and Explore Data"
                     />
                   </h2>
@@ -173,7 +173,7 @@ export class Home extends Component {
                 <EuiTitle size="s">
                   <h2>
                     <FormattedMessage
-                      id="kbn.home.directories.manage.nameTitle"
+                      id="home.directories.manage.nameTitle"
                       defaultMessage="Manage and Administer the Elastic Stack"
                     />
                   </h2>
@@ -193,7 +193,7 @@ export class Home extends Component {
               <EuiText size="s" color="subdued">
                 <p>
                   <FormattedMessage
-                    id="kbn.home.directories.notFound.description"
+                    id="home.directories.notFound.description"
                     defaultMessage="Didn’t find what you were looking for?"
                   />
                 </p>
@@ -201,7 +201,7 @@ export class Home extends Component {
               <EuiSpacer size="s" />
               <EuiButton href="#/home/feature_directory">
                 <FormattedMessage
-                  id="kbn.home.directories.notFound.viewFullButtonLabel"
+                  id="home.directories.notFound.viewFullButtonLabel"
                   defaultMessage="View full directory of Kibana plugins"
                 />
               </EuiButton>

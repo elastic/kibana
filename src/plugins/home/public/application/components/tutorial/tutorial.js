@@ -45,8 +45,8 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
 
-const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', {
+const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
   defaultMessage: 'Add data',
 });
 
@@ -129,7 +129,7 @@ class TutorialUi extends React.Component {
         throw new Error(
           this.props.intl.formatMessage(
             {
-              id: 'kbn.home.tutorial.unhandledInstructionTypeErrorDescription',
+              id: 'home.tutorial.unhandledInstructionTypeErrorDescription',
               defaultMessage: 'Unhandled instruction type {visibleInstructions}',
             },
             {
@@ -226,11 +226,11 @@ class TutorialUi extends React.Component {
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const selfManagedLabel = this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.selfManagedButtonLabel',
+        id: 'home.tutorial.selfManagedButtonLabel',
         defaultMessage: 'Self managed',
       });
       const cloudLabel = this.props.intl.formatMessage({
-        id: 'kbn.home.tutorial.elasticCloudButtonLabel',
+        id: 'home.tutorial.elasticCloudButtonLabel',
         defaultMessage: 'Elastic Cloud',
       });
       const radioButtons = [
@@ -340,7 +340,7 @@ class TutorialUi extends React.Component {
           <EuiText>
             <p>
               <FormattedMessage
-                id="kbn.home.tutorial.noTutorialLabel"
+                id="home.tutorial.noTutorialLabel"
                 defaultMessage="Unable to find tutorial {tutorialId}"
                 values={{ tutorialId: this.props.tutorialId }}
               />

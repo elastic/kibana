@@ -62,7 +62,7 @@ export class SampleDataSetCards extends React.Component {
       sampleDataSets = await listSampleDataSets();
     } catch (fetchError) {
       this.toastNotifications.addDanger({
-        title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
+        title: i18n.translate('home.sampleDataSet.unableToLoadListErrorMessage', {
           defaultMessage: 'Unable to load sample data sets list',
         }),
         text: `${fetchError.message}`,
@@ -100,7 +100,7 @@ export class SampleDataSetCards extends React.Component {
         }));
       }
       this.toastNotifications.addDanger({
-        title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
+        title: i18n.translate('home.sampleDataSet.unableToInstallErrorMessage', {
           defaultMessage: 'Unable to install sample data set: {name}',
           values: { name: targetSampleDataSet.name },
         }),
@@ -122,7 +122,7 @@ export class SampleDataSetCards extends React.Component {
     }
 
     this.toastNotifications.addSuccess({
-      title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
+      title: i18n.translate('home.sampleDataSet.installedLabel', {
         defaultMessage: '{name} installed',
         values: { name: targetSampleDataSet.name },
       }),
@@ -148,7 +148,7 @@ export class SampleDataSetCards extends React.Component {
         }));
       }
       this.toastNotifications.addDanger({
-        title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
+        title: i18n.translate('home.sampleDataSet.unableToUninstallErrorMessage', {
           defaultMessage: 'Unable to uninstall sample data set: {name}',
           values: { name: targetSampleDataSet.name },
         }),
@@ -170,7 +170,7 @@ export class SampleDataSetCards extends React.Component {
     }
 
     this.toastNotifications.addSuccess({
-      title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
+      title: i18n.translate('home.sampleDataSet.uninstalledLabel', {
         defaultMessage: '{name} uninstalled',
         values: { name: targetSampleDataSet.name },
       }),

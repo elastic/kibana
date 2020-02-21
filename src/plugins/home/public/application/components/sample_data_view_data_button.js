@@ -44,11 +44,11 @@ export class SampleDataViewDataButton extends React.Component {
   };
 
   render() {
-    const viewDataButtonLabel = i18n.translate('kbn.home.sampleDataSetCard.viewDataButtonLabel', {
+    const viewDataButtonLabel = i18n.translate('home.sampleDataSetCard.viewDataButtonLabel', {
       defaultMessage: 'View data',
     });
     const viewDataButtonAriaLabel = i18n.translate(
-      'kbn.home.sampleDataSetCard.viewDataButtonAriaLabel',
+      'home.sampleDataSetCard.viewDataButtonAriaLabel',
       {
         defaultMessage: 'View {datasetName}',
         values: {
@@ -84,7 +84,7 @@ export class SampleDataViewDataButton extends React.Component {
         id: 0,
         items: [
           {
-            name: i18n.translate('kbn.home.sampleDataSetCard.dashboardLinkLabel', {
+            name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
               defaultMessage: 'Dashboard',
             }),
             icon: <EuiIcon type="dashboardApp" size="m" />,

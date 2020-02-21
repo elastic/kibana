@@ -13,7 +13,7 @@ exports[`render 1`] = `
       >
         <FormattedMessage
           defaultMessage="Recently viewed"
-          id="kbn.home.recentlyAccessed.recentlyViewedTitle"
+          id="home.recentlyAccessed.recentlyViewedTitle"
           values={Object {}}
         />
       </EuiTextColor>
