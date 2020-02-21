@@ -17,35 +17,40 @@
  * under the License.
  */
 
-import { TriggerContextMapping, TriggerId } from '../types';
+import { TriggerContext } from './trigger';
+import { TriggerInternal } from './trigger_internal';
+import { TriggerId } from '../types';
 
 /**
- * This is a convenience interface used to register a *trigger*.
- *
- * `Trigger` specifies a named anchor to which `Action` can be attached. When
- * `Trigger` is being *called* it creates a `Context` object and passes it to
- * the `execute` method of an `Action`.
- *
- * More than one action can be attached to a single trigger, in which case when
- * trigger is *called* it first displays a context menu for user to pick a
- * single action to execute.
+ * This is a public representation of a trigger that is provided to other plugins.
  */
-export interface Trigger<ID extends TriggerId = TriggerId> {
+export class TriggerContract<T extends TriggerId> {
   /**
    * Unique name of the trigger as identified in `ui_actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
    */
-  id: ID;
+  public readonly id: T;
 
   /**
    * User friendly name of the trigger.
    */
-  title?: string;
+  public readonly title?: string;
 
   /**
    * A longer user friendly description of the trigger.
    */
-  description?: string;
-}
+  public readonly description?: string;
 
-export type TriggerContext<T> = T extends TriggerId ? TriggerContextMapping[T] : never;
+  constructor(private readonly internal: TriggerInternal<T>) {
+    this.id = this.internal.trigger.id;
+    this.title = this.internal.trigger.title;
+    this.description = this.internal.trigger.description;
+  }
+
+  /**
+   * Use this method to execute action attached to this trigger.
+   */
+  public readonly exec = async (context: TriggerContext<T>) => {
+    await this.internal.execute(context);
+  };
+}
