@@ -27,7 +27,6 @@ import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status'
 import { LICENSE_TYPE } from '../../common/constants/license';
 import { annotationRoutes } from '../routes/annotations';
 import { jobRoutes } from '../routes/anomaly_detectors';
-// @ts-ignore: could not find declaration file for module
 import { dataFeedRoutes } from '../routes/datafeeds';
 // @ts-ignore: could not find declaration file for module
 import { indicesRoutes } from '../routes/indices';

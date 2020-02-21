@@ -17,8 +17,18 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { EmbeddablePanel } from '..';
+import { FieldFormatsService } from './field_formats_service';
+import { DateFormat } from './converters/date_server';
+import { coreMock } from '../../../../core/server/mocks';
 
-storiesOf('components/EmbeddablePanel', module).add('default', () => <EmbeddablePanel />);
+describe('FieldFormatService', () => {
+  test('DateFormat is server version', async () => {
+    const service = new FieldFormatsService();
+    const fieldFormatsService = await service.start();
+    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
+    const fieldFormatsRegistry = await fieldFormatsService.fieldFormatServiceFactory(uiSettings);
+    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
+
+    expect(DateFormatFromRegsitry).toEqual(DateFormat);
+  });
+});

@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
-
-export const EmbeddablePanel = () => {
-  return (
-    <EuiPanel data-test-subj="embeddablePanel" paddingSize="none" role="figure">
-      Hello world
-    </EuiPanel>
-  );
-};
+export {
+  TutorialService,
+  TutorialVariables,
+  TutorialServiceSetup,
+  TutorialServiceStart,
+} from './tutorial_service';
