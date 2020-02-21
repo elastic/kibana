@@ -96,9 +96,9 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends Omit<LegacyRequest, 'query'> {
+export interface ImportRulesRequestParams {
   query: { overwrite: boolean };
-  payload: { file: HapiReadableStream };
+  body: { file: HapiReadableStream };
 }
 
 export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {

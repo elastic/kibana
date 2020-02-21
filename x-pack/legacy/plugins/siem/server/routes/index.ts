@@ -55,7 +55,7 @@ export const initRoutes = (
   patchRulesBulkRoute(router);
   deleteRulesBulkRoute(router);
 
-  importRulesRoute(route, config, getClients);
+  importRulesRoute(router, config);
   exportRulesRoute(route, config, getClients);
 
   findRulesStatusesRoute(route, getClients);
