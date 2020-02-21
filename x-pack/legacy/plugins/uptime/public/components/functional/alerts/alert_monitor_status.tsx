@@ -23,6 +23,7 @@ interface AlertMonitorStatusProps {
   filters?: string;
   locations: string[];
   numTimes: number;
+  setAlertParams: (key: string, value: any) => void;
   timerange: {
     from: string;
     to: string;
@@ -64,30 +65,36 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   );
 };
 
-export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (
-  props: AlertMonitorStatusProps
-) => {
+export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);
-  const [locations, setLocations] = useState<Option[]>(
-    props.locations.map(l => ({
+  // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
+  const [locations, setLocations] = useState<any[]>(
+    props.locations.map(location => ({
       disabled: allLabels,
-      label: l,
+      label: location,
     }))
   );
+
   const { setAlertParams } = props;
-  setAlertParams('numTimes', numTimes);
-  setAlertParams('timerange', { from: `now-${numMins}m`, to: 'now' });
-  setAlertParams(
-    'locations',
-    locations.filter(l => l.checked === 'on').map(l => l.label)
-  );
-  setAlertParams('filters', props.filters);
+
+  useEffect(() => {
+    setAlertParams('numTimes', numTimes);
+  }, [numTimes, setAlertParams]);
+  useEffect(() => {
+    setAlertParams('timerange', { from: `now-${numMins}m`, to: 'now' });
+  }, [numMins, setAlertParams]);
+  useEffect(() => {
+    setAlertParams(
+      'locations',
+      locations.filter(l => l.checked === 'on').map(l => l.label)
+    );
+  }, [locations, setAlertParams]);
   useEffect(() => {
     setAlertParams('filters', props.filters);
   }, [props.filters, setAlertParams]);
-  console.log('props', props);
+
   return (
     <>
       <KueryBar autocomplete={props.autocomplete} />
@@ -154,7 +161,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (
                   checked={allLabels}
                   onChange={() => {
                     setAllLabels(!allLabels);
-                    setLocations(locations.map((l: Option) => ({ ...l, disabled: !allLabels })));
+                    setLocations(locations.map((l: any) => ({ ...l, disabled: !allLabels })));
                   }}
                 />
               </EuiFlexItem>

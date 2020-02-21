@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { AlertsContextProvider } from '../../../../../../plugins/triggers_actions_ui/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { AlertsContextProvider } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   addFlyoutVisible: boolean;

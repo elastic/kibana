@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import { setAlertFlyoutVisible } from '../../../state/actions';
-import { UptimeAlertsContextProvider } from '../../functional/uptime_alerts_context_provider';
+import { UptimeAlertsContextProvider } from '../../functional/alerts/uptime_alerts_context_provider';
 import { ToggleAlertFlyoutButton } from '../../functional/toggle_alert_flyout_button';
 
 interface OwnProps {

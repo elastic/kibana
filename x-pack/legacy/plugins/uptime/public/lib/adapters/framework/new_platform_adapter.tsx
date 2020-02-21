@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart, } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { PluginsStart } from 'ui/new_platform/new_platform';
 import { AlertMonitorStatus } from '../../../components/connected';
 import {
   AlertTypeModel,
@@ -42,7 +41,7 @@ export const getKibanaFrameworkAdapter = (
   const getAlertType = (): AlertTypeModel => ({
     id: 'xpack.uptime.alerts.downMonitor',
     name: 'Uptime Monitor Status',
-    iconClass: 'alert',
+    iconClass: 'uptimeApp',
     alertParamsExpression: params => {
       return <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />;
     },
