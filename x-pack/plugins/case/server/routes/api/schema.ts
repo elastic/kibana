@@ -62,3 +62,10 @@ export const SavedObjectsFindOptionsSchema = schema.object({
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
 });
+
+export const NewActionSchema = schema.object({
+  name: schema.string(),
+  actionTypeId: schema.string(),
+  config: schema.object({ apiUrl: schema.uri({ scheme: ['http', 'https'] }) }),
+  secrets: schema.object({ username: schema.string(), password: schema.string() }),
+});
