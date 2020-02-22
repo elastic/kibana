@@ -24,7 +24,12 @@ async function getSavedObjectAttributesFromRepo(
   docID: string
 ) {
   try {
-    return (await savedObjectsRepository.get(docType, docID)).attributes;
+    return (
+      await savedObjectsRepository.get<UpgradeAssistantTelemetrySavedObjectAttributes>(
+        docType,
+        docID
+      )
+    ).attributes;
   } catch (e) {
     return null;
   }
