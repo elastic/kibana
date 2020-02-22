@@ -18,19 +18,14 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { legacyChrome, npSetup, npStart } from './legacy_imports';
+import { npSetup, npStart } from 'ui/new_platform';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
 
 const instance = plugin({
   env: npSetup.plugins.kibanaLegacy.env,
 } as PluginInitializerContext);
-instance.setup(npSetup.core, {
-  ...npSetup.plugins,
-  __LEGACY: {
-    legacyChrome,
-  },
-});
+instance.setup(npSetup.core, npSetup.plugins);
 instance.start(npStart.core, {
   ...npStart.plugins,
   visualizations,

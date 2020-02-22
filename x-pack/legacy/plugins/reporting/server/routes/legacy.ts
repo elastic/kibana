@@ -8,7 +8,7 @@ import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
 import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingSetupDeps } from '../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,

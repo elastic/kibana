@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../../legacy/plugins/alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -12,8 +12,8 @@ export default function(kibana: any) {
     require: ['alerting'],
     name: 'alerts',
     init(server: any) {
-      createNoopAlertType(server.plugins.alerting.setup);
-      createAlwaysFiringAlertType(server.plugins.alerting.setup);
+      createNoopAlertType(server.newPlatform.setup.plugins.alerting);
+      createAlwaysFiringAlertType(server.newPlatform.setup.plugins.alerting);
     },
   });
 }

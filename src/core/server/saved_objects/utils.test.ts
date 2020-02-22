@@ -61,6 +61,7 @@ describe('convertLegacyTypes', () => {
       savedObjectMigrations: {},
       savedObjectSchemas: {},
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -100,6 +101,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -134,6 +136,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -182,6 +185,7 @@ describe('convertLegacyTypes', () => {
       },
       savedObjectSchemas: {},
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
@@ -244,6 +248,7 @@ describe('convertLegacyTypes', () => {
         },
       },
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);

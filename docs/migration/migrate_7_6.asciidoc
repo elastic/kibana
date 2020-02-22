@@ -7,13 +7,18 @@
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to Kibana 7.6.
 
-* <<general-plugin-API-changes, General plugin API changes>>
-* <<move-to-new-platform-changes, Plugin API migrations to New Platform>>
+* <<user-facing-changes, Breaking changes for users>>
+* <<general-plugin-API-changes, Breaking changes for plugin developers>>
 
+[float]
+[[user-facing-changes]]
+=== Breaking changes for users
+
+There are no user-facing breaking changes in 7.6.
 
 [float]
 [[general-plugin-API-changes]]
-=== General plugin API changes
+=== Breaking changes for plugin developers
 
 [float]
 ==== {kib} no longer crashes when a plugin version does not match the server
@@ -568,10 +573,6 @@ This PR removes support for datemath, from now on only ISO8601 encoded strings a
 Make the `Request` instance available to all HTTP interceptors, which is now in a read-only state.
 You may now also under-specify the object returned from HTTP response interceptors
 to only overwrite specific properties.
-
-[float]
-[[move-to-new-platform-changes]]
-=== Plugin API migrations to New Platform
 
 [float]
 ==== Expose whitelisted config values to client-side plugin

@@ -19,7 +19,7 @@
 
 import { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
 import { buildPointSeriesData } from './point_series/point_series';
-import { tabifyAggResponse } from './tabify/tabify';
+import { tabifyAggResponse } from '../../../core_plugins/data/public';
 
 export const aggResponseIndex = {
   hierarchical: buildHierarchicalData,

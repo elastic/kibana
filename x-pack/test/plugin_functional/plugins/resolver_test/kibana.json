@@ -1,0 +1,9 @@
+{
+  "id": "resolver_test",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "resolver_test"],
+  "requiredPlugins": ["embeddable"],
+  "server": false,
+  "ui": true
+}

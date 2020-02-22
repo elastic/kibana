@@ -10,7 +10,7 @@ import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
 
 export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
-  router.post(
+  router.patch(
     {
       path: '/api/cases/{id}',
       validate: {
@@ -25,9 +25,12 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
         const updatedCase = await caseService.updateCase({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
-          updatedAttributes: request.body,
+          updatedAttributes: {
+            ...request.body,
+            updated_at: new Date().toISOString(),
+          },
         });
-        return response.ok({ body: updatedCase });
+        return response.ok({ body: updatedCase.attributes });
       } catch (error) {
         return response.customError(wrapError(error));
       }
