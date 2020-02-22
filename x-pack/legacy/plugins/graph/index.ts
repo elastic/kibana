@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -25,6 +26,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
         main: 'plugins/graph/index',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
@@ -42,14 +44,6 @@ export const graph: LegacyPluginInitializer = kibana => {
     },
 
     init(server) {
-      server.injectUiAppVars('graph', () => {
-        const config = server.config();
-        return {
-          graphSavePolicy: config.get('xpack.graph.savePolicy'),
-          canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls'),
-        };
-      });
-
       server.plugins.xpack_main.registerFeature({
         id: 'graph',
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
@@ -59,6 +53,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
+        validLicenses: ['platinum', 'enterprise', 'trial'],
         privileges: {
           all: {
             savedObject: {

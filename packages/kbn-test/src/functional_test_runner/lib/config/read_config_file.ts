@@ -56,7 +56,7 @@ async function getSettingsFromFile(log: ToolingLog, path: string, settingOverrid
   return transformDeprecations(settingsWithDefaults, logDeprecation);
 }
 
-export async function readConfigFile(log: ToolingLog, path: string, settingOverrides: any) {
+export async function readConfigFile(log: ToolingLog, path: string, settingOverrides: any = {}) {
   return new Config({
     settings: await getSettingsFromFile(log, path, settingOverrides),
     primary: true,

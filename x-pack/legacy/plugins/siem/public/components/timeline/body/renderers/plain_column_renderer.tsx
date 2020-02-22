@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { head } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { getEmptyTagValue } from '../../../empty_value';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
 import { parseValue } from './parse_value';
@@ -27,13 +28,15 @@ export const plainColumnRenderer: ColumnRenderer = {
     timelineId,
     truncate,
     values,
+    linkValues,
   }: {
     columnName: string;
     eventId: string;
-    field: ColumnHeader;
+    field: ColumnHeaderOptions;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
+    linkValues?: string[] | null | undefined;
   }) =>
     values != null
       ? values.map(value => (
@@ -46,6 +49,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             fieldType={field.type || ''}
             value={parseValue(value)}
             truncate={truncate}
+            linkValue={head(linkValues)}
           />
         ))
       : getEmptyTagValue(),

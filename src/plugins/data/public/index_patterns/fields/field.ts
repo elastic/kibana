@@ -26,8 +26,8 @@ import {
   IFieldType,
   getKbnFieldType,
   IFieldSubType,
-  FieldFormat,
   shortenDottedString,
+  FieldFormat,
 } from '../../../common';
 
 export type FieldSpec = Record<string, any>;
@@ -96,11 +96,11 @@ export class Field implements IFieldType {
     let format = spec.format;
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
-      const fieldFormats = getFieldFormats();
+      const fieldFormatsService = getFieldFormats();
 
       format =
         indexPattern.fieldFormatMap[spec.name] ||
-        fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
+        fieldFormatsService.getDefaultInstance(spec.type, spec.esTypes);
     }
 
     const indexed = !!spec.indexed;

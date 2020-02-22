@@ -39,7 +39,12 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import {
+  ElasticsearchServiceSetup,
+  IScopedClusterClient,
+  configSchema as elasticsearchConfigSchema,
+} from './elasticsearch';
+
 import { HttpServiceSetup } from './http';
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -78,6 +83,7 @@ export {
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
+  ElasticsearchConfig,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
@@ -103,12 +109,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
+  HttpServerInfo,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -179,6 +187,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -194,6 +203,8 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
@@ -207,6 +218,15 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeRegistry,
+  SavedObjectsType,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
 } from './saved_objects';
 
 export {
@@ -219,6 +239,8 @@ export {
   ImageValidation,
   DeprecationSettings,
   StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -330,4 +352,15 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+};
+
+/**
+ * Config schemas for the platform services.
+ *
+ * @alpha
+ */
+export const config = {
+  elasticsearch: {
+    schema: elasticsearchConfigSchema,
+  },
 };

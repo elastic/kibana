@@ -23,7 +23,7 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { ValueAxis } from '../../../types';
 import { HeatmapVisParams } from '../../../heatmap';
 import { SwitchOption } from '../../common';
@@ -65,7 +65,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.heatmapOptions.labelsTitle"
+            id="visTypeVislib.controls.heatmapOptions.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -73,7 +73,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.showLabelsTitle', {
+        label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
           defaultMessage: 'Show labels',
         })}
         paramName="show"
@@ -83,7 +83,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
 
       <SwitchOption
         disabled={!valueAxis.labels.show}
-        label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.rotateLabel', {
+        label={i18n.translate('visTypeVislib.controls.heatmapOptions.rotateLabel', {
           defaultMessage: 'Rotate',
         })}
         paramName="rotate"
@@ -94,7 +94,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <SwitchOption
         disabled={!valueAxis.labels.show}
         label={i18n.translate(
-          'kbnVislibVisTypes.controls.heatmapOptions.overwriteAutomaticColorLabel',
+          'visTypeVislib.controls.heatmapOptions.overwriteAutomaticColorLabel',
           {
             defaultMessage: 'Overwrite automatic color',
           }
@@ -107,7 +107,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <EuiFormRow
         display="rowCompressed"
         fullWidth
-        label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorLabel', {
+        label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorLabel', {
           defaultMessage: 'Color',
         })}
       >

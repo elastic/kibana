@@ -42,6 +42,7 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
   const versionTag = config.getBuildVersion();
   const artifactTarball = `kibana${imageFlavor}-${versionTag}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
+  const dockerBuildDate = new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo(
     'build',
@@ -62,6 +63,7 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
     dockerOutputDir,
     baseOSImage,
     ubiImageFlavor,
+    dockerBuildDate,
   };
 
   // Verify if we have the needed kibana target in order

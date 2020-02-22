@@ -6,27 +6,37 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { TestProviders } from '../../../../mock';
-import { FlowTargetSelectConnected } from './index';
+import { FlowTargetSelectConnectedComponent } from './index';
 import { FlowTarget } from '../../../../graphql/types';
 
-describe.skip('Flow Target Select Connected', () => {
+describe('Flow Target Select Connected', () => {
   test('renders correctly against snapshot flowTarget source', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlowTargetSelectConnected flowTarget={FlowTarget.source} />
+        <MemoryRouter>
+          <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.source} />
+        </MemoryRouter>
       </TestProviders>
     );
-    expect(wrapper.find('FlowTargetSelectConnected')).toMatchSnapshot();
+    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
+      FlowTarget.source
+    );
   });
 
   test('renders correctly against snapshot flowTarget destination', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlowTargetSelectConnected flowTarget={FlowTarget.destination} />
+        <MemoryRouter>
+          <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.destination} />
+        </MemoryRouter>
       </TestProviders>
     );
-    expect(wrapper.find('FlowTargetSelectConnected')).toMatchSnapshot();
+
+    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
+      FlowTarget.destination
+    );
   });
 });

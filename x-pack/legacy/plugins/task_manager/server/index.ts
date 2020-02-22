@@ -51,9 +51,7 @@ export function taskManager(kibana: any) {
       server.expose(
         createLegacyApi(
           getTaskManagerSetup(server)!
-            .registerLegacyAPI({
-              savedObjectSchemas,
-            })
+            .registerLegacyAPI({})
             .then((taskManagerPlugin: TaskManager) => {
               // we can't tell the Kibana Platform Task Manager plugin to
               // to wait to `start` as that happens before legacy plugins

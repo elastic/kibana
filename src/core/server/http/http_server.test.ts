@@ -62,6 +62,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   config = {
+    name: 'kibana',
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
@@ -1067,130 +1068,6 @@ describe('setup contract', () => {
     });
   });
 
-  describe('#auth.isAuthenticated()', () => {
-    it('returns true if has been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: true });
-    });
-
-    it('returns false if has not been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-
-    it('returns false if no authorization mechanism has been registered', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-  });
-
-  describe('#auth.get()', () => {
-    it('returns authenticated status and allow associate auth state with request', async () => {
-      const user = { id: '42' };
-      const {
-        createCookieSessionStorageFactory,
-        registerRouter,
-        registerAuth,
-        server: innerServer,
-        auth,
-      } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-      registerAuth((req, res, toolkit) => {
-        sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-        return toolkit.authenticated({ state: user });
-      });
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { state: user, status: 'authenticated' });
-    });
-
-    it('returns correct authentication unknown status', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unknown' });
-    });
-
-    it('returns correct unauthenticated status', async () => {
-      const authenticate = jest.fn();
-
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      await registerAuth(authenticate);
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unauthenticated' });
-
-      expect(authenticate).not.toHaveBeenCalled();
-    });
-  });
-
   describe('#isTlsEnabled', () => {
     it('returns "true" if TLS enabled', async () => {
       const { isTlsEnabled } = await server.setup(configWithSSL);
@@ -1199,6 +1076,39 @@ describe('setup contract', () => {
     it('returns "false" if TLS not enabled', async () => {
       const { isTlsEnabled } = await server.setup(config);
       expect(isTlsEnabled).toBe(false);
+    });
+  });
+
+  describe('#getServerInfo', () => {
+    it('returns correct information', async () => {
+      let { getServerInfo } = await server.setup(config);
+
+      expect(getServerInfo()).toEqual({
+        host: '127.0.0.1',
+        name: 'kibana',
+        port: 10002,
+        protocol: 'http',
+      });
+
+      ({ getServerInfo } = await server.setup({
+        ...config,
+        port: 12345,
+        name: 'custom-name',
+        host: 'localhost',
+      }));
+
+      expect(getServerInfo()).toEqual({
+        host: 'localhost',
+        name: 'custom-name',
+        port: 12345,
+        protocol: 'http',
+      });
+    });
+
+    it('returns correct protocol when ssl is enabled', async () => {
+      const { getServerInfo } = await server.setup(configWithSSL);
+
+      expect(getServerInfo().protocol).toEqual('https');
     });
   });
 });

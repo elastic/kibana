@@ -54,6 +54,7 @@ export const ElementContent = compose(
     onComplete,
     onEmbeddableInputChange,
     onEmbeddableDestroyed,
+    getElementId,
   } = handlers;
 
   return Style.it(
@@ -76,7 +77,14 @@ export const ElementContent = compose(
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-          handlers={{ getFilter, setFilter, done, onEmbeddableInputChange, onEmbeddableDestroyed }}
+          handlers={{
+            getFilter,
+            setFilter,
+            done,
+            onEmbeddableInputChange,
+            onEmbeddableDestroyed,
+            getElementId,
+          }}
         />
       </ElementShareContainer>
     </div>

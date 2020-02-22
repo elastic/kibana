@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.6.0',
+    'v7.7.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.6.0',
+      'v7.7.0',
       'renovate:major',
     ],
   },
@@ -121,6 +121,14 @@
         packageNames: [
           'bluebird',
           '@types/bluebird',
+        ],
+      },
+      {
+        groupSlug: 'browserslist-useragent',
+        groupName: 'browserslist-useragent related packages',
+        packageNames: [
+          'browserslist-useragent',
+          '@types/browserslist-useragent',
         ],
       },
       {
@@ -238,7 +246,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.6.0',
+          'v7.7.0',
           ':ml',
         ],
       },
@@ -658,6 +666,14 @@
         ],
       },
       {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
+        ],
+      },
+      {
         groupSlug: 'object-hash',
         groupName: 'object-hash related packages',
         packageNames: [
@@ -898,6 +914,14 @@
         ],
       },
       {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
+        ],
+      },
+      {
         groupSlug: 'uuid',
         groupName: 'uuid related packages',
         packageNames: [
@@ -919,6 +943,14 @@
         packageNames: [
           'vinyl-fs',
           '@types/vinyl-fs',
+        ],
+      },
+      {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
         ],
       },
       {

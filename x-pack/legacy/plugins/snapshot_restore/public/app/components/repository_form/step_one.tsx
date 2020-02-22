@@ -102,7 +102,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           defaultMessage="A unique name for the repository."
         />
       }
-      idAria="repositoryNameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -112,7 +111,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             defaultMessage="Name"
           />
         }
-        describedByIds={['repositoryNameDescription']}
         isInvalid={Boolean(hasValidationErrors && validation.errors.name)}
         error={validation.errors.name}
         fullWidth
@@ -303,10 +301,9 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           />
         </Fragment>
       }
-      idAria="sourceOnlyDescription"
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace={true} fullWidth describedByIds={['sourceOnlyDescription']}>
+      <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
         <EuiSwitch
           label={
             <FormattedMessage

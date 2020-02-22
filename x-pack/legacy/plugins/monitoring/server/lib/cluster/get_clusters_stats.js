@@ -46,7 +46,7 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: esIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._index',

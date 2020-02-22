@@ -37,6 +37,7 @@ export function createTableHeaderDirective(reactDirective: any, config: IUiSetti
     {
       hideTimeColumn: config.get('doc_table:hideTimeColumn'),
       isShortDots: config.get('shortDots:enable'),
+      defaultSortOrder: config.get('discover:sort:defaultOrder'),
     }
   );
 }

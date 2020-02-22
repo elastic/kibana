@@ -18,36 +18,45 @@
  */
 
 import _ from 'lodash';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
+import {
+  IFieldType,
+  IIndexPattern,
+  Filter,
+  isExistsFilter,
+  isPhraseFilter,
+  getPhraseFilterValue,
+  getPhraseFilterField,
+  isScriptedPhraseFilter,
+  buildFilter,
+  FilterStateStore,
+  FILTERS,
+} from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
-  appFilters: esFilters.Filter[],
+  appFilters: Filter[],
   fieldName: string,
   value: any
-): esFilters.Filter | undefined {
+): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
   return _.find(appFilters, function(filter) {
     if (!filter) return;
 
-    if (fieldName === '_exists_' && esFilters.isExistsFilter(filter)) {
+    if (fieldName === '_exists_' && isExistsFilter(filter)) {
       return filter.exists!.field === value;
     }
 
-    if (esFilters.isPhraseFilter(filter)) {
-      return (
-        esFilters.getPhraseFilterField(filter) === fieldName &&
-        esFilters.getPhraseFilterValue(filter) === value
-      );
+    if (isPhraseFilter(filter)) {
+      return getPhraseFilterField(filter) === fieldName && getPhraseFilterValue(filter) === value;
     }
 
-    if (esFilters.isScriptedPhraseFilter(filter)) {
+    if (isScriptedPhraseFilter(filter)) {
       return filter.meta.field === fieldName && filter.script!.script.params.value === value;
     }
   });
 }
 
-function updateExistingFilter(existingFilter: esFilters.Filter, negate: boolean) {
+function updateExistingFilter(existingFilter: Filter, negate: boolean) {
   existingFilter.meta.disabled = false;
   if (existingFilter.meta.negate !== negate) {
     existingFilter.meta.negate = !existingFilter.meta.negate;
@@ -72,7 +81,7 @@ export function generateFilters(
   values: any,
   operation: string,
   index: string
-): esFilters.Filter[] {
+): Filter[] {
   values = Array.isArray(values) ? values : [values];
   const fieldObj = (_.isObject(field)
     ? field
@@ -80,7 +89,7 @@ export function generateFilters(
         name: field,
       }) as IFieldType;
   const fieldName = fieldObj.name;
-  const newFilters: esFilters.Filter[] = [];
+  const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
 
   const negate = operation === '-';
@@ -95,9 +104,8 @@ export function generateFilters(
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
 
-      const filterType =
-        fieldName === '_exists_' ? esFilters.FILTERS.EXISTS : esFilters.FILTERS.PHRASE;
-      filter = esFilters.buildFilter(
+      const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
+      filter = buildFilter(
         tmpIndexPattern,
         fieldObj,
         filterType,
@@ -105,7 +113,7 @@ export function generateFilters(
         false,
         value,
         null,
-        esFilters.FilterStateStore.APP_STATE
+        FilterStateStore.APP_STATE
       );
     }
 

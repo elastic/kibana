@@ -200,7 +200,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer access-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -242,7 +242,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer access-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -287,7 +287,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer access-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -331,7 +331,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer access-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -448,7 +448,7 @@ describe('PKIAuthenticationProvider', () => {
       expect(authenticationResult.authHeaders).toEqual({
         authorization: `Bearer ${state.accessToken}`,
       });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -491,7 +491,7 @@ describe('PKIAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'pki' });
       expect(authenticationResult.state).toBeUndefined();
     });
 

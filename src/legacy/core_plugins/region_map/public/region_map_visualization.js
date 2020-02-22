@@ -19,11 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { truncatedColorMaps } from 'ui/color_maps';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { toastNotifications } from 'ui/notify';
 
 import { TileMapTooltipFormatter } from './tooltip_formatter';
+import { truncatedColorMaps } from '../../../../plugins/charts/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';

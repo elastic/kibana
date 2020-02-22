@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import moment from 'moment';
 import * as _ from 'lodash';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 

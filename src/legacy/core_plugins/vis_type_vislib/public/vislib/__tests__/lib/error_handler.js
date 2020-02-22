@@ -18,18 +18,15 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
+
 import { ErrorHandler } from '../../lib/_error_handler';
 
 describe('Vislib ErrorHandler Test Suite', function() {
   let errorHandler;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function() {
-      errorHandler = new ErrorHandler();
-    })
-  );
+  beforeEach(() => {
+    errorHandler = new ErrorHandler();
+  });
 
   describe('validateWidthandHeight Method', function() {
     it('should throw an error when width and/or height is 0', function() {

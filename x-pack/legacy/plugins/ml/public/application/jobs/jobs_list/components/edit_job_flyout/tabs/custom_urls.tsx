@@ -20,7 +20,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalFooter,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
@@ -33,11 +32,13 @@ import {
   getTestUrl,
   CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
+import { withKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../new_job/common/job_creator/configs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
 import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
 const MAX_NUMBER_INDEX_PATTERNS = 1000;
@@ -47,6 +48,7 @@ interface CustomUrlsProps {
   jobCustomUrls: UrlConfig[];
   setCustomUrls: (customUrls: UrlConfig[]) => void;
   editMode: 'inline' | 'modal';
+  kibana: MlKibanaReactContextValue;
 }
 
 interface CustomUrlsState {
@@ -58,7 +60,7 @@ interface CustomUrlsState {
   editorSettings?: CustomUrlSettings;
 }
 
-export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
+class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   constructor(props: CustomUrlsProps) {
     super(props);
 
@@ -80,6 +82,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   }
 
   componentDidMount() {
+    const { toasts } = this.props.kibana.services.notifications;
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
       .then(dashboards => {
         this.setState({ dashboards });
@@ -87,7 +90,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       .catch(resp => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger(
+        toasts.addDanger(
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.loadSavedDashboardsErrorNotificationMessage',
             {
@@ -104,7 +107,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       .catch(resp => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger(
+        toasts.addDanger(
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
             {
@@ -143,7 +146,8 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       .catch((error: any) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', error);
-        toastNotifications.addDanger(
+        const { toasts } = this.props.kibana.services.notifications;
+        toasts.addDanger(
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
             {
@@ -156,6 +160,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   onTestButtonClick = () => {
+    const { toasts } = this.props.kibana.services.notifications;
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then(customUrl => {
@@ -166,7 +171,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
           .catch(resp => {
             // eslint-disable-next-line no-console
             console.error('Error obtaining URL for test:', resp);
-            toastNotifications.addWarning(
+            toasts.addWarning(
               i18n.translate(
                 'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
                 {
@@ -179,7 +184,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       .catch(resp => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', resp);
-        toastNotifications.addWarning(
+        toasts.addWarning(
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',
             {
@@ -330,3 +335,5 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
     );
   }
 }
+
+export const CustomUrls = withKibana(CustomUrlsUI);

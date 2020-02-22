@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { auto, IController } from 'angular';
 import React from 'react';
 import { render } from 'react-dom';
 import angular, { ICompileService } from 'angular';
-import {
-  DocViewRenderProps,
-  AngularScope,
-  AngularController,
-  AngularDirective,
-} from './doc_views_types';
+import { DocViewRenderProps, AngularScope, AngularDirective } from './doc_views_types';
 import { DocViewerError } from '../components/doc_viewer/doc_viewer_render_error';
-import { Chrome } from '../../kibana_services';
 
 /**
  * Compiles and injects the give angular template into the given dom node
@@ -36,10 +32,10 @@ export async function injectAngularElement(
   domNode: Element,
   template: string,
   scopeProps: DocViewRenderProps,
-  Controller: AngularController,
-  chrome: Chrome
+  Controller: IController,
+  getInjector: () => Promise<auto.IInjectorService>
 ): Promise<() => void> {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const $injector = await getInjector();
   const rootScope: AngularScope = $injector.get('$rootScope');
   const $compile: ICompileService = $injector.get('$compile');
   const newScope = Object.assign(rootScope.$new(), scopeProps);
@@ -69,7 +65,10 @@ export async function injectAngularElement(
  * Converts a given legacy angular directive to a render function
  * for usage in a react component. Note that the rendering is async
  */
-export function convertDirectiveToRenderFn(directive: AngularDirective, chrome: Chrome) {
+export function convertDirectiveToRenderFn(
+  directive: AngularDirective,
+  getInjector: () => Promise<auto.IInjectorService>
+) {
   return (domNode: Element, props: DocViewRenderProps) => {
     let rejected = false;
 
@@ -78,7 +77,7 @@ export function convertDirectiveToRenderFn(directive: AngularDirective, chrome: 
       directive.template,
       props,
       directive.controller,
-      chrome
+      getInjector
     );
     cleanupFnPromise.catch(e => {
       rejected = true;

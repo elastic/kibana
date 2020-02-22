@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBetaBadge,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { DefaultDraggable } from '../draggables';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
+import { Title } from './title';
+import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 
 interface HeaderProps {
   border?: boolean;
@@ -68,17 +62,6 @@ interface BackOptions {
   text: LinkIconProps['children'];
 }
 
-interface BadgeOptions {
-  beta?: boolean;
-  text: string;
-  tooltip?: string;
-}
-
-interface DraggableArguments {
-  field: string;
-  value: string;
-}
-
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
   badgeOptions?: BadgeOptions;
@@ -86,74 +69,54 @@ export interface HeaderPageProps extends HeaderProps {
   draggableArguments?: DraggableArguments;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: string | React.ReactNode;
+  title: TitleProp;
+  titleNode?: React.ReactElement;
 }
 
-export const HeaderPage = React.memo<HeaderPageProps>(
-  ({
-    backOptions,
-    badgeOptions,
-    border,
-    children,
-    draggableArguments,
-    isLoading,
-    subtitle,
-    subtitle2,
-    title,
-    ...rest
-  }) => (
-    <Header border={border} {...rest}>
-      <EuiFlexGroup alignItems="center">
-        <FlexItem>
-          {backOptions && (
-            <LinkBack>
-              <LinkIcon href={backOptions.href} iconType="arrowLeft">
-                {backOptions.text}
-              </LinkIcon>
-            </LinkBack>
-          )}
-
-          <EuiTitle size="l">
-            <h1 data-test-subj="header-page-title">
-              {!draggableArguments ? (
-                title
-              ) : (
-                <DefaultDraggable
-                  data-test-subj="header-page-draggable"
-                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-                  field={draggableArguments.field}
-                  value={`${draggableArguments.value}`}
-                />
-              )}
-              {badgeOptions && (
-                <>
-                  {' '}
-                  {badgeOptions.beta ? (
-                    <EuiBetaBadge
-                      label={badgeOptions.text}
-                      tooltipContent={badgeOptions.tooltip}
-                      tooltipPosition="bottom"
-                    />
-                  ) : (
-                    <Badge color="hollow">{badgeOptions.text}</Badge>
-                  )}
-                </>
-              )}
-            </h1>
-          </EuiTitle>
-
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </FlexItem>
-
-        {children && (
-          <FlexItem data-test-subj="header-page-supplements" grow={false}>
-            {children}
-          </FlexItem>
+const HeaderPageComponent: React.FC<HeaderPageProps> = ({
+  backOptions,
+  badgeOptions,
+  border,
+  children,
+  draggableArguments,
+  isLoading,
+  subtitle,
+  subtitle2,
+  title,
+  titleNode,
+  ...rest
+}) => (
+  <Header border={border} {...rest}>
+    <EuiFlexGroup alignItems="center">
+      <FlexItem>
+        {backOptions && (
+          <LinkBack>
+            <LinkIcon href={backOptions.href} iconType="arrowLeft">
+              {backOptions.text}
+            </LinkIcon>
+          </LinkBack>
         )}
-      </EuiFlexGroup>
-    </Header>
-  )
+
+        {titleNode || (
+          <Title
+            draggableArguments={draggableArguments}
+            title={title}
+            badgeOptions={badgeOptions}
+          />
+        )}
+
+        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+        {border && isLoading && <EuiProgress size="xs" color="accent" />}
+      </FlexItem>
+
+      {children && (
+        <FlexItem data-test-subj="header-page-supplements" grow={false}>
+          {children}
+        </FlexItem>
+      )}
+    </EuiFlexGroup>
+  </Header>
 );
-HeaderPage.displayName = 'HeaderPage';
+
+export const HeaderPage = React.memo(HeaderPageComponent);

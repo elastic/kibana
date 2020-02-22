@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 
 import {
   deleteJobs as sendDeleteJobsRequest,
@@ -18,6 +17,8 @@ import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../act
 
 import { refreshJobs } from './refresh_jobs';
 import { closeDetailPanel } from './detail_panel';
+
+import { getNotifications } from '../../../kibana_services';
 
 export const deleteJobs = jobIds => async (dispatch, getState) => {
   dispatch({
@@ -40,14 +41,14 @@ export const deleteJobs = jobIds => async (dispatch, getState) => {
   }
 
   if (jobIds.length === 1) {
-    toastNotifications.addSuccess(
+    getNotifications().toasts.addSuccess(
       i18n.translate('xpack.rollupJobs.deleteAction.successSingleNotificationTitle', {
         defaultMessage: `Rollup job '{jobId}' was deleted`,
         values: { jobId: jobIds[0] },
       })
     );
   } else {
-    toastNotifications.addSuccess(
+    getNotifications().toasts.addSuccess(
       i18n.translate('xpack.rollupJobs.deleteAction.successMultipleNotificationTitle', {
         defaultMessage: '{count} rollup jobs were deleted',
         values: { count: jobIds.length },

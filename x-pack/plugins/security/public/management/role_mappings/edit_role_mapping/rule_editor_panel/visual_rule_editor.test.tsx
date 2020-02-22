@@ -72,9 +72,9 @@ describe('VisualRuleEditor', () => {
         new AnyRule([new FieldRule('username', '*')]),
         new ExceptAnyRule([
           new FieldRule('metadata.foo.bar', '*'),
-          new AllRule([new FieldRule('realm', 'special-one')]),
+          new AllRule([new FieldRule('realm.name', 'special-one')]),
         ]),
-        new ExceptAllRule([new FieldRule('realm', '*')]),
+        new ExceptAllRule([new FieldRule('realm.name', '*')]),
       ]),
       maxDepth: 4,
       onSwitchEditorMode: jest.fn(),

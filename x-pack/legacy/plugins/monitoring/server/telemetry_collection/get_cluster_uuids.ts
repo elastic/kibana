@@ -40,7 +40,7 @@ export function fetchClusterUuids({ server, callCluster, start, end }: StatsColl
         cluster_uuids: {
           terms: {
             field: 'cluster_uuid',
-            size: config.get('xpack.monitoring.max_bucket_size'),
+            size: config.get('monitoring.ui.max_bucket_size'),
           },
         },
       },

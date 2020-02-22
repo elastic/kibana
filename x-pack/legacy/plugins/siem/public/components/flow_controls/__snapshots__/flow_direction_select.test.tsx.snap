@@ -3,25 +3,17 @@
 exports[`Select Flow Direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
 <EuiFilterGroup>
   <EuiFilterButton
-    color="text"
     data-test-subj="uniDirectional"
-    grow={true}
     hasActiveFilters={true}
-    iconSide="right"
     onClick={[Function]}
-    type="button"
     withNext={true}
   >
     Unidirectional
   </EuiFilterButton>
   <EuiFilterButton
-    color="text"
     data-test-subj="biDirectional"
-    grow={true}
     hasActiveFilters={false}
-    iconSide="right"
     onClick={[Function]}
-    type="button"
   >
     Bidirectional
   </EuiFilterButton>

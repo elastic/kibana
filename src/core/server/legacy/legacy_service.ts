@@ -258,7 +258,12 @@ export class LegacyService implements CoreService {
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      savedObjects: {
+        getScopedClient: startDeps.core.savedObjects.getScopedClient,
+        createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
+        createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
@@ -282,14 +287,17 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        auth: {
+          get: setupDeps.core.http.auth.get,
+          isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
+        },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        getServerInfo: setupDeps.core.http.getServerInfo,
       },
       savedObjects: {
-        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
-        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -321,6 +329,7 @@ export class LegacyService implements CoreService {
         __internals: {
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
+          typeRegistry: startDeps.core.savedObjects.typeRegistry,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,

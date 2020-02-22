@@ -115,6 +115,14 @@ export const PingListComponent = ({
         })
       );
 
+  const pings: Ping[] = data?.allPings?.pings ?? [];
+
+  const hasStatus: boolean = pings.reduce(
+    (hasHttpStatus: boolean, currentPing: Ping) =>
+      hasHttpStatus || !!currentPing.http?.response?.status_code,
+    false
+  );
+
   const columns: any[] = [
     {
       field: 'monitor.status',
@@ -172,55 +180,57 @@ export const PingListComponent = ({
         }),
     },
     {
-      align: 'right',
+      align: hasStatus ? 'right' : 'center',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
       render: (error: string) => error ?? '-',
     },
-  ];
-  const pings: Ping[] = data?.allPings?.pings ?? [];
-  const hasStatus: boolean = pings.reduce(
-    (hasHttpStatus: boolean, currentPing: Ping) =>
-      hasHttpStatus || !!currentPing.http?.response?.status_code,
-    false
-  );
-  if (hasStatus) {
-    columns.push({
-      field: 'http.response.status_code',
+    // Only add this column is there is any status present in list
+    ...(hasStatus
+      ? [
+          {
+            field: 'http.response.status_code',
+            align: 'right',
+            name: (
+              <SpanWithMargin>
+                {i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+                  defaultMessage: 'Response code',
+                })}
+              </SpanWithMargin>
+            ),
+            render: (statusCode: string) => (
+              <SpanWithMargin>
+                <EuiBadge>{statusCode}</EuiBadge>
+              </SpanWithMargin>
+            ),
+          },
+        ]
+      : []),
+    {
       align: 'right',
-      name: (
-        <SpanWithMargin>
-          {i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-            defaultMessage: 'Response code',
-          })}
-        </SpanWithMargin>
-      ),
-      render: (statusCode: string) => (
-        <SpanWithMargin>
-          <EuiBadge>{statusCode}</EuiBadge>{' '}
-        </SpanWithMargin>
-      ),
-    });
-  }
+      width: '24px',
+      isExpander: true,
+      render: (item: Ping) => {
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+            disabled={!item.error && !(item.http?.response?.body?.bytes > 0)}
+            aria-label={
+              itemIdToExpandedRowMap[item.id]
+                ? i18n.translate('xpack.uptime.pingList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+            }
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        );
+      },
+    },
+  ];
 
-  columns.push({
-    align: 'right',
-    width: '24px',
-    isExpander: true,
-    render: (item: Ping) => (
-      <EuiButtonIcon
-        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
-        aria-label={
-          itemIdToExpandedRowMap[item.id]
-            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
-            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
-        }
-        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
-  });
   const pagination: Pagination = {
     initialPageSize: 20,
     pageIndex: 0,

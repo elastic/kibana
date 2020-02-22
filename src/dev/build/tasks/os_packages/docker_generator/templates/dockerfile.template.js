@@ -26,6 +26,7 @@ function generator({
   usePublicArtifact,
   baseOSImage,
   ubiImageFlavor,
+  dockerBuildDate,
 }) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
@@ -101,6 +102,9 @@ function generator({
   RUN chmod g+ws /usr/share/kibana && \\
       find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \\;
 
+  # Remove the suid bit everywhere to mitigate "Stack Clash"
+  RUN find / -xdev -perm -4000 -exec chmod u-s {} +
+
   # Provide a non-root user to run the process.
   RUN groupadd --gid 1000 kibana && \\
       useradd --uid 1000 --gid 1000 \\
@@ -115,6 +119,8 @@ function generator({
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
     org.label-schema.license="${license}" \\
+    org.label-schema.usage="https://www.elastic.co/guide/en/kibana/index.html" \\
+    org.label-schema.build-date="${dockerBuildDate}" \\
     license="${license}"
 
   ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]

@@ -32,6 +32,7 @@ import { securityMock } from '../../../../security/server/mocks';
 
 describe('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
+  jest.setTimeout(30000);
 
   const headers = {
     authorization: `Basic ${Buffer.from(
@@ -41,7 +42,7 @@ describe('onPostAuthInterceptor', () => {
 
   beforeEach(async () => {
     root = kbnTestServer.createRoot();
-  }, 30000);
+  });
 
   afterEach(async () => await root.shutdown());
 
@@ -107,7 +108,10 @@ describe('onPostAuthInterceptor', () => {
     availableSpaces: any[],
     testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
-    const { http } = await root.setup();
+    const { http, elasticsearch } = await root.setup();
+
+    // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
+    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     const loggingMock = loggingServiceMock
       .create()
@@ -241,7 +245,7 @@ describe('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual(`/spaces/space_selector`);
-    }, 30000);
+    });
 
     it('when accessing the kibana app it always allows the request to continue', async () => {
       const spaces = [
@@ -258,7 +262,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/a-space/app/kibana', spaces);
 
       expect(response.status).toEqual(200);
-    }, 30000);
+    });
 
     it('allows the request to continue when accessing an API endpoint within a non-existent space', async () => {
       const spaces = [
@@ -274,7 +278,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/not-found/api/test/foo', spaces);
 
       expect(response.status).toEqual(200);
-    }, 30000);
+    });
   });
 
   describe('requests handled completely in the new platform', () => {
@@ -293,7 +297,7 @@ describe('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual(`/spaces/space_selector`);
-    }, 30000);
+    });
 
     it('allows the request to continue when accessing an API endpoint within a non-existent space', async () => {
       const spaces = [
@@ -309,7 +313,7 @@ describe('onPostAuthInterceptor', () => {
       const { response } = await request('/s/not-found/api/np_test/foo', spaces);
 
       expect(response.status).toEqual(200);
-    }, 30000);
+    });
   });
 
   it('handles space retrieval errors gracefully when requesting the root, responding with headers returned from ES', async () => {
@@ -421,7 +425,7 @@ describe('onPostAuthInterceptor', () => {
         }),
       })
     );
-  }, 30000);
+  });
 
   it('redirects to the "enter space" endpoint when accessing the root of a non-default space', async () => {
     const spaces = [
@@ -454,7 +458,7 @@ describe('onPostAuthInterceptor', () => {
         }),
       })
     );
-  }, 30000);
+  });
 
   describe('with a single available space', () => {
     it('it redirects to the "enter space" endpoint within the context of the single Space when navigating to Kibana root', async () => {

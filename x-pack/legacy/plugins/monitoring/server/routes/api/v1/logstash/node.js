@@ -60,9 +60,7 @@ export function logstashNodeRoute(server) {
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
-        const showCgroupMetricsLogstash = config.get(
-          'xpack.monitoring.ui.container.logstash.enabled'
-        );
+        const showCgroupMetricsLogstash = config.get('monitoring.ui.container.logstash.enabled');
         const metricCpu = metricSet.find(m => m.name === 'logstash_node_cpu_metric');
         if (showCgroupMetricsLogstash) {
           metricCpu.keys = ['logstash_node_cgroup_quota_as_cpu_utilization'];

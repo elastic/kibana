@@ -31,6 +31,7 @@ import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
+import { AppCategory } from '../../types';
 
 /** @public */
 export interface AppBase {
@@ -43,6 +44,13 @@ export interface AppBase {
    * The title of the application.
    */
   title: string;
+
+  /**
+   * The category definition of the product
+   * See {@link AppCategory}
+   * See DEFAULT_APP_CATEGORIES for more reference
+   */
+  category?: AppCategory;
 
   /**
    * The initial status of the application.
@@ -221,6 +229,7 @@ export interface LegacyApp extends AppBase {
   appUrl: string;
   subUrlBase?: string;
   linkToLastSubUrl?: boolean;
+  disableSubUrlTracking?: boolean;
 }
 
 /**
@@ -584,11 +593,17 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
 
   /**
-   * Returns a relative URL to a given app, including the global base path.
+   * Returns an URL to a given app, including the global base path.
+   * By default, the URL is relative (/basePath/app/my-app).
+   * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+   *
+   * Note that when generating absolute urls, the protocol, host and port are determined from the browser location.
+   *
    * @param appId
    * @param options.path - optional path inside application to deep link to
+   * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string }): string;
+  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
@@ -603,11 +618,19 @@ export interface ApplicationStart {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+
+  /**
+   * An observable that emits the current application id and each subsequent id update.
+   */
+  currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
 export interface InternalApplicationStart
-  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
+  extends Pick<
+    ApplicationStart,
+    'capabilities' | 'navigateToApp' | 'getUrlForApp' | 'currentAppId$'
+  > {
   /**
    * Apps available based on the current capabilities.
    * Should be used to show navigation links and make routing decisions.
@@ -631,7 +654,6 @@ export interface InternalApplicationStart
   ): void;
 
   // Internal APIs
-  currentAppId$: Observable<string | undefined>;
   getComponent(): JSX.Element | null;
 }
 

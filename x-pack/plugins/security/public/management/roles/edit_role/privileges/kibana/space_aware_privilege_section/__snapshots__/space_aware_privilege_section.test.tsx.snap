@@ -24,14 +24,14 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
   </p>
   <p>
     <FormattedMessage
-      defaultMessage="Please ensure your account has all privileges granted by the {kibanaUser} role, and try again."
+      defaultMessage="Please ensure your account has all privileges granted by the {kibanaAdmin} role, and try again."
       id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
       values={
         Object {
-          "kibanaUser": <strong>
+          "kibanaAdmin": <strong>
             <FormattedMessage
-              defaultMessage="kibana_user"
-              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle"
+              defaultMessage="kibana_admin"
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle"
               values={Object {}}
             />
           </strong>,

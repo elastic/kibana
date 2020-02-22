@@ -22,7 +22,7 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../legacy_imports';
+import { VisOptionsProps } from '../../../../vis_default_editor/public';
 import { BasicOptions, TruncateLabelsOption, SwitchOption } from '../common';
 import { PieVisParams } from '../../pie';
 
@@ -39,14 +39,14 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="kbnVislibVisTypes.editors.pie.pieSettingsTitle"
+              id="visTypeVislib.editors.pie.pieSettingsTitle"
               defaultMessage="Pie settings"
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pie.donutLabel', {
+          label={i18n.translate('visTypeVislib.editors.pie.donutLabel', {
             defaultMessage: 'Donut',
           })}
           paramName="isDonut"
@@ -62,14 +62,14 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="kbnVislibVisTypes.editors.pie.labelsSettingsTitle"
+              id="visTypeVislib.editors.pie.labelsSettingsTitle"
               defaultMessage="Labels settings"
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pie.showLabelsLabel', {
+          label={i18n.translate('visTypeVislib.editors.pie.showLabelsLabel', {
             defaultMessage: 'Show labels',
           })}
           paramName="show"
@@ -77,7 +77,7 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           setValue={setLabels}
         />
         <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pie.showTopLevelOnlyLabel', {
+          label={i18n.translate('visTypeVislib.editors.pie.showTopLevelOnlyLabel', {
             defaultMessage: 'Show top level only',
           })}
           paramName="last_level"
@@ -85,7 +85,7 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           setValue={setLabels}
         />
         <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pie.showValuesLabel', {
+          label={i18n.translate('visTypeVislib.editors.pie.showValuesLabel', {
             defaultMessage: 'Show values',
           })}
           paramName="values"

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 
@@ -13,23 +12,11 @@ import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../pages/network/navigation/types';
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
-  breadcrumbs: {
-    set: jest.fn(),
-  },
-  getUiSettingsClient: () => ({
-    get: jest.fn(),
-  }),
-}));
-
-jest.mock('../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
+const setBreadcrumbsMock = jest.fn();
+const chromeMock = {
+  setBreadcrumbs: setBreadcrumbsMock,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
   switch (pageName) {
@@ -217,10 +204,11 @@ describe('Navigation Breadcrumbs', () => {
       ]);
     });
   });
+
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName));
-      expect(chrome.breadcrumbs.set).toBeCalledWith([
+      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName), chromeMock);
+      expect(setBreadcrumbsMock).toBeCalledWith([
         { text: 'SIEM', href: '#/link-to/overview' },
         {
           text: 'Hosts',

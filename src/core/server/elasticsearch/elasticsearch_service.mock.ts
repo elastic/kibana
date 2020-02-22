@@ -23,6 +23,7 @@ import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceSetup } from './types';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
@@ -71,6 +72,12 @@ type MockedInternalElasticSearchServiceSetup = jest.Mocked<
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
     ...createSetupContractMock(),
+    esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
+      isCompatible: true,
+      incompatibleNodes: [],
+      warningNodes: [],
+      kibanaVersion: '8.0.0',
+    }),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },

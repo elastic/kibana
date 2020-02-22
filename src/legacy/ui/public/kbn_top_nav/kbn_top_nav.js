@@ -92,6 +92,7 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     ['onClearSavedQuery', { watchDepth: 'reference' }],
     ['onSaved', { watchDepth: 'reference' }],
     ['onSavedQueryUpdated', { watchDepth: 'reference' }],
+    ['onSavedQueryIdChange', { watchDepth: 'reference' }],
 
     ['indexPatterns', { watchDepth: 'collection' }],
     ['filters', { watchDepth: 'collection' }],
@@ -109,10 +110,14 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     'screenTitle',
     'dateRangeFrom',
     'dateRangeTo',
+    'savedQueryId',
     'isRefreshPaused',
     'refreshInterval',
     'disableAutoFocus',
     'showAutoRefreshOnly',
+
+    // temporary flag to use the stateful components
+    'useDefaultBehaviors',
   ]);
 };
 

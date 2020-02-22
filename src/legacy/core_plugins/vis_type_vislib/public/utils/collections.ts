@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import { colorSchemas } from '../legacy_imports';
+
+import { colorSchemas } from '../../../../../plugins/charts/public';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',
@@ -31,25 +32,25 @@ export type Positions = $Values<typeof Positions>;
 
 const getPositions = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
+    text: i18n.translate('visTypeVislib.legendPositions.topText', {
       defaultMessage: 'Top',
     }),
     value: Positions.TOP,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.legendPositions.leftText', {
+    text: i18n.translate('visTypeVislib.legendPositions.leftText', {
       defaultMessage: 'Left',
     }),
     value: Positions.LEFT,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.legendPositions.rightText', {
+    text: i18n.translate('visTypeVislib.legendPositions.rightText', {
       defaultMessage: 'Right',
     }),
     value: Positions.RIGHT,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.legendPositions.bottomText', {
+    text: i18n.translate('visTypeVislib.legendPositions.bottomText', {
       defaultMessage: 'Bottom',
     }),
     value: Positions.BOTTOM,
@@ -65,19 +66,19 @@ export type ChartTypes = $Values<typeof ChartTypes>;
 
 const getChartTypes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.chartTypes.lineText', {
+    text: i18n.translate('visTypeVislib.chartTypes.lineText', {
       defaultMessage: 'Line',
     }),
     value: ChartTypes.LINE,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.chartTypes.areaText', {
+    text: i18n.translate('visTypeVislib.chartTypes.areaText', {
       defaultMessage: 'Area',
     }),
     value: ChartTypes.AREA,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.chartTypes.barText', {
+    text: i18n.translate('visTypeVislib.chartTypes.barText', {
       defaultMessage: 'Bar',
     }),
     value: ChartTypes.HISTOGRAM,
@@ -92,13 +93,13 @@ export type ChartModes = $Values<typeof ChartModes>;
 
 const getChartModes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.chartModes.normalText', {
+    text: i18n.translate('visTypeVislib.chartModes.normalText', {
       defaultMessage: 'Normal',
     }),
     value: ChartModes.NORMAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.chartModes.stackedText', {
+    text: i18n.translate('visTypeVislib.chartModes.stackedText', {
       defaultMessage: 'Stacked',
     }),
     value: ChartModes.STACKED,
@@ -114,19 +115,19 @@ export type InterpolationModes = $Values<typeof InterpolationModes>;
 
 const getInterpolationModes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.interpolationModes.straightText', {
+    text: i18n.translate('visTypeVislib.interpolationModes.straightText', {
       defaultMessage: 'Straight',
     }),
     value: InterpolationModes.LINEAR,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.interpolationModes.smoothedText', {
+    text: i18n.translate('visTypeVislib.interpolationModes.smoothedText', {
       defaultMessage: 'Smoothed',
     }),
     value: InterpolationModes.CARDINAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.interpolationModes.steppedText', {
+    text: i18n.translate('visTypeVislib.interpolationModes.steppedText', {
       defaultMessage: 'Stepped',
     }),
     value: InterpolationModes.STEP_AFTER,
@@ -148,19 +149,19 @@ export type ScaleTypes = $Values<typeof ScaleTypes>;
 
 const getScaleTypes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
+    text: i18n.translate('visTypeVislib.scaleTypes.linearText', {
       defaultMessage: 'Linear',
     }),
     value: ScaleTypes.LINEAR,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.scaleTypes.logText', {
+    text: i18n.translate('visTypeVislib.scaleTypes.logText', {
       defaultMessage: 'Log',
     }),
     value: ScaleTypes.LOG,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.scaleTypes.squareRootText', {
+    text: i18n.translate('visTypeVislib.scaleTypes.squareRootText', {
       defaultMessage: 'Square root',
     }),
     value: ScaleTypes.SQUARE_ROOT,
@@ -177,25 +178,25 @@ export type AxisModes = $Values<typeof AxisModes>;
 
 const getAxisModes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.axisModes.normalText', {
+    text: i18n.translate('visTypeVislib.axisModes.normalText', {
       defaultMessage: 'Normal',
     }),
     value: AxisModes.NORMAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.axisModes.percentageText', {
+    text: i18n.translate('visTypeVislib.axisModes.percentageText', {
       defaultMessage: 'Percentage',
     }),
     value: AxisModes.PERCENTAGE,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.axisModes.wiggleText', {
+    text: i18n.translate('visTypeVislib.axisModes.wiggleText', {
       defaultMessage: 'Wiggle',
     }),
     value: AxisModes.WIGGLE,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.axisModes.silhouetteText', {
+    text: i18n.translate('visTypeVislib.axisModes.silhouetteText', {
       defaultMessage: 'Silhouette',
     }),
     value: AxisModes.SILHOUETTE,
@@ -219,19 +220,19 @@ export type ThresholdLineStyles = $Values<typeof ThresholdLineStyles>;
 const getThresholdLineStyles = () => [
   {
     value: ThresholdLineStyles.FULL,
-    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.fullText', {
+    text: i18n.translate('visTypeVislib.thresholdLine.style.fullText', {
       defaultMessage: 'Full',
     }),
   },
   {
     value: ThresholdLineStyles.DASHED,
-    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.dashedText', {
+    text: i18n.translate('visTypeVislib.thresholdLine.style.dashedText', {
       defaultMessage: 'Dashed',
     }),
   },
   {
     value: ThresholdLineStyles.DOT_DASHED,
-    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.dotdashedText', {
+    text: i18n.translate('visTypeVislib.thresholdLine.style.dotdashedText', {
       defaultMessage: 'Dot-dashed',
     }),
   },
@@ -239,19 +240,19 @@ const getThresholdLineStyles = () => [
 
 const getRotateOptions = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.horizontalText', {
+    text: i18n.translate('visTypeVislib.categoryAxis.rotate.horizontalText', {
       defaultMessage: 'Horizontal',
     }),
     value: Rotates.HORIZONTAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.verticalText', {
+    text: i18n.translate('visTypeVislib.categoryAxis.rotate.verticalText', {
       defaultMessage: 'Vertical',
     }),
     value: Rotates.VERTICAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.angledText', {
+    text: i18n.translate('visTypeVislib.categoryAxis.rotate.angledText', {
       defaultMessage: 'Angled',
     }),
     value: Rotates.ANGLED,
@@ -273,13 +274,13 @@ export type ColorModes = $Values<typeof ColorModes>;
 
 const getGaugeTypes = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
+    text: i18n.translate('visTypeVislib.gauge.gaugeTypes.arcText', {
       defaultMessage: 'Arc',
     }),
     value: GaugeTypes.ARC,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
+    text: i18n.translate('visTypeVislib.gauge.gaugeTypes.circleText', {
       defaultMessage: 'Circle',
     }),
     value: GaugeTypes.CIRCLE,
@@ -295,19 +296,19 @@ export type Alignments = $Values<typeof Alignments>;
 
 const getAlignments = () => [
   {
-    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', {
+    text: i18n.translate('visTypeVislib.gauge.alignmentAutomaticTitle', {
       defaultMessage: 'Automatic',
     }),
     value: Alignments.AUTOMATIC,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', {
+    text: i18n.translate('visTypeVislib.gauge.alignmentHorizontalTitle', {
       defaultMessage: 'Horizontal',
     }),
     value: Alignments.HORIZONTAL,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', {
+    text: i18n.translate('visTypeVislib.gauge.alignmentVerticalTitle', {
       defaultMessage: 'Vertical',
     }),
     value: Alignments.VERTICAL,

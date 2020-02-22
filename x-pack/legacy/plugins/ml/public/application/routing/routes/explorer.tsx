@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React, { FC, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
-
-import { timefilter } from 'ui/timefilter';
 
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
@@ -32,6 +29,7 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useTimefilter } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -46,12 +44,12 @@ const breadcrumbs = [
 
 export const explorerRoute: MlRoute = {
   path: '/explorer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context, results } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context, results } = useResolver(undefined, undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
@@ -70,8 +68,9 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const [appState, setAppState] = useUrlState('_a');
-  const [globalState] = useUrlState('_g');
+  const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 
@@ -79,17 +78,38 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   useEffect(() => {
     if (refresh !== undefined) {
       setLastRefresh(refresh?.lastRefresh);
-      const activeBounds = timefilter.getActiveBounds();
-      if (activeBounds !== undefined) {
-        explorerService.setBounds(activeBounds);
+
+      if (refresh.timeRange !== undefined) {
+        const { start, end } = refresh.timeRange;
+        setGlobalState('time', {
+          from: start,
+          to: end,
+        });
       }
     }
   }, [refresh?.lastRefresh]);
 
+  // We cannot simply infer bounds from the globalState's `time` attribute
+  // with `moment` since it can contain custom strings such as `now-15m`.
+  // So when globalState's `time` changes, we update the timefilter and use
+  // `timefilter.getBounds()` to update `bounds` in this component's state.
   useEffect(() => {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
 
+      const timefilterBounds = timefilter.getBounds();
+      // Only if both min/max bounds are valid moment times set the bounds.
+      // An invalid string restored from globalState might return `undefined`.
+      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
+        explorerService.setBounds(timefilterBounds);
+      }
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
+
+  useEffect(() => {
     const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);
@@ -100,19 +120,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
   }, []);
-
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-      explorerService.setBounds({
-        min: moment(globalState.time.from),
-        max: moment(globalState.time.to),
-      });
-    }
-  }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
     if (jobIds.length > 0) {

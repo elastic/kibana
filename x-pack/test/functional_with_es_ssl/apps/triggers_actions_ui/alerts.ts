@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
-  const retry = getService('retry');
+  const find = getService('find');
 
   async function createAlert() {
     const { body: createdAlert } = await supertest
@@ -40,13 +40,55 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      const alertsTab = await testSubjects.find('alertsTab');
-      await alertsTab.click();
+      await testSubjects.click('alertsTab');
+    });
+
+    it('should create an alert', async () => {
+      const alertName = generateUniqueKey();
+
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+
+      const nameInput = await testSubjects.find('alertNameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type(alertName);
+
+      await testSubjects.click('threshold-SelectOption');
+
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton');
+      const connectorNameInput = await testSubjects.find('nameInput');
+      await connectorNameInput.click();
+      await connectorNameInput.clearValue();
+      const connectorName = generateUniqueKey();
+      await connectorNameInput.type(connectorName);
+
+      const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
+      await slackWebhookUrlInput.click();
+      await slackWebhookUrlInput.clearValue();
+      await slackWebhookUrlInput.type('https://test');
+
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+
+      const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
+      await loggingMessageInput.click();
+      await loggingMessageInput.clearValue();
+      await loggingMessageInput.type('test message');
+
+      await testSubjects.click('slackAddVariableButton');
+      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      await variableMenuButton.click();
+
+      await testSubjects.click('selectIndexExpression');
+
+      await find.clickByCssSelector('[data-test-subj="cancelSaveAlertButton"]');
+
+      // TODO: implement saving to the server, when threshold API will be ready
     });
 
     it('should search for alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -62,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -76,269 +118,215 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should disable single alert', async () => {
+    it('should disable single alert', async () => {
       const createdAlert = await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
-
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      await enableSwitch.click();
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterDisable.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitchAfterDisable.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should re-enable single alert', async () => {
+    it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      await enableSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterDisable.click();
-
-      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
-      await enableSwitchAfterDisable.click();
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const collapsedItemActionsAfterReEnable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterReEnable.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitchAfterReEnable = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitchAfterReEnable.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should mute single alert', async () => {
+    it('should mute single alert', async () => {
       const createdAlert = await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
-
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      await muteSwitch.click();
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterMute.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should unmute single alert', async () => {
+    it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      await muteSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterMute.click();
-
-      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
-      await muteSwitchAfterMute.click();
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const collapsedItemActionsAfterUnmute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterUnmute.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should delete single alert', async () => {
+    it('should delete single alert', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
-      const deleteBtn = await testSubjects.find('deleteAlert');
-      await deleteBtn.click();
-
-      retry.try(async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(searchResults.length).to.eql(0);
-      });
+      await testSubjects.click('deleteAlert');
+      const emptyPrompt = await find.byCssSelector(
+        '[data-test-subj="createFirstAlertEmptyPrompt"]'
+      );
+      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should mute all selection', async () => {
+    it('should mute all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const muteAllBtn = await testSubjects.find('muteAll');
-      await muteAllBtn.click();
+      await testSubjects.click('muteAll');
 
       // Unmute all button shows after clicking mute all
       await testSubjects.existOrFail('unmuteAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should unmute all selection', async () => {
+    it('should unmute all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const muteAllBtn = await testSubjects.find('muteAll');
-      await muteAllBtn.click();
+      await testSubjects.click('muteAll');
 
-      const unmuteAllBtn = await testSubjects.find('unmuteAll');
-      await unmuteAllBtn.click();
+      await testSubjects.click('unmuteAll');
 
       // Mute all button shows after clicking unmute all
       await testSubjects.existOrFail('muteAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should disable all selection', async () => {
+    it('should disable all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const disableAllBtn = await testSubjects.find('disableAll');
-      await disableAllBtn.click();
+      await testSubjects.click('disableAll');
 
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitch = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should enable all selection', async () => {
+    it('should enable all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const disableAllBtn = await testSubjects.find('disableAll');
-      await disableAllBtn.click();
+      await testSubjects.click('disableAll');
 
-      const enableAllBtn = await testSubjects.find('enableAll');
-      await enableAllBtn.click();
+      await testSubjects.click('enableAll');
 
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitch = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should delete all selection', async () => {
+    it('should delete all selection', async () => {
       const createdAlert = await createAlert();
-
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const deleteAllBtn = await testSubjects.find('deleteAll');
-      await deleteAllBtn.click();
+      await testSubjects.click('deleteAll');
 
-      retry.try(async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(searchResults.length).to.eql(0);
-      });
+      const emptyPrompt = await find.byCssSelector(
+        '[data-test-subj="createFirstAlertEmptyPrompt"]'
+      );
+      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
   });
 };

@@ -73,7 +73,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             />
           </Fragment>
         }
-        idAria="fsRepositoryLocationDescription"
         fullWidth
       >
         <EuiFormRow
@@ -84,7 +83,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['fsRepositoryLocationDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.location)}
           error={settingErrors.location}
         >
@@ -119,13 +117,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
-        idAria="fsRepositoryCompressDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['fsRepositoryCompressDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
         >
@@ -165,7 +161,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
-        idAria="fsRepositoryChunkSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -176,7 +171,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['fsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -212,7 +206,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The rate for creating snapshots for each node."
           />
         }
-        idAria="fsRepositoryMaxSnapshotBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -223,7 +216,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['fsRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -259,7 +251,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="The snapshot restore rate for each node."
           />
         }
-        idAria="fsRepositoryMaxRestoreBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -270,7 +261,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -306,13 +296,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
-        idAria="fsRepositoryReadonlyDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['fsRepositoryReadonlyDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >

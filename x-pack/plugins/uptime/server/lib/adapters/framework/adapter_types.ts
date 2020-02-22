@@ -7,26 +7,13 @@
 import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
-  RequestHandler,
+  SavedObjectsLegacyService,
   IRouter,
   CallAPIOptions,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { ObjectType } from '@kbn/config-schema';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-
-export interface UMFrameworkRouteOptions<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> {
-  path: string;
-  method: string;
-  handler: RequestHandler<P, Q, B>;
-  config?: any;
-  validate: any;
-}
 
 type APICaller = (
   endpoint: string,
@@ -44,11 +31,12 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  router: IRouter;
+  route: IRouter;
 }
 
 export interface UptimeCorePlugins {
   features: PluginSetupContract;
+  savedObjects: SavedObjectsLegacyService;
   usageCollection: UsageCollectionSetup;
 }
 

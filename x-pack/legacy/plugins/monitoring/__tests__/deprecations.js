@@ -80,4 +80,54 @@ describe('monitoring plugin deprecations', function() {
       expect(log.called).to.be(true);
     });
   });
+
+  describe('elasticsearch.username', function() {
+    it('logs a warning if elasticsearch.username is set to "elastic"', () => {
+      const settings = { elasticsearch: { username: 'elastic' } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(true);
+    });
+
+    it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+      const settings = { elasticsearch: { username: 'otheruser' } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+
+    it('does not log a warning if elasticsearch.username is unset', () => {
+      const settings = { elasticsearch: { username: undefined } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+
+    it('logs a warning if ssl.key is set and ssl.certificate is not', () => {
+      const settings = { elasticsearch: { ssl: { key: '' } } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(true);
+    });
+
+    it('logs a warning if ssl.certificate is set and ssl.key is not', () => {
+      const settings = { elasticsearch: { ssl: { certificate: '' } } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(true);
+    });
+
+    it('does not log a warning if both ssl.key and ssl.certificate are set', () => {
+      const settings = { elasticsearch: { ssl: { key: '', certificate: '' } } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+  });
 });

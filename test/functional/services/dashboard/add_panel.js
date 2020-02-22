@@ -54,14 +54,23 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const itemList = await testSubjects.find('savedObjectFinderItemList');
-      const embeddableRows = await itemList.findAllByCssSelector('li');
       const embeddableList = [];
-      for (let i = 0; i < embeddableRows.length; i++) {
-        embeddableList.push(await embeddableRows[i].getVisibleText());
-        await embeddableRows[i].click();
-        await PageObjects.common.closeToast();
-      }
-      log.debug(`Added ${embeddableRows.length} embeddables`);
+      await retry.try(async () => {
+        const embeddableRows = await itemList.findAllByCssSelector('li');
+        for (let i = 0; i < embeddableRows.length; i++) {
+          const name = await embeddableRows[i].getVisibleText();
+
+          if (embeddableList.includes(name)) {
+            // already added this one
+            continue;
+          }
+
+          await embeddableRows[i].click();
+          await PageObjects.common.closeToast();
+          embeddableList.push(name);
+        }
+      });
+      log.debug(`Added ${embeddableList.length} embeddables`);
       return embeddableList;
     }
 

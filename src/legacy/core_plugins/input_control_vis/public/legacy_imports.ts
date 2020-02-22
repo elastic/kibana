@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { SearchSource as SearchSourceClass, ISearchSource } from 'ui/courier';
 import { Class } from '@kbn/utility-types';
+import { SearchSource as SearchSourceClass, ISearchSource } from '../../../../plugins/data/public';
 
-export { Vis, VisParams } from 'ui/vis';
-export { VisOptionsProps } from 'ui/vis/editors/default';
+export { SearchSourceFields } from '../../../../plugins/data/public';
+
 export { ValidatedDualRange } from 'ui/validated_range';
-export { SearchSourceFields } from '../../data/public';
 
 export type SearchSource = Class<ISearchSource>;
 export const SearchSource = SearchSourceClass;

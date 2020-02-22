@@ -94,7 +94,7 @@ You should see the new rules created like so:
       "interval": "5m",
       "rule_id": "rule-1",
       "language": "kuery",
-      "output_index": ".siem-signals-frank-hassanabad",
+      "output_index": ".siem-signals-some-name",
       "max_signals": 100,
       "risk_score": 1,
       "name": "Detect Root/Admin Users",
@@ -152,8 +152,8 @@ logging.events:
 ```
 
 See these two README.md's pages for more references on the alerting and actions API:
-https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
-https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
+https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerting/README.md
+https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions
 
 ### Signals API
 

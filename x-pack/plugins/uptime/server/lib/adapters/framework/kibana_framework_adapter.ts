@@ -24,10 +24,10 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
     };
     switch (method) {
       case 'GET':
-        this.server.router.get(routeDefinition, handler);
+        this.server.route.get(routeDefinition, handler);
         break;
       case 'POST':
-        this.server.router.post(routeDefinition, handler);
+        this.server.route.post(routeDefinition, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
@@ -35,7 +35,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.router.post(
+    this.server.route.post(
       {
         path: routePath,
         validate: {

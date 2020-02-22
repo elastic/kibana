@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -23,9 +24,8 @@ import {
 } from '../events';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
-import { ColumnHeader } from './column_headers/column_header';
+import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -34,7 +34,7 @@ import { useTimelineTypeContext } from '../timeline_context';
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -54,12 +54,11 @@ export interface BodyProps {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
-  range: string;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   sort: Sort;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 
@@ -95,6 +94,7 @@ export const Body = React.memo<BodyProps>(
     toggleColumn,
     updateNote,
   }) => {
+    const containerElementRef = useRef<HTMLDivElement>(null);
     const timelineTypeContext = useTimelineTypeContext();
     const additionalActionWidth =
       timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
@@ -112,7 +112,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
           <EventsTable
             data-test-subj="events-table"
             // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -138,6 +138,7 @@ export const Body = React.memo<BodyProps>(
             />
 
             <Events
+              containerElementRef={containerElementRef.current!}
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}

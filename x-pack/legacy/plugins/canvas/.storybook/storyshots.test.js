@@ -27,6 +27,19 @@ Date.now = jest.fn(() => testTime);
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
+// Mocking to prevent errors with React portal.
+// Temporary until https://github.com/elastic/kibana/pull/55877 provides other alternatives.
+jest.mock('@elastic/eui/lib/components/code/code', () => {
+  const React = require.requireActual('react');
+  return {
+    EuiCode: ({children, className}) => (
+      <span>
+        <code>{children}</code>
+      </span>
+    ),
+  };
+});
+
 // Jest automatically mocks SVGs to be a plain-text string that isn't an SVG.  Canvas uses
 // them in examples, so let's mock a few for tests.
 jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
@@ -49,14 +62,6 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 jest.mock('plugins/interpreter/registries', () => ({}));
-
-// Disabling this test due to https://github.com/elastic/eui/issues/2242
-jest.mock(
-  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.stories',
-  () => {
-    return 'Disabled Panel';
-  }
-);
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(

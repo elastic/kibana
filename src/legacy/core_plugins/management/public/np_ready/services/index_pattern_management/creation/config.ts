@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MatchedIndex } from '../../../../../../kibana/public/management/sections/index_patterns/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(
   'management.editIndexPattern.createIndex.defaultTypeName',
@@ -102,11 +103,11 @@ export class IndexPatternCreationConfig {
     return this.showSystemIndices;
   }
 
-  public getIndexTags() {
+  public getIndexTags(indexName: string) {
     return [];
   }
 
-  public checkIndicesForErrors() {
+  public checkIndicesForErrors(indices: MatchedIndex[]) {
     return undefined;
   }
 

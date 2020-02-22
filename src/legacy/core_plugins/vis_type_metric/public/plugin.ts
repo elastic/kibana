@@ -22,12 +22,14 @@ import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressio
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
-import { metricVisTypeDefinition } from './metric_vis_type';
+import { createMetricVisTypeDefinition } from './metric_vis_type';
+import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -38,9 +40,12 @@ export class MetricVisPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { expressions, visualizations }: MetricVisPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    { expressions, visualizations, charts }: MetricVisPluginSetupDependencies
+  ) {
     expressions.registerFunction(createMetricVisFn);
-    visualizations.types.createReactVisualization(metricVisTypeDefinition);
+    visualizations.types.createReactVisualization(createMetricVisTypeDefinition());
   }
 
   public start(core: CoreStart) {

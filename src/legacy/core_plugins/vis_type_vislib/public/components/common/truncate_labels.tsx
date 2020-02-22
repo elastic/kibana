@@ -33,7 +33,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
 
   return (
     <EuiFormRow
-      label={i18n.translate('kbnVislibVisTypes.controls.truncateLabel', {
+      label={i18n.translate('visTypeVislib.controls.truncateLabel', {
         defaultMessage: 'Truncate',
       })}
       fullWidth

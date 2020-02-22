@@ -12,13 +12,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
+import { signalsHeaders } from '../../pages/detection_engine/components/signals/default_config';
+import { alertsHeaders } from '../alerts_viewer/default_headers';
 import { defaultHeaders as eventsDefaultHeaders } from '../events_viewer/default_headers';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
+import { useTimelineTypeContext } from '../timeline/timeline_context';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
 
@@ -96,27 +99,44 @@ const TitleRow = React.memo<{
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" direction="row" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <EuiTitle data-test-subj="field-browser-title" size="s">
-        <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
-      </EuiTitle>
-    </EuiFlexItem>
+}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => {
+  const timelineTypeContext = useTimelineTypeContext();
+  const handleResetColumns = useCallback(() => {
+    let resetDefaultHeaders = defaultHeaders;
+    if (isEventViewer) {
+      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
+        resetDefaultHeaders = alertsHeaders;
+      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'signals') {
+        resetDefaultHeaders = signalsHeaders;
+      } else {
+        resetDefaultHeaders = eventsDefaultHeaders;
+      }
+    }
+    onUpdateColumns(resetDefaultHeaders);
+    onOutsideClick();
+  }, [isEventViewer, onOutsideClick, onUpdateColumns, timelineTypeContext]);
 
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        data-test-subj="reset-fields"
-        onClick={() => {
-          onUpdateColumns(isEventViewer ? eventsDefaultHeaders : defaultHeaders);
-          onOutsideClick();
-        }}
-      >
-        {i18n.RESET_FIELDS}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      direction="row"
+      gutterSize="none"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiTitle data-test-subj="field-browser-title" size="s">
+          <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty data-test-subj="reset-fields" onClick={handleResetColumns}>
+          {i18n.RESET_FIELDS}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 TitleRow.displayName = 'TitleRow';
 

@@ -104,9 +104,8 @@ export class SessionTimeout implements ISessionTimeout {
    */
   private fetchSessionInfoAndResetTimers = async (extend = false) => {
     const method = extend ? 'POST' : 'GET';
-    const headers = extend ? {} : { 'kbn-system-api': 'true' };
     try {
-      const result = await this.http.fetch(SESSION_ROUTE, { method, headers });
+      const result = await this.http.fetch(SESSION_ROUTE, { method, asSystemRequest: !extend });
 
       this.handleSessionInfoAndResetTimers(result);
 

@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { Vis } from '../..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { start as visualizations } from '../../legacy';
 
@@ -49,7 +48,7 @@ describe('Vis Class', function() {
   );
 
   beforeEach(function() {
-    vis = new Vis(indexPattern, stateFixture);
+    vis = new visualizations.Vis(indexPattern, stateFixture);
   });
 
   const verifyVis = function(vis) {
@@ -85,7 +84,7 @@ describe('Vis Class', function() {
 
   describe('setState()', function() {
     it('should set the state to defaults', function() {
-      const vis = new Vis(indexPattern);
+      const vis = new visualizations.Vis(indexPattern);
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.get('histogram'));
       expect(vis).to.have.property('aggs');
@@ -101,7 +100,7 @@ describe('Vis Class', function() {
       expect(vis.isHierarchical()).to.be(true);
     });
     it('should return false for non-hierarchical vis (like histogram)', function() {
-      const vis = new Vis(indexPattern);
+      const vis = new visualizations.Vis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
     });
   });

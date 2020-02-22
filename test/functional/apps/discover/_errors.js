@@ -22,10 +22,11 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'discover']);
 
   describe('errors', function describeIndexTests() {
     before(async function() {
+      await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('invalid_scripted_field');
       await PageObjects.common.navigateToApp('discover');
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../../legacy/plugins/alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -12,13 +12,47 @@ export default function(kibana: any) {
     require: ['alerting'],
     name: 'alerts',
     init(server: any) {
-      const noopAlertType: AlertType = {
-        id: 'test.noop',
-        name: 'Test: Noop',
-        actionGroups: ['default'],
-        async executor() {},
-      };
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      createNoopAlertType(server.newPlatform.setup.plugins.alerting);
+      createAlwaysFiringAlertType(server.newPlatform.setup.plugins.alerting);
     },
   });
+}
+
+function createNoopAlertType(setupContract: any) {
+  const noopAlertType: AlertType = {
+    id: 'test.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    defaultActionGroupId: 'default',
+    async executor() {},
+  };
+  setupContract.registerType(noopAlertType);
+}
+
+function createAlwaysFiringAlertType(setupContract: any) {
+  // Alert types
+  const alwaysFiringAlertType: any = {
+    id: 'test.always-firing',
+    name: 'Always Firing',
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'other', name: 'Other' },
+    ],
+    async executor(alertExecutorOptions: any) {
+      const { services, state, params } = alertExecutorOptions;
+
+      (params.instances || []).forEach((instance: { id: string; state: any }) => {
+        services
+          .alertInstanceFactory(instance.id)
+          .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
+          .scheduleActions('default');
+      });
+
+      return {
+        globalStateValue: true,
+        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      };
+    },
+  };
+  setupContract.registerType(alwaysFiringAlertType);
 }

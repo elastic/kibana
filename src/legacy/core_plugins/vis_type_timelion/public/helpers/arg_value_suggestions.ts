@@ -18,8 +18,12 @@
  */
 
 import { get } from 'lodash';
-import { TimelionFunctionArgs } from '../../common/types';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
+import { TimelionFunctionArgs } from '../../../../../plugins/timelion/common/types';
+import {
+  indexPatterns as indexPatternsUtils,
+  IndexPatternAttributes,
+} from '../../../../../plugins/data/public';
 
 export interface Location {
   min: number;
@@ -52,7 +56,7 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    const { savedObjects } = await savedObjectsClient.find({
+    const { savedObjects } = await savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title'],
       search: `"${indexPatternTitle}"`,
@@ -83,7 +87,7 @@ export function getArgValueSuggestions() {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
-        const resp = await savedObjectsClient.find({
+        const resp = await savedObjectsClient.find<IndexPatternAttributes>({
           type: 'index-pattern',
           fields: ['title', 'type'],
           search: `${search}`,
@@ -120,7 +124,8 @@ export function getArgValueSuggestions() {
             return (
               field.aggregatable &&
               'number' === field.type &&
-              containsFieldName(valueSplit[1], field)
+              containsFieldName(valueSplit[1], field) &&
+              !indexPatternsUtils.isNestedField(field)
             );
           })
           .map(field => {
@@ -138,7 +143,8 @@ export function getArgValueSuggestions() {
             return (
               field.aggregatable &&
               ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
-              containsFieldName(partial, field)
+              containsFieldName(partial, field) &&
+              !indexPatternsUtils.isNestedField(field)
             );
           })
           .map(field => {
@@ -153,7 +159,11 @@ export function getArgValueSuggestions() {
 
         return indexPattern.fields
           .filter(field => {
-            return 'date' === field.type && containsFieldName(partial, field);
+            return (
+              'date' === field.type &&
+              containsFieldName(partial, field) &&
+              !indexPatternsUtils.isNestedField(field)
+            );
           })
           .map(field => {
             return { name: field.name };

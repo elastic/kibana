@@ -31,7 +31,8 @@ export const overviewHostQuery = gql`
         endgameRegistry
         endgameSecurity
         filebeatSystemModule
-        winlogbeat
+        winlogbeatSecurity
+        winlogbeatMWSysmonOperational
         inspect @include(if: $inspect) {
           dsl
           response

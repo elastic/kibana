@@ -13,6 +13,8 @@ import {
   getRGBColorRangeStrings,
 } from './color_utils';
 
+jest.mock('ui/new_platform');
+
 describe('COLOR_GRADIENTS', () => {
   it('Should contain EuiSuperSelect options list of color ramps', () => {
     expect(COLOR_GRADIENTS.length).toBe(6);

@@ -12,10 +12,6 @@ import { chain, each, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-
-import { npStart } from 'ui/new_platform';
-import { timefilter } from 'ui/timefilter';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -31,6 +27,7 @@ import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
 import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -39,8 +36,6 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import { getSwimlaneContainerWidth } from './legacy_utils';
-
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -149,9 +144,9 @@ export function getInfluencers(selectedJobs = []) {
 }
 
 export function getDateFormatTz() {
-  const config = npStart.core.uiSettings;
+  const uiSettings = getUiSettings();
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
-  const tzConfig = config.get('dateFormat:tz');
+  const tzConfig = uiSettings.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
   return dateFormatTz;
 }
@@ -222,9 +217,23 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
+export function getSelectionJobIds(selectedCells, selectedJobs) {
+  if (
+    selectedCells !== undefined &&
+    selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
+    selectedCells.viewByFieldName !== undefined &&
+    selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+  ) {
+    return selectedCells.lanes;
+  }
+
+  return selectedJobs.map(d => d.id);
+}
+
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
   // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
   // and the max bucket span for the jobs shown in the chart.
+  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const buckets = new TimeBuckets();
   buckets.setInterval('auto');
@@ -531,10 +540,6 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
-  if (mlAnnotationsEnabled === false) {
-    return Promise.resolve([]);
-  }
-
   return new Promise(resolve => {
     ml.annotations
       .getAnnotations({
@@ -587,10 +592,7 @@ export async function loadAnomaliesTableData(
   tableSeverity,
   influencersFilterQuery
 ) {
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
@@ -806,6 +808,7 @@ export function loadViewBySwimlane(
     } else {
       // Ensure the search bounds align to the bucketing interval used in the swimlane so
       // that the first and last buckets are complete.
+      const timefilter = getTimefilter();
       const timefilterBounds = timefilter.getActiveBounds();
       const searchBounds = getBoundsRoundedToInterval(
         timefilterBounds,

@@ -26,3 +26,4 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './header_help_menu';
+export type OnIsLockedUpdate = (isLocked: boolean) => void;

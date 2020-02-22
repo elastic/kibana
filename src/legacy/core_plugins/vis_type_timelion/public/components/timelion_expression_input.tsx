@@ -20,15 +20,18 @@
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 
 import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import {
+  ITimelionFunction,
+  TimelionFunctionArgs,
+} from '../../../../../plugins/timelion/common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
-monacoEditor.languages.register({ id: LANGUAGE_ID });
+monaco.languages.register({ id: LANGUAGE_ID });
 
 interface TimelionExpressionInputProps {
   value: string;
@@ -41,10 +44,10 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
   const provideCompletionItems = useCallback(
-    async (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+    async (model: monaco.editor.ITextModel, position: monaco.Position) => {
       const text = model.getValue();
       const wordUntil = model.getWordUntilPosition(position);
-      const wordRange = new monacoEditor.Range(
+      const wordRange = new monaco.Range(
         position.lineNumber,
         wordUntil.startColumn,
         position.lineNumber,
@@ -72,7 +75,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   );
 
   const provideHover = useCallback(
-    async (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+    async (model: monaco.editor.ITextModel, position: monaco.Position) => {
       const suggestions = await suggest(
         model.getValue(),
         functionList.current,
@@ -107,37 +110,39 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
       <div className="timExpressionInput__editor">
-        <CodeEditor
-          languageId={LANGUAGE_ID}
-          value={value}
-          onChange={setValue}
-          suggestionProvider={{
-            triggerCharacters: ['.', ',', '(', '=', ':'],
-            provideCompletionItems,
-          }}
-          hoverProvider={{ provideHover }}
-          options={{
-            fixedOverflowWidgets: true,
-            fontSize: 14,
-            folding: false,
-            lineNumbers: 'off',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            wordBasedSuggestions: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '(',
-                close: ')',
+        <div className="timExpressionInput__absolute">
+          <CodeEditor
+            languageId={LANGUAGE_ID}
+            value={value}
+            onChange={setValue}
+            suggestionProvider={{
+              triggerCharacters: ['.', ',', '(', '=', ':'],
+              provideCompletionItems,
+            }}
+            hoverProvider={{ provideHover }}
+            options={{
+              fixedOverflowWidgets: true,
+              fontSize: 14,
+              folding: false,
+              lineNumbers: 'off',
+              scrollBeyondLastLine: false,
+              minimap: {
+                enabled: false,
               },
-            ],
-          }}
-        />
+              wordBasedSuggestions: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+            languageConfiguration={{
+              autoClosingPairs: [
+                {
+                  open: '(',
+                  close: ')',
+                },
+              ],
+            }}
+          />
+        </div>
       </div>
     </div>
   );

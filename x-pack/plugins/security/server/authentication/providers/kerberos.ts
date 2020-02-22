@@ -44,6 +44,11 @@ const WWWAuthenticateHeaderName = 'WWW-Authenticate';
  */
 export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Type of the provider.
+   */
+  static readonly type = 'kerberos';
+
+  /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.

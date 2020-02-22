@@ -74,6 +74,8 @@ export class LegacyPlatformService {
         appUrl: navLink.url,
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
+        category: navLink.category,
+        disableSubUrlTracking: navLink.disableSubUrlTracking,
       })
     );
 
@@ -119,6 +121,7 @@ export class LegacyPlatformService {
     const legacyCore: LegacyCoreStart = {
       ...core,
       application: {
+        currentAppId$: core.application.currentAppId$,
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
         navigateToApp: core.application.navigateToApp,

@@ -37,7 +37,7 @@ const userFields = [
     name: 'groups',
   },
   {
-    name: 'realm',
+    name: 'realm.name',
   },
 ];
 

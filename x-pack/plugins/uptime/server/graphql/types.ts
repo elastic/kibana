@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, CallAPIOptions } from 'kibana/server';
+import { RequestHandlerContext, CallAPIOptions } from 'src/core/server';
 import { UMServerLibs } from '../lib/lib';
 
 export type UMContext = RequestHandlerContext & {

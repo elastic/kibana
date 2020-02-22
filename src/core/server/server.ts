@@ -42,12 +42,12 @@ import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
-import { config as savedObjectsConfig } from './saved_objects';
+import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
-import { InternalCoreSetup } from './internal_types';
+import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 import { UuidService } from './uuid';
 
@@ -67,6 +67,8 @@ export class Server {
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
+
+  private coreStart?: InternalCoreStart;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -130,6 +132,7 @@ export class Server {
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
+      http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
       legacyPlugins,
     });
@@ -174,21 +177,24 @@ export class Server {
       uiSettings: uiSettingsStart,
     });
 
-    const coreStart = {
+    this.coreStart = {
       capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
-      plugins: pluginsStart,
     };
+
     await this.legacy.start({
-      core: coreStart,
+      core: {
+        ...this.coreStart,
+        plugins: pluginsStart,
+      },
       plugins: mapToObject(pluginsStart.contracts),
     });
 
     await this.http.start();
     await this.rendering.start();
 
-    return coreStart;
+    return this.coreStart;
   }
 
   public async stop() {
@@ -215,7 +221,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
+        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
         return {
@@ -252,6 +258,7 @@ export class Server {
       [devConfig.path, devConfig.schema],
       [kibanaConfig.path, kibanaConfig.schema],
       [savedObjectsConfig.path, savedObjectsConfig.schema],
+      [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
 

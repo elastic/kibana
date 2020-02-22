@@ -18,17 +18,19 @@
  */
 
 import { get, startsWith } from 'lodash';
-import PEG from 'pegjs';
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
+
+import { Parser } from 'pegjs';
 
 // @ts-ignore
-import grammar from 'raw-loader!../chain.peg';
+import { parse } from '../_generated_/chain';
 
-import { i18n } from '@kbn/i18n';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
-
-const Parser = PEG.generate(grammar);
+import {
+  ITimelionFunction,
+  TimelionFunctionArgs,
+} from '../../../../../plugins/timelion/common/types';
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',
@@ -57,7 +59,7 @@ function getArgumentsHelp(
 }
 
 async function extractSuggestionsFromParsedResult(
-  result: ReturnType<typeof Parser.parse>,
+  result: ReturnType<Parser['parse']>,
   cursorPosition: number,
   functionList: ITimelionFunction[],
   argValueSuggestions: ArgValueSuggestions
@@ -141,7 +143,7 @@ export async function suggest(
   argValueSuggestions: ArgValueSuggestions
 ) {
   try {
-    const result = await Parser.parse(expression);
+    const result = await parse(expression);
 
     return await extractSuggestionsFromParsedResult(
       result,
@@ -213,14 +215,13 @@ export async function suggest(
 export function getSuggestion(
   suggestion: ITimelionFunction | TimelionFunctionArgs,
   type: SUGGESTION_TYPE,
-  range: monacoEditor.Range
-): monacoEditor.languages.CompletionItem {
-  let kind: monacoEditor.languages.CompletionItemKind =
-    monacoEditor.languages.CompletionItemKind.Method;
+  range: monaco.Range
+): monaco.languages.CompletionItem {
+  let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
   let insertText: string = suggestion.name;
-  let insertTextRules: monacoEditor.languages.CompletionItem['insertTextRules'];
+  let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
-  let command: monacoEditor.languages.CompletionItem['command'];
+  let command: monaco.languages.CompletionItem['command'];
 
   switch (type) {
     case SUGGESTION_TYPE.ARGUMENTS:
@@ -228,7 +229,7 @@ export function getSuggestion(
         title: 'Trigger Suggestion Dialog',
         id: 'editor.action.triggerSuggest',
       };
-      kind = monacoEditor.languages.CompletionItemKind.Property;
+      kind = monaco.languages.CompletionItemKind.Property;
       insertText = `${insertText}=`;
       detail = `${i18n.translate(
         'timelion.expressionSuggestions.argument.description.acceptsText',
@@ -243,9 +244,9 @@ export function getSuggestion(
         title: 'Trigger Suggestion Dialog',
         id: 'editor.action.triggerSuggest',
       };
-      kind = monacoEditor.languages.CompletionItemKind.Function;
+      kind = monaco.languages.CompletionItemKind.Function;
       insertText = `${insertText}($0)`;
-      insertTextRules = monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+      insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       detail = `(${
         (suggestion as ITimelionFunction).chainable
           ? i18n.translate('timelion.expressionSuggestions.func.description.chainableHelpText', {
@@ -268,7 +269,7 @@ export function getSuggestion(
         title: 'Trigger Suggestion Dialog',
         id: 'editor.action.triggerSuggest',
       };
-      kind = monacoEditor.languages.CompletionItemKind.Property;
+      kind = monaco.languages.CompletionItemKind.Property;
       detail = suggestion.help || '';
 
       break;

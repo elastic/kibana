@@ -20,7 +20,7 @@ describe('WrapperPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('WrapperPage')).toMatchSnapshot();
+    expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
   });
 
   describe('restrict width', () => {
@@ -33,7 +33,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is number', () => {
@@ -45,7 +45,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is string', () => {
@@ -57,7 +57,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
+      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
     });
   });
 });

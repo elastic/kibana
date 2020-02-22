@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import { createStateStub } from './_utils';
 import { getQueryParameterActions } from '../../np_ready/angular/context/query_parameters/actions';
 

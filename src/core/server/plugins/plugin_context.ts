@@ -161,14 +161,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
+      getServerInfo: deps.http.getServerInfo,
     },
     savedObjects: {
-      setClientFactory: deps.savedObjects.setClientFactory,
+      setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
-      createInternalRepository: deps.savedObjects.createInternalRepository,
-      createScopedRepository: deps.savedObjects.createScopedRepository,
     },
     uiSettings: {
       register: deps.uiSettings.register,
@@ -203,6 +203,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
+      createSerializer: deps.savedObjects.createSerializer,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

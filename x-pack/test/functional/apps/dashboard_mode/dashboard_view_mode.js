@@ -37,9 +37,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
@@ -91,7 +89,7 @@ export default function({ getService, getPageObjects }) {
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
         await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('kibana_user');
+        await PageObjects.security.assignRoleToUser('kibana_admin');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
         await PageObjects.security.clickSaveEditUser();

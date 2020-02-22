@@ -23,6 +23,7 @@ describe('Columns', () => {
         columnHeaders={headersSansTimestamp}
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
+        ecsData={mockTimelineData[0].ecs}
         onColumnResized={jest.fn()}
         timelineId="test"
       />

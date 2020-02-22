@@ -22,8 +22,9 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { truncatedColorMaps } from 'ui/color_maps';
 import * as colorUtil from 'ui/vis/map/color_util';
+
+import { truncatedColorMaps } from '../../../../../plugins/charts/public';
 
 export class ScaledCirclesMarkers extends EventEmitter {
   constructor(
@@ -87,7 +88,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     const quantizeDomain = min !== max ? [min, max] : d3.scale.quantize().domain();
 
-    this._legendColors = makeLegendColors(this._colorRamp);
+    this._legendColors = this.getLegendColors();
     this._legendQuantizer = d3.scale
       .quantize()
       .domain(quantizeDomain)
@@ -222,11 +223,11 @@ export class ScaledCirclesMarkers extends EventEmitter {
   getBounds() {
     return this._leafletLayer.getBounds();
   }
-}
 
-function makeLegendColors(colorRampKey) {
-  const colorRamp = _.get(truncatedColorMaps[colorRampKey], 'value');
-  return colorUtil.getLegendColors(colorRamp);
+  getLegendColors() {
+    const colorRamp = _.get(truncatedColorMaps[this._colorRamp], 'value');
+    return colorUtil.getLegendColors(colorRamp);
+  }
 }
 
 function makeColorDarker(color) {

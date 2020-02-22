@@ -21,19 +21,13 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { createStateStub } from './_utils';
 import { getQueryParameterActions } from '../../np_ready/angular/context/query_parameters/actions';
-import { createIndexPatternsStub } from '../../np_ready/angular/context/api/__tests__/_stubs';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import { npStart } from 'ui/new_platform';
 
 describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
-  beforeEach(
-    ngMock.module(function createServiceStubs($provide) {
-      $provide.value('indexPatterns', createIndexPatternsStub());
-    })
-  );
 
   describe('action addFilter', function() {
     let addFilter;

@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADVANCED_SETTINGS = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.advancedSettingsButton',
+  {
+    defaultMessage: 'Advanced settings',
+  }
+);
+
 export const ADD_REFERENCE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addReferenceDescription',
   {

@@ -34,4 +34,6 @@ export {
   ImageValidation,
   DeprecationSettings,
   StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './types';

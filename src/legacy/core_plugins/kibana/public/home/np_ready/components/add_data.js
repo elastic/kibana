@@ -91,10 +91,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
 
     const getApmCard = () => (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1} className="homAddData__flexItem">
         <EuiCard
+          textAlign="left"
           className="homAddData__card"
-          icon={<EuiIcon className="homAddData__icon" type="logoAPM" />}
+          titleSize="xs"
           title={apmData.title}
           description={<span id={apmData.ariaDescribedby}>{apmData.description}</span>}
           footer={
@@ -115,60 +116,110 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
     return (
       <EuiFlexGroup
-        className="homeAddData__flexGroup"
+        className="homeAddData__flexGroup homAddData__flexTablet"
         wrap={apmUiEnabled}
         gutterSize="l"
         justifyContent="spaceAround"
         responsive={false}
       >
-        {apmUiEnabled !== false && getApmCard()}
+        <EuiFlexItem className="homAddData__cardDivider homAddData__flexItem" grow={3}>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="xl" type="logoObservability" className="homAddData__logo" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>
+                  <FormattedMessage
+                    id="kbn.home.addData.title.observability"
+                    defaultMessage="Observability"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup
+            className="homeAddData__flexGroup"
+            wrap={apmUiEnabled}
+            gutterSize="l"
+            justifyContent="spaceAround"
+            responsive={false}
+          >
+            {apmUiEnabled !== false && getApmCard()}
 
-        <EuiFlexItem grow={false}>
-          <EuiCard
-            className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="logoLogging" />}
-            title={loggingData.title}
-            description={<span id={loggingData.ariaDescribedby}>{loggingData.description}</span>}
-            footer={
-              <EuiButton
-                className="homAddData__button"
-                href="#/home/tutorial_directory/logging"
-                aria-describedby={loggingData.ariaDescribedby}
-              >
-                <FormattedMessage
-                  id="kbn.home.addData.logging.addLogDataButtonLabel"
-                  defaultMessage="Add log data"
-                />
-              </EuiButton>
-            }
-          />
+            <EuiFlexItem grow={1} className="homAddData__flexItem">
+              <EuiCard
+                textAlign="left"
+                className="homAddData__card"
+                title={loggingData.title}
+                titleSize="xs"
+                description={
+                  <span id={loggingData.ariaDescribedby}>{loggingData.description}</span>
+                }
+                footer={
+                  <EuiButton
+                    className="homAddData__button"
+                    href="#/home/tutorial_directory/logging"
+                    aria-describedby={loggingData.ariaDescribedby}
+                  >
+                    <FormattedMessage
+                      id="kbn.home.addData.logging.addLogDataButtonLabel"
+                      defaultMessage="Add log data"
+                    />
+                  </EuiButton>
+                }
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={1} className="homAddData__flexItem">
+              <EuiCard
+                textAlign="left"
+                className="homAddData__card"
+                title={metricsData.title}
+                titleSize="xs"
+                description={
+                  <span id={metricsData.ariaDescribedby}>{metricsData.description}</span>
+                }
+                footer={
+                  <EuiButton
+                    className="homAddData__button"
+                    href="#/home/tutorial_directory/metrics"
+                    aria-describedby={metricsData.ariaDescribedby}
+                  >
+                    <FormattedMessage
+                      id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                      defaultMessage="Add metric data"
+                    />
+                  </EuiButton>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1} className="homAddData__flexItem">
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="xl" type="logoSecurity" className="homAddData__logo" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>
+                  <FormattedMessage
+                    id="kbn.home.addData.title.security"
+                    defaultMessage="Security"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiCard
+            textAlign="left"
+            titleSize="xs"
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="logoMetrics" />}
-            title={metricsData.title}
-            description={<span id={metricsData.ariaDescribedby}>{metricsData.description}</span>}
-            footer={
-              <EuiButton
-                className="homAddData__button"
-                href="#/home/tutorial_directory/metrics"
-                aria-describedby={metricsData.ariaDescribedby}
-              >
-                <FormattedMessage
-                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
-                  defaultMessage="Add metric data"
-                />
-              </EuiButton>
-            }
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiCard
-            className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="logoSecurity" />}
             title={siemData.title}
             description={<span id={siemData.ariaDescribedby}>{siemData.description}</span>}
             footer={
@@ -179,7 +230,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               >
                 <FormattedMessage
                   id="kbn.home.addData.siem.addSiemEventsButtonLabel"
-                  defaultMessage="Add security events"
+                  defaultMessage="Add events"
                 />
               </EuiButton>
             }
@@ -195,29 +246,6 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h2>
-              <FormattedMessage
-                id="kbn.home.addData.addDataToKibanaTitle"
-                defaultMessage="Add Data to Kibana"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="kbn.home.addData.addDataToKibanaDescription"
-                defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-
       {renderCards()}
 
       <EuiHorizontalRule />

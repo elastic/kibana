@@ -18,10 +18,10 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
+import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -32,6 +32,13 @@ export {
   SavedObjectsImportError,
   SavedObjectsImportRetry,
 } from './import/types';
+
+import { LegacyConfig } from '../legacy';
+export {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from '../../types';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -53,40 +60,10 @@ export interface SavedObjectsMigrationVersion {
 }
 
 /**
- * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
  *
  * @public
  */
-export type SavedObjectAttributeSingle =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes;
-
-/**
- * Type definition for a Saved Object attribute value
- *
- * @public
- */
-export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
-
-/**
- * The data for a Saved Object is stored as an object in the `attributes`
- * property.
- *
- * @public
- */
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -232,12 +209,88 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
+ * @remarks This is only internal for now, and will only be public when we expose the registerType API
+ *
+ * @public
+ */
+export interface SavedObjectsType {
+  /**
+   * The name of the type, which is also used as the internal id.
+   */
+  name: string;
+  /**
+   * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
+   * declared as an `extraType` when creating the repository.
+   *
+   * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
+   */
+  hidden: boolean;
+  /**
+   * Is the type global (true), or namespaced (false).
+   */
+  namespaceAgnostic: boolean;
+  /**
+   * If defined, the type instances will be stored in the given index instead of the default one.
+   */
+  indexPattern?: string;
+  /**
+   * If defined, will be used to convert the type to an alias.
+   */
+  convertToAliasScript?: string;
+  /**
+   * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
+   */
+  mappings: SavedObjectsTypeMappingDefinition;
+  /**
+   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   */
+  migrations?: SavedObjectMigrationMap;
+}
+
+/**
  * @internal
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectMappings: SavedObjectsLegacyMapping[];
+  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
+  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
+  savedObjectsManagement: SavedObjectsManagementDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMapping {
+  pluginId: string;
+  properties: SavedObjectsTypeMappingDefinitions;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMigrationDefinitions {
+  [type: string]: SavedObjectMigrationMap;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+interface SavedObjectsLegacyTypeSchema {
+  isNamespaceAgnostic?: boolean;
+  hidden?: boolean;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
+  convertToAliasScript?: string;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacySchemaDefinitions {
+  [type: string]: SavedObjectsLegacyTypeSchema;
 }

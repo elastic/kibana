@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
+
 import percentileTestdata from './testdata_linechart_percentile.json';
 import percentileTestdataResult from './testdata_linechart_percentile_result.json';
+
+import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
 
 describe('Point Series Config Type Class Test Suite', function() {
   let parsedConfig;
@@ -94,8 +95,6 @@ describe('Point Series Config Type Class Test Suite', function() {
       yAxisFormatter: () => 'test',
     },
   };
-
-  beforeEach(ngMock.module('kibana'));
 
   describe('histogram chart', function() {
     beforeEach(function() {

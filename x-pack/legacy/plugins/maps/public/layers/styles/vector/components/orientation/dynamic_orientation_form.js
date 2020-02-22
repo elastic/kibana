@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -30,7 +29,7 @@ export function DynamicOrientationForm({
       <EuiFlexItem>
         <FieldSelect
           fields={fields}
-          selectedFieldName={_.get(styleOptions, 'field.name')}
+          selectedFieldName={styleProperty.getFieldName()}
           onChange={onFieldChange}
           compressed
         />

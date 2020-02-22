@@ -77,7 +77,17 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  AppCategory,
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from '../types';
 
 export {
   ApplicationSetup,
@@ -133,11 +143,12 @@ export {
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,
+  HttpFetchOptionsWithPath,
   HttpFetchQuery,
-  HttpErrorResponse,
-  HttpErrorRequest,
+  HttpInterceptorResponseError,
+  HttpInterceptorRequestError,
   HttpInterceptor,
-  IHttpResponse,
+  HttpResponse,
   HttpHandler,
   IBasePath,
   IAnonymousPaths,

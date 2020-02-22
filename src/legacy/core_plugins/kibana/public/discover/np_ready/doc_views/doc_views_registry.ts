@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { auto } from 'angular';
 import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
-import { Chrome } from '../../kibana_services';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
 
-  constructor(private legacyChrome: Chrome) {}
+  constructor(private getInjector: () => Promise<auto.IInjectorService>) {}
 
   /**
    * Extends and adds the given doc view to the registry array
@@ -32,7 +33,7 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, this.legacyChrome);
+      docView.render = convertDirectiveToRenderFn(docView.directive, this.getInjector);
     }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;

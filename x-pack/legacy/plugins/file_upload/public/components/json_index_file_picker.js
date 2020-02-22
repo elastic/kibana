@@ -13,6 +13,8 @@ import { MAX_FILE_SIZE } from '../../common/constants/file_import';
 import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
+const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map(type => `.${type}`).join(',');
+const acceptedFileTypeStringMessage = ACCEPTABLE_FILETYPES.map(type => `.${type}`).join(', ');
 
 export class JsonIndexFilePicker extends Component {
   state = {
@@ -103,6 +105,7 @@ export class JsonIndexFilePicker extends Component {
       const splitNameArr = name.split('.');
       const fileType = splitNameArr.pop();
       if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
+        //should only occur if browser does not accept the <File> accept parameter
         throw new Error(
           i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError', {
             defaultMessage: 'File is not one of acceptable types: {types}',
@@ -252,7 +255,10 @@ export class JsonIndexFilePicker extends Component {
             ) : (
               <span>
                 {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {
-                  defaultMessage: 'Formats accepted: .json, .geojson',
+                  defaultMessage: 'Formats accepted: {acceptedFileTypeStringMessage}',
+                  values: {
+                    acceptedFileTypeStringMessage,
+                  },
                 })}{' '}
                 <br />
                 <FormattedMessage
@@ -274,6 +280,7 @@ export class JsonIndexFilePicker extends Component {
               />
             }
             onChange={this._fileHandler}
+            accept={acceptedFileTypeString}
           />
         </EuiFormRow>
       </Fragment>

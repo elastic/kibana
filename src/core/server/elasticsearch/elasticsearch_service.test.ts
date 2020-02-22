@@ -31,6 +31,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { duration } from 'moment';
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
@@ -41,7 +42,7 @@ configService.atPath.mockReturnValue(
   new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
     healthCheck: {
-      delay: 2000,
+      delay: duration(2000),
     },
     ssl: {
       verificationMode: 'none',
@@ -125,7 +126,7 @@ describe('#setup', () => {
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
 Object {
-  "healthCheckDelay": 2000,
+  "healthCheckDelay": "PT2S",
   "hosts": Array [
     "http://8.8.8.8",
   ],
@@ -150,7 +151,7 @@ Object {
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
 Object {
-  "healthCheckDelay": 2000,
+  "healthCheckDelay": "PT2S",
   "hosts": Array [
     "http://1.2.3.4",
   ],
@@ -174,7 +175,7 @@ Object {
         new BehaviorSubject({
           hosts: ['http://1.2.3.4', 'http://9.8.7.6'],
           healthCheck: {
-            delay: 2000,
+            delay: duration(2000),
           },
           ssl: {
             verificationMode: 'none',
@@ -196,7 +197,7 @@ Object {
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "healthCheckDelay": 2000,
+          "healthCheckDelay": "PT2S",
           "hosts": Array [
             "http://8.8.8.8",
           ],

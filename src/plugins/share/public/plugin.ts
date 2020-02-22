@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
+import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
 
-  public async setup() {
+  public async setup(core: CoreSetup) {
+    core.application.register(createShortUrlRedirectApp(core, window.location));
     return {
       ...this.shareMenuRegistry.setup(),
     };

@@ -30,6 +30,7 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
   paramName: ParamName;
   value?: ValidParamValues;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
+  'data-test-subj'?: string;
 }
 
 const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
@@ -44,6 +45,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
   paramName,
   value,
   setValue,
+  'data-test-subj': dataTestSubj,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   const availableOptions = useMemo(() => [emptyValue, ...options], [options]);
 
@@ -63,6 +65,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
         value={value === undefined ? emptyValue.value : value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
+        data-test-subj={dataTestSubj}
       />
     </EuiFormRow>
   );

@@ -29,7 +29,8 @@ import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/publ
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
-    getInjected: () => '',
+    tutorialVariables: () => ({}),
+    homeConfig: { disableWelcomeScreen: false },
   }),
 }));
 
@@ -129,7 +130,7 @@ describe('home', () => {
 
     test('should not render directory entry when showOnHomePage is false', async () => {
       const directoryEntry = {
-        id: 'management',
+        id: 'stack-management',
         title: 'Management',
         description: 'Your center console for managing the Elastic Stack.',
         icon: 'managementApp',

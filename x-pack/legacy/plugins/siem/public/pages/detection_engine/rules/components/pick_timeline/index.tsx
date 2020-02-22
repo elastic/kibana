@@ -8,7 +8,7 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { SearchTimelineSuperSelect } from '../../../../../components/timeline/search_super_select';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 export interface FieldValueTimeline {
   id: string | null;
@@ -65,6 +65,7 @@ export const PickTimeline = ({
     >
       <SearchTimelineSuperSelect
         isDisabled={isDisabled}
+        hideUntitled={true}
         timelineId={timelineId}
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}

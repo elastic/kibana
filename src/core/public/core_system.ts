@@ -211,7 +211,7 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
+      const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
@@ -221,13 +221,6 @@ export class CoreSystem {
       coreUiTargetDomElement.id = 'kibana-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
-
-      // ensure the rootDomElement is empty
-      this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(coreUiTargetDomElement);
-      this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const overlays = this.overlay.start({
         i18n,
@@ -246,6 +239,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        uiSettings,
       });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
@@ -276,6 +270,14 @@ export class CoreSystem {
       };
 
       const plugins = await this.plugins.start(core);
+
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
+
       const rendering = this.rendering.start({
         application,
         chrome,

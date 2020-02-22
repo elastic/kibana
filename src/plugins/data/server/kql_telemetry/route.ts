@@ -22,7 +22,7 @@ import { schema } from '@kbn/config-schema';
 
 export function registerKqlTelemetryRoute(
   router: IRouter,
-  savedObjects: CoreSetup['savedObjects'],
+  getStartServices: CoreSetup['getStartServices'],
   logger: Logger
 ) {
   router.post(
@@ -35,6 +35,7 @@ export function registerKqlTelemetryRoute(
       },
     },
     async (context, request, response) => {
+      const [{ savedObjects }] = await getStartServices();
       const internalRepository = savedObjects.createScopedRepository(request);
 
       const {

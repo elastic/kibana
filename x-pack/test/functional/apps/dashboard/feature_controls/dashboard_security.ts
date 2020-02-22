@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
@@ -21,7 +22,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('dashboard security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/44631
+  describe.skip('dashboard security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -87,7 +89,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('dashboardLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -104,7 +108,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
+        await testSubjects.existOrFail('emptyDashboardWidget', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -112,7 +118,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it(`does not allow a visualization to be edited`, async () => {
@@ -265,7 +273,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('dashboardLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
         await testSubjects.missingOrFail('newItemButton');
       });
 
@@ -290,7 +300,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -376,7 +388,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
@@ -400,7 +412,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
@@ -408,7 +420,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

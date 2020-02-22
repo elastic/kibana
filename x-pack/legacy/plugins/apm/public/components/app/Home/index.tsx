@@ -5,27 +5,26 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
   EuiTabs,
-  EuiSpacer
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { $ElementType } from 'utility-types';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { EuiTabLink } from '../../shared/EuiTabLink';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
+import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
+import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
+import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
-import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
-import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
-import { EuiTabLink } from '../../shared/EuiTabLink';
-import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceMap } from '../ServiceMap';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getHomeTabs({
   serviceMapEnabled = false
@@ -116,7 +115,6 @@ export function Home({ tab }: Props) {
           </EuiTabLink>
         ))}
       </EuiTabs>
-      <EuiSpacer />
       {selectedTab.render()}
     </div>
   );

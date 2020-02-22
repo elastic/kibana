@@ -16,7 +16,7 @@ import { BulkUploader } from './bulk_uploader';
  * @param {Object} server HapiJS server instance
  */
 export function initBulkUploader({ config, ...params }) {
-  const interval = config.get('xpack.monitoring.kibana.collection.interval');
+  const interval = config.get('monitoring.kibana.collection.interval');
   return new BulkUploader({
     interval,
     config,

@@ -91,5 +91,6 @@ readonly links: {
         readonly date: {
             readonly dateMath: string;
         };
+        readonly management: Record<string, string>;
     };
 ```

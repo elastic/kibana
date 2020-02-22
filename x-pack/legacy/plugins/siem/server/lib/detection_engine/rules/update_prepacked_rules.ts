@@ -5,9 +5,9 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { ActionsClient } from '../../../../../actions';
-import { AlertsClient } from '../../../../../alerting';
-import { updateRules } from './update_rules';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
+import { patchRules } from './patch_rules';
 import { PrepackagedRules } from '../types';
 
 export const updatePrepackagedRules = async (
@@ -38,14 +38,14 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     } = rule;
 
     // Note: we do not pass down enabled as we do not want to suddenly disable
     // or enable rules on the user when they were not expecting it if a rule updates
-    return updateRules({
+    return patchRules({
       alertsClient,
       actionsClient,
       description,
@@ -70,7 +70,7 @@ export const updatePrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
       references,
       version,
     });

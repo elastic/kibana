@@ -22,21 +22,21 @@ import { useApolloClient } from '../../../utils/apollo_context';
 import * as i18n from './translations';
 
 interface FetchIndexPatternReturn {
-  browserFields: BrowserFields | null;
+  browserFields: BrowserFields;
   isLoading: boolean;
   indices: string[];
   indicesExists: boolean;
-  indexPatterns: IIndexPattern | null;
+  indexPatterns: IIndexPattern;
 }
 
-type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
+export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
   const [indices, setIndices] = useState<string[]>(defaultIndices);
   const [indicesExists, setIndicesExists] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern | null>(null);
-  const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
+  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern>({ fields: [], title: '' });
+  const [browserFields, setBrowserFields] = useState<BrowserFields>({});
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 

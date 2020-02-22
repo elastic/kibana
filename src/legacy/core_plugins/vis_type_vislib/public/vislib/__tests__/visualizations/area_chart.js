@@ -18,14 +18,11 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import _ from 'lodash';
 import $ from 'jquery';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 const dataTypesArray = {
   'series pos': require('../lib/fixtures/mock_data/date_histogram/_series'),
@@ -46,18 +43,14 @@ const visLibParams = {
 _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
   describe('Vislib Area Chart Test Suite for ' + dataTypeName + ' Data', function() {
     let vis;
-    let persistedState;
+    let mockUiState;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis(visLibParams);
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.on('brush', _.noop);
-        vis.render(dataType, persistedState);
-      })
-    );
+    beforeEach(() => {
+      vis = getVis(visLibParams);
+      mockUiState = getMockUiState();
+      vis.on('brush', _.noop);
+      vis.render(dataType, mockUiState);
+    });
 
     afterEach(function() {
       vis.destroy();
@@ -97,17 +90,15 @@ _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
       let d3selectedPath;
       let onMouseOver;
 
-      beforeEach(
-        ngMock.inject(function() {
-          vis.handler.charts.forEach(function(chart) {
-            path = $(chart.chartEl).find('path')[0];
-            d3selectedPath = d3.select(path)[0][0];
+      beforeEach(function() {
+        vis.handler.charts.forEach(function(chart) {
+          path = $(chart.chartEl).find('path')[0];
+          d3selectedPath = d3.select(path)[0][0];
 
-            // d3 instance of click and hover
-            onMouseOver = !!d3selectedPath.__onmouseover;
-          });
-        })
-      );
+          // d3 instance of click and hover
+          onMouseOver = !!d3selectedPath.__onmouseover;
+        });
+      });
 
       it('should attach a hover event', function() {
         vis.handler.charts.forEach(function() {
@@ -124,20 +115,18 @@ _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
       let onClick;
       let onMouseOver;
 
-      beforeEach(
-        ngMock.inject(function() {
-          vis.handler.charts.forEach(function(chart) {
-            circle = $(chart.chartEl).find('circle')[0];
-            brush = $(chart.chartEl).find('.brush');
-            d3selectedCircle = d3.select(circle)[0][0];
+      beforeEach(() => {
+        vis.handler.charts.forEach(function(chart) {
+          circle = $(chart.chartEl).find('circle')[0];
+          brush = $(chart.chartEl).find('.brush');
+          d3selectedCircle = d3.select(circle)[0][0];
 
-            // d3 instance of click and hover
-            onBrush = !!brush;
-            onClick = !!d3selectedCircle.__onclick;
-            onMouseOver = !!d3selectedCircle.__onmouseover;
-          });
-        })
-      );
+          // d3 instance of click and hover
+          onBrush = !!brush;
+          onClick = !!d3selectedCircle.__onclick;
+          onMouseOver = !!d3selectedCircle.__onmouseover;
+        });
+      });
 
       // D3 brushing requires that a g element is appended that
       // listens for mousedown events. This g element includes
@@ -219,7 +208,7 @@ _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
     describe('defaultYExtents is true', function() {
       beforeEach(function() {
         vis.visConfigArgs.defaultYExtents = true;
-        vis.render(dataType, persistedState);
+        vis.render(dataType, mockUiState);
       });
 
       it('should return yAxis extents equal to data extents', function() {
@@ -238,7 +227,7 @@ _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
         beforeEach(function() {
           vis.visConfigArgs.defaultYExtents = true;
           vis.visConfigArgs.boundsMargin = boundsMarginValue;
-          vis.render(dataType, persistedState);
+          vis.render(dataType, mockUiState);
         });
 
         it('should return yAxis extents equal to data extents with boundsMargin', function() {

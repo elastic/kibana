@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 
 import { ErrorHandler } from './_error_handler';
-import { Tooltip } from '../../legacy_imports';
+import { Tooltip } from '../components/tooltip';
 
 export class ChartTitle extends ErrorHandler {
   constructor(visConfig) {

@@ -257,6 +257,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default index',
       }),
       value: null,
+      type: 'string',
       description: i18n.translate('kbn.advancedSettings.defaultIndexText', {
         defaultMessage: 'The index to access if no index is set',
       }),
@@ -814,6 +815,9 @@ export function getUiSettingDefaults() {
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
+      optionLabels: Object.fromEntries(
+        numeralLanguages.map(language => [language.id, language.name])
+      ),
       description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,
         description:

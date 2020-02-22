@@ -6,7 +6,7 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { OverviewNetworkData } from '../../../../graphql/types';
@@ -126,6 +126,10 @@ const Title = styled.div`
   margin-left: 24px;
 `;
 
+const AccordionContent = styled.div`
+  margin-top: 8px;
+`;
+
 export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, loading }) => {
   const allNetworkStats = getOverviewNetworkStats(data);
   const allNetworkStatsCount = allNetworkStats.reduce((total, stat) => total + stat.count, 0);
@@ -136,54 +140,51 @@ export const OverviewNetworkStats = React.memo<OverviewNetworkProps>(({ data, lo
         const statsForGroup = allNetworkStats.filter(s => statGroup.statIds.includes(s.id));
         const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
 
-        const accordionButton = useMemo(
-          () => (
-            <EuiFlexGroup
-              data-test-subj={`network-stat-group-${statGroup.groupId}`}
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText>{statGroup.name}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <StatValue
-                  count={statsForGroupCount}
-                  isGroupStat={true}
-                  isLoading={loading}
-                  max={allNetworkStatsCount}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          [statGroup, statsForGroupCount, loading, allNetworkStatsCount]
-        );
-
         return (
           <React.Fragment key={statGroup.groupId}>
+            <EuiHorizontalRule margin="xs" />
             <EuiAccordion
               id={`network-stat-accordion-group${statGroup.groupId}`}
-              buttonContent={accordionButton}
-              buttonContentClassName="accordion-button"
-            >
-              {statsForGroup.map(stat => (
-                <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+              buttonContent={
+                <EuiFlexGroup
+                  data-test-subj={`network-stat-group-${statGroup.groupId}`}
+                  justifyContent="spaceBetween"
+                >
                   <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="s">
-                      <Title>{stat.title}</Title>
-                    </EuiText>
+                    <EuiText>{statGroup.name}</EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
+                  <EuiFlexItem grow={false}>
                     <StatValue
-                      count={stat.count}
-                      isGroupStat={false}
+                      count={statsForGroupCount}
+                      isGroupStat={true}
                       isLoading={loading}
-                      max={statsForGroupCount}
+                      max={allNetworkStatsCount}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ))}
+              }
+              buttonContentClassName="accordion-button"
+            >
+              <AccordionContent>
+                {statsForGroup.map(stat => (
+                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="s">
+                        <Title>{stat.title}</Title>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
+                      <StatValue
+                        count={stat.count}
+                        isGroupStat={false}
+                        isLoading={loading}
+                        max={statsForGroupCount}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
+              </AccordionContent>
             </EuiAccordion>
-            {i !== networkStatGroups.length - 1 && <EuiHorizontalRule margin="xs" />}
           </React.Fragment>
         );
       })}

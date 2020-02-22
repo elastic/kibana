@@ -19,15 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { History } from 'history';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { History } from 'history';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
 import { migrateLegacyQuery } from '../legacy_imports';
 import {
-  esFilters,
+  Filter,
   Query,
   TimefilterContract as Timefilter,
 } from '../../../../../../plugins/data/public';
@@ -44,7 +44,6 @@ import {
   SavedDashboardPanel,
 } from './types';
 import {
-  createKbnUrlStateStorage,
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
@@ -63,7 +62,7 @@ export class DashboardStateManager {
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
-    filterBars: esFilters.Filter[];
+    filterBars: Filter[];
     query: Query;
   };
   private stateDefaults: DashboardAppStateDefaults;
@@ -74,6 +73,10 @@ export class DashboardStateManager {
 
   public get appState(): DashboardAppState {
     return this.stateContainer.get();
+  }
+
+  public get appState$(): Observable<DashboardAppState> {
+    return this.stateContainer.state$;
   }
 
   private readonly stateContainer: ReduxLikeStateContainer<
@@ -97,13 +100,13 @@ export class DashboardStateManager {
     savedDashboard,
     hideWriteControls,
     kibanaVersion,
-    useHashedUrl,
+    kbnUrlStateStorage,
     history,
   }: {
     savedDashboard: SavedObjectDashboard;
     hideWriteControls: boolean;
     kibanaVersion: string;
-    useHashedUrl: boolean;
+    kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
   }) {
     this.history = history;
@@ -117,7 +120,7 @@ export class DashboardStateManager {
       kibanaVersion
     );
 
-    this.kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: useHashedUrl, history });
+    this.kbnUrlStateStorage = kbnUrlStateStorage;
 
     // setup initial state by merging defaults with state from url
     // also run migration, as state in url could be of older version
@@ -162,7 +165,7 @@ export class DashboardStateManager {
     // make sure url ('_a') matches initial state
     this.kbnUrlStateStorage.set(this.STATE_STORAGE_KEY, initialState, { replace: true });
 
-    // setup state syncing utils. state container will be synched with url into `this.STATE_STORAGE_KEY` query param
+    // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
     this.stateSyncRef = syncState<DashboardAppState>({
       storageKey: this.STATE_STORAGE_KEY,
       stateContainer: {
@@ -170,10 +173,20 @@ export class DashboardStateManager {
         set: (state: DashboardAppState | null) => {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
-          this.stateContainer.set({
-            ...this.stateDefaults,
-            ...state,
-          });
+          if (state) {
+            this.stateContainer.set({
+              ...this.stateDefaults,
+              ...state,
+            });
+          } else {
+            // Do nothing in case when state from url is empty,
+            // this fixes: https://github.com/elastic/kibana/issues/57789
+            // There are not much cases when state in url could become empty:
+            // 1. User manually removed `_a` from the url
+            // 2. Browser is navigating away from the page and most likely there is no `_a` in the url.
+            //    In this case we don't want to do any state updates
+            //    and just allow $scope.$on('destroy') fire later and clean up everything
+          }
         },
       },
       stateStorage: this.kbnUrlStateStorage,
@@ -248,7 +261,7 @@ export class DashboardStateManager {
     this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
   }
 
-  public setFilters(filters: esFilters.Filter[]) {
+  public setFilters(filters: Filter[]) {
     this.stateContainer.transitions.set('filters', filters);
   }
 
@@ -364,7 +377,7 @@ export class DashboardStateManager {
     return this.savedDashboard.timeRestore;
   }
 
-  public getLastSavedFilterBars(): esFilters.Filter[] {
+  public getLastSavedFilterBars(): Filter[] {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
@@ -543,7 +556,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: esFilters.Filter[]) {
+  public applyFilters(query: Query, filters: Filter[]) {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.stateContainer.transitions.set('query', query);

@@ -7,13 +7,13 @@
 import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import chrome from 'ui/chrome';
 
-import { useKibana } from '../../lib/kibana';
+import { useKibana, useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
-  const docLinks = useKibana().services.docLinks;
+  const { docLinks } = useKibana().services;
+  const kibanaBasePath = `${useBasePath()}/app/kibana`;
 
   return (
     <EuiEmptyPrompt
@@ -24,12 +24,12 @@ export const IndexPatternsMissingPromptComponent = () => {
         <>
           <p>
             <FormattedMessage
-              defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with identical names or glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+              defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with matching glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
               id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
               values={{
                 defaultIndex: (
                   <a
-                    href={`${chrome.getBasePath()}/app/kibana#/management/kibana/settings`}
+                    href={`${kibanaBasePath}#/management/kibana/settings`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -61,7 +61,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
+          href={`${kibanaBasePath}#/management/kibana/index_patterns`}
           color="primary"
           target="_blank"
           fill

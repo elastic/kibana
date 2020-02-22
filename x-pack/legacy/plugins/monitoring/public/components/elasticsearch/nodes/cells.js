@@ -21,11 +21,11 @@ const getSlopeArrow = slope => {
   return null;
 };
 
-const metricVal = (metric, format, isPercent) => {
+const metricVal = (metric, format, isPercent, units) => {
   if (isPercent) {
     return formatMetric(metric, format, '%', { prependSpace: false });
   }
-  return formatMetric(metric, format);
+  return formatMetric(metric, format, units);
 };
 
 const noWrapStyle = { overflowX: 'hidden', whiteSpace: 'nowrap' };
@@ -34,6 +34,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   if (isOnline) {
     const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
     const format = get(metric, 'metric.format');
+    const units = get(metric, 'metric.units');
 
     return (
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
@@ -49,7 +50,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
               defaultMessage: '{metric} max',
               values: {
-                metric: metricVal(maxVal, format, isPercent),
+                metric: metricVal(maxVal, format, isPercent, units),
               },
             })}
           </EuiText>
@@ -57,7 +58,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
               defaultMessage: '{metric} min',
               values: {
-                metric: metricVal(minVal, format, isPercent),
+                metric: metricVal(minVal, format, isPercent, units),
               },
             })}
           </EuiText>

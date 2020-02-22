@@ -25,12 +25,12 @@ const breadcrumbs = [
 
 export const analyticsJobsListRoute: MlRoute = {
   path: '/data_frame_analytics',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', undefined, config, basicResolvers(deps));
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />

@@ -97,6 +97,17 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -150,14 +161,20 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -167,12 +184,16 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "getInstance": [MockFunction],
                 "getType": [MockFunction],
                 "getTypeNameByEsTypes": [MockFunction],
+                "getTypeWithoutMetaParams": [MockFunction],
                 "init": [MockFunction],
                 "parseDefaultTypeMap": [MockFunction],
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "get": [MockFunction],
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -205,6 +226,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -319,6 +346,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "get": [Function],
                 "prepend": [Function],
                 "remove": [Function],
+                "serverBasePath": "",
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -727,6 +755,17 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -780,14 +819,20 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -797,12 +842,16 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "getInstance": [MockFunction],
                         "getType": [MockFunction],
                         "getTypeNameByEsTypes": [MockFunction],
+                        "getTypeWithoutMetaParams": [MockFunction],
                         "init": [MockFunction],
                         "parseDefaultTypeMap": [MockFunction],
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "get": [MockFunction],
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -835,6 +884,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -949,6 +1004,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "get": [Function],
                         "prepend": [Function],
                         "remove": [Function],
+                        "serverBasePath": "",
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],
@@ -1339,6 +1395,17 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -1392,14 +1459,20 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -1409,12 +1482,16 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "getInstance": [MockFunction],
                 "getType": [MockFunction],
                 "getTypeNameByEsTypes": [MockFunction],
+                "getTypeWithoutMetaParams": [MockFunction],
                 "init": [MockFunction],
                 "parseDefaultTypeMap": [MockFunction],
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "get": [MockFunction],
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -1447,6 +1524,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -1561,6 +1644,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "get": [Function],
                 "prepend": [Function],
                 "remove": [Function],
+                "serverBasePath": "",
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -1966,6 +2050,17 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -2019,14 +2114,20 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2036,12 +2137,16 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "getInstance": [MockFunction],
                         "getType": [MockFunction],
                         "getTypeNameByEsTypes": [MockFunction],
+                        "getTypeWithoutMetaParams": [MockFunction],
                         "init": [MockFunction],
                         "parseDefaultTypeMap": [MockFunction],
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "get": [MockFunction],
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -2074,6 +2179,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -2188,6 +2299,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "get": [Function],
                         "prepend": [Function],
                         "remove": [Function],
+                        "serverBasePath": "",
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],
@@ -2578,6 +2690,17 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "management": Object {},
                 "navLinks": Object {},
               },
+              "currentAppId$": Observable {
+                "_isScalar": false,
+                "source": Subject {
+                  "_isScalar": false,
+                  "closed": false,
+                  "hasError": false,
+                  "isStopped": false,
+                  "observers": Array [],
+                  "thrownError": null,
+                },
+              },
               "getUrlForApp": [MockFunction],
               "navigateToApp": [MockFunction],
               "registerMountContext": [MockFunction],
@@ -2631,14 +2754,20 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
+                "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2648,12 +2777,16 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "getInstance": [MockFunction],
                 "getType": [MockFunction],
                 "getTypeNameByEsTypes": [MockFunction],
+                "getTypeWithoutMetaParams": [MockFunction],
                 "init": [MockFunction],
                 "parseDefaultTypeMap": [MockFunction],
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {},
+              "indexPatterns": Object {
+                "get": [MockFunction],
+                "make": [Function],
+              },
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -2686,6 +2819,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -2800,6 +2939,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "get": [Function],
                 "prepend": [Function],
                 "remove": [Function],
+                "serverBasePath": "",
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -3205,6 +3345,17 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "management": Object {},
                         "navLinks": Object {},
                       },
+                      "currentAppId$": Observable {
+                        "_isScalar": false,
+                        "source": Subject {
+                          "_isScalar": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      },
                       "getUrlForApp": [MockFunction],
                       "navigateToApp": [MockFunction],
                       "registerMountContext": [MockFunction],
@@ -3258,14 +3409,20 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
+                        "deserialize": [MockFunction],
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -3275,12 +3432,16 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "getInstance": [MockFunction],
                         "getType": [MockFunction],
                         "getTypeNameByEsTypes": [MockFunction],
+                        "getTypeWithoutMetaParams": [MockFunction],
                         "init": [MockFunction],
                         "parseDefaultTypeMap": [MockFunction],
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {},
+                      "indexPatterns": Object {
+                        "get": [MockFunction],
+                        "make": [Function],
+                      },
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -3313,6 +3474,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -3427,6 +3594,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "get": [Function],
                         "prepend": [Function],
                         "remove": [Function],
+                        "serverBasePath": "",
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],

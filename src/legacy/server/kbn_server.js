@@ -36,7 +36,6 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { capabilitiesMixin } from './capabilities';
-import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
@@ -122,9 +121,6 @@ export default class KbnServer {
 
         // setup capabilities routes
         capabilitiesMixin,
-
-        // setup routes for short urls
-        urlShorteningMixin,
 
         // ensure that all bundles are built, or that the
         // watch bundle server is running

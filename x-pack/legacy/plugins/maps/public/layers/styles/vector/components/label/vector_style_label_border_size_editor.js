@@ -6,9 +6,9 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { LABEL_BORDER_SIZES, VECTOR_STYLES } from '../../vector_style_defaults';
-import { getVectorStyleLabel } from '../get_vector_style_label';
+import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { i18n } from '@kbn/i18n';
 
 const options = [
@@ -38,7 +38,12 @@ const options = [
   },
 ];
 
-export function VectorStyleLabelBorderSizeEditor({ handlePropertyChange, styleProperty }) {
+export function VectorStyleLabelBorderSizeEditor({
+  disabled,
+  disabledBy,
+  handlePropertyChange,
+  styleProperty,
+}) {
   function onChange(e) {
     const styleDescriptor = {
       options: { size: e.target.value },
@@ -46,12 +51,13 @@ export function VectorStyleLabelBorderSizeEditor({ handlePropertyChange, stylePr
     handlePropertyChange(styleProperty.getStyleName(), styleDescriptor);
   }
 
-  return (
+  const labelBorderSizeForm = (
     <EuiFormRow
       label={getVectorStyleLabel(VECTOR_STYLES.LABEL_BORDER_SIZE)}
       display="columnCompressed"
     >
       <EuiSelect
+        disabled={disabled}
         options={options}
         value={styleProperty.getOptions().size}
         onChange={onChange}
@@ -61,5 +67,18 @@ export function VectorStyleLabelBorderSizeEditor({ handlePropertyChange, stylePr
         compressed
       />
     </EuiFormRow>
+  );
+
+  if (!disabled) {
+    return labelBorderSizeForm;
+  }
+
+  return (
+    <EuiToolTip
+      anchorClassName="mapStyleFormDisabledTooltip"
+      content={getDisabledByMessage(disabledBy)}
+    >
+      {labelBorderSizeForm}
+    </EuiToolTip>
   );
 }

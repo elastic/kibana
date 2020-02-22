@@ -19,7 +19,7 @@
 
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, skip, take, takeUntil } from 'rxjs/operators';
+import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
@@ -55,7 +55,7 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
@@ -167,7 +167,7 @@ describe('#setup()', () => {
       const { register } = service.setup(setupDeps);
 
       expect(() =>
-        register(Symbol(), createApp({ id: 'app2', appRoute: '/test/app2' }))
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/base-path/app2' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
@@ -430,7 +430,7 @@ describe('#start()', () => {
   beforeEach(() => {
     MockHistory.push.mockReset();
 
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
@@ -518,6 +518,22 @@ describe('#start()', () => {
     expect([...availableApps.keys()]).toEqual(['app1', 'legacyApp1']);
   });
 
+  describe('currentAppId$', () => {
+    it('emits the legacy app id when in legacy mode', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.injectedMetadata.getLegacyMetadata.mockReturnValue({
+        app: {
+          id: 'legacy',
+          title: 'Legacy App',
+        },
+      } as any);
+      await service.setup(setupDeps);
+      const { currentAppId$ } = await service.start(startDeps);
+
+      expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('legacy');
+    });
+  });
+
   describe('getComponent', () => {
     it('returns renderable JSX tree', async () => {
       service.setup(setupDeps);
@@ -545,7 +561,7 @@ describe('#start()', () => {
 
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1')).toBe('/app/app1');
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
     });
 
     it('creates URL for registered appId', async () => {
@@ -557,20 +573,29 @@ describe('#start()', () => {
 
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1')).toBe('/app/app1');
-      expect(getUrlForApp('legacyApp1')).toBe('/app/legacyApp1');
-      expect(getUrlForApp('app2')).toBe('/custom/path');
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
+      expect(getUrlForApp('legacyApp1')).toBe('/base-path/app/legacyApp1');
+      expect(getUrlForApp('app2')).toBe('/base-path/custom/path');
     });
 
     it('creates URLs with path parameter', async () => {
       service.setup(setupDeps);
-
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
+    });
+
+    it('creates absolute URLs when `absolute` parameter is true', async () => {
+      service.setup(setupDeps);
+      const { getUrlForApp } = await service.start(startDeps);
+
+      expect(getUrlForApp('app1', { absolute: true })).toBe('http://localhost/base-path/app/app1');
+      expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
+        'http://localhost/base-path/app/app2/deep/link'
+      );
     });
   });
 
@@ -643,7 +668,7 @@ describe('#start()', () => {
       const { navigateToApp } = await service.start(startDeps);
 
       await navigateToApp('myTestApp');
-      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/myTestApp');
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/base-path/app/myTestApp');
     });
 
     it('updates currentApp$ after mounting', async () => {
@@ -651,7 +676,7 @@ describe('#start()', () => {
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
       const stop$ = new Subject();
-      const promise = currentAppId$.pipe(skip(1), bufferCount(4), takeUntil(stop$)).toPromise();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
       await navigateToApp('beta');

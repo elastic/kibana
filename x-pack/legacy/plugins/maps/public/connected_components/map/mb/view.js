@@ -107,7 +107,6 @@ export class MBMapContainer extends React.Component {
   }
 
   async _createMbMapInstance() {
-    const initialView = this.props.goto ? this.props.goto.center : null;
     return new Promise(resolve => {
       const mbStyle = {
         version: 8,
@@ -127,12 +126,15 @@ export class MBMapContainer extends React.Component {
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
       };
+      const initialView = _.get(this.props.goto, 'center');
       if (initialView) {
         options.zoom = initialView.zoom;
         options.center = {
           lng: initialView.lon,
           lat: initialView.lat,
         };
+      } else {
+        options.bounds = [-170, -60, 170, 75];
       }
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();

@@ -10,4 +10,5 @@ export * from './persist_rule';
 export * from './types';
 export * from './use_rule';
 export * from './use_rules';
+export * from './use_pre_packaged_rules';
 export * from './use_rule_status';

@@ -187,10 +187,6 @@ export class VectorLayer extends AbstractLayer {
     return await this._source.getLeftJoinFields();
   }
 
-  async getSourceName() {
-    return this._source.getDisplayName();
-  }
-
   _getJoinFields() {
     const joinFields = [];
     this.getValidJoins().forEach(join => {
@@ -207,10 +203,6 @@ export class VectorLayer extends AbstractLayer {
   async getNumberFields() {
     const numberFieldOptions = await this._source.getNumberFields();
     return [...numberFieldOptions, ...this._getJoinFields()];
-  }
-
-  async getOrdinalFields() {
-    return [...(await this.getDateFields()), ...(await this.getNumberFields())];
   }
 
   async getCategoricalFields() {
@@ -276,7 +268,7 @@ export class VectorLayer extends AbstractLayer {
 
     try {
       startLoading(sourceDataId, requestToken, searchFilters);
-      const leftSourceName = await this.getSourceName();
+      const leftSourceName = await this._source.getDisplayName();
       const { propertiesMap } = await joinSource.getPropertiesMap(
         searchFilters,
         leftSourceName,

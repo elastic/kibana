@@ -18,10 +18,10 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
+
 import { VisConfig } from '../../lib/vis_config';
+import { getMockUiState } from './fixtures/_vis_fixture';
 
 describe('Vislib VisConfig Class Test Suite', function() {
   let el;
@@ -85,27 +85,23 @@ describe('Vislib VisConfig Class Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      const PersistedState = $injector.get('PersistedState');
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visWrapper')
-        .node();
+  beforeEach(() => {
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'visWrapper')
+      .node();
 
-      visConfig = new VisConfig(
-        {
-          type: 'point_series',
-        },
-        data,
-        new PersistedState(),
-        el,
-        () => undefined
-      );
-    })
-  );
+    visConfig = new VisConfig(
+      {
+        type: 'point_series',
+      },
+      data,
+      getMockUiState(),
+      el,
+      () => undefined
+    );
+  });
 
   afterEach(() => {
     el.remove();

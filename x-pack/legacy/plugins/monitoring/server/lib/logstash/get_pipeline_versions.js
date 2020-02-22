@@ -37,7 +37,7 @@ function fetchPipelineVersions(...args) {
     by_pipeline_hash: {
       terms: {
         field: 'logstash_stats.pipelines.hash',
-        size: config.get('xpack.monitoring.max_bucket_size'),
+        size: config.get('monitoring.ui.max_bucket_size'),
         order: { 'path_to_root>first_seen': 'desc' },
       },
       aggs: {

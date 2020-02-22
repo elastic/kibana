@@ -12,15 +12,17 @@ import {
   mockCasesErrorTriggerData,
 } from '../__fixtures__';
 import { initGetCaseApi } from '../get_case';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
+import { flattenCaseSavedObject } from '../utils';
+import { CaseAttributes } from '../types';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
     routeHandler = await createRoute(initGetCaseApi, 'get');
   });
-  it(`returns the case without case comments when includeComments is false`, async () => {
+  it(`returns the case with empty case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       params: {
@@ -37,8 +39,13 @@ describe('GET case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(mockCases.find(s => s.id === 'mock-id-1'));
-    expect(response.payload.comments).toBeUndefined();
+    expect(response.payload).toEqual(
+      flattenCaseSavedObject(
+        (mockCases.find(s => s.id === 'mock-id-1') as unknown) as SavedObject<CaseAttributes>,
+        []
+      )
+    );
+    expect(response.payload.comments).toEqual([]);
   });
   it(`returns an error when thrown from getCase`, async () => {
     const request = httpServerMock.createKibanaRequest({
@@ -76,7 +83,7 @@ describe('GET case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload.comments.saved_objects).toHaveLength(3);
+    expect(response.payload.comments).toHaveLength(3);
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
     const request = httpServerMock.createKibanaRequest({

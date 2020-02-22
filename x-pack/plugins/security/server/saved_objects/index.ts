@@ -24,12 +24,12 @@ export function setupSavedObjects({ auditLogger, authz, savedObjects }: SetupSav
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
 
-  savedObjects.setClientFactory(({ request }) => {
+  savedObjects.setClientFactoryProvider(repositoryFactory => ({ request }) => {
     const kibanaRequest = getKibanaRequest(request);
     return new SavedObjectsClient(
       authz.mode.useRbacForRequest(kibanaRequest)
-        ? savedObjects.createInternalRepository()
-        : savedObjects.createScopedRepository(kibanaRequest)
+        ? repositoryFactory.createInternalRepository()
+        : repositoryFactory.createScopedRepository(kibanaRequest)
     );
   });
 

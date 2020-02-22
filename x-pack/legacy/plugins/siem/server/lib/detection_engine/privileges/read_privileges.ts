@@ -7,11 +7,11 @@
 import { CallWithRequest } from '../types';
 
 export const readPrivileges = async (
-  callWithRequest: CallWithRequest<unknown, unknown, unknown>,
+  callWithRequest: CallWithRequest<{}, unknown>,
   index: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {
-    path: `_security/user/_has_privileges`,
+    path: '/_security/user/_has_privileges',
     method: 'POST',
     body: {
       cluster: [

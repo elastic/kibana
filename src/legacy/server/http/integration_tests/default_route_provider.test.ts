@@ -29,7 +29,7 @@ let mockDefaultRouteSetting: any = '';
 describe('default route provider', () => {
   let root: Root;
   beforeAll(async () => {
-    root = kbnTestServer.createRoot();
+    root = kbnTestServer.createRoot({ migrations: { skip: true } });
 
     await root.setup();
     await root.start();
