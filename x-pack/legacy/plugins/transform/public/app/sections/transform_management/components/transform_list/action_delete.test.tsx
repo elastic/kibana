@@ -17,6 +17,8 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const Providers = getAppProviders(createPublicShim());
