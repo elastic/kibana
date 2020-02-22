@@ -113,3 +113,11 @@ export const MARKDOWN_SYNTAX_HELP = i18n.translate(
     defaultMessage: 'Markdown syntax help',
   }
 );
+
+export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
+  defaultMessage: 'Add comment',
+});
+
+export const ADD_COMMENT_HELP_TEXT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
+  defaultMessage: 'Add a new comment...',
+});

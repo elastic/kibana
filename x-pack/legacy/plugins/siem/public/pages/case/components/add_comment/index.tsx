@@ -3,14 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { Form, useForm } from '../../../shared_imports';
 import { NewComment } from '../../../../containers/case/types';
@@ -28,7 +22,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 export const AddComment = React.memo<{
   caseId: string;
 }>(({ caseId }) => {
-  const [{ data, isLoading }, setFormData] = usePostComment(caseId);
+  const [{ data, isLoading, newComment }, setFormData] = usePostComment(caseId);
   const { form } = useForm({
     defaultValue: data,
     options: { stripEmptyFields: false },
@@ -41,34 +35,33 @@ export const AddComment = React.memo<{
       setFormData({ ...newData, isNew: true } as NewComment);
     }
   }, [form]);
-
+  const renderCommentButton = useMemo(() => {
+    return (
+      <EuiButton
+        iconType="plusInCircle"
+        isDisabled={isLoading}
+        isLoading={isLoading}
+        onClick={onSubmit}
+        size="s"
+      >
+        {i18n.ADD_COMMENT}
+      </EuiButton>
+    );
+  }, [form]);
   return (
     <>
       {isLoading && <MySpinner size="xl" />}
       <Form form={form}>
         <MarkdownEditor
           fieldName="comment"
+          footerContentRight={renderCommentButton}
           formHook={true}
           initialDescription={data.comment}
           isLoading={isLoading}
           onChange={comment => setFormData({ ...data, comment })}
         />
       </Form>
-      <>
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-              {i18n.SUBMIT}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
+      {newComment && 'new comment got added but we didnt update the UI yet ;)'}
     </>
   );
 });

@@ -83,7 +83,7 @@ export const updateCaseProperty = async (
 };
 
 export const createComment = async (newComment: NewComment, caseId: string): Promise<Comment> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}/comments`, {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}/comment`, {
     method: 'POST',
     asResponse: true,
     body: JSON.stringify(newComment),

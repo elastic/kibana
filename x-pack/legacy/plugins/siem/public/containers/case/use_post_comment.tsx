@@ -83,9 +83,8 @@ export const usePostComment = (
       try {
         const dataWithoutIsNew = state.data;
         delete dataWithoutIsNew.isNew;
-        debugger;
-        const response = await createComment(dataWithoutIsNew);
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+        const response = await createComment(dataWithoutIsNew, state.caseId);
+        dispatch({ type: FETCH_SUCCESS, payload: response }); // TO DO Steph type error
       } catch (error) {
         errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
         dispatch({ type: FETCH_FAILURE });
