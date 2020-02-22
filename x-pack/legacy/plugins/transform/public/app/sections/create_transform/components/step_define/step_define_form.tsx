@@ -28,8 +28,7 @@ import {
 } from '@elastic/eui';
 
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
-import { TransformPivotConfig } from '../../../../common';
-import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
