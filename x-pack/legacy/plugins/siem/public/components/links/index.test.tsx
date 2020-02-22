@@ -128,7 +128,7 @@ describe('Custom Links', () => {
     });
 
     test('it renders tooltip', () => {
-      expect(wrapper.find('EuiToolTip').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="externalLinkTooltip"]').exists()).toBeTruthy();
     });
 
     test('it renders ExternalLinkIcon', () => {

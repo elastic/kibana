@@ -58,7 +58,7 @@ export const ExternalLink = React.memo<{
       [overflowIndexStart]
     );
     return url && children ? (
-      <EuiToolTip content={url} position="top">
+      <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <>
           <EuiLink href={url} target="_blank" rel="noopener">
             {children}
@@ -196,14 +196,6 @@ export const Comma = styled('span')`
 
 Comma.displayName = 'Comma';
 
-const AlignedFlexItem = styled(EuiFlexItem)`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-`;
-
-AlignedFlexItem.displayName = 'AlignedFlexItem';
-
 const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
@@ -243,8 +235,8 @@ const ReputationLinkComponent: React.FC<{
   );
 
   return (
-    <EuiFlexGroup gutterSize="none">
-      <AlignedFlexItem grow={true}>
+    <EuiFlexGroup gutterSize="none" justifyContent="center" direction="column" alignItems="center">
+      <EuiFlexItem grow={true}>
         {ipReputationLinks
           ?.slice(0, overflowIndexStart)
           .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
@@ -258,8 +250,8 @@ const ReputationLinkComponent: React.FC<{
               <>{showDomain ? domain : name ?? domain}</>
             </ExternalLink>
           ))}
-      </AlignedFlexItem>
-      <AlignedFlexItem grow={false}>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <DefaultFieldRendererOverflow
           rowItems={ipReputationLinks}
           idPrefix="moreReputationLink"
@@ -279,7 +271,7 @@ const ReputationLinkComponent: React.FC<{
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={overflowIndexStart}
         />
-      </AlignedFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

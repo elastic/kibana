@@ -135,11 +135,11 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
   <ReputationLink domain={ip} />
 );
 
-interface DefaultFieldRendererProps<T = string> {
-  rowItems: T[] | null | undefined;
+interface DefaultFieldRendererProps {
+  rowItems?: string[] | null | undefined;
   attrName: string;
   idPrefix: string;
-  render?: (item: T) => JSX.Element;
+  render?: (item: string) => JSX.Element;
   displayCount?: number;
   moreMaxHeight?: string;
 }
@@ -202,10 +202,10 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 type RowItemTypes = string | ReputationLinkSetting;
-interface DefaultFieldRendererOverflowProps<T = RowItemTypes> {
-  rowItems: T[];
+interface DefaultFieldRendererOverflowProps {
+  rowItems: string[] | ReputationLinkSetting[];
   idPrefix: string;
-  render?: (item: T) => React.ReactNode;
+  render?: (item: string | ReputationLinkSetting) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
@@ -245,7 +245,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     const [isOpen, setIsOpen] = useState(false);
     return (
       <EuiFlexItem grow={false}>
-        {rowItems?.length > overflowIndexStart && (
+        {rowItems != null && rowItems?.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
             button={
