@@ -34,7 +34,6 @@ exports[`Field for array setting should render as read only if saving is disable
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={true}
@@ -112,7 +111,6 @@ exports[`Field for array setting should render as read only with help text if ov
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={true}
@@ -169,7 +167,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -215,7 +212,6 @@ exports[`Field for array setting should render default value if there is no user
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -368,7 +364,6 @@ exports[`Field for array setting should render user value if there is user value
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="array:test:setting"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -414,7 +409,6 @@ exports[`Field for boolean setting should render as read only if saving is disab
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -498,7 +492,6 @@ exports[`Field for boolean setting should render as read only with help text if 
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -561,7 +554,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -613,7 +605,6 @@ exports[`Field for boolean setting should render default value if there is no us
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -774,7 +765,6 @@ exports[`Field for boolean setting should render user value if there is user val
     labelType="label"
   >
     <EuiSwitch
-      aria-describedby="boolean:test:setting"
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -907,7 +897,6 @@ exports[`Field for image setting should render as read only with help text if ov
     <EuiImage
       allowFullScreen={true}
       alt="image:test:setting"
-      aria-describedby="image:test:setting"
       aria-label="image test setting"
       url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
     />
@@ -1173,7 +1162,6 @@ exports[`Field for image setting should render user value if there is user value
     <EuiImage
       allowFullScreen={true}
       alt="image:test:setting"
-      aria-describedby="image:test:setting"
       aria-label="image test setting"
       url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
     />
@@ -1243,7 +1231,6 @@ exports[`Field for json setting should render as read only if saving is disabled
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1345,7 +1332,6 @@ exports[`Field for json setting should render as read only with help text if ove
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1423,7 +1409,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1532,7 +1517,6 @@ exports[`Field for json setting should render default value if there is no user 
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1730,7 +1714,6 @@ exports[`Field for json setting should render user value if there is user value 
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="json:test:setting"
         aria-label="json test setting"
         editorProps={
           Object {
@@ -1797,7 +1780,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -1896,7 +1878,6 @@ exports[`Field for markdown setting should render as read only with help text if
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -1974,7 +1955,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -2041,7 +2021,6 @@ exports[`Field for markdown setting should render default value if there is no u
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -2232,7 +2211,6 @@ exports[`Field for markdown setting should render user value if there is user va
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
       <EuiCodeEditor
-        aria-describedby="markdown:test:setting"
         aria-label="markdown test setting"
         editorProps={
           Object {
@@ -2296,7 +2274,6 @@ exports[`Field for number setting should render as read only if saving is disabl
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={true}
@@ -2374,7 +2351,6 @@ exports[`Field for number setting should render as read only with help text if o
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={true}
@@ -2431,7 +2407,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2477,7 +2452,6 @@ exports[`Field for number setting should render default value if there is no use
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2626,7 +2600,6 @@ exports[`Field for number setting should render user value if there is user valu
     labelType="label"
   >
     <EuiFieldNumber
-      aria-describedby="number:test:setting"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2672,7 +2645,6 @@ exports[`Field for select setting should render as read only if saving is disabl
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={true}
@@ -2766,7 +2738,6 @@ exports[`Field for select setting should render as read only with help text if o
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={true}
@@ -2839,7 +2810,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -2901,7 +2871,6 @@ exports[`Field for select setting should render default value if there is no use
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3082,7 +3051,6 @@ exports[`Field for select setting should render user value if there is user valu
     labelType="label"
   >
     <EuiSelect
-      aria-describedby="select:test:setting"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3144,7 +3112,6 @@ exports[`Field for string setting should render as read only if saving is disabl
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={true}
@@ -3222,7 +3189,6 @@ exports[`Field for string setting should render as read only with help text if o
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={true}
@@ -3279,7 +3245,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3325,7 +3290,6 @@ exports[`Field for string setting should render default value if there is no use
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3474,7 +3438,6 @@ exports[`Field for string setting should render user value if there is user valu
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test:setting"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3520,7 +3483,6 @@ exports[`Field for stringWithValidation setting should render as read only if sa
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={true}
@@ -3598,7 +3560,6 @@ exports[`Field for stringWithValidation setting should render as read only with 
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={true}
@@ -3655,7 +3616,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -3701,7 +3661,6 @@ exports[`Field for stringWithValidation setting should render default value if t
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -3850,7 +3809,6 @@ exports[`Field for stringWithValidation setting should render user value if ther
     labelType="label"
   >
     <EuiFieldText
-      aria-describedby="string:test-validation:setting"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}

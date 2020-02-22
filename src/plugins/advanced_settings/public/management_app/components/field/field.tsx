@@ -299,10 +299,14 @@ export class Field extends PureComponent<FieldProps> {
       defVal,
       ariaName,
     } = setting;
-    const a11yProps: { [key: string]: string } = {
-      ['aria-label']: ariaName,
-      ['aria-describedby']: id,
-    };
+    const a11yProps: { [key: string]: string } = unsavedChanges
+      ? {
+          ['aria-label']: ariaName,
+          ['aria-describedby']: id,
+        }
+      : {
+          ['aria-label']: ariaName,
+        };
     const currentValue = unsavedChanges
       ? unsavedChanges.value
       : getEditableValue(type, value, defVal);
