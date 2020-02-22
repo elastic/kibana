@@ -4,56 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
-import { DateFromISOString } from 'io-ts-types/lib/DateFromISOString';
+/* eslint-disable @typescript-eslint/camelcase */
 
-export const User = t.type({
-  userId: t.number,
-  name: t.string,
+import * as t from 'io-ts';
+
+import {
+  description,
+  risk_score,
+  references,
+  created_at,
+  created_by,
+  updated_at,
+  saved_id,
+  timeline_id,
+  timeline_title,
+  type,
+  threat,
+} from './schemas';
+
+/**
+ * This is the required fields for the rules schema. Put all required properties on
+ * this base for schemas such as create_rules, update_rules, etc...
+ */
+export const requiredRulesSchema = t.type({
+  created_at,
+  updated_at,
+  created_by,
+  description,
+  risk_score,
+  references,
+  type,
+  threat,
 });
 
-// example risk score
-export const riskScore = new t.Type<number, number, unknown>(
-  'riskScore',
-  t.number.is,
-  (input, context) => {
-    return typeof input === 'number' && Number.isSafeInteger(input) && input >= 0 && input <= 100
-      ? t.success(input)
-      : t.failure(input, context);
-  },
-  t.identity
-);
+export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
 
-// default values test and it should all be strings
-export const references = new t.Type<string[], string[], unknown>(
-  'references',
-  (input: unknown): input is string[] => Array.isArray(input),
-  (input, context) => {
-    if (input == null) {
-      return t.success([]);
-    } else if (Array.isArray(input)) {
-      const everythingIsAString = input.every(element => typeof element === 'string');
-      if (everythingIsAString) {
-        return t.success(input);
-      }
-    }
-    return t.failure(input, context);
-  },
-  t.identity
-);
+/**
+ * This is the partial or optional fields for the rules schema. Put all optional
+ * properties on this. If you have type dependents or exclusive or situations add
+ * them here AND update the check_type_dependents file.
+ */
+export const partialRulesSchema = t.partial({
+  saved_id,
+  timeline_id,
+  timeline_title,
+});
 
-export const createRulesSchema = t.intersection([
-  t.type({
-    created_at: DateFromISOString,
-    updated_at: DateFromISOString,
-    created_by: t.string,
-    description: t.string,
-    risk_score: riskScore,
-  }),
-  t.partial({ references }),
+/**
+ * This is the rules schema with all base and all optional properties
+ * on it merged together
+ */
+export const rulesSchema = t.intersection([
+  t.exact(partialRulesSchema),
+  t.exact(requiredRulesSchema),
 ]);
-
-export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+export type RulesSchema = t.TypeOf<typeof rulesSchema>;
 
 /*
 "description": "Identifies Windows programs run from unexpected parent processes. This could indicate masquerading or other strange activity on a system.",
