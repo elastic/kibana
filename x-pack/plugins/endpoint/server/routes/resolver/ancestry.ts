@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { getAncestors } from './shared';
+import { Fetcher } from './utils/fetch';
 
-interface LifecycleQueryParams {
+interface AncestryQueryParams {
   ancestors: number;
   /**
    * legacyEndpointID is optional because there are two different types of identifiers:
@@ -27,11 +26,11 @@ interface LifecycleQueryParams {
   legacyEndpointID?: string;
 }
 
-interface LifecyclePathParams {
+interface AncestryPathParams {
   id: string;
 }
 
-export const validateLifecycle = {
+export const validateAncestry = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
     ancestors: schema.number({ defaultValue: 0, min: 0, max: 10 }),
@@ -39,28 +38,22 @@ export const validateLifecycle = {
   }),
 };
 
-export function handleLifecycle(
+export function handleAncestry(
   log: Logger
-): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
+): RequestHandler<AncestryPathParams, AncestryQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { ancestors: levels, legacyEndpointID },
+      query: { ancestors, legacyEndpointID: endpointID },
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
 
-      const [ancestors, next] = await getAncestors(client, levels + 1, id, legacyEndpointID);
-      const root = ancestors.shift();
+      const fetcher = new Fetcher(client, id, endpointID);
+      const tree = await fetcher.ancestors(ancestors + 1);
 
       return res.ok({
-        body: Object.assign({ lifecycle: [] }, root, {
-          ancestors,
-          pagination: {
-            next,
-            ancestors: levels,
-          },
-        }),
+        body: tree.render(),
       });
     } catch (err) {
       log.warn(err);

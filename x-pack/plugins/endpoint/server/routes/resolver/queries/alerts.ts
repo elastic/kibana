@@ -6,7 +6,7 @@
 import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-export class RelatedEventsQuery extends ResolverQuery {
+export class AlertsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_pid');
     return {
@@ -21,11 +21,7 @@ export class RelatedEventsQuery extends ResolverQuery {
                 term: { 'agent.id': endpointID },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
+                term: { 'event.kind': 'alert' },
               },
             ],
           },
@@ -46,11 +42,7 @@ export class RelatedEventsQuery extends ResolverQuery {
                 terms: { 'process.entity_id': entityIDs },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
+                term: { 'event.kind': 'alert' },
               },
             ],
           },

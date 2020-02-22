@@ -6,9 +6,9 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { handleRelatedEvents, validateRelatedEvents } from './resolver/related_events';
+import { handleEvents, validateEvents } from './resolver/events';
 import { handleChildren, validateChildren } from './resolver/children';
-import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
+import { handleAncestry, validateAncestry } from './resolver/ancestry';
 import { handleTree, validateTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -16,11 +16,11 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
 
   router.get(
     {
-      path: '/api/endpoint/resolver/{id}/related',
-      validate: validateRelatedEvents,
+      path: '/api/endpoint/resolver/{id}/events',
+      validate: validateEvents,
       options: { authRequired: true },
     },
-    handleRelatedEvents(log)
+    handleEvents(log)
   );
 
   router.get(
@@ -34,16 +34,16 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
 
   router.get(
     {
-      path: '/api/endpoint/resolver/{id}',
-      validate: validateLifecycle,
+      path: '/api/endpoint/resolver/{id}/ancestry',
+      validate: validateAncestry,
       options: { authRequired: true },
     },
-    handleLifecycle(log)
+    handleAncestry(log)
   );
 
   router.get(
     {
-      path: '/api/endpoint/resolver/{id}/tree',
+      path: '/api/endpoint/resolver/{id}',
       validate: validateTree,
       options: { authRequired: true },
     },

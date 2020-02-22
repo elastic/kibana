@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { Tree } from './utils/tree';
-import { getChildren } from './shared';
+import { Fetcher } from './utils/fetch';
 
 interface ChildrenQueryParams {
-  after?: string;
-  limit: number;
+  // the rough approximation of how many children you can request per process, per level
+  // really this only matters for the first level of children, every other level exponentially
+  // increases this value
+  children: number;
+  generations: number;
+  afterChild?: string;
   /**
    * legacyEndpointID is optional because there are two different types of identifiers:
    *
@@ -27,7 +29,6 @@ interface ChildrenQueryParams {
    * and the {id} would be entityID stored in the event's process.entity_id field.
    */
   legacyEndpointID?: string;
-  levels: number;
 }
 
 interface ChildrenPathParams {
@@ -37,10 +38,10 @@ interface ChildrenPathParams {
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    after: schema.maybe(schema.string()),
-    limit: schema.number({ defaultValue: 10, min: 10, max: 100 }),
+    children: schema.number({ defaultValue: 10, min: 10, max: 100 }),
+    generations: schema.number({ defaultValue: 3, min: 0, max: 3 }),
+    afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
-    levels: schema.number({ defaultValue: 1, min: 1, max: 3 }),
   }),
 };
 
@@ -50,16 +51,16 @@ export function handleChildren(
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { limit, after, legacyEndpointID, levels },
+      query: { children, generations, afterChild, legacyEndpointID: endpointID },
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
-      const tree = new Tree(id, limit);
-      const ids = [id];
 
-      await getChildren({ client, tree, ids, limit, levels, legacyEndpointID, after });
+      const fetcher = new Fetcher(client, id, endpointID);
+      const tree = await fetcher.children(children, generations, afterChild);
+
       return res.ok({
-        body: tree.dump(),
+        body: tree.render(),
       });
     } catch (err) {
       log.warn(err);

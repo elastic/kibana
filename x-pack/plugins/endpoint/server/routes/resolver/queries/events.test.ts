@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RelatedEventsQuery } from './related_events';
+import { EventsQuery } from './events';
 import { EndpointAppConstants } from '../../../../common/types';
 
 describe('related events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date();
     expect(
-      new RelatedEventsQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
+      new EventsQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -51,7 +51,7 @@ describe('related events query', () => {
     const timestamp = new Date();
 
     expect(
-      new RelatedEventsQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
+      new EventsQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
     ).toStrictEqual({
       body: {
         query: {

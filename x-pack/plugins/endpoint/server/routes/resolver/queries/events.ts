@@ -6,10 +6,11 @@
 import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-export class LifecycleQuery extends ResolverQuery {
+export class EventsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
+    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_pid');
     return {
-      body: {
+      body: paginator({
         query: {
           bool: {
             filter: [
@@ -23,47 +24,44 @@ export class LifecycleQuery extends ResolverQuery {
                 term: { 'event.kind': 'event' },
               },
               {
-                term: { 'event.category': 'process' },
+                bool: {
+                  must_not: {
+                    term: { 'event.category': 'process' },
+                  },
+                },
               },
             ],
           },
         },
-        size: 10000, // give the max hits we can return
-        sort: [{ '@timestamp': 'asc' }],
-      },
+      }),
       index,
     };
   }
 
   protected query(entityIDs: string[], index: string): JsonObject {
+    const paginator = this.paginateBy('event.id', 'process.entity_id');
     return {
-      body: {
+      body: paginator({
         query: {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': entityIDs },
               },
               {
                 term: { 'event.kind': 'event' },
               },
               {
-                term: { 'event.category': 'process' },
+                bool: {
+                  must_not: {
+                    term: { 'event.category': 'process' },
+                  },
+                },
               },
             ],
           },
         },
-        sort: [{ '@timestamp': 'asc' }],
-      },
+      }),
       index,
     };
   }

@@ -23,6 +23,9 @@ export class ChildrenQuery extends ResolverQuery {
                 term: { 'event.category': 'process' },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 bool: {
                   // Ideally we'd look for one of process_start or process_running, not both
                   // so to solve this we'll probably want to either search for all of them and only return one if that's
@@ -58,6 +61,9 @@ export class ChildrenQuery extends ResolverQuery {
               },
               {
                 term: { 'event.category': 'process' },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 // Corner case, we could only have a process_running or process_terminated

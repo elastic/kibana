@@ -6,17 +6,19 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { getChildren, getAncestors, getRelated } from './shared';
+import { Fetcher } from './utils/fetch';
 import { Tree } from './utils/tree';
 
 interface TreeQueryParams {
   // the rough approximation of how many children you can request per process, per level
   // really this only matters for the first level of children, every other level exponentially
   // increases this value
-  limit: number;
-  levels: number;
+  children: number;
+  generations: number;
   ancestors: number;
-  related: number;
+  events: number;
+  afterChild?: string;
+  afterEvent?: string;
   /**
    * legacyEndpointID is optional because there are two different types of identifiers:
    *
@@ -40,10 +42,12 @@ interface TreePathParams {
 export const validateTree = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    limit: schema.number({ defaultValue: 10, min: 10, max: 100 }),
-    levels: schema.number({ defaultValue: 3, min: 1, max: 3 }),
-    ancestors: schema.number({ defaultValue: 3, min: 3, max: 5 }),
-    related: schema.number({ defaultValue: 100, min: 100, max: 1000 }),
+    children: schema.number({ defaultValue: 10, min: 10, max: 100 }),
+    generations: schema.number({ defaultValue: 3, min: 0, max: 3 }),
+    ancestors: schema.number({ defaultValue: 3, min: 0, max: 5 }),
+    events: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
+    afterEvent: schema.maybe(schema.string()),
+    afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
 };
@@ -52,36 +56,28 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { limit, legacyEndpointID, levels, ancestors: ancestorLevels, related },
+      query: {
+        children,
+        generations,
+        ancestors,
+        events,
+        afterEvent,
+        afterChild,
+        legacyEndpointID: endpointID,
+      },
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
-      const tree = new Tree(id, limit);
 
-      const [, ancestorResponse, relatedResponse] = await Promise.all([
-        getChildren({ client, tree, ids: [id], limit, levels, legacyEndpointID }),
-        getAncestors(client, ancestorLevels + 1, id, legacyEndpointID),
-        getRelated(client, id, related, legacyEndpointID),
-      ]);
-      const response = tree.dump();
+      const fetcher = new Fetcher(client, id, endpointID);
+      const tree = await Tree.merge(
+        fetcher.children(children, generations, afterChild),
+        fetcher.ancestors(ancestors + 1),
+        fetcher.events(events, afterEvent)
+      );
 
-      const [ancestors, nextAncestor] = ancestorResponse || [];
-      const [totalEvents, events, nextEvent] = relatedResponse || [];
-      const lifecycle = ancestors?.shift();
-
-      const { total: totalChildren, next: nextChild } = response.pagination;
       return res.ok({
-        body: Object.assign({}, response, lifecycle, {
-          ancestors,
-          events,
-          pagination: {
-            nextAncestor,
-            nextChild,
-            nextEvent,
-            totalChildren,
-            totalEvents,
-          },
-        }),
+        body: tree.render(),
       });
     } catch (err) {
       log.warn(err);

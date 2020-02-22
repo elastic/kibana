@@ -11,16 +11,20 @@ import { buildPaginationCursor } from './pagination';
 
 interface Node {
   children: Node[];
-  pagination: {
-    total: number | null;
-    next: string | null;
-    limit?: number;
-  };
+  events: ResolverEvent[];
   lifecycle: ResolverEvent[];
+  parent?: Node | null;
+  pagination: {
+    nextChild?: string | null;
+    nextEvent?: string | null;
+    nextAncestor?: string | null;
+  };
 }
 
+type ExtractFunction = (event: ResolverEvent) => string;
+
 function createNode(): Node {
-  return { children: [], pagination: { total: 0, next: null }, lifecycle: [] };
+  return { children: [], pagination: {}, events: [], lifecycle: [] };
 }
 
 // This class aids in constructing a tree of process events. It works in the following way:
@@ -54,62 +58,145 @@ function createNode(): Node {
 // temporally in the same level--so, while a heavily forking process might get shown, maybe the actually malicious
 // event doesn't show up in the tree at the beginning.
 export class Tree {
-  private cache: Record<string, Node>;
-  private root: Node;
+  protected cache: Record<string, Node>;
+  protected root: Node;
+  protected id: string;
 
-  constructor(id: string, limit: number) {
+  constructor(id: string) {
     const root = createNode();
-    root.pagination.limit = limit;
-    this.cache = { [id]: { children: root.children, lifecycle: [], pagination: root.pagination } };
+    this.id = id;
+    this.cache = { [id]: root };
     this.root = root;
   }
 
-  public addChild(event: ResolverEvent, lastLevel: boolean) {
-    const id = extractEntityID(event);
-    const parent = extractParentEntityID(event);
-
-    if (!this.cache[parent]) {
-      // We need to add the node we're creating to the tree immediately
-      // otherwise we wind up with a dangling reference and we'll have
-      // inaccessible nodes in the cache. Since the parent node doesn't
-      // exist in this case, it means we actually can't add it into the
-      // proper location in the tree, so bomb out rather than leaving dangling
-      // references.
-      //
-      // This should never get hit if we paginate properly and traverse each level
-      // of results one at a time.
-      throw new Error('dangling node');
-    }
-    if (!this.cache[id]) {
-      // these should maintain the ordering that elasticsearch hands back
-      this.cache[id] = createNode();
-      if (lastLevel) {
-        // null out the pagination total since we know we haven't requested children yet
-        // the logic should basically be, we have more results to query when either
-        // total is null or total > the number of children we return
-        this.cache[id].pagination.total = null;
-      }
-      this.cache[parent].children.push(this.cache[id]);
-    }
-    this.cache[id].lifecycle.push(event);
+  public render() {
+    return this.root;
   }
 
-  public addPagination(totals: Record<string, number>, sorted: ResolverEvent[]) {
-    const grouped = _.groupBy(sorted, extractParentEntityID);
+  public static async merge(
+    childrenPromise: Promise<Tree>,
+    ancestorsPromise: Promise<Tree>,
+    eventsPromise: Promise<Tree>
+  ) {
+    const [children, ancestors, events] = await Promise.all([
+      childrenPromise,
+      ancestorsPromise,
+      eventsPromise,
+    ]);
+
+    // we only allow for merging when we have partial trees that
+    // represent the same root node
+    const rootID = children.id;
+    if (rootID !== ancestors.id || rootID !== events.id) {
+      throw new Error('cannot merge trees with different roots');
+    }
+
+    // our caches should be exclusive for everything but the root node so we can
+    // just merge them
+    Object.entries(ancestors.cache).forEach(([id, node]) => {
+      if (rootID !== id) children.cache[id] = node;
+    });
+    Object.entries(events.cache).forEach(([id, node]) => {
+      if (rootID !== id) children.cache[id] = node;
+    });
+
+    // fix up the references
+    children.root.lifecycle = events.root.lifecycle; // lifecycle is bound to the ancestors query
+    children.root.parent = ancestors.root.parent;
+    children.root.events = events.root.events;
+
+    // merge the pagination
+    Object.assign(children.root.pagination, ancestors.root.pagination, events.root.pagination);
+
+    return children;
+  }
+
+  public addEvent(...events: ResolverEvent[]) {
+    events.forEach(event => {
+      const id = extractEntityID(event);
+
+      this.ensureCache(id);
+      this.cache[id].events.push(event);
+    });
+  }
+
+  public addAncestor(id: string, ...events: ResolverEvent[]) {
+    this.ensureCache(id);
+    events.forEach(event => {
+      const ancestorID = extractEntityID(event);
+
+      if (!this.cache[ancestorID]) {
+        this.cache[ancestorID] = createNode();
+        this.cache[id].parent = this.cache[ancestorID];
+      }
+      this.cache[ancestorID].lifecycle.push(event);
+    });
+  }
+
+  public markTopAncestor(id: string) {
+    this.ensureCache(id);
+    this.cache[id].parent = null;
+  }
+
+  public setNextAncestor(next: string) {
+    this.root.pagination.nextAncestor = next;
+  }
+
+  public addChild(...events: ResolverEvent[]) {
+    events.forEach(event => {
+      const id = extractEntityID(event);
+      const parent = extractParentEntityID(event);
+
+      this.ensureCache(parent);
+
+      if (!this.cache[id]) {
+        // these should maintain the ordering that elasticsearch hands back
+        this.cache[id] = createNode();
+        this.cache[parent].children.push(this.cache[id]);
+      }
+      this.cache[id].lifecycle.push(event);
+    });
+  }
+
+  public markLeafNode(...ids: string[]) {
+    ids.forEach(id => {
+      this.ensureCache(id);
+      if (!this.cache[id].pagination.nextChild) {
+        this.cache[id].pagination.nextChild = null;
+      }
+    });
+  }
+
+  public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]) {
+    return this.paginate(extractEntityID, 'nextEvent', totals, events);
+  }
+
+  public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]) {
+    return this.paginate(extractParentEntityID, 'nextChild', totals, children);
+  }
+
+  private paginate(
+    grouper: ExtractFunction,
+    attribute: string,
+    totals: Record<string, number>,
+    records: ResolverEvent[]
+  ) {
+    const grouped = _.groupBy(records, grouper);
     Object.entries(totals).forEach(([id, total]) => {
       if (this.cache[id]) {
-        this.cache[id].pagination.total = total;
         if (grouped[id]) {
           // if we have any results, attempt to build a pagination cursor, the function
           // below hands back a null value if no cursor is necessary because we have
-          // all of the children.
-          this.cache[id].pagination.next = buildPaginationCursor(total, grouped[id]);
+          // all of the records.
+          (this.cache[id].pagination as any)[attribute] = buildPaginationCursor(total, grouped[id]);
         }
       }
     });
   }
 
-  public dump() {
-    return this.root;
+  private ensureCache(id: string) {
+    if (!this.cache[id]) {
+      throw new Error('dangling node');
+    }
   }
 }

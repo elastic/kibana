@@ -73,7 +73,6 @@ export function paginate(
   return query;
 }
 
-// this assumes sorted results
 export function buildPaginationCursor(total: number, results: ResolverEvent[]): string | null {
   if (total > results.length && results.length > 0) {
     const lastResult = results[results.length - 1];

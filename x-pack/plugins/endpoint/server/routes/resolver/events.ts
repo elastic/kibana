@@ -6,11 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { getRelated } from './shared';
+import { Fetcher } from './utils/fetch';
 
-interface RelatedEventsQueryParams {
-  after?: string;
-  limit: number;
+interface EventsQueryParams {
+  events: number;
+  afterEvent?: string;
   /**
    * legacyEndpointID is optional because there are two different types of identifiers:
    *
@@ -27,35 +27,33 @@ interface RelatedEventsQueryParams {
   legacyEndpointID?: string;
 }
 
-interface RelatedEventsPathParams {
+interface EventsPathParams {
   id: string;
 }
 
-export const validateRelatedEvents = {
+export const validateEvents = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    after: schema.maybe(schema.string()),
-    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    events: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    afterEvent: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
 };
 
-export function handleRelatedEvents(
-  log: Logger
-): RequestHandler<RelatedEventsPathParams, RelatedEventsQueryParams> {
+export function handleEvents(log: Logger): RequestHandler<EventsPathParams, EventsQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { limit, after, legacyEndpointID },
+      query: { events, afterEvent, legacyEndpointID: endpointID },
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
-      const [total, events, next] = await getRelated(client, id, limit, legacyEndpointID, after);
+
+      const fetcher = new Fetcher(client, id, endpointID);
+      const tree = await fetcher.events(events, afterEvent);
+
       return res.ok({
-        body: {
-          events,
-          pagination: { total, next, limit },
-        },
+        body: tree.render(),
       });
     } catch (err) {
       log.warn(err);
