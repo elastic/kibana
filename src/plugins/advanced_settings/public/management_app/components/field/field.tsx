@@ -301,11 +301,11 @@ export class Field extends PureComponent<FieldProps> {
     } = setting;
     const a11yProps: { [key: string]: string } = unsavedChanges
       ? {
-          ['aria-label']: ariaName,
-          ['aria-describedby']: id,
+          'aria-label': ariaName,
+          'aria-describedby': id,
         }
       : {
-          ['aria-label']: ariaName,
+          'aria-label': ariaName,
         };
     const currentValue = unsavedChanges
       ? unsavedChanges.value
