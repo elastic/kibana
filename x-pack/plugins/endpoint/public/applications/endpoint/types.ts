@@ -34,6 +34,9 @@ export interface ManagementListPagination {
   pageIndex: number;
   pageSize: number;
 }
+export interface ManagingIndexUIQueryParams {
+  selected_host?: string;
+}
 
 // REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
 export interface PolicyData {

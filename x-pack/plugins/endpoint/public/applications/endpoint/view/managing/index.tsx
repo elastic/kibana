@@ -20,22 +20,27 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
+import { useHistory, useLocation, Link } from 'react-router-dom';
 import * as selectors from '../../store/managing/selectors';
 import { ManagementAction } from '../../store/managing/action';
 import { useManagementListSelector } from './hooks';
 import { usePageId } from '../use_page_id';
 import { CreateStructuredSelector } from '../../types';
+import { urlFromQueryParams } from './url_from_query_params';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const ManagementList = () => {
   usePageId('managementPage');
   const dispatch = useDispatch<(a: ManagementAction) => void>();
+  const history = useHistory();
+  const location = useLocation();
   const {
     listData,
     pageIndex,
     pageSize,
     totalHits: totalItemCount,
     isLoading,
+    uiQueryParams: queryParams,
   } = useManagementListSelector(selector);
 
   const paginationSetup = useMemo(() => {
@@ -59,12 +64,27 @@ export const ManagementList = () => {
     [dispatch]
   );
 
+  const handleHostClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (event.target instanceof HTMLElement) {
+      // console.log(event.target);
+      // const hostId: string = event.target.host.id;
+    }
+    // history.push(`${location.pathname}?${hostId}`);
+  }, []);
+
   const columns = [
     {
-      field: 'host.hostname',
+      field: 'host',
       name: i18n.translate('xpack.endpoint.management.list.host', {
         defaultMessage: 'Hostname',
       }),
+      render: ({ host: { hostname, id } }) => {
+        return (
+          <Link to={urlFromQueryParams({ ...queryParams, selected_host = 'todo' })}>
+            {hostname}
+          </Link>
+        );
+      },
     },
     {
       field: '',

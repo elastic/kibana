@@ -15,6 +15,7 @@ const initialState = (): ManagementListState => {
     pageIndex: 0,
     total: 0,
     loading: false,
+    location: undefined,
   };
 };
 
@@ -37,17 +38,18 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
       pageIndex,
       loading: false,
     };
-  }
-
-  if (action.type === 'userExitedManagementList') {
+  } else if (action.type === 'userExitedManagementList') {
     return initialState();
-  }
-
-  if (action.type === 'userPaginatedManagementList') {
+  } else if (action.type === 'userPaginatedManagementList') {
     return {
       ...state,
       ...action.payload,
       loading: true,
+    };
+  } else if (action.type === 'userChangedUrl') {
+    return {
+      ...state,
+      location: action.payload,
     };
   }
 
