@@ -14,6 +14,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { AlertResultList } from '../../../../../common/types';
 import { isOnAlertPage } from './selectors';
 import { createBrowserHistory } from 'history';
+import { mockAlertResultList } from './mock_alert_result_list';
 
 describe('alert list tests', () => {
   let store: Store<AlertListState, AppAction>;
@@ -28,37 +29,7 @@ describe('alert list tests', () => {
   describe('when the user navigates to the alert list page', () => {
     beforeEach(() => {
       coreStart.http.get.mockImplementation(async () => {
-        const response: AlertResultList = {
-          alerts: [
-            {
-              '@timestamp': new Date(1542341895000),
-              agent: {
-                id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',
-                version: '3.0.0',
-              },
-              event: {
-                action: 'open',
-              },
-              file_classification: {
-                malware_classification: {
-                  score: 3,
-                },
-              },
-              host: {
-                hostname: 'HD-c15-bc09190a',
-                ip: '10.179.244.14',
-                os: {
-                  name: 'Windows',
-                },
-              },
-              thread: {},
-            },
-          ],
-          total: 1,
-          request_page_size: 10,
-          request_page_index: 0,
-          result_from_index: 0,
-        };
+        const response: AlertResultList = mockAlertResultList();
         return response;
       });
 

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
 import { Action } from '../actions';
-import { Trigger } from '../triggers/trigger';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
+import { Trigger, TriggerContext } from '../triggers/trigger';
+import { TriggerInternal } from '../triggers/trigger_internal';
+import { TriggerContract } from '../triggers/trigger_contract';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -52,18 +53,20 @@ export class UiActionsService {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
 
-    this.triggers.set(trigger.id, trigger);
+    const triggerInternal = new TriggerInternal(this, trigger);
+
+    this.triggers.set(trigger.id, triggerInternal);
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = (id: string) => {
-    const trigger = this.triggers.get(id);
+  public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
+    const trigger = this.triggers.get(triggerId as string);
 
     if (!trigger) {
-      throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+      throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
     }
 
-    return trigger;
+    return trigger.contract;
   };
 
   public readonly registerAction = (action: Action) => {
@@ -128,41 +131,17 @@ export class UiActionsService {
     );
   };
 
-  private async executeSingleAction<A>(action: Action<A>, actionContext: A) {
-    const href = action.getHref && action.getHref(actionContext);
-
-    if (href) {
-      window.location.href = href;
-      return;
-    }
-
-    await action.execute(actionContext);
-  }
-
-  private async executeMultipleActions<C>(actions: Action[], actionContext: C) {
-    const panel = await buildContextMenuForActions({
-      actions,
-      actionContext,
-      closeMenu: () => session.close(),
-    });
-    const session = openContextMenu([panel]);
-  }
-
-  public readonly executeTriggerActions = async <C>(triggerId: string, actionContext: C) => {
-    const actions = await this.getTriggerCompatibleActions!(triggerId, actionContext);
-
-    if (!actions.length) {
-      throw new Error(
-        `No compatible actions found to execute for trigger [triggerId = ${triggerId}].`
-      );
-    }
-
-    if (actions.length === 1) {
-      await this.executeSingleAction(actions[0], actionContext);
-      return;
-    }
-
-    await this.executeMultipleActions(actions, actionContext);
+  /**
+   * @deprecated
+   *
+   * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
+   */
+  public readonly executeTriggerActions = async <T extends TriggerId>(
+    triggerId: T,
+    context: TriggerContext<T>
+  ) => {
+    const trigger = this.getTrigger<T>(triggerId);
+    await trigger.exec(context);
   };
 
   /**
