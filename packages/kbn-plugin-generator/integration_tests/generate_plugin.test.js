@@ -105,7 +105,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
             '--migrations.skip=true',
           ],
           cwd: generatedPath,
-          wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+          wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
         });
         await pr.stop('kibana');
       });
