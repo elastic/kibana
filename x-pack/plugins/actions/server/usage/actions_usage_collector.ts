@@ -60,11 +60,13 @@ async function getTotalCountByActionTypes(
 
 async function getExecutions(savedObjectsClient: ISavedObjectsRepository) {
   try {
-    const actionsTelemetrySavedObject = ((await savedObjectsClient.get(
-      'actions-telemetry',
-      ACTIONS_TELEMETRY_DOC_ID
-    )) as unknown) as ActionsTelemetrySavedObject;
-    return actionsTelemetrySavedObject.attributes;
+    const actionsTasksSavedObject = await savedObjectsClient.find({
+      type: 'task',
+      fields: ['taskType', 'state'],
+      search: 'actions:*',
+      searchFields: ['taskType'],
+    });
+    return actionsTasksSavedObject.saved_objects;
   } catch (err) {
     return createActionsTelemetry();
   }
@@ -72,10 +74,7 @@ async function getExecutions(savedObjectsClient: ISavedObjectsRepository) {
 
 async function getExecutionsCount(savedObjectsClient: ISavedObjectsRepository) {
   const actionExecutions = await getExecutions(savedObjectsClient);
-  return Object.entries(actionExecutions.excutions_count_by_type).reduce(
-    (sum, [, value]) => sum + value,
-    0
-  );
+  return Object.entries(actionExecutions).reduce((sum, [, value]) => sum + value, 0);
 }
 
 async function getTotalCountByActionType(
@@ -92,7 +91,7 @@ async function getTotalCountByActionType(
 }
 
 async function getTotalInUseCountByActionTypes(
-  savedObjectsClient: any,
+  savedObjectsClient: ISavedObjectsRepository,
   actionTypeRegistry: ActionTypeRegistry
 ) {
   const totalByActionType = actionTypeRegistry
@@ -137,14 +136,15 @@ async function getExecutionsCountByActionTypes(
   actionTypeRegistry: ActionTypeRegistry
 ) {
   const actionExecutions = await getExecutions(savedObjectsClient);
-  const totalByActionType = actionTypeRegistry.list().reduce(
+  /* const totalByActionType = actionTypeRegistry.list().reduce(
     (res: any, actionType) => ({
       ...res,
       [actionType.name]: actionExecutions.excutions_count_by_type[actionType.name] ?? 0,
     }),
     {}
   );
-  return totalByActionType;
+  return totalByActionType; */
+  return {};
 }
 
 export function createActionsUsageCollector(
@@ -175,14 +175,10 @@ export function createActionsUsageCollector(
 }
 
 export function registerActionsUsageCollector(
-  usageCollection: UsageCollectionSetup | undefined,
+  usageCollection: UsageCollectionSetup,
   savedObjects: ISavedObjectsRepository,
   actionTypeRegistry: ActionTypeRegistry
 ) {
-  if (!usageCollection) {
-    return;
-  }
-
   const collector = createActionsUsageCollector(usageCollection, savedObjects, actionTypeRegistry);
   usageCollection.registerCollector(collector);
 }
