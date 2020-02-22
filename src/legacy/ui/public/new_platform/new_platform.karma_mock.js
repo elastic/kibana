@@ -219,6 +219,9 @@ export const npSetup = {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
       },
+      colors: {
+        seedColors: ['white', 'black'],
+      },
     },
     management: {
       sections: {

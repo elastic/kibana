@@ -20,7 +20,7 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 import { tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { getAngularModule } from '../../get_inner_angular';
@@ -36,7 +36,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
 
   const init = () => {
     const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
 
     const vis2 = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
@@ -50,7 +50,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
     vis2.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets);
   };
 
   const initLocalAngular = () => {
