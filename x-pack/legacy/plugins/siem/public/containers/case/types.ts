@@ -24,7 +24,7 @@ export interface CommentSnake {
   created_by: ElasticUserSnake;
   comment: string;
   updated_at: string;
-  version?: string;
+  version: string;
 }
 
 export interface Comment {
@@ -33,7 +33,7 @@ export interface Comment {
   createdBy: ElasticUser;
   comment: string;
   updatedAt: string;
-  version?: string;
+  version: string;
 }
 
 export interface CaseSnake {
@@ -46,7 +46,7 @@ export interface CaseSnake {
   tags: string[];
   title: string;
   updated_at: string;
-  version?: string;
+  version: string;
 }
 
 export interface Case {
@@ -59,7 +59,7 @@ export interface Case {
   tags: string[];
   title: string;
   updatedAt: string;
-  version?: string;
+  version: string;
 }
 
 export interface QueryParams {

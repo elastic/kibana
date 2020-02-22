@@ -20,7 +20,7 @@ import {
 
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
-import { DescriptionMarkdown } from '../description_md_editor';
+import { MarkdownEditor } from '../markdown_editor';
 import { Case } from '../../../../containers/case/types';
 import {
   FormattedRelativePreferenceDate,
@@ -33,7 +33,7 @@ import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
-import { UserActionTree } from '../user_action_tree';
+import { UserActionItem, UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { AddComment } from '../add_comment';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
@@ -61,6 +61,12 @@ const BackgroundWrapper = styled.div`
     background-color: ${theme.eui.euiColorEmptyShade};
     border-top: ${theme.eui.euiBorderThin};
     height: 100%;
+  `}
+`;
+
+const ContentWrapper = styled.div`
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
   `}
 `;
 
@@ -164,8 +170,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
     },
   ];
   const renderUserActions = useMemo(() => {
-    debugger;
-    const userActions = data.comments.reduce(
+    // debugger;
+    const userActions: UserActionItem[] = data.comments.reduce(
       (acc, comment, key) => {
         return [
           ...acc,
@@ -197,11 +203,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
               </EuiFlexGroup>
             ),
             children: (
-              <Markdown
-                raw={comment.comment}
-                data-test-subj="case-view-comment"
-                key={`${comment.commentId}.${key}`}
-              />
+              <ContentWrapper>
+                <Markdown
+                  raw={comment.comment}
+                  data-test-subj="case-view-comment"
+                  key={`${comment.commentId}.${key}`}
+                />
+              </ContentWrapper>
             ),
           },
         ];
@@ -227,36 +235,39 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
-          children: isEditDescription ? (
-            <>
-              <DescriptionMarkdown
-                descriptionInputHeight={200}
-                fieldName="description"
-                initialDescription={data.description}
-                isLoading={isLoading}
-                onChange={updatedDescription => setDescription(updatedDescription)}
-              />
-
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    isDisabled={isLoading}
+          children: (
+            <ContentWrapper>
+              {isEditDescription ? (
+                <>
+                  <MarkdownEditor
+                    fieldName="description"
+                    initialDescription={data.description}
                     isLoading={isLoading}
-                    onClick={() => onUpdateField('description', description)}
-                  >
-                    {i18n.SUBMIT}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
-                    {i18n.CANCEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : (
-            <Markdown raw={data.description} data-test-subj="case-view-description" />
+                    onChange={updatedDescription => setDescription(updatedDescription)}
+                  />
+
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        isDisabled={isLoading}
+                        isLoading={isLoading}
+                        onClick={() => onUpdateField('description', description)}
+                      >
+                        {i18n.SUBMIT}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
+                        {i18n.CANCEL}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              ) : (
+                <Markdown raw={data.description} data-test-subj="case-view-description" />
+              )}
+            </ContentWrapper>
           ),
         },
       ]
@@ -266,6 +277,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
       {
         avatarName: 'getcurrentuser todo',
         children: <AddComment caseId={data.caseId} />,
+        skipPanel: true,
       },
     ];
   }, [data]);

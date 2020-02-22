@@ -86,7 +86,6 @@ describe('CaseView ', () => {
         <CaseComponent {...caseProps} />
       </TestProviders>
     );
-
     expect(
       wrapper
         .find(`[data-test-subj="user-action-1"] [data-test-subj="user-action-avatar"]`)

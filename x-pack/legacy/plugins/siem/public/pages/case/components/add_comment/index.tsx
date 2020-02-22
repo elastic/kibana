@@ -17,7 +17,7 @@ import { NewComment } from '../../../../containers/case/types';
 import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { schema } from './schema';
 import * as i18n from '../../translations';
-import { DescriptionMarkdown } from '../description_md_editor';
+import { MarkdownEditor } from '../markdown_editor';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -46,8 +46,7 @@ export const AddComment = React.memo<{
     <>
       {isLoading && <MySpinner size="xl" />}
       <Form form={form}>
-        <DescriptionMarkdown
-          descriptionInputHeight={200}
+        <MarkdownEditor
           fieldName="comment"
           formHook={true}
           initialDescription={data.comment}

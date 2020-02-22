@@ -11,6 +11,7 @@ import styled, { css } from 'styled-components';
 export interface UserActionItem {
   avatarName: string;
   children?: ReactNode;
+  skipPanel?: boolean;
   title?: ReactNode;
 }
 
@@ -55,9 +56,6 @@ const UserAction = styled(EuiFlexGroup)`
       border-bottom: ${theme.eui.euiBorderThin};
       border-radius: ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius} 0 0;
     }
-    .userAction__content {
-      padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
-    }
     .euiText--small * {
       margin-bottom: 0;
     }
@@ -65,7 +63,7 @@ const UserAction = styled(EuiFlexGroup)`
 `;
 
 const renderUserActions = (userActions: UserActionItem[]) => {
-  return userActions.map(({ avatarName, children, title }, key) => (
+  return userActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
     <UserAction
       data-test-subj={`user-action-${key}`}
       key={key}
@@ -80,18 +78,18 @@ const renderUserActions = (userActions: UserActionItem[]) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel className="userAction__panel" paddingSize="none">
-          {title && (
-            <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
-              {title}
-            </EuiText>
-          )}
-          {children && (
-            <div className="userAction__content" data-test-subj={`user-action-content`}>
-              {children}
-            </div>
-          )}
-        </EuiPanel>
+        {skipPanel && !title ? (
+          <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
+        ) : (
+          <EuiPanel className="userAction__panel" paddingSize="none">
+            {title && (
+              <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
+                {title}
+              </EuiText>
+            )}
+            {children && <div data-test-subj={`user-action-content`}>{children}</div>}
+          </EuiPanel>
+        )}
       </EuiFlexItem>
     </UserAction>
   ));

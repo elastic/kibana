@@ -20,7 +20,7 @@ import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
-import { DescriptionMarkdown } from '../description_md_editor';
+import { MarkdownEditor } from '../markdown_editor';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -66,8 +66,7 @@ export const Create = React.memo(() => {
             isDisabled: isLoading,
           }}
         />
-        <DescriptionMarkdown
-          descriptionInputHeight={200}
+        <MarkdownEditor
           fieldName="description"
           formHook={true}
           initialDescription={data.description}
