@@ -70,7 +70,6 @@ export const Create = React.memo(() => {
           fieldName="description"
           formHook={true}
           initialContent={data.description}
-          isLoading={isLoading}
           onChange={description => setFormData({ ...data, description })}
         />
         <TagContainer>

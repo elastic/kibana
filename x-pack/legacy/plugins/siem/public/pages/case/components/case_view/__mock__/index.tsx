@@ -13,15 +13,15 @@ export const caseProps: CaseProps = {
     caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
     comments: [
       {
-        commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
-        version: 'WzQ3LDFd',
         comment: 'Solve this fast!',
+        commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
         createdAt: '2020-02-20T23:06:33.798Z',
         createdBy: {
           fullName: 'Steph Milovic',
           username: 'smilovic',
         },
         updatedAt: '2020-02-20T23:06:33.798Z',
+        version: 'WzQ3LDFd',
       },
     ],
     createdAt: '2020-02-13T19:44:23.627Z',
@@ -31,6 +31,7 @@ export const caseProps: CaseProps = {
     tags: ['defacement'],
     title: 'Another horrible breach!!',
     updatedAt: '2020-02-19T15:02:57.995Z',
+    version: 'WzQ3LDFd',
   },
   isLoading: false,
 };
@@ -39,15 +40,15 @@ export const data: Case = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   comments: [
     {
-      commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
-      version: 'WzQ3LDFd',
       comment: 'Solve this fast!',
+      commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
       createdAt: '2020-02-20T23:06:33.798Z',
       createdBy: {
         fullName: 'Steph Milovic',
         username: 'smilovic',
       },
       updatedAt: '2020-02-20T23:06:33.798Z',
+      version: 'WzQ3LDFd',
     },
   ],
   createdAt: '2020-02-13T19:44:23.627Z',
@@ -57,4 +58,5 @@ export const data: Case = {
   tags: ['defacement'],
   title: 'Another horrible breach!!',
   updatedAt: '2020-02-19T15:02:57.995Z',
+  version: 'WzQ3LDFd',
 };

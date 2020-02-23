@@ -61,6 +61,7 @@ const initialData: Case = {
   tags: [],
   title: '',
   updatedAt: '',
+  version: '',
 };
 
 export const useGetCase = (caseId: string): [CaseState] => {

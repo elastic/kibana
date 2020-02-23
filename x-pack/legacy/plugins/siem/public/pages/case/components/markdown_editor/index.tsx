@@ -21,7 +21,6 @@ import { CommonUseField } from '../create';
 
 const TextArea = styled(EuiTextArea)`
   width: 100%;
-  background: green;
 `;
 
 const Container = styled(EuiPanel)`
@@ -59,9 +58,8 @@ export const MarkdownEditor = React.memo<{
   footerContentRight?: React.ReactNode;
   formHook?: boolean;
   initialContent: string;
-  isLoading: boolean;
   onChange: (description: string) => void;
-}>(({ fieldName, footerContentRight, formHook = false, initialContent, isLoading, onChange }) => {
+}>(({ fieldName, footerContentRight, formHook = false, initialContent, onChange }) => {
   const [content, setContent] = useState(initialContent);
   const tabs = [
     {
@@ -77,7 +75,6 @@ export const MarkdownEditor = React.memo<{
           componentProps={{
             idAria: `case${fieldName}`,
             'data-test-subj': `case${fieldName}`,
-            isDisabled: isLoading,
             spellcheck: false,
             placeholder: 'Add a placeholder...',
           }}
@@ -90,7 +87,6 @@ export const MarkdownEditor = React.memo<{
           }}
           fullWidth={true}
           aria-label={`case${fieldName}`}
-          disabled={isLoading}
           spellCheck={false}
           value={content}
         />

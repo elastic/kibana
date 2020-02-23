@@ -4,9 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiPanel, EuiText } from '@elastic/eui';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import {
+  EuiAvatar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import * as i18n from '../case_view/translations';
+import {
+  FormattedRelativePreferenceDate,
+  FormattedRelativePreferenceLabel,
+} from '../../../../components/formatted_date';
+import { PropertyActions } from '../property_actions';
+import { Markdown } from '../../../../components/markdown';
+import { MarkdownEditor } from '../markdown_editor';
+import { AddComment } from '../add_comment';
+import { Case } from '../../../../containers/case/types';
 
 export interface UserActionItem {
   avatarName: string;
@@ -16,7 +34,8 @@ export interface UserActionItem {
 }
 
 export interface UserActionTreeProps {
-  userActions: UserActionItem[];
+  initialData: Case;
+  onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
 
 const UserAction = styled(EuiFlexGroup)`
@@ -34,13 +53,6 @@ const UserAction = styled(EuiFlexGroup)`
       background-repeat: no-repeat;
       background-position: left ${theme.eui.euiSizeXXL};
       margin-bottom: ${theme.eui.euiSizeS};
-    }
-    &.repeatAvatar {
-      margin-top: -${theme.eui.euiSizeS};
-      background-position: left 0;
-      .userAction__circle {
-        visibility: hidden;
-      }
     }
     .userAction__panel {
       margin-bottom: ${theme.eui.euiSize};
@@ -62,14 +74,15 @@ const UserAction = styled(EuiFlexGroup)`
   `}
 `;
 
-const renderUserActions = (userActions: UserActionItem[]) => {
+const ContentWrapper = styled.div`
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
+  `}
+`;
+
+const renderUserActionsUI = (userActions: UserActionItem[]) => {
   return userActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
-    <UserAction
-      data-test-subj={`user-action-${key}`}
-      key={key}
-      gutterSize={'none'}
-      className={key > 0 && avatarName === userActions[key - 1].avatarName ? 'repeatAvatar' : ''}
-    >
+    <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
       <EuiFlexItem grow={false}>
         <EuiAvatar
           data-test-subj={`user-action-avatar`}
@@ -78,7 +91,7 @@ const renderUserActions = (userActions: UserActionItem[]) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {skipPanel && !title ? (
+        {skipPanel ? (
           <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
         ) : (
           <EuiPanel className="userAction__panel" paddingSize="none">
@@ -95,8 +108,162 @@ const renderUserActions = (userActions: UserActionItem[]) => {
   ));
 };
 
-export const UserActionTree = React.memo(({ userActions }: UserActionTreeProps) => (
-  <div>{renderUserActions(userActions)}</div>
-));
+// export const UserActionTree = React.memo(({ userActions }: UserActionTreeProps) => {
+export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserActionTreeProps) => {
+  const [data, setData] = useState(initialData);
+  const [editCommentId, setEditCommentId] = useState('');
+  const [description, setDescription] = useState(data.description);
+  const [commentUpdate, setCommentUpdate] = useState('');
+  const [isEditDescription, setIsEditDescription] = useState(false);
+
+  const renderButtons = useCallback(({ cancelAction, saveAction }) => {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" onClick={cancelAction} iconType="cross">
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const renderUserActions = useMemo(() => {
+    const userActions: UserActionItem[] = data.comments.reduce(
+      (acc, comment, key) => {
+        return [
+          ...acc,
+          {
+            avatarName: comment.createdBy.fullName
+              ? comment.createdBy.fullName
+              : comment.createdBy.username,
+            title: (
+              <EuiFlexGroup
+                alignItems="baseline"
+                gutterSize="none"
+                justifyContent="spaceBetween"
+                key={`${comment.commentId}.${key}`}
+              >
+                <EuiFlexItem grow={false}>
+                  <p>
+                    <strong>{`${comment.createdBy.username}`}</strong>
+                    {` ${i18n.ADDED_COMMENT} `}{' '}
+                    <FormattedRelativePreferenceLabel
+                      value={comment.createdAt}
+                      preferenceLabel={`${i18n.ON} `}
+                    />
+                    <FormattedRelativePreferenceDate value={comment.createdAt} />
+                  </p>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <PropertyActions
+                    propertyActions={[
+                      {
+                        iconType: 'documentEdit',
+                        label: i18n.EDIT_COMMENT,
+                        onClick: () => setEditCommentId(comment.commentId),
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            children:
+              comment.commentId === editCommentId ? (
+                <MarkdownEditor
+                  fieldName="comment"
+                  footerContentRight={renderButtons({
+                    cancelAction: () => setEditCommentId(''),
+                    saveAction: () => {
+                      // TO DO
+                      console.log('saved updated comment', commentUpdate, editCommentId);
+                      setEditCommentId('');
+                    },
+                  })}
+                  initialContent={comment.comment}
+                  onChange={updatedComment => {
+                    setCommentUpdate(updatedComment);
+                  }}
+                />
+              ) : (
+                <ContentWrapper key={`${comment.commentId}.${key}`}>
+                  <Markdown raw={comment.comment} data-test-subj="case-view-comment" />
+                </ContentWrapper>
+              ),
+            skipPanel: comment.commentId === editCommentId,
+          },
+        ];
+      },
+      [
+        {
+          avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
+          title: (
+            <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <p>
+                  <strong>{`${data.createdBy.username}`}</strong>
+                  {` ${i18n.ADDED_DESCRIPTION} `}{' '}
+                  <FormattedRelativePreferenceLabel
+                    value={data.createdAt}
+                    preferenceLabel={`${i18n.ON} `}
+                  />
+                  <FormattedRelativePreferenceDate value={data.createdAt} />
+                </p>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PropertyActions
+                  propertyActions={[
+                    {
+                      iconType: 'documentEdit',
+                      label: i18n.EDIT_DESCRIPTION,
+                      onClick: () => setIsEditDescription(true),
+                    },
+                  ]}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          children: isEditDescription ? (
+            <MarkdownEditor
+              fieldName="description"
+              footerContentRight={renderButtons({
+                cancelAction: () => setIsEditDescription(false),
+                saveAction: () => {
+                  onUpdateField('description', description);
+                  setIsEditDescription(false);
+                  setData({
+                    ...data,
+                    description,
+                  });
+                },
+              })}
+              initialContent={data.description}
+              onChange={updatedDescription => setDescription(updatedDescription)}
+            />
+          ) : (
+            <ContentWrapper>
+              <Markdown raw={data.description} data-test-subj="case-view-description" />
+            </ContentWrapper>
+          ),
+          skipPanel: isEditDescription,
+        },
+      ]
+    );
+    return [
+      ...userActions,
+      {
+        avatarName: 'getcurrentuser todo',
+        children: <AddComment caseId={data.caseId} />,
+        skipPanel: true,
+      },
+    ];
+  }, [data, isEditDescription, editCommentId, commentUpdate, description]);
+  return <div>{renderUserActionsUI(renderUserActions)}</div>;
+});
 
 UserActionTree.displayName = 'UserActionTree';

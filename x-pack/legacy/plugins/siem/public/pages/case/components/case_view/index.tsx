@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonToggle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -20,22 +18,18 @@ import {
 
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
-import { MarkdownEditor } from '../markdown_editor';
 import { Case } from '../../../../containers/case/types';
 import {
   FormattedRelativePreferenceDate,
-  FormattedRelativePreferenceLabel,
 } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
-import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
-import { UserActionItem, UserActionTree } from '../user_action_tree';
+import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
-import { AddComment } from '../add_comment';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
 
@@ -64,12 +58,6 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
-const ContentWrapper = styled.div`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
-  `}
-`;
-
 export interface CaseProps {
   caseId: string;
   initialData: Case;
@@ -78,10 +66,8 @@ export interface CaseProps {
 
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
-  const [isEditDescription, setIsEditDescription] = useState(false);
   const [isEditTags, setIsEditTags] = useState(false);
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
-  const [description, setDescription] = useState(data.description);
   const [title, setTitle] = useState(data.title);
   const [tags, setTags] = useState(data.tags);
   const onUpdateField = useCallback(
@@ -101,7 +87,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
               updateKey: 'description',
               updateValue,
             });
-            setIsEditDescription(false);
           }
           break;
         case 'tags':
@@ -139,11 +124,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
   // TO DO refactor each of these const's into their own components
   const propertyActions = [
     {
-      iconType: 'documentEdit',
-      label: 'Edit description',
-      onClick: () => setIsEditDescription(true),
-    },
-    {
       iconType: 'securitySignalResolved',
       label: 'Close case',
       onClick: () => null,
@@ -169,118 +149,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
       onClick: () => null,
     },
   ];
-  const renderUserActions = useMemo(() => {
-    // debugger;
-    const userActions: UserActionItem[] = data.comments.reduce(
-      (acc, comment, key) => {
-        return [
-          ...acc,
-          {
-            avatarName: comment.createdBy.fullName
-              ? comment.createdBy.fullName
-              : comment.createdBy.username,
-            title: (
-              <EuiFlexGroup
-                alignItems="baseline"
-                gutterSize="none"
-                justifyContent="spaceBetween"
-                key={`${comment.commentId}.${key}`}
-              >
-                <EuiFlexItem grow={false}>
-                  <p>
-                    <strong>{`${comment.createdBy.username}`}</strong>
-                    {` ${i18n.ADDED_COMMENT} `}{' '}
-                    <FormattedRelativePreferenceLabel
-                      value={comment.createdAt}
-                      preferenceLabel={`${i18n.ON} `}
-                    />
-                    <FormattedRelativePreferenceDate value={comment.createdAt} />
-                  </p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <PropertyActions propertyActions={propertyActions} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            children: (
-              <ContentWrapper>
-                <Markdown
-                  raw={comment.comment}
-                  data-test-subj="case-view-comment"
-                  key={`${comment.commentId}.${key}`}
-                />
-              </ContentWrapper>
-            ),
-          },
-        ];
-      },
-      [
-        {
-          avatarName: data.createdBy.fullName ? data.createdBy.fullName : data.createdBy.username,
-          title: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <p>
-                  <strong>{`${data.createdBy.username}`}</strong>
-                  {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-                  <FormattedRelativePreferenceLabel
-                    value={data.createdAt}
-                    preferenceLabel={`${i18n.ON} `}
-                  />
-                  <FormattedRelativePreferenceDate value={data.createdAt} />
-                </p>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <PropertyActions propertyActions={propertyActions} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          children: (
-            <ContentWrapper>
-              {isEditDescription ? (
-                <>
-                  <MarkdownEditor
-                    fieldName="description"
-                    initialContent={data.description}
-                    isLoading={isLoading}
-                    onChange={updatedDescription => setDescription(updatedDescription)}
-                  />
-
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        isDisabled={isLoading}
-                        isLoading={isLoading}
-                        onClick={() => onUpdateField('description', description)}
-                      >
-                        {i18n.SUBMIT}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
-                        {i18n.CANCEL}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
-              ) : (
-                <Markdown raw={data.description} data-test-subj="case-view-description" />
-              )}
-            </ContentWrapper>
-          ),
-        },
-      ]
-    );
-    return [
-      ...userActions,
-      {
-        avatarName: 'getcurrentuser todo',
-        children: <AddComment caseId={data.caseId} />,
-        skipPanel: true,
-      },
-    ];
-  }, [data]);
 
   const onSubmit = useCallback(
     newTitle => {
@@ -354,7 +222,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree userActions={renderUserActions} />
+              <UserActionTree initialData={data} onUpdateField={onUpdateField} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList

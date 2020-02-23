@@ -128,3 +128,7 @@ export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addC
 export const ADD_COMMENT_HELP_TEXT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
   defaultMessage: 'Add a new comment...',
 });
+
+export const SAVE = i18n.translate('xpack.siem.case.caseView.description.save', {
+  defaultMessage: 'Save',
+});
