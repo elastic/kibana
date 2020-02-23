@@ -241,7 +241,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
                 <>
                   <MarkdownEditor
                     fieldName="description"
-                    initialDescription={data.description}
+                    initialContent={data.description}
                     isLoading={isLoading}
                     onChange={updatedDescription => setDescription(updatedDescription)}
                   />

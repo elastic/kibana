@@ -49,6 +49,13 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const COMMENT_REQUIRED = i18n.translate(
+  'xpack.siem.case.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'A comment is required.',
+  }
+);
+
 export const EDIT = i18n.translate('xpack.siem.case.caseView.edit', {
   defaultMessage: 'Edit',
 });

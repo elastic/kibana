@@ -69,7 +69,7 @@ export const Create = React.memo(() => {
         <MarkdownEditor
           fieldName="description"
           formHook={true}
-          initialDescription={data.description}
+          initialContent={data.description}
           isLoading={isLoading}
           onChange={description => setFormData({ ...data, description })}
         />

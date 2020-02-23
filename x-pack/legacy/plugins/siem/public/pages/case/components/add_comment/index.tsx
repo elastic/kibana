@@ -56,7 +56,7 @@ export const AddComment = React.memo<{
           fieldName="comment"
           footerContentRight={renderCommentButton}
           formHook={true}
-          initialDescription={data.comment}
+          initialContent={data.comment}
           isLoading={isLoading}
           onChange={comment => setFormData({ ...data, comment })}
         />

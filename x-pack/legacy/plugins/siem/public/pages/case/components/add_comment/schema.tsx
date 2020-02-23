@@ -13,7 +13,7 @@ export const schema: FormSchema = {
     type: FIELD_TYPES.TEXTAREA,
     validations: [
       {
-        validator: emptyField(i18n.DESCRIPTION_REQUIRED),
+        validator: emptyField(i18n.COMMENT_REQUIRED),
       },
     ],
   },
