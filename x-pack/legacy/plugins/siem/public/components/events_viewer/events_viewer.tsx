@@ -107,6 +107,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     kqlMode,
     start,
     end,
+    isEventViewer: true,
   });
   const queryFields = useMemo(
     () =>
