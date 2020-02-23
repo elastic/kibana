@@ -44,24 +44,41 @@ const noop = () => {
   // noop
 };
 
+const { location, addEventListener } = window;
+
+beforeAll(() => {
+  delete window.location;
+  delete window.addEventListener;
+
+  window.addEventListener = jest.fn();
+  window.location = {
+    reload: jest.fn(),
+  };
+});
+
 afterEach(() => {
   jest.restoreAllMocks();
 });
 
+afterAll(() => {
+  window.location = location;
+  window.addEventListener = addEventListener;
+});
+
 describe('reloading', () => {
   it('refreshes the page if a `hashchange` event is emitted', () => {
-    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-
-    const locationReloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(noop);
-
     shallowWithIntl(<FatalErrorsScreen {...defaultProps} />);
-    expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
-    expect(addEventListenerSpy).toHaveBeenCalledWith('hashchange', expect.any(Function), undefined);
+    expect(window.addEventListener).toHaveBeenCalledTimes(1);
+    expect(window.addEventListener).toHaveBeenCalledWith(
+      'hashchange',
+      expect.any(Function),
+      undefined
+    );
 
-    expect(locationReloadSpy).not.toHaveBeenCalled();
-    const [, handler] = addEventListenerSpy.mock.calls[0];
+    expect(window.location.reload).not.toHaveBeenCalled();
+    const [, handler] = window.addEventListener.mock.calls[0];
     (handler as jest.Mock)();
-    expect(locationReloadSpy).toHaveBeenCalledTimes(1);
+    expect(window.location.reload).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -91,6 +108,9 @@ describe('rendering', () => {
 
 describe('buttons', () => {
   beforeAll(() => {
+    delete window.localStorage;
+    delete window.sessionStorage;
+
     Object.assign(window, {
       localStorage: {
         clear: jest.fn(),

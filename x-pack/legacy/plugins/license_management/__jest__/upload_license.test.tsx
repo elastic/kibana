@@ -29,7 +29,11 @@ import {
   // @ts-ignore
 } from './api_responses';
 
-window.location.reload = () => {};
+delete window.location;
+// @ts-ignore
+window.location = {
+  reload: jest.fn(),
+};
 
 let store: any = null;
 let component: any = null;

@@ -64,6 +64,12 @@ describe('NewVisModal', () => {
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
 
+  beforeAll(() => {
+    delete window.location;
+    // @ts-ignore
+    window.location = { assign: jest.fn() };
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -102,7 +108,6 @@ describe('NewVisModal', () => {
 
   describe('open editor', () => {
     it('should open the editor for visualizations without search', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}

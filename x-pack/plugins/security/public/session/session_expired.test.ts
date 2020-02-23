@@ -15,6 +15,9 @@ describe('#logout', () => {
   let newUrlPromise: Promise<string>;
 
   beforeAll(() => {
+    // @ts-ignore
+    delete window.sessionStorage;
+    delete window.location;
     Object.defineProperty(window, 'sessionStorage', {
       value: {
         getItem: mockGetItem,
@@ -24,7 +27,13 @@ describe('#logout', () => {
   });
 
   beforeEach(() => {
-    window.history.pushState({}, '', CURRENT_URL);
+    // @ts-ignore
+    window.location = {
+      pathname: CURRENT_URL,
+      assign: jest.fn(),
+      search: '',
+      hash: '',
+    };
     mockGetItem.mockReset();
     newUrlPromise = new Promise<string>(resolve => {
       jest.spyOn(window.location, 'assign').mockImplementation(url => {
@@ -42,7 +51,9 @@ describe('#logout', () => {
     sessionExpired.logout();
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
-    await expect(newUrlPromise).resolves.toBe(`${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`);
+    await expect(window.location.assign).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`
+    );
   });
 
   it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {

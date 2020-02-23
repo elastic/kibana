@@ -39,12 +39,6 @@ class FakeApp implements App {
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
-(window as any).localStorage = {
-  setItem: (key: string, value: string) => store.set(String(key), String(value)),
-  getItem: (key: string) => store.get(String(key)),
-  removeItem: (key: string) => store.delete(String(key)),
-};
-
 function defaultStartDeps(availableApps?: App[]) {
   const deps = {
     application: applicationServiceMock.createInternalStartContract(),
@@ -81,6 +75,16 @@ async function start({
     chrome: await service.start(startDeps),
   };
 }
+
+beforeAll(() => {
+  // @ts-ignore
+  delete window.localStorage;
+  (window as any).localStorage = {
+    setItem: (key: string, value: string) => store.set(String(key), String(value)),
+    getItem: (key: string) => store.get(String(key)),
+    removeItem: (key: string) => store.delete(String(key)),
+  };
+});
 
 beforeEach(() => {
   store.clear();

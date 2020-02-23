@@ -12,7 +12,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
       id="advancedSettings.form.noSearchResultText"
       values={
         Object {
-          "clearSearch": <ForwardRef
+          "clearSearch": <EuiLink
             onClick={[Function]}
           >
             <FormattedMessage
@@ -20,7 +20,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
               id="advancedSettings.form.clearNoSearchResultText"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -182,7 +182,7 @@ exports[`Form should render normally 1`] = `
                 id="advancedSettings.form.searchResultText"
                 values={
                   Object {
-                    "clearSearch": <ForwardRef
+                    "clearSearch": <EuiLink
                       onClick={[Function]}
                     >
                       <em>
@@ -192,7 +192,7 @@ exports[`Form should render normally 1`] = `
                           values={Object {}}
                         />
                       </em>
-                    </ForwardRef>,
+                    </EuiLink>,
                     "settingsCount": 9,
                   }
                 }
@@ -392,7 +392,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                 id="advancedSettings.form.searchResultText"
                 values={
                   Object {
-                    "clearSearch": <ForwardRef
+                    "clearSearch": <EuiLink
                       onClick={[Function]}
                     >
                       <em>
@@ -402,7 +402,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                           values={Object {}}
                         />
                       </em>
-                    </ForwardRef>,
+                    </EuiLink>,
                     "settingsCount": 9,
                   }
                 }

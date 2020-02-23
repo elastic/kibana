@@ -19,7 +19,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         id="common.ui.fieldEditor.warningCallOutLabel.callOutDetail"
         values={
           Object {
-            "scripFields": <ForwardRef
+            "scripFields": <EuiLink
               href="(docLink for scriptedFields.scriptFields)"
               target="_blank"
             >
@@ -32,8 +32,8 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               <EuiIcon
                 type="link"
               />
-            </ForwardRef>,
-            "scriptsInAggregation": <ForwardRef
+            </EuiLink>,
+            "scriptsInAggregation": <EuiLink
               href="(docLink for scriptedFields.scriptAggs)"
               target="_blank"
             >
@@ -46,7 +46,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               <EuiIcon
                 type="link"
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />

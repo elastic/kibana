@@ -93,7 +93,8 @@
     "**/react-test-renderer": "^16.12.0",
     "**/deepmerge": "^4.2.2",
     "**/serialize-javascript": "^2.1.1",
-    "**/fast-deep-equal": "^3.1.1"
+    "**/fast-deep-equal": "^3.1.1",
+    "**/jsdom": "15.1.1"
   },
   "workspaces": {
     "packages": [
@@ -117,7 +118,7 @@
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
     "@elastic/apm-rum": "^4.6.0",
-    "@elastic/charts": "^17.0.2",
+    "@elastic/charts": "^17.1.1",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.6.0",
     "@elastic/eui": "19.0.0",
@@ -205,7 +206,7 @@
     "leaflet.heat": "0.2.0",
     "less": "^2.7.3",
     "less-loader": "5.0.0",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "4.1.5",
     "markdown-it": "^10.0.0",
@@ -408,7 +409,7 @@
     "eslint-plugin-ban": "^1.4.0",
     "eslint-plugin-cypress": "^2.8.1",
     "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-jest": "^23.7.0",
+    "eslint-plugin-jest": "^23.8.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-mocha": "^6.2.2",
     "eslint-plugin-no-unsanitized": "^3.0.2",

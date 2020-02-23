@@ -47,7 +47,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <ForwardRef
+                "indexPatternLink": <EuiLink
                   href=""
                 >
                   <FormattedMessage
@@ -55,7 +55,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -367,7 +367,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <ForwardRef
+                "indexPatternLink": <EuiLink
                   href=""
                 >
                   <FormattedMessage
@@ -375,7 +375,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -529,7 +529,7 @@ Array [
         id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <ForwardRef
+            "indexPatternLink": <EuiLink
               href=""
             >
               <FormattedMessage
@@ -537,7 +537,7 @@ Array [
                 id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />

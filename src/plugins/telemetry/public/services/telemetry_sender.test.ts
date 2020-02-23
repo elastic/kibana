@@ -34,8 +34,12 @@ describe('TelemetrySender', () => {
     originalLocalStorage = window.localStorage;
   });
 
-  // @ts-ignore
-  beforeEach(() => (window.localStorage = mockLocalStorage = new LocalStorageMock()));
+  beforeEach(() => {
+    // @ts-ignore
+    delete window.localStorage;
+    // @ts-ignore
+    window.localStorage = mockLocalStorage = new LocalStorageMock();
+  });
   // @ts-ignore
   afterAll(() => (window.localStorage = originalLocalStorage));
 

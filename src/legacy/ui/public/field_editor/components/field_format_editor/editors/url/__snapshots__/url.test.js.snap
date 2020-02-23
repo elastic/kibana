@@ -54,7 +54,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -62,7 +62,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -88,7 +88,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -96,7 +96,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -175,7 +175,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -183,7 +183,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -209,7 +209,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -217,7 +217,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -296,7 +296,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -304,7 +304,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -330,7 +330,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -338,7 +338,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -418,7 +418,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -426,7 +426,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
@@ -452,7 +452,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <ForwardRef
+      <EuiLink
         onClick={[Function]}
       >
         <FormattedMessage
@@ -460,7 +460,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </ForwardRef>
+      </EuiLink>
     }
     isInvalid={false}
     label={
