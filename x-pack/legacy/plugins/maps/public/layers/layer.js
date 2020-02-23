@@ -336,10 +336,6 @@ export class AbstractLayer {
     return [];
   }
 
-  async getNumberFields() {
-    return [];
-  }
-
   async getFields() {
     return [];
   }

@@ -102,10 +102,6 @@ export class AbstractESAggSource extends AbstractESSource {
     return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
   }
 
-  async getNumberFields() {
-    return this.getMetricFields();
-  }
-
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
     const metricFields = this.getMetricFields();
     const tooltipPropertiesPromises = [];
