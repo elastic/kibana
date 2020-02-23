@@ -384,6 +384,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
                 items={(availableFieldTypes as DataType[]).map(type => (
                   <EuiContextMenuItem
+                    className="lnsInnerIndexPatternDataPanel__filterType"
                     key={type}
                     icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                     data-test-subj={`typeFilter-${type}`}
@@ -397,7 +398,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       }));
                     }}
                   >
-                    <LensFieldIcon type={type} /> {fieldTypeNames[type]}
+                    <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
+                      <LensFieldIcon type={type} /> {fieldTypeNames[type]}
+                    </span>
                   </EuiContextMenuItem>
                 ))}
               />
