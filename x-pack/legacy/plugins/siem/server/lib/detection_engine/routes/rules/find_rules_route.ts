@@ -11,7 +11,7 @@ import { GetScopedClients } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { transformFindAlerts } from './utils';
+import { transformFindAlerts, validateRuleResponses } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -68,6 +68,7 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
             })
             .code(500);
         } else {
+          validateRuleResponses(transformed.data);
           return transformed;
         }
       } catch (err) {

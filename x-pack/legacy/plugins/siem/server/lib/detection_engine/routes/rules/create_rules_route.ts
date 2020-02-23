@@ -15,7 +15,7 @@ import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../r
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transform } from './utils';
+import { transform, validateRuleResponse } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 
@@ -145,6 +145,7 @@ export const createCreateRulesRoute = (
             })
             .code(500);
         } else {
+          validateRuleResponse(transformed);
           return transformed;
         }
       } catch (err) {

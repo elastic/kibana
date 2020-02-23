@@ -12,7 +12,7 @@ import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '..
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transform } from './utils';
+import { getIdError, transform, validateRuleResponse } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -117,6 +117,7 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
               })
               .code(500);
           } else {
+            validateRuleResponse(transformed);
             return transformed;
           }
         } else {

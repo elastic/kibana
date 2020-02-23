@@ -13,7 +13,7 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { transformOrBulkError, getIdBulkError, validateRuleAndErrorResponses } from './utils';
 import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -129,6 +129,7 @@ export const createUpdateRulesBulkRoute = (
           }
         })
       );
+      validateRuleAndErrorResponses(rules);
       return rules;
     },
   };

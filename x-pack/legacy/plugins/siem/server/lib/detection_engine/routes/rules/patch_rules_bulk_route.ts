@@ -13,7 +13,7 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError } from './utils';
+import { transformOrBulkError, getIdBulkError, validateRuleAndErrorResponses } from './utils';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
@@ -122,6 +122,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
           }
         })
       );
+      validateRuleAndErrorResponses(rules);
       return rules;
     },
   };

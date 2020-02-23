@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy } from 'lodash/fp';
+import { pickBy, has } from 'lodash/fp';
 import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+
+import { formatErrors } from '../schemas/response/utils';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -27,6 +32,8 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { rulesSchema } from '../schemas/response/base_rules_schema';
+import { exactCheck } from '../schemas/response/exact_check';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -150,9 +157,9 @@ export const transformAlertsToRules = (
 };
 
 export const transformFindAlerts = (
-  findResults: { data: unknown[] },
+  findResults: { data: object[] },
   ruleStatuses?: unknown[]
-): unknown | null => {
+): { data: object[] } | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
@@ -264,4 +271,48 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   );
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
+};
+
+/**
+ * Validates and just console logs a warning.
+ * TODO: Get the correct logger to be pushed into this function
+ * @param rule The rule to validate (as an object) since we don't know what it is.
+ */
+export const validateRuleResponse = (rule: object): void => {
+  // Validate and only log warnings if the type is incorrect.
+  const decoded = rulesSchema.decode(rule);
+  const checked = exactCheck(rule, decoded);
+  const left = (errors: t.Errors): void => {
+    const formatted = formatErrors(errors);
+    // TODO: Remove this console statement
+    // eslint-disable-next-line no-console
+    console.log('Warning: you need to update the rule schema or fix a bug', formatted);
+    // TODO: Remove this console statement
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(rule, null, 2));
+  };
+  // We don't return the right decoded _just yet_. Rather we just use
+  // this system for validation checks and return the regular transformed out.
+  const right = (): void => {};
+  const folding = fold(left, right);
+  pipe(checked, folding);
+};
+
+/**
+ * Validates and just console logs a warning.
+ * TODO: Get the correct logger to be pushed into this function
+ * @param rule The rule to validate (as an object) since we don't know what it is.
+ */
+export const validateRuleResponses = (rules: object[]): void => {
+  // first let us filter out any obvious errors being returned
+  rules.forEach(rule => validateRuleResponse(rule));
+};
+
+/**
+ * Validates the responses but ignores validation of any error messages at the moment.
+ * TODO: Add validation for error messages
+ */
+export const validateRuleAndErrorResponses = (rules: object[]): void => {
+  const rulesWithoutErrors = rules.filter(rule => !has('error', rule));
+  validateRuleResponses(rulesWithoutErrors);
 };

@@ -10,7 +10,7 @@ import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '.
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transform } from './utils';
+import { getIdError, transform, validateRuleResponse } from './utils';
 import { transformError, getIndex } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
@@ -123,6 +123,7 @@ export const createUpdateRulesRoute = (
               })
               .code(500);
           } else {
+            validateRuleResponse(transformed);
             return transformed;
           }
         } else {

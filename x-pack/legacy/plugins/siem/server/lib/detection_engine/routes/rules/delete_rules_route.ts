@@ -11,7 +11,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transform } from './utils';
+import { getIdError, transform, validateRuleResponse } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -66,6 +66,7 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
               })
               .code(500);
           } else {
+            validateRuleResponse(transformed);
             return transformed;
           }
         } else {

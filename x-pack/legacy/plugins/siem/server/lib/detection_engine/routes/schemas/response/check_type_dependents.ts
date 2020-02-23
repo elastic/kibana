@@ -8,18 +8,17 @@ import * as t from 'io-ts';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { requiredRulesSchema, RequiredRulesSchema, partialRulesSchema } from './base_rules_schema';
+import {
+  dependentRulesSchema,
+  RequiredRulesSchema,
+  partialRulesSchema,
+  requiredRulesSchema,
+} from './base_rules_schema';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
-
-export const timelineTitle = t.exact(
-  t.type({ timeline_title: partialRulesSchema.props.timeline_title })
-);
-
-export const timelineId = t.exact(t.type({ timeline_id: partialRulesSchema.props.timeline_id }));
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
-    return [t.exact(t.type({ saved_id: partialRulesSchema.props.saved_id }))];
+    return [t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id }))];
   } else {
     return [];
   }
@@ -28,8 +27,8 @@ export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] 
 export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.timeline_id != null) {
     return [
-      t.exact(t.type({ timeline_title: partialRulesSchema.props.timeline_title })),
-      t.exact(t.type({ timeline_id: partialRulesSchema.props.timeline_id })),
+      t.exact(t.type({ timeline_title: dependentRulesSchema.props.timeline_title })),
+      t.exact(t.type({ timeline_id: dependentRulesSchema.props.timeline_id })),
     ];
   } else {
     return [];
@@ -39,6 +38,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
+    t.exact(partialRulesSchema),
     ...addSavedId(typeAndTimelineOnly),
     ...addTimelineTitle(typeAndTimelineOnly),
   ];
@@ -46,9 +46,8 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
   if (dependents.length > 1) {
     // This unsafe cast is because t.intersection does not use an array but rather a set of
     // tuples and really does not look like they expected us to ever dynamically build up
-    // intersections, but here we are doing that. If you go above 4 elements this might crash
-    // or it will be unexpected behavior as it only handles 4 things at a time. Your best bet
-    // after 4 is to call it multiple times in chunks.
+    // intersections, but here we are doing that. Looking at their code, although they limit
+    // the array elements to 5, it looks like you have N number of intersections
     const unsafeCast: [t.Mixed, t.Mixed] = dependents as [t.Mixed, t.Mixed];
     return t.intersection(unsafeCast);
   } else {

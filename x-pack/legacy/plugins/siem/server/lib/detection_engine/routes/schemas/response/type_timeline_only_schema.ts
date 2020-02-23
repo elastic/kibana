@@ -6,14 +6,16 @@
 
 import * as t from 'io-ts';
 
-import { requiredRulesSchema } from './base_rules_schema';
+/* eslint-disable @typescript-eslint/camelcase */
+import { timeline_id, type } from './schemas';
+/* eslint-enable @typescript-eslint/camelcase */
 
 /**
  * Special schema type that is only the type and the timeline_id.
  * This is used for dependent type checking only.
  */
 export const typeAndTimelineOnlySchema = t.intersection([
-  t.exact(t.type({ type: requiredRulesSchema.props.type })),
-  t.exact(t.partial({ timeline_id: t.string })), // TODO: Change this type to use a props.type
+  t.exact(t.type({ type })),
+  t.exact(t.partial({ timeline_id })),
 ]);
 export type TypeAndTimelineOnly = t.TypeOf<typeof typeAndTimelineOnlySchema>;

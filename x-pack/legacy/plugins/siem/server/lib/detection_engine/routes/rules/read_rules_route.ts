@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError, transform } from './utils';
+import { getIdError, transform, validateRuleResponse } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
@@ -53,8 +53,8 @@ export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
           search: rule.id,
           searchFields: ['alertId'],
         });
-        const transformedOrError = transform(rule, ruleStatuses.saved_objects[0]);
-        if (transformedOrError == null) {
+        const transformed = transform(rule, ruleStatuses.saved_objects[0]);
+        if (transformed == null) {
           return headers
             .response({
               message: 'Internal error transforming rules',
@@ -62,7 +62,8 @@ export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
             })
             .code(500);
         } else {
-          return transformedOrError;
+          validateRuleResponse(transformed);
+          return transformed;
         }
       } else {
         const error = getIdError({ id, ruleId });
