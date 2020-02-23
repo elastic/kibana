@@ -26,6 +26,8 @@ import { sampleRule } from '../../signals/__mocks__/es_results';
 import { getSimpleRule } from '../__mocks__/utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
+import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
+import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -627,12 +629,15 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [] });
-      expect(output).toEqual({ data: [] });
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 });
+      expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformFindAlerts({
+        page: 1,
+        perPage: 0,
+        total: 0,
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
@@ -695,17 +700,26 @@ describe('utils', () => {
         version: 1,
       };
       expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
         data: [expected],
       });
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformFindAlerts({ data: [{ random: 1 }] });
+      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
+      const output = transformFindAlerts({
+        data: unsafeCast,
+        page: 1,
+        perPage: 1,
+        total: 1,
+      });
       expect(output).toBeNull();
     });
   });
 
-  describe('transformOrError', () => {
+  describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
@@ -771,7 +785,8 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transform({ data: [{ random: 1 }] });
+      const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
+      const output = transform(unsafeCast);
       expect(output).toBeNull();
     });
   });
@@ -933,7 +948,8 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', { data: [{ random: 1 }] });
+      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const output = transformOrBulkError('rule-1', unsafeCast);
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'Internal error transforming', status_code: 500 },
@@ -1184,15 +1200,12 @@ describe('utils', () => {
     });
 
     test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const output = transformOrImportError(
-        'rule-1',
-        { data: [{ random: 1 }] },
-        {
-          success: true,
-          success_count: 1,
-          errors: [],
-        }
-      );
+      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const output = transformOrImportError('rule-1', unsafeCast, {
+        success: true,
+        success_count: 1,
+        errors: [],
+      });
       const expected: ImportSuccessError = {
         success: false,
         errors: [

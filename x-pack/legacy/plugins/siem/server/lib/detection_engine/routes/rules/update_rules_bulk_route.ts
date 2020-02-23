@@ -13,7 +13,7 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError, validateRuleAndErrorResponses } from './utils';
+import { transformValidateBulkError, getIdBulkError } from './utils';
 import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -120,7 +120,7 @@ export const createUpdateRulesBulkRoute = (
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -129,7 +129,6 @@ export const createUpdateRulesBulkRoute = (
           }
         })
       );
-      validateRuleAndErrorResponses(rules);
       return rules;
     },
   };

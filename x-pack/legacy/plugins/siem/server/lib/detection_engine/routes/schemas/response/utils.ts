@@ -13,14 +13,15 @@ export const formatErrors = (errors: t.Errors): string[] => {
     if (error.message) {
       return error.message;
     } else {
-      return `Invalid value ${error.value} supplied to: ${error.context
+      const mappedContext = error.context
         .filter(
           entry => entry.key != null && entry.key.trim() !== '' && !Number.isInteger(+entry.key)
         )
         .map(entry => {
           return `${entry.key}`;
         })
-        .join(',')}`;
+        .join(',');
+      return `Invalid value "${error.value}" supplied to "${mappedContext}"`;
     }
   });
 };

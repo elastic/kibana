@@ -36,7 +36,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: invalid_extra_data']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_extra_data"']);
     expect(message.schema).toEqual({});
   });
 
@@ -49,7 +49,7 @@ describe('create_rules_schema_output', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value invalid_data supplied to: type',
+      'Invalid value "invalid_data" supplied to "type"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -63,7 +63,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: saved_id']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "saved_id"']);
     expect(message.schema).toEqual({});
   });
 
@@ -94,7 +94,7 @@ describe('create_rules_schema_output', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value undefined supplied to: saved_id',
+      'Invalid value "undefined" supplied to "saved_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -109,7 +109,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: invalid_extra_data']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_extra_data"']);
     expect(message.schema).toEqual({});
   });
 
@@ -139,7 +139,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: invalid_extra_data']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_extra_data"']);
     expect(message.schema).toEqual({});
   });
 
@@ -152,7 +152,7 @@ describe('create_rules_schema_output', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value undefined supplied to: timeline_title',
+      'Invalid value "undefined" supplied to "timeline_title"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -165,7 +165,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: timeline_title']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "timeline_title"']);
     expect(message.schema).toEqual({});
   });
 
@@ -179,7 +179,7 @@ describe('create_rules_schema_output', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys found: timeline_title']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "timeline_title"']);
     expect(message.schema).toEqual({});
   });
 
@@ -194,7 +194,7 @@ describe('create_rules_schema_output', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value undefined supplied to: timeline_title',
+      'Invalid value "undefined" supplied to "timeline_title"',
     ]);
     expect(message.schema).toEqual({});
   });

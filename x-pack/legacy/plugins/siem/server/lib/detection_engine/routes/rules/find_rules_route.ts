@@ -11,7 +11,7 @@ import { GetScopedClients } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
-import { transformFindAlerts, validateRuleResponses } from './utils';
+import { transformValidateFindAlerts } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -59,17 +59,16 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
             return results;
           })
         );
-        const transformed = transformFindAlerts(rules, ruleStatuses);
-        if (transformed == null) {
+        const validate = transformValidateFindAlerts(rules, ruleStatuses);
+        if (validate.errors != null) {
           return headers
             .response({
-              message: 'unknown data type, error transforming alert',
+              message: validate.errors,
               status_code: 500,
             })
             .code(500);
         } else {
-          validateRuleResponses(transformed.data);
-          return transformed;
+          return validate.transformed;
         }
       } catch (err) {
         const error = transformError(err);

@@ -11,7 +11,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transform, validateRuleResponse } from './utils';
+import { getIdError, transformValidate } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -57,17 +57,16 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
+          const validate = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (validate.errors != null) {
             return headers
               .response({
-                message: 'Internal error transforming rules',
+                message: validate.errors,
                 status_code: 500,
               })
               .code(500);
           } else {
-            validateRuleResponse(transformed);
-            return transformed;
+            return validate.transformed;
           }
         } else {
           const error = getIdError({ id, ruleId });

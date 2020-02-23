@@ -7,18 +7,36 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { RiskScore } from '../types/risk_score';
+import { UUID } from '../types/uuid';
+import { IsoDateString } from '../types/iso_date_string';
+import { Version } from '../types/version';
+import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
+import { PositiveInteger } from '../types/positive_integer';
 
 export const description = t.string;
 export const enabled = t.boolean;
 export const exclude_export_details = t.boolean;
 export const false_positives = t.array(t.string);
 export const file_name = t.string;
+
+/**
+ * TODO: Right now the filters is an "unknown", when it could more than likely
+ * become the actual ESFilter as a type.
+ */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
+
+// TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
+
 export const immutable = t.boolean;
+
+// Note: Never make this a strict uuid, we allow the rule_id to be any string at the moment
+// in case we encounter 3rd party rule systems which might be using auto incrementing numbers
+// or other different things.
 export const rule_id = t.string;
-export const id = t.string;
+
+export const id = UUID;
 export const index = t.array(t.string);
 export const interval = t.string;
 export const query = t.string;
@@ -28,40 +46,35 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
-export const meta = t.object;
-// TODO: Make this a custom validator
-export const max_signals = t.number;
-export const name = t.string;
 
 /**
- * Types the risk score as:
- *   - Natural Number (positive integer and not a float),
- *   - Between the values [0 and 100] inclusive.
+ * Note that this is a plain unknown object because we allow the UI
+ * to send us extra additional information as "meta" which can be anything.
+ *
+ * TODO: Strip away extra information and possibly even "freeze" this object
+ * so we have tighter control over 3rd party data structures.
  */
-export const risk_score = new t.Type<number, number, unknown>(
-  'risk_score',
-  t.number.is,
-  (input, context) => {
-    return typeof input === 'number' && Number.isSafeInteger(input) && input >= 0 && input <= 100
-      ? t.success(input)
-      : t.failure(input, context);
-  },
-  t.identity
-);
-
+export const meta = t.object;
+export const max_signals = PositiveIntegerGreaterThanZero;
+export const name = t.string;
+export const risk_score = RiskScore;
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
 export const status = t.keyof({ open: null, closed: null });
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
+
+// TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
+
 export const type = t.keyof({ query: null, saved_query: null });
 export const queryFilter = t.string;
 export const references = t.array(t.string);
-// TODO: Custom validator
-export const per_page = t.number;
-// TODO: Custom validator
-export const page = t.number;
+export const per_page = PositiveInteger;
+export const page = PositiveIntegerGreaterThanZero;
 export const signal_ids = t.array(t.string);
-export const signal_status_query = t.object; // I do not think this can be more strict?
+
+// TODO: Can this be more strict or is this is the set of all Elastic Queries?
+export const signal_status_query = t.object;
+
 export const sort_field = t.string;
 export const sort_order = t.keyof({ asc: null, desc: null });
 export const tags = t.array(t.string);
@@ -92,33 +105,11 @@ export const threat = t.array(
   })
 );
 
-// TODO: Change this back to ISODate or make a custom codec for it so it at least tries to validate an ISO string
-export const created_at = t.string;
-
-// TODO: Change this back to ISODate or make a custom codec for it so it at least tries to validate an ISO string
-export const updated_at = t.string;
+export const created_at = IsoDateString;
+export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
-
-// TODO: Custom validator needed here
-export const version = t.number;
-
-// TODO: Change this back to ISODate or make a custom codec for it so it at least tries to validate an ISO string
-export const last_success_at = t.string;
-
-// TODO: Change this back to ISODate or make a custom codec for it so it at least tries to validate an ISO string
+export const version = Version;
+export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
-
-// TODO: Change this back to ISODate or make a custom codec for it so it at least tries to validate an ISO string
-export const status_date = t.string;
-
-/**
- * Types the referencesWithDefaultArray as:
- *   - If null or undefined, then a default array will be set
- */
-export const referencesWithDefaultArray = new t.Type<string[], string[], unknown>(
-  'referencesWithDefaultArray',
-  references.is,
-  (input): Either<t.Errors, string[]> => (input == null ? t.success([]) : references.decode(input)),
-  t.identity
-);
+export const status_date = IsoDateString;

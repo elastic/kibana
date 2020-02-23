@@ -38,7 +38,7 @@ export const exactCheck = <T>(
       const validationError: t.ValidationError = {
         value: differences,
         context: [],
-        message: `invalid keys found: ${differences.join(',')}`,
+        message: `invalid keys "${differences.join(',')}"`,
       };
       const error: t.Errors = [validationError];
       return left(error);

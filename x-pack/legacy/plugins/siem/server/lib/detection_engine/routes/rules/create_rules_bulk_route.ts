@@ -14,7 +14,7 @@ import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError, getDuplicates, validateRuleAndErrorResponses } from './utils';
+import { transformValidateBulkError, getDuplicates } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
@@ -130,7 +130,7 @@ export const createCreateRulesBulkRoute = (
                 references,
                 version,
               });
-              return transformOrBulkError(ruleIdOrUuid, createdRule);
+              return transformValidateBulkError(ruleIdOrUuid, createdRule);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }
@@ -146,7 +146,6 @@ export const createCreateRulesBulkRoute = (
           })
         ),
       ];
-      validateRuleAndErrorResponses(rules);
       return finalRules;
     },
   };

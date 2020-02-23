@@ -13,7 +13,7 @@ import {
 } from '../../rules/types';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { transformOrBulkError, getIdBulkError, validateRuleAndErrorResponses } from './utils';
+import { transformValidateBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
@@ -113,7 +113,7 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -122,7 +122,6 @@ export const createPatchRulesBulkRoute = (getClients: GetScopedClients): Hapi.Se
           }
         })
       );
-      validateRuleAndErrorResponses(rules);
       return rules;
     },
   };

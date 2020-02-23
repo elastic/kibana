@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy, has } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import { Dictionary } from 'lodash';
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import { PartialAlert, FindResult } from '../../../../../../../../plugins/alerting/server';
 import { formatErrors } from '../schemas/response/utils';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -156,27 +157,90 @@ export const transformAlertsToRules = (
   return alerts.map(alert => transformAlertToRule(alert));
 };
 
-export const transformFindAlerts = (
-  findResults: { data: object[] },
-  ruleStatuses?: unknown[]
-): { data: object[] } | null => {
-  if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
-    return findResults;
+export const transformValidateFindAlerts = (
+  findResults: FindResult,
+  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+): {
+  errors: string | null;
+  transformed: {
+    page: number;
+    perPage: number;
+    total: number;
+    data: Array<Partial<OutputRuleAlertRest>>;
+  } | null;
+} => {
+  const transformed = transformFindAlerts(findResults, ruleStatuses);
+  if (transformed == null) {
+    return {
+      errors: 'unknown data type, error transforming alert',
+      transformed: null,
+    };
+  } else {
+    const errors = validateRuleResponses(transformed.data);
+    if (errors.length !== 0) {
+      return {
+        errors: errors.join(','),
+        transformed: null,
+      };
+    } else {
+      return {
+        errors: null,
+        transformed,
+      };
+    }
   }
-  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    findResults.data = findResults.data.map((alert, idx) =>
-      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
-    );
-    return findResults;
+};
+
+export const transformFindAlerts = (
+  findResults: FindResult,
+  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+): {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<Partial<OutputRuleAlertRest>>;
+} | null => {
+  if (!ruleStatuses && isAlertTypes(findResults.data)) {
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map(alert => transformAlertToRule(alert)),
+    };
+  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map((alert, idx) =>
+        transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+      ),
+    };
   } else {
     return null;
   }
 };
 
+export const transformValidate = (
+  alert: PartialAlert,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+): { errors: string | null; transformed: Partial<OutputRuleAlertRest> | null } => {
+  const transformed = transform(alert, ruleStatus);
+  if (transformed == null) {
+    return { errors: 'Internal error transforming rules', transformed: null };
+  } else {
+    const errors = validateRuleResponse(transformed);
+    if (errors.length !== 0) {
+      return { errors: errors.join(','), transformed: null };
+    } else {
+      return { errors: null, transformed };
+    }
+  }
+};
+
 export const transform = (
-  alert: unknown,
-  ruleStatus?: unknown
+  alert: PartialAlert,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
@@ -190,9 +254,49 @@ export const transform = (
   }
 };
 
+export const transformValidateBulkError = (
+  ruleId: string,
+  alert: PartialAlert,
+  ruleStatus?: unknown
+): Partial<OutputRuleAlertRest> | BulkError => {
+  if (isAlertType(alert)) {
+    if (isRuleStatusFindType(ruleStatus)) {
+      const transformed = transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+      const errors = validateRuleResponse(transformed);
+      if (errors.length !== 0) {
+        return createBulkErrorObject({
+          ruleId,
+          statusCode: 500,
+          message: errors.join(','),
+        });
+      } else {
+        return transformed;
+      }
+    } else {
+      const transformed = transformAlertToRule(alert);
+      const errors = validateRuleResponse(transformed);
+      if (errors.length !== 0) {
+        return createBulkErrorObject({
+          ruleId,
+          statusCode: 500,
+          message: errors.join(','),
+        });
+      } else {
+        return transformed;
+      }
+    }
+  } else {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+    });
+  }
+};
+
 export const transformOrBulkError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
@@ -212,7 +316,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {
@@ -274,45 +378,29 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
 };
 
 /**
- * Validates and just console logs a warning.
- * TODO: Get the correct logger to be pushed into this function
+ * Validates and returns any errors as a string array.
  * @param rule The rule to validate (as an object) since we don't know what it is.
  */
-export const validateRuleResponse = (rule: object): void => {
+export const validateRuleResponse = (rule: object): string[] => {
   // Validate and only log warnings if the type is incorrect.
   const decoded = rulesSchema.decode(rule);
   const checked = exactCheck(rule, decoded);
-  const left = (errors: t.Errors): void => {
+  const left = (errors: t.Errors): string[] => {
     const formatted = formatErrors(errors);
-    // TODO: Remove this console statement
-    // eslint-disable-next-line no-console
-    console.log('Warning: you need to update the rule schema or fix a bug', formatted);
-    // TODO: Remove this console statement
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(rule, null, 2));
+    return formatted;
   };
   // We don't return the right decoded _just yet_. Rather we just use
   // this system for validation checks and return the regular transformed out.
-  const right = (): void => {};
-  const folding = fold(left, right);
-  pipe(checked, folding);
+  const right = (): string[] => {
+    return [];
+  };
+  return pipe(checked, fold(left, right));
 };
 
 /**
- * Validates and just console logs a warning.
- * TODO: Get the correct logger to be pushed into this function
+ * Validates and returns any errors as a string array.
  * @param rule The rule to validate (as an object) since we don't know what it is.
  */
-export const validateRuleResponses = (rules: object[]): void => {
-  // first let us filter out any obvious errors being returned
-  rules.forEach(rule => validateRuleResponse(rule));
-};
-
-/**
- * Validates the responses but ignores validation of any error messages at the moment.
- * TODO: Add validation for error messages
- */
-export const validateRuleAndErrorResponses = (rules: object[]): void => {
-  const rulesWithoutErrors = rules.filter(rule => !has('error', rule));
-  validateRuleResponses(rulesWithoutErrors);
+export const validateRuleResponses = (rules: object[]): string[] => {
+  return rules.map(rule => validateRuleResponse(rule)).flat();
 };
