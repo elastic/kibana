@@ -136,7 +136,7 @@ export const createCreateRulesBulkRoute = (
             }
           })
       );
-      const finalRules = [
+      return [
         ...rules,
         ...dupes.map(ruleId =>
           createBulkErrorObject({
@@ -146,7 +146,6 @@ export const createCreateRulesBulkRoute = (
           })
         ),
       ];
-      return finalRules;
     },
   };
 };
