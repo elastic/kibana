@@ -62,7 +62,7 @@ export class ColorMapSelect extends Component {
           'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeTooltip',
           {
             defaultMessage:
-              'Choose `quantitative` to map the value as a number to a color on a range, or `qualitative` to map the value as a category to a color from a palette',
+              'Choose `quantitative` to map the value as a number to a color on a range. Choose `qualitative` to map the value as a category to a color from a palette',
           }
         )}
       >
