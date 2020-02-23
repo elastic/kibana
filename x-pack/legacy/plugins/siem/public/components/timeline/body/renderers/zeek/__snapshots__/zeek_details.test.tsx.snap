@@ -3363,46 +3363,58 @@ tr:hover .c3:focus::before {
                                                   overflowIndexStart={1}
                                                   showDomain={true}
                                                 >
-                                                  <EuiFlexGroup
-                                                    alignItems="center"
-                                                    direction="column"
-                                                    gutterSize="none"
-                                                    justifyContent="center"
-                                                  >
-                                                    <div
-                                                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                                                  <section>
+                                                    <EuiFlexGroup
+                                                      alignItems="center"
+                                                      direction="row"
+                                                      gutterSize="none"
+                                                      justifyContent="center"
                                                     >
-                                                      <EuiFlexItem
-                                                        grow={true}
+                                                      <div
+                                                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                                       >
-                                                        <div
-                                                          className="euiFlexItem"
-                                                        />
-                                                      </EuiFlexItem>
-                                                      <EuiFlexItem
-                                                        grow={false}
-                                                      >
-                                                        <div
-                                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                        <EuiFlexItem
+                                                          grow={true}
                                                         >
-                                                          <DefaultFieldRendererOverflow
-                                                            idPrefix="moreReputationLink"
-                                                            moreMaxHeight="200px"
-                                                            overflowIndexStart={1}
-                                                            render={[Function]}
+                                                          <div
+                                                            className="euiFlexItem"
                                                           >
-                                                            <EuiFlexItem
-                                                              grow={false}
+                                                            <EuiFlexGroup
+                                                              direction="row"
+                                                              gutterSize="none"
+                                                              justifyContent="center"
                                                             >
                                                               <div
-                                                                className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                                className="euiFlexGroup euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                                               />
-                                                            </EuiFlexItem>
-                                                          </DefaultFieldRendererOverflow>
-                                                        </div>
-                                                      </EuiFlexItem>
-                                                    </div>
-                                                  </EuiFlexGroup>
+                                                            </EuiFlexGroup>
+                                                          </div>
+                                                        </EuiFlexItem>
+                                                        <EuiFlexItem
+                                                          grow={false}
+                                                        >
+                                                          <div
+                                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                          >
+                                                            <DefaultFieldRendererOverflow
+                                                              idPrefix="moreReputationLink"
+                                                              moreMaxHeight="200px"
+                                                              overflowIndexStart={1}
+                                                              render={[Function]}
+                                                            >
+                                                              <EuiFlexItem
+                                                                grow={false}
+                                                              >
+                                                                <div
+                                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                                />
+                                                              </EuiFlexItem>
+                                                            </DefaultFieldRendererOverflow>
+                                                          </div>
+                                                        </EuiFlexItem>
+                                                      </div>
+                                                    </EuiFlexGroup>
+                                                  </section>
                                                 </Memo(ReputationLinkComponent)>
                                               </div>
                                             </div>
