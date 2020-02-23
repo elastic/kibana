@@ -10,7 +10,8 @@ export BUILD_ID
 ES_HOST=https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp.cloud.es.io:9243
 export ES_HOST
 
-STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
+#STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
+STATIC_SITE_URL_BASE='https://storage.googleapis.com/elastic-bekitzur-kibana-coverage-live/jobs/elastic%2Bkibana%2Bcode-coverage'
 export STATIC_SITE_URL_BASE
 
 for x in jest functional mocha; do
