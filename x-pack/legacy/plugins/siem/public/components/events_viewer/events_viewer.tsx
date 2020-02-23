@@ -107,7 +107,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     kqlMode,
     start,
     end,
-    isEventViewer: true,
   });
   const queryFields = useMemo(
     () =>
@@ -201,7 +200,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                         getUpdatedAt={getUpdatedAt}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         height={footerHeight}
-                        isEventViewer={true}
                         isLive={isLive}
                         isLoading={loading}
                         itemsCount={events.length}
