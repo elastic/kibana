@@ -20,25 +20,33 @@
 import { left, right } from './either';
 
 const XPACK = 'x-pack';
+const maybeTotal = coveredFilePath => coveredFilePath === 'total' ?
+  left(coveredFilePath) : right(coveredFilePath);
 
 export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
 
+const dropFront = coveredFilePath => trimLeftFrom('kibana', coveredFilePath);
+const buildFinalUrl = (urlBase, BUILD_ID, ts) => trimmed => {
+  const result = `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`;
+  return result;
+}
+const assignAndReturn = obj => x => {
+  obj.coveredFilePath = x;
+  return obj;
+};
 export const staticSite = urlBase => obj => {
-  const { BUILD_ID, coveredFilePath } = obj;
+  const { BUILD_ID, coveredFilePath, coverageType } = obj;
+  console.log(`\n### coverageType: \n\t${coverageType}`);
   const ts = obj['@timestamp'];
 
-  const maybeTotal = coveredFilePath === 'total' ?
-    left(coveredFilePath) : right(coveredFilePath);
+  const buildTrimmed = buildFinalUrl(urlBase, BUILD_ID, ts);
+  const assignObj = assignAndReturn(obj);
 
-  const assignAndReturn = x => {
-    obj.coveredFilePath = x;
-    return obj;
-  };
+  return maybeTotal(coveredFilePath)
+    .map(dropFront)
+    .map(buildTrimmed)
+    .fold(assignObj, assignObj);
 
-  return maybeTotal
-    .map(coveredFilePath => trimLeftFrom('kibana', coveredFilePath))
-    .map(trimmed => `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`)
-    .fold(assignAndReturn, assignAndReturn);
 };
 export const statsAndCoveredFilePath = (...xs) => {
   const [coveredFilePath] = xs[0][1];
@@ -80,17 +88,20 @@ export const distro = obj => {
 };
 
 export const testRunner = obj => {
-  const { coverageSummaryPath } = obj;
+  const { coverageSummaryPath, coveredFilePath } = obj;
+  console.log(`\n### coveredFilePath: \n\t${coveredFilePath}`);
 
   let coverageType = 'other';
 
+  const upperCoverageType = x => {
+    if (coverageSummaryPath.includes(x)) {
+      coverageType = x.toUpperCase();
+      return;
+    }
+  };
+
   ['mocha', 'jest', 'functional']
-    .forEach(x => {
-      if (coverageSummaryPath.includes(x)) {
-        coverageType = x.toUpperCase();
-        return;
-      }
-    });
+    .forEach(upperCoverageType);
 
   return {
     coverageType,

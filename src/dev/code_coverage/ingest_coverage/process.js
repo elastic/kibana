@@ -63,20 +63,21 @@ export default ({ coverageSummaryPath }, log) => {
   validateRoot(KIBANA_ROOT, log);
   const addPrePopulatedTimeStamp = addTimeStamp(ts(log));
 
-  const prokStatsTimeStampBuildIdCoveredFilePath = pipe(
+  const prokStatsTimeStampBuildId = pipe(
     statsAndCoveredFilePath,
     buildId,
     addPrePopulatedTimeStamp,
-    staticSite(staticSiteUrlBase)
   );
-  const addCoverageSummaryPathTestRunnerAndDistro = pipe(addCoverageSummaryPath(coverageSummaryPath), testRunner, distro);
+  const addCoverageSummaryPathAndDistro = pipe(addCoverageSummaryPath(coverageSummaryPath), distro);
+  const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
   const objStream = jsonStream(coverageSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
-      map(prokStatsTimeStampBuildIdCoveredFilePath),
-      map(addCoverageSummaryPathTestRunnerAndDistro),
+      map(prokStatsTimeStampBuildId),
+      map(addCoverageSummaryPathAndDistro),
+      map(addTestRunnerAndStaticSiteUrl),
       map(maybeDropCoveredFilePath),
       concatMap(x => of(x).pipe(delay(ms)))
     )
