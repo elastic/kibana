@@ -43,23 +43,21 @@ const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
 
 const ts = log => {
-  const timestamp = process.env.TIME_STAMP || moment.utc().format();
-  const outFileDir = 'src/dev/code_coverage';
-  const timeStampDatFileName = 'current_build_timestamp.dat';
-  const fullTimeStampPath = resolve(KIBANA_ROOT, outFileDir, timeStampDatFileName);
+  return process.env.TIME_STAMP || moment.utc().format();
+  // const outFileDir = 'src/dev/code_coverage';
+  // const timeStampDatFileName = 'current_build_timestamp.dat';
+  // const fullTimeStampPath = resolve(KIBANA_ROOT, outFileDir, timeStampDatFileName);
 
   // log.debug(`\n### Flushing timestamp ${green(timestamp)}, to ${green(fullTimeStampPath)}`);
   //
   // flushTimeStamp(fullTimeStampPath)(timestamp);
-
-  return timestamp;
 };
 
-const flushTimeStamp = filePath => x =>
-  fs.writeFileSync(resolve(filePath), x, { encoding: 'utf8' });
+// const flushTimeStamp = filePath => x =>
+//   fs.writeFileSync(resolve(filePath), x, { encoding: 'utf8' });
 
 
-export default ({ coveragePath }, log) => {
+export default ({ coverageSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
   validateRoot(KIBANA_ROOT, log);
@@ -71,14 +69,14 @@ export default ({ coveragePath }, log) => {
     addPrePopulatedTimeStamp,
     staticSite(staticSiteUrlBase)
   );
-  const addPathTestRunnerAndDistro = pipe(addPath(coveragePath), testRunner, distro);
+  const addCoverageSummaryPathTestRunnerAndDistro = pipe(addPath(coverageSummaryPath), testRunner, distro);
 
-  const objStream = jsonStream(coveragePath).on('done', noop);
+  const objStream = jsonStream(coverageSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
       map(prokStatsTimeStampBuildIdCoveredFilePath),
-      map(addPathTestRunnerAndDistro),
+      map(addCoverageSummaryPathTestRunnerAndDistro),
       map(maybeDropCoveredFilePath),
       concatMap(x => of(x).pipe(delay(ms)))
     )

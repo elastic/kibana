@@ -48,8 +48,8 @@ export const statsAndCoveredFilePath = (...xs) => {
     ...stats,
   };
 };
-export const addPath = coveragePath => obj => ({
-  coveragePath: trimLeftFrom('target', coveragePath),
+export const addPath = coverageSummaryPath => obj => ({
+  coverageSummaryPath: trimLeftFrom('target', coverageSummaryPath),
   ...obj,
 });
 
@@ -80,13 +80,13 @@ export const distro = obj => {
 };
 
 export const testRunner = obj => {
-  const { coveragePath } = obj;
+  const { coverageSummaryPath } = obj;
 
   let coverageType = 'other';
 
   ['mocha', 'jest', 'functional']
     .forEach(x => {
-      if (coveragePath.includes(x)) {
+      if (coverageSummaryPath.includes(x)) {
         coverageType = x.toUpperCase();
         return;
       }
