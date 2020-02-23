@@ -9,6 +9,7 @@ import {
   IndexPattern,
   esQuery,
   IndexPatternsContract,
+  IndexPatternAttributes,
 } from '../../../../../../../../src/plugins/data/public';
 
 type IndexPatternId = string;
@@ -27,7 +28,7 @@ export function loadIndexPatterns(
 ) {
   fullIndexPatterns = indexPatterns;
   return savedObjectsClient
-    .find({
+    .find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
