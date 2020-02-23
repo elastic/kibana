@@ -31,8 +31,3 @@ export const DeleteDatasourcesRequestSchema = {
     datasourceIds: schema.arrayOf(schema.string()),
   }),
 };
-
-export type DeleteDatasourcesResponse = Array<{
-  id: string;
-  success: boolean;
-}>;

@@ -7,18 +7,19 @@ import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
 import { EPM_API_ROOT } from '../../../common';
 import {
-  GetCategoriesResponse,
   GetPackagesRequestSchema,
-  GetPackagesResponse,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetInfoResponse,
   InstallPackageRequestSchema,
-  InstallPackageResponse,
   DeletePackageRequestSchema,
-  DeletePackageResponse,
 } from '../../types';
-
+import {
+  GetInfoResponse,
+  InstallPackageResponse,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetPackagesResponse,
+} from '../../../common';
 import {
   getCategories,
   getPackages,

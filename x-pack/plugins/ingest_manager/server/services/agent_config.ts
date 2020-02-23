@@ -11,13 +11,8 @@ import {
   DEFAULT_AGENT_CONFIG,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
 } from '../constants';
-import {
-  NewAgentConfig,
-  AgentConfig,
-  AgentConfigStatus,
-  ListWithKuery,
-  DeleteAgentConfigsResponse,
-} from '../types';
+import { NewAgentConfig, AgentConfig, AgentConfigStatus, ListWithKuery } from '../types';
+import { DeleteAgentConfigsResponse } from '../../common';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
 import { agentConfigUpdateEventHandler } from './agent_config_update';

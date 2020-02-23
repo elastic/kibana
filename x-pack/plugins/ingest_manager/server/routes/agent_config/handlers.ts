@@ -8,16 +8,18 @@ import { RequestHandler } from 'kibana/server';
 import { appContextService, agentConfigService } from '../../services';
 import {
   GetAgentConfigsRequestSchema,
-  GetAgentConfigsResponse,
   GetOneAgentConfigRequestSchema,
-  GetOneAgentConfigResponse,
   CreateAgentConfigRequestSchema,
-  CreateAgentConfigResponse,
   UpdateAgentConfigRequestSchema,
-  UpdateAgentConfigResponse,
   DeleteAgentConfigsRequestSchema,
-  DeleteAgentConfigsResponse,
 } from '../../types';
+import {
+  GetAgentConfigsResponse,
+  GetOneAgentConfigResponse,
+  CreateAgentConfigResponse,
+  UpdateAgentConfigResponse,
+  DeleteAgentConfigsResponse,
+} from '../../../common';
 
 export const getAgentConfigsHandler: RequestHandler<
   undefined,

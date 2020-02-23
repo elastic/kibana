@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { AgentEventSchema, AgentTypeSchema } from '../models';
-import { Agent, AgentEvent } from '../../../common';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({
@@ -17,24 +16,11 @@ export const GetAgentsRequestSchema = {
   }),
 };
 
-export interface GetAgentsResponse {
-  list: Agent[];
-  total: number;
-  page: number;
-  perPage: number;
-  success: boolean;
-}
-
 export const GetOneAgentRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
 };
-
-export interface GetOneAgentResponse {
-  item: Agent;
-  success: boolean;
-}
 
 export const PostAgentCheckinRequestSchema = {
   params: schema.object({
@@ -77,16 +63,6 @@ export const PostAgentUnenrollRequestSchema = {
   ]),
 };
 
-export interface PostAgentUnenrollResponse {
-  results: Array<{
-    success: boolean;
-    error?: any;
-    id: string;
-    action: string;
-  }>;
-  success: boolean;
-}
-
 export const GetOneAgentEventsRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
@@ -97,14 +73,6 @@ export const GetOneAgentEventsRequestSchema = {
     kuery: schema.maybe(schema.string()),
   }),
 };
-
-export interface GetOneAgentEventsResponse {
-  list: AgentEvent[];
-  total: number;
-  page: number;
-  perPage: number;
-  success: boolean;
-}
 
 export const DeleteAgentRequestSchema = {
   params: schema.object({

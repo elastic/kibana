@@ -5,20 +5,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { NewAgentConfigSchema } from '../models';
-import { AgentConfig } from '../../../common';
 import { ListWithKuerySchema } from './index';
 
 export const GetAgentConfigsRequestSchema = {
   query: ListWithKuerySchema,
 };
-
-export interface GetAgentConfigsResponse {
-  items: AgentConfig[];
-  total: number;
-  page: number;
-  perPage: number;
-  success: boolean;
-}
 
 export const GetOneAgentConfigRequestSchema = {
   params: schema.object({
@@ -26,37 +17,17 @@ export const GetOneAgentConfigRequestSchema = {
   }),
 };
 
-export interface GetOneAgentConfigResponse {
-  item: AgentConfig;
-  success: boolean;
-}
-
 export const CreateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
-
-export interface CreateAgentConfigResponse {
-  item: AgentConfig;
-  success: boolean;
-}
 
 export const UpdateAgentConfigRequestSchema = {
   ...GetOneAgentConfigRequestSchema,
   body: NewAgentConfigSchema,
 };
 
-export interface UpdateAgentConfigResponse {
-  item: AgentConfig;
-  success: boolean;
-}
-
 export const DeleteAgentConfigsRequestSchema = {
   body: schema.object({
     agentConfigIds: schema.arrayOf(schema.string()),
   }),
 };
-
-export type DeleteAgentConfigsResponse = Array<{
-  id: string;
-  success: boolean;
-}>;

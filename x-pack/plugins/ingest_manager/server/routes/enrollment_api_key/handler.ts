@@ -11,11 +11,13 @@ import {
   PostEnrollmentAPIKeyRequestSchema,
   DeleteEnrollmentAPIKeyRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
+} from '../../types';
+import {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../types';
+} from '../../../common';
 import * as APIKeyService from '../../services/api_keys';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
