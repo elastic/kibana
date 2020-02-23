@@ -332,10 +332,6 @@ export class AbstractLayer {
     return [];
   }
 
-  async getDateFields() {
-    return [];
-  }
-
   async getFields() {
     return [];
   }

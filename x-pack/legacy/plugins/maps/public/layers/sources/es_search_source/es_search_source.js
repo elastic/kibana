@@ -158,17 +158,6 @@ export class ESSearchSource extends AbstractESSource {
     );
   }
 
-  async getDateFields() {
-    try {
-      const indexPattern = await this.getIndexPattern();
-      return indexPattern.fields.getByType('date').map(field => {
-        return this.createField({ fieldName: field.name });
-      });
-    } catch (error) {
-      return [];
-    }
-  }
-
   async getFields() {
     try {
       const indexPattern = await this.getIndexPattern();
