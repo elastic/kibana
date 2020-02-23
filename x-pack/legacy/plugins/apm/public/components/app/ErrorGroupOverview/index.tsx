@@ -18,7 +18,7 @@ import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../../../plugins/observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 const ErrorGroupOverview: React.FC = () => {
