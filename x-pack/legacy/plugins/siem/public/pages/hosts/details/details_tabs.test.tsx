@@ -36,7 +36,7 @@ describe('body', () => {
     allHosts: 'HostsQueryTabBody',
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
-    events: 'EventsQueryTabBody',
+    events: 'Memo(EventsQueryTabBodyComponent)',
     alerts: 'HostAlertsQueryTabBody',
   };
 

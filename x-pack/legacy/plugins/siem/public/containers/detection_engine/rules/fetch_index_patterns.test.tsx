@@ -13,7 +13,7 @@ import { mocksSource } from '../../source/mock';
 import { useFetchIndexPatterns, Return } from './fetch_index_patterns';
 
 const mockUseApolloClient = useApolloClient as jest.Mock;
-jest.mock('../../../utils/apollo_context');
+jest.mock('@apollo/client');
 
 describe('useFetchIndexPatterns', () => {
   beforeEach(() => {

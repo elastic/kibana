@@ -29,7 +29,6 @@
     "@cypress/webpack-preprocessor": "^4.1.0",
     "@graphql-codegen/add": "^1.12.2",
     "@graphql-codegen/core": "^1.12.2",
-    "@graphql-codegen/introspection": "^1.12.2",
     "@graphql-codegen/typescript": "^1.12.2",
     "@graphql-codegen/typescript-compatibility": "^1.12.2",
     "@graphql-codegen/typescript-operations": "^1.12.2",
@@ -183,7 +182,7 @@
     "yargs": "4.8.1"
   },
   "dependencies": {
-    "@apollo/client": "^3.0.0-beta.36",
+    "@apollo/client": "^3.0.0-beta.37",
     "@apollo/react-components": "^3.2.0-beta.1",
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",

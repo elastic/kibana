@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@apollo/client@^3.0.0-beta.10", "@apollo/client@^3.0.0-beta.23", "@apollo/client@^3.0.0-beta.35", "@apollo/client@^3.0.0-beta.36":
-  version "3.0.0-beta.35"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.0.0-beta.35.tgz#ec981a8e36baf6a99c8b63d4bb44d28c881d537e"
-  integrity sha512-BEUia7pcLBFJoTOUkiHTXu54FDxutLahc4Qn8x1bt159ht4KE2vfzM9x5oN6TsoNgruH6DYajIZ0WdU4NYeTbA==
+"@apollo/client@^3.0.0-beta.10", "@apollo/client@^3.0.0-beta.23", "@apollo/client@^3.0.0-beta.37":
+  version "3.0.0-beta.37"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.0.0-beta.37.tgz#24d4eacebc2dd0d6c27e87b8aacbb5323c0d29d6"
+  integrity sha512-EVarxDX4dG51IHs9DyivYZQN51U2eu9deWRyAI9xkp6Y5vwmTfAcfMYQIxc/ZZhiFAq4MEk0EPLtU2kOfTILjQ==
   dependencies:
     "@types/zen-observable" "^0.8.0"
     "@wry/equality" "^0.1.9"
@@ -2561,14 +2561,6 @@
     "@graphql-codegen/plugin-helpers" "1.12.2"
     "@graphql-toolkit/common" "0.9.7"
     "@graphql-toolkit/schema-merging" "0.9.7"
-    tslib "1.10.0"
-
-"@graphql-codegen/introspection@^1.12.2":
-  version "1.12.2"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/introspection/-/introspection-1.12.2.tgz#4a9adac083e1554a257bbd6359631c53bfc92581"
-  integrity sha512-YMQIn1R2CxYZLkxkW6fUxqfTBr2WC3Cimp6/0oEcSyLA/W1scVuDw/IUeU5Iu4CEmz8IaqPSjSMEN+8l95wKlA==
-  dependencies:
-    "@graphql-codegen/plugin-helpers" "1.12.2"
     tslib "1.10.0"
 
 "@graphql-codegen/plugin-helpers@1.12.2":

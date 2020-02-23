@@ -14,9 +14,13 @@ export function compose(core: CoreStart): AppFrontendLibs {
   const basePath = core.http.basePath.get();
 
   const apolloClient = new ApolloClient({
-    connectToDevTools: process.env.NODE_ENV !== 'production',
+    connectToDevTools: true,
     cache: new InMemoryCache({
-      dataIdFromObject: () => null,
+      typePolicies: {
+        TimelineItem: {
+          keyFields: ['_id', '_index', 'data'],
+        },
+      },
     }),
     link: ApolloLink.from(getLinks(basePath)),
   });
