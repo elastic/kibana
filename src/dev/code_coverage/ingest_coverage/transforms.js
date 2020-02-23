@@ -48,7 +48,7 @@ export const statsAndCoveredFilePath = (...xs) => {
     ...stats,
   };
 };
-export const addPath = coverageSummaryPath => obj => ({
+export const addCoverageSummaryPath = coverageSummaryPath => obj => ({
   coverageSummaryPath: trimLeftFrom('target', coverageSummaryPath),
   ...obj,
 });

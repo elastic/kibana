@@ -26,7 +26,7 @@ import * as fs from 'fs';
 import {
   staticSite,
   statsAndCoveredFilePath,
-  addPath,
+  addCoverageSummaryPath,
   testRunner,
   addTimeStamp,
   distro,
@@ -69,7 +69,7 @@ export default ({ coverageSummaryPath }, log) => {
     addPrePopulatedTimeStamp,
     staticSite(staticSiteUrlBase)
   );
-  const addCoverageSummaryPathTestRunnerAndDistro = pipe(addPath(coverageSummaryPath), testRunner, distro);
+  const addCoverageSummaryPathTestRunnerAndDistro = pipe(addCoverageSummaryPath(coverageSummaryPath), testRunner, distro);
 
   const objStream = jsonStream(coverageSummaryPath).on('done', noop);
 
