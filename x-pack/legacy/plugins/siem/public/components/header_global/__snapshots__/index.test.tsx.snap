@@ -35,7 +35,7 @@ exports[`HeaderGlobal it renders 1`] = `
             navTabs={
               Object {
                 "case": Object {
-                  "disabled": true,
+                  "disabled": false,
                   "href": "#/link-to/case",
                   "id": "case",
                   "name": "Case",
