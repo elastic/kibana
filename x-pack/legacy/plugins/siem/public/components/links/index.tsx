@@ -27,7 +27,7 @@ import * as i18n from '../page/network/ip_overview/translations';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
 
-export const DEFAULT_NUMBER_OF_REPUTATION_LINK = 5;
+export const DEFAULT_NUMBER_OF_LINK = 5;
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
@@ -50,22 +50,22 @@ export const ExternalLink = React.memo<{
     url,
     children,
     idx,
-    overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
-    allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+    overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
+    allItemsLimit = DEFAULT_NUMBER_OF_LINK,
   }) => {
+    const lastVisibleItemIndex = useMemo(() => overflowIndexStart - 1, [overflowIndexStart]);
+    const lastItemIndex = useMemo(() => allItemsLimit - 1, [allItemsLimit]);
     const lastIndexToShow = useMemo(
-      () => Math.max(0, Math.min(overflowIndexStart - 1, allItemsLimit - 1)),
+      () => Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex)),
       [overflowIndexStart]
     );
-    return url && children ? (
+    return url && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
-        <>
-          <EuiLink href={url} target="_blank" rel="noopener">
-            {children}
-            <ExternalLinkIcon />
-          </EuiLink>
-          {!isNil(idx) && idx < lastIndexToShow && <Comma />}
-        </>
+        <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
+          {children}
+          <ExternalLinkIcon data-test-subj="externalLinkIcon" />
+          {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
+        </EuiLink>
       </EuiToolTip>
     ) : null;
   }
@@ -202,8 +202,8 @@ const ReputationLinkComponent: React.FC<{
   showDomain?: boolean;
   domain: string;
 }> = ({
-  overflowIndexStart = DEFAULT_NUMBER_OF_REPUTATION_LINK,
-  allItemsLimit = DEFAULT_NUMBER_OF_REPUTATION_LINK,
+  overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
+  allItemsLimit = DEFAULT_NUMBER_OF_LINK,
   showDomain = false,
   domain,
 }) => {
@@ -235,44 +235,51 @@ const ReputationLinkComponent: React.FC<{
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="center" direction="column" alignItems="center">
-      <EuiFlexItem grow={true}>
-        {ipReputationLinks
-          ?.slice(0, overflowIndexStart)
-          .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-            <ExternalLink
-              url={urlTemplate}
-              overflowIndexStart={overflowIndexStart}
-              allItemsLimit={ipReputationLinks.length}
-              idx={id}
-              key={`reputationLink-${id}`}
-            >
-              <>{showDomain ? domain : name ?? domain}</>
-            </ExternalLink>
-          ))}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DefaultFieldRendererOverflow
-          rowItems={ipReputationLinks}
-          idPrefix="moreReputationLink"
-          render={rowItem => {
-            return (
-              isReputationLink(rowItem) && (
-                <ExternalLink
-                  url={rowItem.url_template}
-                  overflowIndexStart={overflowIndexStart}
-                  allItemsLimit={allItemsLimit}
-                >
-                  <>{rowItem.name ?? domain}</>
-                </ExternalLink>
-              )
-            );
-          }}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={overflowIndexStart}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <section>
+      <EuiFlexGroup gutterSize="none" justifyContent="center" direction="row" alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup gutterSize="none" justifyContent="center" direction="row">
+            {ipReputationLinks
+              ?.slice(0, overflowIndexStart)
+              .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+                <EuiFlexItem grow={false}>
+                  <ExternalLink
+                    allItemsLimit={ipReputationLinks.length}
+                    idx={id}
+                    key={`reputationLink-${id}`}
+                    overflowIndexStart={overflowIndexStart}
+                    url={urlTemplate}
+                    data-test-subj="externalLinkComponent"
+                  >
+                    <>{showDomain ? domain : name ?? domain}</>
+                  </ExternalLink>
+                </EuiFlexItem>
+              ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DefaultFieldRendererOverflow
+            rowItems={ipReputationLinks}
+            idPrefix="moreReputationLink"
+            render={rowItem => {
+              return (
+                isReputationLink(rowItem) && (
+                  <ExternalLink
+                    url={rowItem.url_template}
+                    overflowIndexStart={overflowIndexStart}
+                    allItemsLimit={allItemsLimit}
+                  >
+                    <>{rowItem.name ?? domain}</>
+                  </ExternalLink>
+                )
+              );
+            }}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={overflowIndexStart}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </section>
   );
 };
 
