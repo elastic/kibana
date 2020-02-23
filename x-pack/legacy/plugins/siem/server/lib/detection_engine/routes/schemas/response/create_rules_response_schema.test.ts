@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck } from './exact_check';
 import { createRulesSchema, CreateRulesSchema } from './create_rules_response_schema';
 import { foldLeftRight, getBaseResponsePayload } from './__mocks__/utils';
-import { RulesSchema } from './base_rules_schema';
+import { RulesSchema } from './rules_schema';
 import { getPaths } from './utils';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';

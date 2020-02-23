@@ -9,7 +9,7 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { isObject } from 'lodash/fp';
 import { checkTypeDependents } from './check_type_dependents';
-import { RulesSchema } from './base_rules_schema';
+import { RulesSchema } from './rules_schema';
 
 export const createRulesSchema = new t.Type<RulesSchema, RulesSchema, unknown>(
   'createRulesSchema',

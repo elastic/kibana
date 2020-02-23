@@ -33,7 +33,7 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
-import { rulesSchema } from '../schemas/response/base_rules_schema';
+import { rulesSchema } from '../schemas/response/rules_schema';
 import { exactCheck } from '../schemas/response/exact_check';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
@@ -382,15 +382,14 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
  * @param rule The rule to validate (as an object) since we don't know what it is.
  */
 export const validateRuleResponse = (rule: object): string[] => {
-  // Validate and only log warnings if the type is incorrect.
   const decoded = rulesSchema.decode(rule);
   const checked = exactCheck(rule, decoded);
   const left = (errors: t.Errors): string[] => {
     const formatted = formatErrors(errors);
     return formatted;
   };
-  // We don't return the right decoded _just yet_. Rather we just use
-  // this system for validation checks and return the regular transformed out.
+  // We don't return the right decoded at the moment. Rather we just use
+  // this system for validation checks and only return errors if we find errors.
   const right = (): string[] => {
     return [];
   };

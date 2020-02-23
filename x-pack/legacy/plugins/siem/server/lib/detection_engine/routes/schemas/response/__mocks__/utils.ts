@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
-import { RulesSchema } from '../base_rules_schema';
+import { RulesSchema } from '../rules_schema';
 
 interface Message<T> {
   errors: t.Errors;

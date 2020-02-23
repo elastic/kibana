@@ -13,7 +13,7 @@ import {
   RequiredRulesSchema,
   partialRulesSchema,
   requiredRulesSchema,
-} from './base_rules_schema';
+} from './rules_schema';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
