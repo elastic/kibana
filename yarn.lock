@@ -17013,11 +17013,6 @@ invert-kv@^2.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
 
-io-ts-types@^0.5.5:
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.5.5.tgz#31df3fc14a1295d48e36d164f8399f755f750dad"
-  integrity sha512-REkSSrgkfxFzDy32dsrPiQqGERO2o4KUtSox96B4ZKFSiB5mg0zl4cXl072TvROzcvuc0zGPlFzrRTYWaTcj/w==
-
 io-ts@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.0.5.tgz#e6e3db9df8b047f9cbd6b69e7d2ad3e6437a0b13"
@@ -20988,11 +20983,6 @@ monocle-ts@^1.0.0:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
   integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
-
-monocle-ts@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-2.1.0.tgz#5c1bbade7952b57e33f2179866467e87d9ed5977"
-  integrity sha512-YWH8TDcZSEeCaxp0ZjgccLChnaDvTiUHILpuI0DSZeASYSCgwdz+h6+uEG4QCwYreGsn1oI18ysrcUPv6xWK7w==
 
 monotone-convex-hull-2d@^1.0.1:
   version "1.0.1"
