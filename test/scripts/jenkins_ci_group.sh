@@ -2,4 +2,4 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-node scripts/jest
+node scripts/jest --maxWorkers 3
