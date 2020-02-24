@@ -18,16 +18,49 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
+import { Logger } from '../../logging';
+import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
+import { registerGetRoute } from './get';
+import { registerCreateRoute } from './create';
+import { registerDeleteRoute } from './delete';
+import { registerFindRoute } from './find';
+import { registerUpdateRoute } from './update';
+import { registerBulkGetRoute } from './bulk_get';
+import { registerBulkCreateRoute } from './bulk_create';
+import { registerBulkUpdateRoute } from './bulk_update';
+import { registerLogLegacyImportRoute } from './log_legacy_import';
+import { registerExportRoute } from './export';
+import { registerImportRoute } from './import';
+import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
 
-interface RegisterRouteOptions {
+export function registerRoutes({
+  http,
+  logger,
+  config,
+  importableExportableTypes,
+  migratorPromise,
+}: {
   http: InternalHttpServiceSetup;
+  logger: Logger;
+  config: SavedObjectConfig;
+  importableExportableTypes: string[];
   migratorPromise: Promise<IKibanaMigrator>;
-}
+}) {
+  const router = http.createRouter('/api/saved_objects/');
 
-export function registerRoutes({ http, migratorPromise }: RegisterRouteOptions) {
-  const router = http.createRouter('/api/saved_objects');
-
+  registerGetRoute(router);
+  registerCreateRoute(router);
+  registerDeleteRoute(router);
+  registerFindRoute(router);
+  registerUpdateRoute(router);
+  registerBulkGetRoute(router);
+  registerBulkCreateRoute(router);
+  registerBulkUpdateRoute(router);
+  registerLogLegacyImportRoute(router, logger);
+  registerExportRoute(router, config, importableExportableTypes);
+  registerImportRoute(router, config, importableExportableTypes);
+  registerResolveImportErrorsRoute(router, config, importableExportableTypes);
   registerMigrateRoute(router, migratorPromise);
 }

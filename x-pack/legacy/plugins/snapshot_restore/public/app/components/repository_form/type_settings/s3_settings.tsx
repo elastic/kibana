@@ -93,7 +93,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the AWS S3 client."
           />
         }
-        idAria="s3RepositoryClientDescription"
         fullWidth
       >
         <EuiFormRow
@@ -104,7 +103,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryClientDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
@@ -139,7 +137,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The name of the AWS S3 bucket to use for snapshots."
           />
         }
-        idAria="s3RepositoryBucketDescription"
         fullWidth
       >
         <EuiFormRow
@@ -150,7 +147,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryBucketDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
         >
@@ -185,7 +181,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The bucket path to the repository data."
           />
         }
-        idAria="s3RepositoryBasePathDescription"
         fullWidth
       >
         <EuiFormRow
@@ -196,7 +191,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryBasePathDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
@@ -231,13 +225,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
-        idAria="s3RepositoryCompressDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['s3RepositoryCompressDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
         >
@@ -277,7 +269,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
-        idAria="s3RepositoryChunkSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -288,7 +279,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -324,13 +314,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="Encrypts files on the server using AES256 algorithm."
           />
         }
-        idAria="s3RepositoryServerSideEncryptionDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['s3RepositoryServerSideEncryptionDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.serverSideEncryption)}
           error={settingErrors.serverSideEncryption}
         >
@@ -371,7 +359,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               to split the chunk into several parts and upload each in its own request."
           />
         }
-        idAria="s3RepositoryBufferSizeDescription"
         fullWidth
       >
         <EuiFormRow
@@ -382,7 +369,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryBufferSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
           error={settingErrors.bufferSize}
           helpText={textService.getSizeNotationHelpText()}
@@ -418,7 +404,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The canned ACL to add to new S3 buckets and objects."
           />
         }
-        idAria="s3RepositoryCannedAclDescription"
         fullWidth
       >
         <EuiFormRow
@@ -429,7 +414,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryCannedAclDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.cannedAcl)}
           error={settingErrors.cannedAcl}
         >
@@ -465,7 +449,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The storage class for new objects in the S3 repository."
           />
         }
-        idAria="s3RepositoryStorageClassDescription"
         fullWidth
       >
         <EuiFormRow
@@ -476,7 +459,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryStorageClassDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.storageClass)}
           error={settingErrors.storageClass}
         >
@@ -512,7 +494,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The rate for creating snapshots for each node."
           />
         }
-        idAria="s3RepositoryMaxSnapshotBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -523,7 +504,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -559,7 +539,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="The snapshot restore rate for each node."
           />
         }
-        idAria="s3RepositoryMaxRestoreBytesDescription"
         fullWidth
       >
         <EuiFormRow
@@ -570,7 +549,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['s3RepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
           helpText={textService.getSizeNotationHelpText()}
@@ -606,13 +584,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
-        idAria="s3RepositoryReadonlyDescription"
         fullWidth
       >
         <EuiFormRow
           hasEmptyLabelSpace={true}
           fullWidth
-          describedByIds={['s3RepositoryReadonlyDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >

@@ -12,13 +12,11 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
 
-export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, xpackMainPlugin) {
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
-  const PolledDataChecker = polledDataCheckerFactory(callWithRequest);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(callWithRequest);
+export function estimateBucketSpanFactory(callAsCurrentUser, callAsInternalUser, xpackMainPlugin) {
+  const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
 
   class BucketSpanEstimator {
     constructor(
@@ -245,7 +243,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
 
   const getFieldCardinality = function(index, field) {
     return new Promise((resolve, reject) => {
-      callWithRequest('search', {
+      callAsCurrentUser('search', {
         index,
         size: 0,
         body: {
@@ -277,7 +275,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       getFieldCardinality(index, field)
         .then(value => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
-          callWithRequest('search', {
+          callAsCurrentUser('search', {
             index,
             size: 0,
             body: {
@@ -337,7 +335,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       function getBucketSpanEstimation() {
         // fetch the `search.max_buckets` cluster setting so we're able to
         // adjust aggregations to not exceed that limit.
-        callWithInternalUser('cluster.getSettings', {
+        callAsInternalUser('cluster.getSettings', {
           flatSettings: true,
           includeDefaults: true,
           filterPath: '*.*max_buckets',
@@ -402,7 +400,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
             'cluster:monitor/xpack/ml/datafeeds/stats/get',
           ],
         };
-        callWithRequest('ml.privilegeCheck', { body })
+        callAsCurrentUser('ml.privilegeCheck', { body })
           .then(resp => {
             if (
               resp.cluster['cluster:monitor/xpack/ml/job/get'] &&

@@ -8,11 +8,7 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -30,7 +26,6 @@ import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { InputsModelId } from '../../store/inputs/constants';
 import { InputsRange } from '../../store/inputs/model';
 import { AlertsByCategory } from '../overview/alerts_by_category';
 import { useSignalInfo } from './components/signals_info';
@@ -46,21 +41,6 @@ import { DetectionEngineHeaderPage } from './components/detection_engine_header_
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { DetectionEngineTab } from './types';
-
-interface ReduxProps {
-  filters: Filter[];
-  query: Query;
-}
-
-export interface DispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
 
 const detectionsTabs: Record<string, NavTab> = {
   [DetectionEngineTab.signals]: {
@@ -79,7 +59,7 @@ const detectionsTabs: Record<string, NavTab> = {
   },
 };
 
-const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> = ({
+const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -234,7 +214,8 @@ const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
 };
 
-export const DetectionEnginePage = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(React.memo(DetectionEnginePageComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const DetectionEnginePage = connector(React.memo(DetectionEnginePageComponent));

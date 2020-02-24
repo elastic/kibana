@@ -32,9 +32,13 @@ import { LegacyServiceDiscoverPlugins } from '../legacy';
 import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
-import { SavedObjectsConfigType } from './saved_objects_config';
-import { InternalHttpServiceSetup, KibanaRequest } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType } from './types';
+import {
+  SavedObjectsConfigType,
+  SavedObjectsMigrationConfigType,
+  SavedObjectConfig,
+} from './saved_objects_config';
+import { KibanaRequest, InternalHttpServiceSetup } from '../http';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -218,6 +222,7 @@ export class SavedObjectsService
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
+  private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
@@ -241,9 +246,26 @@ export class SavedObjectsService
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
+    const importableExportableTypes = getImportableAndExportableTypes(
+      setupDeps.legacyPlugins.uiExports
+    );
+
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('savedObjects')
+      .pipe(first())
+      .toPromise();
+    const savedObjectsMigrationConfig = await this.coreContext.configService
+      .atPath<SavedObjectsMigrationConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+
     registerRoutes({
       http: setupDeps.http,
+      logger: this.logger,
+      config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      importableExportableTypes,
     });
 
     return {
@@ -270,7 +292,7 @@ export class SavedObjectsService
     core: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
-    if (!this.setupDeps) {
+    if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
 
@@ -280,12 +302,8 @@ export class SavedObjectsService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+    const migrator = this.createMigrator(kibanaConfig, this.config.migration, migrationsRetryDelay);
 
     this.migrator$.next(migrator);
 
@@ -300,7 +318,7 @@ export class SavedObjectsService
      * So, when the `migrations.skip` is true, we skip migrations altogether.
      */
     const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+    const skipMigrations = cliArgs.optimize || this.config.migration.skip;
 
     if (skipMigrations) {
       this.logger.warn(
@@ -365,7 +383,7 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsConfigType,
+    savedObjectsConfig: SavedObjectsMigrationConfigType,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
@@ -384,4 +402,17 @@ export class SavedObjectsService
       ),
     });
   }
+}
+
+function getImportableAndExportableTypes({
+  savedObjectMappings = [],
+  savedObjectsManagement = {},
+}: SavedObjectsLegacyUiExports) {
+  const visibleTypes = savedObjectMappings.reduce(
+    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
+    [] as string[]
+  );
+  return visibleTypes.filter(
+    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
+  );
 }

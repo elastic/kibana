@@ -17,7 +17,8 @@ import React, {
   useState
 } from 'react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
