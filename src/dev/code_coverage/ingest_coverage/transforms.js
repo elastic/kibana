@@ -25,29 +25,6 @@ const maybeTotal = coveredFilePath => coveredFilePath === 'total' ?
 
 export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
 
-const dropFront = coveredFilePath => trimLeftFrom('kibana', coveredFilePath);
-const buildFinalUrl = (urlBase, BUILD_ID, ts) => trimmed => {
-  const result = `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`;
-  return result;
-}
-const assignAndReturn = obj => x => {
-  obj.coveredFilePath = x;
-  return obj;
-};
-export const staticSite = urlBase => obj => {
-  const { BUILD_ID, coveredFilePath, coverageType } = obj;
-  console.log(`\n### coverageType: \n\t${coverageType}`);
-  const ts = obj['@timestamp'];
-
-  const buildTrimmed = buildFinalUrl(urlBase, BUILD_ID, ts);
-  const assignObj = assignAndReturn(obj);
-
-  return maybeTotal(coveredFilePath)
-    .map(dropFront)
-    .map(buildTrimmed)
-    .fold(assignObj, assignObj);
-
-};
 export const statsAndCoveredFilePath = (...xs) => {
   const [coveredFilePath] = xs[0][1];
   const [stats] = xs[0];
@@ -56,6 +33,7 @@ export const statsAndCoveredFilePath = (...xs) => {
     ...stats,
   };
 };
+
 export const addCoverageSummaryPath = coverageSummaryPath => obj => ({
   coverageSummaryPath: trimLeftFrom('target', coverageSummaryPath),
   ...obj,
@@ -87,24 +65,48 @@ export const distro = obj => {
   };
 };
 
+const dropFront = coveredFilePath => trimLeftFrom('kibana', coveredFilePath);
+const buildFinalUrl = (urlBase, BUILD_ID, ts) => trimmed => {
+  const result = `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`;
+  return result;
+}
+const assignAndReturn = obj => x => {
+  obj.coveredFilePath = x;
+  return obj;
+};
+
+export const staticSite = urlBase => obj => {
+  const { BUILD_ID, coveredFilePath, testRunnerType } = obj;
+  console.log(`\n### testRunnerType: \n\t${testRunnerType}`);
+  const ts = obj['@timestamp'];
+
+  const buildTrimmed = buildFinalUrl(urlBase, BUILD_ID, ts);
+  const assignObj = assignAndReturn(obj);
+
+  return maybeTotal(coveredFilePath)
+    .map(dropFront)
+    .map(buildTrimmed)
+    .fold(assignObj, assignObj);
+
+};
+
 export const testRunner = obj => {
-  const { coverageSummaryPath, coveredFilePath } = obj;
-  console.log(`\n### coveredFilePath: \n\t${coveredFilePath}`);
+  const { coverageSummaryPath } = obj;
 
-  let coverageType = 'other';
+  let testRunnerType = 'other';
 
-  const upperCoverageType = x => {
+  const upperTestRunnerType = x => {
     if (coverageSummaryPath.includes(x)) {
-      coverageType = x.toUpperCase();
+      testRunnerType = x.toUpperCase();
       return;
     }
   };
 
   ['mocha', 'jest', 'functional']
-    .forEach(upperCoverageType);
+    .forEach(upperTestRunnerType);
 
   return {
-    coverageType,
+    testRunnerType,
     ...obj,
   };
 };
