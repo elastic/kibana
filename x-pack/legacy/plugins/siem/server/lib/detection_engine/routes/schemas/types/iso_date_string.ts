@@ -9,9 +9,8 @@ import * as t from 'io-ts';
 export type IsoDateStringC = t.Type<string, string, unknown>;
 
 /**
- * Types the risk score as:
- *   - Natural Number (positive integer and not a float),
- *   - Between the values [0 and 100] inclusive.
+ * Types the IsoDateString as:
+ *   - A string that is an ISOString
  */
 export const IsoDateString: IsoDateStringC = new t.Type<string, string, unknown>(
   'IsoDateString',

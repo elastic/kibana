@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 export type VersionC = t.Type<number, number, unknown>;
 
 /**
- * Types the version are:
+ * Types the version as:
  *   - Natural Number (positive integer and not a float)
  *   - Greater than or equal to 1
  */
