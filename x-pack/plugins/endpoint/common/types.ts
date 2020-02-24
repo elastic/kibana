@@ -150,6 +150,11 @@ export interface AlertDataWrapper {
 
 export type AlertHits = AlertDataWrapper[];
 
+export enum Direction {
+  asc = 'asc',
+  desc = 'desc',
+}
+
 export interface LegacyEndpointEvent {
   '@timestamp': Date;
   endgame: {

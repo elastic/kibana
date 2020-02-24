@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Direction } from '../../../../../../legacy/plugins/siem/public/graphql/types';
 import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Direction } from '../../../../common/types';
 
 /**
  * Request params for alert queries.

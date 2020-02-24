@@ -7,7 +7,6 @@ import { get } from 'lodash';
 import { encode, decode, RisonValue } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
-import { Direction } from '../../../../../../legacy/plugins/siem/public/graphql/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Filter, TimeRange, esQuery, esKuery } from '../../../../../../../src/plugins/data/server';
 import {
@@ -16,6 +15,7 @@ import {
   AlertDataWrapper,
   AlertHits,
   AlertResultList,
+  Direction,
   ESTotal,
 } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
