@@ -7,6 +7,8 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { RulesSchema } from '../rules_schema';
+import { RulesBulkSchema } from '../rules_bulk_schema';
+import { ErrorSchema } from '../error_schema';
 
 interface Message<T> {
   errors: t.Errors;
@@ -27,6 +29,7 @@ const onRight = <T>(schema: T): Message<T> => {
 export const foldLeftRight = fold(onLeft, onRight);
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
+
 export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
@@ -57,4 +60,16 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
+});
+
+export const getRulesBulkPayload = (): RulesBulkSchema => [getBaseResponsePayload()];
+
+export const getErrorPayload = (
+  id: string = '819eded6-e9c8-445b-a647-519aea39e063'
+): ErrorSchema => ({
+  id,
+  error: {
+    status_code: 404,
+    message: 'id: "819eded6-e9c8-445b-a647-519aea39e063" not found',
+  },
 });

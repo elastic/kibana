@@ -102,7 +102,6 @@ export const createBulkErrorObject = ({
 
 export interface ImportRegular {
   rule_id: string;
-  id: string;
   status_code: number;
   message?: string;
 }

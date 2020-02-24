@@ -10,13 +10,18 @@ import * as t from 'io-ts';
 import { rule_id, status_code, message } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const errorSchema = t.exact(
+// We use id: t.string intentionally and _never_ the id from global schemas as
+// sometimes echo back out the id that the user gave us and it is not guaranteed
+// to be a UUID but rather just a string
+const partial = t.exact(t.partial({ id: t.string, rule_id }));
+const required = t.exact(
   t.type({
-    rule_id,
     error: t.type({
       status_code,
       message,
     }),
   })
 );
+
+export const errorSchema = t.intersection([partial, required]);
 export type ErrorSchema = t.TypeOf<typeof errorSchema>;
