@@ -37,6 +37,7 @@ export default function({ getService, getPageObjects }) {
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
+      await PageObjects.common.navigateToApp('discover');
     });
 
     after(function unloadMakelogs() {

@@ -188,7 +188,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async get(url: string, insertTimestamp: boolean = false) {
-      if (insertTimestamp || url.includes('discover')) {
+      if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           (parsed.query as any)._t = Date.now();
           return void 0;

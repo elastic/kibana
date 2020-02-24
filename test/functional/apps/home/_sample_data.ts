@@ -34,6 +34,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('smoke');
 
     before(async () => {
+      await PageObjects.common.navigateToApp('home');
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
