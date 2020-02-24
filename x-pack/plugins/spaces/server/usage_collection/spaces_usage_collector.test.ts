@@ -74,7 +74,7 @@ describe('with a basic license', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
@@ -122,7 +122,7 @@ describe('with no license', () => {
   beforeAll(async () => {
     const { features, licensing, usageCollecion } = setup({ license: { isAvailable: false } });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });
@@ -153,7 +153,7 @@ describe('with platinum license', () => {
       license: { isAvailable: true, type: 'platinum' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndexConfig: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
     });

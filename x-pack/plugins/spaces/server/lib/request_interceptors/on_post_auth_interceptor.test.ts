@@ -205,7 +205,6 @@ describe('onPostAuthInterceptor', () => {
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      getLegacyAPI: () => legacyAPI,
       http: (http as unknown) as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,

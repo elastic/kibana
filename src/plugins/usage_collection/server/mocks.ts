@@ -17,13 +17,12 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingServiceMock } from '../../../core/server/mocks';
 import { UsageCollectionSetup } from './plugin';
 import { CollectorSet } from './collector';
 
 const createSetupContract = () => {
-  const setupContract = {
+  return {
     ...new CollectorSet({
       logger: loggingServiceMock.createLogger(),
       maximumWaitTimeForAllCollectorsInS: 1,
@@ -32,8 +31,6 @@ const createSetupContract = () => {
       UsageCollectionSetup['registerLegacySavedObjects']
     >,
   } as UsageCollectionSetup;
-
-  return setupContract;
 };
 
 export const usageCollectionPluginMock = {

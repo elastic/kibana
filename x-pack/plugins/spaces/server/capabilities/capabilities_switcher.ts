@@ -23,16 +23,14 @@ export function setupCapabilitiesSwitcher(
     }
 
     try {
-      const [activeSpace, startServices] = await Promise.all([
+      const [activeSpace, [, { features }]] = await Promise.all([
         spacesService.getActiveSpace(request),
         core.getStartServices(),
       ]);
 
-      const [, pluginsStart] = startServices;
+      const registeredFeatures = features.getFeatures();
 
-      const features = pluginsStart.features.getFeatures();
-
-      return toggleCapabilities(features, capabilities, activeSpace);
+      return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
     } catch (e) {
       logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;

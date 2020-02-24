@@ -115,7 +115,7 @@ export interface UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
 }
@@ -135,7 +135,7 @@ export function getSpacesUsageCollector(
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const kibanaIndex = (await deps.kibanaIndexConfig.pipe(take(1)).toPromise()).kibana.index;
+      const kibanaIndex = (await deps.kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
       const usageStats = await getSpacesUsage(callCluster, kibanaIndex, deps.features, available);
 
@@ -165,12 +165,9 @@ export function getSpacesUsageCollector(
 }
 
 export function registerSpacesUsageCollector(
-  usageCollection: UsageCollectionSetup | undefined,
+  usageCollection: UsageCollectionSetup,
   deps: CollectorDeps
 ) {
-  if (!usageCollection) {
-    return;
-  }
   const collector = getSpacesUsageCollector(usageCollection, deps);
   usageCollection.registerCollector(collector);
 }

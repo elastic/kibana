@@ -67,7 +67,7 @@ export class Plugin {
 
   private readonly config$: Observable<ConfigType>;
 
-  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
 
@@ -91,7 +91,7 @@ export class Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
-    this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
+    this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
   }
 
@@ -141,11 +141,13 @@ export class Plugin {
 
     setupCapabilities(core, spacesService, this.log);
 
-    registerSpacesUsageCollector(plugins.usageCollection, {
-      kibanaIndexConfig: this.kibanaIndexConfig,
-      features: plugins.features,
-      licensing: plugins.licensing,
-    });
+    if (plugins.usageCollection) {
+      registerSpacesUsageCollector(plugins.usageCollection, {
+        kibanaIndexConfig$: this.kibanaIndexConfig$,
+        features: plugins.features,
+        licensing: plugins.licensing,
+      });
+    }
 
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
