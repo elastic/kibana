@@ -25,6 +25,8 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
     // Using a wrapping <div> element because shallow() would fail

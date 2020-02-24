@@ -11,7 +11,7 @@ Return type of the Saved Objects `find()` method.
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> 
+export interface SavedObjectsFindResponse<T = unknown> 
 ```
 
 ## Properties
