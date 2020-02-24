@@ -5,8 +5,8 @@
  */
 
 import { RouteDeps } from '.';
-import { CASES_API_BASE_URL } from '../../constants';
-import { NewActionSchema } from './schema';
+import { CASES_API_BASE_URL, SUPPORTED_ACTIONS } from '../../constants';
+import { NewActionSchema, FindActionsSchema } from './schema';
 import { CaseRequestHandler, NewActionType } from './types';
 import { createRequestHandler } from './utils';
 
@@ -22,6 +22,31 @@ const createNewActionHandler: CaseRequestHandler = async (service, context, requ
   }
 };
 
+const getFilter = (actions: string[]): string => {
+  if (!actions || actions.length === 0) {
+    return '';
+  }
+
+  const operator = 'OR';
+
+  const concatenatedActionsWithOperator = actions.reduce(
+    (prev, curr) => `${prev} ${operator} ${curr}`
+  );
+
+  return `action.attributes.actionTypeId: (${concatenatedActionsWithOperator})`;
+};
+
+const findActionsHandler: CaseRequestHandler = async (service, context, request, response) => {
+  const actionsClient = await context.actions.getActionsClient();
+
+  try {
+    const results = await actionsClient.find({ options: { filter: getFilter(SUPPORTED_ACTIONS) } });
+    return response.ok({ body: { ...results } });
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createNewAction = ({ caseService, router }: RouteDeps) => {
   router.post(
     {
@@ -31,5 +56,17 @@ export const createNewAction = ({ caseService, router }: RouteDeps) => {
       },
     },
     createRequestHandler(caseService, createNewActionHandler)
+  );
+};
+
+export const findActions = ({ caseService, router }: RouteDeps) => {
+  router.get(
+    {
+      path: `${CASES_API_BASE_URL}/configure/action/_find`,
+      validate: {
+        query: FindActionsSchema,
+      },
+    },
+    createRequestHandler(caseService, findActionsHandler)
   );
 };
