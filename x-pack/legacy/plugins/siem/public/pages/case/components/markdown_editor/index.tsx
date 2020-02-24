@@ -55,71 +55,81 @@ const MarkdownContainer = styled(EuiPanel)`
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
   fieldName: 'comment' | 'description';
+  fieldPlaceholder?: string;
   footerContentRight?: React.ReactNode;
   formHook?: boolean;
   initialContent: string;
   onChange: (description: string) => void;
-}>(({ fieldName, footerContentRight, formHook = false, initialContent, onChange }) => {
-  const [content, setContent] = useState(initialContent);
-  const tabs = [
-    {
-      id: fieldName,
-      name: i18n.MARKDOWN,
-      content: formHook ? (
-        <CommonUseField
-          path={fieldName}
-          onChange={e => {
-            setContent(e as string);
-            onChange(e as string);
-          }}
-          componentProps={{
-            idAria: `case${fieldName}`,
-            'data-test-subj': `case${fieldName}`,
-            spellcheck: false,
-            placeholder: 'Add a placeholder...',
-          }}
+}>(
+  ({
+    fieldName,
+    fieldPlaceholder,
+    footerContentRight,
+    formHook = false,
+    initialContent,
+    onChange,
+  }) => {
+    const [content, setContent] = useState(initialContent);
+    const tabs = [
+      {
+        id: fieldName,
+        name: i18n.MARKDOWN,
+        content: formHook ? (
+          <CommonUseField
+            path={fieldName}
+            onChange={e => {
+              setContent(e as string);
+              onChange(e as string);
+            }}
+            componentProps={{
+              idAria: `case${fieldName}`,
+              'data-test-subj': `case${fieldName}`,
+              spellcheck: false,
+              euiFieldProps: { placeholder: fieldPlaceholder ? fieldPlaceholder : '' },
+            }}
+          />
+        ) : (
+          <TextArea
+            onChange={e => {
+              setContent(e.target.value);
+              onChange(e.target.value);
+            }}
+            fullWidth={true}
+            aria-label={`case${fieldName}`}
+            spellCheck={false}
+            value={content}
+          />
+        ),
+      },
+      {
+        id: 'preview',
+        name: i18n.PREVIEW,
+        content: (
+          <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
+            <Markdown raw={content} />
+          </MarkdownContainer>
+        ),
+      },
+    ];
+    return (
+      <Container>
+        <Tabs
+          data-test-subj={`new-${fieldName}-tabs`}
+          size="s"
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
         />
-      ) : (
-        <TextArea
-          onChange={e => {
-            setContent(e.target.value);
-            onChange(e.target.value);
-          }}
-          fullWidth={true}
-          aria-label={`case${fieldName}`}
-          spellCheck={false}
-          value={content}
-        />
-      ),
-    },
-    {
-      id: 'preview',
-      name: i18n.PREVIEW,
-      content: (
-        <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
-          <Markdown raw={content} />
-        </MarkdownContainer>
-      ),
-    },
-  ];
-  return (
-    <Container>
-      <Tabs
-        data-test-subj={`new-${fieldName}-tabs`}
-        size="s"
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-      />
-      <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiLink href="https://www.markdownguide.org/cheat-sheet/" external target="_blank">
-            {i18n.MARKDOWN_SYNTAX_HELP}
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{footerContentRight && footerContentRight}</EuiFlexItem>
-      </Footer>
-    </Container>
-  );
-});
+        <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiLink href="https://www.markdownguide.org/cheat-sheet/" external target="_blank">
+              {i18n.MARKDOWN_SYNTAX_HELP}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{footerContentRight && footerContentRight}</EuiFlexItem>
+        </Footer>
+      </Container>
+    );
+  }
+);
 
 MarkdownEditor.displayName = 'MarkdownEditor';

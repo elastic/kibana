@@ -108,7 +108,6 @@ const renderUserActionsUI = (userActions: UserActionItem[]) => {
   ));
 };
 
-// export const UserActionTree = React.memo(({ userActions }: UserActionTreeProps) => {
 export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserActionTreeProps) => {
   const [data, setData] = useState(initialData);
   const [editCommentId, setEditCommentId] = useState('');

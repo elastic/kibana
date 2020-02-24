@@ -74,15 +74,15 @@ export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.case.caseView.pageBad
 
 export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.caseView.pageBadgeTooltip', {
   defaultMessage:
-    'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
+    'Cases is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
 });
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
-  defaultMessage: 'Case Workflow Management within the Elastic SIEM',
+  defaultMessage: 'Cases within the Elastic SIEM',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
-  defaultMessage: 'Case Workflows',
+  defaultMessage: 'Cases',
 });
 
 export const PREVIEW = i18n.translate('xpack.siem.case.caseView.preview', {
