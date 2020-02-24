@@ -51,6 +51,7 @@ export const signalRulesAlertType = ({
         }),
       },
     ],
+    defaultActionGroupId: 'default',
     validate: {
       params: schema.object({
         description: schema.string(),
