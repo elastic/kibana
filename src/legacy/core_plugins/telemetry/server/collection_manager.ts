@@ -169,8 +169,10 @@ export class TelemetryCollectionManager {
       return;
     }
 
-    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig);
-    const licenses = await collection.licenseGetter(clustersDetails, statsCollectionConfig);
+    const [stats, licenses] = await Promise.all([
+      collection.statsGetter(clustersDetails, statsCollectionConfig),
+      collection.licenseGetter(clustersDetails, statsCollectionConfig),
+    ]);
 
     return stats.map(stat => {
       const license = licenses[stat.cluster_uuid];
