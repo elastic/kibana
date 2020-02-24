@@ -6,12 +6,7 @@
 
 import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  SavedObjectsLegacyService,
-  IRouter,
-  CallAPIOptions,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { IRouter, CallAPIOptions, SavedObjectsClientContract } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 
@@ -36,7 +31,6 @@ export interface UptimeCoreSetup {
 
 export interface UptimeCorePlugins {
   features: PluginSetupContract;
-  savedObjects: SavedObjectsLegacyService;
   usageCollection: UsageCollectionSetup;
 }
 

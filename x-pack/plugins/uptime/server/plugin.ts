@@ -8,13 +8,10 @@ import { PluginInitializerContext, CoreStart, CoreSetup } from '../../../../src/
 import { initServerWithKibana } from './kibana.index';
 import { UptimeCorePlugins } from './lib/adapters';
 
-export function plugin(_initializerContext: PluginInitializerContext) {
-  return new Plugin();
-}
-
 export class Plugin {
+  constructor(_initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
     initServerWithKibana({ route: core.http.createRouter() }, plugins);
   }
-  public start(core: CoreStart, plugins: any) {}
+  public start(_core: CoreStart, _plugins: any) {}
 }

@@ -8,4 +8,5 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 
 export { initServerWithKibana, KibanaServer } from './kibana.index';
-export const plugin = (_initializerContext: PluginInitializerContext) => new Plugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);
