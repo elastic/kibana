@@ -5,19 +5,23 @@
  */
 
 import { initRoutes } from './routes/file_upload';
+import { setElasticsearchClientServices, setInternalRepository } from './kibana_server_services';
 import { registerFileUploadUsageCollector } from './telemetry';
 
 export class FileUploadPlugin {
-  setup(core, plugins, __LEGACY) {
-    const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
-    const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
-    const router = core.http.createRouter();
+  constructor() {
+    this.router = null;
+  }
 
-    initRoutes(router, elasticsearchPlugin, getSavedObjectsRepository);
+  setup(core) {
+    setElasticsearchClientServices(core.elasticsearch);
+    this.router = core.http.createRouter();
+  }
 
-    registerFileUploadUsageCollector(plugins.usageCollection, {
-      elasticsearchPlugin,
-      getSavedObjectsRepository,
-    });
+  start(core, plugins) {
+    initRoutes(this.router, core.savedObjects.getSavedObjectsRepository);
+    setInternalRepository(core.savedObjects.createInternalRepository);
+
+    registerFileUploadUsageCollector(plugins.usageCollection);
   }
 }
