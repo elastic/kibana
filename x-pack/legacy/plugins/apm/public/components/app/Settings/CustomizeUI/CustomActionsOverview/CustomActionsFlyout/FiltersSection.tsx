@@ -74,6 +74,8 @@ export const FiltersSection = ({
         )}
       </EuiText>
 
+      <EuiSpacer size="s" />
+
       <Filters filters={filters} onChange={onChange} />
 
       <EuiSpacer size="xs" />

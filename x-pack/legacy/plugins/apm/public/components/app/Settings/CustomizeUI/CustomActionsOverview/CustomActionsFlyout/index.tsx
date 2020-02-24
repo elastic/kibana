@@ -114,7 +114,7 @@ export const CustomActionsFlyout = ({
                   'xpack.apm.settings.customizeUI.customActions.flyout.label',
                   {
                     defaultMessage:
-                      'Actions will be shown in the context of trace and error details througout the APM app. You can specify an unlimited amount of links, but we will opt to only show the first 3 alphabetically.'
+                      'Actions will be available in the context of transaction details throughout the APM app. You can create an unlimited number of actions and use the filter options to scope them to only appear for specific services. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. TODO: Learn more about it in the docs.'
                   }
                 )}
               </p>

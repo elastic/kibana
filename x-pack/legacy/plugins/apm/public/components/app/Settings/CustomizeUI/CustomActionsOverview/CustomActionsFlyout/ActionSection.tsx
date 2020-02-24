@@ -25,7 +25,7 @@ interface ActionField {
   label: string;
   helpText: string;
   placeholder: string;
-  register: ValidationOptions;
+  validations: ValidationOptions;
 }
 
 const actionFields: ActionField[] = [
@@ -33,9 +33,9 @@ const actionFields: ActionField[] = [
     name: 'label',
     label: 'Label',
     helpText:
-      'Keep it as short as possible. This is the label shown in the actions context menu.',
+      'This is the label shown in the actions context menu. Keep it as short as possible.',
     placeholder: 'e.g. Support tickets',
-    register: { required: true }
+    validations: { required: true }
   },
   {
     name: 'url',
@@ -43,7 +43,7 @@ const actionFields: ActionField[] = [
     helpText:
       'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
     placeholder: 'e.g. https://www.elastic.co/',
-    register: { required: true }
+    validations: { required: true }
   }
 ];
 
@@ -85,7 +85,7 @@ export const ActionSection = ({ register, errors }: ActionSectionProps) => {
             }
           >
             <EuiFieldText
-              inputRef={register(field.register)}
+              inputRef={register(field.validations)}
               placeholder={field.placeholder}
               name={field.name}
               fullWidth
