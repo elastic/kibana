@@ -24,7 +24,6 @@
  * directly where they are needed.
  */
 
-export { State } from 'ui/state_management/state';
 export { PersistedState } from 'ui/persisted_state';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
