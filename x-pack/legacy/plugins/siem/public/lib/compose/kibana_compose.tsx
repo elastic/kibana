@@ -14,7 +14,7 @@ export function compose(core: CoreStart): AppFrontendLibs {
   const basePath = core.http.basePath.get();
 
   const apolloClient = new ApolloClient({
-    connectToDevTools: true,
+    connectToDevTools: process.env.NODE_ENV !== 'production',
     cache: new InMemoryCache({
       typePolicies: {
         TimelineItem: {
