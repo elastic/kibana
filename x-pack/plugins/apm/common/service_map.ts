@@ -21,3 +21,12 @@ export interface Connection {
   source: ConnectionNode;
   destination: ConnectionNode;
 }
+
+export interface ServiceNodeMetrics {
+  numInstances: number;
+  avgMemoryUsage: number | null;
+  avgCpuUsage: number | null;
+  avgTransactionDuration: number | null;
+  avgRequestsPerMinute: number | null;
+  avgErrorsPerMinute: number | null;
+}
