@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
-import { convertToGeoJson } from './convert_to_geojson';
+import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
   getDefaultDynamicProperties,
@@ -175,76 +175,110 @@ export class ESGeoGridSource extends AbstractESAggSource {
         bucketsPerGrid++;
       }
     });
-    const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
-    const aggs = {
-      compositeSplit: {
-        composite: {
-          size: gridsPerRequest,
-          sources: [
-            {
-              gridSplit: {
-                geotile_grid: {
-                  field: this._descriptor.geoField,
-                  precision: searchFilters.geogridPrecision,
-                },
-              },
-            },
-          ],
-        },
-        aggs: {
-          gridCentroid: {
-            geo_centroid: {
-              field: this._descriptor.geoField,
-            },
-          },
-          ...this.getValueAggsDsl(indexPattern),
-        },
-      },
-    };
 
     const features = [];
-    let requestCount = 0;
-    let afterKey = null;
-    while (true) {
-      if (!isRequestStillActive()) {
-        // Stop paging through results if request is obsolete
-        throw new DataRequestAbortError();
-      }
+    // Do not use composite aggregation when there are no terms sub-aggregations
+    // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
+    if (bucketsPerGrid === 1) {
+      searchSource.setField('aggs', {
+        gridSplit: {
+          geotile_grid: {
+            field: this._descriptor.geoField,
+            precision: searchFilters.geogridPrecision,
+          },
+          aggs: {
+            gridCentroid: {
+              geo_centroid: {
+                field: this._descriptor.geoField,
+              },
+            },
+            ...this.getValueAggsDsl(),
+          },
+        },
+      });
 
-      requestCount++;
-
-      // circuit breaker to ensure reasonable number of requests
-      if (requestCount > 5) {
-        throw new Error(
-          i18n.translate('xpack.maps.source.esGrid.compositePaginationErrorMessage', {
-            defaultMessage: `{layerName} is causing too many requests. Reduce "Grid resolution" and/or reduce the number of top term "Metrics".`,
-            values: { layerName },
-          })
-        );
-      }
-
-      if (afterKey) {
-        aggs.compositeSplit.composite.after = afterKey;
-      }
-      searchSource.setField('aggs', aggs);
-      const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
       const esResponse = await this._runEsQuery({
-        requestId,
-        requestName: `${layerName} (${requestCount})`,
+        requestId: this.getId(),
+        requestName: layerName,
         searchSource,
         registerCancelCallback,
         requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-          defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
-          values: { requestId },
+          defaultMessage: 'Elasticsearch geo grid aggregation request',
         }),
       });
 
-      features.push(...convertToGeoJson(esResponse, this._descriptor.requestType));
+      features.push(...convertRegularRespToGeoJson(esResponse, this._descriptor.requestType));
+    } else {
+      const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
+      const aggs = {
+        compositeSplit: {
+          composite: {
+            size: gridsPerRequest,
+            sources: [
+              {
+                gridSplit: {
+                  geotile_grid: {
+                    field: this._descriptor.geoField,
+                    precision: searchFilters.geogridPrecision,
+                  },
+                },
+              },
+            ],
+          },
+          aggs: {
+            gridCentroid: {
+              geo_centroid: {
+                field: this._descriptor.geoField,
+              },
+            },
+            ...this.getValueAggsDsl(indexPattern),
+          },
+        },
+      };
 
-      afterKey = esResponse.aggregations.compositeSplit.after_key;
-      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
-        // Finished because request did not get full resultset back
-        break;
+      let requestCount = 0;
+      let afterKey = null;
+      while (true) {
+        if (!isRequestStillActive()) {
+          // Stop paging through results if request is obsolete
+          throw new DataRequestAbortError();
+        }
+
+        requestCount++;
+
+        // circuit breaker to ensure reasonable number of requests
+        if (requestCount > 5) {
+          throw new Error(
+            i18n.translate('xpack.maps.source.esGrid.compositePaginationErrorMessage', {
+              defaultMessage: `{layerName} is causing too many requests. Reduce "Grid resolution" and/or reduce the number of top term "Metrics".`,
+              values: { layerName },
+            })
+          );
+        }
+
+        if (afterKey) {
+          aggs.compositeSplit.composite.after = afterKey;
+        }
+        searchSource.setField('aggs', aggs);
+        const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
+        const esResponse = await this._runEsQuery({
+          requestId,
+          requestName: `${layerName} (${requestCount})`,
+          searchSource,
+          registerCancelCallback,
+          requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+            defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
+            values: { requestId },
+          }),
+        });
+
+        features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
+
+        afterKey = esResponse.aggregations.compositeSplit.after_key;
+        if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+          // Finished because request did not get full resultset back
+          break;
+        }
       }
     }
 

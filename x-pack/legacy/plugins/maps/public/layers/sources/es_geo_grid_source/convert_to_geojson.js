@@ -11,13 +11,39 @@ import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
 
-export function convertToGeoJson(esResponse, renderAs) {
+export function convertCompositeRespToGeoJson(esResponse, renderAs) {
+  return convertToGeoJson(
+    esResponse,
+    renderAs,
+    esResponse => {
+      return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
+    },
+    gridBucket => {
+      return gridBucket.key.gridSplit;
+    }
+  );
+}
+
+export function convertRegularRespToGeoJson(esResponse, renderAs) {
+  return convertToGeoJson(
+    esResponse,
+    renderAs,
+    esResponse => {
+      return _.get(esResponse, 'aggregations.gridSplit.buckets', []);
+    },
+    gridBucket => {
+      return gridBucket.key;
+    }
+  );
+}
+
+function convertToGeoJson(esResponse, renderAs, pluckGridBuckets, pluckGridKey) {
   const features = [];
 
-  const gridBuckets = _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
+  const gridBuckets = pluckGridBuckets(esResponse);
   for (let i = 0; i < gridBuckets.length; i++) {
     const gridBucket = gridBuckets[i];
-    const gridKey = gridBucket.key.gridSplit;
+    const gridKey = pluckGridKey(gridBucket);
     features.push({
       type: 'Feature',
       geometry: rowToGeometry({
