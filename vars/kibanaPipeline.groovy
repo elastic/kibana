@@ -341,7 +341,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
         // retryable("kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
-          def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
+          def filesString = testSuite.files.collect { "--include-file '${it}'" }.join(' ')
 
           iteration++
 
@@ -355,7 +355,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
                   --config '${testSuite.config}' \
                   --debug \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-                  ${tagString}
+                  ${filesString}
               """, "OSS tests: ${testSuite.config}"
             )
             testSuite.success = true
@@ -404,7 +404,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
         // retryable("xpack-kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
-          def tagString = testSuite.tags.collect { "--include-tag '${it}'" }.join(' ')
+          def filesString = testSuite.files.collect { "--include-file '${it}'" }.join(' ')
 
           iteration++
 
@@ -418,7 +418,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
                   --config '${testSuite.config}' \
                   --debug \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-                  ${tagString}
+                  ${filesString}
               """, "X-Pack tests: ${testSuite.config}" // TODO add --bail back?
             )
             testSuite.success = true

@@ -48,6 +48,10 @@ export function runFtrCli() {
           kbnTestServer: {
             installDir: parseInstallDir(flags),
           },
+          suiteFiles: {
+            include: toArray(flags['include-file'] as string | string[]),
+            exclude: toArray(flags['exclude-file'] as string | string[]),
+          },
           suiteTags: {
             include: toArray(flags['include-tag'] as string | string[]),
             exclude: toArray(flags['exclude-tag'] as string | string[]),
@@ -104,7 +108,16 @@ export function runFtrCli() {
     },
     {
       flags: {
-        string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag', 'kibana-install-dir'],
+        string: [
+          'config',
+          'grep',
+          'exclude',
+          'include-file',
+          'exclude-file',
+          'include-tag',
+          'exclude-tag',
+          'kibana-install-dir',
+        ],
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
         default: {
           config: 'test/functional/config.js',
@@ -116,6 +129,8 @@ export function runFtrCli() {
         --grep <pattern>   pattern used to select which tests to run
         --invert           invert grep to exclude tests
         --exclude=file     path to a test file that should not be loaded
+        --include-file=file  a test file to be included, pass multiple times for multiple files
+        --exclude-file=file  a test file to be excluded, pass multiple times for multiple files
         --include-tag=tag  a tag to be included, pass multiple times for multiple tags
         --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
         --test-stats       print the number of tests (included and excluded) to STDERR

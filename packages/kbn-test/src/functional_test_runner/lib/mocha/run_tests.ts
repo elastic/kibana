@@ -22,10 +22,10 @@ import { resolve, sep } from 'path';
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
 
-const allSuites = {};
-const setSuccessStatus = suite => {
+const allSuites: any = {};
+const setSuccessStatus = (suite: any) => {
   if (suite.tests && suite.tests.length) {
-    suite.success = !suite.tests.find(t => t.state === 'failed');
+    suite.success = !suite.tests.find((t: any) => t.state === 'failed');
 
     if (!suite.success) {
       return;
@@ -33,7 +33,7 @@ const setSuccessStatus = suite => {
   }
 
   if (suite.suites && suite.suites.length) {
-    suite.success = !suite.suites.find(s => !s.success);
+    suite.success = !suite.suites.find((s: any) => !s.success);
   }
 };
 
@@ -104,9 +104,11 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
   });
 
   lifecycle.cleanup.add(() => {
-    const flattened = [];
-    Object.values(allSuites).forEach(x => Object.values(x).forEach(y => flattened.push(y)));
-    flattened.sort((a, b) => b.duration - a.duration);
+    const flattened: object[] = [];
+    Object.values(allSuites).forEach((x: any) =>
+      Object.values(x).forEach((y: any) => flattened.push(y))
+    );
+    flattened.sort((a: object, b: object) => b.duration - a.duration);
     fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
   });
 

@@ -65,15 +65,16 @@ export function decorateMochaUi(lifecycle, context, config) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
-          const tag = this.file
-            .match(/\/test\/(.*?)$/)[1]
+          const filePath = this.file.match(/\/(test\/.*?)$/)[1];
+          const tag = filePath
+            .slice(5)
             .replace('/index.js', '')
             .replace(/\.(j|t)s$/, '')
             .replace('/test_suites/', '/')
             .replace(/\//g, '.');
 
-          this.tags(tag);
-          this.suiteTag = tag;
+          this.tags([tag, filePath]);
+          this.suiteTag = filePath;
 
           this.ftrConfig = config;
 
