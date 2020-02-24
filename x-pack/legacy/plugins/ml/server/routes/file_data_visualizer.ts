@@ -47,7 +47,6 @@ export function fileDataVisualizerRoutes({
   router,
   xpackMainPlugin,
   savedObjects,
-  elasticsearchPlugin,
 }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer

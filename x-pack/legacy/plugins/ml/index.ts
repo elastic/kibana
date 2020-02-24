@@ -11,11 +11,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
 import { CloudSetup } from '../../../plugins/cloud/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import {
-  MlInitializerContext,
-  MlCoreSetup,
-  MlHttpServiceSetup,
-} from './server/new_platform/plugin';
+import { MlInitializerContext, MlCoreSetup } from './server/new_platform/plugin';
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
 
@@ -72,22 +68,15 @@ export const ml = (kibana: any) => {
         },
       } as unknown) as MlInitializerContext;
 
-      const mlHttpService: MlHttpServiceSetup = {
-        ...kbnServer.newPlatform.setup.core.http,
-        route: server.route.bind(server),
-      };
-
       const core: MlCoreSetup = {
         injectUiAppVars: server.injectUiAppVars,
-        http: mlHttpService,
-        savedObjects: server.savedObjects,
+        http: kbnServer.newPlatform.setup.core.http,
         coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
         elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
       };
-      const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
+      const { usageCollection, cloud, home, security } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
-        elasticsearch: server.plugins.elasticsearch, // legacy
-        security: server.newPlatform.setup.plugins.security,
+        security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
         home,
