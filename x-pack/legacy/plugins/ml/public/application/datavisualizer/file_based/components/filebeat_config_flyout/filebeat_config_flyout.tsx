@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { createFilebeatConfig } from './filebeat_config';
 import { useMlKibana } from '../../../../contexts/kibana';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -35,7 +36,7 @@ export enum EDITOR_MODE {
 }
 interface Props {
   index: string;
-  results: any;
+  results: FindFileStructureResponse;
   indexPatternId: string;
   ingestPipelineId: string;
   closeFlyout(): void;
@@ -60,7 +61,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    const config = createFilebeatConfig(index, results, indexPatternId, ingestPipelineId, username);
+    const config = createFilebeatConfig(index, results, ingestPipelineId, username);
     setFileBeatConfig(config);
   }, [username]);
 

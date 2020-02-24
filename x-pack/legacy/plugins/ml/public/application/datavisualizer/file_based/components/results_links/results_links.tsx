@@ -17,20 +17,16 @@ import { useMlKibana } from '../../../../contexts/kibana';
 const RECHECK_DELAY_MS = 3000;
 
 interface Props {
-  results: any;
   index: string;
   indexPatternId: string;
-  ingestPipelineId: string;
   timeFieldName?: string;
   createIndexPattern: boolean;
   showFilebeatFlyout(): void;
 }
 
 export const ResultsLinks: FC<Props> = ({
-  results,
   index,
   indexPatternId,
-  ingestPipelineId,
   timeFieldName,
   createIndexPattern,
   showFilebeatFlyout,

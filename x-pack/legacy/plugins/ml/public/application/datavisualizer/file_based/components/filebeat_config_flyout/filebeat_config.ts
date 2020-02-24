@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+
 export function createFilebeatConfig(
   index: string,
-  results: any,
-  indexPatternId: string,
+  results: FindFileStructureResponse,
   ingestPipelineId: string,
   username: string | null
 ) {
@@ -22,7 +23,7 @@ export function createFilebeatConfig(
     '',
     ...getProcessors(results),
     'output.elasticsearch:',
-    ...getHosts(results),
+    ...getHosts(),
     ...getUserDetails(username),
     `  index: "${index}"`,
     `  pipeline: "${ingestPipelineId}"`,
@@ -54,7 +55,7 @@ function getProcessors(results: any) {
   return results.need_client_timezone === true ? ['processors:', '- add_locale: ~', ''] : [];
 }
 
-function getHosts(results: any) {
+function getHosts() {
   return ['  hosts:["<es_url>"]'];
 }
 
