@@ -28,6 +28,9 @@ export const registerMigrateRoute = (
     {
       path: '/_migrate',
       validate: false,
+      options: {
+        tags: ['access:migrateSavedObjects'],
+      },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const migrator = await migratorPromise;
