@@ -14,6 +14,7 @@ import { HeaderSection } from '../../header_section';
 type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSelected' | 'title'> & {
   /** The number of timelines currently selected */
   selectedTimelinesCount: number;
+  children?: JSX.Element;
 };
 
 /**
@@ -21,7 +22,7 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSele
  * and action buttons (i.e. Favorite Selected and Delete Selected)
  */
 export const TitleRow = React.memo<Props>(
-  ({ onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
+  ({ children, onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
     <HeaderSection title={title}>
       {(onAddTimelinesToFavorites || onDeleteSelected) && (
         <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -38,6 +39,8 @@ export const TitleRow = React.memo<Props>(
               </EuiButton>
             </EuiFlexItem>
           )}
+
+          {children && <EuiFlexItem>{children}</EuiFlexItem>}
 
           {onDeleteSelected && (
             <EuiFlexItem grow={false}>

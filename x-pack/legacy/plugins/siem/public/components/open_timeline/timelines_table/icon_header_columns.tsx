@@ -6,18 +6,49 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import { EuiIcon, EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 
+const EditTimelineActions = React.memo<{ actionsColumns: [] }>(({ actionsColumns }) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+  const tooglePopover = useCallback(
+    (newState: boolean) => {
+      setPopover(newState);
+    },
+    [setPopover]
+  );
+  return (
+    <EuiPopover
+      anchorPosition="upCenter"
+      button={
+        <EuiButtonIcon
+          aria-label={'All Actions'}
+          data-test-subj="edit-timeline-all-actions"
+          iconType="boxesHorizontal"
+          onClick={tooglePopover.bind(null, !isPopoverOpen)}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={tooglePopover.bind(null, false)}
+    >
+      {actionsColumns?.length &&
+        actionsColumns?.map((action, idx) => {
+          return <span key={`editTimelineAction-${idx}`}>{`item ${idx} `}</span>;
+        })}
+    </EuiPopover>
+  );
+});
+
+EditTimelineActions.displayName = 'EditTimelineActions';
 /**
  * Returns the columns that have icon headers
  */
-export const getIconHeaderColumns = () => [
+export const getIconHeaderColumns = actionsColumns => [
   {
     align: 'center',
     field: 'pinnedEventIds',
@@ -60,6 +91,16 @@ export const getIconHeaderColumns = () => [
       const fill = isFavorite ? 'starFilled' : 'starEmpty';
 
       return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
+    },
+    sortable: false,
+    width: ACTION_COLUMN_WIDTH,
+  },
+  {
+    align: 'center',
+    field: 'visControls',
+    name: null,
+    render: () => {
+      return <EditTimelineActions actionsColumns={actionsColumns} />;
     },
     sortable: false,
     width: ACTION_COLUMN_WIDTH,

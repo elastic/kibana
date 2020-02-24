@@ -46,6 +46,7 @@ const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
  * view, and the full view shown in the `All Timelines` view of the
  * `Timelines` page
  */
+
 const getTimelinesTableColumns = ({
   actionTimelineToShow,
   deleteTimelines,
@@ -60,20 +61,22 @@ const getTimelinesTableColumns = ({
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-}) => [
-  ...getCommonColumns({
-    itemIdToExpandedNotesRowMap,
-    onOpenTimeline,
-    onToggleShowNotes,
-  }),
-  ...getExtendedColumnsIfEnabled(showExtendedColumns),
-  ...getIconHeaderColumns(),
-  ...getActionsColumns({
+}) => {
+  const actionsColumns = getActionsColumns({
     deleteTimelines,
     onOpenTimeline,
     actionTimelineToShow,
-  }),
-];
+  });
+  return [
+    ...getCommonColumns({
+      itemIdToExpandedNotesRowMap,
+      onOpenTimeline,
+      onToggleShowNotes,
+    }),
+    ...getExtendedColumnsIfEnabled(showExtendedColumns),
+    ...getIconHeaderColumns(actionsColumns),
+  ];
+};
 
 export interface TimelinesTableProps {
   actionTimelineToShow: ActionTimelineToShow[];
