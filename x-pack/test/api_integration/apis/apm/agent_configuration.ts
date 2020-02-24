@@ -116,15 +116,15 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           settings: { transaction_sample_rate: 0.2 },
         },
         {
-          service: { environment: 'production' },
+          service: { name: 'my_service', environment: 'development' },
           settings: { transaction_sample_rate: 0.3 },
         },
         {
-          service: { environment: 'development' },
+          service: { environment: 'production' },
           settings: { transaction_sample_rate: 0.4 },
         },
         {
-          service: { name: 'my_service', environment: 'development' },
+          service: { environment: 'development' },
           settings: { transaction_sample_rate: 0.5 },
         },
       ];
@@ -143,19 +143,23 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           expectedSettings: { transaction_sample_rate: 0.1 },
         },
         {
+          service: { name: 'my_service', environment: 'non_existing_env' },
+          expectedSettings: { transaction_sample_rate: 0.2 },
+        },
+        {
           service: { name: 'my_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.2 },
         },
         {
-          service: { name: 'non_existing_service', environment: 'production' },
+          service: { name: 'my_service', environment: 'development' },
           expectedSettings: { transaction_sample_rate: 0.3 },
         },
         {
-          service: { name: 'non_existing_service', environment: 'development' },
+          service: { name: 'non_existing_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.4 },
         },
         {
-          service: { name: 'my_service', environment: 'development' },
+          service: { name: 'non_existing_service', environment: 'development' },
           expectedSettings: { transaction_sample_rate: 0.5 },
         },
       ];

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -15,6 +13,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const security = getService('security');
   const spaces = getService('spaces');
   const es = getService('legacyEs');
+  const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
   const end = encodeURIComponent(new Date().toISOString());
@@ -147,7 +146,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           index: '.apm-agent-configuration',
         });
 
-        console.warn(JSON.stringify(res, null, 2));
+        log.error(JSON.stringify(res, null, 2));
       },
     },
   ];
@@ -215,9 +214,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      console.log(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
+      log.info(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
-      console.log(`Responded: ${endpoint.req.url}`);
+      log.info(`Responded: ${endpoint.req.url}`);
 
       try {
         if (expectation === 'forbidden') {
@@ -248,17 +247,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       settings: { transaction_sample_rate: 0.5 },
     };
     before(async () => {
-      console.log(`Creating agent configuration`);
+      log.info(`Creating agent configuration`);
       await executeAsAdmin({
         method: 'put',
         url: '/api/apm/settings/agent-configuration',
         body: config,
       });
-      console.log(`Agent configuration created`);
+      log.info(`Agent configuration created`);
     });
 
     after(async () => {
-      console.log('deleting agent configuration');
+      log.info('deleting agent configuration');
       await executeAsAdmin({
         method: 'delete',
         url: `/api/apm/settings/agent-configuration`,
