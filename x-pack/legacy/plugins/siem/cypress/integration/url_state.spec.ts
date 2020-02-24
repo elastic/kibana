@@ -242,7 +242,7 @@ describe('url state', () => {
       .invoke('text')
       .should('be.above', 0);
 
-    const timelineName = 'SIEM UI';
+    const timelineName = 'SIEM';
     addNameToTimeline(timelineName);
     addDescriptionToTimeline('This is the best timeline of the world');
 
