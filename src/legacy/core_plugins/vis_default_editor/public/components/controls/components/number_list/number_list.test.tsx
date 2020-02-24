@@ -63,6 +63,7 @@ describe('NumberList', () => {
 
   test('should show an order error', () => {
     defaultProps.numberArray = [3, 1];
+    defaultProps.validateAscendingOrder = true;
     defaultProps.showValidation = true;
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
@@ -84,7 +85,7 @@ describe('NumberList', () => {
     defaultProps.showValidation = true;
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(comp.find('EuiFormErrorText').length).toBe(7);
+    expect(comp.find('EuiFormErrorText').length).toBe(6);
   });
 
   test('should set validity as true', () => {
@@ -95,6 +96,7 @@ describe('NumberList', () => {
 
   test('should set validity as false when the order is invalid', () => {
     defaultProps.numberArray = [3, 2];
+    defaultProps.validateAscendingOrder = true;
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
     expect(defaultProps.setValidity).lastCalledWith(false);
