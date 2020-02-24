@@ -9,21 +9,21 @@ import {
   BrushEndListener,
   Chart,
   getSpecId,
+  RectAnnotation,
   ScaleType,
   Settings,
   Theme,
-  TooltipType,
-  RectAnnotation
+  TooltipType
 } from '@elastic/charts';
 import '@elastic/charts/dist/theme_light.css';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { getWaterfall } from './app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import response from './scrubber.data.json';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // The contents of scrubber.data.json is was directly copied from a trace API
-// response, originally http://localhost:5601/kbn/api/apm/traces/21bd90461ba6355df98352070360f5f7.
+// response, originally http://localhost:5601/kbn/api/apm/traces/21bd90461ba6355df98352070360f5f7?start=2020-01-23T17%3A33%3A56.839Z&end=2020-02-24T17%3A33%3A56.840Z
 // You can paste the contents of any trace to see the response.
 const entryTransactionId = '6528d29667c22f62';
 const waterfall = getWaterfall(response, entryTransactionId);
