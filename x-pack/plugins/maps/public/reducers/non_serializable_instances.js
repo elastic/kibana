@@ -16,7 +16,8 @@ function createInspectorAdapters() {
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
-  if (getInjectedVarFunc()('showMapsInspectorAdapter', false)) {
+  const getInjectedVar = getInjectedVarFunc();
+  if (getInjectedVar && getInjectedVar('showMapsInspectorAdapter', false)) {
     inspectorAdapters.map = new MapAdapter();
   }
   return inspectorAdapters;

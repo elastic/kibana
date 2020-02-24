@@ -11,7 +11,9 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, BrowserRouter, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
+// @ts-ignore
 import { appStoreFactory } from './store';
+// @ts-ignore
 import { AlertIndex } from './view/alerts';
 
 /**
