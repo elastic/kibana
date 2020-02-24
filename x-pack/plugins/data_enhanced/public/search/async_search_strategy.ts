@@ -9,7 +9,6 @@ import { mergeMap, expand, takeUntil } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
-  ISearchGeneric,
   ISearchStrategy,
   SYNC_SEARCH_STRATEGY,
   TSearchStrategyProvider,
@@ -57,14 +56,15 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       return search(request, options).pipe(
         expand(response => {
           // If the response indicates it is complete, stop polling and complete the observable
-          if (response.loaded >= response.total) return EMPTY;
+          if ((response.loaded ?? 0) >= (response.total ?? 0)) return EMPTY;
 
           id = response.id;
+
           // Delay by the given poll interval
           return timer(pollInterval).pipe(
             // Send future requests using just the ID from the response
             mergeMap(() => {
-              return search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY);
+              return search({ id, serverStrategy }, options);
             })
           );
         }),

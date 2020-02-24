@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
