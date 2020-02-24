@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(
@@ -28,31 +28,37 @@ export async function storeReport(
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
   const appUsage = report.application_usage ? Object.entries(report.application_usage) : [];
   const timestamp = new Date();
-  await Promise.all([
+  return Promise.all<{ saved_objects: Array<SavedObject<any>> }>([
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
       const savedObjectId = `${key}:${userAgent}`;
-      await internalRepository.create(
-        'ui-metric',
-        { count: 1 },
-        {
-          id: savedObjectId,
-          overwrite: true,
-        }
-      );
+      return {
+        saved_objects: [
+          await internalRepository.create(
+            'ui-metric',
+            { count: 1 },
+            {
+              id: savedObjectId,
+              overwrite: true,
+            }
+          ),
+        ],
+      };
     }),
     ...uiStatsMetrics.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
-      await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+      return {
+        saved_objects: [
+          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+        ],
+      };
     }),
-    ...appUsage.map(async ([appId, metric]) => {
-      // Store individual values in saved objects
-      await internalRepository.create('application_usage_transactional', {
-        ...metric,
-        appId,
-        timestamp,
-      });
-    }),
+    internalRepository.bulkCreate(
+      appUsage.map(([appId, metric]) => ({
+        type: 'application_usage_transactional',
+        attributes: { ...metric, appId, timestamp },
+      }))
+    ),
   ]);
 }
