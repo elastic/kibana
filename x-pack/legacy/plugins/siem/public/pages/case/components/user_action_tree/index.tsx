@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -25,6 +25,7 @@ import { Markdown } from '../../../../components/markdown';
 import { MarkdownEditor } from '../markdown_editor';
 import { AddComment } from '../add_comment';
 import { Case } from '../../../../containers/case/types';
+import { useUpdateComment } from '../../../../containers/case/use_update_comment';
 
 export interface UserActionItem {
   avatarName: string;
@@ -81,6 +82,7 @@ const ContentWrapper = styled.div`
 `;
 
 export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTreeProps) => {
+  const [{ comments }, dispatchUpdateComment] = useUpdateComment(data.comments);
   const [editCommentId, setEditCommentId] = useState('');
   const [description, setDescription] = useState(data.description);
   const [commentUpdate, setCommentUpdate] = useState('');
@@ -102,9 +104,8 @@ export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTre
       </EuiFlexGroup>
     );
   }, []);
-
   const renderUserActions = useMemo(() => {
-    const userActions: UserActionItem[] = data.comments.reduce(
+    const userActions: UserActionItem[] = comments.reduce(
       (acc, comment, key) => {
         return [
           ...acc,
@@ -152,7 +153,7 @@ export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTre
                     saveAction: () => {
                       // TO DO
                       if (commentUpdate !== comment.comment) {
-                        onUpdateField('comment', commentUpdate);
+                        dispatchUpdateComment(comment.commentId, commentUpdate);
                       }
                       setEditCommentId('');
                     },
@@ -232,7 +233,7 @@ export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTre
         skipPanel: true,
       },
     ];
-  }, [data.version, isEditDescription, editCommentId, description, commentUpdate]);
+  }, [data.version, isEditDescription, editCommentId, description, commentUpdate, comments]);
 
   return (
     <>

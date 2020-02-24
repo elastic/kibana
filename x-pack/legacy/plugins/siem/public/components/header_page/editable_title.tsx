@@ -29,12 +29,11 @@ const StyledEuiButtonIcon = styled(EuiButtonIcon)`
 StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
 
 interface Props {
-  isLoading: boolean;
   title: string | React.ReactNode;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
+const EditableTitleComponent: React.FC<Props> = ({ onSubmit, title }) => {
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState(title);
 
@@ -62,8 +61,6 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            isDisabled={isLoading}
-            isLoading={isLoading}
             onClick={() => onClickSubmit(changedTitle as string)}
             data-test-subj="editable-title-submit-btn"
           >

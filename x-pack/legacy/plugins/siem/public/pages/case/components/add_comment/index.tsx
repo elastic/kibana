@@ -54,14 +54,15 @@ export const AddComment = React.memo<{
       <Form form={form}>
         <MarkdownEditor
           fieldName="comment"
-          fieldPlaceholder={i18n.ADD_COMMENT_HELP_TEXT}
+          placeholder={i18n.ADD_COMMENT_HELP_TEXT}
           footerContentRight={renderCommentButton}
           formHook={true}
           initialContent={data.comment}
           onChange={comment => setFormData({ ...data, comment })}
         />
       </Form>
-      {newComment && 'TO DO new comment got added but we didnt update the UI yet ;)'}
+      {newComment &&
+        'TO DO new comment got added but we didnt update the UI yet. Refresh the page to see your comment ;)'}
     </>
   );
 });

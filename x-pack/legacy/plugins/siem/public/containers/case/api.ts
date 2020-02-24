@@ -9,6 +9,7 @@ import {
   AllCases,
   Case,
   CaseSnake,
+  Comment,
   CommentSnake,
   FetchCasesProps,
   NewCase,
@@ -90,4 +91,18 @@ export const createComment = async (newComment: NewComment, caseId: string): Pro
   });
   await throwIfNotOk(response.response);
   return convertToCamelCase<CommentSnake, Comment>(response.body!);
+};
+
+export const updateComment = async (
+  commentId: string,
+  commentUpdate: string,
+  version: string
+): Promise<Partial<Comment>> => {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/comment/${commentId}`, {
+    method: 'PATCH',
+    asResponse: true,
+    body: JSON.stringify({ comment: commentUpdate, version }),
+  });
+  await throwIfNotOk(response.response);
+  return convertToCamelCase<Partial<CommentSnake>, Partial<Comment>>(response.body!);
 };

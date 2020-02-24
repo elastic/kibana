@@ -13,7 +13,7 @@ const { emptyField } = fieldValidators;
 export const schema: FormSchema = {
   title: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.CASE_TITLE,
+    label: i18n.NAME,
     validations: [
       {
         validator: emptyField(i18n.TITLE_REQUIRED),
@@ -22,6 +22,7 @@ export const schema: FormSchema = {
   },
   description: {
     type: FIELD_TYPES.TEXTAREA,
+    label: i18n.DESCRIPTION,
     validations: [
       {
         validator: emptyField(i18n.DESCRIPTION_REQUIRED),

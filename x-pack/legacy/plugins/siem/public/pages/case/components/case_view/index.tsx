@@ -59,10 +59,9 @@ const BackgroundWrapper = styled.div`
 export interface CaseProps {
   caseId: string;
   initialData: Case;
-  isLoading: boolean;
 }
 
-export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoading }) => {
+export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditTags, setIsEditTags] = useState(false);
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
@@ -156,7 +155,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
     [title]
   );
 
-  const titleNode = <EditableTitle isLoading={isLoading} title={title} onSubmit={onSubmit} />;
+  const titleNode = <EditableTitle title={title} onSubmit={onSubmit} />;
 
   return (
     <>
@@ -262,7 +261,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     );
   }
 
-  return <CaseComponent caseId={caseId} initialData={data} isLoading={isLoading} />;
+  return <CaseComponent caseId={caseId} initialData={data} />;
 });
 
 CaseView.displayName = 'CaseView';

@@ -14,8 +14,8 @@ export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const CASE_TITLE = i18n.translate('xpack.siem.case.caseView.caseTitle', {
-  defaultMessage: 'Case Title',
+export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
+  defaultMessage: 'Name',
 });
 
 export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.createdAt', {

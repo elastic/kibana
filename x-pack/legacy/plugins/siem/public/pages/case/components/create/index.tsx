@@ -12,7 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { Field, Form, getUseField, useForm } from '../../../shared_imports';
 import { NewCase } from '../../../../containers/case/types';
@@ -24,8 +24,16 @@ import { MarkdownEditor } from '../markdown_editor';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const TagContainer = styled.div`
-  margin-top: 16px;
+const ContainerBig = styled.div`
+  ${({ theme }) => css`
+    margin-top: ${theme.eui.euiSizeXL};
+  `}
+`;
+
+const Container = styled.div`
+  ${({ theme }) => css`
+    margin-top: ${theme.eui.euiSize};
+  `}
 `;
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -66,13 +74,7 @@ export const Create = React.memo(() => {
             isDisabled: isLoading,
           }}
         />
-        <MarkdownEditor
-          fieldName="description"
-          formHook={true}
-          initialContent={data.description}
-          onChange={description => setFormData({ ...data, description })}
-        />
-        <TagContainer>
+        <Container>
           <CommonUseField
             path="tags"
             componentProps={{
@@ -85,7 +87,15 @@ export const Create = React.memo(() => {
               isDisabled: isLoading,
             }}
           />
-        </TagContainer>
+        </Container>
+        <ContainerBig>
+          <MarkdownEditor
+            fieldName="description"
+            formHook={true}
+            initialContent={data.description}
+            onChange={description => setFormData({ ...data, description })}
+          />
+        </ContainerBig>
       </Form>
       <>
         <EuiHorizontalRule margin="m" />
