@@ -136,7 +136,7 @@ export const AlertIndex = memo(() => {
       if (columnId === 'alert_type') {
         return (
           <Link
-            data-testid="alertTypeCellLink"
+            data-test-subj="alertTypeCellLink"
             to={urlFromQueryParams({ ...queryParams, selected_alert: 'TODO' })}
           >
             {i18n.translate(
@@ -203,7 +203,7 @@ export const AlertIndex = memo(() => {
   return (
     <>
       {hasSelectedAlert && (
-        <EuiFlyout data-testid="alertDetailFlyout" size="l" onClose={handleFlyoutClose}>
+        <EuiFlyout data-test-subj="alertDetailFlyout" size="l" onClose={handleFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -216,7 +216,7 @@ export const AlertIndex = memo(() => {
           <EuiFlyoutBody />
         </EuiFlyout>
       )}
-      <EuiPage data-test-subj="alertListPage" data-testid="alertListPage">
+      <EuiPage data-test-subj="alertListPage">
         <EuiPageBody>
           <EuiPageContent>
             <EuiDataGrid
@@ -233,7 +233,6 @@ export const AlertIndex = memo(() => {
               renderCellValue={renderCellValue}
               pagination={pagination}
               data-test-subj="alertListGrid"
-              data-testid="alertListGrid"
             />
           </EuiPageContent>
         </EuiPageBody>

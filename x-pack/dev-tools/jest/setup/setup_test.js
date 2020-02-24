@@ -11,3 +11,9 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom/extend-expect';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import * as testingLibraryDom from '@testing-library/dom';
+
+testingLibraryDom.configure({
+  testIdAttribute: 'data-test-subj',
+});

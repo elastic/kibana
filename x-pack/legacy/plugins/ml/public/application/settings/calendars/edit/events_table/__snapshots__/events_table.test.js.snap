@@ -133,7 +133,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            data-testid="ml_new_event"
+            data-test-subj="ml_new_event"
             iconType="plusInCircle"
             isDisabled={false}
             onClick={[MockFunction]}
@@ -146,7 +146,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             />
           </EuiButton>,
           <EuiButton
-            data-testid="ml_import_events"
+            data-test-subj="ml_import_events"
             iconType="importAction"
             isDisabled={false}
             onClick={[MockFunction]}
