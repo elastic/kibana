@@ -31,3 +31,8 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
    storiesOf('Hello world', module).add('default', () => <div>Hello world!</div>);
    ```
 4. Launch Storybook with `yarn storybook <plugin>`.
+
+
+## Test you Storybook on CI
+
+To build your Storybook on every CI run add it to `test/scripts/jenkins_unit.sh` script.

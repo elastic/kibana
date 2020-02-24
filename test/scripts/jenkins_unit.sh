@@ -13,4 +13,12 @@ else
   yarn run grunt "test:mochaCoverage";
   echo ""
   echo ""
+  # When moving these somewhere also update packages/kbn-storybook/README.md
+  echo " -> Running Storybook builds"
+  yarn storybook apm --site
+  yarn storybook canvas --site
+  yarn storybook drilldowns --site
+  yarn storybook embeddable --site
+  echo ""
+  echo ""
 fi
