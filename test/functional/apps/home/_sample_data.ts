@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       ]);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await kibanaServer.uiSettings.replace({
-        pageNavigation: 'individual',
+        // pageNavigation: 'individual',
       });
     });
 
