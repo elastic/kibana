@@ -27,7 +27,18 @@ One common development workflow is:
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
 ](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
 
-### EPM API Tests
+### API Tests
+#### Ingest & Fleet
+  1. In one terminal, change to the `x-pack` directory and start the test server with
+      ```
+      node scripts/functional_tests_server.js --config test/api_integration/config.ts
+      ```
+
+  1. in a second terminal, run the tests from the Kibana root directory with
+      ```
+      node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
+      ```
+#### EPM
   1. In one terminal, change to the `x-pack` directory and start the test server with
       ```
       node scripts/functional_tests_server.js --config test/epm_api_integration/config.ts
@@ -37,7 +48,7 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
       ```
       node scripts/functional_test_runner.js --config x-pack/test/epm_api_integration/config.ts
       ```
- 
+
  ### Staying up-to-date with `master`
  While we're developing in the `feature-ingest` feature branch, here's is more information on keeping up to date with upstream kibana.
 
