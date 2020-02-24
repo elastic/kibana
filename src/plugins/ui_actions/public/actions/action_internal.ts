@@ -20,6 +20,7 @@
 import { Action, ActionContext, AnyActionDefinition } from './action';
 import { AbstractPresentable } from '../util/abstract_presentable';
 import { createActionStateContainer, ActionState } from './action_state_container';
+import { uiToReactComponent } from '../../../kibana_react/public';
 
 export class ActionInternal<A extends AnyActionDefinition>
   implements Action<ActionContext<A>>, AbstractPresentable<ActionContext<A>> {
@@ -29,6 +30,8 @@ export class ActionInternal<A extends AnyActionDefinition>
   public readonly type: string = this.definition.type || '';
   public readonly factoryId: string = this.definition.factoryId || '';
   public readonly MenuItem? = this.definition.MenuItem;
+  public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+
   public get order() {
     return this.state.get().order;
   }
