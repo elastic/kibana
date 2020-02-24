@@ -254,6 +254,8 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
             );
           }
           acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          acc.rulesAcc.set(uuid.v4(), parsedRule);
         }
       }
 

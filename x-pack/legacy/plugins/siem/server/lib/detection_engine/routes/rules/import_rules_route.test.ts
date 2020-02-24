@@ -8,6 +8,7 @@ import { omit } from 'lodash/fp';
 
 import {
   getSimpleRuleAsMultipartContent,
+  getSimpleRuleAsMultipartContentNoRuleId,
   TEST_BOUNDARY,
   UNPARSABLE_LINE,
   getSimpleRule,
@@ -323,6 +324,21 @@ describe('import_rules_route', () => {
         success: true,
         success_count: 2,
       });
+      expect(statusCode).toEqual(200);
+    });
+
+    test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+
+      const requestPayload = getSimpleRuleAsMultipartContentNoRuleId(2);
+      const { statusCode, payload } = await server.inject(getImportRulesRequest(requestPayload));
+      const parsed: ImportSuccessError = JSON.parse(payload);
+
+      expect(parsed.success).toEqual(false);
+      expect(parsed.errors[0].error.message).toEqual(
+        'child "rule_id" fails because ["rule_id" is required]'
+      );
+      expect(parsed.errors[0].error.status_code).toEqual(400);
       expect(statusCode).toEqual(200);
     });
 
