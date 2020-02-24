@@ -533,7 +533,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<RawAlert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
@@ -556,7 +556,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<RawAlert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
