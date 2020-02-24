@@ -44,7 +44,10 @@ const CaseDetailsLinkComponent: React.FC<{ children?: React.ReactNode; detailNam
   children,
   detailName,
 }) => (
-  <EuiLink href={getCaseDetailsUrl(encodeURIComponent(detailName))}>
+  <EuiLink
+    href={getCaseDetailsUrl(encodeURIComponent(detailName))}
+    data-test-subj="case-details-link"
+  >
     {children ? children : detailName}
   </EuiLink>
 );
