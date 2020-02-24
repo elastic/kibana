@@ -5,7 +5,6 @@
  */
 
 import { Request, Server } from 'hapi';
-import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
@@ -31,9 +30,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
 
   features.registerFeature({
     id: PLUGIN.ID,
-    name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
-      defaultMessage: 'Uptime',
-    }),
+    name: PLUGIN.NAME,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
