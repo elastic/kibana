@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AbstractPresentable } from '../util/abstract_presentable';
+import { Presentable } from '../util/presentable';
 import { AbstractConfigurable } from '../util/abstract_configurable';
 
 /**
@@ -25,7 +25,7 @@ import { AbstractConfigurable } from '../util/abstract_configurable';
  *
  * @deprecated
  */
-export interface Action<Context extends {} = {}> extends Partial<AbstractPresentable<Context>> {
+export interface Action<Context extends {} = {}> extends Partial<Presentable<Context>> {
   id: string;
 
   readonly type: string;
@@ -65,7 +65,7 @@ export interface ActionDefinition<
   Context extends object = object,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> extends Partial<AbstractPresentable<Context>>, Partial<AbstractConfigurable<Config, Context>> {
+> extends Partial<Presentable<Context>>, Partial<AbstractConfigurable<Config, Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */

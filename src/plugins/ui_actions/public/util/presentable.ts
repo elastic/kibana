@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/common';
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface AbstractPresentable<Context extends object = object> {
+export interface Presentable<Context extends object = object> {
   /**
    * Determined the display order in relation to other items. Higher numbers are
    * displayed first.

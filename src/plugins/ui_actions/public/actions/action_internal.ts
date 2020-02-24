@@ -18,12 +18,12 @@
  */
 
 import { Action, ActionContext, AnyActionDefinition } from './action';
-import { AbstractPresentable } from '../util/abstract_presentable';
+import { Presentable } from '../util/presentable';
 import { createActionStateContainer, ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
 
 export class ActionInternal<A extends AnyActionDefinition>
-  implements Action<ActionContext<A>>, AbstractPresentable<ActionContext<A>> {
+  implements Action<ActionContext<A>>, Presentable<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
