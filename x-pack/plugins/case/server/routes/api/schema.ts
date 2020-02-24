@@ -71,3 +71,7 @@ export const NewActionSchema = schema.object({
   config: schema.object({ apiUrl: schema.uri({ scheme: ['http', 'https'] }) }),
   secrets: schema.object({ username: schema.string(), password: schema.string() }),
 });
+
+export const FindActionsSchema = schema.object({
+  filter: schema.maybe(schema.string()),
+});
