@@ -208,6 +208,7 @@ function discoverController(
     replaceUrlState,
     isAppStateDirty,
     kbnUrlStateStorage,
+    getPreviousAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: false,
@@ -250,10 +251,15 @@ function discoverController(
   const appStateUnsubscribe = appStateContainer.subscribe(async newState => {
     const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState($scope.state);
+    let fetchData = false;
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
         $scope.state = { ...newState };
+
+        if (!_.isEqual(newStatePartial.query, getPreviousAppState().query)) {
+          fetchData = true;
+        }
 
         if (oldStatePartial.savedQuery !== newStatePartial.savedQuery) {
           if (newStatePartial.savedQuery) {
@@ -264,6 +270,9 @@ function discoverController(
           } else {
             delete $scope.savedQuery;
           }
+          fetchData = true;
+        }
+        if (fetchData) {
           $fetchObservable.next();
         } else {
           $scope.$digest();
