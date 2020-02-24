@@ -14,8 +14,6 @@ import {
   GlobalStateProvider,
   StateManagementConfigProvider,
   AppStateProvider,
-  EventsProvider,
-  PersistedState,
   createTopNavDirective,
   createTopNavHelper,
   KbnUrlProvider,
@@ -41,7 +39,6 @@ export const localAppModule = (core: AppMountContext['core']) => {
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
   createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(npStart.plugins.navigation);
   createHrefModule(core);
 
@@ -50,7 +47,6 @@ export const localAppModule = (core: AppMountContext['core']) => {
     'monitoring/Config',
     'monitoring/I18n',
     'monitoring/Private',
-    'monitoring/PersistedState',
     'monitoring/TopNav',
     'monitoring/State',
     'monitoring/Storage',
@@ -69,26 +65,12 @@ function createLocalStateModule() {
       'monitoring/Config',
       'monitoring/KbnUrl',
       'monitoring/Promise',
-      'monitoring/PersistedState',
     ])
     .factory('AppState', function(Private: IPrivate) {
       return Private(AppStateProvider);
     })
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('monitoring/PersistedState', ['monitoring/Private', 'monitoring/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: string) {
-          super(value, path, Events);
-        }
-      };
     });
 }
 
