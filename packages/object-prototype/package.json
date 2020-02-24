@@ -1,0 +1,33 @@
+{
+  "name": "object-prototype",
+  "version": "3.0.4",
+  "description": "A replacement prototype for `Object.prototype` with all the same functions",
+  "main": "index.js",
+  "dependencies": {
+    "object-prototype-functions": "1.2.0"
+  },
+  "devDependencies": {
+    "debug": "^4.1.1",
+    "tape": "^4.13.0"
+  },
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/kibana.git"
+  },
+  "keywords": [
+    "object",
+    "prototype",
+    "pollution",
+    "polyfill",
+    "security"
+  ],
+  "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/elastic/kibana/issues"
+  },
+  "homepage": "https://github.com/elastic/kibana/blob/master/packages/object-prototype/README.md"
+}

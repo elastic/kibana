@@ -525,6 +525,16 @@ module.exports = {
     },
 
     /**
+     * object-prototype package specific rules
+     */
+    {
+      files: ['packages/object-prototype/**/*.js'],
+      rules: {
+        'mocha/handle-done-callback': 'off', // TODO: Find a way to disable all mocha rules
+      },
+    },
+
+    /**
      * APM overrides
      */
     {

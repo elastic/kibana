@@ -1,0 +1,28 @@
+{
+  "name": "object-prototype-functions",
+  "version": "1.2.0",
+  "description": "An array containing the names of the functions on `Object.prototype`",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/kibana.git"
+  },
+  "keywords": [
+    "object",
+    "prototype",
+    "function",
+    "functions",
+    "name"
+  ],
+  "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/elastic/kibana/issues"
+  },
+  "homepage": "https://github.com/elastic/kibana/blob/master/packages/object-prototype-functions/README.md"
+}
