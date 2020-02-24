@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import { pageIndex, pageSize } from './selectors';
+import { pageIndex, pageSize, isOnManagementPage, hasSelectedHost } from './selectors';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 
@@ -13,7 +13,7 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     if (
-      (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
+      (action.type === 'userChangedUrl' && isOnManagementPage(getState())) ||
       action.type === 'userPaginatedManagementList'
     ) {
       const managementPageIndex = pageIndex(getState());

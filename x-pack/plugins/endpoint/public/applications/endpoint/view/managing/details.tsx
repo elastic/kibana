@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { useManagementListSelector } from './hooks';
+import { urlFromQueryParams } from './url_from_query_params';
+import { uiQueryParams } from './../../store/managing/selectors';
 
 export const ManagementDetails = () => {
-  const dispatch = useDispatch<(a: ManagementAction) => void>();
-  const isVisible = true;
-  const useLocation;
+  const history = useHistory();
+  const queryParams = useManagementListSelector(uiQueryParams);
+  const handleFlyoutClose = useCallback(() => {
+    const { selected_host, ...queryParamsWithoutSelectedHost } = queryParams;
+    history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
+  }, [history, queryParams]);
 
   return (
-    <EuiFlyout>
+    <EuiFlyout onClose={handleFlyoutClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="something">Flyout details</h2>
+          <h2>Flyout details</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

@@ -16,25 +16,21 @@ import {
   EuiTitle,
   EuiBasicTable,
   EuiTextColor,
-  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
-import { useHistory, useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { ManagementDetails } from './details';
 import * as selectors from '../../store/managing/selectors';
 import { ManagementAction } from '../../store/managing/action';
 import { useManagementListSelector } from './hooks';
-import { usePageId } from '../use_page_id';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const ManagementList = () => {
-  usePageId('managementPage');
   const dispatch = useDispatch<(a: ManagementAction) => void>();
-  const history = useHistory();
-  const location = useLocation();
   const {
     listData,
     pageIndex,
@@ -42,6 +38,7 @@ export const ManagementList = () => {
     totalHits: totalItemCount,
     isLoading,
     uiQueryParams: queryParams,
+    hasSelectedHost,
   } = useManagementListSelector(selector);
 
   const paginationSetup = useMemo(() => {
@@ -64,14 +61,6 @@ export const ManagementList = () => {
     },
     [dispatch]
   );
-
-  const handleHostClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    if (event.target instanceof HTMLElement) {
-      // console.log(event.target);
-      // const hostId: string = event.target.host.id;
-    }
-    // history.push(`${location.pathname}?${hostId}`);
-  }, []);
 
   const columns = useMemo(() => {
     return [
@@ -147,42 +136,45 @@ export const ManagementList = () => {
   }, [queryParams]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h2 data-test-subj="managementViewTitle">
-                  <FormattedMessage
-                    id="xpack.endpoint.managementList.hosts"
-                    defaultMessage="Hosts"
-                  />
-                </h2>
-              </EuiTitle>
-              <h4>
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.endpoint.managementList.totalCount"
-                    defaultMessage="{totalItemCount} Hosts"
-                    values={{ totalItemCount }}
-                  />
-                </EuiTextColor>
-              </h4>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiBasicTable
-              data-test-subj="managementListTable"
-              items={listData}
-              columns={columns}
-              loading={isLoading}
-              pagination={paginationSetup}
-              onChange={onTableChange}
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <>
+      {hasSelectedHost && <ManagementDetails />}
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2 data-test-subj="managementViewTitle">
+                    <FormattedMessage
+                      id="xpack.endpoint.managementList.hosts"
+                      defaultMessage="Hosts"
+                    />
+                  </h2>
+                </EuiTitle>
+                <h4>
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.endpoint.managementList.totalCount"
+                      defaultMessage="{totalItemCount} Hosts"
+                      values={{ totalItemCount }}
+                    />
+                  </EuiTextColor>
+                </h4>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+              <EuiBasicTable
+                data-test-subj="managementListTable"
+                items={listData}
+                columns={columns}
+                loading={isLoading}
+                pagination={paginationSetup}
+                onChange={onTableChange}
+              />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 };

@@ -18,6 +18,9 @@ export const totalHits = (state: ManagementListState) => state.total;
 
 export const isLoading = (state: ManagementListState) => state.loading;
 
+export const isOnManagementPage = (state: ManagementListState) =>
+  state.location ? state.location.pathname === '/management' : false;
+
 export const uiQueryParams: (
   state: ManagementListState
 ) => Immutable<ManagingIndexUIQueryParams> = createSelector(
