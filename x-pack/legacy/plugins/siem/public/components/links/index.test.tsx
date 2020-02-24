@@ -262,7 +262,7 @@ describe('Custom Links', () => {
           );
         });
 
-        test(`should render Comma if current id is smaller than the index of last item`, () => {
+        test(`should render Comma correctly`, () => {
           expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
         });
       }
