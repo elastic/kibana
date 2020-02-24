@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiBasicTable,
   EuiTextColor,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -72,78 +73,78 @@ export const ManagementList = () => {
     // history.push(`${location.pathname}?${hostId}`);
   }, []);
 
-  const columns = [
-    {
-      field: 'host',
-      name: i18n.translate('xpack.endpoint.management.list.host', {
-        defaultMessage: 'Hostname',
-      }),
-      render: ({ host: { hostname, id } }) => {
-        return (
-          <Link to={urlFromQueryParams({ ...queryParams, selected_host = 'todo' })}>
-            {hostname}
-          </Link>
-        );
+  const columns = useMemo(() => {
+    return [
+      {
+        field: 'host',
+        name: i18n.translate('xpack.endpoint.management.list.host', {
+          defaultMessage: 'Hostname',
+        }),
+        render: ({ hostname, id }: { hostname: string; id: string }) => {
+          return (
+            <Link to={urlFromQueryParams({ ...queryParams, selected_host: id })}>{hostname}</Link>
+          );
+        },
       },
-    },
-    {
-      field: '',
-      name: i18n.translate('xpack.endpoint.management.list.policy', {
-        defaultMessage: 'Policy',
-      }),
-      render: () => {
-        return 'Policy Name';
+      {
+        field: '',
+        name: i18n.translate('xpack.endpoint.management.list.policy', {
+          defaultMessage: 'Policy',
+        }),
+        render: () => {
+          return 'Policy Name';
+        },
       },
-    },
-    {
-      field: '',
-      name: i18n.translate('xpack.endpoint.management.list.policyStatus', {
-        defaultMessage: 'Policy Status',
-      }),
-      render: () => {
-        return 'Policy Status';
+      {
+        field: '',
+        name: i18n.translate('xpack.endpoint.management.list.policyStatus', {
+          defaultMessage: 'Policy Status',
+        }),
+        render: () => {
+          return 'Policy Status';
+        },
       },
-    },
-    {
-      field: '',
-      name: i18n.translate('xpack.endpoint.management.list.alerts', {
-        defaultMessage: 'Alerts',
-      }),
-      render: () => {
-        return '0';
+      {
+        field: '',
+        name: i18n.translate('xpack.endpoint.management.list.alerts', {
+          defaultMessage: 'Alerts',
+        }),
+        render: () => {
+          return '0';
+        },
       },
-    },
-    {
-      field: 'host.os.name',
-      name: i18n.translate('xpack.endpoint.management.list.os', {
-        defaultMessage: 'Operating System',
-      }),
-    },
-    {
-      field: 'host.ip',
-      name: i18n.translate('xpack.endpoint.management.list.ip', {
-        defaultMessage: 'IP Address',
-      }),
-    },
-    {
-      field: '',
-      name: i18n.translate('xpack.endpoint.management.list.sensorVersion', {
-        defaultMessage: 'Sensor Version',
-      }),
-      render: () => {
-        return 'version';
+      {
+        field: 'host.os.name',
+        name: i18n.translate('xpack.endpoint.management.list.os', {
+          defaultMessage: 'Operating System',
+        }),
       },
-    },
-    {
-      field: '',
-      name: i18n.translate('xpack.endpoint.management.list.lastActive', {
-        defaultMessage: 'Last Active',
-      }),
-      render: () => {
-        return 'xxxx';
+      {
+        field: 'host.ip',
+        name: i18n.translate('xpack.endpoint.management.list.ip', {
+          defaultMessage: 'IP Address',
+        }),
       },
-    },
-  ];
+      {
+        field: '',
+        name: i18n.translate('xpack.endpoint.management.list.sensorVersion', {
+          defaultMessage: 'Sensor Version',
+        }),
+        render: () => {
+          return 'version';
+        },
+      },
+      {
+        field: '',
+        name: i18n.translate('xpack.endpoint.management.list.lastActive', {
+          defaultMessage: 'Last Active',
+        }),
+        render: () => {
+          return 'xxxx';
+        },
+      },
+    ];
+  }, [queryParams]);
 
   return (
     <EuiPage>
