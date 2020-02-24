@@ -53,8 +53,8 @@ export const ExternalLink = React.memo<{
     overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
     allItemsLimit = DEFAULT_NUMBER_OF_LINK,
   }) => {
-    const lastVisibleItemIndex = useMemo(() => overflowIndexStart - 1, [overflowIndexStart]);
-    const lastItemIndex = useMemo(() => allItemsLimit - 1, [allItemsLimit]);
+    const lastVisibleItemIndex = overflowIndexStart - 1;
+    const lastItemIndex = allItemsLimit - 1;
     const lastIndexToShow = useMemo(
       () => Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex)),
       [overflowIndexStart]
