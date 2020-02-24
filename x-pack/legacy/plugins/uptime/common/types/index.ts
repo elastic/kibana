@@ -5,3 +5,4 @@
  */
 
 export * from './ping/histogram';
+export * from './pings/ping';

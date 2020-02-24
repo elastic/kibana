@@ -20,24 +20,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import { Ping, PingResults } from '../../../../common/graphql/types';
+import { PingsResponse } from '../../../../common/types/ping/ping';
+import { Ping } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { pingsQuery } from '../../../queries';
 import { LocationName } from './../location_name';
 import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 
-interface PingListQueryResult {
-  allPings?: PingResults;
-}
-
 interface PingListProps {
+  allPings: PingsResponse;
+  loading: boolean;
   onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
@@ -46,7 +42,6 @@ interface PingListProps {
   selectedLocation: string | undefined;
 }
 
-type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
 interface ExpandedRowMap {
   [key: string]: JSX.Element;
 }
@@ -75,7 +70,7 @@ const SpanWithMargin = styled.span`
 `;
 
 export const PingListComponent = ({
-  data,
+  allPings,
   loading,
   onPageCountChange,
   onSelectedLocationChange,
@@ -83,7 +78,7 @@ export const PingListComponent = ({
   pageSize,
   selectedOption,
   selectedLocation,
-}: Props) => {
+}: PingListProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
   const statusOptions = [
@@ -106,7 +101,7 @@ export const PingListComponent = ({
       value: 'down',
     },
   ];
-  const locations = get<string[]>(data, 'allPings.locations');
+  const { locations } = allPings;
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
@@ -115,7 +110,7 @@ export const PingListComponent = ({
         })
       );
 
-  const pings: Ping[] = data?.allPings?.pings ?? [];
+  const { pings } = allPings;
 
   const hasStatus: boolean = pings.reduce(
     (hasHttpStatus: boolean, currentPing: Ping) =>
@@ -331,8 +326,3 @@ export const PingListComponent = ({
     </Fragment>
   );
 };
-
-export const PingList = withUptimeGraphQL<PingListQueryResult, PingListProps>(
-  PingListComponent,
-  pingsQuery
-);

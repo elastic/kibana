@@ -80,7 +80,7 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
-  extend type Query {
+  type Query {
     getMonitors(
       dateRangeStart: String!
       dateRangeEnd: String!

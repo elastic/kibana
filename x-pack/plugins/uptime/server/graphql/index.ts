@@ -6,7 +6,7 @@
 
 import { createMonitorsResolvers, monitorsSchema } from './monitors';
 import { createMonitorStatesResolvers, monitorStatesSchema } from './monitor_states';
-import { createPingsResolvers, pingsSchema } from './pings';
+import { pingsSchema } from './pings';
 import { CreateUMGraphQLResolvers } from './types';
 import { unsignedIntegerResolverFunctions, unsignedIntegerSchema } from './unsigned_int_scalar';
 
@@ -14,7 +14,6 @@ export { DEFAULT_GRAPHQL_PATH } from './constants';
 export const resolvers: CreateUMGraphQLResolvers[] = [
   createMonitorsResolvers,
   createMonitorStatesResolvers,
-  createPingsResolvers,
   unsignedIntegerResolverFunctions,
 ];
 export const typeDefs: any[] = [

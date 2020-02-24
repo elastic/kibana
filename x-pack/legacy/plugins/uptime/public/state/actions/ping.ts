@@ -6,7 +6,13 @@
 
 import { createAction } from 'redux-actions';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
+import { GetPingsParams } from '../../../server/lib/requests';
+import { PingsResponse } from '../../../common/types/ping/ping';
 
 export const getPingHistogram = createAction<GetPingHistogramParams>('GET_PING_HISTOGRAM');
 export const getPingHistogramSuccess = createAction<HistogramResult>('GET_PING_HISTOGRAM_SUCCESS');
 export const getPingHistogramFail = createAction<Error>('GET_PING_HISTOGRAM_FAIL');
+
+export const getPings = createAction<GetPingsParams>('GET PINGS');
+export const getPingsSuccess = createAction<PingsResponse>('GET PINGS SUCCESS');
+export const getPingsFail = createAction<Error>('GET PINGS FAIL');

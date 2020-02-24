@@ -41,3 +41,7 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
     esKuery: ui.esKuery,
   };
 };
+
+export const selectPingList = ({ pingList }: AppState) => {
+  return pingList;
+};

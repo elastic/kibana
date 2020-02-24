@@ -9,7 +9,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
-import { MonitorCharts, PingList } from '../components/functional';
+import { PingList } from '../components/connected';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
@@ -19,6 +19,7 @@ import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitor } from '../state/actions';
 import { PageHeader } from './page_header';
+import { MonitorCharts } from '../components/functional';
 
 interface StateProps {
   selectedMonitor: Ping | null;

@@ -5,9 +5,41 @@
  */
 
 import { stringify } from 'query-string';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
 import { APIFn } from './types';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
+import { GetPingsParams } from '../../../server/lib/requests';
+import { PingsResponseType, PingsResponse } from '../../../common/types/ping/ping';
+
+export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
+  dateRangeStart,
+  dateRangeEnd,
+  location,
+  monitorId,
+  size,
+  sort,
+  status,
+}) => {
+  const apiPath = '/api/uptime/pings';
+  const params = {
+    dateRangeStart,
+    dateRangeEnd,
+    location,
+    monitorId,
+    size,
+    sort,
+    status,
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${apiPath}?${urlParams}`);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const data = await response.json();
+  PathReporter.report(PingsResponseType.decode(data));
+  return data;
+};
 
 export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> = async ({
   basePath,
