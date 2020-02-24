@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { formatResponse } from '../../lib/helpers';
 import { Response } from '../../common/types';
@@ -15,12 +14,12 @@ interface Props {
   response?: Response;
 }
 
-export function OutputTab({ response = {} }: Props) {
+export function OutputTab({ response }: Props) {
   return (
     <>
       <EuiSpacer size="m" />
       <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-        {formatResponse(response.success || response.error)}
+        {formatResponse(response)}
       </EuiCodeBlock>
     </>
   );

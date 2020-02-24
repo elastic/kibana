@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
   EuiTabbedContent,

@@ -16,17 +16,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-import { painlessContextOptions } from '../../common/constants';
+import { ContextChangeHandler, ContextSetup } from '../../common/types';
 
 interface Props {
-  context: string;
-  contextSetup: Record<string, string>;
-  setContext: (context: string) => void;
-  setContextSetup: (contextSetup: Record<string, string>) => void;
-  renderMainControls: () => React.ReactElement;
+  contextSetup: ContextSetup;
+  onContextChange: ContextChangeHandler;
 }
 
-export function ParametersTab({ context, contextSetup, setContext, setContextSetup }: Props) {
+export function ParametersTab({ contextSetup, onContextChange }: Props) {
   return (
     <>
       <EuiSpacer size="m" />
@@ -68,7 +65,7 @@ export function ParametersTab({ context, contextSetup, setContext, setContextSet
             languageId="javascript"
             height={600}
             value={contextSetup.params}
-            onChange={(value: string) => setContextSetup({ params: value })}
+            onChange={(value: string) => onContextChange({ contextSetup: { params: value } })}
             options={{
               fontSize: 12,
               minimap: {

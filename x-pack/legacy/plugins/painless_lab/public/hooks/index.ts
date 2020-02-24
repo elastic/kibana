@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'painlessLab';
-
-export const API_ROUTE_EXECUTE = '/api/painless_lab/execute';
+export { useSubmitCode } from './use_submit_code';

@@ -190,6 +190,6 @@ function getPainlessLanguage() {
 export function registerPainless() {
   // TODO: Referring to `window.monaco` is a temporary fix for the imported `monaco`  module not
   // being the same one in use by the editor.
-  window.monaco.languages.register({ id: LANGUAGE_ID });
-  window.monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, getPainlessLanguage());
+  (window as any).monaco.languages.register({ id: LANGUAGE_ID });
+  (window as any).monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, getPainlessLanguage());
 }

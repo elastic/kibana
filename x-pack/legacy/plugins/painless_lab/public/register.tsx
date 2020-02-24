@@ -12,7 +12,6 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
 import { registerPainless } from './register_painless';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { ADVANCED_SETTINGS_FLAG_NAME } from '../common/constants';
 
 npSetup.plugins.home.featureCatalogue.register({
   id: 'painlessLab',
@@ -28,12 +27,8 @@ npSetup.plugins.home.featureCatalogue.register({
   category: FeatureCatalogueCategory.ADMIN,
 });
 
-npSetup.core.uiSettings.get$(ADVANCED_SETTINGS_FLAG_NAME, false).subscribe(value => {
-  // eslint-disable-next-line
-  console.log('use this to figure out whether we should register', value);
-});
-
 npSetup.plugins.devTools.register({
+  id: 'painless_lab',
   order: 7,
   title: (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -54,7 +49,7 @@ npSetup.plugins.devTools.register({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  ),
+  ) as any,
   enableRouting: false,
   disabled: false,
   tooltipContent: xpackInfo.get('features.painlessLab.message'),

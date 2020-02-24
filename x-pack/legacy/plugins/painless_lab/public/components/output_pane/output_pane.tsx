@@ -15,28 +15,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { formatJson, formatResponse } from '../../lib/helpers';
-import { Response } from '../../common/types';
+import { Response, ContextSetup, Context, ContextChangeHandler } from '../../common/types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';
 
-export function OutputPane({
-  response,
-  context,
-  contextSetup,
-  setContext,
-  setContextSetup,
-  isLoading,
-}: {
+interface Props {
+  context: Context;
+  contextSetup: ContextSetup;
+  isLoading: boolean;
+  onContextChange: ContextChangeHandler;
   response?: Response;
-}) {
+}
+
+export function OutputPane({ response, context, contextSetup, onContextChange, isLoading }: Props) {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         {isLoading ? (
           <EuiLoadingSpinner size="m" />
-        ) : response.error ? (
+        ) : response && response.error ? (
           <EuiIcon type="alert" color="danger" />
         ) : (
           <EuiIcon type="check" color="secondary" />
@@ -59,7 +57,8 @@ export function OutputPane({
         tabs={[
           {
             id: 'output',
-            name: outputTabLabel,
+            // TODO: Currently this causes an Eui prop error because it is expecting string, but we give it React.ReactNode - should fix.
+            name: outputTabLabel as any,
             content: <OutputTab response={response} />,
           },
           {
@@ -68,12 +67,7 @@ export function OutputPane({
               defaultMessage: 'Parameters',
             }),
             content: (
-              <ParametersTab
-                context={context}
-                contextSetup={contextSetup}
-                setContext={setContext}
-                setContextSetup={setContextSetup}
-              />
+              <ParametersTab contextSetup={contextSetup} onContextChange={onContextChange} />
             ),
           },
           {
@@ -85,8 +79,7 @@ export function OutputPane({
               <ContextTab
                 context={context}
                 contextSetup={contextSetup}
-                setContext={setContext}
-                setContextSetup={setContextSetup}
+                onContextChange={onContextChange}
               />
             ),
           },

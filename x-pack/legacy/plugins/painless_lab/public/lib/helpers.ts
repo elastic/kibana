@@ -75,7 +75,6 @@ export function formatResponse(response?: Response): string {
   if (!response) {
     return '';
   }
-
   if (typeof response.result === 'string') {
     return response.result.replace(/\\n/g, '\n');
   } else if (response.error) {
@@ -84,15 +83,23 @@ export function formatResponse(response?: Response): string {
   return formatJson(response);
 }
 
-export function formatExecutionError(json: ExecutionError): string {
-  if (json.script_stack && json.caused_by) {
-    return `Unhandled Exception ${json.caused_by.type}
+export function formatExecutionError(executionErrorOrError: ExecutionError | Error): string {
+  if (executionErrorOrError instanceof Error) {
+    return executionErrorOrError.message;
+  }
 
-${json.caused_by.reason}
+  if (
+    executionErrorOrError.script_stack &&
+    executionErrorOrError.caused_by &&
+    executionErrorOrError.position
+  ) {
+    return `Unhandled Exception ${executionErrorOrError.caused_by.type}
 
-Located at:
-${formatJson(json.script_stack)}
+${executionErrorOrError.caused_by.reason}
+
+Stack:
+${formatJson(executionErrorOrError.script_stack)}
 `;
   }
-  return formatJson(json);
+  return formatJson(executionErrorOrError);
 }
