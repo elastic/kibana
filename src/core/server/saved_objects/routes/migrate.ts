@@ -31,11 +31,10 @@ export const registerMigrateRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const migrator = await migratorPromise;
-      const result = await migrator.runMigrations({ rerun: true });
+      await migrator.runMigrations({ rerun: true });
       return res.ok({
         body: {
           success: true,
-          result,
         },
       });
     })
