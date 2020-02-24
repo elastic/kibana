@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { ServerRoute } from 'hapi';
-import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import {
   Logger,
   PluginInitializerContext,
@@ -16,7 +14,6 @@ import {
   IScopedClusterClient,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
@@ -38,7 +35,6 @@ import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 import { dataRecognizer } from '../routes/modules';
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
 import { calendars } from '../routes/calendars';
-// @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
 import { filtersRoutes } from '../routes/filters';
 import { resultsServiceRoutes } from '../routes/results_service';
@@ -53,9 +49,6 @@ import { elasticsearchJsPlugin } from '../client/elasticsearch_ml';
 export const PLUGIN_ID = 'ml';
 
 type CoreHttpSetup = CoreSetup['http'];
-export interface MlHttpServiceSetup extends CoreHttpSetup {
-  route(route: ServerRoute | ServerRoute[]): void;
-}
 
 export interface MlXpackMainPlugin extends XPackMainPlugin {
   status?: any;
@@ -63,8 +56,7 @@ export interface MlXpackMainPlugin extends XPackMainPlugin {
 
 export interface MlCoreSetup {
   injectUiAppVars: (id: string, callback: () => {}) => any;
-  http: MlHttpServiceSetup;
-  savedObjects: SavedObjectsLegacyService;
+  http: CoreHttpSetup;
   coreSavedObjects: SavedObjectsServiceStart;
   elasticsearch: ElasticsearchServiceSetup;
 }
@@ -73,7 +65,6 @@ export interface MlInitializerContext extends PluginInitializerContext {
   log: Logger;
 }
 export interface PluginsSetup {
-  elasticsearch: ElasticsearchPlugin;
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
@@ -85,11 +76,8 @@ export interface PluginsSetup {
 }
 
 export interface RouteInitialization {
-  commonRouteConfig: any;
   config?: any;
-  elasticsearchPlugin: ElasticsearchPlugin;
   elasticsearchService: ElasticsearchServiceSetup;
-  route(route: ServerRoute | ServerRoute[]): void;
   router: IRouter;
   xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsServiceStart;
@@ -166,21 +154,6 @@ export class Plugin {
     });
 
     // Add server routes and initialize the plugin here
-    const commonRouteConfig = {
-      pre: [
-        function forbidApiAccess() {
-          const licenseCheckResults = xpackMainPlugin.info
-            .feature(pluginId)
-            .getLicenseCheckResults();
-          if (licenseCheckResults.isAvailable) {
-            return null;
-          } else {
-            throw Boom.forbidden(licenseCheckResults.message);
-          }
-        },
-      ],
-    };
-
     // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
     http.registerRouteHandlerContext('ml', (context, request) => {
@@ -190,10 +163,7 @@ export class Plugin {
     });
 
     const routeInitializationDeps: RouteInitialization = {
-      commonRouteConfig,
-      route: http.route,
       router: http.createRouter(),
-      elasticsearchPlugin: plugins.elasticsearch,
       elasticsearchService: core.elasticsearch,
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
