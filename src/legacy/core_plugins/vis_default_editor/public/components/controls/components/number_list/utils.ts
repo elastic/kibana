@@ -76,7 +76,7 @@ function validateOrder(list: Array<number | undefined>) {
   return result;
 }
 
-function validateUniqueness(list: Array<number | undefined>): number[] {
+function getDuplicateIndices(list: Array<number | undefined>): number[] {
   const duplicateModelIndices: number[] = [];
   list.forEach((value, index) => {
     if (list.indexOf(value) !== index) {
@@ -147,7 +147,7 @@ export {
   getRange,
   validateValue,
   validateOrder,
-  validateUniqueness,
+  getDuplicateIndices as validateUniqueness,
   getNextModel,
   getInitModelList,
   getUpdatedModels,

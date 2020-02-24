@@ -87,7 +87,7 @@ function NumberList({
         individualModelErrorMessage = i18n.translate(
           'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
           {
-            defaultMessage: 'The value should not be duplicated.',
+            defaultMessage: 'Duplicated value.',
           }
         );
         invalidModelIndex = duplicateModelIndices;
