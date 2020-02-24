@@ -17,11 +17,14 @@ import {
 import { txtClose } from './i18n';
 
 export interface FlyoutFrameProps {
-  title?: string;
+  title?: React.ReactNode;
   footer?: React.ReactNode;
   onClose?: () => void;
 }
 
+/**
+ * @todo This component can be moved to `kibana_react`.
+ */
 export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   title = '',
   footer,
@@ -30,8 +33,8 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
 }) => {
   const headerFragment = title && (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 id="flyoutTitle">{title}</h2>
+      <EuiTitle size="s">
+        <h1>{title}</h1>
       </EuiTitle>
     </EuiFlyoutHeader>
   );
@@ -41,12 +44,19 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onClose && (
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="flyoutCloseButton"
+            >
               {txtClose}
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{footer}</EuiFlexItem>
+        <EuiFlexItem grow={false} data-test-subj="flyoutFooter">
+          {footer}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
