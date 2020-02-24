@@ -5,6 +5,10 @@
  */
 
 import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
+import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -20,12 +24,14 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
+import { getActionType } from './pages/detection_engine/example_action';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -33,6 +39,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   uiActions: UiActionsStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 
@@ -51,6 +58,8 @@ export class Plugin implements IPlugin<Setup, Start> {
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, this.id);
+
+    plugins.triggers_actions_ui.actionTypeRegistry.register(getActionType());
 
     core.application.register({
       id: this.id,
