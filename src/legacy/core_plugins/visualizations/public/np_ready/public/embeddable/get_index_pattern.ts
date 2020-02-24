@@ -21,7 +21,7 @@ import { VisSavedObject } from '../types';
 import {
   indexPatterns,
   IIndexPattern,
-  IndexPatternAttributes
+  IndexPatternAttributes,
 } from '../../../../../../../plugins/data/public';
 import { getUISettings, getSavedObjects } from '../services';
 

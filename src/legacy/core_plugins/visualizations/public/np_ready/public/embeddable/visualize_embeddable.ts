@@ -36,7 +36,7 @@ import {
   Container,
   selectRangeTrigger,
   valueClickTrigger,
-  EmbeddableVisTriggerContext
+  EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
@@ -298,7 +298,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
           };
-          getUiActions().getTrigger(triggerId).exec(context);
+          getUiActions()
+            .getTrigger(triggerId)
+            .exec(context);
         }
       })
     );
