@@ -127,7 +127,7 @@ export const loginAndWaitForPage = (url: string) => {
   cy.contains('a', 'SIEM');
 };
 
-export const loginAndWaitForPageUrlState = (url: string) => {
+export const loginAndWaitForPageWithoutDateRange = (url: string) => {
   login();
   cy.viewport('macbook-15');
   cy.visit(url);

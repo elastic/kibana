@@ -15,7 +15,7 @@ import { ANOMALIES_TAB } from '../screens/hosts/main';
 import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/siem_header';
 import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
 
-import { loginAndWaitForPage, loginAndWaitForPageUrlState } from '../tasks/login';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import {
   setStartDate,
   setEndDate,
@@ -63,7 +63,7 @@ const ABSOLUTE_DATE = {
 
 describe('url state', () => {
   it('sets the global start and end dates from the url', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -77,7 +77,7 @@ describe('url state', () => {
   });
 
   it('sets the url state when start and end date are set', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateDates();
     waitForIpsTableToBeLoaded();
@@ -93,7 +93,7 @@ describe('url state', () => {
   });
 
   it('sets the timeline start and end dates from the url when locked to global time', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     openTimeline();
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
@@ -109,7 +109,7 @@ describe('url state', () => {
   });
 
   it('sets the timeline start and end dates independently of the global start and end dates when times are unlocked', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -136,7 +136,7 @@ describe('url state', () => {
   });
 
   it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
     openTimeline();
     setTimelineStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateTimelineDates();
@@ -152,24 +152,24 @@ describe('url state', () => {
   });
 
   it('sets kql on network page', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
     cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
 
     cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
   });
 
   it('sets the url state when kql is set and check if href reflect this change', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
 
@@ -181,7 +181,7 @@ describe('url state', () => {
   });
 
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlHostNew);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlHostNew);
     kqlSearch('host.name: "siem-kibana" {enter}');
     openAllHosts();
     waitForAllHostsToBeLoaded();
@@ -227,7 +227,7 @@ describe('url state', () => {
   });
 
   it('Do not clears kql when navigating to a new page', () => {
-    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
 
     cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
