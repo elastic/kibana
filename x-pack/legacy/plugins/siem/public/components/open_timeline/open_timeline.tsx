@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
@@ -17,8 +17,11 @@ import {
   UtilityBarSection,
   UtilityBarGroup,
   UtilityBarText,
+  UtilityBarAction,
 } from '../detection_engine/utility_bar';
 import * as i18n from './translations';
+import { BATCH_ACTIONS, REFRESH } from '../../pages/detection_engine/rules/translations';
+import { useStateToaster } from '../toasters';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -45,6 +48,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => {
+    const [, dispatchToaster] = useStateToaster();
     const text = useMemo(
       () => (
         <FormattedMessage
@@ -63,6 +67,30 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       ),
       [totalSearchResultsCount]
     );
+
+    const getBatchItemsPopoverContent = useCallback(
+      (closePopover: () => void) => (
+        <EuiContextMenuPanel
+          items={
+            /* getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)*/
+            [
+              <EuiContextMenuItem
+                key={'BatchItemKey'}
+                icon="checkInCircleFilled"
+                disabled={false}
+                onClick={async () => {
+                  closePopover();
+                }}
+              >
+                {'Batch Item'}
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      ),
+      [selectedItems, /* dispatch, */ dispatchToaster, history]
+    );
+
     return (
       <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
         <TitleRow
@@ -86,6 +114,24 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           <UtilityBarSection>
             <UtilityBarGroup>
               <UtilityBarText>{text}</UtilityBarText>
+            </UtilityBarGroup>
+
+            <UtilityBarGroup>
+              <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
+              <UtilityBarAction
+                iconSide="right"
+                iconType="arrowDown"
+                popoverContent={getBatchItemsPopoverContent}
+              >
+                {BATCH_ACTIONS}
+              </UtilityBarAction>
+              <UtilityBarAction
+                iconSide="right"
+                iconType="refresh"
+                onClick={() => null /* dispatch({ type: 'refresh' })*/}
+              >
+                {REFRESH}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>

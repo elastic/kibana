@@ -5,7 +5,7 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { EuiButton } from '@elastic/eui';
@@ -30,11 +30,17 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
   const [showImportModal, setShowImportModal] = useState(false);
+  const toggleImportModal = useCallback(
+    newState => {
+      setShowImportModal(newState);
+    },
+    [setShowImportModal]
+  );
   return (
     <>
       <ImportRuleModal
         showModal={showImportModal}
-        closeModal={() => setShowImportModal(false)}
+        closeModal={toggleImportModal.bind(null, false)}
         importComplete={() => {
           /* setImportCompleteToggle(!importCompleteToggle)*/
         }}
@@ -44,9 +50,7 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
           <EuiButton
             iconType="indexOpen"
             isDisabled={false}
-            onClick={() => {
-              setShowImportModal(true);
-            }}
+            onClick={toggleImportModal.bind(null, true)}
           >
             {'Import Timeline'}
           </EuiButton>

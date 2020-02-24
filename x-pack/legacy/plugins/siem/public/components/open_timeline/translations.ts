@@ -107,3 +107,10 @@ export const ZERO_TIMELINES_MATCH = i18n.translate(
     defaultMessage: '0 timelines match the search criteria',
   }
 );
+
+export const SELECTED_TIMELINES = (selectedTimelines: number) =>
+  i18n.translate('xpack.siem.open.timeline.selectedTimelinesTitle', {
+    values: { selectedTimelines },
+    defaultMessage:
+      'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
+  });
