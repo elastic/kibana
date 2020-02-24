@@ -68,7 +68,7 @@ describe('Persisted State Provider', () => {
   });
 
   describe('JSON importing and exporting', () => {
-    let persistedStateValue;
+    let persistedStateValue: any;
 
     beforeEach(() => {
       persistedStateValue = { one: 1, two: 2, 'meaning of life': 42 };
@@ -245,23 +245,22 @@ describe('Persisted State Provider', () => {
   });
 
   describe('events', () => {
-    let persistedState;
-    let emitter;
+    let persistedState: PersistedState;
+    let emmiter: any;
 
-    const getByType = (type, spy) => {
-      spy = spy || emitter;
-      return spy.getCalls().filter(call => {
+    const getByType = (type: string): any[] => {
+      return emmiter.getCalls().filter((call: any) => {
         return call.args[0] === type;
       });
     };
 
-    const watchEmitter = state => {
+    const watchEmitter = (state: any) => {
       return sinon.spy(state, 'emit');
     };
 
     beforeEach(() => {
       persistedState = new PersistedState({ checker: { events: 'event tests' } });
-      emitter = watchEmitter(persistedState);
+      emmiter = watchEmitter(persistedState);
     });
 
     test('should emit set when setting values', () => {
