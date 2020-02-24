@@ -23,7 +23,7 @@ export function createFilebeatConfig(
     '',
     ...getProcessors(results),
     'output.elasticsearch:',
-    ...getHosts(),
+    '  hosts:["<es_url>"]',
     ...getUserDetails(username),
     `  index: "${index}"`,
     `  pipeline: "${ingestPipelineId}"`,
@@ -53,10 +53,6 @@ function getMultiline(results: any) {
 
 function getProcessors(results: any) {
   return results.need_client_timezone === true ? ['processors:', '- add_locale: ~', ''] : [];
-}
-
-function getHosts() {
-  return ['  hosts:["<es_url>"]'];
 }
 
 function getUserDetails(username: string | null) {
