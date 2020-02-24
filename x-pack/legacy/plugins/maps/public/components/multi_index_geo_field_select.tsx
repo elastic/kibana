@@ -7,15 +7,16 @@
 import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiTextColor, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { GeoFieldWithIndex } from '../types/geo_field_with_index';
 
 const OPTION_ID_DELIMITER = '/';
 
-function createOptionId({ indexPatternId, geoFieldName }) {
+function createOptionId(geoField: GeoFieldWithIndex): string {
   // Namespace field with indexPatterId to avoid collisions between field names
-  return `${indexPatternId}${OPTION_ID_DELIMITER}${geoFieldName}`;
+  return `${geoField.indexPatternId}${OPTION_ID_DELIMITER}${geoField.geoFieldName}`;
 }
 
-function splitOptionId(optionId) {
+function splitOptionId(optionId: string) {
   const split = optionId.split(OPTION_ID_DELIMITER);
   return {
     indexPatternId: split[0],
@@ -23,8 +24,14 @@ function splitOptionId(optionId) {
   };
 }
 
-export function MultiIndexGeoFieldSelect({ selectedField, fields = [], onChange }) {
-  function onFieldSelect(selectedOptionId) {
+interface Props {
+  fields: GeoFieldWithIndex[];
+  onChange: (newSelectedField: GeoFieldWithIndex | undefined) => void;
+  selectedField: GeoFieldWithIndex;
+}
+
+export function MultiIndexGeoFieldSelect({ fields, onChange, selectedField }: Props) {
+  function onFieldSelect(selectedOptionId: string) {
     const { indexPatternId, geoFieldName } = splitOptionId(selectedOptionId);
 
     const newSelectedField = fields.find(field => {
@@ -33,18 +40,18 @@ export function MultiIndexGeoFieldSelect({ selectedField, fields = [], onChange 
     onChange(newSelectedField);
   }
 
-  const options = fields.map(({ indexPatternId, indexPatternTitle, geoFieldName }) => {
+  const options = fields.map((geoField: GeoFieldWithIndex) => {
     return {
       inputDisplay: (
         <EuiText size="s" component="span">
           <EuiTextColor color="subdued">
-            <small>{indexPatternTitle}</small>
+            <small>{geoField.indexPatternTitle}</small>
           </EuiTextColor>
           <br />
-          {geoFieldName}
+          {geoField.geoFieldName}
         </EuiText>
       ),
-      value: createOptionId({ indexPatternId, geoFieldName }),
+      value: createOptionId(geoField),
     };
   });
 
