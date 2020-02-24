@@ -25,7 +25,7 @@ describe('when on the alerting page', () => {
 
   /**
    * @testing-library/react provides `queryByTestId`, but that uses the data attribute
-   * 'data-testid' whereas our FTR and EUI's tesxts all use 'data-test-subj'. While @testing-library/react
+   * 'data-testid' whereas our FTR and EUI's tests all use 'data-test-subj'. While @testing-library/react
    * could be configured to use 'data-test-subj', it is not currently configured that way.
    *
    * This provides an equivalent function to `queryByTestId` but that uses our 'data-test-subj' attribute.
