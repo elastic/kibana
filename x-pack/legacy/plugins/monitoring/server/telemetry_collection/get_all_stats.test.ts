@@ -223,7 +223,8 @@ describe('get_all_stats', () => {
         beats: {},
       });
 
-      expect(clusters).toStrictEqual(expectedClusters);
+      const [a, b, c] = expectedClusters;
+      expect(clusters).toStrictEqual([a, b, { ...c, stack_stats: {} }]);
     });
 
     it('handles no clusters response', () => {
