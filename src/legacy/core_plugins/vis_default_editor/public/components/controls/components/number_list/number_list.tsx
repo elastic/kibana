@@ -85,7 +85,7 @@ function NumberList({
       const duplicateModelIndices = validateUniqueness(numberArray);
       if (duplicateModelIndices.length) {
         individualModelErrorMessage = i18n.translate(
-          'visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage',
+          'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
           {
             defaultMessage: 'The value should not be duplicated.',
           }
