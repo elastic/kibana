@@ -6,8 +6,8 @@
 
 import React from 'react';
 import DateMath from '@elastic/datemath';
-import { MonitorChartsComponent } from '../monitor_charts';
-import { MonitorChart } from '../../../../common/graphql/types';
+import { MonitorCharts } from '../monitor_charts';
+import { MonitorChart } from '../../../../common/types';
 import { shallowWithRouter } from '../../../lib';
 
 describe('MonitorCharts component', () => {
@@ -63,7 +63,7 @@ describe('MonitorCharts component', () => {
 
   it('renders the component without errors', () => {
     const component = shallowWithRouter(
-      <MonitorChartsComponent
+      <MonitorCharts
         data={{ monitorChartsData: chartResponse.monitorChartsData }}
         loading={false}
         monitorId="something"

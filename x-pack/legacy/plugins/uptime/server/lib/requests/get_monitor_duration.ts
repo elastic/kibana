@@ -147,8 +147,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     // we must add null entries
     if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
       resultLocations.forEach(resultLocation => {
-        // the current bucket has a value for this location, do nothing
-        if (location && location !== resultLocation) return;
         // the current bucket had no value for this location, insert a null value
         if (!bucketLocations.has(resultLocation)) {
           const locationLine = monitorChartsData.locationDurationLines.find(

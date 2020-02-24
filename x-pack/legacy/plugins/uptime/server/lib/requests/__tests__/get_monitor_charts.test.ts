@@ -54,7 +54,6 @@ describe('ElasticsearchMonitorsAdapter', () => {
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
-      location: 'Philadelphia',
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
