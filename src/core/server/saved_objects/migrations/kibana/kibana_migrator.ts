@@ -93,11 +93,11 @@ export class KibanaMigrator {
    *
    * @param rerun - If true, method will run a new migration when called again instead of
    * returning the result of the initial migration. This should only be used when factors external
-   * to Kibana itself alters the kibana index causing the saved objects mappings or data to change
+   * to Kibana itself alter the kibana index causing the saved objects mappings or data to change
    * after the Kibana server performed the initial migration.
    *
    * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
-   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can leads to
+   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can lead to
    * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
    * code should ensure that the initial call resolves before calling the function again.
    *
