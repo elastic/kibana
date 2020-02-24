@@ -18,10 +18,11 @@
  */
 
 import { Presentable } from '../util/presentable';
-import { AbstractConfigurable } from '../util/abstract_configurable';
+import { Configurable } from '../util/configurable';
 
 /**
- * Legacy action interface, do not use.
+ * Legacy action interface, do not use. Use @type {ActionDefinition} and
+ * @type {ActionInternal} instead.
  *
  * @deprecated
  */
@@ -65,7 +66,7 @@ export interface ActionDefinition<
   Context extends object = object,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> extends Partial<Presentable<Context>>, Partial<AbstractConfigurable<Config, Context>> {
+> extends Partial<Presentable<Context>>, Partial<Configurable<Config, Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */

@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/common';
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface AbstractConfigurable<Config, Context = void> {
+export interface Configurable<Config, Context = void> {
   /**
    * Default config for this item, used when item is created for the first time.
    */
