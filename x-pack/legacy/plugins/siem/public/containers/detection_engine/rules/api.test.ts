@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaServices } from '../../../lib/kibana';
 import {
   addRule,
   fetchRules,
@@ -21,64 +20,55 @@ import {
 } from './api';
 import { ruleMock, rulesMock } from './mock';
 import { ToasterErrors } from '../../../components/ml/api/throw_if_not_ok';
+import { globalNode } from '../../../mock';
 
 const abortCtrl = new AbortController();
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../lib/kibana');
+jest.mock('ui/chrome', () => ({
+  getBasePath: () => {
+    return '';
+  },
+  getUiSettingsClient: () => ({
+    get: jest.fn(),
+  }),
+}));
 
 const mockfetchSuccess = (body: unknown, fetchMock?: jest.Mock) => {
   if (fetchMock) {
-    mockKibanaServices.mockImplementation(() => ({
-      http: {
-        fetch: fetchMock,
-      },
-    }));
+    globalNode.window.fetch = fetchMock;
   } else {
-    mockKibanaServices.mockImplementation(() => ({
-      http: {
-        fetch: () => ({
-          response: {
-            ok: true,
-            message: 'success',
-            text: 'success',
-          },
-          body,
-        }),
-      },
-    }));
+    globalNode.window.fetch = () => ({
+      ok: true,
+      message: 'success',
+      text: 'success',
+      body,
+      json: () => body,
+      blob: () => body,
+    });
   }
 };
 
 const mockfetchError = () => {
-  mockKibanaServices.mockImplementation(() => ({
-    http: {
-      fetch: () => ({
-        response: {
-          ok: false,
-          text: () =>
-            JSON.stringify({
-              message: 'super mega error, it is not that bad',
-            }),
-        },
-        body: null,
+  globalNode.window.fetch = () => ({
+    ok: false,
+    text: () =>
+      JSON.stringify({
+        message: 'super mega error, it is not that bad',
       }),
-    },
-  }));
+    body: null,
+  });
 };
 
 describe('Detections Rules API', () => {
   const fetchMock = jest.fn();
   describe('addRule', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, body', async () => {
@@ -86,7 +76,11 @@ describe('Detections Rules API', () => {
 
       await addRule({ rule: ruleMock, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         body:
           '{"description":"some desc","enabled":true,"false_positives":[],"filters":[],"from":"now-360s","index":["apm-*-transaction*","auditbeat-*","endgame-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf","language":"kuery","risk_score":75,"name":"Test rule","query":"user.email: \'root@elastic.co\'","references":[],"severity":"high","tags":["APM"],"to":"now","type":"query","threat":[]}',
         method: 'POST',
@@ -111,15 +105,13 @@ describe('Detections Rules API', () => {
 
   describe('fetchRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: rulesMock,
+        json: () => rulesMock,
       }));
     });
 
@@ -127,17 +119,18 @@ describe('Detections Rules API', () => {
       mockfetchSuccess(null, fetchMock);
 
       await fetchRules({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('check parameter url, query with a filter', async () => {
@@ -154,18 +147,18 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          filter: 'alert.attributes.name: hello world',
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc&filter=alert.attributes.name:%20hello%20world',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('check parameter url, query with showCustomRules', async () => {
@@ -182,18 +175,18 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          filter: 'alert.attributes.tags: "__internal_immutable:false"',
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc&filter=alert.attributes.tags:%20%22__internal_immutable:false%22',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('check parameter url, query with showElasticRules', async () => {
@@ -210,18 +203,18 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          filter: 'alert.attributes.tags: "__internal_immutable:true"',
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc&filter=alert.attributes.tags:%20%22__internal_immutable:true%22',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('check parameter url, query with tags', async () => {
@@ -238,18 +231,18 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          filter: 'alert.attributes.tags: hello AND alert.attributes.tags: world',
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc&filter=alert.attributes.tags:hello%20AND%20alert.attributes.tags:world',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('check parameter url, query with all options', async () => {
@@ -266,19 +259,19 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
-        asResponse: true,
-        method: 'GET',
-        query: {
-          filter:
-            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags: hello AND alert.attributes.tags: world',
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find?page=1&per_page=20&sort_field=enabled&sort_order=desc&filter=alert.attributes.name:%20ruleName%20AND%20alert.attributes.tags:%20%22__internal_immutable:false%22%20AND%20alert.attributes.tags:%20%22__internal_immutable:true%22%20AND%20alert.attributes.tags:hello%20AND%20alert.attributes.tags:world',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('happy path', async () => {
@@ -300,25 +293,24 @@ describe('Detections Rules API', () => {
 
   describe('fetchRuleById', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, query', async () => {
       mockfetchSuccess(null, fetchMock);
 
       await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
-        asResponse: true,
-        query: {
-          id: 'mySuperRuleId',
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules?id=mySuperRuleId', {
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
         },
         method: 'GET',
         signal: abortCtrl.signal,
@@ -342,15 +334,13 @@ describe('Detections Rules API', () => {
 
   describe('enableRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, body when enabling rules', async () => {
@@ -358,7 +348,11 @@ describe('Detections Rules API', () => {
 
       await enableRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'], enabled: true });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_update', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         body: '[{"id":"mySuperRuleId","enabled":true},{"id":"mySuperRuleId_II","enabled":true}]',
         method: 'PATCH',
       });
@@ -368,7 +362,11 @@ describe('Detections Rules API', () => {
 
       await enableRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'], enabled: false });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_update', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         body: '[{"id":"mySuperRuleId","enabled":false},{"id":"mySuperRuleId_II","enabled":false}]',
         method: 'PATCH',
       });
@@ -394,15 +392,13 @@ describe('Detections Rules API', () => {
 
   describe('deleteRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, body when deleting rules', async () => {
@@ -410,7 +406,11 @@ describe('Detections Rules API', () => {
 
       await deleteRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'] });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_delete', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         body: '[{"id":"mySuperRuleId"},{"id":"mySuperRuleId_II"}]',
         method: 'DELETE',
       });
@@ -435,15 +435,13 @@ describe('Detections Rules API', () => {
 
   describe('duplicateRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, body when duplicating rules', async () => {
@@ -451,7 +449,11 @@ describe('Detections Rules API', () => {
 
       await duplicateRules({ rules: rulesMock.data });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_create', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         body:
           '[{"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"version":1},{"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"version":1}]',
         method: 'POST',
@@ -475,15 +477,13 @@ describe('Detections Rules API', () => {
 
   describe('createPrepackagedRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url when creating pre-packaged rules', async () => {
@@ -491,7 +491,11 @@ describe('Detections Rules API', () => {
 
       await createPrepackagedRules({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         signal: abortCtrl.signal,
         method: 'PUT',
       });
@@ -526,49 +530,44 @@ describe('Detections Rules API', () => {
     const formData = new FormData();
     formData.append('file', fileToImport);
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, body and query when importing rules', async () => {
       mockfetchSuccess(null, fetchMock);
       await importRules({ fileToImport, signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_import', {
-        asResponse: true,
-        signal: abortCtrl.signal,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': undefined,
-        },
-        query: {
-          overwrite: false,
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_import?overwrite=false',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'kbn-xsrf': 'true',
+          },
+          signal: abortCtrl.signal,
+          method: 'POST',
+          body: formData,
+        }
+      );
     });
 
     test('check parameter url, body and query when importing rules with overwrite', async () => {
       mockfetchSuccess(null, fetchMock);
 
       await importRules({ fileToImport, overwrite: true, signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_import', {
-        asResponse: true,
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_import?overwrite=true', {
+        credentials: 'same-origin',
+        headers: {
+          'kbn-xsrf': 'true',
+        },
         signal: abortCtrl.signal,
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': undefined,
-        },
-        query: {
-          overwrite: true,
-        },
       });
     });
 
@@ -599,15 +598,14 @@ describe('Detections Rules API', () => {
 
   describe('exportRules', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
+        blob: () => ruleMock,
       }));
     });
 
@@ -617,16 +615,19 @@ describe('Detections Rules API', () => {
         ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
-        asResponse: true,
-        signal: abortCtrl.signal,
-        method: 'POST',
-        body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
-        query: {
-          exclude_export_details: false,
-          file_name: 'rules_export.ndjson',
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          signal: abortCtrl.signal,
+          method: 'POST',
+          body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
+        }
+      );
     });
 
     test('check parameter url, body and query when exporting rules with excludeExportDetails', async () => {
@@ -636,16 +637,19 @@ describe('Detections Rules API', () => {
         ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
-        asResponse: true,
-        signal: abortCtrl.signal,
-        method: 'POST',
-        body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
-        query: {
-          exclude_export_details: true,
-          file_name: 'rules_export.ndjson',
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_export?exclude_export_details=true&file_name=rules_export.ndjson',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          signal: abortCtrl.signal,
+          method: 'POST',
+          body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
+        }
+      );
     });
 
     test('check parameter url, body and query when exporting rules with fileName', async () => {
@@ -655,16 +659,19 @@ describe('Detections Rules API', () => {
         ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
-        asResponse: true,
-        signal: abortCtrl.signal,
-        method: 'POST',
-        body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
-        query: {
-          exclude_export_details: false,
-          file_name: 'myFileName.ndjson',
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=myFileName.ndjson',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          signal: abortCtrl.signal,
+          method: 'POST',
+          body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
+        }
+      );
     });
 
     test('check parameter url, body and query when exporting rules with all options', async () => {
@@ -675,16 +682,19 @@ describe('Detections Rules API', () => {
         ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
-        asResponse: true,
-        signal: abortCtrl.signal,
-        method: 'POST',
-        body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
-        query: {
-          exclude_export_details: true,
-          file_name: 'myFileName.ndjson',
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_export?exclude_export_details=true&file_name=myFileName.ndjson',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          signal: abortCtrl.signal,
+          method: 'POST',
+          body: '{"objects":[{"rule_id":"mySuperRuleId"},{"rule_id":"mySuperRuleId_II"}]}',
+        }
+      );
     });
 
     test('happy path', async () => {
@@ -720,29 +730,31 @@ describe('Detections Rules API', () => {
 
   describe('getRuleStatusById', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url, query', async () => {
       mockfetchSuccess(null, fetchMock);
 
       await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find_statuses', {
-        asResponse: true,
-        query: {
-          ids: '["mySuperRuleId"]',
-        },
-        method: 'GET',
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find_statuses?ids=%5B%22mySuperRuleId%22%5D',
+        {
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
     test('happy path', async () => {
       const statusMock = {
@@ -776,15 +788,13 @@ describe('Detections Rules API', () => {
 
   describe('fetchTags', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url when fetching tags', async () => {
@@ -792,7 +802,11 @@ describe('Detections Rules API', () => {
 
       await fetchTags({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/tags', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         signal: abortCtrl.signal,
         method: 'GET',
       });
@@ -815,15 +829,13 @@ describe('Detections Rules API', () => {
 
   describe('getPrePackagedRulesStatus', () => {
     beforeEach(() => {
-      mockKibanaServices.mockClear();
       fetchMock.mockClear();
       fetchMock.mockImplementation(() => ({
-        response: {
-          ok: true,
-          message: 'success',
-          text: 'success',
-        },
+        ok: true,
+        message: 'success',
+        text: 'success',
         body: ruleMock,
+        json: () => ruleMock,
       }));
     });
     test('check parameter url when fetching tags', async () => {
@@ -831,7 +843,11 @@ describe('Detections Rules API', () => {
 
       await getPrePackagedRulesStatus({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged/_status', {
-        asResponse: true,
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
         signal: abortCtrl.signal,
         method: 'GET',
       });

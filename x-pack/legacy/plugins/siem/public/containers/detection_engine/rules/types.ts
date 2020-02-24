@@ -197,3 +197,12 @@ export interface RuleInfoStatus {
   last_failure_message: string | null;
   last_success_message: string | null;
 }
+
+export type RuleStatusResponse = Record<string, RuleStatus>;
+
+export interface PrePackagedRulesStatusResponse {
+  rules_custom_installed: number;
+  rules_installed: number;
+  rules_not_installed: number;
+  rules_not_updated: number;
+}
