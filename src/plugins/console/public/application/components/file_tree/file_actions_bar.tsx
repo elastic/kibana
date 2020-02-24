@@ -89,6 +89,8 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          ownFocus
+          initialFocus={() => document.querySelector('.conAppFileNameTextField')! as HTMLElement}
           isOpen={showCreateFilePopover && !disabled}
           closePopover={() => setShowPopover(false)}
           button={

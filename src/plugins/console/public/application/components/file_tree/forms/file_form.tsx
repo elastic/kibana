@@ -51,6 +51,7 @@ export const FileForm: FunctionComponent<Props> = ({ onSubmit, isSubmitting, ini
       >
         <EuiFormRow display="rowCompressed" label="Filename">
           <EuiFieldText
+            className="conAppFileNameTextField"
             isLoading={isSubmitting}
             compressed
             isInvalid={isInvalid}

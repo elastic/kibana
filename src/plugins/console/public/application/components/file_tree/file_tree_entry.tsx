@@ -50,27 +50,37 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [nameValue, setNameValue] = useState<undefined | string>(undefined);
 
-  const renderInputField = () => (
-    <EuiFlexItem>
-      <EuiFieldText
-        className="conApp__fileTree__entry__nameInput"
-        inputRef={(ref: HTMLInputElement) => ref?.focus()}
-        compressed
-        onBlur={() => {
-          // Don't allow empty names to be saved
-          if (nameValue && onEdit) {
-            onEdit({ name: nameValue, id });
-          }
-          setNameValue(undefined);
-          setIsEditing(false);
-        }}
-        onChange={event => {
-          setNameValue(event.target.value);
-        }}
-        value={nameValue}
-      />
-    </EuiFlexItem>
-  );
+  const renderInputField = () => {
+    const handleSubmit = () => {
+      // Don't allow empty names to be saved and don't
+      // save the same name again...
+      if (nameValue && nameValue !== name && onEdit) {
+        onEdit({ name: nameValue, id });
+      }
+      setNameValue(undefined);
+      setIsEditing(false);
+    };
+    return (
+      <EuiFlexItem>
+        <EuiFieldText
+          className="conApp__fileTree__entry__nameInput"
+          inputRef={(ref: HTMLInputElement) => ref?.focus()}
+          compressed
+          onKeyDown={event => {
+            if (event.keyCode === 13 /* Enter */) {
+              event.preventDefault();
+              handleSubmit();
+            }
+          }}
+          onBlur={() => handleSubmit()}
+          onChange={event => {
+            setNameValue(event.target.value);
+          }}
+          value={nameValue}
+        />
+      </EuiFlexItem>
+    );
+  };
 
   const renderEntry = () => (
     <EuiFlexItem>
@@ -86,6 +96,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           onFocus={event => {
             if (canEdit) {
               event.stopPropagation();
+              event.preventDefault();
               setIsEditing(true);
               setNameValue(name);
             }
