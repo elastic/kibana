@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
 import { SavedObjectLoader } from '../../../../../../../plugins/saved_objects/public';
 import { VisTypeAlias } from '../vis_types';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -65,7 +65,9 @@ export async function findListItems({
     defaultSearchOperator: 'AND' as 'AND',
   };
 
-  const { total, savedObjects } = await savedObjectsClient.find(searchOptions);
+  const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
+    searchOptions
+  );
 
   return {
     total,
