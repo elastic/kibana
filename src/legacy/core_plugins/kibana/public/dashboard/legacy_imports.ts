@@ -39,4 +39,3 @@ export {
   PrivateProvider,
   PromiseServiceCreator,
 } from '../../../../../plugins/kibana_legacy/public';
-export { wrapInI18nContext } from 'ui/i18n';

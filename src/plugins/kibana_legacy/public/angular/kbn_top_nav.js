@@ -70,8 +70,8 @@ export function createTopNavDirective() {
   };
 }
 
-export const createTopNavHelper = ({ TopNavMenu }, wrapInI18nContext) => reactDirective => {
-  return reactDirective(wrapInI18nContext(TopNavMenu), [
+export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
+  return reactDirective(TopNavMenu, [
     ['config', { watchDepth: 'value' }],
     ['disabledButtons', { watchDepth: 'reference' }],
 

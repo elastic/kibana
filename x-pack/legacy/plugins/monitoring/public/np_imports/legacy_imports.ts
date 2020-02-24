@@ -21,4 +21,3 @@ export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-export { wrapInI18nContext } from 'ui/i18n';

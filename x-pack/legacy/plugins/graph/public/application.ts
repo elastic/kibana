@@ -20,11 +20,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
-import {
-  configureAppAngularModule,
-  addAppRedirectMessageToUrl,
-  wrapInI18nContext,
-} from './legacy_imports';
+import { configureAppAngularModule, addAppRedirectMessageToUrl } from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
 import {
@@ -135,7 +131,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('graphTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

@@ -23,7 +23,6 @@ import {
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   npStart,
-  wrapInI18nContext,
 } from '../legacy_imports';
 
 // @ts-ignore
@@ -135,7 +134,7 @@ function createLocalTopNavModule({ ui }: any) {
   angular
     .module('monitoring/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(ui, wrapInI18nContext));
+    .directive('kbnTopNavHelper', createTopNavHelper(ui));
 }
 
 function createLocalI18nModule() {

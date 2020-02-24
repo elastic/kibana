@@ -36,7 +36,6 @@ import {
   PrivateProvider,
   PromiseServiceCreator,
   RedirectWhenMissingProvider,
-  wrapInI18nContext,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -169,7 +168,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

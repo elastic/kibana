@@ -19,7 +19,6 @@
 
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { wrapInI18nContext } from 'ui/i18n';
 import {
   createTopNavDirective,
   createTopNavHelper,
@@ -29,7 +28,4 @@ const module = uiModules.get('kibana');
 
 module.directive('kbnTopNav', createTopNavDirective);
 
-module.directive(
-  'kbnTopNavHelper',
-  createTopNavHelper(npStart.plugins.navigation.ui, wrapInI18nContext)
-);
+module.directive('kbnTopNavHelper', createTopNavHelper(npStart.plugins.navigation.ui));

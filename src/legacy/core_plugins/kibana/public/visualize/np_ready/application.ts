@@ -32,7 +32,6 @@ import {
   PrivateProvider,
   PromiseServiceCreator,
   StateManagementConfigProvider,
-  wrapInI18nContext,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import {
@@ -167,7 +166,7 @@ function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/visualize/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui, wrapInI18nContext));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
