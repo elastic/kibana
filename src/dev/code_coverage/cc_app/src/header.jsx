@@ -13,12 +13,12 @@ export default function Header({ url }) {
       >
         <img
           src={logo}
-          className="App-logo"
+          className="App-logo inline"
           alt="logo"
           style={{ height: 20, width: 20}}
         />
 
-        Build Stats
+        <span className="text-lg">Build Stats</span>
       </a>
     </header>
   );
