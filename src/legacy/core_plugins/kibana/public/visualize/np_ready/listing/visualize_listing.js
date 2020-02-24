@@ -32,7 +32,7 @@ export function initListingDirective(app) {
   );
 }
 
-export function VisualizeListingController($injector, $scope, createNewVis) {
+export function VisualizeListingController($injector, $location, $scope, createNewVis) {
   const {
     addBasePath,
     chrome,
