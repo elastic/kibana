@@ -21,7 +21,7 @@ import url from 'url';
 
 import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 import { toastNotifications } from '../../notify/toasts';
-import { npStart } from '../../new_platform';
+import { npSetup } from '../../new_platform';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private, $location) => {
@@ -73,7 +73,7 @@ function updateUsage($event) {
   const scope = $event.targetScope;
   const app = scope.chrome.getApp();
   const appId = app.id === 'kibana' ? scope.getFirstPathSegment() : app.id;
-  if (npStart.plugins.applicationUsage) npStart.plugins.applicationUsage.__LEGACY.appChanged(appId);
+  if (npSetup.plugins.usageCollection) npSetup.plugins.usageCollection.__LEGACY.appChanged(appId);
 }
 
 /**

@@ -17,9 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { ApplicationUsagePlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ApplicationUsagePlugin(initializerContext);
-}
+export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';

@@ -18,8 +18,16 @@
  */
 
 export const mappings = {
-  application_usage: {
+  application_usage_totals: {
     properties: {
+      appId: { type: 'keyword' },
+      numberOfClicks: { type: 'long' },
+      minutesOnScreen: { type: 'float' },
+    },
+  },
+  application_usage_transactional: {
+    properties: {
+      timestamp: { type: 'date' },
       appId: { type: 'keyword' },
       numberOfClicks: { type: 'long' },
       minutesOnScreen: { type: 'float' },

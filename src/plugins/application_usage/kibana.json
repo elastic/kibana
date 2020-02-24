@@ -1,9 +1,0 @@
-{
-  "id": "applicationUsage",
-  "version": "kibana",
-  "server": true,
-  "ui": true,
-  "optionalPlugins": [
-    "usageCollection"
-  ]
-}

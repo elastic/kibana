@@ -17,18 +17,24 @@
  * under the License.
  */
 
-/*
- * Key for the localStorage service
- */
-export const LOCALSTORAGE_KEY = 'application_usage.aggregated';
-export const LOCALSTORAGE_KEY_LAST_REPORTED = 'application_usage.lastReported';
+import { Observable, Subject, merge } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { Reporter } from '@kbn/analytics';
 
 /**
  * List of appIds not to report usage from (due to legacy hacks)
  */
-export const DO_NOT_REPORT = ['kibana'];
+const DO_NOT_REPORT = ['kibana'];
 
-/**
- * Report to server every 10 minutes
- */
-export const REPORT_INTERVAL = 10 * 60 * 1000;
+export function reportApplicationUsage(
+  currentAppId$: Observable<string | undefined>,
+  reporter: Reporter
+) {
+  const customAppIdEmitter$ = new Subject<string>();
+  merge(currentAppId$, customAppIdEmitter$)
+    .pipe(
+      filter(appId => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
+      distinctUntilChanged()
+    )
+    .subscribe(appId => appId && reporter.reportApplicationUsage(appId));
+}

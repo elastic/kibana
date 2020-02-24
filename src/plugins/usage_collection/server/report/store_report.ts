@@ -17,16 +17,22 @@
  * under the License.
  */
 
+import { ISavedObjectsRepository } from 'kibana/server';
 import { ReportSchemaType } from './schema';
 
-export async function storeReport(internalRepository: any, report: ReportSchemaType) {
+export async function storeReport(
+  internalRepository: ISavedObjectsRepository,
+  report: ReportSchemaType
+) {
   const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  return Promise.all([
+  const appUsage = report.application_usage ? Object.entries(report.application_usage) : [];
+  const timestamp = new Date();
+  await Promise.all([
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
       const savedObjectId = `${key}:${userAgent}`;
-      return await internalRepository.create(
+      await internalRepository.create(
         'ui-metric',
         { count: 1 },
         {
@@ -38,7 +44,15 @@ export async function storeReport(internalRepository: any, report: ReportSchemaT
     ...uiStatsMetrics.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
-      return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+      await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+    }),
+    ...appUsage.map(async ([appId, metric]) => {
+      // Store individual values in saved objects
+      await internalRepository.create('application_usage_transactional', {
+        ...metric,
+        appId,
+        timestamp,
+      });
     }),
   ]);
 }
