@@ -22,7 +22,7 @@ import { ASYNC_DEMO_SEARCH_STRATEGY } from '../common';
 
 function getFibonacciSequence(n = 0) {
   const beginning = [0, 1].slice(0, n);
-  return Array(n)
+  return Array(Math.max(0, n))
     .fill(null)
     .reduce((sequence, value, i) => {
       if (i < 2) return sequence;

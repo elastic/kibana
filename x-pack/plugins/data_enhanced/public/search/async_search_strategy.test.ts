@@ -24,7 +24,19 @@ describe('Async search strategy', () => {
   it('only sends one request if the first response is complete', async () => {
     mockSearch.mockReturnValueOnce(of({ id: 1, total: 1, loaded: 1 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+    const asyncSearch = asyncSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+        getSearchStrategy: jest.fn().mockImplementation(() => {
+          return () => {
+            return {
+              search: mockSearch,
+            };
+          };
+        }),
+      },
+      mockSearch
+    );
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
 
@@ -39,7 +51,19 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+    const asyncSearch = asyncSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+        getSearchStrategy: jest.fn().mockImplementation(() => {
+          return () => {
+            return {
+              search: mockSearch,
+            };
+          };
+        }),
+      },
+      mockSearch
+    );
 
     expect(mockSearch).toBeCalledTimes(0);
 
@@ -53,7 +77,19 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+    const asyncSearch = asyncSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+        getSearchStrategy: jest.fn().mockImplementation(() => {
+          return () => {
+            return {
+              search: mockSearch,
+            };
+          };
+        }),
+      },
+      mockSearch
+    );
 
     expect(mockSearch).toBeCalledTimes(0);
 
@@ -70,15 +106,31 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+    const asyncSearch = asyncSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+        getSearchStrategy: jest.fn().mockImplementation(() => {
+          return () => {
+            return {
+              search: mockSearch,
+            };
+          };
+        }),
+      },
+      mockSearch
+    );
     const abortController = new AbortController();
     const options = { ...mockOptions, signal: abortController.signal };
 
     const promise = asyncSearch.search(mockRequest, options).toPromise();
     abortController.abort();
 
-    await promise;
-    expect(mockSearch).toBeCalledTimes(2);
-    expect(mockCoreSetup.http.delete).toBeCalled();
+    try {
+      await promise;
+    } catch (e) {
+      expect(e.name).toBe('AbortError');
+      expect(mockSearch).toBeCalledTimes(1);
+      expect(mockCoreSetup.http.delete).toBeCalled();
+    }
   });
 });

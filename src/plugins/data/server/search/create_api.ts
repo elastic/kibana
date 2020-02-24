@@ -46,8 +46,8 @@ export function createApi({
       if (!strategyProvider) {
         throw new Error(`No strategy found for ${strategyName}`);
       }
-      const strategy = await strategyProvider(caller);
-      return strategy.cancel ?? strategy.cancel(id);
+      const strategy = await strategyProvider(caller, api.search);
+      return strategy.cancel && strategy.cancel(id);
     },
   };
   return api;

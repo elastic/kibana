@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, timer } from 'rxjs';
-import { mergeMap, takeWhile, expand } from 'rxjs/operators';
+import { EMPTY, fromEvent, NEVER, Observable, throwError, timer } from 'rxjs';
+import { mergeMap, expand, takeUntil } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -37,19 +37,28 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       const { serverStrategy } = request;
       let id: string | undefined = request.id;
 
-      if (options.signal) {
-        options.signal.addEventListener('abort', () => {
-          // If we haven't received the response to the initial request, including the ID, then
-          // we don't need to send a follow-up request to delete this search
-          if (id === undefined) return;
+      const aborted$ = options.signal
+        ? fromEvent(options.signal, 'abort').pipe(
+            mergeMap(() => {
+              // If we haven't received the response to the initial request, including the ID, then
+              // we don't need to send a follow-up request to delete this search. Otherwise, we
+              // send the follow-up request to delete this search, then throw an abort error.
+              if (id !== undefined) {
+                context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
+              }
 
-          // Send the follow-up request to delete this search, then throw an abort error
-          context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
-        });
-      }
+              const error = new Error('Aborted');
+              error.name = 'AbortError';
+              return throwError(error);
+            })
+          )
+        : NEVER;
 
       return search(request, options).pipe(
         expand(response => {
+          // If the response indicates it is complete, stop polling and complete the observable
+          if (response.loaded >= response.total) return EMPTY;
+
           id = response.id;
           // Delay by the given poll interval
           return timer(pollInterval).pipe(
@@ -59,8 +68,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
             })
           );
         }),
-        // Continue polling until the response indicates it is complete
-        takeWhile(({ total = 1, loaded = 1 }) => loaded < total, true)
+        takeUntil(aborted$)
       );
     },
   };
