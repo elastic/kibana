@@ -72,15 +72,6 @@ export function isRoleDeprecated(role: Partial<Role>) {
 }
 
 /**
- * Returns the reason this role is deprecated.
- *
- * @param role the Role as returned by roles API
- */
-export function getRoleDeprecatedReason(role: Partial<Role>) {
-  return role.metadata?._deprecated_reason ?? '';
-}
-
-/**
  * Returns the extended deprecation notice for the provided role.
  *
  * @param role the Role as returned by roles API
@@ -123,4 +114,13 @@ export function prepareRoleClone(role: Role): Role {
   clone.name = '';
 
   return clone;
+}
+
+/**
+ * Returns the reason this role is deprecated.
+ *
+ * @param role the Role as returned by roles API
+ */
+function getRoleDeprecatedReason(role: Partial<Role>) {
+  return role.metadata?._deprecated_reason ?? '';
 }

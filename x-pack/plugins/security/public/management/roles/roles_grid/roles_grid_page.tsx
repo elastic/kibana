@@ -377,6 +377,7 @@ export class RolesGridPage extends Component<Props, State> {
   private renderToolsRight() {
     return (
       <EuiSwitch
+        data-test-subj="showReservedRolesSwitch"
         label={
           <FormattedMessage
             id="xpack.security.management.roles.showReservedRolesLabel"

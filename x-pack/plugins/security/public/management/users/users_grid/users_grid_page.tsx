@@ -194,7 +194,7 @@ export class UsersGridPage extends Component<Props, State> {
     };
     const sorting = {
       sort: {
-        field: 'full_name',
+        field: 'username',
         direction: 'asc',
       },
     } as const;
@@ -344,6 +344,7 @@ export class UsersGridPage extends Component<Props, State> {
   private renderToolsRight() {
     return (
       <EuiSwitch
+        data-test-subj="showReservedUsersSwitch"
         label={
           <FormattedMessage
             id="xpack.security.management.users.showReservedUsersLabel"

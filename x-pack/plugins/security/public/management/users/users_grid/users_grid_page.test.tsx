@@ -13,6 +13,7 @@ import { userAPIClientMock } from '../index.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { findTestSubject } from 'test_utils/find_test_subject';
+import { EuiBasicTable } from '@elastic/eui';
 
 describe('UsersGridPage', () => {
   it('renders the list of users', async () => {
@@ -166,6 +167,75 @@ describe('UsersGridPage', () => {
         "position": "top",
       }
     `);
+  });
+
+  it('hides reserved users when instructed to', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+        {
+          username: 'reserved',
+          email: 'reserved@bar.net',
+          full_name: '',
+          roles: ['superuser'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+          },
+        },
+      ]);
+    });
+
+    const roleAPIClientMock = rolesAPIClientMock.create();
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={roleAPIClientMock}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+      {
+        username: 'reserved',
+        email: 'reserved@bar.net',
+        full_name: '',
+        roles: ['superuser'],
+        enabled: true,
+        metadata: {
+          _reserved: true,
+        },
+      },
+    ]);
+
+    findTestSubject(wrapper, 'showReservedUsersSwitch').simulate('click');
+
+    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+    ]);
   });
 });
 

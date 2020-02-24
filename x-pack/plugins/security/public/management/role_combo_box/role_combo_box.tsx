@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiText } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { Role, isRoleDeprecated } from '../../../common/model';
+import { RoleComboBoxOption } from './role_combo_box_option';
 
 interface Props {
   availableRoles: Role[];
@@ -25,7 +26,7 @@ export const RoleComboBox = (props: Props) => {
 
   const roleNameToOption = (roleName: string) => {
     const roleDefinition = props.availableRoles.find(role => role.name === roleName);
-    const isDeprecated = roleDefinition && isRoleDeprecated(roleDefinition);
+    const isDeprecated: boolean = (roleDefinition && isRoleDeprecated(roleDefinition)) ?? false;
     return {
       color: isDeprecated ? 'warning' : 'default',
       'data-test-subj': `roleOption-${roleName}`,
@@ -54,20 +55,7 @@ export const RoleComboBox = (props: Props) => {
       isDisabled={props.isDisabled}
       options={options}
       selectedOptions={selectedOptions}
-      renderOption={option => {
-        const isDeprecated = option.value!.isDeprecated;
-        const deprecatedLabel = i18n.translate(
-          'xpack.security.management.users.editUser.deprecatedRoleText',
-          {
-            defaultMessage: '(deprecated)',
-          }
-        );
-        return (
-          <EuiText color={option.color as any}>
-            {option.label} {isDeprecated ? deprecatedLabel : ''}
-          </EuiText>
-        );
-      }}
+      renderOption={option => <RoleComboBoxOption option={option} />}
     />
   );
 };
