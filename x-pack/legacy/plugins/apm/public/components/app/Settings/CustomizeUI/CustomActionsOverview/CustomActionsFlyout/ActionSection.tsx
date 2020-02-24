@@ -32,9 +32,10 @@ const actionFields: ActionField[] = [
   {
     name: 'label',
     label: 'Label',
-    helpText: 'Labels can be a maximum of 128 characters',
+    helpText:
+      'Keep it as short as possible. This is the label shown in the actions context menu.',
     placeholder: 'e.g. Support tickets',
-    register: { required: true, maxLength: 128 }
+    register: { required: true }
   },
   {
     name: 'url',

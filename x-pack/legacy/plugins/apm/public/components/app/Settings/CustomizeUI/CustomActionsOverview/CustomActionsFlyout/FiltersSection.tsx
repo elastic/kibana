@@ -22,14 +22,16 @@ export interface Filter {
   value: string;
 }
 
+const DEFAULT_OPTION = {
+  value: 'DEFAULT',
+  text: i18n.translate(
+    'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
+    { defaultMessage: 'Select fields...' }
+  )
+};
+
 const filterOptions = [
-  {
-    value: 'DEFAULT',
-    text: i18n.translate(
-      'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
-      { defaultMessage: 'Select fields...' }
-    )
-  },
+  DEFAULT_OPTION,
   { value: 'service.name', text: 'service.name' },
   { value: 'service.environment', text: 'service.environment' },
   { value: 'transaction.type', text: 'transaction.type' },
@@ -174,7 +176,10 @@ const Filters = ({
                     idx
                   )
                 }
-                isInvalid={isEmpty(filter.key) && !isEmpty(filter.value)}
+                isInvalid={
+                  !isEmpty(filter.value) &&
+                  (isEmpty(filter.key) || filter.key === DEFAULT_OPTION.value)
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem>
