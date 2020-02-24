@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
@@ -118,7 +118,7 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    const existingObject = await this.savedObjectsClient.get('action', id);
+    const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -144,13 +144,13 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
-    const result = await this.savedObjectsClient.get('action', id);
+    const result = await this.savedObjectsClient.get<RawAction>('action', id);
 
     return {
       id,
-      actionTypeId: result.attributes.actionTypeId as string,
-      name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, any>,
+      actionTypeId: result.attributes.actionTypeId,
+      name: result.attributes.name,
+      config: result.attributes.config,
     };
   }
 

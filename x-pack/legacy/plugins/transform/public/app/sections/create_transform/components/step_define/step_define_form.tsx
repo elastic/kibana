@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { TransformPivotConfig } from '../../../../common';
+import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
@@ -383,7 +384,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
     stringifiedPivotConfig
   );
-  const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+
+  const {
+    convertToJson,
+    setXJson: setAdvancedEditorConfig,
+    xJson: advancedEditorConfig,
+  } = useXJsonMode(stringifiedPivotConfig);
+
   // source config
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
   const [
@@ -407,7 +414,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   };
 
   const applyAdvancedPivotEditorChanges = () => {
-    const pivotConfig = JSON.parse(advancedEditorConfig);
+    const pivotConfig = JSON.parse(convertToJson(advancedEditorConfig));
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
@@ -442,10 +449,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       });
     }
     setAggList(newAggList);
-    const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
 
-    setAdvancedEditorConfig(prettyPivotConfig);
-    setAdvancedEditorConfigLastApplied(prettyPivotConfig);
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
     setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
@@ -513,13 +518,11 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
       pivotAggsArr
     );
 
-    const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
     const stringifiedSourceConfigUpdate = JSON.stringify(
       previewRequestUpdate.source.query,
       null,
       2
     );
-    setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
     setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
 
     onChange({
@@ -784,7 +787,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                 >
                   <EuiPanel grow={false} paddingSize="none">
                     <EuiCodeEditor
-                      mode="json"
+                      mode={xJsonMode}
                       width="100%"
                       value={advancedEditorConfig}
                       onChange={(d: string) => {
@@ -799,7 +802,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
                         // Try to parse the string passed on from the editor.
                         // If parsing fails, the "Apply"-Button will be disabled
                         try {
-                          JSON.parse(d);
+                          JSON.parse(convertToJson(d));
                           setAdvancedPivotEditorApplyButtonEnabled(true);
                         } catch (e) {
                           setAdvancedPivotEditorApplyButtonEnabled(false);

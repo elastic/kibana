@@ -96,12 +96,12 @@
         }
       }
 
-      &--toggle {
-        padding-left: 0;
+      &--multiField {
+        padding-left: $euiSizeL;
       }
 
-      &--multiField {
-        padding-left: $euiSizeS;
+      &--toggle {
+        padding-left: 0;
       }
     }
 }
