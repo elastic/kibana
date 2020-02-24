@@ -51,7 +51,7 @@ function getMultiline(results: any) {
 }
 
 function getProcessors(results: any) {
-  return results.need_client_timezone === true ? ['processors:', '- add_locale: ~'] : [];
+  return results.need_client_timezone === true ? ['processors:', '- add_locale: ~', ''] : [];
 }
 
 function getHosts(results: any) {
