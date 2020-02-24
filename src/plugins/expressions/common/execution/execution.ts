@@ -197,9 +197,9 @@ export class Execution<
       }
 
       const { function: fnName, arguments: fnArgs } = link;
-      const fnDef = getByAlias(this.state.get().functions, fnName);
+      const fn = getByAlias(this.state.get().functions, fnName);
 
-      if (!fnDef) {
+      if (!fn) {
         return createError({ message: `Function ${fnName} could not be found.` });
       }
 
@@ -209,15 +209,16 @@ export class Execution<
       try {
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
-        const { resolvedArgs } = await this.resolveArgs(fnDef, input, fnArgs);
+        const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
         args = resolvedArgs;
-        timeStart = this.params.debug ? Date.now() : 0;
-        const output = await this.invokeFunction(fnDef, input, resolvedArgs);
+        timeStart = this.params.debug ? performance.now() : 0;
+        const output = await this.invokeFunction(fn, input, resolvedArgs);
 
         if (this.params.debug) {
-          const timeEnd: number = Date.now();
+          const timeEnd: number = performance.now();
           (link as ExpressionAstFunction).debug = {
             success: true,
+            fn,
             input,
             args: resolvedArgs,
             output,
@@ -228,13 +229,14 @@ export class Execution<
         if (getType(output) === 'error') return output;
         input = output;
       } catch (rawError) {
-        const timeEnd: number = this.params.debug ? Date.now() : 0;
+        const timeEnd: number = this.params.debug ? performance.now() : 0;
         rawError.message = `[${fnName}] > ${rawError.message}`;
         const error = createError(rawError) as ExpressionValueError;
 
         if (this.params.debug) {
           (link as ExpressionAstFunction).debug = {
             success: false,
+            fn,
             input,
             args,
             error,

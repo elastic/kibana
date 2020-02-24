@@ -18,6 +18,7 @@
  */
 
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
+import { ExpressionFunction } from '../../public';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression
@@ -45,6 +46,11 @@ export interface ExpressionAstFunctionDebug {
    * True if function successfully returned output, false if function threw.
    */
   success: boolean;
+
+  /**
+   * Reference to the expression function this AST node represents.
+   */
+  fn: ExpressionFunction;
 
   /**
    * Input that expression function received as its first argument.

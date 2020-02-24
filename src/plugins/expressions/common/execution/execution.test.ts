@@ -23,6 +23,12 @@ import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../../public';
 import { ExecutionContract } from './execution_contract';
 
+beforeAll(() => {
+  if (typeof performance === 'undefined') {
+    (global as any).performance = { now: Date.now };
+  }
+});
+
 const createExecution = (
   expression: string = 'foo bar=123',
   context: Record<string, unknown> = {},
@@ -445,6 +451,16 @@ describe('Execution', () => {
         }
       });
 
+      test('stores "fn" reference to the function', async () => {
+        const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
+        execution.start(-1);
+        await execution.result;
+
+        for (const node of execution.state.get().ast.chain) {
+          expect(node.debug?.fn.name).toBe('add');
+        }
+      });
+
       test('saves duration it took to execute each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
@@ -465,7 +481,7 @@ describe('Execution', () => {
         const node = execution.state.get().ast.chain[0];
         expect(typeof node.debug?.duration).toBe('number');
         expect(node.debug?.duration).toBeLessThan(50);
-        expect(node.debug?.duration).toBeGreaterThanOrEqual(10);
+        expect(node.debug?.duration).toBeGreaterThanOrEqual(5);
       });
 
       test('adds .debug field in expression AST on each executed function', async () => {
@@ -541,7 +557,7 @@ describe('Execution', () => {
         );
       });
 
-      test('sore debug information about sub-expressions', async () => {
+      test('store debug information about sub-expressions', async () => {
         const execution = createExecution(
           'add val={var_set name=foo value=5 | var name=foo} | add val=10',
           {},
@@ -627,6 +643,7 @@ describe('Execution', () => {
 
         expect(node2.debug).toMatchObject({
           success: false,
+          fn: expect.any(Object),
           input: expect.any(Object),
           args: expect.any(Object),
           error: expect.any(Object),
