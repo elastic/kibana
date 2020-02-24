@@ -100,7 +100,7 @@ async function attemptToCreateCommand(
           chromeOptions.push('headless', 'disable-gpu');
         }
         if (certValidation === '0') {
-          chromeOptions.push('headless', 'disable-gpu', 'ignore-certificate-errors');
+          chromeOptions.push('ignore-certificate-errors');
         }
         if (remoteDebug === '1') {
           // Visit chrome://inspect in chrome to remotely view/debug
