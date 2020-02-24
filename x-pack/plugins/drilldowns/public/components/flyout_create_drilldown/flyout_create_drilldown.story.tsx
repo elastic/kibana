@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
+
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
@@ -11,12 +13,12 @@ import { FlyoutCreateDrilldown } from '.';
 
 storiesOf('components/FlyoutCreateDrilldown', module)
   .add('default', () => {
-    return <FlyoutCreateDrilldown />;
+    return <FlyoutCreateDrilldown context={{} as any} />;
   })
   .add('open in flyout', () => {
     return (
       <EuiFlyout>
-        <FlyoutCreateDrilldown />
+        <FlyoutCreateDrilldown context={{} as any} />
       </EuiFlyout>
     );
   });

@@ -10,6 +10,9 @@ export interface DrilldownHelloBarProps {
   docsLink?: string;
 }
 
+/**
+ * @todo https://github.com/elastic/kibana/issues/55311
+ */
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink }) => {
   return (
     <div>
@@ -18,10 +21,6 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink }
         can add multiple options or simply override the default filtering behavior.
       </p>
       <a href={docsLink}>View docs</a>
-      <img
-        src="https://user-images.githubusercontent.com/9773803/72729009-e5803180-3b8e-11ea-8330-b86089bf5f0a.png"
-        alt=""
-      />
     </div>
   );
 };
