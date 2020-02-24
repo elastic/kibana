@@ -28,7 +28,7 @@ export async function saveConfig({
   captureBody,
   transactionMaxSpans,
   agentName,
-  existingConfig,
+  isExistingConfig,
   toasts,
   trackApmEvent
 }: {
@@ -39,7 +39,7 @@ export async function saveConfig({
   captureBody: string;
   transactionMaxSpans: string;
   agentName?: string;
-  existingConfig: boolean;
+  isExistingConfig: boolean;
   toasts: NotificationsStart['toasts'];
   trackApmEvent: UiTracker;
 }) {
@@ -68,7 +68,7 @@ export async function saveConfig({
       pathname: '/api/apm/settings/agent-configuration',
       method: 'PUT',
       params: {
-        query: { overwrite: existingConfig },
+        query: { overwrite: isExistingConfig },
         body: configuration
       }
     });
