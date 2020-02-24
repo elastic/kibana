@@ -5,11 +5,16 @@
  */
 
 import { ManagementListPagination } from '../../types';
-import { EndpointResultList } from '../../../../../common/types';
+import { EndpointResultList, EndpointMetadata } from '../../../../../common/types';
 
 interface ServerReturnedManagementList {
   type: 'serverReturnedManagementList';
   payload: EndpointResultList;
+}
+
+interface ServerReturnedManagementDetails {
+  type: 'serverReturnedManagementDetails';
+  payload: EndpointMetadata;
 }
 
 interface UserExitedManagementList {
@@ -23,5 +28,6 @@ interface UserPaginatedManagementList {
 
 export type ManagementAction =
   | ServerReturnedManagementList
+  | ServerReturnedManagementDetails
   | UserExitedManagementList
   | UserPaginatedManagementList;

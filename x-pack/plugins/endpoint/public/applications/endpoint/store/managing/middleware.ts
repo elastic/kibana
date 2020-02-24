@@ -5,7 +5,13 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import { pageIndex, pageSize, isOnManagementPage, hasSelectedHost } from './selectors';
+import {
+  pageIndex,
+  pageSize,
+  isOnManagementPage,
+  hasSelectedHost,
+  uiQueryParams,
+} from './selectors';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 
@@ -29,6 +35,14 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
       response.request_page_index = managementPageIndex;
       dispatch({
         type: 'serverReturnedManagementList',
+        payload: response,
+      });
+    }
+    if (action.type === 'userChangedUrl' && hasSelectedHost !== undefined) {
+      const { selected_host: selectedHost } = uiQueryParams(getState());
+      const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+      dispatch({
+        type: 'serverReturnedManagementDetails',
         payload: response,
       });
     }
