@@ -19,11 +19,10 @@
 
 export { PersistedState } from '../../../ui/public/persisted_state';
 export {
-  AggConfigs,
   IAggConfig,
   IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
-} from '../../../ui/public/agg_types';
+} from '../../data/public/';
 import '../../../ui/public/directives/bind';
 export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';

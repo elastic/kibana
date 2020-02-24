@@ -66,6 +66,7 @@ export {
   convertIPRangeToString,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
+  setBounds,
   isStringType,
   isType,
   isValidInterval,
