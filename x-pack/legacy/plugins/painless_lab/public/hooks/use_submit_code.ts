@@ -14,10 +14,8 @@ import { executeCode } from '../lib/execute_code';
 const DEBOUNCE_MS = 800;
 
 export const useSubmitCode = (http: HttpSetup) => {
-  // .then off the same promise reference to enforce sequential
-  // execution
   const currentRequestIdRef = useRef(0);
-  const [response, setResponse] = useState<null | Response>(null);
+  const [response, setResponse] = useState<Response | undefined>(undefined);
   const [inProgress, setInProgress] = useState(false);
 
   const submit = useCallback(

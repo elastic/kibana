@@ -21,11 +21,11 @@ import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';
 
 interface Props {
-  response: Response | null;
   context: Context;
   contextSetup: ContextSetup;
   isLoading: boolean;
   onContextChange: ContextChangeHandler;
+  response?: Response;
 }
 
 export function OutputPane({ response, context, contextSetup, onContextChange, isLoading }: Props) {
