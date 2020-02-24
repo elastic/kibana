@@ -18,7 +18,6 @@ import {
   SERVICE_NODE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
-import { PromiseReturnType } from '../../../typings/common';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -31,10 +30,6 @@ interface TaskParameters {
   minutes: number;
   filter: ESFilter[];
 }
-
-export type ServiceNodeMetrics = PromiseReturnType<
-  typeof getServiceMapServiceNodeInfo
->;
 
 export async function getServiceMapServiceNodeInfo({
   serviceName,

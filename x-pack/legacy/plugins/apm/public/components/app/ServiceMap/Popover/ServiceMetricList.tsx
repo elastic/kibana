@@ -15,8 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/server/lib/service_map/get_service_map_service_node_info';
+import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
 import {
   asDuration,
   asPercent,

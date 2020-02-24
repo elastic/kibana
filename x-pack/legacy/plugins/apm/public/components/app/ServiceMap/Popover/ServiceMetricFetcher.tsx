@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
+import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
@@ -26,16 +26,7 @@ export function ServiceMetricFetcher({
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: {
-            path: {
-              serviceName
-            },
-            query: {
-              start,
-              end,
-              environment
-            }
-          }
+          params: { path: { serviceName }, query: { start, end, environment } }
         });
       }
     },
