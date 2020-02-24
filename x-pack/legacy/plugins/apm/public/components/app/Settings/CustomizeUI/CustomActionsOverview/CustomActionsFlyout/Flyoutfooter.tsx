@@ -12,8 +12,19 @@ import {
   EuiButton
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DeleteButton } from './DeleteButton';
 
-export const FlyoutFooter = ({ onClose }: { onClose: () => void }) => {
+export const FlyoutFooter = ({
+  onClose,
+  isLoading,
+  onDelete,
+  customActionId
+}: {
+  onClose: () => void;
+  isLoading: boolean;
+  onDelete: () => void;
+  customActionId?: string;
+}) => {
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -28,14 +39,26 @@ export const FlyoutFooter = ({ onClose }: { onClose: () => void }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill type="submit">
-            {i18n.translate(
-              'xpack.apm.settings.customizeUI.customActions.flyout.save',
-              {
-                defaultMessage: 'Save'
-              }
+          <EuiFlexGroup>
+            {customActionId && (
+              <EuiFlexItem>
+                <DeleteButton
+                  customActionId={customActionId}
+                  onDelete={onDelete}
+                />
+              </EuiFlexItem>
             )}
-          </EuiButton>
+            <EuiFlexItem>
+              <EuiButton fill type="submit" isLoading={isLoading}>
+                {i18n.translate(
+                  'xpack.apm.settings.customizeUI.customActions.flyout.save',
+                  {
+                    defaultMessage: 'Save'
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

@@ -13,7 +13,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
@@ -21,12 +21,14 @@ import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { ActionSection } from './ActionSection';
 import { Filter, FiltersSection } from './FiltersSection';
-import { FlyoutFooter } from './Flyoutfooter';
+import { FlyoutFooter } from './FlyoutFooter';
 import { saveCustomAction } from './saveCustomAction';
 
 interface Props {
   onClose: () => void;
   customActionSelected?: CustomAction;
+  onSave: () => void;
+  onDelete: () => void;
 }
 
 export interface CustomActionFormData extends Omit<CustomAction, 'filters'> {
@@ -44,7 +46,7 @@ const convertFiltersToArray = (filters?: CustomAction['filters']) => {
 const convertFiltersToObject = (
   filters: CustomActionFormData['filters']
 ): CustomAction['filters'] => {
-  if (filters.length) {
+  if (filters && filters.length) {
     return filters
       .filter(({ key, value }) => !isEmpty(key) && !isEmpty(value))
       .reduce((acc: Record<string, string>, { key, value }) => {
@@ -56,9 +58,12 @@ const convertFiltersToObject = (
 
 export const CustomActionsFlyout = ({
   onClose,
-  customActionSelected
+  customActionSelected,
+  onSave,
+  onDelete
 }: Props) => {
   const callApmApiFromHook = useCallApmApi();
+  const [isLoading, setIsLoading] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
   const { register, handleSubmit, errors, control, watch } = useForm<
     CustomActionFormData
@@ -69,23 +74,27 @@ export const CustomActionsFlyout = ({
     }
   });
 
-  const onSubmit = handleSubmit((customAction: CustomActionFormData) => {
-    saveCustomAction({
+  const onSubmit = async (customAction: CustomActionFormData) => {
+    setIsLoading(true);
+    await saveCustomAction({
       callApmApi: callApmApiFromHook,
       customAction: {
+        ...customActionSelected,
         ...customAction,
         filters: convertFiltersToObject(customAction.filters)
       },
       toasts
     });
-  });
+    setIsLoading(false);
+    onSave();
+  };
   // Watch for any change on filters to render the component
   const filters = watch('filters');
 
   return (
     <EuiPortal>
       <EuiFlyout ownFocus onClose={onClose} size="m">
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2>
@@ -124,7 +133,12 @@ export const CustomActionsFlyout = ({
             />
           </EuiFlyoutBody>
 
-          <FlyoutFooter onClose={onClose} />
+          <FlyoutFooter
+            onClose={onClose}
+            isLoading={isLoading}
+            onDelete={onDelete}
+            customActionId={customActionSelected?.id}
+          />
         </form>
       </EuiFlyout>
     </EuiPortal>

@@ -21,7 +21,7 @@ export const CustomActionsOverview = () => {
     CustomAction | undefined
   >();
 
-  const { data: customActions } = useFetcher(
+  const { data: customActions, refetch } = useFetcher(
     callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-actions' }),
     []
   );
@@ -49,6 +49,14 @@ export const CustomActionsOverview = () => {
         <CustomActionsFlyout
           onClose={onCloseFlyout}
           customActionSelected={customActionSelected}
+          onSave={() => {
+            onCloseFlyout();
+            refetch();
+          }}
+          onDelete={() => {
+            onCloseFlyout();
+            refetch();
+          }}
         />
       )}
       <EuiPanel>
