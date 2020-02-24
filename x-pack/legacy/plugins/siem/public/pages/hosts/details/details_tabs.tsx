@@ -24,7 +24,7 @@ import {
   HostAlertsQueryTabBody,
 } from '../navigation';
 
-const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
+export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     pageFilters,
     deleteQuery,
@@ -105,5 +105,3 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 );
 
 HostDetailsTabs.displayName = 'HostDetailsTabs';
-
-export { HostDetailsTabs };

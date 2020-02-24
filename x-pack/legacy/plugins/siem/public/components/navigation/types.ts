@@ -7,8 +7,8 @@
 import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../store/hosts/model';
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { CONSTANTS, UrlStateType } from '../url_state/constants';
-import { Timeline } from '../url_state/types';
 
 export interface SiemNavigationProps {
   display?: 'default' | 'condensed';
@@ -24,7 +24,7 @@ export interface SiemNavigationComponentProps {
     [CONSTANTS.filters]?: Filter[];
     [CONSTANTS.savedQuery]?: string;
     [CONSTANTS.timerange]: UrlInputsModel;
-    [CONSTANTS.timeline]: Timeline;
+    [CONSTANTS.timeline]: TimelineUrl;
   };
 }
 

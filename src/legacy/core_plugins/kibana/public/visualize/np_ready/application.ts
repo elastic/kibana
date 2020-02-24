@@ -22,8 +22,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
 import {
-  AppStateProvider,
-  AppState,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
@@ -45,7 +43,7 @@ import { VisualizeKibanaServices } from '../kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (
+export const renderApp = (
   element: HTMLElement,
   appBasePath: string,
   deps: VisualizeKibanaServices
@@ -58,7 +56,6 @@ export const renderApp = async (
       { core: deps.core, env: deps.pluginInitializerContext.env },
       true
     );
-    // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);
@@ -117,12 +114,6 @@ function createLocalStateModule() {
       'app/visualize/Promise',
       'app/visualize/PersistedState',
     ])
-    .factory('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: IPrivate) {
-      return Private<AppState>(AppStateProvider).getAppState;
-    })
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
     });

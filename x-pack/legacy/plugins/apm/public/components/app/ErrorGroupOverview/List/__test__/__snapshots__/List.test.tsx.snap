@@ -120,10 +120,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>
@@ -478,10 +475,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>
