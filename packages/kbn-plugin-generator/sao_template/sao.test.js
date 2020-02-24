@@ -31,7 +31,7 @@ function getFileContents(file) {
   return file.contents.toString();
 }
 
-describe('plugin generator sao integration', () => {
+describe.skip('plugin generator sao integration', () => {
   test('skips files when answering no', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: false,
