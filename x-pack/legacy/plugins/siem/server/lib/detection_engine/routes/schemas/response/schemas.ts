@@ -104,7 +104,6 @@ export const threat = t.array(
     technique: threat_techniques,
   })
 );
-
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
@@ -113,3 +112,14 @@ export const version = Version;
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
 export const status_date = IsoDateString;
+export const rules_installed = PositiveInteger;
+export const rules_updated = PositiveInteger;
+export const status_code = PositiveInteger;
+export const message = t.string;
+export const perPage = PositiveInteger;
+export const total = PositiveInteger;
+export const success = t.boolean;
+export const success_count = PositiveInteger;
+export const rules_custom_installed = PositiveInteger;
+export const rules_not_installed = PositiveInteger;
+export const rules_not_updated = PositiveInteger;

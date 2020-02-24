@@ -6,7 +6,8 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError, transformValidate } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';

@@ -8,9 +8,8 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from './exact_check';
-import { createRulesSchema, CreateRulesSchema } from './create_rules_response_schema';
+import { rulesSchema, RulesSchema } from './rules_schema';
 import { foldLeftRight, getBaseResponsePayload } from './__mocks__/utils';
-import { RulesSchema } from './rules_schema';
 import { getPaths } from './utils';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
@@ -19,10 +18,10 @@ describe('create_rules_schema_output', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getBaseResponsePayload();
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    const expected: CreateRulesSchema = getBaseResponsePayload();
+    const expected: RulesSchema = getBaseResponsePayload();
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(expected);
@@ -32,7 +31,7 @@ describe('create_rules_schema_output', () => {
     const payload: RulesSchema & { invalid_extra_data?: string } = getBaseResponsePayload();
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -44,7 +43,7 @@ describe('create_rules_schema_output', () => {
     const payload: Omit<RulesSchema, 'type'> & { type: string } = getBaseResponsePayload();
     payload.type = 'invalid_data';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -59,7 +58,7 @@ describe('create_rules_schema_output', () => {
     payload.type = 'query';
     payload.saved_id = 'save id 123';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -72,7 +71,7 @@ describe('create_rules_schema_output', () => {
     payload.type = 'saved_query';
     payload.saved_id = 'save id 123';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     const expected = getBaseResponsePayload();
@@ -89,7 +88,7 @@ describe('create_rules_schema_output', () => {
     payload.type = 'saved_query';
     delete payload.saved_id;
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -105,7 +104,7 @@ describe('create_rules_schema_output', () => {
     payload.saved_id = 'save id 123';
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -118,7 +117,7 @@ describe('create_rules_schema_output', () => {
     payload.timeline_id = 'some timeline id';
     payload.timeline_title = 'some timeline title';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     const expected = getBaseResponsePayload();
@@ -135,7 +134,7 @@ describe('create_rules_schema_output', () => {
     payload.timeline_title = 'some timeline title';
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -147,7 +146,7 @@ describe('create_rules_schema_output', () => {
     const payload = getBaseResponsePayload();
     payload.timeline_id = 'some timeline id';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -161,7 +160,7 @@ describe('create_rules_schema_output', () => {
     const payload = getBaseResponsePayload();
     payload.timeline_title = 'some timeline title';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -175,7 +174,7 @@ describe('create_rules_schema_output', () => {
     payload.type = 'saved_query';
     payload.timeline_title = 'some timeline title';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -189,7 +188,7 @@ describe('create_rules_schema_output', () => {
     payload.type = 'saved_query';
     payload.timeline_id = 'some timeline id';
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 

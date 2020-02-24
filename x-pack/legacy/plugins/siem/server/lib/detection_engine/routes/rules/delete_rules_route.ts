@@ -11,7 +11,9 @@ import { deleteRules } from '../../rules/delete_rules';
 import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transformValidate } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';

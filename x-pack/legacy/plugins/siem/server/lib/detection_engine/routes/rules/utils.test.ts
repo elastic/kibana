@@ -88,7 +88,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -151,7 +150,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -216,7 +214,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -281,7 +278,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -344,7 +340,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -410,7 +405,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -476,7 +470,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -542,7 +535,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
@@ -694,7 +686,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         version: 1,
@@ -776,7 +767,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         version: 1,
@@ -939,7 +929,6 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         version: 1,
@@ -1029,7 +1018,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'rule-1',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [
@@ -1089,7 +1077,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'rule-1',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [
@@ -1138,7 +1125,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'some other id',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [

@@ -10,7 +10,8 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { transformValidateBulkError, getIdBulkError } from './utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validateRulesBulkSchema } from './validate';
 import { transformBulkError } from '../utils';
 import { QueryBulkRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
@@ -67,7 +68,17 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
           }
         })
       );
-      return rules;
+      const validate = validateRulesBulkSchema(rules);
+      if (validate.errors != null) {
+        return headers
+          .response({
+            message: validate.errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validate.transformed;
+      }
     },
   };
 };

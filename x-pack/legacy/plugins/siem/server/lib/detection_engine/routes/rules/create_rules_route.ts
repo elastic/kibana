@@ -15,7 +15,8 @@ import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../r
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transformValidate } from './utils';
+import { transformValidate } from './validate';
+
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 

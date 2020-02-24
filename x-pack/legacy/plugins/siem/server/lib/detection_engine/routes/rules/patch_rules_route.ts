@@ -12,7 +12,9 @@ import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '..
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transformValidate } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 

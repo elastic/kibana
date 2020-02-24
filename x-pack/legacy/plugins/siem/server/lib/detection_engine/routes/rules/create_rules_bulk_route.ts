@@ -14,7 +14,8 @@ import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
-import { transformValidateBulkError, getDuplicates } from './utils';
+import { getDuplicates } from './utils';
+import { transformValidateBulkError, validateRulesBulkSchema } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
@@ -136,7 +137,7 @@ export const createCreateRulesBulkRoute = (
             }
           })
       );
-      return [
+      const rulesBulk = [
         ...rules,
         ...dupes.map(ruleId =>
           createBulkErrorObject({
@@ -146,6 +147,17 @@ export const createCreateRulesBulkRoute = (
           })
         ),
       ];
+      const validate = validateRulesBulkSchema(rulesBulk);
+      if (validate.errors != null) {
+        return headers
+          .response({
+            message: validate.errors,
+            status_code: 500,
+          })
+          .code(500);
+      } else {
+        return validate.transformed;
+      }
     },
   };
 };

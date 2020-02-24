@@ -5,9 +5,11 @@
  */
 
 /* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
+import { isObject } from 'lodash/fp';
+import { Either } from 'fp-ts/lib/Either';
 
+import { checkTypeDependents } from './check_type_dependents';
 import {
   description,
   enabled,
@@ -113,12 +115,34 @@ export const partialRulesSchema = t.partial({
 });
 
 /**
- * This is the rules schema with all base and all optional properties
- * on it merged together
+ * This is the rules schema WITHOUT typeDependents. You don't normally want to use this for a decode
  */
-export const rulesSchema = t.intersection([
+export const rulesWithoutTypeDependentsSchema = t.intersection([
   t.exact(dependentRulesSchema),
   t.exact(partialRulesSchema),
   t.exact(requiredRulesSchema),
 ]);
+export type RulesWithoutTypeDependentsSchema = t.TypeOf<typeof rulesWithoutTypeDependentsSchema>;
+
+/**
+ * This is the rulesSchema you want to use for checking type dependents and all the properties
+ * through: rulesSchema.decode(someJSONObject)
+ */
+export const rulesSchema = new t.Type<
+  RulesWithoutTypeDependentsSchema,
+  RulesWithoutTypeDependentsSchema,
+  unknown
+>(
+  'RulesSchema',
+  (input: unknown): input is RulesWithoutTypeDependentsSchema => isObject(input),
+  (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
+    return checkTypeDependents(input);
+  },
+  t.identity
+);
+
+/**
+ * This is the correct type you want to use for Rules that are outputted from the
+ * REST interface. This has all base and all optional properties merged together.
+ */
 export type RulesSchema = t.TypeOf<typeof rulesSchema>;

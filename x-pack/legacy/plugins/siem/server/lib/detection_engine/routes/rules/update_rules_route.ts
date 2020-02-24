@@ -10,7 +10,9 @@ import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '.
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
-import { getIdError, transformValidate } from './utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
+
 import { transformError, getIndex } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
