@@ -26,15 +26,28 @@ describe('children events query', () => {
                 term: { 'event.category': 'process' },
               },
               {
-                term: { 'event.type': 'process_start' },
+                term: { 'event.kind': 'event' },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      term: { 'event.type': 'process_start' },
+                    },
+                    {
+                      term: { 'event.action': 'fork_event' },
+                    },
+                  ],
+                },
               },
             ],
           },
         },
         aggs: {
-          total: {
-            value_count: {
-              field: 'endgame.serial_event_id',
+          totals: {
+            terms: {
+              field: 'endgame.unique_ppid',
+              size: 1,
             },
           },
         },
@@ -57,19 +70,13 @@ describe('children events query', () => {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.parent.entity_id': ['baz'] },
-                    },
-                    {
-                      terms: { 'process.parent.entity_id': ['baz'] },
-                    },
-                  ],
-                },
+                terms: { 'process.parent.entity_id': ['baz'] },
               },
               {
                 term: { 'event.category': 'process' },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 term: { 'event.type': 'start' },
@@ -78,9 +85,10 @@ describe('children events query', () => {
           },
         },
         aggs: {
-          total: {
-            value_count: {
-              field: 'event.id',
+          totals: {
+            terms: {
+              field: 'process.parent.entity_id',
+              size: 1,
             },
           },
         },

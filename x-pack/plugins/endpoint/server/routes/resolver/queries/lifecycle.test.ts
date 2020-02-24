@@ -20,11 +20,15 @@ describe('lifecycle query', () => {
                 term: { 'agent.id': 'awesome-id' },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.category': 'process' },
               },
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
@@ -50,11 +54,15 @@ describe('lifecycle query', () => {
                 },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.category': 'process' },
               },
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: EndpointAppConstants.EVENT_INDEX_NAME,

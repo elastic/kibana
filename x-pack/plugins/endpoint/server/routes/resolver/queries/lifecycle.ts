@@ -62,6 +62,7 @@ export class LifecycleQuery extends ResolverQuery {
             ],
           },
         },
+        size: 10000, // give the max hits we can return
         sort: [{ '@timestamp': 'asc' }],
       },
       index,

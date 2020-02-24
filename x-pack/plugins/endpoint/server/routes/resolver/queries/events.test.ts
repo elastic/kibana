@@ -23,6 +23,9 @@ describe('related events query', () => {
                 term: { 'agent.id': 'awesome-id' },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 bool: {
                   must_not: {
                     term: { 'event.category': 'process' },
@@ -33,9 +36,10 @@ describe('related events query', () => {
           },
         },
         aggs: {
-          total: {
-            value_count: {
-              field: 'endgame.serial_event_id',
+          totals: {
+            terms: {
+              field: 'endgame.unique_pid',
+              size: 1,
             },
           },
         },
@@ -58,16 +62,10 @@ describe('related events query', () => {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': ['baz'] },
-                    },
-                    {
-                      terms: { 'process.entity_id': ['baz'] },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': ['baz'] },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 bool: {
@@ -80,9 +78,10 @@ describe('related events query', () => {
           },
         },
         aggs: {
-          total: {
-            value_count: {
-              field: 'event.id',
+          totals: {
+            terms: {
+              field: 'process.entity_id',
+              size: 1,
             },
           },
         },
