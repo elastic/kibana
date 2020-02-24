@@ -4,45 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import {
-  BarSeries,
   BrushEndListener,
   Chart,
-  getSpecId,
-  RectAnnotation,
-  ScaleType,
   Settings,
-  Theme,
-  TooltipType
+  TooltipType,
+  BarSeries,
+  getSpecId,
+  ScaleType,
+  RectAnnotation,
+  Theme
 } from '@elastic/charts';
-import '@elastic/charts/dist/theme_light.css';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { getWaterfall } from './app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import response from './scrubber.data.json';
+import { IWaterfall } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 
-// The contents of scrubber.data.json is was directly copied from a trace API
-// response, originally http://localhost:5601/kbn/api/apm/traces/21bd90461ba6355df98352070360f5f7?start=2020-01-23T17%3A33%3A56.839Z&end=2020-02-24T17%3A33%3A56.840Z
-// You can paste the contents of any trace to see the response.
-const entryTransactionId = '6528d29667c22f62';
-const waterfall = getWaterfall(response, entryTransactionId);
+type Selection = [number, number] | [undefined, undefined];
 
-const data = waterfall.items.map((item, index) => ({
-  ...item,
-  min: item.offset + item.skew,
-  max: item.offset + item.duration,
-  x: index
-}));
-console.log({ data });
-const chartTheme: Partial<Theme> = {
-  chartPaddings: { left: 0, top: 0, bottom: 0, right: 0 },
-  chartMargins: { left: 0, top: 0, bottom: 0, right: 0 },
-  scales: { barsPadding: 0, histogramPadding: 0 }
-};
-const maxY = Math.max(...data.map(item => item.max));
+interface SelectionTextProps {
+  selection: Selection;
+  resetSelection: () => void;
+}
 
-function SelectionAnnotation({ selection }: { selection: Selection }) {
+function SelectionAnnotation({
+  maxY,
+  selection,
+  waterfall
+}: {
+  maxY: number;
+  selection: Selection;
+  waterfall: IWaterfall;
+}) {
   const x0 = 0;
   const x1 = selection[0] ? waterfall.items.length - 1 : 0;
   const y1left = (selection[0] ?? 0) * 100;
@@ -81,13 +73,6 @@ function SelectionAnnotation({ selection }: { selection: Selection }) {
   );
 }
 
-type Selection = [number, number] | [undefined, undefined];
-
-interface SelectionTextProps {
-  selection: Selection;
-  resetSelection: () => void;
-}
-
 function SelectionText({ selection, resetSelection }: SelectionTextProps) {
   return (
     <div
@@ -109,15 +94,32 @@ function SelectionText({ selection, resetSelection }: SelectionTextProps) {
   );
 }
 
-function TimelineScrubber() {
+const chartTheme: Partial<Theme> = {
+  chartPaddings: { left: 0, top: 0, bottom: 0, right: 0 },
+  chartMargins: { left: 0, top: 0, bottom: 0, right: 0 },
+  scales: { barsPadding: 0, histogramPadding: 0 }
+};
+
+interface Props {
+  waterfall: IWaterfall;
+}
+
+export function MiniWaterfall({ waterfall }: Props) {
   const [selection, setSelection] = React.useState<Selection>([
     undefined,
     undefined
   ]);
 
+  const data = waterfall.items.map((item, index) => ({
+    ...item,
+    min: item.offset + item.skew,
+    max: item.offset + item.duration,
+    x: index
+  }));
+  const maxY = Math.max(...data.map(item => item.max));
+
   const onBrushEnd: BrushEndListener = (y1, y2) => {
     setSelection([y1, y2]);
-    console.log(y1, y2);
   };
 
   function resetSelection() {
@@ -130,13 +132,16 @@ function TimelineScrubber() {
       <div style={{ height: 60 }}>
         <Chart>
           <Settings
-            debug={true}
             onBrushEnd={onBrushEnd}
             rotation={90}
             theme={chartTheme}
             tooltip={TooltipType.None}
           />
-          <SelectionAnnotation selection={selection} />
+          <SelectionAnnotation
+            maxY={maxY}
+            selection={selection}
+            waterfall={waterfall}
+          />
           <BarSeries
             id={getSpecId('lines')}
             xScaleType={ScaleType.Linear}
@@ -154,15 +159,3 @@ function TimelineScrubber() {
     </>
   );
 }
-
-storiesOf('TimelineScrubber', module).add(
-  '¯\\_(ツ)_/¯',
-  () => {
-    return (
-      <div style={{ maxWidth: 1330, padding: 16, border: '1px solid grey' }}>
-        <TimelineScrubber />
-      </div>
-    );
-  },
-  { info: { source: false, propTables: false }, showAddonPanel: false }
-);

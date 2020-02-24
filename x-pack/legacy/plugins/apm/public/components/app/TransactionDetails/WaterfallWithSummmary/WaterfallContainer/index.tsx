@@ -10,6 +10,7 @@ import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
 import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { MiniWaterfall } from './MiniWaterfall';
 
 interface Props {
   urlParams: IUrlParams;
@@ -31,6 +32,7 @@ export function WaterfallContainer({
   return (
     <div>
       <ServiceLegends serviceColors={waterfall.serviceColors} />
+      <MiniWaterfall waterfall={waterfall} />
       <Waterfall
         location={location}
         waterfallItemId={urlParams.waterfallItemId}
