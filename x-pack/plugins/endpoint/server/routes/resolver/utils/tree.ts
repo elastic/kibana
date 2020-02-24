@@ -101,7 +101,7 @@ export class Tree {
     });
 
     // fix up the references
-    children.root.lifecycle = events.root.lifecycle; // lifecycle is bound to the ancestors query
+    children.root.lifecycle = ancestors.root.lifecycle; // lifecycle is bound to the ancestors query
     children.root.parent = ancestors.root.parent;
     children.root.events = events.root.events;
 
@@ -133,13 +133,12 @@ export class Tree {
     });
   }
 
-  public markTopAncestor(id: string) {
-    this.ensureCache(id);
-    this.cache[id].parent = null;
+  public setNextAncestor(next: string | null) {
+    this.root.pagination.nextAncestor = next;
   }
 
-  public setNextAncestor(next: string) {
-    this.root.pagination.nextAncestor = next;
+  public setNextEvent(next: string | null) {
+    this.root.pagination.nextEvent = next;
   }
 
   public addChild(...events: ResolverEvent[]) {

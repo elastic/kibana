@@ -47,7 +47,7 @@ export class Fetcher {
     const { results } = await query.search(this.client, id);
 
     if (results.length === 0) {
-      tree.markTopAncestor(id);
+      tree.setNextAncestor(null);
       return;
     }
 
@@ -63,6 +63,7 @@ export class Fetcher {
     const { totals, results } = await query.search(this.client, this.id);
     tree.addEvent(...results);
     tree.paginateEvents(totals, results);
+    if (results.length === 0) tree.setNextEvent(null);
   }
 
   private async doChildren(
