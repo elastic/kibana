@@ -7,14 +7,14 @@
 import { get, set } from 'lodash';
 import mockChartsData from './monitor_charts_mock.json';
 import { assertCloseTo } from '../../helper';
-import { getMonitorCharts } from '../get_monitor_charts';
+import { getMonitorDurationChart } from '../get_monitor_charts';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await getMonitorCharts({
+    await getMonitorDurationChart({
       callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
@@ -49,7 +49,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await getMonitorCharts({
+    await getMonitorDurationChart({
       callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
@@ -86,7 +86,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     searchMock.mockReturnValue(mockChartsData);
     const search = searchMock.bind({});
     expect(
-      await getMonitorCharts({
+      await getMonitorDurationChart({
         callES: search,
         monitorId: 'id',
         dateRangeStart: 'now-15m',

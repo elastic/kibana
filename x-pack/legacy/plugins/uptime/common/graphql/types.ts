@@ -8,6 +8,8 @@
 // Scalars
 // ====================================================
 
+import { MonitorChart } from '../types';
+
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -416,42 +418,6 @@ export interface SnapshotCount {
 }
 
 
-/** The data used to populate the monitor charts. */
-export interface MonitorChart {
-  /** The average values for the monitor duration. */
-  locationDurationLines: LocationDurationLine[];
-  /** The counts of up/down checks for the monitor. */
-  status: StatusData[];
-  /** The maximum status doc count in this chart. */
-  statusMaxCount: number;
-  /** The maximum duration value in this chart. */
-  durationMaxValue: number;
-}
-
-export interface LocationDurationLine {
-  name: string;
-
-  line: MonitorDurationAveragePoint[];
-}
-/** Represents the average monitor duration ms at a point in time. */
-export interface MonitorDurationAveragePoint {
-  /** The timeseries value for this point. */
-  x: UnsignedInteger;
-  /** The average duration ms for the monitor. */
-  y?: number | null;
-}
-/** Represents a bucket of monitor status information. */
-export interface StatusData {
-  /** The timeseries point for this status data. */
-  x: UnsignedInteger;
-  /** The value of up counts for this point. */
-  up?: number | null;
-  /** The value for down counts for this point. */
-  down?: number | null;
-  /** The total down counts for this point. */
-  total?: number | null;
-}
-
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
@@ -616,16 +582,6 @@ export interface AllPingsQueryArgs {
   /** The upper limit of the date range. */
   dateRangeEnd: string;
   /** Optional: agent location to filter by. */
-  location?: string | null;
-}
-
-export interface GetMonitorChartsDataQueryArgs {
-  monitorId: string;
-
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
   location?: string | null;
 }
 

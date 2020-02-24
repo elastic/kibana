@@ -10,3 +10,4 @@ export * from './snapshot';
 export * from './monitor_status';
 export * from './index_pattern';
 export * from './ping';
+export * from './monitor_duration';

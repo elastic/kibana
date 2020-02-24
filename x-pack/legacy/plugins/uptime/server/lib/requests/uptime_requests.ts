@@ -34,7 +34,7 @@ export interface UptimeRequests {
   getIndexPattern: ESQ<any, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
   getMonitor: ESQ<GetMonitorParams, Ping>;
-  getMonitorCharts: ESQ<GetMonitorChartsParams, MonitorChart>;
+  getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorChart>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
   getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;

@@ -7,15 +7,15 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { INDEX_NAMES } from '../../../common/constants';
 import { getHistogramIntervalFormatted } from '../helper';
-import { MonitorChart, LocationDurationLine } from '../../../common/graphql/types';
+import { LocationDurationLine, MonitorChart } from '../../../common/types';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */
   monitorId: string;
-  /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
+  /** @member dateStart timestamp bounds */
+  dateStart: string;
   /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
+  dateEnd: string;
   /** @member location optional location value for use in filtering*/
   location?: string | null;
 }
@@ -43,17 +43,17 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
 /**
  * Fetches data used to populate monitor charts
  */
-export const getMonitorCharts: UMElasticsearchQueryFn<
+export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorChart
-> = async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
+> = async ({ callES, dateStart, dateEnd, monitorId, location }) => {
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
     body: {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
+            { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
             { term: { 'monitor.id': monitorId } },
             { term: { 'monitor.status': 'up' } },
             // if location is truthy, add it as a filter. otherwise add nothing
@@ -66,7 +66,7 @@ export const getMonitorCharts: UMElasticsearchQueryFn<
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd),
+            fixed_interval: getHistogramIntervalFormatted(dateStart, dateEnd),
             min_doc_count: 0,
           },
           aggs: {
