@@ -19,38 +19,26 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       .set('kbn-xsrf', 'foo');
   }
 
-  async function createConfiguration(config: any) {
+  async function createConfiguration(config: AgentConfigurationIntake) {
     log.debug('creating configuration', config.service);
     const res = await supertest
       .put(`/api/apm/settings/agent-configuration`)
       .send(config)
       .set('kbn-xsrf', 'foo');
 
-    if (res.statusCode !== 200) {
-      throw new Error(
-        `Could not create config ${JSON.stringify(config.service)}. Received statuscode ${
-          res.statusCode
-        } and message: ${JSON.stringify(res.body)}`
-      );
-    }
+    throwOnError(res);
 
     return res;
   }
 
-  async function updateConfiguration(config: any) {
+  async function updateConfiguration(config: AgentConfigurationIntake) {
     log.debug('updating configuration', config.service);
     const res = await supertest
       .put(`/api/apm/settings/agent-configuration?overwrite=true`)
       .send(config)
       .set('kbn-xsrf', 'foo');
 
-    if (res.statusCode !== 200) {
-      throw new Error(
-        `Could not update config ${JSON.stringify(config.service)}. Received statuscode ${
-          res.statusCode
-        } and message: ${JSON.stringify(res.body)}`
-      );
-    }
+    throwOnError(res);
 
     return res;
   }
@@ -62,15 +50,20 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       .send({ service })
       .set('kbn-xsrf', 'foo');
 
-    if (res.statusCode !== 200) {
-      throw new Error(
-        `Could not delete config ${JSON.stringify(service)}. Received statuscode ${
-          res.statusCode
-        } and message: ${JSON.stringify(res.body)}`
-      );
-    }
+    throwOnError(res);
 
     return res;
+  }
+
+  function throwOnError(res: any) {
+    const { statusCode, req, body } = res;
+    if (statusCode !== 200) {
+      throw new Error(`
+      Endpoint: ${req.method} ${req.path}
+      Service: ${JSON.stringify(res.request._data.service)}
+      Status code: ${statusCode}
+      Response: ${body.message}`);
+    }
   }
 
   describe('agent configuration', () => {
