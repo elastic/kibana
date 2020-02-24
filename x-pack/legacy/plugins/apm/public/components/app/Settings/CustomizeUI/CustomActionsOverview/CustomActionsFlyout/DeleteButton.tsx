@@ -48,10 +48,10 @@ async function deleteConfig(
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/custom-actions/{customActionId}',
+      pathname: '/api/apm/settings/custom-actions/{id}',
       method: 'DELETE',
       params: {
-        path: { customActionId }
+        path: { id: customActionId }
       }
     });
     toasts.addSuccess({

@@ -18,12 +18,12 @@ export const saveCustomAction = async ({
   customAction: CustomAction;
   toasts: NotificationsStart['toasts'];
 }) => {
-  if ('id' in customAction) {
+  if (customAction?.id) {
     await callApmApi({
-      pathname: '/api/apm/settings/custom-actions/{customActionId}',
+      pathname: '/api/apm/settings/custom-actions/{id}',
       method: 'PUT',
       params: {
-        path: { customActionId: customAction.id },
+        path: { id: customAction.id },
         body: customAction
       }
     });
