@@ -22,9 +22,9 @@ import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/types';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { EmbeddableVisTriggerContext } from 'src/plugins/embeddable/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -40,10 +40,11 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  valueClickTrigger,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedObject } from '../../../../../plugins/saved_objects/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
 
@@ -301,13 +302,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
-
-          npStart.plugins.uiActions.executeTriggerActions(eventName, {
+          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
+            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
-          });
+          };
+          npStart.plugins.uiActions.getTrigger(triggerId).exec(context);
         }
       })
     );
@@ -367,9 +369,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
       },
-      extraHandlers: {
-        uiState: this.uiState,
-      },
+      uiState: this.uiState,
     };
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
