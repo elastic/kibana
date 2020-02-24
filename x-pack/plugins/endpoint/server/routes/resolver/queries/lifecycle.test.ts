@@ -53,6 +53,7 @@ describe('lifecycle query', () => {
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: EndpointAppConstants.EVENT_INDEX_NAME,
