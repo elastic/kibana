@@ -20,24 +20,34 @@
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
-
+import { green } from './utils'
 const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
+
 export const ingest = log => async body => {
-  const  index = (!body.coveredFilePath) ? TOTALS_INDEX : COVERAGE_INDEX;
+  const  index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
 
   try {
     await client.index({ index, body });
+
     log.verbose(`
 ### Sent:
 ### ES HOST (redacted): ${redacted}
-### Index: ${index}
+### Index: ${green(index)}
 ${pretty(body)}
 `);
+
+    const {staticSiteUrl} = body;
+    log.debug(`
+### Sent:
+### Index: ${green(index)}
+### staticSiteUrl: ${staticSiteUrl}
+`);
+
   } catch (e) {
     const red = color('red');
     const err = `

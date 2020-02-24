@@ -18,18 +18,19 @@
  */
 
 import { left, right } from './either';
+import { always } from './utils';
+import { XPACK, STATIC_SITE_URL_PROP_NAME } from './constants';
 
-const XPACK = 'x-pack';
-const maybeTotal = coveredFilePath => coveredFilePath === 'total' ?
-  left(coveredFilePath) : right(coveredFilePath);
+const maybeTotal = x =>
+  x === 'total' ? left(x) : right(x);
 
 export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
 
-export const statsAndCoveredFilePath = (...xs) => {
-  const [coveredFilePath] = xs[0][1];
+export const statsAndstaticSiteUrl = (...xs) => {
+  const [staticSiteUrl] = xs[0][1];
   const [stats] = xs[0];
   return {
-    coveredFilePath,
+    staticSiteUrl,
     ...stats,
   };
 };
@@ -40,8 +41,8 @@ export const addCoverageSummaryPath = coverageSummaryPath => obj => ({
 });
 
 export const truncate = text => obj => {
-  const { coveredFilePath } = obj;
-  if (coveredFilePath.includes(text)) obj.coveredFilePath = trimLeftFrom(text, coveredFilePath);
+  const { staticSiteUrl } = obj;
+  if (staticSiteUrl.includes(text)) obj.staticSiteUrl = trimLeftFrom(text, staticSiteUrl);
   return obj;
 };
 
@@ -51,12 +52,12 @@ export const addTimeStamp = ts => obj => ({
 });
 
 export const distro = obj => {
-  const { coveredFilePath } = obj;
+  const { staticSiteUrl } = obj;
   let distro;
   if (process.env.DISTRO) {
     distro = process.env.DISTRO;
   } else {
-    distro = coveredFilePath.includes(XPACK) ? XPACK : 'OSS';
+    distro = staticSiteUrl.includes(XPACK) ? XPACK : 'OSS';
   }
 
   return {
@@ -65,28 +66,29 @@ export const distro = obj => {
   };
 };
 
-const dropFront = coveredFilePath => trimLeftFrom('kibana', coveredFilePath);
-const buildFinalUrl = (urlBase, BUILD_ID, ts) => trimmed => {
-  const result = `${urlBase}/${BUILD_ID}/${ts}/${trimmed}`;
-  return result;
+const dropFront = staticSiteUrl => {
+  const result = trimLeftFrom('kibana', staticSiteUrl);
+  const trimmedAgain = result.replace(/kibana/, '');
+  return trimmedAgain;
 }
-const assignAndReturn = obj => x => {
-  obj.coveredFilePath = x;
+const buildFinalUrl = (urlBase, BUILD_ID, ts, testRunnerType) => trimmed =>
+  `${urlBase}/${BUILD_ID}/${ts}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
+const assignUrl = obj => name => value => {
+  obj[name] = value;
   return obj;
 };
-
 export const staticSite = urlBase => obj => {
-  const { BUILD_ID, coveredFilePath, testRunnerType } = obj;
-  console.log(`\n### testRunnerType: \n\t${testRunnerType}`);
+  const { BUILD_ID, staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
 
-  const buildTrimmed = buildFinalUrl(urlBase, BUILD_ID, ts);
-  const assignObj = assignAndReturn(obj);
+  const buildFinalStaticSiteUrl = buildFinalUrl(urlBase, BUILD_ID, ts, testRunnerType);
+  const assignObj = assignUrl(obj);
+  const assignstaticSiteUrl = assignObj(STATIC_SITE_URL_PROP_NAME);
 
-  return maybeTotal(coveredFilePath)
+  return maybeTotal(staticSiteUrl)
     .map(dropFront)
-    .map(buildTrimmed)
-    .fold(assignObj, assignObj);
+    .map(buildFinalStaticSiteUrl)
+    .fold(always(assignstaticSiteUrl(undefined)), assignstaticSiteUrl);
 
 };
 
@@ -109,16 +111,6 @@ export const testRunner = obj => {
     testRunnerType,
     ...obj,
   };
-};
-
-// Since we do not wish to post a path if it's a total,
-// drop it when it's a total (totals go to a different index).
-export const maybeDropCoveredFilePath = obj => {
-  const { coveredFilePath } = obj;
-  if (coveredFilePath === 'total') {
-    delete obj.coveredFilePath;
-  }
-  return obj;
 };
 
 export const buildId = obj => {

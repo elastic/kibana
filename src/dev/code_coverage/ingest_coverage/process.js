@@ -22,16 +22,14 @@ import { concatMap, delay, map } from 'rxjs/operators';
 import jsonStream from './json_stream';
 import { pipe, noop, green } from './utils';
 import { ingest } from './ingest';
-import * as fs from 'fs';
 import {
   staticSite,
-  statsAndCoveredFilePath,
+  statsAndstaticSiteUrl,
   addCoverageSummaryPath,
   testRunner,
   addTimeStamp,
   distro,
   buildId,
-  maybeDropCoveredFilePath,
 } from './transforms';
 import moment from 'moment';
 import { resolve } from "path";
@@ -42,20 +40,7 @@ const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
 
-const ts = log => {
-  return process.env.TIME_STAMP || moment.utc().format();
-  // const outFileDir = 'src/dev/code_coverage';
-  // const timeStampDatFileName = 'current_build_timestamp.dat';
-  // const fullTimeStampPath = resolve(KIBANA_ROOT, outFileDir, timeStampDatFileName);
-
-  // log.debug(`\n### Flushing timestamp ${green(timestamp)}, to ${green(fullTimeStampPath)}`);
-  //
-  // flushTimeStamp(fullTimeStampPath)(timestamp);
-};
-
-// const flushTimeStamp = filePath => x =>
-//   fs.writeFileSync(resolve(filePath), x, { encoding: 'utf8' });
-
+const ts = log => process.env.TIME_STAMP || moment.utc().format();
 
 export default ({ coverageSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
@@ -64,7 +49,7 @@ export default ({ coverageSummaryPath }, log) => {
   const addPrePopulatedTimeStamp = addTimeStamp(ts(log));
 
   const prokStatsTimeStampBuildId = pipe(
-    statsAndCoveredFilePath,
+    statsAndstaticSiteUrl,
     buildId,
     addPrePopulatedTimeStamp,
   );
@@ -78,7 +63,6 @@ export default ({ coverageSummaryPath }, log) => {
       map(prokStatsTimeStampBuildId),
       map(addCoverageSummaryPathAndDistro),
       map(addTestRunnerAndStaticSiteUrl),
-      map(maybeDropCoveredFilePath),
       concatMap(x => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
