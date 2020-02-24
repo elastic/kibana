@@ -120,7 +120,7 @@ export const MarkdownEditor = React.memo<{
           initialSelectedTab={tabs[0]}
         />
         <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiLink href="https://www.markdownguide.org/cheat-sheet/" external target="_blank">
               {i18n.MARKDOWN_SYNTAX_HELP}
             </EuiLink>

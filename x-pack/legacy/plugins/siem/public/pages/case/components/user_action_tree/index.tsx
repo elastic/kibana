@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -34,7 +34,7 @@ export interface UserActionItem {
 }
 
 export interface UserActionTreeProps {
-  initialData: Case;
+  data: Case;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
 
@@ -80,36 +80,7 @@ const ContentWrapper = styled.div`
   `}
 `;
 
-const renderUserActionsUI = (userActions: UserActionItem[]) => {
-  return userActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
-    <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
-      <EuiFlexItem grow={false}>
-        <EuiAvatar
-          data-test-subj={`user-action-avatar`}
-          className="userAction__circle"
-          name={avatarName}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {skipPanel ? (
-          <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
-        ) : (
-          <EuiPanel className="userAction__panel" paddingSize="none">
-            {title && (
-              <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
-                {title}
-              </EuiText>
-            )}
-            {children && <div data-test-subj={`user-action-content`}>{children}</div>}
-          </EuiPanel>
-        )}
-      </EuiFlexItem>
-    </UserAction>
-  ));
-};
-
-export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserActionTreeProps) => {
-  const [data, setData] = useState(initialData);
+export const UserActionTree = React.memo(({ data, onUpdateField }: UserActionTreeProps) => {
   const [editCommentId, setEditCommentId] = useState('');
   const [description, setDescription] = useState(data.description);
   const [commentUpdate, setCommentUpdate] = useState('');
@@ -180,7 +151,9 @@ export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserAc
                     cancelAction: () => setEditCommentId(''),
                     saveAction: () => {
                       // TO DO
-                      console.log('saved updated comment', commentUpdate, editCommentId);
+                      if (commentUpdate !== comment.comment) {
+                        onUpdateField('comment', commentUpdate);
+                      }
                       setEditCommentId('');
                     },
                   })}
@@ -233,12 +206,10 @@ export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserAc
               footerContentRight={renderButtons({
                 cancelAction: () => setIsEditDescription(false),
                 saveAction: () => {
-                  onUpdateField('description', description);
+                  if (description !== data.description) {
+                    onUpdateField('description', description);
+                  }
                   setIsEditDescription(false);
-                  setData({
-                    ...data,
-                    description,
-                  });
                 },
               })}
               initialContent={data.description}
@@ -261,8 +232,41 @@ export const UserActionTree = React.memo(({ initialData, onUpdateField }: UserAc
         skipPanel: true,
       },
     ];
-  }, [data, isEditDescription, editCommentId, commentUpdate, description]);
-  return <div>{renderUserActionsUI(renderUserActions)}</div>;
+  }, [data.version, isEditDescription, editCommentId, description, commentUpdate]);
+
+  return (
+    <>
+      {renderUserActions.map(({ avatarName, children, skipPanel = false, title }, key) => (
+        <UserAction data-test-subj={`user-action-${key}`} key={key} gutterSize={'none'}>
+          <EuiFlexItem grow={false}>
+            <EuiAvatar
+              data-test-subj={`user-action-avatar`}
+              className="userAction__circle"
+              name={avatarName}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {skipPanel ? (
+              <>{children && <div data-test-subj={`user-action-content`}>{children}</div>}</>
+            ) : (
+              <EuiPanel className="userAction__panel" paddingSize="none">
+                {title && (
+                  <EuiText
+                    size="s"
+                    className="userAction__title"
+                    data-test-subj={`user-action-title`}
+                  >
+                    {title}
+                  </EuiText>
+                )}
+                {children && <div data-test-subj={`user-action-content`}>{children}</div>}
+              </EuiPanel>
+            )}
+          </EuiFlexItem>
+        </UserAction>
+      ))}
+    </>
+  );
 });
 
 UserActionTree.displayName = 'UserActionTree';

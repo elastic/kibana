@@ -19,9 +19,7 @@ import {
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
-import {
-  FormattedRelativePreferenceDate,
-} from '../../../../components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
@@ -222,7 +220,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoa
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree initialData={data} onUpdateField={onUpdateField} />
+              <UserActionTree data={data} onUpdateField={onUpdateField} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList
