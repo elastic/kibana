@@ -225,4 +225,34 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
     return execution;
   }
+
+  public fork(): Executor<Context> {
+    const initialState = this.state.get();
+    const fork = new Executor<Context>(initialState);
+
+    /**
+     * Synchronize registry state - make any new types, functions and context
+     * also available in the forked instance of `Executor`.
+     */
+    this.state.state$.subscribe(({ types, functions, context }) => {
+      const state = fork.state.get();
+      fork.state.set({
+        ...state,
+        types: {
+          ...types,
+          ...state.types,
+        },
+        functions: {
+          ...functions,
+          ...state.functions,
+        },
+        context: {
+          ...context,
+          ...state.context,
+        },
+      });
+    });
+
+    return fork;
+  }
 }

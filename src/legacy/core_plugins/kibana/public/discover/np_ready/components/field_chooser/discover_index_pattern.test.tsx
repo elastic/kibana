@@ -31,14 +31,14 @@ const indexPattern1 = {
   attributes: {
     title: 'test1 title',
   },
-} as SavedObject;
+} as SavedObject<any>;
 
 const indexPattern2 = {
   id: 'test2',
   attributes: {
     title: 'test2 title',
   },
-} as SavedObject;
+} as SavedObject<any>;
 
 const defaultProps = {
   indexPatternList: [indexPattern1, indexPattern2],

@@ -17,7 +17,7 @@ import {
   unit,
   units
 } from '../../../../../../../style/variables';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 
 const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};
