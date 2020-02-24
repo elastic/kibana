@@ -35,7 +35,7 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
   const areActionButtonsVisible = status === 'idle';
 
   let isChainedMultifieldsWarningVisible = false;
-  // We add "!Boolean(parentField?.hasMultiFields)" as we only want to show a callOut at the "root" of the nestsed multi-fields
+  // We add "!Boolean(parentField?.hasMultiFields)" as we only want to show a callOut at the "root" of the nested multi-fields
   if (field.hasMultiFields && !Boolean(parentField?.hasMultiFields)) {
     isChainedMultifieldsWarningVisible = field
       .childFields!.map(getField)
