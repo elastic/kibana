@@ -54,6 +54,7 @@ export const setSignalsStatusRouteDef = (
             },
             query: queryObject,
           },
+          ignoreUnavailable: true,
         });
       } catch (exc) {
         // error while getting or updating signal with id: id in signal index .siem-signals

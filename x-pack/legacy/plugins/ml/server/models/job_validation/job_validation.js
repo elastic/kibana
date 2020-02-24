@@ -23,7 +23,7 @@ export async function validateJob(
   callWithRequest,
   payload,
   kbnVersion = 'current',
-  elasticsearchPlugin,
+  callAsInternalUser,
   xpackMainPlugin
 ) {
   const messages = getMessages();
@@ -111,7 +111,7 @@ export async function validateJob(
           callWithRequest,
           job,
           duration,
-          elasticsearchPlugin,
+          callAsInternalUser,
           xpackMainPlugin
         ))
       );

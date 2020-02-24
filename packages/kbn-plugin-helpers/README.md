@@ -30,8 +30,8 @@ $ plugin-helpers help
     start                       Start kibana and have it include this plugin
     build [options] [files...]  Build a distributable archive
     test                        Run the server and browser tests
-    test:browser [options]      Run the browser tests in a real web browser
-    test:server [files...]      Run the server tests using mocha
+    test:karma [options]      Run the browser tests in a real web browser
+    test:mocha [files...]      Run the server tests using mocha
 
   Options:
 

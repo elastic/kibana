@@ -6,10 +6,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { PLUGIN } from '../common/constants';
+import { Observable } from 'rxjs';
 import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
-import { Dependencies, LicenseStatus, RouteDependencies } from './types';
 
+import { PLUGIN } from '../common/constants';
+import { Dependencies, LicenseStatus, RouteDependencies } from './types';
+import { ConfigType } from './config';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -20,9 +22,11 @@ import {
 export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> {
   licenseStatus: LicenseStatus;
   log: Logger;
+  config: Observable<ConfigType>;
 
-  constructor({ logger }: PluginInitializerContext) {
+  constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();
+    this.config = config.create();
     this.licenseStatus = { valid: false };
   }
 

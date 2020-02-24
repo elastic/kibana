@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const { relative } = require('path');
+const { relative, resolve } = require('path');
+const fs = require('fs');
 
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
@@ -29,9 +30,55 @@ const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
 const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
-module.exports = function({ name, targetPath, isKibanaPlugin }) {
+async function gitInit(dir) {
+  // Only plugins in /plugins get git init
+  try {
+    await execa('git', ['init', dir]);
+    console.log(`Git repo initialized in ${dir}`);
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Failure to git init ${dir}: ${error.all || error}`);
+  }
+}
+
+async function moveToCustomFolder(from, to) {
+  try {
+    await execa('mv', [from, to]);
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Failure to move plugin to ${to}: ${error.all || error}`);
+  }
+}
+
+async function eslintPlugin(dir) {
+  try {
+    await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Failure when running prettier on the generated output: ${error.all || error}`);
+  }
+}
+
+module.exports = function({ name, targetPath }) {
   return {
     prompts: {
+      customPath: {
+        message: 'Would you like to create the plugin in a different folder?',
+        default: '/plugins',
+        filter(value) {
+          // Keep default value empty
+          if (value === '/plugins') return '';
+          // Remove leading slash
+          return value.startsWith('/') ? value.slice(1) : value;
+        },
+        validate(customPath) {
+          const p = resolve(process.cwd(), customPath);
+          const exists = fs.existsSync(p);
+          if (!exists)
+            return `Folder should exist relative to the kibana root folder. Consider /src/plugins or /x-pack/plugins.`;
+          return true;
+        },
+      },
       description: {
         message: 'Provide a short description',
         default: 'An awesome Kibana plugin',
@@ -50,11 +97,18 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
         message: 'Should a server API be generated?',
         default: true,
       },
-      // generateTranslations: {
-      //   type: 'confirm',
-      //   message: 'Should translation files be generated?',
-      //   default: true,
-      // },
+      generateTranslations: {
+        type: 'confirm',
+        when: answers => {
+          // only for 3rd party plugins
+          return !answers.customPath && answers.generateApp;
+        },
+        message: 'Should translation files be generated?',
+        default({ customPath }) {
+          // only for 3rd party plugins
+          return !customPath;
+        },
+      },
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
@@ -64,19 +118,22 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       generateEslint: {
         type: 'confirm',
         message: 'Would you like to use a custom eslint file?',
-        default: !isKibanaPlugin,
+        default({ customPath }) {
+          return !customPath;
+        },
       },
     },
     filters: {
       'public/**/index.scss': 'generateScss',
       'public/**/*': 'generateApp',
       'server/**/*': 'generateApi',
-      // 'translations/**/*': 'generateTranslations',
-      // '.i18nrc.json': 'generateTranslations',
+      'translations/**/*': 'generateTranslations',
+      'i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',
+      'i18nrc.json': '.i18nrc.json',
     },
     data: answers =>
       Object.assign(
@@ -86,31 +143,35 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
           camelCase,
           snakeCase,
           name,
-          isKibanaPlugin,
+          // kibana plugins are placed in a the non default path
+          isKibanaPlugin: !answers.customPath,
           kbnVersion: answers.kbnVersion,
           upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
           hasScss: !!answers.generateScss,
-          relRoot: isKibanaPlugin ? '../../../..' : '../../..',
+          relRoot: relative(
+            resolve(answers.customPath || targetPath, name, 'public'),
+            process.cwd()
+          ),
         },
         answers
       ),
     enforceNewFolder: true,
     installDependencies: false,
-    gitInit: !isKibanaPlugin,
-    async post({ log }) {
-      const dir = relative(process.cwd(), targetPath);
+    async post({ log, answers }) {
+      let dir = relative(process.cwd(), targetPath);
+      if (answers.customPath) {
+        // Move to custom path
+        moveToCustomFolder(targetPath, answers.customPath);
+        dir = relative(process.cwd(), resolve(answers.customPath, snakeCase(name)));
+      } else {
+        // Init git only in the default path
+        await gitInit(dir);
+      }
 
       // Apply eslint to the generated plugin
-      try {
-        await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
-      } catch (error) {
-        console.error(error);
-        throw new Error(
-          `Failure when running prettier on the generated output: ${error.all || error}`
-        );
-      }
+      eslintPlugin(dir);
 
       log.success(chalk`🎉
 
