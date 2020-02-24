@@ -38,6 +38,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
 import { showNewVisModal } from '../np_ready/public/wizard';
+import { TimefilterContract } from '../../../../../plugins/data/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -51,7 +52,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor(private getSavedVisualizationsLoader: () => SavedVisualizations) {
+  constructor(
+    private timefilter: TimefilterContract,
+    private getSavedVisualizationsLoader: () => SavedVisualizations
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -114,6 +118,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
       return new VisualizeEmbeddable(
+        this.timefilter,
         {
           savedVisualization: savedObject,
           indexPatterns,

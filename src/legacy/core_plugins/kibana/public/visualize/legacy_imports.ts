@@ -24,22 +24,12 @@
  * directly where they are needed.
  */
 
-import chrome from 'ui/chrome';
-
-export const legacyChrome = chrome;
-export { Chrome } from 'ui/chrome';
-
-// @ts-ignore
-export { AppState, AppStateProvider } from 'ui/state_management/app_state';
 export { State } from 'ui/state_management/state';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
-
-export { npSetup, npStart } from 'ui/new_platform';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
@@ -55,7 +45,6 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { VisType } from '../../../visualizations/public';
 export {
   configureAppAngularModule,
   ensureDefaultIndexPattern,

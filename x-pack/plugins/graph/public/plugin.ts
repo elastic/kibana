@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { Plugin } from 'src/core/public';
+import { PluginInitializerContext } from 'kibana/public';
 import { toggleNavLink } from './services/toggle_nav_link';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
@@ -14,14 +15,17 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { ConfigSchema } from '../config';
 
 export interface GraphPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
-export class GraphPlugin implements Plugin {
+export class GraphPlugin implements Plugin<{ config: Readonly<ConfigSchema> }, void> {
   private licensing: LicensingPluginSetup | null = null;
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   setup(core: CoreSetup, { licensing, home }: GraphPluginSetupDependencies) {
     this.licensing = licensing;
@@ -39,6 +43,16 @@ export class GraphPlugin implements Plugin {
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    return {
+      /**
+       * The configuration is temporarily exposed to allow the legacy graph plugin to consume
+       * the setting. Once the graph plugin is migrated completely, this will become an implementation
+       * detail.
+       * @deprecated
+       */
+      config: this.initializerContext.config.get(),
+    };
   }
 
   start(core: CoreStart) {
@@ -52,3 +66,5 @@ export class GraphPlugin implements Plugin {
 
   stop() {}
 }
+
+export type GraphSetup = ReturnType<GraphPlugin['setup']>;

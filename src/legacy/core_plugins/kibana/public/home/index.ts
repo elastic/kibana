@@ -17,42 +17,13 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import chrome from 'ui/chrome';
-import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { TelemetryOptInProvider } from '../../../telemetry/public/services';
-import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
+import { HomePlugin } from './plugin';
 
-/**
- * Get dependencies relying on the global angular context.
- * They also have to get resolved together with the legacy imports above
- */
-async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
-  const injector = await chrome.dangerouslyGetActiveInjector();
+const instance = new HomePlugin({
+  env: npSetup.plugins.kibanaLegacy.env,
+} as PluginInitializerContext);
+instance.setup(npSetup.core, npSetup.plugins);
 
-  const Private = injector.get<IPrivate>('Private');
-
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-  const telemetryOptInProvider = Private(TelemetryOptInProvider);
-
-  return {
-    telemetryOptInProvider,
-    shouldShowTelemetryOptIn:
-      telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn(),
-  };
-}
-
-(async () => {
-  const instance = new HomePlugin();
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-      getAngularDependencies,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-  });
-})();
+instance.start(npStart.core, npStart.plugins);

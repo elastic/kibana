@@ -5,7 +5,7 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-import { esFilters, esKuery, KueryNode } from '../../../../../../../../../src/plugins/data/public';
+import { Filter, esKuery, KueryNode } from '../../../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProvidersAnd,
@@ -80,7 +80,7 @@ export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs) => {
   return '';
 };
 
-export const replaceTemplateFieldFromMatchFilters = (filters: esFilters.Filter[], ecsData: Ecs) =>
+export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs) =>
   filters.map(filter => {
     if (
       filter.meta.type === 'phrase' &&

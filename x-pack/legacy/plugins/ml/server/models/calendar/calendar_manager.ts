@@ -6,6 +6,7 @@
 
 import { difference } from 'lodash';
 import Boom from 'boom';
+import { IScopedClusterClient } from 'src/core/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {
@@ -23,13 +24,12 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _client: any;
+  private _client: IScopedClusterClient['callAsCurrentUser'];
   private _eventManager: any;
 
-  constructor(isLegacy: boolean, client: any) {
-    const actualClient = isLegacy === true ? client : client.ml!.mlClient.callAsCurrentUser;
-    this._client = actualClient;
-    this._eventManager = new EventManager(actualClient);
+  constructor(client: any) {
+    this._client = client;
+    this._eventManager = new EventManager(client);
   }
 
   async getCalendar(calendarId: string) {

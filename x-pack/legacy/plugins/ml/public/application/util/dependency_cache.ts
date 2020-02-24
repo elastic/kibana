@@ -12,11 +12,7 @@ import {
   ApplicationStart,
   HttpStart,
 } from 'src/core/public';
-import {
-  IndexPatternsContract,
-  FieldFormatsStart,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   DocLinksStart,
   ToastsStart,
@@ -34,7 +30,7 @@ export interface DependencyCache {
   toastNotifications: ToastsStart | null;
   overlays: OverlayStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
-  fieldFormats: FieldFormatsStart | null;
+  fieldFormats: DataPublicPluginStart['fieldFormats'] | null;
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;

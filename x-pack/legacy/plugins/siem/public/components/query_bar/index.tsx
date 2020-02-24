@@ -8,7 +8,7 @@ import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 
 import {
-  esFilters,
+  Filter,
   IIndexPattern,
   FilterManager,
   Query,
@@ -30,7 +30,7 @@ export interface QueryBarComponentProps {
   isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   onChangedQuery: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
@@ -110,7 +110,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
-      (newFilters: esFilters.Filter[]) => {
+      (newFilters: Filter[]) => {
         filterManager.setFilters(newFilters);
       },
       [filterManager]

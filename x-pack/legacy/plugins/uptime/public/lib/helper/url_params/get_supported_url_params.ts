@@ -46,7 +46,7 @@ const {
  * require further development.
  */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | string[] | undefined;
+  [key: string]: string | string[] | undefined | null;
 }): UptimeUrlParams => {
   const filteredParams: { [key: string]: string | undefined } = {};
   Object.keys(params).forEach(key => {

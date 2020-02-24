@@ -14,6 +14,7 @@ import {
   CoreSetup,
   IRouter,
   IScopedClusterClient,
+  SavedObjectsServiceStart,
 } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -25,38 +26,24 @@ import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
 import { LICENSE_TYPE } from '../../common/constants/license';
-// @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
-// @ts-ignore: could not find declaration file for module
 import { jobRoutes } from '../routes/anomaly_detectors';
-// @ts-ignore: could not find declaration file for module
 import { dataFeedRoutes } from '../routes/datafeeds';
-// @ts-ignore: could not find declaration file for module
 import { indicesRoutes } from '../routes/indices';
-// @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
-// @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
-// @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
-// @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
-// @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
 import { calendars } from '../routes/calendars';
 // @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
-// @ts-ignore: could not find declaration file for module
 import { filtersRoutes } from '../routes/filters';
-// @ts-ignore: could not find declaration file for module
 import { resultsServiceRoutes } from '../routes/results_service';
-// @ts-ignore: could not find declaration file for module
 import { jobServiceRoutes } from '../routes/job_service';
-// @ts-ignore: could not find declaration file for module
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
-// @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
 import { initMlServerLog, LogInitialization } from '../client/log';
 import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server';
@@ -78,6 +65,7 @@ export interface MlCoreSetup {
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsLegacyService;
+  coreSavedObjects: SavedObjectsServiceStart;
   elasticsearch: ElasticsearchServiceSetup;
 }
 export interface MlInitializerContext extends PluginInitializerContext {
@@ -104,13 +92,10 @@ export interface RouteInitialization {
   route(route: ServerRoute | ServerRoute[]): void;
   router: IRouter;
   xpackMainPlugin: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsLegacyService;
+  savedObjects?: SavedObjectsServiceStart;
   spacesPlugin: any;
+  securityPlugin: any;
   cloud?: CloudSetup;
-}
-export interface UsageInitialization {
-  elasticsearchPlugin: ElasticsearchPlugin;
-  savedObjects: SavedObjectsLegacyService;
 }
 
 declare module 'kibana/server' {
@@ -133,7 +118,7 @@ export class Plugin {
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
     const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
-    const { http } = core;
+    const { http, coreSavedObjects } = core;
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
@@ -212,18 +197,15 @@ export class Plugin {
       elasticsearchService: core.elasticsearch,
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
+      securityPlugin: plugins.security,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
       ...routeInitializationDeps,
       config: this.config,
-      savedObjects: core.savedObjects,
+      savedObjects: coreSavedObjects,
       spacesPlugin: plugins.spaces,
       cloud: plugins.cloud,
-    };
-    const usageInitializationDeps: UsageInitialization = {
-      elasticsearchPlugin: plugins.elasticsearch,
-      savedObjects: core.savedObjects,
     };
 
     const logInitializationDeps: LogInitialization = {
@@ -238,7 +220,7 @@ export class Plugin {
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);
     systemRoutes(extendedRouteInitializationDeps);
-    dataRecognizer(routeInitializationDeps);
+    dataRecognizer(extendedRouteInitializationDeps);
     dataVisualizerRoutes(routeInitializationDeps);
     calendars(routeInitializationDeps);
     fieldsService(routeInitializationDeps);
@@ -249,7 +231,7 @@ export class Plugin {
     fileDataVisualizerRoutes(extendedRouteInitializationDeps);
 
     initMlServerLog(logInitializationDeps);
-    makeMlUsageCollector(plugins.usageCollection, usageInitializationDeps);
+    makeMlUsageCollector(plugins.usageCollection, coreSavedObjects);
   }
 
   public stop() {}

@@ -6,6 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
+import { createMockReportingCore } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -19,7 +20,11 @@ const cancellationToken = {
 
 let config;
 let mockServer;
-beforeEach(() => {
+let mockReporting;
+
+beforeEach(async () => {
+  mockReporting = await createMockReportingCore();
+
   config = {
     'xpack.reporting.encryptionKey': 'testencryptionkey',
     'server.basePath': '/sbp',
@@ -27,18 +32,11 @@ beforeEach(() => {
     'server.port': 5601,
   };
   mockServer = {
-    expose: jest.fn(),
-    log: jest.fn(),
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
     },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
-
   mockServer.config().get.mockImplementation(key => {
     return config[key];
   });
@@ -60,38 +58,13 @@ const encryptHeaders = async headers => {
   return await crypto.encrypt(headers);
 };
 
-test(`passes browserTimezone to generatePdf`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-
-  const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
-
-  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
-    browserDriverFactory: {},
-  });
-  const browserTimezone = 'UTC';
-  await executeJob(
-    'pdfJobId',
-    { relativeUrls: [], browserTimezone, headers: encryptedHeaders },
-    cancellationToken
-  );
-
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(generatePdfObservable).toBeCalledWith(
-    expect.any(LevelLogger),
-    undefined,
-    [],
-    browserTimezone,
-    expect.anything(),
-    undefined,
-    undefined
-  );
-});
-
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
-    browserDriverFactory: {},
-  });
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -111,9 +84,12 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
-    browserDriverFactory: {},
-  });
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',

@@ -8,7 +8,7 @@ import { isEmpty, isString, flow } from 'lodash/fp';
 import {
   EsQueryConfig,
   Query,
-  esFilters,
+  Filter,
   esQuery,
   esKuery,
   IIndexPattern,
@@ -93,7 +93,7 @@ export const convertToBuildEsQuery = ({
   config: EsQueryConfig;
   indexPattern: IIndexPattern;
   queries: Query[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }) => {
   try {
     return JSON.stringify(

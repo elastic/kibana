@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import queryString from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -113,7 +112,7 @@ export const categorizationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,

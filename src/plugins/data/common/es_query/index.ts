@@ -17,7 +17,5 @@
  * under the License.
  */
 export * from './es_query';
-import * as esFilters from './filters';
+export * from './filters';
 export * from './kuery';
-
-export { esFilters };

@@ -82,7 +82,6 @@ export class VisEditor extends Component {
     // This check should be redundant, since this method should only be called when we're in editor
     // mode where there's also an appState passed into us.
     if (this.props.appState) {
-      this.props.appState.vis = this.props.vis.getState();
       this.props.appState.save();
     }
   }, VIS_STATE_DEBOUNCE_DELAY);

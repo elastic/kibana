@@ -88,7 +88,7 @@ beforeEach(() => {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
+          internal: new Map([['plugin-id', { publicTargetDir: 'path/to/target/public' }]]),
           browserConfigs: new Map(),
         },
       },
