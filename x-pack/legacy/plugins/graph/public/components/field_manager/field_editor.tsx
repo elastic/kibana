@@ -237,10 +237,18 @@ export function FieldEditor({
                     renderOption={(option, searchValue, contentClassName) => {
                       const { type, label } = option;
                       return (
-                        <span className={contentClassName}>
-                          <FieldIcon type={type!} size="m" useColor />{' '}
-                          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-                        </span>
+                        <EuiFlexGroup
+                          className={contentClassName}
+                          gutterSize="s"
+                          alignItems="center"
+                        >
+                          <EuiFlexItem grow={null}>
+                            <FieldIcon type={type!} fill="none" />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       );
                     }}
                     compressed
