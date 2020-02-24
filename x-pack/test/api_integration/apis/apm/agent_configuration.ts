@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import { AgentConfigurationIntake } from '../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { AgentConfigurationIntake } from '../../../../legacy/plugins/apm/server/lib/settings/agent_configuration/configuration_types';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -19,7 +19,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       .set('kbn-xsrf', 'foo');
   }
 
-  let createdConfigs: AgentConfigurationIntake[] = [];
   async function createConfiguration(config: any) {
     log.debug('creating configuration', config.service);
     const res = await supertest
@@ -35,7 +34,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       );
     }
 
-    createdConfigs.push(config);
     return res;
   }
 
@@ -57,24 +55,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return res;
   }
 
-  async function deleteCreatedConfigurations() {
-    const promises = Promise.all(createdConfigs.map(deleteConfiguration));
-    return promises;
-  }
-
   async function deleteConfiguration({ service }: AgentConfigurationIntake) {
     log.debug('deleting configuration', service);
     const res = await supertest
       .delete(`/api/apm/settings/agent-configuration`)
       .send({ service })
       .set('kbn-xsrf', 'foo');
-
-    createdConfigs = createdConfigs.filter(c => {
-      const isMatch =
-        c.service.name === service.name && c.service.environment === service.environment;
-
-      return !isMatch;
-    });
 
     if (res.statusCode !== 200) {
       throw new Error(
@@ -103,10 +89,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         await createConfiguration(newConfig);
       });
 
-      after(async () => {
-        await deleteCreatedConfigurations();
-      });
-
       it('can find the created config', async () => {
         const { statusCode, body } = await searchConfigurations(searchParams);
         expect(statusCode).to.equal(200);
@@ -131,40 +113,35 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     describe('when creating multiple configurations', () => {
-      before(async () => {
-        // all / all
-        await createConfiguration({
+      const configs = [
+        {
           service: {},
           settings: { transaction_sample_rate: 0.1 },
-        });
-
-        // my_service / all
-        await createConfiguration({
+        },
+        {
           service: { name: 'my_service' },
           settings: { transaction_sample_rate: 0.2 },
-        });
-
-        // all / production
-        await createConfiguration({
+        },
+        {
           service: { environment: 'production' },
           settings: { transaction_sample_rate: 0.3 },
-        });
-
-        // all / production
-        await createConfiguration({
+        },
+        {
           service: { environment: 'development' },
           settings: { transaction_sample_rate: 0.4 },
-        });
-
-        // my_service / production
-        await createConfiguration({
+        },
+        {
           service: { name: 'my_service', environment: 'development' },
           settings: { transaction_sample_rate: 0.5 },
-        });
+        },
+      ];
+
+      before(async () => {
+        await Promise.all(configs.map(config => createConfiguration(config)));
       });
 
       after(async () => {
-        await deleteCreatedConfigurations();
+        await Promise.all(configs.map(config => deleteConfiguration(config)));
       });
 
       const agentsRequests = [
@@ -204,17 +181,18 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     describe('when an agent retrieves a configuration', () => {
+      const config = {
+        service: { name: 'myservice', environment: 'development' },
+        settings: { transaction_sample_rate: 0.9 },
+      };
+
       before(async () => {
         log.debug('creating agent configuration');
-
-        await createConfiguration({
-          service: { name: 'myservice', environment: 'development' },
-          settings: { transaction_sample_rate: 0.9 },
-        });
+        await createConfiguration(config);
       });
 
       after(async () => {
-        await deleteCreatedConfigurations();
+        await deleteConfiguration(config);
       });
 
       it(`should have 'applied_by_agent=false' on first request`, async () => {
