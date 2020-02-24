@@ -16,25 +16,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
-import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 
-type Keys = 'key' | 'value';
-export type Filter = {
-  [key in Keys]: string;
-};
-
-const DEFAULT_OPTION = {
-  value: 'DEFAULT',
-  text: i18n.translate(
-    'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
-    {
-      defaultMessage: 'Select fields...'
-    }
-  )
-};
+export interface Filter {
+  key: string;
+  value: string;
+}
 
 const filterOptions = [
-  DEFAULT_OPTION,
+  {
+    value: 'DEFAULT',
+    text: i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption',
+      { defaultMessage: 'Select fields...' }
+    )
+  },
   { value: 'service.name', text: 'service.name' },
   { value: 'service.environment', text: 'service.environment' },
   { value: 'transaction.type', text: 'transaction.type' },
@@ -43,12 +38,10 @@ const filterOptions = [
 
 export const FiltersSection = ({
   filters = [{ key: '', value: '' }],
-  onChange,
-  customAction
+  onChange
 }: {
   filters: Filter[];
   onChange?: (filters: Filter[]) => void;
-  customAction?: CustomAction;
 }) => {
   const handleAddFilter = () => {
     if (typeof onChange === 'function') {
@@ -132,12 +125,12 @@ const Filters = ({
 }) => {
   const filterValueRefs = useRef<HTMLInputElement[]>([]);
 
-  const onChangeFilter = (key: Keys, value: string, idx: number) => {
+  const onChangeFilter = (filter: Filter, idx: number) => {
     if (filterValueRefs.current[idx]) {
       filterValueRefs.current[idx].focus();
     }
     const copyOfFilters = [...filters];
-    copyOfFilters[idx][key] = value;
+    copyOfFilters[idx] = filter;
     if (typeof onChange === 'function') {
       onChange(copyOfFilters);
     }
@@ -169,7 +162,12 @@ const Filters = ({
                 fullWidth
                 options={selectOptions}
                 value={filter.key}
-                onChange={e => onChangeFilter('key', e.target.value, idx)}
+                onChange={e =>
+                  onChangeFilter(
+                    { key: e.target.value, value: filter.value || '' },
+                    idx
+                  )
+                }
                 isInvalid={isEmpty(filter.key) && !isEmpty(filter.value)}
               />
             </EuiFlexItem>
@@ -179,7 +177,12 @@ const Filters = ({
                   'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={e => onChangeFilter('value', e.target.value, idx)}
+                onChange={e =>
+                  onChangeFilter(
+                    { key: filter.key, value: e.target.value },
+                    idx
+                  )
+                }
                 value={filter.value}
                 isInvalid={!isEmpty(filter.key) && isEmpty(filter.value)}
                 inputRef={ref => {

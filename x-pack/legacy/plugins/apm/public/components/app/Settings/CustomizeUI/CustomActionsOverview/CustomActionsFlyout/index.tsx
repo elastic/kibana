@@ -15,23 +15,44 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { isEmpty } from 'lodash';
 import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { ActionSection } from './ActionSection';
 import { Filter, FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './Flyoutfooter';
+import { saveCustomAction } from './saveCustomAction';
 
 interface Props {
   onClose: () => void;
   customActionSelected?: CustomAction;
 }
 
-export interface FormData {
-  label: string;
-  url: string;
+export interface CustomActionFormData extends Omit<CustomAction, 'filters'> {
   filters: Filter[];
 }
+
+const convertFiltersToArray = (filters?: CustomAction['filters']) => {
+  if (filters) {
+    return Object.keys(filters).map(key => {
+      return { key, value: filters[key] || '' };
+    });
+  }
+};
+
+const convertFiltersToObject = (
+  filters: CustomActionFormData['filters']
+): CustomAction['filters'] => {
+  if (filters.length) {
+    return filters
+      .filter(({ key, value }) => !isEmpty(key) && !isEmpty(value))
+      .reduce((acc: Record<string, string>, { key, value }) => {
+        acc[key] = value;
+        return acc;
+      }, {}) as CustomAction['filters'];
+  }
+};
 
 export const CustomActionsFlyout = ({
   onClose,
@@ -40,14 +61,24 @@ export const CustomActionsFlyout = ({
   const callApmApiFromHook = useCallApmApi();
   const { toasts } = useApmPluginContext().core.notifications;
   const { register, handleSubmit, errors, control, watch } = useForm<
-    FormData
-  >();
-
-  const onSubmit = handleSubmit((customAction: FormData) => {
-    console.log('### caue: onSubmit -> customAction', customAction);
-    // saveCustomAction({ callApmApi: callApmApiFromHook, customAction, toasts });
+    CustomActionFormData
+  >({
+    defaultValues: {
+      ...customActionSelected,
+      filters: convertFiltersToArray(customActionSelected?.filters)
+    }
   });
 
+  const onSubmit = handleSubmit((customAction: CustomActionFormData) => {
+    saveCustomAction({
+      callApmApi: callApmApiFromHook,
+      customAction: {
+        ...customAction,
+        filters: convertFiltersToObject(customAction.filters)
+      },
+      toasts
+    });
+  });
   // Watch for any change on filters to render the component
   const filters = watch('filters');
 
@@ -82,24 +113,14 @@ export const CustomActionsFlyout = ({
 
             <EuiSpacer size="l" />
 
-            <ActionSection
-              register={register}
-              errors={errors}
-              customAction={customActionSelected}
-            />
+            <ActionSection register={register} errors={errors} />
 
             <EuiSpacer size="l" />
 
             <Controller
-              as={
-                <FiltersSection
-                  filters={filters}
-                  customAction={customActionSelected}
-                />
-              }
+              as={<FiltersSection filters={filters} />}
               name="filters"
               control={control}
-              defaultValue={filters}
             />
           </EuiFlyoutBody>
 

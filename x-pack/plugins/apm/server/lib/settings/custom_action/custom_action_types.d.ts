@@ -10,7 +10,12 @@ export interface CustomAction {
   url: string;
   actionId: 'trace';
   filters?: {
-    service?: { name?: string; environment?: string };
-    transaction?: { type?: string; name?: string };
+    [key: string]: string;
+    // 'service.name': string;
+    // 'service.environment': string;
+    // 'transacttion.type': string;
+    // 'transaction.name': string;
+    // service?: { name?: string; environment?: string };
+    // transaction?: { type?: string; name?: string };
   };
 }

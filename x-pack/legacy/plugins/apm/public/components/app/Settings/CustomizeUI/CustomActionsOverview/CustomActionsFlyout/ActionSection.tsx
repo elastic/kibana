@@ -18,11 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
-import { FormData } from './';
+import { CustomActionFormData } from './';
 
 interface ActionField {
-  name: keyof Omit<FormData, 'filters'>;
+  name: keyof CustomActionFormData;
   label: string;
   helpText: string;
   placeholder: string;
@@ -49,15 +48,10 @@ const actionFields: ActionField[] = [
 
 interface ActionSectionProps {
   register: FormContextValues['register'];
-  errors: NestDataObject<FormData>;
-  customAction?: CustomAction;
+  errors: NestDataObject<CustomActionFormData>;
 }
 
-export const ActionSection = ({
-  register,
-  errors,
-  customAction
-}: ActionSectionProps) => {
+export const ActionSection = ({ register, errors }: ActionSectionProps) => {
   return (
     <>
       <EuiTitle size="xs">
@@ -72,7 +66,6 @@ export const ActionSection = ({
       </EuiTitle>
       <EuiSpacer size="l" />
       {actionFields.map((field: ActionField) => {
-        const value = (customAction && customAction[field.name]) || '';
         return (
           <EuiFormRow
             key={field.name}
@@ -86,7 +79,6 @@ export const ActionSection = ({
               name={field.name}
               fullWidth
               isInvalid={!isEmpty(errors[field.name])}
-              value={value}
             />
           </EuiFormRow>
         );

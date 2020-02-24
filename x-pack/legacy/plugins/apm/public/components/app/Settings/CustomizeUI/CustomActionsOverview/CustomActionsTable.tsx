@@ -48,10 +48,6 @@ export const CustomActionsTable = ({
       )
     },
     {
-      field: 'actions',
-      name: 'Actions'
-    },
-    {
       name: i18n.translate(
         'xpack.apm.settings.customizeUI.customActions.table.actions',
         { defaultMessage: 'Actions' }
