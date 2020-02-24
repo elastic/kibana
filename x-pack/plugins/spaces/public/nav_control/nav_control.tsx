@@ -23,7 +23,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
         <I18nContext>
           <NavControlPopover
             spacesManager={spacesManager}
-            serverBasePath={core.injectedMetadata.getInjectedVar('serverBasePath') as string}
+            serverBasePath={core.http.basePath.serverBasePath}
             anchorPosition="downLeft"
             capabilities={core.application.capabilities}
             navigateToApp={core.application.navigateToApp}

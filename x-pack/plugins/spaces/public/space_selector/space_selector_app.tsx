@@ -31,7 +31,7 @@ export const spaceSelectorApp = Object.freeze({
         ]);
         return renderSpaceSelectorApp(coreStart.i18n, params.element, {
           spacesManager,
-          serverBasePath: coreStart.injectedMetadata.getInjectedVar('serverBasePath') as string,
+          serverBasePath: coreStart.http.basePath.serverBasePath,
         });
       },
     });
