@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceSetup interface
 
-Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types and creating and registering Saved Object client wrappers and factories
+Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
 
 <b>Signature:</b>
 
