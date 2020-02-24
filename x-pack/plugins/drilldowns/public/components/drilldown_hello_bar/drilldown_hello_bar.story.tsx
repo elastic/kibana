@@ -6,8 +6,8 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DrilldownPicker } from '..';
+import { DrilldownHelloBar } from '.';
 
-storiesOf('components/DrilldownPicker', module).add('default', () => {
-  return <DrilldownPicker />;
+storiesOf('components/DrilldownHelloBar', module).add('default', () => {
+  return <DrilldownHelloBar />;
 });

@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { FormCreateDrilldown } from '..';
+import { FormCreateDrilldown } from '.';
 
 storiesOf('components/FormCreateDrilldown', module).add('default', () => {
   return <FormCreateDrilldown />;
