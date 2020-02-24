@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component, ChangeEvent } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -16,30 +15,48 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
+import { GeoFieldWithIndex } from '../types/geo_field_with_index';
 
-export class DistanceFilterForm extends Component {
-  static propTypes = {
-    buttonLabel: PropTypes.string.isRequired,
-    geoFields: PropTypes.array.isRequired,
-    onSubmit: PropTypes.func.isRequired,
-  };
+interface Props {
+  className?: string;
+  buttonLabel: string;
+  geoFields: GeoFieldWithIndex[];
+  onSubmit: ({
+    filterLabel,
+    indexPatternId,
+    geoFieldName,
+  }: {
+    filterLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+  }) => void;
+}
 
+interface State {
+  selectedField: GeoFieldWithIndex | undefined;
+  filterLabel: string;
+}
+
+export class DistanceFilterForm extends Component<Props, State> {
   state = {
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
 
-  _onGeoFieldChange = selectedField => {
+  _onGeoFieldChange = (selectedField: GeoFieldWithIndex | undefined) => {
     this.setState({ selectedField });
   };
 
-  _onFilterLabelChange = e => {
+  _onFilterLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       filterLabel: e.target.value,
     });
   };
 
   _onSubmit = () => {
+    if (!this.state.selectedField) {
+      return;
+    }
     this.props.onSubmit({
       filterLabel: this.state.filterLabel,
       indexPatternId: this.state.selectedField.indexPatternId,

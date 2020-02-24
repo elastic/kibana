@@ -27,7 +27,7 @@ function splitOptionId(optionId: string) {
 interface Props {
   fields: GeoFieldWithIndex[];
   onChange: (newSelectedField: GeoFieldWithIndex | undefined) => void;
-  selectedField: GeoFieldWithIndex;
+  selectedField: GeoFieldWithIndex | undefined;
 }
 
 export function MultiIndexGeoFieldSelect({ fields, onChange, selectedField }: Props) {
