@@ -7,7 +7,7 @@
 // Service for carrying out queries to obtain data
 // specific to fields in Elasticsearch indices.
 
-export function fieldsServiceProvider(callWithRequest) {
+export function fieldsServiceProvider(callAsCurrentUser) {
   // Obtains the cardinality of one or more fields.
   // Returns an Object whose keys are the names of the fields,
   // with values equal to the cardinality of the field.
@@ -17,7 +17,7 @@ export function fieldsServiceProvider(callWithRequest) {
     // First check that each of the supplied fieldNames are aggregatable,
     // then obtain the cardinality for each of the aggregatable fields.
     return new Promise((resolve, reject) => {
-      callWithRequest('fieldCaps', {
+      callAsCurrentUser('fieldCaps', {
         index,
         fields: fieldNames,
       })
@@ -72,7 +72,7 @@ export function fieldsServiceProvider(callWithRequest) {
               aggs,
             };
 
-            callWithRequest('search', {
+            callAsCurrentUser('search', {
               index,
               body,
             })
@@ -106,7 +106,7 @@ export function fieldsServiceProvider(callWithRequest) {
     return new Promise((resolve, reject) => {
       const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-      callWithRequest('search', {
+      callAsCurrentUser('search', {
         index,
         size: 0,
         body: {

@@ -9,12 +9,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('test endpoints api', () => {
-    describe('POST /api/endpoint/endpoints when index is empty', () => {
-      it('endpoints api should return empty result when index is empty', async () => {
-        await esArchiver.unload('endpoint/endpoints/api_feature');
+  describe('test metadata api', () => {
+    describe('POST /api/endpoint/metadata when index is empty', () => {
+      it('metadata api should return empty result when index is empty', async () => {
+        await esArchiver.unload('endpoint/metadata/api_feature');
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -25,12 +25,12 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/endpoint/endpoints when index is not empty', () => {
-      before(() => esArchiver.load('endpoint/endpoints/api_feature'));
-      after(() => esArchiver.unload('endpoint/endpoints/api_feature'));
-      it('endpoints api should return one entry for each endpoint with default paging', async () => {
+    describe('POST /api/endpoint/metadata when index is not empty', () => {
+      before(() => esArchiver.load('endpoint/metadata/api_feature'));
+      after(() => esArchiver.unload('endpoint/metadata/api_feature'));
+      it('metadata api should return one entry for each endpoint with default paging', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -40,9 +40,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('endpoints api should return page based on paging properties passed.', async () => {
+      it('metadata api should return page based on paging properties passed.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -61,12 +61,12 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(1);
       });
 
-      /* test that when paging properties produces no result, the total should reflect the actual number of endpoints
+      /* test that when paging properties produces no result, the total should reflect the actual number of metadata
       in the index.
        */
-      it('endpoints api should return accurate total endpoints if page index produces no result', async () => {
+      it('metadata api should return accurate total metadata if page index produces no result', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -85,9 +85,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(30);
       });
 
-      it('endpoints api should return 400 when pagingProperties is below boundaries.', async () => {
+      it('metadata api should return 400 when pagingProperties is below boundaries.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -103,9 +103,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
       });
 
-      it('endpoints api should return page based on filters passed.', async () => {
+      it('metadata api should return page based on filters passed.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({ filter: 'not host.ip:10.101.149.26' })
           .expect(200);
@@ -115,10 +115,10 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('endpoints api should return page based on filters and paging passed.', async () => {
+      it('metadata api should return page based on filters and paging passed.', async () => {
         const notIncludedIp = '10.101.149.26';
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -143,10 +143,10 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('endpoints api should return page based on host.os.variant filter.', async () => {
+      it('metadata api should return page based on host.os.variant filter.', async () => {
         const variantValue = 'Windows Pro';
         const { body } = await supertest
-          .post('/api/endpoint/endpoints')
+          .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             filter: `host.os.variant.keyword:${variantValue}`,
@@ -158,6 +158,40 @@ export default function({ getService }: FtrProviderContext) {
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
         expect(body.endpoints.length).to.eql(2);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('metadata api should return the latest event for all the events for an endpoint', async () => {
+        const targetEndpointIp = '10.192.213.130';
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `host.ip:${targetEndpointIp}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(1);
+        const resultIp: string = body.endpoints[0].host.ip.filter(
+          (ip: string) => ip === targetEndpointIp
+        );
+        expect(resultIp).to.eql([targetEndpointIp]);
+        expect(body.endpoints[0].event.created).to.eql('2020-01-24T16:06:09.541Z');
+        expect(body.endpoints.length).to.eql(1);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('metadata api should return  all endpoints when filter is empty string', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: '',
+          })
+          .expect(200);
+        expect(body.total).to.eql(3);
+        expect(body.endpoints.length).to.eql(3);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
