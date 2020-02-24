@@ -88,9 +88,7 @@ export const SnapshotMetricInputRT = rt.union([
 export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
-    metric: rt.type({
-      type: SnapshotMetricTypeRT,
-    }),
+    metric: SnapshotMetricInputRT,
     groupBy: SnapshotGroupByRT,
     nodeType: ItemTypeRT,
     sourceId: rt.string,
