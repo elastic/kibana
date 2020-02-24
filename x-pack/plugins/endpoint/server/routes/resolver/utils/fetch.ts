@@ -38,6 +38,12 @@ export class Fetcher {
     return tree;
   }
 
+  public async alerts(limit: number, after?: string): Promise<Tree> {
+    const tree = new Tree(this.id);
+    await this.doAlerts(tree, limit, after);
+    return tree;
+  }
+
   public async stats(tree: Tree): Promise<Tree> {
     await this.doStats(tree);
     return tree;
@@ -61,6 +67,16 @@ export class Fetcher {
 
     const next = extractParentEntityID(results[0]);
     await this.doAncestors(tree, id, next, levels - 1);
+  }
+
+  private async doAlerts(tree: Tree, limit: number, after?: string) {
+    // uncomment this when we implement `AlertsQuery`
+    //
+    // const query = new AlertsQuery(this.endpointID, getPaginationParams(limit, after));
+    // const { totals, results } = await query.search(this.client, this.id);
+    // tree.addAlert(...results);
+    // tree.paginateAlerts(totals, results);
+    // if (results.length === 0) tree.setNextAlert(null);
   }
 
   private async doEvents(tree: Tree, limit: number, after?: string) {

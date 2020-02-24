@@ -17,12 +17,14 @@ interface NodeStats {
 interface Node {
   children: Node[];
   events: ResolverEvent[];
+  alerts: ResolverEvent[];
   lifecycle: ResolverEvent[];
   parent?: Node | null;
   pagination: {
     nextChild?: string | null;
     nextEvent?: string | null;
     nextAncestor?: string | null;
+    nextAlert?: string | null;
   };
   stats?: NodeStats;
 }
@@ -30,7 +32,7 @@ interface Node {
 type ExtractFunction = (event: ResolverEvent) => string;
 
 function createNode(): Node {
-  return { children: [], pagination: {}, events: [], lifecycle: [] };
+  return { children: [], pagination: {}, events: [], alerts: [], lifecycle: [] };
 }
 
 // This class aids in constructing a tree of process events. It works in the following way:
@@ -86,18 +88,20 @@ export class Tree {
   public static async merge(
     childrenPromise: Promise<Tree>,
     ancestorsPromise: Promise<Tree>,
-    eventsPromise: Promise<Tree>
+    eventsPromise: Promise<Tree>,
+    alertsPromise: Promise<Tree>
   ) {
-    const [children, ancestors, events] = await Promise.all([
+    const [children, ancestors, events, alerts] = await Promise.all([
       childrenPromise,
       ancestorsPromise,
       eventsPromise,
+      alertsPromise,
     ]);
 
     // we only allow for merging when we have partial trees that
     // represent the same root node
     const rootID = children.id;
-    if (rootID !== ancestors.id || rootID !== events.id) {
+    if (rootID !== ancestors.id || rootID !== events.id || rootID !== alerts.id) {
       throw new Error('cannot merge trees with different roots');
     }
 
@@ -106,17 +110,20 @@ export class Tree {
     Object.entries(ancestors.cache).forEach(([id, node]) => {
       if (rootID !== id) children.cache[id] = node;
     });
-    Object.entries(events.cache).forEach(([id, node]) => {
-      if (rootID !== id) children.cache[id] = node;
-    });
 
     // fix up the references
     children.root.lifecycle = ancestors.root.lifecycle; // lifecycle is bound to the ancestors query
     children.root.parent = ancestors.root.parent;
     children.root.events = events.root.events;
+    children.root.alerts = alerts.root.alerts;
 
     // merge the pagination
-    Object.assign(children.root.pagination, ancestors.root.pagination, events.root.pagination);
+    Object.assign(
+      children.root.pagination,
+      ancestors.root.pagination,
+      events.root.pagination,
+      alerts.root.pagination
+    );
 
     return children;
   }
@@ -127,6 +134,15 @@ export class Tree {
 
       this.ensureCache(id);
       this.cache[id].events.push(event);
+    });
+  }
+
+  public addAlert(...alerts: ResolverEvent[]) {
+    alerts.forEach(alert => {
+      const id = extractEntityID(alert);
+
+      this.ensureCache(id);
+      this.cache[id].alerts.push(alert);
     });
   }
 
@@ -156,6 +172,10 @@ export class Tree {
     this.root.pagination.nextEvent = next;
   }
 
+  public setNextAlert(next: string | null) {
+    this.root.pagination.nextAlert = next;
+  }
+
   public addChild(...events: ResolverEvent[]) {
     events.forEach(event => {
       const id = extractEntityID(event);
@@ -183,6 +203,10 @@ export class Tree {
 
   public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]) {
     return this.paginate(extractEntityID, 'nextEvent', totals, events);
+  }
+
+  public paginateAlerts(totals: Record<string, number>, events: ResolverEvent[]) {
+    return this.paginate(extractEntityID, 'nextAlert', totals, events);
   }
 
   public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]) {

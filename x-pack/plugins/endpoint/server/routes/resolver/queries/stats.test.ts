@@ -57,7 +57,7 @@ describe('stats query', () => {
                           },
                           {
                             terms: {
-                              alert_entity_id_field: ['5'],
+                              'endgame.data.alert_details.acting_process.unique_pid': ['5'],
                             },
                           },
                         ],
@@ -78,7 +78,9 @@ describe('stats query', () => {
             },
             aggs: {
               ids: {
-                terms: 'alert_entity_id_field',
+                terms: {
+                  field: 'endgame.data.alert_details.acting_process.unique_pid',
+                },
               },
             },
           },
@@ -90,7 +92,9 @@ describe('stats query', () => {
             },
             aggs: {
               ids: {
-                terms: 'endgame.unique_pid',
+                terms: {
+                  field: 'endgame.unique_pid',
+                },
               },
             },
           },
@@ -155,7 +159,9 @@ describe('stats query', () => {
             },
             aggs: {
               ids: {
-                terms: 'process.entity_id',
+                terms: {
+                  field: 'process.entity_id',
+                },
               },
             },
           },
@@ -167,7 +173,9 @@ describe('stats query', () => {
             },
             aggs: {
               ids: {
-                terms: 'process.entity_id',
+                terms: {
+                  field: 'process.entity_id',
+                },
               },
             },
           },

@@ -16,7 +16,9 @@ interface TreeQueryParams {
   children: number;
   generations: number;
   ancestors: number;
+  alerts: number;
   events: number;
+  afterAlert?: string;
   afterChild?: string;
   afterEvent?: string;
   /**
@@ -61,6 +63,8 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
         generations,
         ancestors,
         events,
+        alerts,
+        afterAlert,
         afterEvent,
         afterChild,
         legacyEndpointID: endpointID,
@@ -72,6 +76,7 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
       const fetcher = new Fetcher(client, id, endpointID);
       const tree = await Tree.merge(
         fetcher.children(children, generations, afterChild),
+        fetcher.alerts(alerts, afterAlert),
         fetcher.ancestors(ancestors + 1),
         fetcher.events(events, afterEvent)
       );

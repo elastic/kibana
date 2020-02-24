@@ -63,7 +63,11 @@ export class StatsQuery extends ResolverQuery {
                       bool: {
                         filter: [
                           { term: { 'event.kind': 'alert' } },
-                          { terms: { alert_entity_id_field: uniquePIDs } },
+                          {
+                            terms: {
+                              'endgame.data.alert_details.acting_process.unique_pid': uniquePIDs,
+                            },
+                          },
                         ],
                       },
                     },
@@ -77,7 +81,7 @@ export class StatsQuery extends ResolverQuery {
           alerts: {
             filter: { term: { 'event.kind': 'alert' } },
             aggs: {
-              ids: { terms: { field: 'alert_entity_id_field' } },
+              ids: { terms: { field: 'endgame.data.alert_details.acting_process.unique_pid' } },
             },
           },
           events: {
