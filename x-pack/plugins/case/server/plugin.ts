@@ -34,6 +34,7 @@ export class CasePlugin {
     if (!config.enabled) {
       return;
     }
+
     const service = new CaseService(this.log);
 
     this.log.debug(
