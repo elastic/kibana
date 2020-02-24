@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
-  describe.only('Management', () => {
+  describe('Management', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('settings');
     });
