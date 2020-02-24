@@ -76,13 +76,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             [
               <EuiContextMenuItem
                 key={'BatchItemKey'}
-                icon="checkInCircleFilled"
+                icon="trash"
                 disabled={false}
                 onClick={async () => {
                   closePopover();
                 }}
               >
-                {'Batch Item'}
+                {'Delete selected timeline'}
               </EuiContextMenuItem>,
             ]
           }
