@@ -20,9 +20,12 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ErrorConfigureAction } from '.';
+import { createSampleGoToUrlAction } from '../../tests';
+import { ActionInternal } from '../../actions';
+
+const action = new ActionInternal(createSampleGoToUrlAction());
 
 storiesOf('components/ErrorConfigureAction', module)
   .add('default', () => <ErrorConfigureAction />)
-  .add('[actionId=TEST_SAMPLE_ACTION]', () => (
-    <ErrorConfigureAction actionId={'TEST_SAMPLE_ACTION'} />
-  ));
+  .add('with action', () => <ErrorConfigureAction action={action} />)
+  .add('with action and message', () => <ErrorConfigureAction action={action} msg="Foo bar." />);

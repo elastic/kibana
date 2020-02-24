@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { ActionDefinition } from '../../actions';
+import React from 'react';
+import { EuiCode } from '@elastic/eui';
+import { AnyActionInternal } from '../../actions';
 
-interface Config {
-  url: string;
-  openInNewTab: boolean;
+export interface ActionIdentifierProps {
+  action: AnyActionInternal;
 }
 
-export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
-
-export const createSampleGoToUrlAction = (): ActionDefinition<object, void, Config> => {
-  return {
-    type: SAMPLE_GO_TO_URL_ACTION,
-    id: SAMPLE_GO_TO_URL_ACTION,
-    execute() {},
-  };
-};
+export const ActionIdentifier: React.FC<ActionIdentifierProps> = ({ action }) => (
+  <p>
+    {action.id && (
+      <>
+        Action ID: <EuiCode>{action.id}</EuiCode>
+        <br />
+      </>
+    )}
+    {action.type && (
+      <>
+        Action type: <EuiCode>{action.type}</EuiCode>
+        <br />
+      </>
+    )}
+  </p>
+);

@@ -19,6 +19,8 @@
 
 import React from 'react';
 import { AnyActionInternal } from '../../actions';
+import { ErrorConfigureAction } from '../error_configure_action';
+import { txtMissingCollectConfig } from './i18n';
 
 export interface ConfigureActionProps {
   action: AnyActionInternal;
@@ -26,7 +28,7 @@ export interface ConfigureActionProps {
 
 export const ConfigureAction: React.FC<ConfigureActionProps> = ({ action }) => {
   if (!action.ReactCollectConfig) {
-    return <div>no config collection possible</div>;
+    return <ErrorConfigureAction action={action} msg={txtMissingCollectConfig} />;
   }
 
   return (

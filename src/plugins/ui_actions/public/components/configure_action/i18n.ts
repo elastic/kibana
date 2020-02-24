@@ -17,19 +17,8 @@
  * under the License.
  */
 
-import { ActionDefinition } from '../../actions';
+import { i18n } from '@kbn/i18n';
 
-interface Config {
-  url: string;
-  openInNewTab: boolean;
-}
-
-export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
-
-export const createSampleGoToUrlAction = (): ActionDefinition<object, void, Config> => {
-  return {
-    type: SAMPLE_GO_TO_URL_ACTION,
-    id: SAMPLE_GO_TO_URL_ACTION,
-    execute() {},
-  };
-};
+export const txtMissingCollectConfig = i18n.translate('uiActions.components.missingCollectConfig', {
+  defaultMessage: 'Dynamic action must have CollectConfig component defined.',
+});

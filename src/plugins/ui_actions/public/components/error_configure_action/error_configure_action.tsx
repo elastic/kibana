@@ -18,23 +18,23 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCode } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { txtSorryActionConfigurationError } from './i18n';
+import { AnyActionInternal } from '../../actions';
+import { ActionIdentifier } from './action_identifier';
 
 export interface ErrorConfigureActionProps {
-  actionId?: string;
+  msg?: React.ReactNode;
+  action?: AnyActionInternal;
 }
 
 export const ErrorConfigureAction: React.FC<ErrorConfigureActionProps> = ({
-  actionId,
+  action,
+  msg,
   children,
 }) => (
   <EuiCallOut title={txtSorryActionConfigurationError} color="danger" iconType="alert">
-    <p>{children}</p>
-    {actionId && (
-      <p>
-        Action ID: <EuiCode>{actionId}</EuiCode>
-      </p>
-    )}
+    {(msg || children) && <p>{msg || children}</p>}
+    {action && <ActionIdentifier action={action} />}
   </EuiCallOut>
 );
