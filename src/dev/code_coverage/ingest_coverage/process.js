@@ -31,22 +31,20 @@ import {
   distro,
   buildId,
 } from './transforms';
-import moment from 'moment';
 import { resolve } from "path";
 
 const KIBANA_ROOT_PATH = '../../../..';
 const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 
 const ms = process.env.DELAY || 0;
-const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || '';
+const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || undefined;
 
-const ts = log => process.env.TIME_STAMP || moment.utc().format();
 
 export default ({ coverageSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
   validateRoot(KIBANA_ROOT, log);
-  const addPrePopulatedTimeStamp = addTimeStamp(ts(log));
+  const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
 
   const prokStatsTimeStampBuildId = pipe(
     statsAndstaticSiteUrl,
