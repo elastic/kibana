@@ -204,7 +204,7 @@ describe('Custom Links', () => {
           );
         });
 
-        test(`should render Comma if current id is smaller than the index of last visible item`, () => {
+        test(`should render Comma if current id (${idx}) is smaller than the index of last visible item`, () => {
           expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
         });
       }
@@ -233,7 +233,7 @@ describe('Custom Links', () => {
           );
         });
 
-        test(`should render Comma execpt the last item`, () => {
+        test(`Current item (${idx}) should render Comma execpt the last item`, () => {
           expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
         });
       }
@@ -262,7 +262,7 @@ describe('Custom Links', () => {
           );
         });
 
-        test(`should render Comma correctly`, () => {
+        test(`Current item (${idx}) should render Comma correctly`, () => {
           expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
         });
       }
