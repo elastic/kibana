@@ -66,17 +66,17 @@ export const distro = obj => {
   };
 };
 
-const dropFront = staticSiteUrl => {
-  const result = trimLeftFrom('kibana', staticSiteUrl);
-  const trimmedAgain = result.replace(/kibana/, '');
-  return trimmedAgain;
-}
+const dropFront = staticSiteUrl =>
+  trimLeftFrom('kibana', staticSiteUrl).replace(/kibana/, '');
+
 const buildFinalUrl = (urlBase, BUILD_ID, ts, testRunnerType) => trimmed =>
   `${urlBase}/${BUILD_ID}/${ts}/${testRunnerType.toLowerCase()}-combined${trimmed}`;
+
 const assignUrl = obj => name => value => {
   obj[name] = value;
   return obj;
 };
+
 export const staticSite = urlBase => obj => {
   const { BUILD_ID, staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
