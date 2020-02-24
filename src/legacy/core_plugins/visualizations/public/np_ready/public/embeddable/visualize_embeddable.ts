@@ -20,7 +20,6 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -35,8 +34,9 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  valueClickTrigger,
+  EmbeddableVisTriggerContext
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
@@ -291,13 +291,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
-
-          getUiActions().executeTriggerActions(eventName, {
+          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
+            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
-          });
+          };
+          getUiActions().getTrigger(triggerId).exec(context);
         }
       })
     );
