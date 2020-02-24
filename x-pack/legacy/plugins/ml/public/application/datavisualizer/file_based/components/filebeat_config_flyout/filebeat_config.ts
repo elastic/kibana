@@ -23,7 +23,7 @@ export function createFilebeatConfig(
     '',
     ...getProcessors(results),
     'output.elasticsearch:',
-    '  hosts:["<es_url>"]',
+    '  hosts: ["<es_url>"]',
     ...getUserDetails(username),
     `  index: "${index}"`,
     `  pipeline: "${ingestPipelineId}"`,
