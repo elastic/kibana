@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { ActionDefinition } from '../../actions';
 import { CollectConfigProps } from '../../util';
 import { reactToUiComponent } from '../../../../kibana_react/public';
@@ -30,21 +30,26 @@ interface Config {
   openInNewTab: boolean;
 }
 
-const CollectConfig: React.FC<CollectConfigProps<Config, object>> = ({ config }) => {
+const CollectConfig: React.FC<CollectConfigProps<Config, object>> = ({ config, onConfig }) => {
   return (
-    <EuiForm>
+    <>
       <EuiFormRow label="Enter target URL">
-        <EuiFieldText placeholder="Enter URL" name="url" value={config.url} onChange={() => {}} />
+        <EuiFieldText
+          placeholder="Enter URL"
+          name="url"
+          value={config.url}
+          onChange={event => onConfig({ ...config, url: event.target.value })}
+        />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
         <EuiSwitch
           name="switch"
           label="Open in new tab?"
           checked={config.openInNewTab}
-          onChange={() => {}}
+          onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
         />
       </EuiFormRow>
-    </EuiForm>
+    </>
   );
 };
 

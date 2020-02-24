@@ -25,19 +25,27 @@ export interface ActionState<Config extends object> {
   readonly config: Config;
 }
 
+export interface ActionStateTransitions<Config extends object> {
+  setConfig: (state: ActionState<Config>) => (config: Config) => ActionState<Config>;
+}
+
+export type ActionStateContainer<Config extends object> = StateContainer<
+  ActionState<Config>,
+  ActionStateTransitions<Config>,
+  {}
+>;
+
 export const defaultState: ActionState<object> = {
   name: '',
   order: 0,
   config: {},
 };
 
-export type ActionStateContainer<Config extends object> = StateContainer<
-  ActionState<Config>,
-  {},
-  {}
->;
+const pureTransitions: ActionStateTransitions<any> = {
+  setConfig: state => config => ({ ...state, config }),
+};
 
 export const createActionStateContainer = <Config extends object>(
   state: Partial<ActionState<Config>>
-) =>
-  createStateContainer<ActionState<Config>>({ ...defaultState, ...state } as ActionState<Config>);
+): ActionStateContainer<Config> =>
+  createStateContainer({ ...defaultState, ...state } as ActionState<Config>, pureTransitions);

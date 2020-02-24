@@ -30,5 +30,13 @@ const actionMissingCollectConfig = new ActionInternal({
 });
 
 storiesOf('components/ConfigureAction', module)
-  .add('default', () => <ConfigureAction action={action} />)
+  .add('default', () => (
+    <div>
+      <ConfigureAction action={action} />
+      <br />
+      <hr />
+      <br />
+      <pre>{JSON.stringify(action.state.get(), null, 4)}</pre>
+    </div>
+  ))
   .add('missing CollectConfig', () => <ConfigureAction action={actionMissingCollectConfig} />);

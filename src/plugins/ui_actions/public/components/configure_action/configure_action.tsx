@@ -18,26 +18,31 @@
  */
 
 import React from 'react';
+import { EuiForm } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import { AnyActionInternal } from '../../actions';
 import { ErrorConfigureAction } from '../error_configure_action';
 import { txtMissingCollectConfig } from './i18n';
 
 export interface ConfigureActionProps {
+  context?: unknown;
   action: AnyActionInternal;
 }
 
-export const ConfigureAction: React.FC<ConfigureActionProps> = ({ action }) => {
+export const ConfigureAction: React.FC<ConfigureActionProps> = ({ context, action }) => {
+  const actionState = useObservable(action.state.state$, action.state.get());
+
   if (!action.ReactCollectConfig) {
     return <ErrorConfigureAction action={action} msg={txtMissingCollectConfig} />;
   }
 
   return (
-    <div>
+    <EuiForm>
       <action.ReactCollectConfig
-        config={action.state.get().config}
-        context={{} as any}
-        onConfig={() => {}}
+        context={context}
+        config={actionState.config}
+        onConfig={action.state.transitions.setConfig}
       />
-    </div>
+    </EuiForm>
   );
 };
