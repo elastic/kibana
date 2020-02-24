@@ -43,7 +43,7 @@ export function MultiIndexGeoFieldSelect({ fields, onChange, selectedField }: Pr
   const options = fields.map((geoField: GeoFieldWithIndex) => {
     return {
       inputDisplay: (
-        <EuiText size="s" component="span">
+        <EuiText size="s">
           <EuiTextColor color="subdued">
             <small>{geoField.indexPatternTitle}</small>
           </EuiTextColor>
