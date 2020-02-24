@@ -22,6 +22,15 @@ import { idObjectProps } from '../id_object';
 
 export const textObjectTypeName = 'text-object';
 
+/**
+ * Takes an array of text objects and sorts them according to date created and places
+ * scratch pad at as the first element, if one exists in the array.
+ */
+export const sortTextObjectsAsc = (textObjects: TextObjectWithId[]) =>
+  textObjects.sort((a, b) =>
+    a.isScratchPad ? -1 : b.isScratchPad ? 1 : a.createdAt - b.createdAt
+  );
+
 export const optionalTextObjectProps = {
   /**
    * An optional user provided name for the text object

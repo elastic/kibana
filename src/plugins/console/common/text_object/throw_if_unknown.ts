@@ -25,7 +25,7 @@ export const throwIfUnknown = <A, O>(codec: Type<A, O>, value: unknown) =>
     codec.decode(value),
     fold(
       () => {
-        throw new Error(`Cannot assign ${value} to TextObject`);
+        throw new Error(`Cannot assign ${JSON.stringify(value, null, 2)} to TextObject`);
       },
       result => result
     )

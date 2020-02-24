@@ -5,9 +5,7 @@
   min-width: $euiButtonMinWidth * 2.5;
 
   &__spinner {
-    text-align: center;
-    display: block;
-    margin: auto 0;
+    padding-right: 5px;
   }
 
   &__actionBar {
@@ -23,6 +21,7 @@
   &__entry {
     font-size: $euiSizeM;
     padding: 2px 5px;
+    height: $euiFormControlHeight * 0.9;
 
     &--selected {
       background-color: $euiColorMediumShade;

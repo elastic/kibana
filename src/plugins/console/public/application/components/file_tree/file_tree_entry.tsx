@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon } from '@elastic/eui';
+import React, { FunctionComponent, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
+
+export interface EditHandlerArg {
+  id: string;
+  name: string;
+}
 
 export interface Props {
+  id: string;
   name: string;
-  onSelect: () => void;
-  onDelete: () => void;
+  onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (props: EditHandlerArg) => void;
   className?: string;
   canDelete?: boolean;
+  canEdit?: boolean;
 }
 
 export const FileTreeEntry: FunctionComponent<Props> = ({
@@ -34,30 +43,79 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
   onSelect,
   canDelete,
   onDelete,
+  canEdit,
+  onEdit,
+  id,
 }) => {
-  return (
-    <EuiFlexGroup gutterSize="none" className={className}>
-      <EuiFlexItem onClick={onSelect}>
-        <EuiText size="s">
-          <span
-            tabIndex={0}
-            onFocus={event => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [nameValue, setNameValue] = useState<undefined | string>(undefined);
+
+  const renderInputField = () => (
+    <EuiFlexItem>
+      <EuiFieldText
+        className="conApp__fileTree__entry__nameInput"
+        inputRef={(ref: HTMLInputElement) => ref?.focus()}
+        compressed
+        onBlur={() => {
+          // Don't allow empty names to be saved
+          if (nameValue && onEdit) {
+            onEdit({ name: nameValue, id });
+          }
+          setNameValue(undefined);
+          setIsEditing(false);
+        }}
+        onChange={event => {
+          setNameValue(event.target.value);
+        }}
+        value={nameValue}
+      />
+    </EuiFlexItem>
+  );
+
+  const renderEntry = () => (
+    <EuiFlexItem>
+      <EuiText
+        aria-label={i18n.translate('console.fileTree.fileEntryName', {
+          defaultMessage: '{name}',
+          values: { name },
+        })}
+        size="s"
+      >
+        <span
+          tabIndex={0}
+          onFocus={event => {
+            if (canEdit) {
               event.stopPropagation();
-              console.log('yeah!');
-            }}
-          >
-            {name}
-          </span>
-        </EuiText>
-      </EuiFlexItem>
+              setIsEditing(true);
+              setNameValue(name);
+            }
+          }}
+        >
+          {name}
+        </span>
+      </EuiText>
+    </EuiFlexItem>
+  );
+
+  return (
+    <EuiFlexGroup
+      justifyContent="center"
+      alignItems="center"
+      gutterSize="none"
+      className={className}
+      onClick={() => onSelect(id)}
+    >
+      {isEditing ? renderInputField() : renderEntry()}
       {canDelete && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            tabIndex={0}
             aria-label={i18n.translate('console.fileTree.deleteButtonLabel', {
-              defaultMessage: 'Delete',
+              defaultMessage: 'Delete {name}',
+              values: { name },
             })}
             className="conApp__fileTree__entry__deleteActionButton"
-            onClick={onDelete}
+            onClick={() => onDelete(id)}
             color="danger"
             iconType="trash"
           />

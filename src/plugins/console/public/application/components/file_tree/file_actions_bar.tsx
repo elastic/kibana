@@ -18,45 +18,40 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { FileForm } from './forms';
-import { TextObjectWithId } from '../../../../common/text_object';
 
 export interface Props {
-  currentTextObject: TextObjectWithId;
   onCreate: (fileName: string) => void;
-  canEdit: boolean;
-  onEdit: (fileName: string) => void;
   onFilter: () => void;
   disabled?: boolean;
+  fileActionInProgress?: boolean;
 }
 
 export const FileActionsBar: FunctionComponent<Props> = ({
-  currentTextObject,
   onCreate,
-  canEdit,
-  onEdit,
   onFilter,
   disabled,
+  fileActionInProgress,
 }) => {
   const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
-  const [showEditFilePopover, setShowEditFilePopover] = useState(false);
 
   const setShowPopover = (popover: 'create' | 'edit' | false) => {
     switch (popover) {
       case 'create':
         setShowCreateFilePopover(true);
-        setShowEditFilePopover(false);
-        break;
-      case 'edit':
-        setShowCreateFilePopover(false);
-        setShowEditFilePopover(true);
         break;
       case false:
       default:
         setShowCreateFilePopover(false);
-        setShowEditFilePopover(false);
     }
   };
 
@@ -68,41 +63,16 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       className="conApp__fileTree__actionBar"
     >
       <EuiFlexItem>
-        <EuiText size="s">Files</EuiText>
+        <EuiText size="s">
+          {i18n.translate('console.fileTree.title', { defaultMessage: 'Files' })}
+        </EuiText>
       </EuiFlexItem>
-      {/* Edit Action */}
-      {canEdit && (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={showEditFilePopover && !disabled}
-            closePopover={() => setShowEditFilePopover(false)}
-            button={
-              <EuiButtonIcon
-                disabled={disabled}
-                onClick={() => {
-                  setShowPopover('edit');
-                }}
-                aria-label={i18n.translate('console.fileTree.forms.editButtonAriaLabel', {
-                  defaultMessage: 'Edit a file',
-                })}
-                color="ghost"
-                iconType="pencil"
-              />
-            }
-          >
-            <FileForm
-              initial={{
-                fileName: currentTextObject.name ?? '',
-              }}
-              isSubmitting={Boolean(disabled)}
-              onSubmit={(fileName: string) => {
-                onEdit(fileName);
-                setShowPopover(false);
-              }}
-            />
-          </EuiPopover>
+      {fileActionInProgress && (
+        <EuiFlexItem className="conApp__fileTree__spinner" grow={false}>
+          <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
       )}
+
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           disabled={disabled}

@@ -20,6 +20,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
+import { sortTextObjectsAsc } from '../../../../common/text_object';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
@@ -52,13 +53,8 @@ export const useDataInit = () => {
           });
           dispatch({ type: 'textObject.upsertAndSetCurrent', payload: newObject });
         } else {
-          const hasScratchPad = results.some(textObject => textObject.isScratchPad);
-          // For backwards compatibility, we sort here according to date created to
-          // always take the first item created.
-          const [defaultTextObject, ...otherObjects] = results.sort(
-            (a, b) => a.createdAt - b.createdAt
-          );
-          if (!hasScratchPad) {
+          const [defaultTextObject, ...otherObjects] = sortTextObjectsAsc(results);
+          if (!defaultTextObject.isScratchPad) {
             defaultTextObject.isScratchPad = true;
           }
           dispatch({

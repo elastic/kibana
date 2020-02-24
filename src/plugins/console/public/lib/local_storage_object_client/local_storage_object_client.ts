@@ -41,7 +41,9 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
   }
 
   async update(obj: Partial<O> & IdObject): Promise<void> {
-    this.client.set(this.getFullEntryName(obj.id), obj);
+    const objIdName = this.getFullEntryName(obj.id);
+    const currentObj = this.client.get(objIdName);
+    this.client.set(objIdName, { ...currentObj, ...obj });
   }
 
   async delete(id: string) {

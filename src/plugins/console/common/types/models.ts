@@ -22,14 +22,14 @@ import { IdObject } from '../id_object';
 
 export interface ObjectStorage<O extends IdObject> {
   /**
-   * Creates a new object in the underlying persistance layer.
+   * Creates a new object in the underlying persistence layer.
    *
    * @remarks Does not accept an ID, a new ID is generated and returned with the newly created object.
    */
   create(obj: Omit<O, 'id'>): Promise<O>;
 
   /**
-   * This method should update specific object in the persistance layer.
+   * This method should update specific object in the persistence layer.
    */
   update(obj: Partial<O>): Promise<void>;
 
