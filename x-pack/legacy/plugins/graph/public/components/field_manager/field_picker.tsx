@@ -122,7 +122,7 @@ function toOptions(
       .filter(field => isExplorable(field) || field.selected)
       .map(field => ({
         label: field.name,
-        prepend: <FieldIcon type={field.type} size="m" useColor />,
+        prepend: <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />,
         checked: field.selected ? 'on' : undefined,
       }))
   );

@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function callWithInternalUserFactory(elasticsearchPlugin: any): any;
+export function XJsonMode() {}
+export function setDependencyCache() {}
+export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
+export const SORT_DIRECTION = { ASC: 'asc' };
