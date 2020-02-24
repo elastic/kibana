@@ -52,3 +52,16 @@
   @include euiFormControlLayoutPadding(1, 'right');
   @include euiFormControlLayoutPadding(1, 'left');
 }
+
+.lnsInnerIndexPatternDataPanel__filterType {
+  padding: $euiSizeS;
+}
+
+.lnsInnerIndexPatternDataPanel__filterTypeInner {
+  display: flex;
+  align-items: center;
+
+  .lnsFieldListPanel__fieldIcon {
+    margin-right: $euiSizeS;
+  }
+}
