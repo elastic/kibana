@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "private": true,
   "license": "Elastic-License",
-  "scripts": {},
+  "scripts": {
+    "scriptsGoHere": "ls"
+  },
   "dependencies": {
     "react-redux": "^7.1.0"
   },
