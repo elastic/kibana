@@ -8,7 +8,7 @@ import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
-import { useFetcher } from '../../../../../hooks/useFetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { CustomActionsFlyout } from './CustomActionsFlyout';
 import { CustomActionsTable } from './CustomActionsTable';
 import { EmptyPrompt } from './EmptyPrompt';
@@ -21,7 +21,7 @@ export const CustomActionsOverview = () => {
     CustomAction | undefined
   >();
 
-  const { data: customActions, refetch } = useFetcher(
+  const { data: customActions, status, refetch } = useFetcher(
     callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-actions' }),
     []
   );
@@ -41,7 +41,8 @@ export const CustomActionsOverview = () => {
     setIsFlyoutOpen(true);
   };
 
-  const hasCustomActions = !isEmpty(customActions);
+  const showEmptyPrompt =
+    status === FETCH_STATUS.SUCCESS && isEmpty(customActions);
 
   return (
     <>
@@ -64,7 +65,7 @@ export const CustomActionsOverview = () => {
           <EuiFlexItem grow={false}>
             <Title />
           </EuiFlexItem>
-          {hasCustomActions && (
+          {!showEmptyPrompt && (
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -79,13 +80,13 @@ export const CustomActionsOverview = () => {
 
         <EuiSpacer size="m" />
 
-        {hasCustomActions ? (
+        {showEmptyPrompt ? (
+          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
+        ) : (
           <CustomActionsTable
             items={customActions}
             onCustomActionSelected={setCustomActionSelected}
           />
-        ) : (
-          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
         )}
       </EuiPanel>
     </>

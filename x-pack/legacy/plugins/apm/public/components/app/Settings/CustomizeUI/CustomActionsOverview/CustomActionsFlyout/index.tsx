@@ -36,7 +36,7 @@ export interface CustomActionFormData extends Omit<CustomAction, 'filters'> {
 }
 
 const convertFiltersToArray = (filters?: CustomAction['filters']) => {
-  if (filters) {
+  if (filters && Object.keys(filters).length) {
     return Object.keys(filters).map(key => {
       return { key, value: filters[key] || '' };
     });

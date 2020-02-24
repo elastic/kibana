@@ -5,9 +5,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { units, px } from '../../../../../style/variables';
 import { CustomAction } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
+import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 
 interface Props {
   items: CustomAction[];
@@ -15,7 +17,7 @@ interface Props {
 }
 
 export const CustomActionsTable = ({
-  items,
+  items = [],
   onCustomActionSelected
 }: Props) => {
   const columns = [
@@ -36,6 +38,7 @@ export const CustomActionsTable = ({
       truncateText: true
     },
     {
+      width: px(160),
       align: 'right',
       field: '@timestamp',
       name: i18n.translate(
@@ -48,6 +51,7 @@ export const CustomActionsTable = ({
       )
     },
     {
+      width: px(units.quadruple),
       name: i18n.translate(
         'xpack.apm.settings.customizeUI.customActions.table.actions',
         { defaultMessage: 'Actions' }
@@ -75,12 +79,12 @@ export const CustomActionsTable = ({
 
   return (
     <ManagedTable
+      noItemsMessage={<LoadingStatePrompt />}
       items={items}
       columns={columns}
       initialPageSize={10}
-      initialSortField="occurrenceCount"
-      initialSortDirection="desc"
-      sortItems={false}
+      initialSortField="@timestamp"
+      initialSortDirection="asc"
     />
   );
 };
