@@ -8,55 +8,33 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiKeyPadMenuItem, EuiIcon } from '@elastic/eui';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeIndex } from '../../../../../../../plugins/triggers_actions_ui/public/types';
+import { ActionForm } from '../../../../../../../plugins/triggers_actions_ui/public';
+import {
+  ActionTypeIndex,
+  AlertAction,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import * as i18nCommon from '../../common/translations';
 import { EmptyPage } from '../../../components/empty_page';
 import { useKibana } from '../../../lib/kibana';
 
 const OverviewEmptyComponent: React.FC = () => {
+  const actionTypes = [
+    { id: '.email', name: 'Email', enabled: true },
+    { id: '.index', name: 'Index', enabled: true },
+    { id: '.pagerduty', name: 'PagerDuty', enabled: true },
+    { id: '.server-log', name: 'Server log', enabled: true },
+    { id: '.servicenow', name: 'servicenow', enabled: true },
+    { id: '.slack', name: 'Slack', enabled: true },
+    { id: '.webhook', name: 'Webhook', enabled: true },
+    { id: '.example-action', name: 'Example Action', enabled: true },
+  ];
   const { http, docLinks, triggers_actions_ui } = useKibana().services;
   const basePath = http.basePath.get();
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-
-  // load action types
-  useEffect(() => {
-    (async () => {
-      // here shoud be a call for actions server API to get a list of action types
-      // const actionTypes = await loadActionTypes({ http });
-
-      // hardcoded for example
-      const actionTypes = [
-        { id: '.email', name: 'Email', enabled: true },
-        { id: '.index', name: 'Index', enabled: true },
-        { id: '.pagerduty', name: 'PagerDuty', enabled: true },
-        { id: '.server-log', name: 'Server log', enabled: true },
-        { id: '.servicenow', name: 'servicenow', enabled: true },
-        { id: '.slack', name: 'Slack', enabled: true },
-        { id: '.webhook', name: 'Webhook', enabled: true },
-        { id: '.example-action', name: 'Example Action', enabled: true },
-      ];
-      const index: ActionTypeIndex = {};
-      for (const actionTypeItem of actionTypes) {
-        index[actionTypeItem.id] = actionTypeItem;
-      }
-      setActionTypesIndex(index);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
-    return (
-      <EuiKeyPadMenuItem
-        key={index}
-        data-test-subj={`${item.id}-ActionTypeSelectOption`}
-        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
-        onClick={() => alert('new action type was added')}
-      >
-        <EuiIcon size="xl" type={item.iconClass} />
-      </EuiKeyPadMenuItem>
-    );
-  });
+  // this is for example, but in real code it should be a property of Alert object
+  const [actions, setActions] = useState<AlertAction[]>([]);
 
   return (
     <>
@@ -73,9 +51,24 @@ const OverviewEmptyComponent: React.FC = () => {
         title={i18nCommon.EMPTY_TITLE}
       />
       <EuiSpacer size="xl" />
-      <EuiFlexGroup gutterSize="s" wrap>
-        {actionTypeNodes}
-      </EuiFlexGroup>
+      <ActionForm
+        actions={actions}
+        messageVariables={['test var1', 'test var2']}
+        defaultActionGroupId={'default'}
+        setActionIdByIndex={(id: string, index: number) => {
+          actions[index].id = id;
+        }}
+        setAlertProperty={(updatedActions: AlertAction[]) => setActions(updatedActions)}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setActionParamsProperty={(key: string, value: any, index: number) =>
+          (actions[index] = { ...actions[index], [key]: value })
+        }
+        http={http}
+        actionTypeRegistry={actionTypeRegistry}
+        actionTypes={actionTypes}
+        actionsErrors={{}}
+        defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+      />
     </>
   );
 };
