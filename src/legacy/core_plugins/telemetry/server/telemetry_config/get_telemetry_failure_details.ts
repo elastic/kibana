@@ -16,17 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-export const DashboardConstants = {
-  ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
-  LANDING_PAGE_PATH: '/dashboards',
-  CREATE_NEW_DASHBOARD_URL: '/dashboard',
-  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-  DASHBOARDS_ID: 'dashboards',
-  DASHBOARD_ID: 'dashboard',
-};
+interface GetTelemetryFailureDetailsConfig {
+  telemetrySavedObject: TelemetrySavedObject;
+}
 
-export function createDashboardEditUrl(id: string) {
-  return `/dashboard/${id}`;
+export interface TelemetryFailureDetails {
+  failureCount: number;
+  failureVersion?: string;
+}
+
+export function getTelemetryFailureDetails({
+  telemetrySavedObject,
+}: GetTelemetryFailureDetailsConfig): TelemetryFailureDetails {
+  if (!telemetrySavedObject) {
+    return {
+      failureVersion: undefined,
+      failureCount: 0,
+    };
+  }
+  const { reportFailureCount, reportFailureVersion } = telemetrySavedObject;
+
+  return {
+    failureCount: typeof reportFailureCount === 'number' ? reportFailureCount : 0,
+    failureVersion: typeof reportFailureVersion === 'string' ? reportFailureVersion : undefined,
+  };
 }

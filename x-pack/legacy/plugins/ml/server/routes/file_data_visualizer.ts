@@ -138,7 +138,7 @@ export function fileDataVisualizerRoutes({
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          await incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects!);
+          await incrementFileDataVisualizerIndexCreationCount(savedObjects!);
         }
 
         const result = await importData(
