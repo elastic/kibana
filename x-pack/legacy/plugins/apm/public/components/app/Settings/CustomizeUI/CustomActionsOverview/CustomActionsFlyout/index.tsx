@@ -93,8 +93,8 @@ export const CustomActionsFlyout = ({
 
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={onClose} size="m">
-        <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <EuiFlyout ownFocus onClose={onClose} size="m">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2>
@@ -139,8 +139,8 @@ export const CustomActionsFlyout = ({
             onDelete={onDelete}
             customActionId={customActionSelected?.id}
           />
-        </form>
-      </EuiFlyout>
+        </EuiFlyout>
+      </form>
     </EuiPortal>
   );
 };

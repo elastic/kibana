@@ -68,6 +68,7 @@ export const ActionSection = ({ register, errors }: ActionSectionProps) => {
       {actionFields.map((field: ActionField) => {
         return (
           <EuiFormRow
+            fullWidth
             key={field.name}
             label={field.label}
             helpText={field.helpText}

@@ -156,12 +156,18 @@ const Filters = ({
         const selectOptions = getSelectOptions(filters, idx);
         return (
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiSelect
                 id={filterId}
                 fullWidth
                 options={selectOptions}
                 value={filter.key}
+                prepend={i18n.translate(
+                  'xpack.apm.settings.customizeUI.customActions.flyout.filters.prepend',
+                  {
+                    defaultMessage: 'Field'
+                  }
+                )}
                 onChange={e =>
                   onChangeFilter(
                     { key: e.target.value, value: filter.value || '' },
@@ -171,7 +177,7 @@ const Filters = ({
                 isInvalid={isEmpty(filter.key) && !isEmpty(filter.value)}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiFieldText
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption.value',
