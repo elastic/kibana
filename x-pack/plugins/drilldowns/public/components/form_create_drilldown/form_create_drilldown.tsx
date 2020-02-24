@@ -10,21 +10,38 @@ import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { txtNameOfDrilldown, txtUntitledDrilldown, txtDrilldownAction } from './i18n';
 import { DrilldownPicker } from '../drilldown_picker';
 
-// eslint-disable-next-line
-export interface FormCreateDrilldownProps {}
+const noop = () => {};
 
-export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = () => {
+export interface FormCreateDrilldownProps {
+  name?: string;
+  onNameChange?: (name: string) => void;
+}
+
+export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
+  name = '',
+  onNameChange = noop,
+}) => {
+  const nameFragment = (
+    <EuiFormRow label={txtNameOfDrilldown}>
+      <EuiFieldText
+        name="drilldown_name"
+        placeholder={txtUntitledDrilldown}
+        value={name}
+        disabled={onNameChange === noop}
+        onChange={event => onNameChange(event.target.value)}
+      />
+    </EuiFormRow>
+  );
+
   return (
-    <div>
+    <>
       <DrilldownHelloBar />
       <EuiForm>
-        <EuiFormRow label={txtNameOfDrilldown}>
-          <EuiFieldText name="drilldown_name" placeholder={txtUntitledDrilldown} />
-        </EuiFormRow>
+        {nameFragment}
         <EuiFormRow label={txtDrilldownAction}>
           <DrilldownPicker />
         </EuiFormRow>
       </EuiForm>
-    </div>
+    </>
   );
 };
