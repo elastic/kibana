@@ -172,7 +172,7 @@ const Filters = ({
                 )}
                 onChange={e =>
                   onChangeFilter(
-                    { key: e.target.value, value: filter.value || '' },
+                    { key: e.target.value, value: filter.value },
                     idx
                   )
                 }

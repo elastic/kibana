@@ -34,10 +34,9 @@ export function DeleteButton({ onDelete, customActionId }: Props) {
         onDelete();
       }}
     >
-      {i18n.translate(
-        'xpack.apm.settings.customizeUI.customActions.buttonLabel',
-        { defaultMessage: 'Delete' }
-      )}
+      {i18n.translate('xpack.apm.settings.customizeUI.customActions.delete', {
+        defaultMessage: 'Delete'
+      })}
     </EuiButtonEmpty>
   );
 }

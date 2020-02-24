@@ -73,7 +73,16 @@ export const ActionSection = ({ register, errors }: ActionSectionProps) => {
             key={field.name}
             label={field.label}
             helpText={field.helpText}
-            labelAppend={<EuiText size="xs">Required</EuiText>}
+            labelAppend={
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.apm.settings.customizeUI.customActions.flyout.required',
+                  {
+                    defaultMessage: 'Required'
+                  }
+                )}
+              </EuiText>
+            }
           >
             <EuiFieldText
               inputRef={register(field.register)}
