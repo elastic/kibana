@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiBadge,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, Link } from 'react-router-dom';
@@ -25,7 +26,7 @@ import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
-import { AlertDetailResolver } from './resolver';
+import { AlertDetails } from './alert_details';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -138,7 +139,7 @@ export const AlertIndex = memo(() => {
         return (
           <Link
             data-testid="alertTypeCellLink"
-            to={urlFromQueryParams({ ...queryParams, selected_alert: row.event.id })}
+            to={urlFromQueryParams({ ...queryParams, selected_alert: row.id })}
           >
             {i18n.translate(
               'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
@@ -201,6 +202,8 @@ export const AlertIndex = memo(() => {
     };
   }, [onChangeItemsPerPage, onChangePage, pageIndex, pageSize]);
 
+  const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
+
   return (
     <>
       {hasSelectedAlert && (
@@ -215,7 +218,7 @@ export const AlertIndex = memo(() => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <AlertDetailResolver selectedEvent={selectedEvent} />
+            {selectedAlertData ? <AlertDetails /> : <EuiLoadingSpinner size="xl" />}
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

@@ -106,6 +106,9 @@ export interface AlertListState {
 
   /** Current location object from React Router history. */
   readonly location?: Immutable<EndpointAppLocation>;
+
+  /** Specific Alert data to be shown in the details view */
+  readonly alert_details?: Immutable<AlertData>;
 }
 
 /**
