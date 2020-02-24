@@ -58,6 +58,12 @@ export function createKbnUrlTracker({
   toastNotifications,
   history,
   storage,
+  shouldTrackUrlUpdate = pathname => {
+    const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
+    const targetAppName = pathname.split('/')[1];
+
+    return currentAppName === targetAppName;
+  },
 }: {
   /**
    * Base url of the current app. This will be used as a prefix for the
@@ -82,7 +88,7 @@ export function createKbnUrlTracker({
     stateUpdate$: Observable<unknown>;
   }>;
   /**
-   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given ntime.
+   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given time.
    */
   storageKey: string;
   /**
@@ -101,6 +107,13 @@ export function createKbnUrlTracker({
    * Storage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used.
    */
   storage?: Storage;
+  /**
+   * Checks if pathname belongs to current app. It's used in history listener to define whether it's necessary to set pathname as active url or not.
+   * The default implementation compares the app name to the first part of pathname. Consumers can override this function for more complex cases.
+   *
+   * @param {string} pathname A location's pathname which comes to history listener
+   */
+  shouldTrackUrlUpdate?: (pathname: string) => boolean;
 }): KbnUrlTracker {
   const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
@@ -148,7 +161,9 @@ export function createKbnUrlTracker({
     unsubscribe();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
-      setActiveUrl(location.pathname + location.search);
+      if (shouldTrackUrlUpdate(location.pathname)) {
+        setActiveUrl(location.pathname + location.search);
+      }
     });
   }
 
