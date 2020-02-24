@@ -40053,9 +40053,9 @@ function getFlags(argv, options) {
 }
 exports.getFlags = getFlags;
 function getHelp(options) {
-    var _a, _b;
+    var _a;
     const usage = options.usage || `node ${path_1.relative(process.cwd(), process.argv[1])}`;
-    const optionHelp = (dedent_1.default(((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.flags) === null || _b === void 0 ? void 0 : _b.help) || '') +
+    const optionHelp = (dedent_1.default(((_a = options === null || options === void 0 ? void 0 : options.flags) === null || _a === void 0 ? void 0 : _a.help) || '') +
         '\n' +
         dedent_1.default `
       --verbose, -v      Log verbosely
@@ -40458,7 +40458,7 @@ class KbnClientRequester {
         const url = url_1.default.resolve(this.pickUrl(), options.path);
         const description = options.description || `${options.method} ${url}`;
         let attempt = 0;
-        const maxAttempts = (_a = options.retries, (_a !== null && _a !== void 0 ? _a : DEFAULT_MAX_ATTEMPTS));
+        const maxAttempts = (_a = options.retries) !== null && _a !== void 0 ? _a : DEFAULT_MAX_ATTEMPTS;
         while (true) {
             attempt += 1;
             try {
