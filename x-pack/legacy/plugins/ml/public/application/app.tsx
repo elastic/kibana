@@ -83,7 +83,6 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
 
 export const renderApp = (coreStart: CoreStart, depsStart: object, deps: MlDependencies) => {
   ReactDOM.render(<App coreStart={coreStart} deps={deps} />, deps.element);
-  // const user = deps.security.authc.getCurrentUser().then(console.log);
 
   return () => ReactDOM.unmountComponentAtNode(deps.element);
 };

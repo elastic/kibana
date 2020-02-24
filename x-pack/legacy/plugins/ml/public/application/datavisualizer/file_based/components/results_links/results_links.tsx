@@ -168,7 +168,7 @@ export const ResultsLinks: FC<Props> = ({
           title={
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfig"
-              defaultMessage="Create Filebeat config"
+              defaultMessage="Create Filebeat configuration"
             />
           }
           description=""

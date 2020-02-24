@@ -110,7 +110,7 @@ const Contents: FC<{
         <h5>
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigTitle"
-            defaultMessage="Filebeat config"
+            defaultMessage="Filebeat configuration"
           />
         </h5>
       </EuiTitle>
