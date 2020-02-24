@@ -48,7 +48,7 @@ export interface IExpressionLoaderParams {
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
-  extraHandlers?: Record<string, any>;
+  uiState?: unknown;
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
 }
