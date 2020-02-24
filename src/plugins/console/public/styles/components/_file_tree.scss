@@ -17,15 +17,38 @@
   }
 
   &__scratchPadEntry {
-    border-bottom: $euiColorLightShade dashed 1px;
+    font-style: italic;
   }
 
   &__entry {
-    border-radius: 0;
     font-size: $euiSizeM;
-    padding-right: 5px;
+    padding: 2px 5px;
 
     &--selected {
+      background-color: $euiColorMediumShade;
+    }
+
+
+    @mixin transitionToShowDeleteActionButton {
+      transition: opacity .2s;
+      opacity: 100%;
+    }
+
+
+    &:hover &__deleteActionButton {
+      @include transitionToShowDeleteActionButton
+    }
+
+
+    &__deleteActionButton {
+      // Default is hidden
+      opacity: 0;
+      &:focus {
+        @include transitionToShowDeleteActionButton
+      }
+    }
+
+    &:hover {
       background-color: $euiColorLightShade;
     }
   }

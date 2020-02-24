@@ -76,12 +76,7 @@ export function Main() {
 
   return (
     <div id="consoleRoot">
-      <EuiFlexGroup
-        className="consoleContainer"
-        gutterSize="none"
-        direction="column"
-        responsive={false}
-      >
+      <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>

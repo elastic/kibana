@@ -26,8 +26,6 @@ import { TextObjectWithId } from '../../../../common/text_object';
 export interface Props {
   currentTextObject: TextObjectWithId;
   onCreate: (fileName: string) => void;
-  canDelete: boolean;
-  onDelete: (textObject: TextObjectWithId) => void;
   canEdit: boolean;
   onEdit: (fileName: string) => void;
   onFilter: () => void;
@@ -37,8 +35,6 @@ export interface Props {
 export const FileActionsBar: FunctionComponent<Props> = ({
   currentTextObject,
   onCreate,
-  canDelete,
-  onDelete,
   canEdit,
   onEdit,
   onFilter,
@@ -47,7 +43,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
   const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
   const [showEditFilePopover, setShowEditFilePopover] = useState(false);
 
-  const setShowPopover = (popover: 'create' | 'edit' | 'delete' | false) => {
+  const setShowPopover = (popover: 'create' | 'edit' | false) => {
     switch (popover) {
       case 'create':
         setShowCreateFilePopover(true);
@@ -57,7 +53,6 @@ export const FileActionsBar: FunctionComponent<Props> = ({
         setShowCreateFilePopover(false);
         setShowEditFilePopover(true);
         break;
-      case 'delete':
       case false:
       default:
         setShowCreateFilePopover(false);
@@ -106,23 +101,6 @@ export const FileActionsBar: FunctionComponent<Props> = ({
               }}
             />
           </EuiPopover>
-        </EuiFlexItem>
-      )}
-      {/* Delete Action */}
-      {canDelete && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            disabled={disabled}
-            onClick={() => {
-              setShowPopover('delete');
-              onDelete(currentTextObject);
-            }}
-            aria-label={i18n.translate('console.fileTree.forms.deleteButtonAriaLabel', {
-              defaultMessage: 'Delete a file',
-            })}
-            color="ghost"
-            iconType="trash"
-          />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

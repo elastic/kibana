@@ -19,18 +19,23 @@
 
 import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiTreeView, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useEditorReadContext, useEditorActionContext } from '../../contexts';
 import { useTextObjectsCRUD } from '../../hooks/text_objects';
-import { FileActionsBar, FileSearchBar, DeleteFileModal } from '../../components';
+import {
+  FileActionsBar,
+  FileSearchBar,
+  DeleteFileModal,
+  FileTree as FileTreeComponent,
+} from '../../components';
 
 import { filterTextObjects } from './filter_text_objects';
 
 export const FileTree: FunctionComponent = () => {
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
   const [isFileActionInProgress, setIsFileActionInProgress] = useState(false);
-  const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<undefined | string>(undefined);
   const [showFileSearchBar, setShowFileSearchBar] = useState(false);
 
   const textObjectsCRUD = useTextObjectsCRUD();
@@ -55,7 +60,6 @@ export const FileTree: FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <FileActionsBar
             disabled={isFileActionInProgress}
-            canDelete={!currentTextObject.isScratchPad}
             currentTextObject={currentTextObject}
             canEdit={!currentTextObject.isScratchPad}
             onEdit={fileName => {
@@ -71,7 +75,6 @@ export const FileTree: FunctionComponent = () => {
                   setIsFileActionInProgress(false);
                 });
             }}
-            onDelete={() => setShowDeleteFileModal(true)}
             onCreate={fileName => {
               setIsFileActionInProgress(true);
               textObjectsCRUD
@@ -107,28 +110,27 @@ export const FileTree: FunctionComponent = () => {
               <EuiLoadingSpinner size="xl" />
             </div>
           ) : (
-            <EuiTreeView
-              aria-label="File tree view"
-              display="compressed"
-              items={filteredTextObjects
+            <FileTreeComponent
+              entries={filteredTextObjects
                 .sort((a, b) => (a.isScratchPad ? 1 : a.createdAt - b.createdAt))
-                .map(({ isScratchPad, name, id }, idx) => {
+                .map(({ isScratchPad, name, id }) => {
                   return {
                     id,
+                    canDelete: !isScratchPad,
                     className: classNames({
                       conApp__fileTree__scratchPadEntry: isScratchPad,
                       conApp__fileTree__entry: true,
                       'conApp__fileTree__entry--selected': id === currentTextObjectId,
                     }),
-                    label: isScratchPad ? 'Scratch Pad' : name ?? `Untitled`,
-                    icon: isScratchPad ? <EuiIcon size="s" type="pencil" /> : undefined,
-                    useEmptyIcon: !isScratchPad,
-                    callback: () => {
+                    name: isScratchPad ? 'Default' : name ?? `Untitled`,
+                    onSelect: () => {
                       dispatch({
                         type: 'textObject.setCurrent',
                         payload: id,
                       });
-                      return '';
+                    },
+                    onDelete: () => {
+                      setIdToDelete(id);
                     },
                   };
                 })}
@@ -136,13 +138,13 @@ export const FileTree: FunctionComponent = () => {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showDeleteFileModal && (
+      {idToDelete && (
         <DeleteFileModal
-          fileName={currentTextObject.name || 'Untitled'}
-          onClose={() => setShowDeleteFileModal(false)}
+          fileName={textObjects[idToDelete]?.name ?? 'Untitled'}
+          onClose={() => setIdToDelete(undefined)}
           onDeleteConfirmation={() => {
             setIsFileActionInProgress(true);
-            setShowDeleteFileModal(false);
+            setIdToDelete(undefined);
             textObjectsCRUD.delete(currentTextObject).finally(() => {
               setIsFileActionInProgress(false);
             });
