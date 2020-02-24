@@ -12,7 +12,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 import { useApi } from '../../../../hooks/use_api';
 
-import { isDefaultQuery, EsDocSource, PivotQuery } from '../../../../common';
+import { isDefaultQuery, matchAllQuery, EsDocSource, PivotQuery } from '../../../../common';
 
 export enum SOURCE_INDEX_STATUS {
   UNUSED,
@@ -76,7 +76,7 @@ export const useSourceIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        body: { query: isDefaultQuery(query) ? { match_all: {} } : query },
+        body: { query: isDefaultQuery(query) ? matchAllQuery : query },
       });
 
       if (isErrorResponse(resp)) {

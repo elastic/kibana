@@ -76,11 +76,14 @@ export {
   TermsAgg,
 } from './pivot_group_by';
 export {
+  defaultQuery,
   getPreviewRequestBody,
   getCreateRequestBody,
   getPivotQuery,
   isDefaultQuery,
+  isMatchAllQuery,
   isSimpleQuery,
+  matchAllQuery,
   PivotQuery,
   SimpleQuery,
 } from './request';
