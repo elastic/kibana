@@ -83,7 +83,11 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
 }
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
-  const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
+  const fieldLists = indexPatterns.map(indexPattern =>
+    indexPattern.attributes && indexPattern.attributes.fields
+      ? JSON.parse(indexPattern.attributes.fields)
+      : []
+  );
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
       (field: IFieldType) =>
