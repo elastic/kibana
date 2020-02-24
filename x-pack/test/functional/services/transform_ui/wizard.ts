@@ -431,15 +431,17 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertStartButtonExists() {
-      await testSubjects.existOrFail('transformWizardStartButton');
-      expect(await testSubjects.isDisplayed('transformWizardStartButton')).to.eql(
-        true,
-        `Expected 'Start' button to be displayed`
-      );
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('transformWizardStartButton');
+        expect(await testSubjects.isDisplayed('transformWizardStartButton')).to.eql(
+          true,
+          `Expected 'Start' button to be displayed`
+        );
+      });
     },
 
     async assertStartButtonEnabled(expectedValue: boolean) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(5000, async () => {
         const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
         expect(isEnabled).to.eql(
           expectedValue,
@@ -480,17 +482,21 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async createTransform() {
       await testSubjects.click('transformWizardCreateButton');
-      await this.assertStartButtonExists();
-      await this.assertStartButtonEnabled(true);
-      await this.assertManagementCardExists();
-      await this.assertCreateButtonEnabled(false);
+      await retry.tryForTime(5000, async () => {
+        await this.assertStartButtonExists();
+        await this.assertStartButtonEnabled(true);
+        await this.assertManagementCardExists();
+        await this.assertCreateButtonEnabled(false);
+      });
     },
 
     async startTransform() {
       await testSubjects.click('transformWizardStartButton');
-      await this.assertDiscoverCardExists();
-      await this.assertStartButtonEnabled(false);
-      await this.assertProgressbarExists();
+      await retry.tryForTime(5000, async () => {
+        await this.assertDiscoverCardExists();
+        await this.assertStartButtonEnabled(false);
+        await this.assertProgressbarExists();
+      });
     },
   };
 }
