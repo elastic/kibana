@@ -15,6 +15,7 @@ interface NodeStats {
 }
 
 interface Node {
+  id: string;
   children: Node[];
   events: ResolverEvent[];
   alerts: ResolverEvent[];
@@ -31,8 +32,8 @@ interface Node {
 
 type ExtractFunction = (event: ResolverEvent) => string;
 
-function createNode(): Node {
-  return { children: [], pagination: {}, events: [], alerts: [], lifecycle: [] };
+function createNode(id: string): Node {
+  return { id, children: [], pagination: {}, events: [], alerts: [], lifecycle: [] };
 }
 
 // This class aids in constructing a tree of process events. It works in the following way:
@@ -71,7 +72,7 @@ export class Tree {
   protected id: string;
 
   constructor(id: string) {
-    const root = createNode();
+    const root = createNode(id);
     this.id = id;
     this.cache = { [id]: root };
     this.root = root;
@@ -152,7 +153,7 @@ export class Tree {
       const ancestorID = extractEntityID(event);
 
       if (!this.cache[ancestorID]) {
-        this.cache[ancestorID] = createNode();
+        this.cache[ancestorID] = createNode(ancestorID);
         this.cache[id].parent = this.cache[ancestorID];
       }
       this.cache[ancestorID].lifecycle.push(event);
@@ -185,7 +186,7 @@ export class Tree {
 
       if (!this.cache[id]) {
         // these should maintain the ordering that elasticsearch hands back
-        this.cache[id] = createNode();
+        this.cache[id] = createNode(id);
         this.cache[parent].children.push(this.cache[id]);
       }
       this.cache[id].lifecycle.push(event);

@@ -76,9 +76,9 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
       const fetcher = new Fetcher(client, id, endpointID);
       const tree = await Tree.merge(
         fetcher.children(children, generations, afterChild),
-        fetcher.alerts(alerts, afterAlert),
         fetcher.ancestors(ancestors + 1),
-        fetcher.events(events, afterEvent)
+        fetcher.events(events, afterEvent),
+        fetcher.alerts(alerts, afterAlert)
       );
 
       const enrichedTree = await fetcher.stats(tree);
