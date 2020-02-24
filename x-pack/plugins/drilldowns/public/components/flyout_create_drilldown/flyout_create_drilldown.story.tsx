@@ -7,16 +7,16 @@
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import { FormCreateDrilldown } from '.';
+import { FlyoutCreateDrilldown } from '.';
 
-storiesOf('components/FormCreateDrilldown', module)
+storiesOf('components/FlyoutCreateDrilldown', module)
   .add('default', () => {
-    return <FormCreateDrilldown />;
+    return <FlyoutCreateDrilldown />;
   })
   .add('open in flyout', () => {
     return (
       <EuiFlyout>
-        <FormCreateDrilldown />
+        <FlyoutCreateDrilldown />
       </EuiFlyout>
     );
   });
