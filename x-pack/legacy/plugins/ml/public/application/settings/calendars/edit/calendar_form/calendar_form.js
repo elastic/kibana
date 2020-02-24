@@ -134,59 +134,58 @@ export const CalendarForm = ({
         </Fragment>
       )}
 
-      <EuiFormRow
+      <EuiSpacer size="m" />
+
+      <EuiSwitch
+        name="switch"
         label={
           <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.allJobsTitle"
-            defaultMessage="Apply to all jobs"
+            id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
+            defaultMessage="Apply calendar to all jobs"
           />
         }
-      >
-        <EuiSwitch
-          name="switch"
-          label={
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-              defaultMessage="Apply calendar to all jobs"
+        checked={isGlobalCalendar}
+        onChange={onGlobalCalendarChange}
+      />
+
+      {isGlobalCalendar === false && (
+        <>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+                defaultMessage="Jobs"
+              />
+            }
+          >
+            <EuiComboBox
+              options={jobIds}
+              selectedOptions={selectedJobOptions}
+              onChange={onJobSelection}
+              isDisabled={saving === true || canCreateCalendar === false}
             />
-          }
-          checked={isGlobalCalendar}
-          onChange={onGlobalCalendarChange}
-        />
-      </EuiFormRow>
+          </EuiFormRow>
 
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
-            defaultMessage="Jobs"
-          />
-        }
-      >
-        <EuiComboBox
-          options={jobIds}
-          selectedOptions={selectedJobOptions}
-          onChange={onJobSelection}
-          isDisabled={saving === true || canCreateCalendar === false || isGlobalCalendar === true}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-            defaultMessage="Groups"
-          />
-        }
-      >
-        <EuiComboBox
-          onCreateOption={onCreateGroupOption}
-          options={groupIds}
-          selectedOptions={selectedGroupOptions}
-          onChange={onGroupSelection}
-          isDisabled={saving === true || canCreateCalendar === false || isGlobalCalendar === true}
-        />
-      </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+                defaultMessage="Groups"
+              />
+            }
+          >
+            <EuiComboBox
+              onCreateOption={onCreateGroupOption}
+              options={groupIds}
+              selectedOptions={selectedGroupOptions}
+              onChange={onGroupSelection}
+              isDisabled={saving === true || canCreateCalendar === false}
+            />
+          </EuiFormRow>
+        </>
+      )}
 
       <EuiSpacer size="xl" />
 
