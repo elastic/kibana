@@ -5,13 +5,36 @@
  */
 
 import React from 'react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
+
+import styled from 'styled-components';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
+const EuiFormRowExtended = styled(EuiFormRow)`
+  .euiFormRow__labelWrapper {
+    .euiFormRow__label {
+      width: 100%;
+    }
+  }
+`;
+
 const ConnectorsComponent: React.FC = () => {
-  const dropDownLabel = <div>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</div>;
+  const dropDownLabel = (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -19,9 +42,9 @@ const ConnectorsComponent: React.FC = () => {
       title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
       description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
     >
-      <EuiFormRow fullWidth label={dropDownLabel}>
+      <EuiFormRowExtended fullWidth label={dropDownLabel}>
         <ConnectorsDropdown />
-      </EuiFormRow>
+      </EuiFormRowExtended>
     </EuiDescribedFormGroup>
   );
 };

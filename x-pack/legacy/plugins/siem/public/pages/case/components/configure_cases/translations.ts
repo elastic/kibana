@@ -31,3 +31,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM_LABEL = i18n.translate(
 export const NO_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.noConnector', {
   defaultMessage: 'No connector selected',
 });
+
+export const ADD_NEW_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.addNewConnector', {
+  defaultMessage: 'Add new connector option',
+});
