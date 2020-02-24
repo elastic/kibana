@@ -234,7 +234,7 @@ describe('SavedObjectsService', () => {
 
     describe('#getTypeRegistry', () => {
       it('returns the internal type registry of the service', async () => {
-        const coreContext = mockCoreContext.create();
+        const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
         const { getTypeRegistry } = await soService.start({});
