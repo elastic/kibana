@@ -51,7 +51,7 @@ describe('Test discover state', () => {
       }
     `);
   });
-  test('URL navigation to url without _g and _a, state should not change', async () => {
+  test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(index:modified)');
     await history.push('/');
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
@@ -61,10 +61,17 @@ describe('Test discover state', () => {
     `);
   });
 
-  test('isAppStateDirty to find out whether the current state has changed', async () => {
+  test('isAppStateDirty returns  whether the current state has changed', async () => {
     state.setAppState({ index: 'modified' });
     expect(state.isAppStateDirty()).toBeTruthy();
     state.resetInitialAppState();
     expect(state.isAppStateDirty()).toBeFalsy();
+  });
+
+  test('getPreviousAppState returns the state before the current', async () => {
+    state.setAppState({ index: 'first' });
+    const stateA = state.appStateContainer.getState();
+    state.setAppState({ index: 'second' });
+    expect(state.getPreviousAppState()).toEqual(stateA);
   });
 });

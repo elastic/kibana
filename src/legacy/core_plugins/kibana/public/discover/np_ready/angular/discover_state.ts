@@ -26,6 +26,7 @@ import {
   IKbnUrlStateStorage,
 } from '../../../../../../../plugins/kibana_utils/public';
 import { esFilters, Filter, Query } from '../../../../../../../plugins/data/public';
+import { migrateLegacyQuery } from '../../../../../../../plugins/kibana_legacy/public';
 
 interface AppState {
   /**
@@ -52,17 +53,6 @@ interface AppState {
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
-}
-
-interface GlobalState {
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
-  /**
-   * Time filter
-   */
-  time?: { from: string; to: string };
 }
 
 interface GetStateParams {
@@ -114,6 +104,10 @@ export interface GetStateReturn {
    */
   resetInitialAppState: () => void;
   /**
+   * Return the Appstate before the current app state, useful for diffing changes
+   */
+  getPreviousAppState: () => AppState;
+  /**
    * Returns whether the current app state is different to the initial state
    */
   isAppStateDirty: () => void;
@@ -143,29 +137,38 @@ export function getState({
     ...defaultAppState,
     ...appStateFromUrl,
   };
-
+  let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
+
+  const appStateContainerModified = {
+    ...appStateContainer,
+    ...{
+      set: (value: AppState | null) => {
+        if (value) {
+          previousAppState = appStateContainer.getState();
+          appStateContainer.set(value);
+        }
+      },
+    },
+  };
 
   const { start, stop } = syncState({
     storageKey: APP_STATE_URL_KEY,
-    stateContainer: {
-      ...appStateContainer,
-      // handle null value when url switch doesn't contain state info
-      ...{ set: value => value && appStateContainer.set(value) },
-    },
+    stateContainer: appStateContainerModified,
     stateStorage,
   });
 
   return {
     kbnUrlStateStorage: stateStorage,
-    appStateContainer,
+    appStateContainer: appStateContainerModified,
     startSync: start,
     stopSync: stop,
-    setAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
+    setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     getAppFilters: () => getFilters(appStateContainer.getState()),
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
+    getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     replaceUrlState: async (startSync = true) => {
@@ -183,13 +186,13 @@ export function getState({
  * Helper function to merge a given new state with the existing state and to set the given state
  * container
  */
-export function setState(
-  stateContainer: ReduxLikeStateContainer<AppState | GlobalState>,
-  newState: AppState | GlobalState
-) {
+export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
   const oldState = stateContainer.getState();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
+    if (mergedState.query) {
+      mergedState.query = migrateLegacyQuery(mergedState.query);
+    }
     stateContainer.set(mergedState);
   }
 }
@@ -210,7 +213,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
  * helper function to extract filters of the given state
  * returns a state object without filters and an array of filters
  */
-export function splitState(state: AppState | GlobalState = {}) {
+export function splitState(state: AppState = {}) {
   const { filters = [], ...statePartial } = state;
   return { filters, state: statePartial };
 }
@@ -219,7 +222,7 @@ export function splitState(state: AppState | GlobalState = {}) {
  * Helper function to compare 2 different state, is needed since comparing filters
  * works differently
  */
-export function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalState) {
+export function isEqualState(stateA: AppState, stateB: AppState) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
@@ -233,7 +236,7 @@ export function isEqualState(stateA: AppState | GlobalState, stateB: AppState | 
 /**
  * Helper function to return array of filter object of a given state
  */
-const getFilters = (state: AppState | GlobalState): Filter[] => {
+const getFilters = (state: AppState): Filter[] => {
   if (!state || !Array.isArray(state.filters)) {
     return [];
   }
