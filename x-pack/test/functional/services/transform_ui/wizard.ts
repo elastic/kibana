@@ -118,7 +118,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         // check if the returned unique value matches the supplied filter value
         expect(uniqueColumnValues).to.eql(
           expectedColumnValues,
-          `Unique EuiInMemoryTable column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
         );
       });
     },
@@ -130,13 +130,13 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
         expect(rowsData).to.length(
           rows,
-          `EuiInMemoryTable rows should be ${rows} (got ${rowsData.length})`
+          `EuiDataGrid rows should be ${rows} (got ${rowsData.length})`
         );
 
         rowsData.map((r, i) =>
           expect(r).to.length(
             columns,
-            `EuiInMemoryTable row #${i + 1} column count should be ${columns} (got ${r.length})`
+            `EuiDataGrid row #${i + 1} column count should be ${columns} (got ${r.length})`
           )
         );
       });
@@ -439,13 +439,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertStartButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(2000, async () => {
+        const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+      });
     },
 
     async assertManagementCardExists() {
