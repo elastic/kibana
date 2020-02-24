@@ -12,10 +12,12 @@ import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { timefilter } from 'ui/timefilter';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
   copyPersistentState,
   TRACKED_LAYER_DESCRIPTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {

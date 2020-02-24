@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {getDataFilters} from "../../../../legacy/plugins/maps/public/selectors/map_selectors";
-
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';

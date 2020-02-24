@@ -17,6 +17,7 @@ import _ from 'lodash';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';

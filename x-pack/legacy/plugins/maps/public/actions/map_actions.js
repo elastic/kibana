@@ -19,12 +19,14 @@ import {
   getOpenTooltips,
   getQuery,
 } from '../selectors/map_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import {

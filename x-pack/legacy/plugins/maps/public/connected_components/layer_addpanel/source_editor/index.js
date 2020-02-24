@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 import { SourceEditor } from './view';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {

@@ -16,6 +16,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
@@ -30,6 +31,7 @@ import {
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
   FLYOUT_STATE,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/ui';
 import {
   enableFullScreen,
@@ -39,12 +41,14 @@ import {
   setOpenTOCDetails,
 } from '../actions/ui_actions';
 import { getIsFullScreen } from '../selectors/ui_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
 } from '../selectors/map_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService, getInspector } from '../kibana_services';

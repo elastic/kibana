@@ -19,6 +19,7 @@ import { esFilters } from '../../../../../../src/plugins/data/public';
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { npStart } from 'ui/new_platform';
 import {
@@ -39,6 +40,7 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors'
 import {
   getInspectorAdapters,
   setEventHandlers,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';

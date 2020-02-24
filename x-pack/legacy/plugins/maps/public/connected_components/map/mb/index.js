@@ -24,6 +24,7 @@ import {
   isTooltipControlDisabled,
   isViewControlHidden,
 } from '../../../selectors/map_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {

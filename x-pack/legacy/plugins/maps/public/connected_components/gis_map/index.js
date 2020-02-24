@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';

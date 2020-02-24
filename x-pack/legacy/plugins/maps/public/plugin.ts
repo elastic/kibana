@@ -10,6 +10,8 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapView } from '../../../../plugins/maps/public/inspector/views/map_view';
 import { setLicenseId, setInspector } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -31,11 +33,6 @@ interface MapsPluginSetupDependencies {
   };
 }
 
-// This function will grow as more pieces are migrated to NP
-function initializeNewPlatformCode(getInjectedVar: any) {
-  setInjectedVarFunc(getInjectedVar);
-}
-
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
@@ -50,7 +47,9 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     }
     np.home.featureCatalogue.register(featureCatalogueEntry);
 
-    initializeNewPlatformCode(core.injectedMetadata.getInjectedVar);
+    // NP setup
+    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    np.inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {
