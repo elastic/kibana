@@ -14,7 +14,7 @@ import { FlyoutCreateDrilldown } from '../../components/flyout_create_drilldown'
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
-interface ActionContext {
+export interface FlyoutCreateDrilldownActionContext {
   embeddable: IEmbeddable;
 }
 
@@ -22,29 +22,31 @@ export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
 }
 
-export class OpenFlyoutAddDrilldown implements Action<ActionContext> {
+export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldownActionContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 100;
+  public order = 5;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
-    return i18n.translate('xpack.drilldowns.panel.openFlyoutAddDrilldown.displayName', {
-      defaultMessage: 'Add drilldown',
+    return i18n.translate('xpack.drilldowns.FlyoutCreateDrilldownAction.displayName', {
+      defaultMessage: 'Create Drilldown',
     });
   }
 
   public getIconType() {
-    return 'empty';
+    return 'plusInCircle';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: FlyoutCreateDrilldownActionContext) {
     return true;
   }
 
-  public async execute(context: ActionContext) {
+  public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
-    overlays.openFlyout(toMountPoint(<FlyoutCreateDrilldown />));
+    const handle = overlays.openFlyout(
+      toMountPoint(<FlyoutCreateDrilldown context={context} onClose={() => handle.close()} />)
+    );
   }
 }

@@ -9,12 +9,17 @@ import { EuiButton } from '@elastic/eui';
 import { FormCreateDrilldown } from '../form_create_drilldown';
 import { FlyoutFrame } from '../flyout_frame';
 import { txtCreateDrilldown } from './i18n';
+import { FlyoutCreateDrilldownActionContext } from '../../actions';
 
 export interface FlyoutCreateDrilldownProps {
+  context: FlyoutCreateDrilldownActionContext;
   onClose?: () => void;
 }
 
-export const FlyoutCreateDrilldown: React.FC<FlyoutCreateDrilldownProps> = ({ onClose }) => {
+export const FlyoutCreateDrilldown: React.FC<FlyoutCreateDrilldownProps> = ({
+  context,
+  onClose,
+}) => {
   const footer = (
     <EuiButton onClick={() => {}} fill>
       {txtCreateDrilldown}
