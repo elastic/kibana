@@ -18,7 +18,7 @@ import { initPostCommentApi } from './post_comment';
 import { initUpdateCaseApi } from './update_case';
 import { initUpdateCommentApi } from './update_comment';
 
-import { createNewAction } from './configure_cases';
+import { createNewAction, findActions } from './configure_cases';
 
 export interface RouteDeps {
   caseService: CaseServiceSetup;
@@ -38,4 +38,5 @@ export function initCaseApi(deps: RouteDeps) {
   initUpdateCaseApi(deps);
   initUpdateCommentApi(deps);
   createNewAction(deps);
+  findActions(deps);
 }
