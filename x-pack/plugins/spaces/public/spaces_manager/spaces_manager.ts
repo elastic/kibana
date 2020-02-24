@@ -9,9 +9,7 @@ import { HttpSetup } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'src/legacy/core_plugins/management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
-import { ENTER_SPACE_PATH } from '../../common/constants';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
-import { addSpaceIdToPath } from '../../common';
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
