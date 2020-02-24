@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiPath } from '../../lib/helper';
+import { stringify } from 'query-string';
 
-interface APIParams {
-  basePath: string;
-}
+import { getApiPath } from '../../lib/helper';
+import { BaseParams } from './types';
 
 export const fetchMonitorDuration = async ({
   basePath,
   monitorId,
   dateStart,
   dateEnd,
-}: APIParams) => {
+}: BaseParams) => {
   const url = getApiPath(`/api/uptime/monitor/duration`, basePath);
 
   const params = {
@@ -23,7 +22,7 @@ export const fetchMonitorDuration = async ({
     dateStart,
     dateEnd,
   };
-  const urlParams = new URLSearchParams(params).toString();
+  const urlParams = stringify(params);
 
   const response = await fetch(`${url}?${urlParams}`);
   if (!response.ok) {

@@ -13,7 +13,7 @@ import {
 import { MonitorChart } from '../../../common/types';
 
 export interface MonitorDuration {
-  monitor_duration: MonitorChart;
+  monitor_duration: MonitorChart | null;
   errors: any[];
   loading: boolean;
 }

@@ -43,7 +43,7 @@ export const MonitorPage = () => {
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <MonitorCharts monitorId={monitorId} variables={sharedVariables} />
+      <MonitorCharts monitorId={monitorId} />
       <EuiSpacer size="s" />
       <PingList
         onPageCountChange={setPingListPageCount}

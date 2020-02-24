@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping, MonitorChart, PingResults, StatesIndexStatus } from '../../../common/graphql/types';
+import { Ping, PingResults, StatesIndexStatus } from '../../../common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
@@ -25,7 +25,7 @@ import {
 } from '../../../common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
-import { HistogramResult } from '../../../common/types';
+import { HistogramResult, MonitorChart } from '../../../common/types';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 

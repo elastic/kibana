@@ -11,4 +11,4 @@ export const getMonitorDurationAction = createAction<QueryParams>('GET_MONITOR_D
 export const getMonitorDurationActionSuccess = createAction<QueryParams>(
   'GET_MONITOR_DURATION_SUCCESS'
 );
-export const getMonitorDurationActionFail = createAction<QueryParams>('GET_MONITOR_DURATION_FAIL');
+export const getMonitorDurationActionFail = createAction<Error>('GET_MONITOR_DURATION_FAIL');
