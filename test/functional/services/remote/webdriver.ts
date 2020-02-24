@@ -66,11 +66,11 @@ async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number,
-  remoteSessionUrl: string
+  logPollingMs: number
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
+  const remoteSessionUrl = process.env.REMOTE_SESSION_URL;
 
   const buildDriverInstance = async () => {
     switch (browserType) {
@@ -267,8 +267,7 @@ export async function initWebDriver(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number,
-  remoteSessionUrl: string
+  logPollingMs: number
 ) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
@@ -291,7 +290,7 @@ export async function initWebDriver(
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs, remoteSessionUrl),
+          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
         ]);
 
         if (!command) {

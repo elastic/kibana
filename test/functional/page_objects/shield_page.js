@@ -29,6 +29,7 @@ export function ShieldPageProvider({ getService }) {
     await testSubjects.setValue('loginPassword', pwd);
     await testSubjects.click('loginSubmit');
     await find.waitForDeletedByCssSelector('.kibanaWelcomeLogo');
+    await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
   };
 
   const samlLogin = async (user, pwd) => {
@@ -36,6 +37,7 @@ export function ShieldPageProvider({ getService }) {
       await find.setValue('input[name="email"]', user);
       await find.setValue('input[type="password"]', pwd);
       await find.clickByCssSelector('.auth0-label-submit');
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
     } catch (err) {
       log.debug(`${err} \nFailed to find Auth0 login page, trying the Auth0 last login page`);
       await find.clickByCssSelector('.auth0-lock-social-button');
@@ -48,8 +50,7 @@ export function ShieldPageProvider({ getService }) {
         process.env.VM === 'ubuntu18_deb_oidc' ||
         process.env.VM === 'ubuntu16_deb_desktop_saml'
       ) {
-        const [samlUser, samlPass] = parse(process.env.KIBANAURL);
-        await samlLogin(samlUser, samlPass);
+        await samlLogin(user, pwd);
         return;
       }
 
@@ -66,16 +67,6 @@ export function ShieldPageProvider({ getService }) {
       await testSubjects.click('userMenuButton');
       await this.sleep(500);
       await testSubjects.click('logoutLink');
-
-      // for new K7 app menu
-      // await this.remote.setFindTimeout(defaultFindTimeout)
-      //     .findByCssSelector('#headerUserMenu')
-      //     .click();
-      //
-      // await sleep(1111);
-      // await this.remote.setFindTimeout(defaultFindTimeout)
-      //     .findByCssSelector('.euiLink[href="/logout"]')
-      //     .click();
       log.debug('### found and clicked log out--------------------------');
       await this.sleep(8002);
     }
@@ -87,8 +78,4 @@ export function ShieldPageProvider({ getService }) {
   }
 
   return new ShieldPage();
-}
-function parse(x) {
-  const { username, password } = new URL(x);
-  return [decodeURIComponent(username), password];
 }

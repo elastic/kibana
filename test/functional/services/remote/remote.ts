@@ -59,8 +59,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     log,
     browserType,
     lifecycle,
-    config.get('browser.logPollingMs'),
-    process.env.REMOTE_SESSION_URL
+    config.get('browser.logPollingMs')
   );
   const isW3CEnabled = (driver as any).executor_.w3c;
 
@@ -99,7 +98,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       })
     )
     .subscribe({
-      next({ message, level }) {
+      next({ message, level }: any) {
         const msg = message.replace(/\\n/g, '\n');
         log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
           `browser[${level}] ${msg}`

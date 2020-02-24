@@ -47,6 +47,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     shouldAcceptAlert: boolean;
     useActualUrl: boolean;
   }
+  interface LegacyUrl {
+    pathname: string;
+    hash: string;
+  }
 
   class CommonPage {
     /**
@@ -101,7 +105,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      // we won't find this kibanaChrome on the auth0 saml type login page
+      // await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -254,7 +259,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     ) {
       const kibServerConf = config.get('servers.kibana');
       const getKibServerUrl = getUrl.noAuth.bind(null, kibServerConf);
-      const buildLegacyUrl = ({ pathname, hash }) =>
+      const buildLegacyUrl = ({ pathname, hash }: LegacyUrl) =>
         getKibServerUrl({ pathname: `${basePath}${pathname}`, hash });
       const buildUrl = () =>
         config.has(['apps', appName])
@@ -320,10 +325,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         if (await testSubjects.exists('statusPageContainer'))
           throw new Error('Navigation ended up at the status page.');
       };
-      const navToAppFail = async (x: any) => {
-        if (x) log.debug(`\n### x: \n\t${x}`);
-      };
-      await retry.tryForTime(defaultTryTimeout * 2, navToAppSuccess, navToAppFail);
+      await retry.tryForTime(defaultTryTimeout * 2, navToAppSuccess);
     }
 
     async waitUntilUrlIncludes(path: string) {
