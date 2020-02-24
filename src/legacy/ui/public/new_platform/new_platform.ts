@@ -20,7 +20,6 @@ import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
-import { ApplicationUsagePluginStart } from 'src/plugins/application_usage/public';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
@@ -83,7 +82,6 @@ export interface PluginsStart {
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
   telemetry?: TelemetryPluginStart;
-  applicationUsage?: ApplicationUsagePluginStart;
 }
 
 export const npSetup = {
