@@ -35,15 +35,17 @@ function anchor(isCurrent, item) {
   </a>);
 }
 
-function title(item) {
-  const dropPrefix = () => ['gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/', ''];
-  const dropPostfix = () => [/(\d.*)\/\d.*$/, '$1'];
-  const maybeReplace = item.includes('gs://kibana-ci-artifacts') ? right(item) : left(item);
-  return maybeReplace
+const dropPrefix = x => [`gs://${x}/jobs/elastic+kibana+code-coverage/`, ''];
+const dropPostfix = () => [/(\d.*)\/\d.*$/, '$1'];
+const maybeReplace = (item, storeUrlBase) => item.includes(`gs://${storeUrlBase}`) ? right(item) : left(item);
+
+function title (item) {
+  const storeUrlBase = 'elastic-bekitzur-kibana-coverage-live';
+  return maybeReplace(item, storeUrlBase)
     .fold(
       () => item,
       () => item
-        .replace(...dropPrefix())
+        .replace(...dropPrefix(storeUrlBase))
         .replace(...dropPostfix())
     );
 }

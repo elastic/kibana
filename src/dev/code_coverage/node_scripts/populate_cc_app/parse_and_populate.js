@@ -53,7 +53,8 @@ function onComplete (initData) {
     initData.currentJobNumber = currentJobNumber;
 
     const constructCurrentFrom = currentItem(currentJobNumber, log);
-    const prefix = 'gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/';
+    const prefix = 'gs://elastic-bekitzur-kibana-coverage-live/jobs/elastic+kibana+code-coverage/';
+
 
     initData.currentJobTimeStamp = currentJobTimeStamp(log);
     initData.currentItem = `${constructCurrentFrom(prefix)}`;

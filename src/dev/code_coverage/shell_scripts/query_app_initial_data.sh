@@ -4,7 +4,7 @@ set -o xtrace
 
 echo "### Querying App Initial Data"
 
-BUCKET="gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage"
+BUCKET="gs://elastic-bekitzur-kibana-coverage-live/jobs/elastic+kibana+code-coverage"
 export BUCKET
 CURRENT_BUILD_ID=$1
 export CURRENT_BUILD_ID
