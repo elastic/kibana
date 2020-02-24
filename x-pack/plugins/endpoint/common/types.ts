@@ -71,13 +71,19 @@ export interface EndpointResultList {
 }
 
 export interface AlertData {
-  '@timestamp': string;
+  '@timestamp': Date;
   agent: {
     id: string;
     version: string;
+    name: string;
   };
   event: {
     action: string;
+  };
+  endpoint: {
+    policy: {
+      id: string;
+    };
   };
   file_classification: {
     malware_classification: {
@@ -85,16 +91,28 @@ export interface AlertData {
     };
   };
   host: {
+    id: string;
     hostname: string;
-    ip: string;
+    ip: string[];
+    mac: string[];
     os: {
       name: string;
+      full: string;
+      version: string;
+      variant: string;
     };
   };
+  process: {
+    entity_id: string;
+    parent?: {
+      entity_id?: string;
+    }
+  },
   thread: {};
 }
 
 export interface EndpointMetadata {
+  '@timestamp': Date;
   event: {
     created: Date;
   };
@@ -104,8 +122,8 @@ export interface EndpointMetadata {
     };
   };
   agent: {
-    version: string;
     id: string;
+    version: string;
     name: string;
   };
   host: {
@@ -139,22 +157,39 @@ export interface LegacyEndpointEvent {
 
 export interface EndpointEvent {
   '@timestamp': Date;
+  agent: {
+    id: string;
+    version: string;
+    name: string;
+  };
+  ecs: {
+    version: string;
+  }
   event: {
     category: string;
     type: string;
     id: string;
+    kind: string;
   };
-  endpoint: {
-    process: {
-      entity_id: string;
-      parent: {
-        entity_id: string;
-      };
+  host: {
+    id: string;
+    hostname: string;
+    ip: string[];
+    mac: string[];
+    os: {
+      name: string;
+      full: string;
+      version: string;
+      variant: string;
     };
   };
-  agent: {
-    type: string;
+  process: {
+    entity_id: string;
+    parent?: {
+      entity_id?: string;
+    };
   };
+  
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
