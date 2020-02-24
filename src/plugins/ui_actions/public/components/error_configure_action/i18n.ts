@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { ErrorConfigureAction } from '.';
+import { i18n } from '@kbn/i18n';
 
-storiesOf('components/ErrorConfigureAction', module)
-  .add('default', () => <ErrorConfigureAction />)
-  .add('[actionId=TEST_SAMPLE_ACTION]', () => (
-    <ErrorConfigureAction actionId={'TEST_SAMPLE_ACTION'} />
-  ));
+export const txtSorryActionConfigurationError = i18n.translate(
+  'uiActions.components.sorryActionConfigurationError',
+  {
+    defaultMessage: 'Sorry, action configuration error',
+  }
+);

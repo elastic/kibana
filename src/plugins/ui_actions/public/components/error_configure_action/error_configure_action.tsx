@@ -18,13 +18,23 @@
  */
 
 import React from 'react';
+import { EuiCallOut, EuiCode } from '@elastic/eui';
+import { txtSorryActionConfigurationError } from './i18n';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+export interface ErrorConfigureActionProps {
+  actionId?: string;
+}
 
-export const ErrorConfigureAction: React.FC = () => (
-  <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
-    <p>
-      Now you have to fix it, but maybe <EuiLink href="#">this link can help</EuiLink>.
-    </p>
+export const ErrorConfigureAction: React.FC<ErrorConfigureActionProps> = ({
+  actionId,
+  children,
+}) => (
+  <EuiCallOut title={txtSorryActionConfigurationError} color="danger" iconType="alert">
+    <p>{children}</p>
+    {actionId && (
+      <p>
+        Action ID: <EuiCode>{actionId}</EuiCode>
+      </p>
+    )}
   </EuiCallOut>
 );
