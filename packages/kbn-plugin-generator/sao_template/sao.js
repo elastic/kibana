@@ -17,21 +17,19 @@
  * under the License.
  */
 
-const { resolve, relative, dirname } = require('path');
+const { relative } = require('path');
 
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
-const execa = require('execa');
 const chalk = require('chalk');
+const execa = require('execa');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
 const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
-const KBN_DIR = dirname(kibanaPkgPath);
-
-module.exports = function({ name }) {
+module.exports = function({ name, targetPath, isKibanaPlugin }) {
   return {
     prompts: {
       description: {
@@ -47,41 +45,38 @@ module.exports = function({ name }) {
         message: 'Should an app component be generated?',
         default: true,
       },
-      generateTranslations: {
-        type: 'confirm',
-        message: 'Should translation files be generated?',
-        default: true,
-      },
-      generateHack: {
-        type: 'confirm',
-        message: 'Should a hack component be generated?',
-        default: true,
-      },
       generateApi: {
         type: 'confirm',
         message: 'Should a server API be generated?',
         default: true,
       },
+      // generateTranslations: {
+      //   type: 'confirm',
+      //   message: 'Should translation files be generated?',
+      //   default: true,
+      // },
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
         when: answers => answers.generateApp,
         default: true,
       },
+      generateEslint: {
+        type: 'confirm',
+        message: 'Would you like to use a custom eslint file?',
+        default: !isKibanaPlugin,
+      },
     },
     filters: {
+      'public/**/index.scss': 'generateScss',
       'public/**/*': 'generateApp',
-      'translations/**/*': 'generateTranslations',
-      '.i18nrc.json': 'generateTranslations',
-      'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
-      'public/app.scss': 'generateScss',
-      '.kibana-plugin-helpers.json': 'generateScss',
+      // 'translations/**/*': 'generateTranslations',
+      // '.i18nrc.json': 'generateTranslations',
+      'eslintrc.js': 'generateEslint',
     },
     move: {
-      gitignore: '.gitignore',
       'eslintrc.js': '.eslintrc.js',
-      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(
@@ -91,34 +86,36 @@ module.exports = function({ name }) {
           camelCase,
           snakeCase,
           name,
+          isKibanaPlugin,
+          kbnVersion: answers.kbnVersion,
+          upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
+          hasUi: !!answers.generateApp,
+          hasServer: !!answers.generateApi,
+          hasScss: !!answers.generateScss,
+          relRoot: isKibanaPlugin ? '../../../..' : '../../..',
         },
         answers
       ),
     enforceNewFolder: true,
     installDependencies: false,
-    gitInit: true,
+    gitInit: !isKibanaPlugin,
     async post({ log }) {
-      await execa('yarn', ['kbn', 'bootstrap'], {
-        cwd: KBN_DIR,
-        stdio: 'inherit',
-      });
+      const dir = relative(process.cwd(), targetPath);
 
-      const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
-
+      // Apply eslint to the generated plugin
       try {
-        await execa('yarn', ['lint', '--fix'], {
-          cwd: dir,
-          all: true,
-        });
+        await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
       } catch (error) {
-        throw new Error(`Failure when running prettier on the generated output: ${error.all}`);
+        console.error(error);
+        throw new Error(
+          `Failure when running prettier on the generated output: ${error.all || error}`
+        );
       }
 
       log.success(chalk`🎉
 
-Your plugin has been created in {bold ${dir}}. Move into that directory to run it:
+Your plugin has been created in {bold ${dir}}.
 
-  {bold cd "${dir}"}
   {bold yarn start}
 `);
     },
