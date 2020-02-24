@@ -10,7 +10,7 @@ import Boom from 'boom';
 import { difference } from 'lodash';
 import { wrapError } from './utils';
 import { RouteDeps } from '.';
-import { UpdatedCaseSchema } from './schema';
+import { UpdateCaseArguments } from './schema';
 import { CaseAttributes, UpdatedCaseTyped, Writable } from './types';
 
 interface UpdateCase extends Writable<UpdatedCaseTyped> {
