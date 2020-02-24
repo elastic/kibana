@@ -266,10 +266,13 @@ export class ESGeoGridSource extends AbstractESAggSource {
           requestName: `${layerName} (${requestCount})`,
           searchSource,
           registerCancelCallback,
-          requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-            defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
-            values: { requestId },
-          }),
+          requestDescription: i18n.translate(
+            'xpack.maps.source.esGrid.compositeInspectorDescription',
+            {
+              defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
+              values: { requestId },
+            }
+          ),
         });
 
         features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
