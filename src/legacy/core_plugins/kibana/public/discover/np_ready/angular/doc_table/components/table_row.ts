@@ -56,7 +56,6 @@ export function createTableRowDirective(
     scope: {
       columns: '=',
       filter: '=',
-      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',

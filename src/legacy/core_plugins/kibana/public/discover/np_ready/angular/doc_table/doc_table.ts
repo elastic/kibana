@@ -49,7 +49,6 @@ export function createDocTableDirective(
       isLoading: '=?',
       infiniteScroll: '=?',
       filter: '=?',
-      filters: '=?',
       minimumVisibleRows: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
