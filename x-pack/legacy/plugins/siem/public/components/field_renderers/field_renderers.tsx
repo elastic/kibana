@@ -136,7 +136,7 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 );
 
 interface DefaultFieldRendererProps {
-  rowItems?: string[] | null | undefined;
+  rowItems: string[] | null | undefined;
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
