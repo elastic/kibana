@@ -15,7 +15,7 @@ import {
   ResolverCursorPaginatedQueryParams,
   ResolverPathParams,
   ResolverChildrenResults,
-} from '../../../common/types';
+} from '../../../common/resolver';
 
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),

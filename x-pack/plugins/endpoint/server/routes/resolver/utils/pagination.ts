@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/resolver';
 import { extractEventID } from './normalize';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 

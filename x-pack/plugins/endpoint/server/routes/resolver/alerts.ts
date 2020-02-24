@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { RequestHandler, Logger, IKibanaResponse, ResponseError } from 'kibana/server';
+import { RequestHandler, Logger } from 'kibana/server';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedAlertsQuery } from './queries/related_alerts';
 import {
   ResolverCursorPaginatedQueryParams,
   ResolverPathParams,
   ResolverAlertResults,
-} from '../../../common/types';
+} from '../../../common/resolver';
 
 export const validateRelatedAlerts = {
   params: schema.object({ id: schema.string() }),

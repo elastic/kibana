@@ -14,7 +14,7 @@ import {
   ResolverLifecycleQueryParams,
   ResolverPathParams,
   ResolverLifecycleResults,
-} from '../../../common/types';
+} from '../../../common/resolver';
 
 export const validateLifecycle = {
   params: schema.object({ id: schema.string() }),

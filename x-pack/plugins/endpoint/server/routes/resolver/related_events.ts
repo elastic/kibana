@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
-import { ResolverCursorPaginatedQueryParams, ResolverPathParams } from '../../../common/types';
+import { ResolverCursorPaginatedQueryParams, ResolverPathParams } from '../../../common/resolver';
 
 export const validateRelatedEvents = {
   params: schema.object({ id: schema.string() }),
