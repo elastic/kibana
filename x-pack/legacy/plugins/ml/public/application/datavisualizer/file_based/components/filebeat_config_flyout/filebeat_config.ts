@@ -14,7 +14,7 @@ export function createFilebeatConfig(
 ) {
   return [
     'filebeat.inputs:',
-    `- type: ${index}`,
+    '- type: log',
     '  paths:',
     "  - '<add path to your files here>'",
     ...getEncoding(results),
@@ -27,6 +27,10 @@ export function createFilebeatConfig(
     ...getUserDetails(username),
     `  index: "${index}"`,
     `  pipeline: "${ingestPipelineId}"`,
+    '',
+    'setup:',
+    '  template.enabled: false',
+    '  ilm.enabled: false',
   ].join('\n');
 }
 
@@ -36,7 +40,7 @@ function getEncoding(results: any) {
 
 function getExcludeLines(results: any) {
   return results.exclude_lines_pattern !== undefined
-    ? [`  exclude_lines: ['${results.exclude_lines_pattern}']`]
+    ? [`  exclude_lines: ['${results.exclude_lines_pattern.replace(/'/g, "''")}']`]
     : [];
 }
 
@@ -44,7 +48,7 @@ function getMultiline(results: any) {
   return results.multiline_start_pattern !== undefined
     ? [
         '  multiline:',
-        `    pattern: '${results.multiline_start_pattern}'`,
+        `    pattern: '${results.multiline_start_pattern.replace(/'/g, "''")}'`,
         '    match: after',
         '    negate: true',
       ]
