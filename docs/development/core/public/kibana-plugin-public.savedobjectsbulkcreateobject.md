@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions 
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions 
 ```
 
 ## Properties

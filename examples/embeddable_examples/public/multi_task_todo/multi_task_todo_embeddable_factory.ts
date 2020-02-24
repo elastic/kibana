@@ -23,9 +23,13 @@ import {
   MultiTaskTodoEmbeddable,
   MULTI_TASK_TODO_EMBEDDABLE,
   MultiTaskTodoInput,
+  MultiTaskTodoOutput,
 } from './multi_task_todo_embeddable';
 
-export class MultiTaskTodoEmbeddableFactory extends EmbeddableFactory {
+export class MultiTaskTodoEmbeddableFactory extends EmbeddableFactory<
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput
+> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
 
   public isEditable() {
@@ -34,6 +38,15 @@ export class MultiTaskTodoEmbeddableFactory extends EmbeddableFactory {
 
   public async create(initialInput: MultiTaskTodoInput, parent?: IContainer) {
     return new MultiTaskTodoEmbeddable(initialInput, parent);
+  }
+
+  /**
+   * Check out todo_embeddable_factory for a better example that asks for data from
+   * the user. This just returns default data.  That's okay too though, if you want to
+   * start with default data and expose an "edit" action to modify it.
+   */
+  public async getExplicitInput() {
+    return { title: 'default title', tasks: ['Im default data'] };
   }
 
   public getDisplayName() {
