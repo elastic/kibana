@@ -35,6 +35,11 @@ interface ProviderState {
  */
 export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Type of the provider.
+   */
+  static readonly type = 'basic';
+
+  /**
    * Performs initial login request using username and password.
    * @param request Request instance.
    * @param attempt User credentials.

@@ -4,10 +4,7 @@
     "IRC activity may be normal behavior for developers and engineers but is unusual for non-engineering end users. IRC activity involving an unusual source or destination may be more suspicious. IRC activity involving a production server is often suspicious. Because these ports are in the ephemeral range, this rule may false under certain conditions, such as when a NAT-ed web server replies to a client which has used a port in the range by coincidence. In this case, these servers can be excluded. Some legacy applications may use these ports, but this is very uncommon and usually only appears in local traffic using private IPs, which does not match this rule's conditions."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

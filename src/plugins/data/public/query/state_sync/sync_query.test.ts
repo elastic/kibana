@@ -21,7 +21,7 @@ import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { esFilters } from '../../../common';
+import { Filter, FilterStateStore } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createKbnUrlStateStorage,
@@ -31,7 +31,7 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';
-import { QuerySyncState, syncQuery } from './sync_query';
+import { getQueryStateContainer, QuerySyncState, syncQuery } from './sync_query';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -59,8 +59,8 @@ describe('sync_query', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
 
-  let gF: esFilters.Filter;
-  let aF: esFilters.Filter;
+  let gF: Filter;
+  let aF: Filter;
 
   const pathWithFilter =
     "/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))";
@@ -82,8 +82,8 @@ describe('sync_query', () => {
     history = createBrowserHistory();
     kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-    gF = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    aF = getFilter(esFilters.FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+    gF = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+    aF = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
   });
   afterEach(() => {
     filterManagerChangeSub.unsubscribe();
@@ -162,5 +162,70 @@ describe('sync_query', () => {
     filterManager.setFilters([gF]); // global filters didn't change
     expect(spy).not.toBeCalled();
     stop();
+  });
+
+  describe('getQueryStateContainer', () => {
+    test('state is initialized with state from query service', () => {
+      const { stop, querySyncStateContainer, initialState } = getQueryStateContainer(
+        queryServiceStart
+      );
+      expect(querySyncStateContainer.getState()).toMatchInlineSnapshot(`
+        Object {
+          "filters": Array [],
+          "refreshInterval": Object {
+            "pause": true,
+            "value": 0,
+          },
+          "time": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+        }
+      `);
+      expect(initialState).toEqual(querySyncStateContainer.getState());
+      stop();
+    });
+
+    test('state takes initial overrides into account', () => {
+      const { stop, querySyncStateContainer, initialState } = getQueryStateContainer(
+        queryServiceStart,
+        {
+          time: { from: 'now-99d', to: 'now' },
+        }
+      );
+      expect(querySyncStateContainer.getState().time).toEqual({
+        from: 'now-99d',
+        to: 'now',
+      });
+      expect(initialState).toEqual(querySyncStateContainer.getState());
+      stop();
+    });
+
+    test('when filters change, state container contains updated global filters', () => {
+      const { stop, querySyncStateContainer } = getQueryStateContainer(queryServiceStart);
+      filterManager.setFilters([gF, aF]);
+      expect(querySyncStateContainer.getState().filters).toHaveLength(1);
+      stop();
+    });
+
+    test('when time range changes, state container contains updated time range', () => {
+      const { stop, querySyncStateContainer } = getQueryStateContainer(queryServiceStart);
+      timefilter.setTime({ from: 'now-30m', to: 'now' });
+      expect(querySyncStateContainer.getState().time).toEqual({
+        from: 'now-30m',
+        to: 'now',
+      });
+      stop();
+    });
+
+    test('when refresh interval changes, state container contains updated refresh interval', () => {
+      const { stop, querySyncStateContainer } = getQueryStateContainer(queryServiceStart);
+      timefilter.setRefreshInterval({ pause: true, value: 100 });
+      expect(querySyncStateContainer.getState().refreshInterval).toEqual({
+        pause: true,
+        value: 100,
+      });
+      stop();
+    });
   });
 });

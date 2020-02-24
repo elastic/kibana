@@ -146,7 +146,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   // link.active and link.lastUrl properties
   coreNavLinks
     .getAll()
-    .filter(link => link.subUrlBase)
+    .filter(link => link.subUrlBase && !link.disableSubUrlTracking)
     .forEach(link => {
       coreNavLinks.update(link.id, {
         subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),

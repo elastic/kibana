@@ -47,7 +47,7 @@ describe('getNodeIds', () => {
     };
     const clusterUuid = '1cb';
 
-    const result = await getNodeIds(req, '.monitoring-es-*,monitoring-es-*', { clusterUuid }, 10);
+    const result = await getNodeIds(req, '.monitoring-es-*', { clusterUuid }, 10);
     expect(result).toEqual([
       { name: 'foobar', uuid: 1 },
       { name: 'barfoo', uuid: 2 },

@@ -6,6 +6,3 @@
 
 export { MonitorPage } from './monitor';
 export { NotFoundPage } from './not_found';
-export { PageHeader } from './page_header';
-export { SettingsPage } from './settings';
-export { OverviewPage } from '../components/connected/';

@@ -24,6 +24,7 @@ import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { FilterFieldTypes } from '../param_types/field';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -31,7 +32,7 @@ export interface IMetricAggConfig extends AggConfig {
 
 export interface MetricAggParam<TMetricAggConfig extends AggConfig>
   extends AggParamType<TMetricAggConfig> {
-  filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+  filterFieldTypes?: FilterFieldTypes;
   onlyAggregatable?: boolean;
 }
 

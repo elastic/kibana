@@ -31,13 +31,14 @@ import {
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
 import { findByTitle, getRoutes } from '../utils';
-import { indexPatterns } from '../';
+import { IndexPatternMissingIndices } from '../lib';
 import { Field, FieldList, IFieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { getNotifications, getFieldFormats } from '../../services';
+import { TypeMeta } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -49,7 +50,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public type?: string;
   public fieldFormatMap: any;
-  public typeMeta: any;
+  public typeMeta?: TypeMeta;
   public fields: IFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
@@ -63,7 +64,7 @@ export class IndexPattern implements IIndexPattern {
   private getConfig: any;
   private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
-  private fieldsFetcher: any;
+  public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
 
   private mapping: MappingObject = expandShorthand({
@@ -336,6 +337,10 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(name);
   }
 
+  getAggregationRestrictions() {
+    return this.typeMeta?.aggs;
+  }
+
   isWildcard() {
     return _.includes(this.title, '*');
   }
@@ -484,7 +489,7 @@ export class IndexPattern implements IIndexPattern {
         // so do not rethrow the error here
         const { toasts } = getNotifications();
 
-        if (err instanceof indexPatterns.IndexPatternMissingIndices) {
+        if (err instanceof IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
 
           return [];

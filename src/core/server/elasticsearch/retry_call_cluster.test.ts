@@ -66,6 +66,7 @@ describe('migrationsRetryCallCluster', () => {
     'RequestTimeout',
     'AuthenticationException',
     'AuthorizationException',
+    'Gone',
   ];
 
   const mockLogger = loggingServiceMock.create();

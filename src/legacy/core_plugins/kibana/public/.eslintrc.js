@@ -17,7 +17,14 @@
  * under the License.
  */
 
+const topLevelConfig = require('../../../../../.eslintrc.js');
 const path = require('path');
+
+const topLevelRestricedZones = topLevelConfig.overrides.find(
+  override =>
+    override.files[0] === '**/*.{js,ts,tsx}' &&
+    Object.keys(override.rules)[0] === '@kbn/eslint/no-restricted-paths'
+).rules['@kbn/eslint/no-restricted-paths'][1].zones;
 
 /**
  * Builds custom restricted paths configuration for the shimmed plugins within the kibana plugin.
@@ -28,34 +35,37 @@ const path = require('path');
  * @returns zones configuration for the no-restricted-paths linter
  */
 function buildRestrictedPaths(shimmedPlugins) {
-  return shimmedPlugins.map(shimmedPlugin => ([{
-    target: [
-      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/np_ready/**/*`,
-    ],
-    from: [
-      'ui/**/*',
-      'src/legacy/ui/**/*',
-      'src/legacy/core_plugins/kibana/public/**/*',
-      'src/legacy/core_plugins/data/public/**/*',
-      '!src/legacy/core_plugins/data/public/index.ts',
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
-    ],
-    allowSameFolder: false,
-    errorMessage: `${shimmedPlugin} is a shimmed plugin that is not allowed to import modules from the legacy platform. If you need legacy modules for the transition period, import them either in the legacy_imports, kibana_services or index module.`,
-  }, {
-    target: [
-      'src/**/*',
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
-      'x-pack/**/*',
-    ],
-    from: [
-      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/legacy.ts`,
-    ],
-    allowSameFolder: false,
-    errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin} in another plugin, consider re-exporting it from the top level index module`,
-  }])).reduce((acc, part) => [...acc, ...part], []);
+  return shimmedPlugins
+    .map(shimmedPlugin => [
+      {
+        target: [`src/legacy/core_plugins/kibana/public/${shimmedPlugin}/np_ready/**/*`],
+        from: [
+          'ui/**/*',
+          'src/legacy/ui/**/*',
+          'src/legacy/core_plugins/kibana/public/**/*',
+          'src/legacy/core_plugins/data/public/**/*',
+          '!src/legacy/core_plugins/data/public/index.ts',
+          `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+        ],
+        allowSameFolder: false,
+        errorMessage: `${shimmedPlugin} is a shimmed plugin that is not allowed to import modules from the legacy platform. If you need legacy modules for the transition period, import them either in the legacy_imports, kibana_services or index module.`,
+      },
+      {
+        target: [
+          'src/**/*',
+          `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+          'x-pack/**/*',
+        ],
+        from: [
+          `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+          `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
+          `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/legacy.ts`,
+        ],
+        allowSameFolder: false,
+        errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin} in another plugin, consider re-exporting it from the top level index module`,
+      },
+    ])
+    .reduce((acc, part) => [...acc, ...part], []);
 }
 
 module.exports = {
@@ -66,7 +76,9 @@ module.exports = {
       'error',
       {
         basePath: path.resolve(__dirname, '../../../../../'),
-        zones: buildRestrictedPaths(['visualize', 'discover', 'dashboard', 'devTools', 'home']),
+        zones: topLevelRestricedZones.concat(
+          buildRestrictedPaths(['visualize', 'discover', 'dashboard', 'devTools', 'home'])
+        ),
       },
     ],
   },

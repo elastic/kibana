@@ -17,22 +17,16 @@
  * under the License.
  */
 
-import { IndexPattern, Field } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import {
-  IAggConfig,
-  IAggType,
-  AggGroupNames,
-  BUCKET_TYPES,
-  IndexedArray,
-  EditorConfig,
-} from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
+import { EditorConfig } from './utils';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
@@ -111,8 +105,10 @@ describe('DefaultEditorAggParams helpers', () => {
               name: 'field',
               type: 'field',
               filterFieldTypes,
-              getAvailableFields: jest.fn((fields: IndexedArray<Field>) =>
-                fields.filter(({ type }) => filterFieldTypes.includes(type))
+              getAvailableFields: jest.fn((aggConfig: IAggConfig) =>
+                aggConfig
+                  .getIndexPattern()
+                  .fields.filter(({ type }) => filterFieldTypes.includes(type))
               ),
             },
             {

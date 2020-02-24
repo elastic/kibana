@@ -176,20 +176,9 @@ describe('Common authentication routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
-    it('returns 500 if cannot retrieve current user due to unhandled exception.', async () => {
-      const unhandledException = new Error('Something went wrong.');
-      authc.getCurrentUser.mockRejectedValue(unhandledException);
-
-      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
-
-      expect(response.status).toBe(500);
-      expect(response.payload).toEqual(unhandledException);
-      expect(authc.getCurrentUser).toHaveBeenCalledWith(mockRequest);
-    });
-
     it('returns current user.', async () => {
       const mockUser = mockAuthenticatedUser();
-      authc.getCurrentUser.mockResolvedValue(mockUser);
+      authc.getCurrentUser.mockReturnValue(mockUser);
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 

@@ -30,7 +30,6 @@ import {
   Axis,
   Chart,
   HistogramBarSeries,
-  GeometryValue,
   LineAnnotation,
   Position,
   ScaleType,
@@ -38,10 +37,11 @@ import {
   RectAnnotation,
   TooltipValue,
   TooltipType,
+  ElementClickListener,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
+import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
 import { getServices, timezoneProvider } from '../../../kibana_services';
 
@@ -139,7 +139,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     this.props.timefilterUpdateHandler(range);
   };
 
-  public onElementClick = (xInterval: number) => (elementData: GeometryValue[]) => {
+  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
     const startRange = elementData[0].x;
 
     const range = {

@@ -21,12 +21,13 @@ describe('createCloudUsageCollector', () => {
   });
 
   describe('Fetched Usage data', () => {
-    it('return isCloudEnabled boolean', () => {
+    it('return isCloudEnabled boolean', async () => {
       const mockConfigs = getMockConfigs(true);
       const usageCollection = mockUsageCollection() as any;
       const collector = createCloudUsageCollector(usageCollection, mockConfigs);
+      const callCluster = {} as any; // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
 
-      expect(collector.fetch().isCloudEnabled).toBe(true);
+      expect((await collector.fetch(callCluster)).isCloudEnabled).toBe(true); // Adding the await because the fetch can be a Promise or a synchronous method and TS complains in the test if not awaited
     });
   });
 });

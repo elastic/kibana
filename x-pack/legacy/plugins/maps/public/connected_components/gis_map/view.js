@@ -15,7 +15,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
-import { isNestedField } from '../../../../../../../src/plugins/data/public';
+import { indexPatterns as indexPatternsUtils } from '../../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 
@@ -81,7 +81,7 @@ export class GisMap extends Component {
       indexPatterns.forEach(indexPattern => {
         indexPattern.fields.forEach(field => {
           if (
-            !isNestedField(field) &&
+            !indexPatternsUtils.isNestedField(field) &&
             (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
               field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
           ) {

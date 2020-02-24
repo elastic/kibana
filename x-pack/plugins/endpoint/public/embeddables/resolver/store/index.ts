@@ -4,43 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore, StoreEnhancer } from 'redux';
-import { ResolverAction } from '../types';
+import { createStore, applyMiddleware, Store } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { ResolverAction, ResolverState } from '../types';
 import { resolverReducer } from './reducer';
 
-export const storeFactory = () => {
-  /**
-   * Redux Devtools extension exposes itself via a property on the global object.
-   * This interface can be used to cast `window` to a type that may expose Redux Devtools.
-   */
-  interface SomethingThatMightHaveReduxDevTools {
-    __REDUX_DEVTOOLS_EXTENSION__?: (options?: PartialReduxDevToolsOptions) => StoreEnhancer;
-  }
+export const storeFactory = (): { store: Store<ResolverState, ResolverAction> } => {
+  const actionsBlacklist: Array<ResolverAction['type']> = ['userMovedPointer'];
+  const composeEnhancers = composeWithDevTools({
+    name: 'Resolver',
+    actionsBlacklist,
+  });
 
-  /**
-   * Some of the options that can be passed when configuring Redux Devtools.
-   */
-  interface PartialReduxDevToolsOptions {
-    /**
-     * A name for this store
-     */
-    name?: string;
-    /**
-     * A list of action types to ignore. This is used to ignore high frequency events created by a mousemove handler
-     */
-    actionsBlacklist?: readonly string[];
-  }
-  const windowWhichMightHaveReduxDevTools = window as SomethingThatMightHaveReduxDevTools;
-  // Make sure blacklisted action types are valid
-  const actionsBlacklist: ReadonlyArray<ResolverAction['type']> = ['userMovedPointer'];
-  const store = createStore(
-    resolverReducer,
-    windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__ &&
-      windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__({
-        name: 'Resolver',
-        actionsBlacklist,
-      })
-  );
+  const middlewareEnhancer = applyMiddleware();
+
+  const store = createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
   return {
     store,
   };

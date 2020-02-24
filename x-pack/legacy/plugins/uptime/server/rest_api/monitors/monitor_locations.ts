@@ -26,7 +26,7 @@ export const createGetMonitorLocationsRoute: UMRestApiRouteFactory = (libs: UMSe
 
     return response.ok({
       body: {
-        ...(await libs.monitors.getMonitorLocations({
+        ...(await libs.requests.getMonitorLocations({
           callES,
           monitorId,
           dateStart,

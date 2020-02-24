@@ -17,43 +17,30 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
-import { IUiActionsApi, IActionRegistry, ITriggerRegistry } from './types';
-import { createApi } from './api';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { UiActionsService } from './service';
 
-export interface IUiActionsSetup {
-  attachAction: IUiActionsApi['attachAction'];
-  detachAction: IUiActionsApi['detachAction'];
-  registerAction: IUiActionsApi['registerAction'];
-  registerTrigger: IUiActionsApi['registerTrigger'];
-}
+export type UiActionsSetup = Pick<
+  UiActionsService,
+  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
+>;
 
-export type IUiActionsStart = IUiActionsApi;
+export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 
-export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart> {
-  private readonly triggers: ITriggerRegistry = new Map();
-  private readonly actions: IActionRegistry = new Map();
-  private api!: IUiActionsApi;
+export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
+  private readonly service = new UiActionsService();
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.api = createApi({ triggers: this.triggers, actions: this.actions }).api;
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup): UiActionsSetup {
+    return this.service;
   }
 
-  public setup(core: CoreSetup): IUiActionsSetup {
-    return {
-      registerTrigger: this.api.registerTrigger,
-      registerAction: this.api.registerAction,
-      attachAction: this.api.attachAction,
-      detachAction: this.api.detachAction,
-    };
-  }
-
-  public start(core: CoreStart): IUiActionsStart {
-    return this.api;
+  public start(core: CoreStart): UiActionsStart {
+    return this.service;
   }
 
   public stop() {
-    this.actions.clear();
-    this.triggers.clear();
+    this.service.clear();
   }
 }

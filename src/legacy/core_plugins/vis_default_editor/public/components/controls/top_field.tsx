@@ -20,12 +20,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Field } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 import { AggParamEditorProps } from '../agg_param_props';
 
-function TopFieldParamEditor(props: AggParamEditorProps<Field>) {
+function TopFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
   const compatibleAggs = getCompatibleAggs(props.agg);
   let customError;
 

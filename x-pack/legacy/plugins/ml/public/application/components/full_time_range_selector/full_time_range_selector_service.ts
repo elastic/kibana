@@ -7,10 +7,9 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
-import { timefilter } from 'ui/timefilter';
 import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
+import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
@@ -24,6 +23,7 @@ export async function setFullTimeRange(
   query: Query
 ): Promise<GetTimeFieldRangeResponse> {
   try {
+    const timefilter = getTimefilter();
     const resp = await ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
@@ -35,6 +35,7 @@ export async function setFullTimeRange(
     });
     return resp;
   } catch (resp) {
+    const toastNotifications = getToastNotifications();
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
         defaultMessage: 'An error occurred setting the time range.',
@@ -45,20 +46,12 @@ export async function setFullTimeRange(
 }
 
 export function getTimeFilterRange(): TimeRange {
-  let from = 0;
-  let to = 0;
-  const fromString = timefilter.getTime().from;
-  const toString = timefilter.getTime().to;
-  if (typeof fromString === 'string' && typeof toString === 'string') {
-    const fromMoment = dateMath.parse(fromString);
-    const toMoment = dateMath.parse(toString);
-    if (typeof fromMoment !== 'undefined' && typeof toMoment !== 'undefined') {
-      const fromMs = fromMoment.valueOf();
-      const toMs = toMoment.valueOf();
-      from = fromMs;
-      to = toMs;
-    }
-  }
+  const timefilter = getTimefilter();
+  const fromMoment = dateMath.parse(timefilter.getTime().from);
+  const toMoment = dateMath.parse(timefilter.getTime().to);
+  const from = fromMoment !== undefined ? fromMoment.valueOf() : 0;
+  const to = toMoment !== undefined ? toMoment.valueOf() : 0;
+
   return {
     to,
     from,

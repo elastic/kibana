@@ -43,11 +43,6 @@ export const getConfigTelemetryDesc = () => {
  */
 export const REPORT_INTERVAL_MS = 86400000;
 
-/*
- * Key for the localStorage service
- */
-export const LOCALSTORAGE_KEY = 'telemetry.data';
-
 /**
  * Link to the Elastic Telemetry privacy statement.
  */

@@ -15,12 +15,12 @@ export function AnalysisSummary({ results }) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.analysisSummary.summaryTitle"
             defaultMessage="Summary"
           />
-        </h3>
+        </h2>
       </EuiTitle>
 
       <EuiSpacer size="m" />

@@ -6,6 +6,7 @@
 
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
@@ -97,8 +98,10 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
+    currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
@@ -715,6 +718,8 @@ export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
     remove: (url: string) => string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
+    readonly serverBasePath: string;
 }
 
 // @public
@@ -730,6 +735,8 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface IHttpFetchError extends Error {
     // (undocumented)
     readonly body?: any;
+    // (undocumented)
+    readonly name: string;
     // @deprecated (undocumented)
     readonly req: Request;
     // (undocumented)
@@ -925,7 +932,7 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public (undocumented)
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
@@ -968,13 +975,13 @@ export interface SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBatchResponse<T = unknown> {
     // (undocumented)
     savedObjects: Array<SimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -987,7 +994,7 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1010,17 +1017,17 @@ export interface SavedObjectsBulkUpdateOptions {
 export class SavedObjectsClient {
     // @internal
     constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkGet: (objects?: {
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+    create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
-    get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    find: <T = unknown>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
@@ -1062,7 +1069,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
 }
 
 // @public
-export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1169,8 +1176,8 @@ export interface SavedObjectsUpdateOptions {
 }
 
 // @public
-export class SimpleSavedObject<T extends SavedObjectAttributes> {
-    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+export class SimpleSavedObject<T = unknown> {
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)

@@ -36,6 +36,12 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: node => {
+    return node;
+  },
+}));
+
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
@@ -47,7 +53,7 @@ const props = {
 };
 
 function prepareEditTest() {
-  const wrapper = shallowWithIntl(<EditFilterList.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(<EditFilterList {...props} />);
 
   // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
   // has resolved.
@@ -62,7 +68,7 @@ function prepareEditTest() {
 
 describe('EditFilterList', () => {
   test('renders the edit page for a new filter list and updates ID', () => {
-    const wrapper = shallowWithIntl(<EditFilterList.WrappedComponent {...props} />);
+    const wrapper = shallowWithIntl(<EditFilterList {...props} />);
     expect(wrapper).toMatchSnapshot();
 
     const instance = wrapper.instance();

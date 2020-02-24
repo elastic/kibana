@@ -18,7 +18,8 @@
  */
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, AggParam, EditorConfig } from '../../legacy_imports';
+import { IAggConfig, AggParam } from '../../legacy_imports';
+import { EditorConfig } from '../utils';
 
 export const aggParamCommonPropsMock = {
   agg: {} as IAggConfig,

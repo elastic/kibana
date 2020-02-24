@@ -5,13 +5,12 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { editorConfigProviders } from 'ui/vis/config';
 import { aggTypeFilters } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types';
 import { addSearchStrategy } from '../../../../../src/plugins/data/public';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
-import { addBadgeExtension, addToggleExtension } from '../../index_management/public';
+import { extensionsService } from '../../index_management/public';
 
 const plugin = new RollupPlugin();
 
@@ -20,10 +19,8 @@ export const setup = plugin.setup(npSetup.core, {
   __LEGACY: {
     aggTypeFilters,
     aggTypeFieldFilters,
-    editorConfigProviders,
     addSearchStrategy,
-    addBadgeExtension,
-    addToggleExtension,
+    indexManagementExtensions: extensionsService,
     managementLegacy: management,
   },
 });

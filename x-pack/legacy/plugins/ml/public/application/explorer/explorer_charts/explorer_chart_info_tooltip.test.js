@@ -23,7 +23,7 @@ describe('ExplorerChartTooltip', () => {
       jobId: 'mock-job-id',
     };
 
-    const wrapper = shallowWithIntl(<ExplorerChartInfoTooltip.WrappedComponent {...infoTooltip} />);
+    const wrapper = shallowWithIntl(<ExplorerChartInfoTooltip {...infoTooltip} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

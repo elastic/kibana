@@ -72,6 +72,8 @@ export class ColorMapSelect extends Component {
         <EuiSpacer size="s" />
         <ColorStopsCategorical
           colorStops={this.state.customColorMap}
+          field={this.props.styleProperty.getField()}
+          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}
         />
       </Fragment>

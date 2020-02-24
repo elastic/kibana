@@ -22,12 +22,12 @@ export function FileContents({ data, format, numberOfLines }) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle"
             defaultMessage="File contents"
           />
-        </h3>
+        </h2>
       </EuiTitle>
 
       <div>

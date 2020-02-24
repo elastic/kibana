@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { syncQuery } from './sync_query';
+export { syncQuery, getQueryStateContainer } from './sync_query';
 export { syncAppFilters } from './sync_app_filters';

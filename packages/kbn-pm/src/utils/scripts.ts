@@ -67,11 +67,14 @@ export function runScriptInPackageStreaming(script: string, args: string[], pkg:
 }
 
 export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesInfo> {
-  const workspacesInfo = await spawn('yarn', ['workspaces', 'info', '--json'], {
+  const { stdout } = await spawn('yarn', ['--json', 'workspaces', 'info'], {
     cwd: directory,
     stdio: 'pipe',
   });
 
-  const stdout = JSON.parse(workspacesInfo.stdout);
-  return JSON.parse(stdout.data);
+  try {
+    return JSON.parse(JSON.parse(stdout).data);
+  } catch (error) {
+    throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
+  }
 }

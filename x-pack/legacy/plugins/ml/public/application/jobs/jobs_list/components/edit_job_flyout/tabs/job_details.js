@@ -10,9 +10,10 @@ import React, { Component } from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiComboBox } from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-class JobDetailsUI extends Component {
+export class JobDetails extends Component {
   constructor(props) {
     super(props);
 
@@ -129,10 +130,12 @@ class JobDetailsUI extends Component {
             error={groupsValidationError}
           >
             <EuiComboBox
-              placeholder={this.props.intl.formatMessage({
-                id: 'xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsPlaceholder',
-                defaultMessage: 'Select or create groups',
-              })}
+              placeholder={i18n.translate(
+                'xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsPlaceholder',
+                {
+                  defaultMessage: 'Select or create groups',
+                }
+              )}
               options={groups}
               selectedOptions={selectedGroups}
               onChange={this.onGroupsChange}
@@ -164,11 +167,9 @@ class JobDetailsUI extends Component {
     );
   }
 }
-JobDetailsUI.propTypes = {
+JobDetails.propTypes = {
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
   setJobDetails: PropTypes.func.isRequired,
 };
-
-export const JobDetails = injectI18n(JobDetailsUI);

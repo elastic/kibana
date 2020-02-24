@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SavedObjectSaveModal,
   OnSaveProps,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../../src/plugins/saved_objects/public';
 
 import { GraphSavePolicy } from '../types/config';
 
