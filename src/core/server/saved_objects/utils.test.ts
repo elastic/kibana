@@ -219,6 +219,7 @@ describe('convertLegacyTypes', () => {
       },
       savedObjectSchemas: {},
       savedObjectValidations: {},
+      savedObjectsManagement: {},
     };
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
