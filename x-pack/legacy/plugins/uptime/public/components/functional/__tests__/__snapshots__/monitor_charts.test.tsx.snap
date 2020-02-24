@@ -51,7 +51,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     }
   }
 >
-  <MonitorChartsComponent
+  <Component
     data={
       Object {
         "monitorChartsData": Object {

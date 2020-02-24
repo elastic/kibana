@@ -16,8 +16,6 @@ export interface GetMonitorChartsParams {
   dateStart: string;
   /** @member dateRangeEnd timestamp bounds */
   dateEnd: string;
-  /** @member location optional location value for use in filtering*/
-  location?: string | null;
 }
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
@@ -46,7 +44,7 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorChart
-> = async ({ callES, dateStart, dateEnd, monitorId, location }) => {
+> = async ({ callES, dateStart, dateEnd, monitorId }) => {
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
     body: {
@@ -56,8 +54,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
             { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
             { term: { 'monitor.id': monitorId } },
             { term: { 'monitor.status': 'up' } },
-            // if location is truthy, add it as a filter. otherwise add nothing
-            ...(!!location ? [{ term: { 'observer.geo.name': location } }] : []),
           ],
         },
       },

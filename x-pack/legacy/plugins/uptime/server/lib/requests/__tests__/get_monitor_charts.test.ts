@@ -7,7 +7,7 @@
 import { get, set } from 'lodash';
 import mockChartsData from './monitor_charts_mock.json';
 import { assertCloseTo } from '../../helper';
-import { getMonitorDurationChart } from '../get_monitor_charts';
+import { getMonitorDurationChart } from '../get_monitor_duration';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
@@ -17,8 +17,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
     await getMonitorDurationChart({
       callES: search,
       monitorId: 'fooID',
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
@@ -52,8 +52,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
     await getMonitorDurationChart({
       callES: search,
       monitorId: 'fooID',
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
       location: 'Philadelphia',
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
@@ -89,8 +89,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
       await getMonitorDurationChart({
         callES: search,
         monitorId: 'id',
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
+        dateStart: 'now-15m',
+        dateEnd: 'now',
       })
     ).toMatchSnapshot();
   });
