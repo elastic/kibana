@@ -5,12 +5,19 @@
  */
 import React, { useMemo } from 'react';
 import { memo } from 'react';
-import { EuiAccordion, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiDescriptionList,
+  EuiTitle,
+  EuiText,
+  EuiHealth,
+} from '@elastic/eui';
 import { FormattedDate } from 'react-intl';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../../store/alerts/selectors';
 
-export const AlertDetails = memo(() => {
+export const AlertDetailsOverview = memo(() => {
   const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
   if (alertDetailsData === undefined) {
     return null;
@@ -118,11 +125,11 @@ export const AlertDetails = memo(() => {
     return [
       {
         title: 'File Name',
-        description: alertDetailsData.host.hostname,
+        description: 'TODO',
       },
       {
         title: 'File Path',
-        description: alertDetailsData.host.ip,
+        description: 'TODO',
       },
       {
         title: 'File Size',
@@ -149,7 +156,7 @@ export const AlertDetails = memo(() => {
         description: 'TODO',
       },
     ];
-  }, [alertDetailsData]);
+  }, []);
 
   const sourceProcessDetailsColumns = useMemo(() => {
     return [
@@ -204,23 +211,43 @@ export const AlertDetails = memo(() => {
     return [
       {
         title: 'SID',
-        description: alertDetailsData.host.hostname,
+        description: 'TODO',
       },
       {
         title: 'Integrity Level',
-        description: alertDetailsData.host.ip,
+        description: 'TODO',
       },
       {
         title: 'Privileges',
         description: 'TODO',
       },
     ];
-  }, [alertDetailsData]);
+  }, []);
 
   return (
     <>
+      {/* Hard coded top level alert details component. TODO: maybe abstract somewhere else? */}
+      <EuiTitle size="s">
+        <h3>Detected Malicious File</h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiText>
+        <p>
+          Endgame MalwareScore detected the opening of a document with a blah blah blah on{' '}
+          {alertDetailsData.host.hostname} on {AlertDetailsDate}
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiText>
+        Endpoint Status: <EuiHealth color="success">Online</EuiHealth>
+      </EuiText>
+      <EuiSpacer />
+      <EuiText>Alert Status: Open</EuiText>
+      <EuiSpacer />
+
+      {/* Start of Alert Details overview component TODO: delete this comment eventually */}
       <EuiAccordion
-        id="alertDetailsAlertAccordian"
+        id="alertDetailsAlertAccordion"
         buttonContent="Alert"
         paddingSize="l"
         initialIsOpen={true}
@@ -235,7 +262,7 @@ export const AlertDetails = memo(() => {
       <EuiSpacer />
 
       <EuiAccordion
-        id="alertDetailsHostAccordian"
+        id="alertDetailsHostAccordion"
         buttonContent="Host"
         paddingSize="l"
         initialIsOpen={true}
@@ -250,7 +277,7 @@ export const AlertDetails = memo(() => {
       <EuiSpacer />
 
       <EuiAccordion
-        id="alertDetailsHashAccordian"
+        id="alertDetailsHashAccordion"
         buttonContent="Hash"
         paddingSize="l"
         initialIsOpen={true}
@@ -265,7 +292,7 @@ export const AlertDetails = memo(() => {
       <EuiSpacer />
 
       <EuiAccordion
-        id="alertDetailsFileAccordian"
+        id="alertDetailsFileAccordion"
         buttonContent="File"
         paddingSize="l"
         initialIsOpen={true}
@@ -280,7 +307,7 @@ export const AlertDetails = memo(() => {
       <EuiSpacer />
 
       <EuiAccordion
-        id="alertDetailsSourceProcessAccordian"
+        id="alertDetailsSourceProcessAccordion"
         buttonContent="Source Process"
         paddingSize="l"
         initialIsOpen={true}
@@ -295,7 +322,7 @@ export const AlertDetails = memo(() => {
       <EuiSpacer />
 
       <EuiAccordion
-        id="alertDetailsSourceProcessTokenAccordian"
+        id="alertDetailsSourceProcessTokenAccordion"
         buttonContent="Source Process Token"
         paddingSize="l"
         initialIsOpen={true}

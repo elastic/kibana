@@ -26,7 +26,7 @@ import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
-import { AlertDetails } from './alert_details';
+import { AlertDetailsOverview } from './alert_details_overview';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -218,7 +218,7 @@ export const AlertIndex = memo(() => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            {selectedAlertData ? <AlertDetails /> : <EuiLoadingSpinner size="xl" />}
+            {selectedAlertData ? <AlertDetailsOverview /> : <EuiLoadingSpinner size="xl" />}
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
