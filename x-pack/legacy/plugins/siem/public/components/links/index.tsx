@@ -253,7 +253,7 @@ const ReputationLinkComponent: React.FC<{
               ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {ipReputationLinks.length && (
+        {ipReputationLinks?.length && (
           <EuiFlexItem grow={false}>
             <DefaultFieldRendererOverflow
               rowItems={ipReputationLinks}

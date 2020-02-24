@@ -1402,7 +1402,7 @@ tr:hover .c3:focus::before {
                   >
                     <ErrorBoundary>
                       <App
-                        contextId="6"
+                        contextId="0"
                         liftInstruction="Draggable item. Ensure your screen reader is not in browse mode and then press space bar to lift."
                         onDragEnd={[MockFunction]}
                         setCallbacks={[Function]}
@@ -2173,7 +2173,7 @@ tr:hover .c3:focus::before {
                                                           useClone={null}
                                                         >
                                                           <div
-                                                            data-rbd-droppable-context-id="6"
+                                                            data-rbd-droppable-context-id="0"
                                                             data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                           >
                                                             <PublicDraggable
@@ -2231,10 +2231,10 @@ tr:hover .c3:focus::before {
                                                                       usePortal={false}
                                                                     >
                                                                       <ProviderContainerComponent
-                                                                        aria-labelledby="rbd-lift-instruction-6"
-                                                                        data-rbd-drag-handle-context-id="6"
+                                                                        aria-labelledby="rbd-lift-instruction-0"
+                                                                        data-rbd-drag-handle-context-id="0"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                                        data-rbd-draggable-context-id="6"
+                                                                        data-rbd-draggable-context-id="0"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
@@ -2250,11 +2250,11 @@ tr:hover .c3:focus::before {
                                                                         tabIndex={0}
                                                                       >
                                                                         <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
+                                                                          aria-labelledby="rbd-lift-instruction-0"
                                                                           className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
+                                                                          data-rbd-drag-handle-context-id="0"
                                                                           data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
-                                                                          data-rbd-draggable-context-id="6"
+                                                                          data-rbd-draggable-context-id="0"
                                                                           data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_session_id-Cu0n232QMyvNtzb75j"
                                                                           data-test-subj="providerContainer"
                                                                           draggable={false}
@@ -2475,7 +2475,7 @@ tr:hover .c3:focus::before {
                                                           useClone={null}
                                                         >
                                                           <div
-                                                            data-rbd-droppable-context-id="6"
+                                                            data-rbd-droppable-context-id="0"
                                                             data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                           >
                                                             <PublicDraggable
@@ -2533,10 +2533,10 @@ tr:hover .c3:focus::before {
                                                                       usePortal={false}
                                                                     >
                                                                       <ProviderContainerComponent
-                                                                        aria-labelledby="rbd-lift-instruction-6"
-                                                                        data-rbd-drag-handle-context-id="6"
+                                                                        aria-labelledby="rbd-lift-instruction-0"
+                                                                        data-rbd-drag-handle-context-id="0"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                                        data-rbd-draggable-context-id="6"
+                                                                        data-rbd-draggable-context-id="0"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
@@ -2552,11 +2552,11 @@ tr:hover .c3:focus::before {
                                                                         tabIndex={0}
                                                                       >
                                                                         <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
+                                                                          aria-labelledby="rbd-lift-instruction-0"
                                                                           className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
+                                                                          data-rbd-drag-handle-context-id="0"
                                                                           data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
-                                                                          data-rbd-draggable-context-id="6"
+                                                                          data-rbd-draggable-context-id="0"
                                                                           data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-event_dataset-zeek_files"
                                                                           data-test-subj="providerContainer"
                                                                           draggable={false}
@@ -2777,7 +2777,7 @@ tr:hover .c3:focus::before {
                                                           useClone={null}
                                                         >
                                                           <div
-                                                            data-rbd-droppable-context-id="6"
+                                                            data-rbd-droppable-context-id="0"
                                                             data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                           >
                                                             <PublicDraggable
@@ -2835,10 +2835,10 @@ tr:hover .c3:focus::before {
                                                                       usePortal={false}
                                                                     >
                                                                       <ProviderContainerComponent
-                                                                        aria-labelledby="rbd-lift-instruction-6"
-                                                                        data-rbd-drag-handle-context-id="6"
+                                                                        aria-labelledby="rbd-lift-instruction-0"
+                                                                        data-rbd-drag-handle-context-id="0"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                                        data-rbd-draggable-context-id="6"
+                                                                        data-rbd-draggable-context-id="0"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
@@ -2854,11 +2854,11 @@ tr:hover .c3:focus::before {
                                                                         tabIndex={0}
                                                                       >
                                                                         <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
+                                                                          aria-labelledby="rbd-lift-instruction-0"
                                                                           className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
+                                                                          data-rbd-drag-handle-context-id="0"
                                                                           data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
-                                                                          data-rbd-draggable-context-id="6"
+                                                                          data-rbd-draggable-context-id="0"
                                                                           data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_sha1-fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                                           data-test-subj="providerContainer"
                                                                           draggable={false}
@@ -3079,7 +3079,7 @@ tr:hover .c3:focus::before {
                                                           useClone={null}
                                                         >
                                                           <div
-                                                            data-rbd-droppable-context-id="6"
+                                                            data-rbd-droppable-context-id="0"
                                                             data-rbd-droppable-id="droppableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                           >
                                                             <PublicDraggable
@@ -3137,10 +3137,10 @@ tr:hover .c3:focus::before {
                                                                       usePortal={false}
                                                                     >
                                                                       <ProviderContainerComponent
-                                                                        aria-labelledby="rbd-lift-instruction-6"
-                                                                        data-rbd-drag-handle-context-id="6"
+                                                                        aria-labelledby="rbd-lift-instruction-0"
+                                                                        data-rbd-drag-handle-context-id="0"
                                                                         data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                                        data-rbd-draggable-context-id="6"
+                                                                        data-rbd-draggable-context-id="0"
                                                                         data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                                         data-test-subj="providerContainer"
                                                                         draggable={false}
@@ -3156,11 +3156,11 @@ tr:hover .c3:focus::before {
                                                                         tabIndex={0}
                                                                       >
                                                                         <div
-                                                                          aria-labelledby="rbd-lift-instruction-6"
+                                                                          aria-labelledby="rbd-lift-instruction-0"
                                                                           className="c3"
-                                                                          data-rbd-drag-handle-context-id="6"
+                                                                          data-rbd-drag-handle-context-id="0"
                                                                           data-rbd-drag-handle-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
-                                                                          data-rbd-draggable-context-id="6"
+                                                                          data-rbd-draggable-context-id="0"
                                                                           data-rbd-draggable-id="draggableId.content.draggable-zeek-element-draggable-wrapper-zeek-signature-draggable-zeek-element-test-19-zeek_files_md5-f7653f1951693021daa9e6be61226e32"
                                                                           data-test-subj="providerContainer"
                                                                           draggable={false}
