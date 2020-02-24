@@ -12,29 +12,39 @@ import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
 
 export async function searchConfigurations({
-  serviceName,
-  environment,
+  service,
   setup
 }: {
-  serviceName: string;
-  environment?: string;
+  service: AgentConfiguration['service'];
   setup: Setup;
 }) {
   const { internalClient, indices } = setup;
-  const environmentFilter = environment
+
+  // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring).
+  // Additionally a boost has been added to service.name to ensure it scores higher.
+  // If there is tie between a config with a matching service.name and a config with a matching environment, the config that matches service.name wins
+  const serviceNameFilter = service.name
     ? [
         {
           constant_score: {
-            filter: { term: { [SERVICE_ENVIRONMENT]: { value: environment } } },
+            filter: { term: { [SERVICE_NAME]: service.name } },
+            boost: 2
+          }
+        }
+      ]
+    : [];
+
+  const environmentFilter = service.environment
+    ? [
+        {
+          constant_score: {
+            filter: { term: { [SERVICE_ENVIRONMENT]: service.environment } },
             boost: 1
           }
         }
       ]
     : [];
 
-  // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring)
-  // Additionally a boost has been added to service.name to ensure it scores higher
-  // if there is tie between a config with a matching service.name and a config with a matching environment
   const params = {
     index: indices.apmAgentConfigurationIndex,
     body: {
@@ -42,12 +52,7 @@ export async function searchConfigurations({
         bool: {
           minimum_should_match: 2,
           should: [
-            {
-              constant_score: {
-                filter: { term: { [SERVICE_NAME]: { value: serviceName } } },
-                boost: 2
-              }
-            },
+            ...serviceNameFilter,
             ...environmentFilter,
             { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
             { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }

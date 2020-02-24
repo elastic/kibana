@@ -878,8 +878,6 @@
     "kbn.advancedSettings.histogram.maxBarsTitle": "最大条形数",
     "kbn.advancedSettings.historyLimitText": "在具有历史记录（例如查询输入）的字段中，显示此数目的最近值",
     "kbn.advancedSettings.historyLimitTitle": "历史记录限制",
-    "kbn.advancedSettings.indexPattern.recentMatchingText": "对于名称中包含时间戳的索引模式，寻找此数目的最近匹配模式，以从其中查询字段映射",
-    "kbn.advancedSettings.indexPattern.recentMatchingTitle": "最近匹配模式",
     "kbn.advancedSettings.indexPatternPlaceholderText": "在“管理 > 索引模式 > 创建索引模式”中“索引模式名称”的占位符。",
     "kbn.advancedSettings.indexPatternPlaceholderTitle": "索引模式占位符",
     "kbn.advancedSettings.maxBucketsText": "单个数据源可以返回的最大存储桶数目",
