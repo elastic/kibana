@@ -17,19 +17,46 @@
  * under the License.
  */
 
+import React from 'react';
+import { EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { ActionDefinition } from '../../actions';
+import { CollectConfigProps } from '../../util';
+import { reactToUiComponent } from '../../../../kibana_react/public';
+
+export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
 
 interface Config {
   url: string;
   openInNewTab: boolean;
 }
 
-export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
+const CollectConfig: React.FC<CollectConfigProps<Config, object>> = ({ config }) => {
+  return (
+    <EuiForm>
+      <EuiFormRow label="Enter target URL">
+        <EuiFieldText placeholder="Enter URL" name="url" value={config.url} onChange={() => {}} />
+      </EuiFormRow>
+      <EuiFormRow hasChildLabel={false}>
+        <EuiSwitch
+          name="switch"
+          label="Open in new tab?"
+          checked={config.openInNewTab}
+          onChange={() => {}}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  );
+};
 
 export const createSampleGoToUrlAction = (): ActionDefinition<object, void, Config> => {
   return {
     type: SAMPLE_GO_TO_URL_ACTION,
     id: SAMPLE_GO_TO_URL_ACTION,
     execute() {},
+    defaultConfig: {
+      url: '',
+      openInNewTab: false,
+    },
+    CollectConfig: reactToUiComponent(CollectConfig),
   };
 };

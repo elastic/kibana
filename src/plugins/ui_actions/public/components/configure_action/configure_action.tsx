@@ -33,9 +33,11 @@ export const ConfigureAction: React.FC<ConfigureActionProps> = ({ action }) => {
 
   return (
     <div>
-      <div>
-        ID: <code>{action.id}</code>
-      </div>
+      <action.ReactCollectConfig
+        config={action.state.get().config}
+        context={{} as any}
+        onConfig={() => {}}
+      />
     </div>
   );
 };

@@ -24,7 +24,11 @@ import { createSampleGoToUrlAction } from '../../tests';
 import { ActionInternal } from '../../actions';
 
 const action = new ActionInternal(createSampleGoToUrlAction());
+const actionMissingCollectConfig = new ActionInternal({
+  ...createSampleGoToUrlAction(),
+  CollectConfig: undefined,
+});
 
-storiesOf('components/ConfigureAction', module).add('default', () => (
-  <ConfigureAction action={action} />
-));
+storiesOf('components/ConfigureAction', module)
+  .add('default', () => <ConfigureAction action={action} />)
+  .add('missing CollectConfig', () => <ConfigureAction action={actionMissingCollectConfig} />);

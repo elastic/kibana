@@ -37,7 +37,7 @@ export interface Configurable<Config, Context = void> {
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<Context, Config> {
+export interface CollectConfigProps<Config, Context = void> {
   /**
    * Context represents environment where this component is being rendered.
    */

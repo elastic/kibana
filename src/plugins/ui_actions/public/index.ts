@@ -34,6 +34,7 @@ export {
   ActionDefinition as UiActionsActionDefinition,
   ActionInternal as UiActionsActionInternal,
 } from './actions';
+export { CollectConfigProps as UiActionsCollectConfigProps } from './util';
 export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping } from './types';
