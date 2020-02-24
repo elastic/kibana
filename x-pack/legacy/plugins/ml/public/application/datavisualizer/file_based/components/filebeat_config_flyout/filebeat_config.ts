@@ -11,7 +11,7 @@ export function createFilebeatConfig(
   ingestPipelineId: string,
   username: string | null
 ) {
-  const txt = [
+  return [
     'filebeat.inputs:',
     `- type: ${index}`,
     '  paths:',
@@ -24,10 +24,9 @@ export function createFilebeatConfig(
     'output.elasticsearch:',
     ...getHosts(results),
     ...getUserDetails(username),
-    `  index: ${index}`,
-    `  pipeline: ${ingestPipelineId}`,
-  ];
-  return txt.join('\n');
+    `  index: "${index}"`,
+    `  pipeline: "${ingestPipelineId}"`,
+  ].join('\n');
 }
 
 function getEncoding(results: any) {
@@ -56,12 +55,12 @@ function getProcessors(results: any) {
 }
 
 function getHosts(results: any) {
-  return ['  hosts:["test test"]'];
+  return ['  hosts:["<es_url>"]'];
 }
 
 function getUserDetails(username: string | null) {
   if (username !== null) {
-    return [`  username: '${username}'`, '  password: <password>'];
+    return [`  username: "${username}"`, '  password: "<password>"'];
   } else {
     return [];
   }

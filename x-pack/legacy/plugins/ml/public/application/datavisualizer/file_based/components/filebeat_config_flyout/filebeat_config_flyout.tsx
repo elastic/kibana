@@ -21,12 +21,13 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiTextArea,
+  EuiCodeBlock,
+  EuiCode,
+  EuiCopy,
 } from '@elastic/eui';
 import { createFilebeatConfig } from './filebeat_config';
 import { useMlKibana } from '../../../../contexts/kibana';
 
-const EDITOR_HEIGHT = '800px';
 export enum EDITOR_MODE {
   HIDDEN,
   READONLY,
@@ -54,7 +55,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
 
   useEffect(() => {
     security.authc.getCurrentUser().then(user => {
-      setUsername(user.username);
+      setUsername(user.username === undefined ? null : user.username);
     });
   }, []);
 
@@ -63,13 +64,11 @@ export const FilebeatConfigFlyout: FC<Props> = ({
     setFileBeatConfig(config);
   }, [username]);
 
-  function onCopyToClipboard() {}
-
   return (
     <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
       <EuiFlyoutBody>
         <EuiFlexGroup>
-          <Contents value={fileBeatConfig} />
+          <Contents value={fileBeatConfig} username={username} index={index} />
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -83,12 +82,16 @@ export const FilebeatConfigFlyout: FC<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onCopyToClipboard} fill>
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.fileBeatConfigFlyout.copyButton"
-                defaultMessage="Copy to clipboard"
-              />
-            </EuiButton>
+            <EuiCopy textToCopy={fileBeatConfig}>
+              {copy => (
+                <EuiButton onClick={copy}>
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.fileBeatConfigFlyout.copyButton"
+                    defaultMessage="Copy to clipboard"
+                  />
+                </EuiButton>
+              )}
+            </EuiCopy>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
@@ -98,19 +101,61 @@ export const FilebeatConfigFlyout: FC<Props> = ({
 
 const Contents: FC<{
   value: string;
-}> = ({ value }) => {
+  index: string;
+  username: string | null;
+}> = ({ value, index, username }) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
         <h5>
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfig"
+            id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigTitle"
             defaultMessage="Filebeat config"
           />
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiTextArea fullWidth={true} aria-label="aria label" value={value} onChange={() => {}} />
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigTopText1"
+          defaultMessage="Additional data can be uploaded to the {index} index using Filebeat."
+          values={{ index: <EuiCode>{index}</EuiCode> }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigTopText2"
+          defaultMessage="Modify {filebeatYml} to set the connection information:"
+          values={{ filebeatYml: <EuiCode>filebeat.yml</EuiCode> }}
+        />
+      </p>
+
+      <EuiSpacer size="s" />
+
+      <EuiCodeBlock language="bash">{value}</EuiCodeBlock>
+
+      <EuiSpacer size="s" />
+      <p>
+        {username === null ? (
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigBottomTextNoUsername"
+            defaultMessage="Where {esUrl} is the URL of Elasticsearch."
+            values={{
+              esUrl: <EuiCode>{'<es_url>'}</EuiCode>,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.resultsLinks.fileBeatConfigBottomText"
+            defaultMessage="Where {password} is the password of the {user} user, {esUrl} is the URL of Elasticsearch."
+            values={{
+              user: <EuiCode>{username}</EuiCode>,
+              password: <EuiCode>{'<password>'}</EuiCode>,
+              esUrl: <EuiCode>{'<es_url>'}</EuiCode>,
+            }}
+          />
+        )}
+      </p>
     </EuiFlexItem>
   );
 };
