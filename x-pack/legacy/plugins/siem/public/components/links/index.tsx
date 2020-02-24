@@ -55,10 +55,7 @@ export const ExternalLink = React.memo<{
   }) => {
     const lastVisibleItemIndex = overflowIndexStart - 1;
     const lastItemIndex = allItemsLimit - 1;
-    const lastIndexToShow = useMemo(
-      () => Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex)),
-      [overflowIndexStart]
-    );
+    const lastIndexToShow = Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex));
     return url && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
@@ -199,6 +196,11 @@ export const Comma = styled('span')`
 
 Comma.displayName = 'Comma';
 
+const defaultNameMapping: Record<DefaultReputationLink, string> = {
+  [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
+  [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
+};
+
 const ReputationLinkComponent: React.FC<{
   overflowIndexStart?: number;
   allItemsLimit?: number;
@@ -212,14 +214,6 @@ const ReputationLinkComponent: React.FC<{
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
     IP_REPUTATION_LINKS_SETTING
-  );
-
-  const defaultNameMapping: Record<DefaultReputationLink, string> = useMemo(
-    () => ({
-      [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
-      [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
-    }),
-    []
   );
 
   const ipReputationLinks: ReputationLinkSetting[] = useMemo(
