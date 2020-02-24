@@ -15,6 +15,13 @@ export interface PaginationParams {
   eventID?: string;
 }
 
+export interface PaginatedResults {
+  totals: Record<string, number>;
+  results: ResolverEvent[];
+  // content holder for any other extra aggregation counts
+  extras?: Record<string, Record<string, number>>;
+}
+
 interface PaginationCursor {
   timestamp: Date;
   eventID: string;
@@ -85,9 +92,7 @@ export function buildPaginationCursor(total: number, results: ResolverEvent[]): 
   return null;
 }
 
-export function paginatedResults(
-  response: SearchResponse<ResolverEvent>
-): { totals: Record<string, number>; results: ResolverEvent[] } {
+export function paginatedResults(response: SearchResponse<ResolverEvent>): PaginatedResults {
   if (response.hits.hits.length === 0) {
     return { totals: {}, results: [] };
   }

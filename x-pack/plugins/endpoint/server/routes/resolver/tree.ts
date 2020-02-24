@@ -76,8 +76,10 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
         fetcher.events(events, afterEvent)
       );
 
+      const enrichedTree = await fetcher.stats(tree);
+
       return res.ok({
-        body: tree.render(),
+        body: enrichedTree.render(),
       });
     } catch (err) {
       log.warn(err);

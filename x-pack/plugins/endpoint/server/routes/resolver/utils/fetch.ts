@@ -11,6 +11,7 @@ import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
+import { StatsQuery } from '../queries/stats';
 
 export class Fetcher {
   constructor(
@@ -34,6 +35,11 @@ export class Fetcher {
   public async events(limit: number, after?: string): Promise<Tree> {
     const tree = new Tree(this.id);
     await this.doEvents(tree, limit, after);
+    return tree;
+  }
+
+  public async stats(tree: Tree): Promise<Tree> {
+    await this.doStats(tree);
     return tree;
   }
 
@@ -92,5 +98,16 @@ export class Fetcher {
     tree.markLeafNode(...childIDs);
 
     await this.doChildren(tree, childIDs, limit * limit, levels - 1);
+  }
+
+  private async doStats(tree: Tree) {
+    const statsQuery = new StatsQuery(this.endpointID);
+    const ids = tree.ids();
+    const { extras } = await statsQuery.search(this.client, ...ids);
+    const alerts = extras?.alerts || {};
+    const events = extras?.events || {};
+    ids.forEach(id => {
+      tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
+    });
   }
 }

@@ -9,6 +9,11 @@ import { ResolverEvent } from '../../../../common/types';
 import { extractEntityID, extractParentEntityID } from './normalize';
 import { buildPaginationCursor } from './pagination';
 
+interface NodeStats {
+  totalEvents: number;
+  totalAlerts: number;
+}
+
 interface Node {
   children: Node[];
   events: ResolverEvent[];
@@ -19,6 +24,7 @@ interface Node {
     nextEvent?: string | null;
     nextAncestor?: string | null;
   };
+  stats?: NodeStats;
 }
 
 type ExtractFunction = (event: ResolverEvent) => string;
@@ -71,6 +77,10 @@ export class Tree {
 
   public render() {
     return this.root;
+  }
+
+  public ids() {
+    return Object.keys(this.cache);
   }
 
   public static async merge(
@@ -131,6 +141,11 @@ export class Tree {
       }
       this.cache[ancestorID].lifecycle.push(event);
     });
+  }
+
+  public addStats(id: string, stats: NodeStats) {
+    this.ensureCache(id);
+    this.cache[id].stats = stats;
   }
 
   public setNextAncestor(next: string | null) {

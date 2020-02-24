@@ -42,16 +42,7 @@ export class LifecycleQuery extends ResolverQuery {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': entityIDs },
               },
               {
                 term: { 'event.kind': 'event' },

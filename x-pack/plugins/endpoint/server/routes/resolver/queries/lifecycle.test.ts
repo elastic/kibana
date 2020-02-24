@@ -42,16 +42,7 @@ describe('lifecycle query', () => {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': ['baz'] },
-                    },
-                    {
-                      terms: { 'process.entity_id': ['baz'] },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': ['baz'] },
               },
               {
                 term: { 'event.kind': 'event' },
@@ -62,7 +53,6 @@ describe('lifecycle query', () => {
             ],
           },
         },
-        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: EndpointAppConstants.EVENT_INDEX_NAME,

@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import { EndpointAppConstants } from '../../../../common/types';
-import { paginate, paginatedResults, PaginationParams } from '../utils/pagination';
+import { EndpointAppConstants, ResolverEvent } from '../../../../common/types';
+import {
+  paginate,
+  paginatedResults,
+  PaginationParams,
+  PaginatedResults,
+} from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export abstract class ResolverQuery {
@@ -33,7 +39,11 @@ export abstract class ResolverQuery {
   }
 
   async search(client: IScopedClusterClient, ...ids: string[]) {
-    return paginatedResults(await client.callAsCurrentUser('search', this.build(...ids)));
+    return this.postSearch(await client.callAsCurrentUser('search', this.build(...ids)));
+  }
+
+  protected postSearch(response: SearchResponse<ResolverEvent>): PaginatedResults {
+    return paginatedResults(response);
   }
 
   protected abstract legacyQuery(
