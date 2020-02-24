@@ -6,9 +6,11 @@
 
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
+import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -96,8 +98,10 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
+    currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
@@ -263,6 +267,8 @@ export interface ChromeNavLink {
     readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
+    // @deprecated
+    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
     readonly icon?: string;
@@ -428,11 +434,13 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
     };
     observability: {
         label: string;
+        euiIconType: string;
         order: number;
     };
     security: {
         label: string;
         order: number;
+        euiIconType: string;
     };
     management: {
         label: string;
@@ -577,26 +585,19 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
-// @public (undocumented)
-export interface HttpErrorRequest {
-    // (undocumented)
-    error: Error;
-    // (undocumented)
-    request: Request;
-}
-
-// @public (undocumented)
-export interface HttpErrorResponse extends IHttpResponse {
-    // (undocumented)
-    error: Error | IHttpFetchError;
-}
-
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
+    asSystemRequest?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
+}
+
+// @public
+export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
+    // (undocumented)
+    path: string;
 }
 
 // @public (undocumented)
@@ -610,12 +611,18 @@ export interface HttpHandler {
     // (undocumented)
     <TResponseBody = any>(path: string, options: HttpFetchOptions & {
         asResponse: true;
-    }): Promise<IHttpResponse<TResponseBody>>;
+    }): Promise<HttpResponse<TResponseBody>>;
+    // (undocumented)
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+        asResponse: true;
+    }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
     <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    // (undocumented)
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
-// @public (undocumented)
+// @public
 export interface HttpHeadersInit {
     // (undocumented)
     [name: string]: any;
@@ -623,10 +630,26 @@ export interface HttpHeadersInit {
 
 // @public
 export interface HttpInterceptor {
-    request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+}
+
+// @public (undocumented)
+export interface HttpInterceptorRequestError {
+    // (undocumented)
+    error: Error;
+    // (undocumented)
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>;
+}
+
+// @public (undocumented)
+export interface HttpInterceptorResponseError extends HttpResponse {
+    // (undocumented)
+    error: Error | IHttpFetchError;
+    // (undocumented)
+    request: Readonly<Request>;
 }
 
 // @public
@@ -645,6 +668,14 @@ export interface HttpRequestInit {
     referrerPolicy?: ReferrerPolicy;
     signal?: AbortSignal | null;
     window?: null;
+}
+
+// @public (undocumented)
+export interface HttpResponse<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
+    readonly request: Readonly<Request>;
+    readonly response?: Readonly<Response>;
 }
 
 // @public (undocumented)
@@ -687,6 +718,8 @@ export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
     remove: (url: string) => string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
+    readonly serverBasePath: string;
 }
 
 // @public
@@ -702,6 +735,8 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface IHttpFetchError extends Error {
     // (undocumented)
     readonly body?: any;
+    // (undocumented)
+    readonly name: string;
     // @deprecated (undocumented)
     readonly req: Request;
     // (undocumented)
@@ -716,13 +751,6 @@ export interface IHttpFetchError extends Error {
 export interface IHttpInterceptController {
     halt(): void;
     halted: boolean;
-}
-
-// @public (undocumented)
-export interface IHttpResponse<TResponseBody = any> {
-    readonly body?: TResponseBody;
-    readonly request: Readonly<Request>;
-    readonly response?: Readonly<Response>;
 }
 
 // @public
@@ -904,7 +932,7 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public (undocumented)
-export interface SavedObject<T extends SavedObjectAttributes = any> {
+export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
@@ -947,13 +975,13 @@ export interface SavedObjectsBaseOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBatchResponse<T = unknown> {
     // (undocumented)
     savedObjects: Array<SimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -966,7 +994,7 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -989,17 +1017,17 @@ export interface SavedObjectsBulkUpdateOptions {
 export class SavedObjectsClient {
     // @internal
     constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkGet: (objects?: {
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+    create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
-    get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    find: <T = unknown>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
@@ -1041,7 +1069,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
 }
 
 // @public
-export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1148,8 +1176,8 @@ export interface SavedObjectsUpdateOptions {
 }
 
 // @public
-export class SimpleSavedObject<T extends SavedObjectAttributes> {
-    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+export class SimpleSavedObject<T = unknown> {
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)

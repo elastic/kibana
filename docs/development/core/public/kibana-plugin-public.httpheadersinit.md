@@ -4,6 +4,7 @@
 
 ## HttpHeadersInit interface
 
+Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause [HttpHandler](./kibana-plugin-public.httphandler.md) to throw an error.
 
 <b>Signature:</b>
 

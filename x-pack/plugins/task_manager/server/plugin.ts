@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { once } from 'lodash';
 import { TaskDictionary, TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
-import { createTaskManager, LegacyDeps } from './create_task_manager';
+import { createTaskManager } from './create_task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 
-export type PluginLegacyDependencies = Pick<LegacyDeps, 'savedObjectSchemas'>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginLegacyDependencies {}
 export type TaskManagerSetupContract = {
-  config$: Observable<TaskManagerConfig>;
   registerLegacyAPI: (legacyDependencies: PluginLegacyDependencies) => Promise<TaskManager>;
 } & Pick<TaskManager, 'addMiddleware' | 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
   TaskManager,
-  'fetch' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
+  'fetch' | 'get' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
 >;
 
 export class TaskManagerPlugin
@@ -40,7 +40,6 @@ export class TaskManagerPlugin
     const config$ = this.initContext.config.create<TaskManagerConfig>();
     const elasticsearch = core.elasticsearch.adminClient;
     return {
-      config$,
       registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
         config$.subscribe(async config => {
           const [{ savedObjects }] = await core.getStartServices();
@@ -51,7 +50,7 @@ export class TaskManagerPlugin
               config,
               elasticsearch,
               savedObjectsRepository,
-              ...__LEGACY,
+              savedObjectsSerializer: savedObjects.createSerializer(),
             })
           );
           this.legacyTaskManager$.complete();
@@ -70,6 +69,7 @@ export class TaskManagerPlugin
   public start(): TaskManagerStartContract {
     return {
       fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
+      get: (...args) => this.taskManager.then(tm => tm.get(...args)),
       remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),
       schedule: (...args) => this.taskManager.then(tm => tm.schedule(...args)),
       runNow: (...args) => this.taskManager.then(tm => tm.runNow(...args)),

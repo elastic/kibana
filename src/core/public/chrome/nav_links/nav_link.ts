@@ -79,6 +79,17 @@ export interface ChromeNavLink {
   readonly subUrlBase?: string;
 
   /**
+   * A flag that tells legacy chrome to ignore the link when
+   * tracking sub-urls
+   *
+   * @internalRemarks
+   * This should be removed once legacy apps are gone.
+   *
+   * @deprecated
+   */
+  readonly disableSubUrlTracking?: boolean;
+
+  /**
    * Whether or not the subUrl feature should be enabled.
    *
    * @internalRemarks

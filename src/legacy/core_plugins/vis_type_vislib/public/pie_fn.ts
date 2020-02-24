@@ -18,17 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { KbnVislibVisTypesDependencies } from './plugin';
-
-const name = 'kibana_pie';
-
-type Context = KibanaDatatable;
+// @ts-ignore
+import { vislibSlicesResponseHandler } from './vislib/response_handler';
 
 interface Arguments {
   visConfig: string;
@@ -40,19 +36,15 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
-export const createPieVisFn = (deps: KbnVislibVisTypesDependencies) => (): ExpressionFunction<
-  typeof name,
-  Context,
+export const createPieVisFn = (): ExpressionFunctionDefinition<
+  'kibana_pie',
+  KibanaDatatable,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
   name: 'kibana_pie',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),
@@ -63,11 +55,9 @@ export const createPieVisFn = (deps: KbnVislibVisTypesDependencies) => (): Expre
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(input, args) {
     const visConfig = JSON.parse(args.visConfig);
-
-    const responseHandler = deps.vislibSlicesResponseHandlerProvider().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const convertedData = vislibSlicesResponseHandler(input, visConfig.dimensions);
 
     return {
       type: 'render',

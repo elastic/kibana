@@ -15,15 +15,6 @@ import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import { plugin } from './np_ready';
-
-import {
-  setTelemetryOptInService,
-  setTelemetryEnabled,
-  setHttpClient,
-  TelemetryOptInProvider,
-  // @ts-ignore
-} from './np_ready/application/lib/telemetry';
-
 import { BASE_PATH } from '../common/constants';
 
 const licenseManagementUiEnabled = chrome.getInjected('licenseManagementUiEnabled');
@@ -51,15 +42,6 @@ if (licenseManagementUiEnabled) {
     });
   };
 
-  const initializeTelemetry = ($injector: any) => {
-    const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-    const Private = $injector.get('Private');
-    const telemetryOptInProvider = Private(TelemetryOptInProvider);
-    setTelemetryOptInService(telemetryOptInProvider);
-    setTelemetryEnabled(telemetryEnabled);
-    setHttpClient($injector.get('$http'));
-  };
-
   const template = `<kbn-management-app section="elasticsearch/license_management">
     <div id="licenseReactRoot"></div>
   </kbn-management-app>`;
@@ -69,8 +51,6 @@ if (licenseManagementUiEnabled) {
     controllerAs: 'licenseManagement',
     controller: class LicenseManagementController {
       constructor($injector: any, $rootScope: any, $scope: any, $route: any) {
-        initializeTelemetry($injector);
-
         $scope.$$postDigest(() => {
           const element = document.getElementById('licenseReactRoot')!;
 
@@ -94,6 +74,7 @@ if (licenseManagementUiEnabled) {
               },
             },
             {
+              telemetry: (npSetup.plugins as any).telemetry,
               __LEGACY: { xpackInfo, refreshXpack, MANAGEMENT_BREADCRUMB },
             }
           );

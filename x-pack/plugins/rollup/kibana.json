@@ -1,0 +1,6 @@
+{
+  "id": "rollup",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true
+}

@@ -26,7 +26,7 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from '../migrations/types';
-import { Query, esFilters } from '../../../../../../plugins/data/public';
+import { Query, Filter } from '../../../../../../plugins/data/public';
 
 export type NavAction = (anchorElement?: any) => void;
 
@@ -103,7 +103,7 @@ export interface DashboardAppState {
     useMargins: boolean;
   };
   query: Query | string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   viewMode: ViewMode;
   savedQuery?: string;
 }
@@ -137,15 +137,3 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
-
-export type ConfirmModalFn = (
-  message: string,
-  confirmOptions: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    confirmButtonText: string;
-    cancelButtonText: string;
-    defaultFocusedButton: string;
-    title: string;
-  }
-) => void;

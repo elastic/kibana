@@ -160,7 +160,7 @@ export class Worker extends events.EventEmitter {
     };
 
     return this._client
-      .callWithInternalUser('update', {
+      .callAsInternalUser('update', {
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -199,7 +199,7 @@ export class Worker extends events.EventEmitter {
     });
 
     return this._client
-      .callWithInternalUser('update', {
+      .callAsInternalUser('update', {
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -286,7 +286,7 @@ export class Worker extends events.EventEmitter {
         };
 
         return this._client
-          .callWithInternalUser('update', {
+          .callAsInternalUser('update', {
             index: job._index,
             id: job._id,
             if_seq_no: job._seq_no,
@@ -431,7 +431,7 @@ export class Worker extends events.EventEmitter {
     };
 
     return this._client
-      .callWithInternalUser('search', {
+      .callAsInternalUser('search', {
         index: `${this.queue.index}-*`,
         body: query,
       })

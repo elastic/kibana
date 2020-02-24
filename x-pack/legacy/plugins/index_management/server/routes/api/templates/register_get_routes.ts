@@ -3,37 +3,62 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { schema } from '@kbn/config-schema';
 
 import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
 
-let callWithInternalUser: any;
+export function registerGetAllRoute({ router, license }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/templates'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
-const allHandler: RouterRouteHandler = async (_req, callWithRequest) => {
-  const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
+      const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
 
-  const indexTemplatesByName = await callWithRequest('indices.getTemplate');
-
-  return deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
-};
-
-const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { name } = req.params;
-  const managedTemplatePrefix = await getManagedTemplatePrefix(callWithInternalUser);
-  const indexTemplateByName = await callWithRequest('indices.getTemplate', { name });
-
-  if (indexTemplateByName[name]) {
-    return deserializeTemplate({ ...indexTemplateByName[name], name }, managedTemplatePrefix);
-  }
-};
-
-export function registerGetAllRoute(router: Router, server: any) {
-  callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
-  router.get('templates', allHandler);
+      return res.ok({ body: deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix) });
+    })
+  );
 }
 
-export function registerGetOneRoute(router: Router, server: any) {
-  callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
-  router.get('templates/{name}', oneHandler);
+const paramsSchema = schema.object({
+  name: schema.string(),
+});
+
+export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/templates/{name}'), validate: { params: paramsSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { name } = req.params as typeof paramsSchema.type;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+
+      try {
+        const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+        const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+
+        if (indexTemplateByName[name]) {
+          return res.ok({
+            body: deserializeTemplate(
+              { ...indexTemplateByName[name], name },
+              managedTemplatePrefix
+            ),
+          });
+        }
+
+        return res.notFound();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }

@@ -155,7 +155,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     }
     labelType="label"
   >
-    <InjectIntl(EventsTable)
+    <EventsTable
       canCreateCalendar={true}
       canDeleteCalendar={true}
       eventsList={Array []}

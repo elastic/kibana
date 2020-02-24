@@ -1,20 +1,20 @@
 {
   "description": "Identifies use of vssadmin.exe for shadow copy deletion on endpoints.  This commonly occurs in tandem with ransomware or other destructive attacks.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "Volume Shadow Copy Deletion via VssAdmin",
   "query": "  event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",
-  "risk_score": 75,
+  "risk_score": 73,
   "rule_id": "b5ea4bfe-a1b2-421f-9d47-22a75a6f2921",
   "severity": "high",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1490",
           "name": "Inhibit System Recovery",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

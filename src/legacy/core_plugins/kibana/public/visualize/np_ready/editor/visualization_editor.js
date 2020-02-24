@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export function initVisEditorDirective(app) {
-  app.directive('visualizationEditor', function($timeout, getAppState) {
+export function initVisEditorDirective(app, deps) {
+  app.directive('visualizationEditor', function($timeout) {
     return {
       restrict: 'E',
       scope: {
@@ -27,6 +27,7 @@ export function initVisEditorDirective(app) {
         timeRange: '=',
         filters: '=',
         query: '=',
+        appState: '=',
       },
       link: function($scope, element) {
         const Editor = $scope.savedObj.vis.type.editor;
@@ -34,11 +35,14 @@ export function initVisEditorDirective(app) {
 
         $scope.renderFunction = () => {
           editor.render({
+            core: deps.core,
+            data: deps.data,
+            embeddable: deps.embeddable,
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
-            appState: getAppState(),
+            appState: $scope.appState,
           });
         };
 

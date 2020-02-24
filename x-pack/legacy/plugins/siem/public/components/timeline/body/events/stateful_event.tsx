@@ -13,6 +13,7 @@ import { TimelineDetailsQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
 import {
@@ -26,7 +27,6 @@ import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
-import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
@@ -35,9 +35,10 @@ import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;
+  containerElementRef: HTMLDivElement;
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -55,7 +56,7 @@ interface Props {
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   timelineId: string;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
 
@@ -115,6 +116,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
   addNoteToEvent,
   browserFields,
+  containerElementRef,
   columnHeaders,
   columnRenderers,
   event,
@@ -201,6 +203,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     <VisibilitySensor
       partialVisibility={true}
       scrollCheck={true}
+      containment={containerElementRef}
       offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
@@ -279,7 +282,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.
           const height =
-            divElement.current != null
+            divElement.current != null && divElement.current.clientHeight
               ? `${divElement.current.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 

@@ -94,6 +94,41 @@ const fieldsWithData = [
   'relatedContent.url.raw',
 ];
 
+const metricBeatData = [
+  '@timestamp',
+  'agent.ephemeral_id',
+  'agent.hostname',
+  'agent.id',
+  'agent.type',
+  'agent.version',
+  'ecs.version',
+  'event.dataset',
+  'event.duration',
+  'event.module',
+  'host.architecture',
+  'host.hostname',
+  'host.id',
+  'host.name',
+  'host.os.build',
+  'host.os.family',
+  'host.os.kernel',
+  'host.os.name',
+  'host.os.platform',
+  'host.os.version',
+  'metricset.name',
+  'service.type',
+  'system.cpu.cores',
+  'system.cpu.idle.pct',
+  'system.cpu.iowait.pct',
+  'system.cpu.irq.pct',
+  'system.cpu.nice.pct',
+  'system.cpu.softirq.pct',
+  'system.cpu.steal.pct',
+  'system.cpu.system.pct',
+  'system.cpu.total.pct',
+  'system.cpu.user.pct',
+];
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -122,6 +157,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.indexPatternTitle).to.eql('logstash-*');
         expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
+      });
+
+      it('should succeed for thousands of fields', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/lens/existing_fields/${encodeURIComponent(
+              'metricbeat-*'
+            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}`
+          )
+          .set(COMMON_HEADERS)
+          .expect(200);
+
+        expect(body.indexPatternTitle).to.eql('metricbeat-*');
+        expect(body.existingFieldNames.sort()).to.eql(metricBeatData.sort());
       });
 
       it('should throw a 404 for a non-existent index', async () => {

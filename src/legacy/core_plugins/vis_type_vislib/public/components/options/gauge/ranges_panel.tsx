@@ -22,12 +22,12 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ColorSchemas } from '../../../legacy_imports';
 import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 import { ColorSchemaVislibParams } from '../../../types';
 import { Gauge } from '../../../gauge';
 import { SetColorRangeValue } from '../../common/color_ranges';
+import { ColorSchemas } from '../../../../../../../plugins/charts/public';
 
 function RangesPanel({
   setGaugeValue,

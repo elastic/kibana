@@ -77,7 +77,7 @@
   bottom: 0;
   z-index: $euiZLevel + 1000;
   background: inherit;
-  background-image: linear-gradient(0deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
+  background-color: $euiPageBackgroundColor;
   opacity: 0;
   overflow: auto;
   animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
@@ -85,20 +85,20 @@
   &::before {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     z-index: 1;
-    width: 400px;
-    height: 370px;
+    width: 310px;
+    height: 477px;
     content: url(lightOrDarkTheme('ui/assets/images/bg_top_branded.svg', 'ui/assets/images/bg_top_branded_dark.svg'));
   }
 
   &::after {
     position: fixed;
     bottom: 0;
-    left: 0;
+    right: 0;
     z-index: 1;
-    width: 1170px;
-    height: 880px;
+    width: 313px;
+    height: 461px;
     content: url(lightOrDarkTheme('ui/assets/images/bg_bottom_branded.svg', 'ui/assets/images/bg_bottom_branded_dark.svg'));
   }
 

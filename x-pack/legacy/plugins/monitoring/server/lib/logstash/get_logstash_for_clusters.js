@@ -60,7 +60,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
           logstash_uuids: {
             terms: {
               field: 'logstash_stats.logstash.uuid',
-              size: config.get('xpack.monitoring.max_bucket_size'),
+              size: config.get('monitoring.ui.max_bucket_size'),
             },
             aggs: {
               latest_report: {
@@ -119,7 +119,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
           logstash_versions: {
             terms: {
               field: 'logstash_stats.logstash.version',
-              size: config.get('xpack.monitoring.max_bucket_size'),
+              size: config.get('monitoring.ui.max_bucket_size'),
             },
           },
           pipelines_nested: {
@@ -135,7 +135,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
               queue_types: {
                 terms: {
                   field: 'logstash_stats.pipelines.queue.type',
-                  size: config.get('xpack.monitoring.max_bucket_size'),
+                  size: config.get('monitoring.ui.max_bucket_size'),
                 },
                 aggs: {
                   num_pipelines: {

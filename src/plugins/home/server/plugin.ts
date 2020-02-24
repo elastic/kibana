@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,

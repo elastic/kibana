@@ -12,7 +12,7 @@ import {
   RecursiveReadonly,
 } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
-import { Plugin, PluginSetupContract, PluginSetupDependencies } from './plugin';
+import { Plugin, SecurityPluginSetup, PluginSetupDependencies } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
@@ -24,7 +24,7 @@ export {
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
 } from './authentication';
-export { PluginSetupContract };
+export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
@@ -35,7 +35,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   ],
 };
 export const plugin: PluginInitializer<
-  RecursiveReadonly<PluginSetupContract>,
+  RecursiveReadonly<SecurityPluginSetup>,
   void,
   PluginSetupDependencies
 > = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);

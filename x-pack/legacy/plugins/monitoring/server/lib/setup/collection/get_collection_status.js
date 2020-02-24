@@ -242,7 +242,7 @@ async function hasNecessaryPermissions(req) {
  * Determines if we should ignore this bucket from this product.
  *
  * We need this logic because APM and Beats are separate products, but their
- * monitoring data appears in the same index (.monitoring-beats-*,monitoring-beats-*) and the single
+ * monitoring data appears in the same index (.monitoring-beats-*) and the single
  * way to determine the difference between two documents in that index
  * is `beats_stats.beat.type` which we are performing a terms agg in the above query.
  * If that value is `apm-server` and we're attempting to calculating status for beats
@@ -325,7 +325,7 @@ async function getLiveElasticsearchCollectionEnabled(req) {
  * }
 
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
- * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-*,monitoring-* indices)
+ * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
  * @param {*} nodeUuid Optional and will be used to filter down the query if used
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
@@ -348,7 +348,6 @@ export const getCollectionStatus = async (
       },
     };
   }
-
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 

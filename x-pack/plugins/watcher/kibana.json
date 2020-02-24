@@ -5,7 +5,7 @@
     "home",
     "licensing",
     "management",
-    "eui_utils",
+    "charts",
     "data"
   ],
   "server": true,

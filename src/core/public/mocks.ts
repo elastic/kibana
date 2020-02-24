@@ -26,7 +26,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
@@ -40,6 +40,7 @@ export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
   const mock = {
@@ -70,7 +71,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    savedObjects: savedObjectsMock.createStartContract(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },

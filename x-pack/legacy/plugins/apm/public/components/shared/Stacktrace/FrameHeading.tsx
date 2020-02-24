@@ -7,7 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -34,7 +34,7 @@ const FrameHeading: React.FC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber = stackframe.line.number;
+  const lineNumber = stackframe.line?.number ?? 0;
 
   const name =
     'filename' in stackframe ? stackframe.filename : stackframe.classname;
@@ -46,7 +46,7 @@ const FrameHeading: React.FC<Props> = ({ stackframe, isLibraryFrame }) => {
       {lineNumber > 0 && (
         <Fragment>
           {' at '}
-          <FileDetail>line {stackframe.line.number}</FileDetail>
+          <FileDetail>line {lineNumber}</FileDetail>
         </Fragment>
       )}
     </FileDetails>

@@ -12,11 +12,11 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
-import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
 import { explorerService } from '../explorer_dashboard_service';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
+  getSelectionJobIds,
   getSelectionTimeRange,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
@@ -60,8 +60,6 @@ const memoizedLoadOverallData = memoize(loadOverallData);
 const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 const memoizedLoadViewBySwimlane = memoize(loadViewBySwimlane);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
-
-const dateFormatTz = getDateFormatTz();
 
 export interface LoadExplorerDataConfig {
   bounds: TimeRangeBounds;
@@ -114,17 +112,14 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
   } = config;
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
-
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
-
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const timerange = getSelectionTimeRange(
     selectedCells,
     swimlaneBucketInterval.asSeconds(),
     bounds
   );
+
+  const dateFormatTz = getDateFormatTz();
 
   // First get the data where we have all necessary args at hand using forkJoin:
   // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues

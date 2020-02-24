@@ -26,6 +26,11 @@ export interface AuthenticatedUser extends User {
    * The name and type of the Realm where the user information were retrieved from.
    */
   lookup_realm: UserRealm;
+
+  /**
+   * Name of the Kibana authentication provider that used to authenticate user.
+   */
+  authentication_provider: string;
 }
 
 export function canUserChangePassword(user: AuthenticatedUser) {

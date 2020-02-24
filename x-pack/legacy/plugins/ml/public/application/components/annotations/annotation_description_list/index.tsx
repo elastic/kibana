@@ -13,27 +13,24 @@ import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Annotation } from '../../../../../common/types/annotations';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {
   annotation: Annotation;
-  intl: InjectedIntl;
 }
 
-export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props) => {
+export const AnnotationDescriptionList = ({ annotation }: Props) => {
   const listItems = [
     {
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle',
+      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle', {
         defaultMessage: 'Job ID',
       }),
       description: annotation.job_id,
     },
     {
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle',
+      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle', {
         defaultMessage: 'Start',
       }),
       description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
@@ -42,8 +39,7 @@ export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props
 
   if (annotation.end_timestamp !== undefined) {
     listItems.push({
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle',
+      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle', {
         defaultMessage: 'End',
       }),
       description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
@@ -52,31 +48,36 @@ export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props
 
   if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
     listItems.push({
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle',
+      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle', {
         defaultMessage: 'Created',
       }),
       description: formatHumanReadableDateTimeSeconds(annotation.create_time),
     });
     listItems.push({
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
-        defaultMessage: 'Created by',
-      }),
+      title: i18n.translate(
+        'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
+        {
+          defaultMessage: 'Created by',
+        }
+      ),
       description: annotation.create_username,
     });
     listItems.push({
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
-        defaultMessage: 'Last modified',
-      }),
+      title: i18n.translate(
+        'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
+        {
+          defaultMessage: 'Last modified',
+        }
+      ),
       description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
     });
     listItems.push({
-      title: intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
-        defaultMessage: 'Modified by',
-      }),
+      title: i18n.translate(
+        'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
+        {
+          defaultMessage: 'Modified by',
+        }
+      ),
       description: annotation.modified_username,
     });
   }
@@ -88,4 +89,4 @@ export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props
       listItems={listItems}
     />
   );
-});
+};

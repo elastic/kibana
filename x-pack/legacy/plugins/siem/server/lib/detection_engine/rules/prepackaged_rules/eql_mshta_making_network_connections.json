@@ -1,23 +1,23 @@
 {
-  "description": "Identifies Mshta.exe making outbound network connections. This may indicate adversarial activity as Mshta is often leveraged by adversaries to execute malicious scripts and evade detection.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies mshta.exe making a network connection. This may indicate adversarial activity as mshta.exe is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "Mshta Making Network Connections",
-  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\" and not process.name:\"mshta.exe\"",
+  "max_signals": 100,
+  "name": "Network Connection via Mshta",
+  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\"",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/05/cyber-espionage-apt32.html"
   ],
-  "risk_score": 50,
+  "risk_score": 47,
   "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
   "severity": "medium",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -25,7 +25,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1170",
           "name": "Mshta",
@@ -34,7 +34,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

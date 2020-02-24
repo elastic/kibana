@@ -20,7 +20,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      kibanaServer: kibanaAPITestsConfig.get('services.kibanaServer'),
       randomness: kibanaAPITestsConfig.get('services.randomness'),
       legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),

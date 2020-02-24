@@ -30,6 +30,9 @@ exports.externals = {
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.ElasticEuiLightTheme',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.ElasticEuiDarkTheme',
+  '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
+  '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
+  '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -38,4 +41,7 @@ exports.externals = {
   'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
+  '@kbn/ui-shared-deps/monaco': '__kbnSharedDeps__.Monaco',
+  // this is how plugins/consumers from npm load monaco
+  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBare',
 };

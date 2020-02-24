@@ -18,7 +18,6 @@
  */
 
 import { wrapAuthConfig } from '../../wrap_auth_config';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../../../utils/artifact_type';
 
 const matchSnapshot = /-SNAPSHOT$/;
 
@@ -36,8 +35,6 @@ export function registerStatusApi(kbnServer, server, config) {
         return {
           name: config.get('server.name'),
           uuid: config.get('server.uuid'),
-          // flag to help tests know that kibana is running from source, not included in distributable response
-          ...(IS_KIBANA_DISTRIBUTABLE ? {} : { running_from_source: true }),
           version: {
             number: config.get('pkg.version').replace(matchSnapshot, ''),
             build_hash: config.get('pkg.buildSha'),

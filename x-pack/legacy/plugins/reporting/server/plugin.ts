@@ -4,104 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-import { IUiSettingsClient } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
-// @ts-ignore
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
-import { PLUGIN_ID } from '../common/constants';
-import { ReportingPluginSpecOptions } from '../types.d';
-import { registerRoutes } from './routes';
-import { LevelLogger, checkLicenseFactory, getExportTypesRegistry, runValidations } from './lib';
-import { createBrowserDriverFactory } from './browsers';
-import { registerReportingUsageCollector } from './usage';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { logConfiguration } from '../log_configuration';
+import { createBrowserDriverFactory } from './browsers';
+import { ReportingCore } from './core';
+import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
+import { setFieldFormats } from './services';
+import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
+import { registerReportingUsageCollector } from './usage';
+// @ts-ignore no module definition
+import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 
-// For now there is no exposed functionality to other plugins
-export type ReportingSetup = object;
-export type ReportingStart = object;
+export class ReportingPlugin
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  private logger: LevelLogger;
+  private reportingCore: ReportingCore;
 
-export interface ReportingSetupDeps {
-  usageCollection: UsageCollectionSetup;
-}
-export type ReportingStartDeps = object;
+  constructor(context: PluginInitializerContext) {
+    this.logger = new LevelLogger(context.logger.get('reporting'));
+    this.reportingCore = new ReportingCore(this.logger);
+  }
 
-type LegacyPlugins = Legacy.Server['plugins'];
+  public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { elasticsearch, usageCollection, __LEGACY } = plugins;
 
-export interface LegacySetup {
-  config: Legacy.Server['config'];
-  info: Legacy.Server['info'];
-  log: Legacy.Server['log'];
-  plugins: {
-    elasticsearch: LegacyPlugins['elasticsearch'];
-    security: LegacyPlugins['security'];
-    xpack_main: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-  route: Legacy.Server['route'];
-  savedObjects: Legacy.Server['savedObjects'];
-  uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
-  fieldFormatServiceFactory: (uiConfig: IUiSettingsClient) => unknown;
-}
+    const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, this.logger); // required for validations :(
+    runValidations(__LEGACY, elasticsearch, browserDriverFactory, this.logger); // this must run early, as it sets up config defaults
 
-export type ReportingPlugin = Plugin<
-  ReportingSetup,
-  ReportingStart,
-  ReportingSetupDeps,
-  ReportingStartDeps
->;
+    const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
+    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
 
-/* We need a factory that returns an instance of the class because the class
- * implementation itself restricts against having Legacy dependencies passed
- * into `setup`. The factory parameters take the legacy dependencies, and the
- * `setup` method gets it from enclosure */
-export function reportingPluginFactory(
-  __LEGACY: LegacySetup,
-  legacyPlugin: ReportingPluginSpecOptions
-) {
-  return new (class ReportingPlugin implements ReportingPlugin {
-    public async setup(core: CoreSetup, plugins: ReportingSetupDeps): Promise<ReportingSetup> {
-      const exportTypesRegistry = getExportTypesRegistry();
+    // Register a function with server to manage the collection of usage stats
+    registerReportingUsageCollector(this.reportingCore, __LEGACY, usageCollection);
 
-      let isCollectorReady = false;
-      // Register a function with server to manage the collection of usage stats
-      const { usageCollection } = plugins;
-      registerReportingUsageCollector(
-        usageCollection,
-        __LEGACY,
-        () => isCollectorReady,
-        exportTypesRegistry
-      );
+    // regsister setup internals
+    this.reportingCore.pluginSetup({ browserDriverFactory });
 
-      const logger = LevelLogger.createForServer(__LEGACY, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(__LEGACY);
+    return {};
+  }
 
-      logConfiguration(__LEGACY, logger);
-      runValidations(__LEGACY, logger, browserDriverFactory);
+  public async start(core: CoreStart, plugins: ReportingStartDeps) {
+    const { reportingCore, logger } = this;
+    const { elasticsearch, __LEGACY } = plugins;
 
-      const { xpack_main: xpackMainPlugin } = __LEGACY.plugins;
-      mirrorPluginStatus(xpackMainPlugin, legacyPlugin);
-      const checkLicense = checkLicenseFactory(exportTypesRegistry);
-      (xpackMainPlugin as any).status.once('green', () => {
-        // Register a function that is called whenever the xpack info changes,
-        // to re-compute the license check results for this plugin
-        xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
-      });
+    const esqueue = await createQueueFactory(reportingCore, __LEGACY, elasticsearch, logger);
+    const enqueueJob = enqueueJobFactory(reportingCore, __LEGACY, elasticsearch, logger);
 
-      // Post initialization of the above code, the collector is now ready to fetch its data
-      isCollectorReady = true;
+    this.reportingCore.pluginStart({
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
+      esqueue,
+      enqueueJob,
+    });
 
-      // Reporting routes
-      registerRoutes(__LEGACY, exportTypesRegistry, browserDriverFactory, logger);
+    setFieldFormats(plugins.data.fieldFormats);
+    logConfiguration(__LEGACY, this.logger);
 
-      return {};
-    }
+    return {};
+  }
 
-    public start(core: CoreStart, plugins: ReportingStartDeps): ReportingStart {
-      return {};
-    }
-  })();
+  public getReportingCore() {
+    return this.reportingCore;
+  }
 }

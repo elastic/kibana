@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import { colorSchemas } from '../legacy_imports';
+
+import { colorSchemas } from '../../../../../plugins/charts/public';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',

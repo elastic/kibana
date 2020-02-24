@@ -86,7 +86,7 @@ export class LegacyService implements CoreService {
   public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService, env } = coreContext;
+    const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
@@ -95,7 +95,7 @@ export class LegacyService implements CoreService {
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -262,6 +262,7 @@ export class LegacyService implements CoreService {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
@@ -286,8 +287,13 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        auth: {
+          get: setupDeps.core.http.auth.get,
+          isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
+        },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        getServerInfo: setupDeps.core.http.getServerInfo,
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
@@ -323,6 +329,7 @@ export class LegacyService implements CoreService {
         __internals: {
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
+          typeRegistry: startDeps.core.savedObjects.typeRegistry,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString, isEmpty } from 'lodash/fp';
 import React from 'react';
 
@@ -15,7 +15,7 @@ import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { HostDetailsLink } from '../../../links';
-import { getRuleDetailsUrl } from '../../../link_to/redirect_to_detection_engine';
+
 import { Port, PORT_NAMES } from '../../../port';
 import { TruncatableText } from '../../../truncatable_text';
 import {
@@ -23,8 +23,11 @@ import {
   HOST_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
+  EVENT_MODULE_FIELD_NAME,
+  RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from './constants';
+import { renderRuleName, renderEventModule, renderRulReference } from './formatted_field_helpers';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -88,6 +91,12 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
+  } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+    return renderRuleName({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
+    return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === RULE_REFERENCE_FIELD_NAME) {
+    return renderRulReference({ contextId, eventId, fieldName, linkValue, truncate, value });
   } else if (columnNamesNotDraggable.includes(fieldName)) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
@@ -109,24 +118,6 @@ const FormattedFieldValueComponent: React.FC<{
       </TruncatableText>
     ) : (
       <>{value}</>
-    );
-  } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
-    const ruleName = `${value}`;
-    const ruleId = linkValue;
-
-    return isString(value) && ruleName.length > 0 && ruleId != null ? (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
-        tooltipContent={value}
-        value={value}
-      >
-        <EuiLink href={getRuleDetailsUrl(ruleId)}>
-          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
-        </EuiLink>
-      </DefaultDraggable>
-    ) : (
-      getEmptyTagValue()
     );
   } else {
     const contentValue = getOrEmptyTagFromValue(value);

@@ -31,6 +31,7 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
     label: i18n.translate('core.ui.observabilityNavList.label', {
       defaultMessage: 'Observability',
     }),
+    euiIconType: 'logoObservability',
     order: 2000,
   },
   security: {
@@ -38,6 +39,7 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Security',
     }),
     order: 3000,
+    euiIconType: 'logoSecurity',
   },
   management: {
     label: i18n.translate('core.ui.managementNavList.label', {

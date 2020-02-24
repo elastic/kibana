@@ -7,7 +7,7 @@
 import { readFileSync } from 'fs';
 import { readPkcs12Truststore, readPkcs12Keystore } from '../../../../../../src/core/utils';
 
-const KEY = 'xpack.monitoring.elasticsearch';
+const KEY = 'monitoring.ui.elasticsearch';
 
 /*
  * Parse a config object's Elasticsearch configuration, reading any
@@ -16,10 +16,13 @@ const KEY = 'xpack.monitoring.elasticsearch';
  * TODO: this code can be removed when this plugin is migrated to the Kibana Platform,
  * at that point the ElasticsearchClient and ElasticsearchConfig should be used instead
  */
-export const parseElasticsearchConfig = (config: any) => {
-  const es = config.get(KEY);
+export const parseElasticsearchConfig = (config: any, configKey: string = KEY) => {
+  const es = config.get(configKey);
+  if (!es) {
+    return {};
+  }
 
-  const errorPrefix = `[config validation of [${KEY}].ssl]`;
+  const errorPrefix = `[config validation of [${configKey}].ssl]`;
   if (es.ssl?.key && es.ssl?.keystore?.path) {
     throw new Error(`${errorPrefix}: cannot use [key] when [keystore.path] is specified`);
   }

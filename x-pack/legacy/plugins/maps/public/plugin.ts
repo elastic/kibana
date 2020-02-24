@@ -10,7 +10,10 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId } from './kibana_services';
+import { setLicenseId, setInspector } from './kibana_services';
+import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -20,14 +23,20 @@ import { setLicenseId } from './kibana_services';
 export type MapsPluginSetup = ReturnType<MapsPlugin['setup']>;
 export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 
+interface MapsPluginSetupDependencies {
+  __LEGACY: any;
+  np: {
+    licensing?: LicensingPluginSetup;
+    home: HomePublicPluginSetup;
+  };
+}
+
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup(core: any, plugins: any) {
-    const {
-      __LEGACY: { uiModules },
-      np: { licensing },
-    } = plugins;
-
+  public setup(
+    core: any,
+    { __LEGACY: { uiModules }, np: { licensing, home } }: MapsPluginSetupDependencies
+  ) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
       .directive('mapListing', function(reactDirective: any) {
@@ -35,9 +44,13 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       });
 
     if (licensing) {
-      licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
+      licensing.license$.subscribe(({ uid }) => setLicenseId(uid));
     }
+
+    home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    setInspector(plugins.np.inspector);
+  }
 }

@@ -30,6 +30,9 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLightTheme = require('@elastic/eui/dist/eui_theme_light.json');
 export const ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_dark.json');
+export const KbnI18n = require('@kbn/i18n');
+export const KbnI18nAngular = require('@kbn/i18n/angular');
+export const KbnI18nReact = require('@kbn/i18n/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 export const React = require('react');
@@ -37,6 +40,8 @@ export const ReactDom = require('react-dom');
 export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
+export const Monaco = require('./monaco.ts');
+export const MonacoBare = require('monaco-editor/esm/vs/editor/editor.api');
 
 // load timezone data into moment-timezone
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));

@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { autocomplete, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../lib/kibana';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;
@@ -15,7 +15,7 @@ interface KueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySuggestion[];
+    suggestions: QuerySuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -30,7 +30,7 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
     const [currentRequest, setCurrentRequest] = useState<KueryAutocompletionCurrentRequest | null>(
       null
     );
-    const [suggestions, setSuggestions] = useState<autocomplete.QuerySuggestion[]>([]);
+    const [suggestions, setSuggestions] = useState<QuerySuggestion[]>([]);
     const kibana = useKibana();
     const loadSuggestions = async (
       expression: string,

@@ -19,39 +19,40 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs } from 'ui/agg_types/agg_configs';
+import { AggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
   KibanaDatatable,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
+  ISearchSource,
+  SearchSource,
   Query,
   TimeRange,
-  esFilters,
+  Filter,
   getTime,
   FilterManager,
 } from '../../../../../../plugins/data/public';
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
+import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
 import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
-import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../..';
-import { SearchSource } from '../search_source';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
-  aggs: AggConfigs;
+  aggs: IAggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;
@@ -64,7 +65,8 @@ export interface RequestHandlerParams {
 
 const name = 'esaggs';
 
-type Context = KibanaContext | null;
+type Input = KibanaContext | null;
+type Output = Promise<KibanaDatatable>;
 
 interface Arguments {
   index: string;
@@ -73,8 +75,6 @@ interface Arguments {
   includeFormatHints: boolean;
   aggConfigs: string;
 }
-
-type Return = Promise<KibanaDatatable>;
 
 const handleCourierRequest = async ({
   searchSource,
@@ -219,12 +219,10 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
   name,
   type: 'kibana_datatable',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
@@ -254,7 +252,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       help: '',
     },
   },
-  async fn(context, args, { inspectorAdapters, abortSignal }) {
+  async fn(input, args, { inspectorAdapters, abortSignal }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
 
@@ -270,13 +268,13 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const response = await handleCourierRequest({
       searchSource,
       aggs,
-      timeRange: get(context, 'timeRange', undefined),
-      query: get(context, 'query', undefined),
-      filters: get(context, 'filters', undefined),
+      timeRange: get(input, 'timeRange', undefined),
+      query: get(input, 'query', undefined),
+      filters: get(input, 'filters', undefined),
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters,
+      inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
@@ -288,6 +286,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
+          meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

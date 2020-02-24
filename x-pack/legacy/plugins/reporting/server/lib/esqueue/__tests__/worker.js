@@ -288,7 +288,7 @@ describe('Worker class', function() {
     describe('error handling', function() {
       it('should pass search errors', function(done) {
         searchStub = sinon
-          .stub(mockQueue.client, 'callWithInternalUser')
+          .stub(mockQueue.client, 'callAsInternalUser')
           .withArgs('search')
           .callsFake(() => Promise.reject());
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
@@ -303,7 +303,7 @@ describe('Worker class', function() {
       describe('missing index', function() {
         it('should swallow error', function(done) {
           searchStub = sinon
-            .stub(mockQueue.client, 'callWithInternalUser')
+            .stub(mockQueue.client, 'callAsInternalUser')
             .withArgs('search')
             .callsFake(() => Promise.reject({ status: 404 }));
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
@@ -317,7 +317,7 @@ describe('Worker class', function() {
 
         it('should return an empty array', function(done) {
           searchStub = sinon
-            .stub(mockQueue.client, 'callWithInternalUser')
+            .stub(mockQueue.client, 'callAsInternalUser')
             .withArgs('search')
             .callsFake(() => Promise.reject({ status: 404 }));
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
@@ -343,7 +343,7 @@ describe('Worker class', function() {
 
       beforeEach(() => {
         searchStub = sinon
-          .stub(mockQueue.client, 'callWithInternalUser')
+          .stub(mockQueue.client, 'callAsInternalUser')
           .withArgs('search')
           .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
         anchorMoment = moment(anchor);
@@ -417,10 +417,10 @@ describe('Worker class', function() {
         type: 'test',
         id: 12345,
       };
-      return mockQueue.client.callWithInternalUser('get', params).then(jobDoc => {
+      return mockQueue.client.callAsInternalUser('get', params).then(jobDoc => {
         job = jobDoc;
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
-        updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
+        updateSpy = sinon.spy(mockQueue.client, 'callAsInternalUser').withArgs('update');
       });
     });
 
@@ -483,9 +483,9 @@ describe('Worker class', function() {
     });
 
     it('should reject the promise on conflict errors', function() {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job).catch(err => {
@@ -494,9 +494,9 @@ describe('Worker class', function() {
     });
 
     it('should reject the promise on other errors', function() {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .returns(Promise.reject({ statusCode: 401 }));
       return worker._claimJob(job).catch(err => {
@@ -532,12 +532,12 @@ describe('Worker class', function() {
     });
 
     afterEach(() => {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
     });
 
     it('should emit for errors from claiming job', function(done) {
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .rejects({ statusCode: 401 });
 
@@ -558,7 +558,7 @@ describe('Worker class', function() {
 
     it('should reject the promise if an error claiming the job', function() {
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .rejects({ statusCode: 409 });
       return worker._claimPendingJobs(getMockJobs()).catch(err => {
@@ -568,7 +568,7 @@ describe('Worker class', function() {
 
     it('should get the pending job', function() {
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .resolves({ test: 'cool' });
       sinon.stub(worker, '_performJob').callsFake(identity);
@@ -590,10 +590,10 @@ describe('Worker class', function() {
       anchorMoment = moment(anchor);
       clock = sinon.useFakeTimers(anchorMoment.valueOf());
 
-      return mockQueue.client.callWithInternalUser('get').then(jobDoc => {
+      return mockQueue.client.callAsInternalUser('get').then(jobDoc => {
         job = jobDoc;
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
-        updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
+        updateSpy = sinon.spy(mockQueue.client, 'callAsInternalUser').withArgs('update');
       });
     });
 
@@ -625,18 +625,18 @@ describe('Worker class', function() {
     });
 
     it('should return true on conflict errors', function() {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .rejects({ statusCode: 409 });
       return worker._failJob(job).then(res => expect(res).to.equal(true));
     });
 
     it('should return false on other document update errors', function() {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .rejects({ statusCode: 401 });
       return worker._failJob(job).then(res => expect(res).to.equal(false));
@@ -672,9 +672,9 @@ describe('Worker class', function() {
     });
 
     it('should emit on other document update errors', function(done) {
-      mockQueue.client.callWithInternalUser.restore();
+      mockQueue.client.callAsInternalUser.restore();
       sinon
-        .stub(mockQueue.client, 'callWithInternalUser')
+        .stub(mockQueue.client, 'callAsInternalUser')
         .withArgs('update')
         .rejects({ statusCode: 401 });
 
@@ -703,9 +703,9 @@ describe('Worker class', function() {
         value: random(0, 100, true),
       };
 
-      return mockQueue.client.callWithInternalUser('get', {}, { payload }).then(jobDoc => {
+      return mockQueue.client.callAsInternalUser('get', {}, { payload }).then(jobDoc => {
         job = jobDoc;
-        updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
+        updateSpy = sinon.spy(mockQueue.client, 'callAsInternalUser').withArgs('update');
       });
     });
 
@@ -871,7 +871,7 @@ describe('Worker class', function() {
         };
 
         sinon
-          .stub(mockQueue.client, 'callWithInternalUser')
+          .stub(mockQueue.client, 'callAsInternalUser')
           .withArgs('update')
           .rejects({ statusCode: 413 });
 
@@ -893,7 +893,7 @@ describe('Worker class', function() {
     describe('search failure', function() {
       it('causes _processPendingJobs to reject the Promise', function() {
         sinon
-          .stub(mockQueue.client, 'callWithInternalUser')
+          .stub(mockQueue.client, 'callAsInternalUser')
           .withArgs('search')
           .rejects(new Error('test error'));
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
@@ -996,7 +996,7 @@ describe('Worker class', function() {
 
       beforeEach(function() {
         sinon
-          .stub(mockQueue.client, 'callWithInternalUser')
+          .stub(mockQueue.client, 'callAsInternalUser')
           .withArgs('search')
           .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
       });
@@ -1086,20 +1086,12 @@ describe('Format Job Object', () => {
   });
 });
 
-// FAILING: https://github.com/elastic/kibana/issues/51372
-describe.skip('Get Doc Path from ES Response', () => {
+describe('Get Doc Path from ES Response', () => {
   it('returns a formatted string after response of an update', function() {
     const responseMock = {
       _index: 'foo',
       _id: 'booId',
     };
-    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
-  });
-  it('returns the same formatted string even if there is no _doc provided', function() {
-    const responseMock = {
-      _index: 'foo',
-      _id: 'booId',
-    };
-    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
+    expect(getUpdatedDocPath(responseMock)).equal('/foo/booId');
   });
 });

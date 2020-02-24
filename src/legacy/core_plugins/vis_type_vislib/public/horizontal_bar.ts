@@ -38,9 +38,9 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
-export const createHorizontalBarVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createHorizontalBarVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'horizontal_bar',
   title: i18n.translate('visTypeVislib.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal Bar',

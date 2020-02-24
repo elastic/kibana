@@ -21,17 +21,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
-import { DefaultEditorSize, VisOptionsProps } from './legacy_imports';
+import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions } from './timelion_options';
-import { VisParams } from './timelion_vis_fn';
 import { TimelionVisDependencies } from './plugin';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
 export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
-  const { http, uiSettings } = dependencies;
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
@@ -55,11 +53,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       ),
     },
     editorConfig: {
-      optionsTemplate: (props: VisOptionsProps<VisParams>) => (
-        <KibanaContextProvider services={{ uiSettings, http }}>
-          <TimelionOptions {...props} />
-        </KibanaContextProvider>
-      ),
+      optionsTemplate: TimelionOptions,
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,

@@ -44,7 +44,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
   const min = start;
 
   const bucketSize = Math.max(
-    config.get('xpack.monitoring.min_interval_seconds'),
+    config.get('monitoring.ui.min_interval_seconds'),
     calculateAuto(100, duration).asSeconds()
   );
 
@@ -59,7 +59,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
 
   const params = {
     index: esIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     body: {
       query: createQuery({
@@ -78,7 +78,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('xpack.monitoring.max_bucket_size'),
+            size: config.get('monitoring.ui.max_bucket_size'),
           },
           aggs: {
             by_date: {

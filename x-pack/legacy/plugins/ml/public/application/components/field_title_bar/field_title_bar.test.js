@@ -7,10 +7,6 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
-jest.mock('ui/i18n', () => ({
-  I18nContext: jest.fn(),
-}));
-
 import { FieldTitleBar } from './field_title_bar';
 
 // helper to let PropTypes throw errors instead of just doing console.error()

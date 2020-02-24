@@ -17,12 +17,13 @@ import { displaySuccessToast, useStateToaster } from '../../../../components/toa
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
-import { FormData, FormHook } from '../components/shared_imports';
+import { FormData, FormHook } from '../../../shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
+import { redirectToDetections } from '../helpers';
 import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
@@ -69,6 +70,7 @@ const CreateRulePageComponent: React.FC = () => {
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
@@ -239,11 +241,7 @@ const CreateRulePageComponent: React.FC = () => {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;

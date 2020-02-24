@@ -4,14 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('axios', () => ({
+  request: jest.fn(),
+}));
+
 import { getActionType } from './webhook';
+import { ActionType, Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { configUtilsMock } from '../actions_config.mock';
-import { ActionType } from '../types';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
+import axios from 'axios';
+
+const axiosRequestMock = axios.request as jest.Mock;
 
 const ACTION_TYPE_ID = '.webhook';
+
+const services: Services = {
+  callCluster: async (path: string, opts: any) => {},
+  savedObjectsClient: savedObjectsClientMock.create(),
+};
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -38,20 +51,18 @@ describe('secrets validation', () => {
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
-  test('fails when secret password is omitted', () => {
+  test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [password]: expected value of type [string] but got [undefined]"`
+      `"error validating action type secrets: both user and password must be specified"`
     );
   });
 
-  test('fails when secret user is omitted', () => {
+  test('succeeds when basic authentication credentials are omitted', () => {
     expect(() => {
-      validateSecrets(actionType, {});
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
-    );
+      validateSecrets(actionType, {}).toEqual({});
+    });
   });
 });
 
@@ -130,7 +141,7 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
-- [headers.0]: expected value of type [object] but got [string]
+- [headers.0]: could not parse record value from [application/json]
 - [headers.1]: expected value to equal [null] but got [application/json]"
 `);
   });
@@ -188,5 +199,84 @@ describe('params validation', () => {
     expect(validateParams(actionType, params)).toEqual({
       ...params,
     });
+  });
+});
+
+describe('execute()', () => {
+  beforeAll(() => {
+    axiosRequestMock.mockReset();
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: configUtilsMock,
+    });
+  });
+
+  beforeEach(() => {
+    axiosRequestMock.mockReset();
+    axiosRequestMock.mockResolvedValue({
+      status: 200,
+      statusText: '',
+      data: '',
+      headers: [],
+      config: {},
+    });
+  });
+
+  test('execute with username/password sends request with basic auth', async () => {
+    await actionType.executor({
+      actionId: 'some-id',
+      services,
+      config: {
+        url: 'https://abc.def/my-webhook',
+        method: 'post',
+        headers: {
+          aheader: 'a value',
+        },
+      },
+      secrets: { user: 'abc', password: '123' },
+      params: { body: 'some data' },
+    });
+
+    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+          Object {
+            "auth": Object {
+              "password": "123",
+              "username": "abc",
+            },
+            "data": "some data",
+            "headers": Object {
+              "aheader": "a value",
+            },
+            "method": "post",
+            "url": "https://abc.def/my-webhook",
+          }
+    `);
+  });
+
+  test('execute without username/password sends request without basic auth', async () => {
+    await actionType.executor({
+      actionId: 'some-id',
+      services,
+      config: {
+        url: 'https://abc.def/my-webhook',
+        method: 'post',
+        headers: {
+          aheader: 'a value',
+        },
+      },
+      secrets: {},
+      params: { body: 'some data' },
+    });
+
+    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+          Object {
+            "data": "some data",
+            "headers": Object {
+              "aheader": "a value",
+            },
+            "method": "post",
+            "url": "https://abc.def/my-webhook",
+          }
+    `);
   });
 });

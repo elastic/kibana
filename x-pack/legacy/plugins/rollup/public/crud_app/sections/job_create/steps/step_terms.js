@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -17,13 +17,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { termsDetailsUrl } from '../../../services';
+import { getTermsDetailsUrl } from '../../../services';
 
 import { FieldList } from '../../components';
 
 import { FieldChooser } from './components';
 
-export class StepTermsUi extends Component {
+export class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -99,7 +99,7 @@ export class StepTermsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={termsDetailsUrl}
+              href={getTermsDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateTermsDocsButton"
@@ -140,5 +140,3 @@ export class StepTermsUi extends Component {
     );
   }
 }
-
-export const StepTerms = injectI18n(StepTermsUi);

@@ -14,12 +14,41 @@ import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
 import { METRIC_TYPE } from '../../common/constants';
 
+function filterFieldsForAgg(fields, aggType) {
+  if (!fields) {
+    return [];
+  }
+
+  if (aggType === METRIC_TYPE.UNIQUE_COUNT) {
+    return fields.filter(field => {
+      return field.aggregatable;
+    });
+  }
+
+  return fields.filter(field => {
+    return field.aggregatable && field.type === 'number';
+  });
+}
+
 export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
   const onAggChange = metricAggregationType => {
-    onChange({
+    const newMetricProps = {
       ...metric,
       type: metricAggregationType,
-    });
+    };
+
+    // unset field when new agg type does not support currently selected field.
+    if (metric.field && metricAggregationType !== METRIC_TYPE.COUNT) {
+      const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
+      const found = fieldsForNewAggType.find(field => {
+        return field.name === metric.field;
+      });
+      if (!found) {
+        newMetricProps.field = undefined;
+      }
+    }
+
+    onChange(newMetricProps);
   };
   const onFieldChange = fieldName => {
     onChange({
@@ -36,12 +65,6 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
   let fieldSelect;
   if (metric.type && metric.type !== METRIC_TYPE.COUNT) {
-    const filterField =
-      metric.type !== METRIC_TYPE.UNIQUE_COUNT
-        ? field => {
-            return field.type === 'number';
-          }
-        : undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
@@ -55,8 +78,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
           })}
           value={metric.field}
           onChange={onFieldChange}
-          filterField={filterField}
-          fields={fields}
+          fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
           compressed
         />

@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
@@ -21,7 +22,17 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
-
+interface AlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+}
 export const signalRulesAlertType = ({
   logger,
   version,
@@ -32,10 +43,17 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: ['default'],
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
+    defaultActionGroupId: 'default',
     validate: {
       params: schema.object({
-        createdAt: schema.string(),
         description: schema.string(),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
@@ -53,10 +71,9 @@ export const signalRulesAlertType = ({
         maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
-        threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+        threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
-        updatedAt: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
         version: schema.number({ defaultValue: 1 }),
       }),
@@ -76,7 +93,7 @@ export const signalRulesAlertType = ({
         type,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
-      const savedObject = await services.savedObjectsClient.get('alert', alertId);
+      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -117,13 +134,15 @@ export const signalRulesAlertType = ({
         );
       }
 
-      const name: string = savedObject.attributes.name;
-      const tags: string[] = savedObject.attributes.tags;
+      const name = savedObject.attributes.name;
+      const tags = savedObject.attributes.tags;
 
-      const createdBy: string = savedObject.attributes.createdBy;
-      const updatedBy: string = savedObject.attributes.updatedBy;
-      const interval: string = savedObject.attributes.schedule.interval;
-      const enabled: boolean = savedObject.attributes.enabled;
+      const createdBy = savedObject.attributes.createdBy;
+      const createdAt = savedObject.attributes.createdAt;
+      const updatedBy = savedObject.attributes.updatedBy;
+      const updatedAt = savedObject.updated_at ?? '';
+      const interval = savedObject.attributes.schedule.interval;
+      const enabled = savedObject.attributes.enabled;
       const gap = getGapBetweenRuns({
         previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
         interval,
@@ -210,7 +229,9 @@ export const signalRulesAlertType = ({
             filter: esFilter,
             name,
             createdBy,
+            createdAt,
             updatedBy,
+            updatedAt,
             interval,
             enabled,
             pageSize: searchAfterSize,
@@ -264,8 +285,6 @@ export const signalRulesAlertType = ({
             }
           }
         } catch (err) {
-          // TODO: Error handling and writing of errors into a signal that has error
-          // handling/conditions
           logger.error(
             `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
           );

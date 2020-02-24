@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageTitle should render normally 1`] = `
+<EuiText>
+  <h1
+    data-test-subj="managementSettingsTitle"
+  >
+    <FormattedMessage
+      defaultMessage="Settings"
+      id="advancedSettings.pageTitle"
+      values={Object {}}
+    />
+  </h1>
+</EuiText>
+`;

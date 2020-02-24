@@ -20,18 +20,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
-  EuiCallOut,
+  EuiTitle,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -79,8 +78,6 @@ import {
   processRecordScoreResults,
   getFocusData,
 } from './timeseriesexplorer_utils';
-
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -135,8 +132,8 @@ function getTimeseriesexplorerDefaultState() {
     loading: false,
     modelPlotEnabled: false,
     // Toggles display of annotations in the focus chart
-    showAnnotations: mlAnnotationsEnabled,
-    showAnnotationsCheckbox: mlAnnotationsEnabled,
+    showAnnotations: true,
+    showAnnotationsCheckbox: true,
     // Toggles display of forecast data in the focus chart
     showForecast: true,
     showForecastCheckbox: false,
@@ -161,6 +158,7 @@ export class TimeSeriesExplorer extends React.Component {
     bounds: PropTypes.object.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     lastRefresh: PropTypes.number.isRequired,
+    previousRefresh: PropTypes.number.isRequired,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
@@ -188,6 +186,24 @@ export class TimeSeriesExplorer extends React.Component {
    */
   contextChart$ = new Subject();
 
+  /**
+   * Returns field names that don't have a selection yet.
+   */
+  getFieldNamesWithEmptyValues = () => {
+    const latestEntityControls = this.getControlsForDetector();
+    return latestEntityControls
+      .filter(({ fieldValue }) => !fieldValue)
+      .map(({ fieldName }) => fieldName);
+  };
+
+  /**
+   * Checks if all entity control dropdowns have a selection.
+   */
+  arePartitioningFieldsProvided = () => {
+    const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+    return fieldNamesWithEmptyValues.length === 0;
+  };
+
   detectorIndexChangeHandler = e => {
     const { appStateHandler } = this.props;
     const id = e.target.value;
@@ -197,11 +213,9 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   toggleShowAnnotationsHandler = () => {
-    if (mlAnnotationsEnabled) {
-      this.setState(prevState => ({
-        showAnnotations: !prevState.showAnnotations,
-      }));
-    }
+    this.setState(prevState => ({
+      showAnnotations: !prevState.showAnnotations,
+    }));
   };
 
   toggleShowForecastHandler = () => {
@@ -296,7 +310,21 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   contextChartSelected = selection => {
+    const zoomState = {
+      from: selection.from.toISOString(),
+      to: selection.to.toISOString(),
+    };
+
+    if (
+      isEqual(this.props.zoom, zoomState) &&
+      this.state.focusChartData !== undefined &&
+      this.props.previousRefresh === this.props.lastRefresh
+    ) {
+      return;
+    }
+
     this.contextChart$.next(selection);
+    this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
   };
 
   entityFieldValueChanged = (entity, fieldValue) => {
@@ -509,27 +537,38 @@ export class TimeSeriesExplorer extends React.Component {
               (Array.isArray(stateUpdate.contextForecastData) &&
                 stateUpdate.contextForecastData.length > 0);
             stateUpdate.loading = false;
+
             // Set zoomFrom/zoomTo attributes in scope which will result in the metric chart automatically
             // selecting the specified range in the context chart, and so loading that date range in the focus chart.
-            if (stateUpdate.contextChartData.length) {
+            // Only touch the zoom range if data for the context chart has been loaded and all necessary
+            // partition fields have a selection.
+            if (
+              stateUpdate.contextChartData.length &&
+              this.arePartitioningFieldsProvided() === true
+            ) {
               // Check for a zoom parameter in the appState (URL).
               let focusRange = calculateInitialFocusRange(
                 zoom,
                 stateUpdate.contextAggregationInterval,
                 bounds
               );
-
-              if (focusRange === undefined) {
+              if (
+                focusRange === undefined ||
+                this.previousSelectedForecastId !== this.props.selectedForecastId
+              ) {
                 focusRange = calculateDefaultFocusRange(
                   autoZoomDuration,
                   stateUpdate.contextAggregationInterval,
                   stateUpdate.contextChartData,
                   stateUpdate.contextForecastData
                 );
+                this.previousSelectedForecastId = this.props.selectedForecastId;
               }
 
-              stateUpdate.zoomFrom = focusRange[0];
-              stateUpdate.zoomTo = focusRange[1];
+              this.contextChartSelected({
+                from: focusRange[0],
+                to: focusRange[1],
+              });
             }
 
             this.setState(stateUpdate);
@@ -771,6 +810,7 @@ export class TimeSeriesExplorer extends React.Component {
           },
         }
       );
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning(warningText);
       detectorIndex = detectors[0].index;
     }
@@ -881,11 +921,6 @@ export class TimeSeriesExplorer extends React.Component {
             ...refreshFocusData,
             ...tableData,
           });
-          const zoomState = {
-            from: selection.from.toISOString(),
-            to: selection.to.toISOString(),
-          };
-          this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
         })
     );
 
@@ -917,6 +952,11 @@ export class TimeSeriesExplorer extends React.Component {
       if (this.props.selectedForecastId !== undefined) {
         // Ensure the forecast data will be shown if hidden previously.
         this.setState({ showForecast: true });
+        // Not best practice but we need the previous value for another comparison
+        // once all the data was loaded.
+        if (previousProps !== undefined) {
+          this.previousSelectedForecastId = previousProps.selectedForecastId;
+        }
       }
     }
 
@@ -926,17 +966,15 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      !isEqual(previousProps.zoom, this.props.zoom)
+      previousProps.selectedForecastId !== this.props.selectedForecastId ||
+      previousProps.selectedJobId !== this.props.selectedJobId
     ) {
       const fullRefresh =
         previousProps === undefined ||
         !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
+        previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId;
       this.loadSingleMetricData(fullRefresh);
     }
@@ -960,41 +998,6 @@ export class TimeSeriesExplorer extends React.Component {
       previousProps.tableSeverity !== this.props.tableSeverity
     ) {
       tableControlsListener();
-    }
-
-    if (
-      this.props.autoZoomDuration === undefined ||
-      this.props.selectedForecastId !== undefined ||
-      this.state.contextAggregationInterval === undefined ||
-      this.state.contextChartData === undefined ||
-      this.state.contextChartData.length === 0
-    ) {
-      return;
-    }
-
-    const defaultRange = calculateDefaultFocusRange(
-      this.props.autoZoomDuration,
-      this.state.contextAggregationInterval,
-      this.state.contextChartData,
-      this.state.contextForecastData
-    );
-
-    const selection = {
-      from: this.state.zoomFrom,
-      to: this.state.zoomTo,
-    };
-
-    if (
-      (selection.from.getTime() !== defaultRange[0].getTime() ||
-        selection.to.getTime() !== defaultRange[1].getTime()) &&
-      isNaN(Date.parse(selection.from)) === false &&
-      isNaN(Date.parse(selection.to)) === false
-    ) {
-      const zoomState = {
-        from: selection.from.toISOString(),
-        to: selection.to.toISOString(),
-      };
-      this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
     }
   }
 
@@ -1070,12 +1073,8 @@ export class TimeSeriesExplorer extends React.Component {
 
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
-
-    const fieldNamesWithEmptyValues = entityControls
-      .filter(({ fieldValue }) => !fieldValue)
-      .map(({ fieldName }) => fieldName);
-
-    const arePartitioningFieldsProvided = fieldNamesWithEmptyValues.length === 0;
+    const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+    const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
 
     const detectorSelectOptions = getViewableDetectors(selectedJob).map(d => ({
       value: d.index,
@@ -1091,13 +1090,12 @@ export class TimeSeriesExplorer extends React.Component {
       this.previousShowAnnotations === showAnnotations &&
       this.previousShowForecast === showForecast &&
       this.previousShowModelBounds === showModelBounds &&
-      this.previousLastRefresh === lastRefresh
+      this.props.previousRefresh === lastRefresh
     ) {
       renderFocusChartOnly = false;
     }
 
     this.previousChartProps = chartProps;
-    this.previousLastRefresh = lastRefresh;
     this.previousShowAnnotations = showAnnotations;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
@@ -1205,56 +1203,62 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be infered correctly. */}
+              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
               <ChartTooltip />
-              <EuiText className="results-container">
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                    defaultMessage: 'Single time series analysis of {functionLabel}',
-                    values: { functionLabel: chartDetails.functionLabel },
-                  })}
-                </span>
-                &nbsp;
-                {chartDetails.entityData.count === 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.length > 0 && '('}
-                    {chartDetails.entityData.entities
-                      .map(entity => {
-                        return `${entity.fieldName}: ${entity.fieldValue}`;
-                      })
-                      .join(', ')}
-                    {chartDetails.entityData.entities.length > 0 && ')'}
-                  </span>
-                )}
-                {chartDetails.entityData.count !== 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.map((countData, i) => {
-                      return (
-                        <Fragment key={countData.fieldName}>
-                          {i18n.translate(
-                            'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                            {
-                              defaultMessage:
-                                '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                              values: {
-                                openBrace: i === 0 ? '(' : '',
-                                closeBrace:
-                                  i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                cardinalityValue:
-                                  countData.cardinality === 0
-                                    ? allValuesLabel
-                                    : countData.cardinality,
-                                cardinality: countData.cardinality,
-                                fieldName: countData.fieldName,
-                              },
-                            }
-                          )}
-                          {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                        </Fragment>
-                      );
-                    })}
-                  </span>
-                )}
+
+              <div className="results-container">
+                <EuiTitle className="panel-title">
+                  <h2 style={{ display: 'inline' }}>
+                    <span>
+                      {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
+                        defaultMessage: 'Single time series analysis of {functionLabel}',
+                        values: { functionLabel: chartDetails.functionLabel },
+                      })}
+                    </span>
+                    &nbsp;
+                    {chartDetails.entityData.count === 1 && (
+                      <span className="entity-count-text">
+                        {chartDetails.entityData.entities.length > 0 && '('}
+                        {chartDetails.entityData.entities
+                          .map(entity => {
+                            return `${entity.fieldName}: ${entity.fieldValue}`;
+                          })
+                          .join(', ')}
+                        {chartDetails.entityData.entities.length > 0 && ')'}
+                      </span>
+                    )}
+                    {chartDetails.entityData.count !== 1 && (
+                      <span className="entity-count-text">
+                        {chartDetails.entityData.entities.map((countData, i) => {
+                          return (
+                            <Fragment key={countData.fieldName}>
+                              {i18n.translate(
+                                'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                {
+                                  defaultMessage:
+                                    '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                  values: {
+                                    openBrace: i === 0 ? '(' : '',
+                                    closeBrace:
+                                      i === chartDetails.entityData.entities.length - 1 ? ')' : '',
+                                    cardinalityValue:
+                                      countData.cardinality === 0
+                                        ? allValuesLabel
+                                        : countData.cardinality,
+                                    cardinality: countData.cardinality,
+                                    fieldName: countData.fieldName,
+                                  },
+                                }
+                              )}
+                              {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                            </Fragment>
+                          );
+                        })}
+                      </span>
+                    )}
+                  </h2>
+                </EuiTitle>
+
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
                     <EuiFlexItem grow={false}>
@@ -1309,11 +1313,14 @@ export class TimeSeriesExplorer extends React.Component {
                 </div>
                 {showAnnotations && focusAnnotationData.length > 0 && (
                   <div>
-                    <span className="panel-title">
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
-                        defaultMessage: 'Annotations',
-                      })}
-                    </span>
+                    <EuiTitle className="panel-title">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
                     <AnnotationsTable
                       annotations={focusAnnotationData}
                       isSingleMetricViewerLinkVisible={false}
@@ -1323,11 +1330,14 @@ export class TimeSeriesExplorer extends React.Component {
                   </div>
                 )}
                 <AnnotationFlyout />
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.anomaliesTitle', {
-                    defaultMessage: 'Anomalies',
-                  })}
-                </span>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                      defaultMessage="Anomalies"
+                    />
+                  </h2>
+                </EuiTitle>
                 <EuiFlexGroup
                   direction="row"
                   gutterSize="l"
@@ -1354,7 +1364,7 @@ export class TimeSeriesExplorer extends React.Component {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-              </EuiText>
+              </div>
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (

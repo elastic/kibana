@@ -18,7 +18,7 @@
  */
 
 import { TimefilterContract } from 'src/plugins/data/public';
-import { SavedObjectSaveOpts } from '../../legacy_imports';
+import { SavedObjectSaveOpts } from '../../../../../../../plugins/saved_objects/public';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 

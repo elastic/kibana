@@ -21,7 +21,7 @@ StaticSwitch.displayName = 'StaticSwitch';
 export interface JobSwitchProps {
   job: SiemJob;
   isSiemJobsLoading: boolean;
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
@@ -48,9 +48,10 @@ export const JobSwitchComponent = ({
 }: JobSwitchProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const handleChange = useCallback(
-    e => {
+    async e => {
       setIsLoading(true);
-      onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+      await onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+      setIsLoading(false);
     },
     [job, setIsLoading, onJobStateChange]
   );
@@ -58,7 +59,7 @@ export const JobSwitchComponent = ({
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedState) ? (
           <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
         ) : (
           <StaticSwitch

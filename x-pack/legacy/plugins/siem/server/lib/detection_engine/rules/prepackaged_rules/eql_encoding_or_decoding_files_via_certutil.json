@@ -1,20 +1,20 @@
 {
   "description": "Identifies the use of certutil.exe to encode or decode data. CertUtil is a native Windows component which is part of Certificate Services. CertUtil is often abused by attackers to encode or decode base64 data for stealthier command and control or exfiltration.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "Encoding or Decoding Files via CertUtil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and    process.name:\"certutil.exe\" and    process.args:(\"-encode\" or \"/encode\" or \"-decode\" or \"/decode\")",
-  "risk_score": 50,
+  "risk_score": 47,
   "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf",
   "severity": "medium",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

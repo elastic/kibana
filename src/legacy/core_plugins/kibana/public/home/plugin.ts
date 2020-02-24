@@ -17,85 +17,75 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginStart,
+  HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-
-export interface LegacyAngularInjectedDependencies {
-  telemetryOptInProvider: any;
-  shouldShowTelemetryOptIn: boolean;
-}
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   home: HomePublicPluginStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  __LEGACY: {
-    metadata: {
-      app: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-    };
-    getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
   usageCollection: UsageCollectionSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
+  private featureCatalogue: HomePublicPluginStart['featureCatalogue'] | null = null;
+  private telemetry?: TelemetryPluginStart;
+
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   setup(
-    core: CoreSetup,
-    {
-      kibana_legacy,
-      usageCollection,
-      __LEGACY: { getAngularDependencies, ...legacyServices },
-    }: HomePluginSetupDependencies
+    core: CoreSetup<HomePluginStartDependencies>,
+    { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
-        const angularDependencies = await getAngularDependencies();
+        const [coreStart, { home: homeStart }] = await core.getStartServices();
         setServices({
-          ...legacyServices,
           trackUiMetric,
-          http: contextCore.http,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          http: coreStart.http,
           toastNotifications: core.notifications.toasts,
-          banners: contextCore.overlays.banners,
-          getInjected: core.injectedMetadata.getInjectedVar,
-          docLinks: contextCore.docLinks,
+          banners: coreStart.overlays.banners,
+          docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
-          chrome: contextCore.chrome,
+          chrome: coreStart.chrome,
+          telemetry: this.telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
-          ...angularDependencies,
+          config: kibanaLegacy.config,
+          homeConfig: home.config,
+          tutorialVariables: homeStart.tutorials.get,
+          featureCatalogue: this.featureCatalogue!,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -103,9 +93,11 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+  start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
+    this.featureCatalogue = home.featureCatalogue;
     this.dataStart = data;
+    this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;
   }
 

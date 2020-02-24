@@ -17,42 +17,33 @@
  * under the License.
  */
 
-import { ExpressionInterpret } from '../interpreter_provider';
-import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-import { ExpressionRenderDefinition } from '../registries';
+import {
+  IInterpreterRenderHandlers,
+  ExpressionValue,
+  ExecutionContextSearch,
+  ExpressionsService,
+} from '../../common';
 
-export type ExpressionInterpretWithHandlers = (
-  ast: Parameters<ExpressionInterpret>[0],
-  context: Parameters<ExpressionInterpret>[1],
-  handlers: IInterpreterHandlers
-) => ReturnType<ExpressionInterpret>;
-
-export interface ExpressionInterpreter {
-  interpretAst: ExpressionInterpretWithHandlers;
-}
-
+/**
+ * @deprecated
+ *
+ * This type if remainder from legacy platform, will be deleted going further.
+ */
 export interface ExpressionExecutor {
   interpreter: ExpressionInterpreter;
 }
 
-export type RenderId = number;
-export type Data = any;
-export type event = any;
-export type Context = object;
-
-export interface SearchContext {
-  type: 'kibana_context';
-  filters?: esFilters.Filter[];
-  query?: Query;
-  timeRange?: TimeRange;
+/**
+ * @deprecated
+ */
+export interface ExpressionInterpreter {
+  interpretAst: ExpressionsService['run'];
 }
 
-export type IGetInitialContext = () => SearchContext | Context;
-
 export interface IExpressionLoaderParams {
-  searchContext?: SearchContext;
-  context?: Context;
+  searchContext?: ExecutionContextSearch;
+  context?: ExpressionValue;
   variables?: Record<string, any>;
   disableCaching?: boolean;
   customFunctions?: [];
@@ -61,49 +52,6 @@ export interface IExpressionLoaderParams {
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
 }
-
-export interface IInterpreterHandlers {
-  getInitialContext: IGetInitialContext;
-  inspectorAdapters?: Adapters;
-  variables?: Record<string, any>;
-  abortSignal?: AbortSignal;
-}
-
-export interface IInterpreterRenderHandlers {
-  /**
-   * Done increments the number of rendering successes
-   */
-  done: () => void;
-  onDestroy: (fn: () => void) => void;
-  reload: () => void;
-  update: (params: any) => void;
-  event: (event: event) => void;
-}
-
-export interface IInterpreterRenderFunction<T = unknown> {
-  name: string;
-  displayName: string;
-  help: string;
-  validate: () => void;
-  reuseDomNode: boolean;
-  render: (domNode: Element, data: T, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
-}
-
-export interface IInterpreterErrorResult {
-  type: 'error';
-  error: { message: string; name: string; stack: string };
-}
-
-export interface IInterpreterSuccessResult {
-  type: string;
-  as?: string;
-  value?: unknown;
-  error?: unknown;
-}
-
-export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
-
-export { ExpressionRenderDefinition };
 
 export interface RenderError extends Error {
   type?: string;

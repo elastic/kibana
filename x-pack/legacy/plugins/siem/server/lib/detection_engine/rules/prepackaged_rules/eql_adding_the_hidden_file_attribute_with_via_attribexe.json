@@ -1,20 +1,20 @@
 {
-  "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
-  "name": "Adding the Hidden File Attribute with via attrib.exe",
+  "max_signals": 100,
+  "name": "Adding Hidden File Attribute via Attrib",
   "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1158",
           "name": "Hidden Files and Directories",
@@ -37,7 +37,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1158",
           "name": "Hidden Files and Directories",
@@ -46,7 +46,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

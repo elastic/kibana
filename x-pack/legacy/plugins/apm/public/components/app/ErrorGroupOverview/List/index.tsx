@@ -9,8 +9,9 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ErrorGroupListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/errors/get_error_groups';
 import {
   fontFamilyCode,
   fontSizes,
@@ -160,7 +161,7 @@ const ErrorGroupList: React.FC<Props> = props => {
       items={items}
       columns={columns}
       initialPageSize={25}
-      initialSortField="latestOccurrenceAt"
+      initialSortField="occurrenceCount"
       initialSortDirection="desc"
       sortItems={false}
     />

@@ -6,24 +6,21 @@
 
 import { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
-import { getEsNames } from './es/names';
-import { createMockEsContext } from './es/context.mock';
+import { contextMock } from './es/context.mock';
 import { loggingServiceMock } from '../../../../src/core/server/logging/logging_service.mock';
 
 const loggingService = loggingServiceMock.create();
 const systemLogger = loggingService.get();
 
 describe('EventLogService', () => {
-  const esContext = createMockEsContext({
-    esNames: getEsNames('ABC'),
-    logger: systemLogger,
-  });
+  const esContext = contextMock.create();
 
   function getService(config: IEventLogConfig) {
     const { enabled, logEntries, indexEntries } = config;
     return new EventLogService({
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled,
         logEntries,
@@ -67,6 +64,7 @@ describe('EventLogService', () => {
     const params = {
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled: true,
         logEntries: true,
@@ -103,6 +101,7 @@ describe('EventLogService', () => {
     const params = {
       esContext,
       systemLogger,
+      kibanaUUID: '42',
       config: {
         enabled: true,
         logEntries: true,

@@ -9,8 +9,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
@@ -31,6 +29,7 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useTimefilter } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -45,12 +44,12 @@ const breadcrumbs = [
 
 export const explorerRoute: MlRoute = {
   path: '/explorer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context, results } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context, results } = useResolver(undefined, undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
@@ -71,6 +70,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 
@@ -110,9 +110,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-
     const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);

@@ -67,7 +67,6 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                       width={32}
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <title />
                       <path
                         d="M14 32l-.36-.14A21.07 21.07 0 010 12.07V5.44L14 .06l14 5.38v6.63a21.07 21.07 0 01-13.64 19.78L14 32zM2 6.82v5.25a19.08 19.08 0 0012 17.77 19.08 19.08 0 0012-17.77V6.82L14 2.2 2 6.82z"
                       />

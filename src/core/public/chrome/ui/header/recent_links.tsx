@@ -95,7 +95,7 @@ export function RecentLinks({ recentlyAccessedItems, navLinks, basePath }: Props
           label: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsLabel', {
             defaultMessage: 'Recently viewed',
           }),
-          iconType: 'clock',
+          iconType: 'recentlyViewedApp',
           isDisabled: recentlyAccessedItems.length === 0,
           flyoutMenu: {
             title: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle', {

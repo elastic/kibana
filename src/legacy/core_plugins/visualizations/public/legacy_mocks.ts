@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { searchSourceMock } from '../../../ui/public/courier/search_source/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { searchSourceMock } from '../../../../plugins/data/public/search/search_source/mocks';

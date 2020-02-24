@@ -1,0 +1,10 @@
+{
+  "id": "uiActionsExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["ui_actions_explorer"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "uiActionsExamples"],
+  "optionalPlugins": []
+}

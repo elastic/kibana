@@ -15,6 +15,7 @@ exports[`props iconType 1`] = `
   }
   layout="horizontal"
   title="Great tutorial"
+  titleSize="xs"
 />
 `;
 
@@ -34,6 +35,7 @@ exports[`props iconUrl 1`] = `
   }
   layout="horizontal"
   title="Great tutorial"
+  titleSize="xs"
 />
 `;
 
@@ -46,6 +48,7 @@ exports[`props isBeta 1`] = `
   href="link_to_item"
   layout="horizontal"
   title="Great tutorial"
+  titleSize="xs"
 />
 `;
 
@@ -58,5 +61,6 @@ exports[`render 1`] = `
   href="link_to_item"
   layout="horizontal"
   title="Great tutorial"
+  titleSize="xs"
 />
 `;

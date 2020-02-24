@@ -49,6 +49,8 @@ export class ArrayType<T> extends Type<T[]> {
       case 'any.required':
       case 'array.base':
         return `expected value of type [array] but got [${typeDetect(value)}]`;
+      case 'array.parse':
+        return `could not parse array value from [${value}]`;
       case 'array.min':
         return `array size is [${value.length}], but cannot be smaller than [${limit}]`;
       case 'array.max':

@@ -20,13 +20,13 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
+  Filter,
   TimeRange,
   FilterManager,
-  onlyDisabledFiltersChanged,
-  generateFilters,
   getTime,
   Query,
   IFieldType,
@@ -43,13 +43,11 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
 import {
-  Adapters,
   angular,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
   IndexPattern,
-  RequestAdapter,
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -98,7 +96,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
-  private prevFilters?: esFilters.Filter[];
+  private prevFilters?: Filter[];
   private prevQuery?: Query;
 
   constructor(
@@ -112,7 +110,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: TExecuteTriggerActions,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
     parent?: Container
   ) {
     super(
@@ -237,7 +235,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id!);
+      let filters = esFilters.generateFilters(
+        this.filterManager,
+        field,
+        value,
+        operator,
+        indexPattern.id!
+      );
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
@@ -266,7 +270,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
     searchSource.setField(
       'sort',
-      getSortForSearchSource(this.searchScope.sort, this.searchScope.indexPattern)
+      getSortForSearchSource(
+        this.searchScope.sort,
+        this.searchScope.indexPattern,
+        getServices().uiSettings.get('discover:sort:defaultOrder')
+      )
     );
 
     // Log request to inspector
@@ -313,7 +321,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     const isFetchRequired =
-      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
       !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);

@@ -16,7 +16,7 @@
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
 export function prefixIndexPattern(config, indexPattern, ccs) {
-  const ccsEnabled = config.get('xpack.monitoring.ccs.enabled');
+  const ccsEnabled = config.get('monitoring.ui.ccs.enabled');
 
   if (!ccsEnabled || !ccs) {
     return indexPattern;

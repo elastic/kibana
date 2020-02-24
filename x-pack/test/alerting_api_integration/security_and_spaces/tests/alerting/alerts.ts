@@ -147,6 +147,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference,
                 source: 'action:test.index-record',
               });
+
+              await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -752,8 +754,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        // Flaky: https://github.com/elastic/kibana/issues/54125
-        it.skip(`should unmute all instances when unmuting an alert`, async () => {
+        it(`should unmute all instances when unmuting an alert`, async () => {
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({

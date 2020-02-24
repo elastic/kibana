@@ -6,14 +6,17 @@
 
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
+import { Logger, CoreStart } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 
 export interface TaskRunnerContext {
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  logger: Logger;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
+  getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
 }
 
 export class TaskRunnerFactory {
@@ -40,9 +43,11 @@ export class TaskRunnerFactory {
 
     const { actionExecutor } = this;
     const {
+      logger,
       encryptedSavedObjectsPlugin,
       spaceIdToNamespace,
       getBasePath,
+      getScopedSavedObjectsClient,
     } = this.taskRunnerContext!;
 
     return {
@@ -85,6 +90,7 @@ export class TaskRunnerFactory {
           actionId,
           request: fakeRequest,
         });
+
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
@@ -92,6 +98,17 @@ export class TaskRunnerFactory {
             executorResult.message,
             executorResult.data,
             executorResult.retry == null ? false : executorResult.retry
+          );
+        }
+
+        // Cleanup action_task_params object now that we're done with it
+        try {
+          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
           );
         }
       },

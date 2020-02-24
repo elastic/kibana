@@ -18,7 +18,6 @@
  */
 
 import { config } from './config';
-import { Env } from '../config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -49,12 +48,6 @@ export interface ICspConfig {
    * in a `Content-Security-Policy` header.
    */
   readonly header: string;
-
-  /**
-   * Flag indicating that the configuraion changes the csp
-   * rules from the defaults
-   */
-  readonly rulesChangedFromDefault: boolean;
 }
 
 /**
@@ -62,37 +55,23 @@ export interface ICspConfig {
  * @public
  */
 export class CspConfig implements ICspConfig {
+  static readonly DEFAULT = new CspConfig();
+
   public readonly rules: string[];
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly header: string;
-  public readonly rulesChangedFromDefault: boolean;
 
   /**
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(env: Env, rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>) {
+  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
-    this.rules = source.rules.map(rule => {
-      // if we receive an env, and it indicates that this isn't a distributable, add `blob:` to the style csp rules
-      if (env && !env.packageInfo.dist && rule.startsWith('style-src ')) {
-        return rule.replace(/^style-src /, 'style-src blob: ');
-      }
-
-      return rule;
-    });
+    this.rules = source.rules;
     this.strict = source.strict;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.header = this.rules.join('; ');
-
-    // only check to see if the csp values are customized when `rawCspConfig` was received.
-    if (!rawCspConfig) {
-      this.rulesChangedFromDefault = false;
-    } else {
-      const defaultCsp = new CspConfig(env);
-      this.rulesChangedFromDefault = defaultCsp.header !== this.header;
-    }
+    this.header = source.rules.join('; ');
   }
 }

@@ -6,7 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
@@ -29,7 +29,7 @@ import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
-import { filterAlertsNetwork } from './navigation/alerts_query_tab_body';
+import { filterNetworkData } from './navigation/alerts_query_tab_body';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
@@ -38,7 +38,7 @@ import { NetworkRouteType } from './navigation/types';
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
 
-const NetworkComponent = React.memo<NetworkComponentProps>(
+const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
   ({
     filters,
     query,
@@ -54,9 +54,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams();
 
-    const networkFilters = useMemo(() => {
+    const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
+        return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
       }
       return filters;
     }, [tabName, filters]);
@@ -76,7 +76,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: networkFilters,
+              filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -133,7 +139,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiSpacer />
 
                       <NetworkRoutes
-                        filterQuery={filterQuery}
+                        filterQuery={tabsFilterQuery}
                         from={from}
                         isInitializing={isInitializing}
                         indexPattern={indexPattern}
@@ -177,6 +183,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const Network = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(NetworkComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const Network = connector(NetworkComponent);

@@ -27,8 +27,8 @@ import { FetchResult, NewsfeedPluginInjectedConfig } from '../types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
-export type Setup = void;
-export type Start = void;
+export type Setup = object;
+export type Start = object;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
@@ -38,7 +38,9 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): Setup {}
+  public setup(core: CoreSetup): Setup {
+    return {};
+  }
 
   public start(core: CoreStart): Start {
     const api$ = this.fetchNewsfeed(core);
@@ -46,6 +48,8 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
       order: 1000,
       mount: target => this.mount(api$, target),
     });
+
+    return {};
   }
 
   public stop() {

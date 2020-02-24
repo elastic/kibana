@@ -86,9 +86,9 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, euiUtils, uiSettings } = useAppContext();
+  const { createTimeBuckets, theme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartsTheme = euiUtils.useChartsTheme();
+  const chartsTheme = theme.useChartsTheme();
   const {
     index,
     timeField,
@@ -180,7 +180,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={error as Error}
+          error={(error as unknown) as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>

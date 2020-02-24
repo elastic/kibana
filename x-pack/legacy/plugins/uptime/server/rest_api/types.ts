@@ -15,7 +15,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'kibana/server';
+} from 'src/core/server';
 import { UMServerLibs } from '../lib/lib';
 
 /**

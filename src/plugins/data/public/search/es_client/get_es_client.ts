@@ -25,8 +25,7 @@ import { BehaviorSubject } from 'rxjs';
 export function getEsClient(
   injectedMetadata: CoreStart['injectedMetadata'],
   http: CoreStart['http'],
-  packageInfo: PackageInfo,
-  loadingCount$: BehaviorSubject<number>
+  packageInfo: PackageInfo
 ) {
   const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
   const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
@@ -38,6 +37,9 @@ export function getEsClient(
     requestTimeout: esRequestTimeout,
     apiVersion: esApiVersion,
   });
+
+  const loadingCount$ = new BehaviorSubject(0);
+  http.addLoadingCountSource(loadingCount$);
 
   return {
     search: wrapEsClientMethod(client, 'search', loadingCount$),

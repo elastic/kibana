@@ -15,7 +15,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
-  const kibanaServer = getService('kibanaServer');
 
   describe('OpenID Connect Implicit Flow authentication', () => {
     describe('finishing handshake', () => {
@@ -57,17 +56,12 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         await (dom.window as Record<string, any>).__isScriptExecuted__;
-        const isDist = await kibanaServer.status.isDistributable();
 
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          [
-            `script-src 'unsafe-eval' 'self';`,
-            `worker-src blob: 'self';`,
-            `style-src ${isDist ? '' : 'blob: '}'unsafe-inline' 'self'`,
-          ].join(' ')
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.
@@ -148,6 +142,7 @@ export default function({ getService }: FtrProviderContext) {
           'enabled',
           'authentication_realm',
           'lookup_realm',
+          'authentication_provider',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');

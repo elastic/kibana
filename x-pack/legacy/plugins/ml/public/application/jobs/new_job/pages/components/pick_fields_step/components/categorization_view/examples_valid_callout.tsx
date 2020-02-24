@@ -56,7 +56,11 @@ export const ExamplesValidCallout: FC<Props> = ({
   }
 
   return (
-    <EuiCallOut color={color} title={title}>
+    <EuiCallOut
+      color={color}
+      title={title}
+      data-test-subj={`mlJobWizardCategorizationExamplesCallout ${overallValidStatus}`}
+    >
       {validationChecks.map((v, i) => (
         <div key={i}>{v.message}</div>
       ))}

@@ -42,6 +42,7 @@ export class StartDatafeedModal extends Component {
       allowCreateWatch: false,
       initialSpecifiedStartTime: now,
       now,
+      timeRangeValid: true,
     };
 
     this.initialSpecifiedStartTime = now;
@@ -75,6 +76,10 @@ export class StartDatafeedModal extends Component {
 
   closeModal = () => {
     this.setState({ isModalVisible: false });
+  };
+
+  setTimeRangeValid = timeRangeValid => {
+    this.setState({ timeRangeValid });
   };
 
   showModal = (jobs, showCreateWatchFlyout) => {
@@ -116,10 +121,19 @@ export class StartDatafeedModal extends Component {
   };
 
   render() {
-    const { jobs, initialSpecifiedStartTime, startTime, endTime, createWatch, now } = this.state;
+    const {
+      jobs,
+      initialSpecifiedStartTime,
+      startTime,
+      endTime,
+      createWatch,
+      now,
+      timeRangeValid,
+    } = this.state;
     const startableJobs = jobs !== undefined ? jobs.filter(j => j.hasDatafeed) : [];
     // disable start button if the start and end times are the same
-    const startDisabled = startTime !== undefined && startTime === endTime;
+    const startDisabled =
+      timeRangeValid === false || (startTime !== undefined && startTime === endTime);
     let modal;
 
     if (this.state.isModalVisible) {
@@ -151,6 +165,7 @@ export class StartDatafeedModal extends Component {
                 setStartTime={this.setStartTime}
                 setEndTime={this.setEndTime}
                 now={now}
+                setTimeRangeValid={this.setTimeRangeValid}
               />
               {this.state.endTime === undefined && (
                 <div className="create-watch">

@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../features/public';
 // These modules should be moved into a common directory
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -28,6 +27,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
+import { Space } from '../../../../../spaces/public';
 
 const buildFeatures = () => {
   return [
@@ -155,7 +155,7 @@ function getProps({
 
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
-  http.get.mockImplementation(async path => {
+  http.get.mockImplementation(async (path: any) => {
     if (path === '/api/features') {
       return buildFeatures();
     }
@@ -509,7 +509,7 @@ describe('<EditRolePage />', () => {
 
   it('can render if features are not available', async () => {
     const { http } = coreMock.createStart();
-    http.get.mockImplementation(async path => {
+    http.get.mockImplementation(async (path: any) => {
       if (path === '/api/features') {
         const error = { response: { status: 404 } };
         throw error;

@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  ChromeStart,
-  DocLinksStart,
-  HttpSetup,
-  ToastsSetup,
-  IUiSettingsClient,
-} from 'kibana/public';
+import React, { useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
+import { DocLinksStart, HttpSetup, ToastsSetup, IUiSettingsClient } from 'kibana/public';
 
 import {
   HashRouter,
@@ -26,6 +21,8 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
+
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
@@ -33,6 +30,7 @@ import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -40,19 +38,23 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
-  chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  euiUtils: any;
+  theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
-  getLicenseStatus: () => LicenseStatus;
-  MANAGEMENT_BREADCRUMB: any;
+  licenseStatus$: Observable<LicenseStatus>;
+  setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
 }
 
 export const App = (deps: AppDeps) => {
-  const { valid, message } = deps.getLicenseStatus();
+  const [{ valid, message }, setLicenseStatus] = useState<LicenseStatus>({ valid: true });
+
+  useEffect(() => {
+    const s = deps.licenseStatus$.subscribe(setLicenseStatus);
+    return () => s.unsubscribe();
+  }, [deps.licenseStatus$]);
 
   if (!valid) {
     return (

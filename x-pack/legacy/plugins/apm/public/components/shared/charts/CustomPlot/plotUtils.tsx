@@ -11,9 +11,12 @@ import d3 from 'd3';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
+import {
+  TimeSeries,
+  Coordinate
+} from '../../../../../../../../plugins/apm/typings/timeseries';
 import { unit } from '../../../../style/variables';
-import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
+import { getDomainTZ, getTimeTicksTZ } from '../helper/timezone';
 
 const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {
@@ -73,7 +76,6 @@ export function getPlotValues(
   );
 
   const xMin = d3.min(flattenedCoordinates, d => d.x);
-
   const xMax = d3.max(flattenedCoordinates, d => d.x);
 
   if (yMax === 'max') {
@@ -83,9 +85,7 @@ export function getPlotValues(
     yMin = d3.min(flattenedCoordinates, d => d.y ?? 0);
   }
 
-  const [xMinZone, xMaxZone] = [xMin, xMax].map(x => {
-    return x - getTimezoneOffsetInMs(x);
-  });
+  const [xMinZone, xMaxZone] = getDomainTZ(xMin, xMax);
 
   const xScale = getXScale(xMin, xMax, width);
   const yScale = getYScale(yMin, yMax);
@@ -97,15 +97,11 @@ export function getPlotValues(
   // d3 will determine the exact number of ticks based on the selected range
   const xTickTotal = Math.floor(width / 100);
 
-  const xTickValues = d3.time.scale
-    .utc()
-    .domain([xMinZone, xMaxZone])
-    .range([0, width])
-    .ticks(xTickTotal)
-    .map(x => {
-      const time = x.getTime();
-      return new Date(time + getTimezoneOffsetInMs(time));
-    });
+  const xTickValues = getTimeTicksTZ({
+    domain: [xMinZone, xMaxZone],
+    totalTicks: xTickTotal,
+    width
+  });
 
   return {
     x: xScale,

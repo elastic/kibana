@@ -19,7 +19,6 @@
 
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
-jest.mock('ui/vis/index.js');
 jest.mock('ui/vis/vis_factory');
 jest.mock('ui/registry/vis_types');
 jest.mock('./types/vis_type_alias_registry');
@@ -48,12 +47,16 @@ const createStartContract = (): VisualizationsStart => ({
     all: jest.fn(),
     getAliases: jest.fn(),
   },
+  getSavedVisualizationsLoader: jest.fn(),
+  showNewVisModal: jest.fn(),
+  Vis: jest.fn(),
 });
 
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
   const setup = plugin.setup(coreMock.createSetup(), {
+    data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),

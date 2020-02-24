@@ -7,12 +7,8 @@ import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
-
-import { npSetup } from 'ui/new_platform';
-import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { Action, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
 
 import {
   ViewMode,
@@ -22,11 +18,9 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
 import { ISearchEmbeddable } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
 
-import { API_BASE_URL_V1 } from '../../common/constants';
+import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
 
-const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
-
-const CSV_REPORTING_ACTION = 'downloadCsvReport';
+const { core } = npStart;
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -38,7 +32,7 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-class GetCsvReportPanelAction implements IAction<ActionContext> {
+class GetCsvReportPanelAction implements Action<ActionContext> {
   private isDownloading: boolean;
   public readonly type = CSV_REPORTING_ACTION;
   public readonly id = CSV_REPORTING_ACTION;
@@ -71,12 +65,6 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
   }
 
   public isCompatible = async (context: ActionContext) => {
-    const enablePanelActionDownload = chrome.getInjected('enablePanelActionDownload');
-
-    if (!enablePanelActionDownload) {
-      return false;
-    }
-
     const { embeddable } = context;
 
     return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
@@ -100,7 +88,7 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
     const searchEmbeddable = embeddable;
     const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
     const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
-    const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+    const kibanaTimezone = core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
     const filename = embeddable.getTitle();
@@ -125,7 +113,7 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
 
     this.isDownloading = true;
 
-    toastNotifications.addSuccess({
+    core.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
@@ -135,7 +123,8 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
       'data-test-subj': 'csvDownloadStarted',
     });
 
-    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
+    await core.http
+      .post(`${API_GENERATE_IMMEDIATE}/${id}`, { body })
       .then((rawResponse: string) => {
         this.isDownloading = false;
 
@@ -162,7 +151,7 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
 
   private onGenerationFail(error: Error) {
     this.isDownloading = false;
-    toastNotifications.addDanger({
+    core.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
       }),
@@ -175,5 +164,6 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
 }
 
 const action = new GetCsvReportPanelAction();
+
 npSetup.plugins.uiActions.registerAction(action);
 npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);

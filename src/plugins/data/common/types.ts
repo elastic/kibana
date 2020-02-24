@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export * from './field_formats/types';
 export * from './timefilter/types';
 export * from './query/types';
 export * from './kbn_field_types/types';
 export * from './index_patterns/types';
+export { TextContextTypeConvert, IFieldFormatMetaParams } from './field_formats/types';

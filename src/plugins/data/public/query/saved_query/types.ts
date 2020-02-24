@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RefreshInterval, TimeRange, Query, esFilters } from '../..';
+import { RefreshInterval, TimeRange, Query, Filter } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;
@@ -32,7 +32,7 @@ export interface SavedQueryAttributes {
   title: string;
   description: string;
   query: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
 }
 

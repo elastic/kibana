@@ -6,42 +6,44 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
-import styled from 'styled-components';
+import React, { useEffect, useMemo } from 'react';
 
-import {
-  ERROR_FETCHING_ALERTS_DATA,
-  SHOWING,
-  UNIT,
-} from '../../../components/alerts_viewer/translations';
-import { alertsStackByOptions } from '../../../components/alerts_viewer';
+import { Position } from '@elastic/charts';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { SHOWING, UNIT } from '../../../components/alerts_viewer/translations';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
-import { SetAbsoluteRangeDatePicker } from '../../network/types';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import { HostsType } from '../../../store/hosts/model';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
+import {
+  alertsStackByOptions,
+  histogramConfigs,
+} from '../../../components/alerts_viewer/histogram_configs';
+import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
 
 const ID = 'alertsByCategoryOverview';
 
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
+const DEFAULT_STACK_BY = 'event.module';
 
 interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   from: number;
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setQuery: (params: {
     id: string;
     inspect: inputsModel.InspectQuery | null;
@@ -51,80 +53,64 @@ interface Props {
   to: number;
 }
 
-const ViewAlertsButton = styled(EuiButton)`
-  margin-left: 8px;
-`;
+const AlertsByCategoryComponent: React.FC<Props> = ({
+  deleteQuery,
+  filters = NO_FILTERS,
+  from,
+  hideHeaderChildren = false,
+  indexPattern,
+  query = DEFAULT_QUERY,
+  setQuery,
+  to,
+}) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
 
-export const AlertsByCategory = React.memo<Props>(
-  ({
-    deleteQuery,
-    filters = NO_FILTERS,
-    from,
-    hideHeaderChildren = false,
-    indexPattern,
-    query = DEFAULT_QUERY,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-  }) => {
-    useEffect(() => {
-      return () => {
-        if (deleteQuery) {
-          deleteQuery({ id: ID });
-        }
-      };
-    }, []);
+  const kibana = useKibana();
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-    const kibana = useKibana();
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const alertsCountViewAlertsButton = useMemo(
+    () => <EuiButton href={getDetectionEngineAlertUrl()}>{i18n.VIEW_ALERTS}</EuiButton>,
+    []
+  );
 
-    const updateDateRangeCallback = useCallback(
-      (min: number, max: number) => {
-        setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-    const alertsCountViewAlertsButton = useMemo(
-      () => (
-        <ViewAlertsButton href={getDetectionEngineAlertUrl()}>{i18n.VIEW_ALERTS}</ViewAlertsButton>
-      ),
-      []
-    );
-
-    const getSubtitle = useCallback(
-      (totalCount: number) =>
+  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      defaultStackByOption:
+        alertsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
+      getSubtitle: (totalCount: number) =>
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
-      []
-    );
+      legendPosition: Position.Right,
+    }),
+    []
+  );
 
-    return (
-      <MatrixHistogramContainer
-        dataKey="AlertsHistogram"
-        defaultStackByOption={alertsStackByOptions[0]}
-        endDate={to}
-        errorMessage={ERROR_FETCHING_ALERTS_DATA}
-        filterQuery={convertToBuildEsQuery({
-          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-          indexPattern,
-          queries: [query],
-          filters,
-        })}
-        headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
-        id={ID}
-        isAlertsHistogram={true}
-        legendPosition={'right'}
-        query={MatrixHistogramGqlQuery}
-        setQuery={setQuery}
-        sourceId="default"
-        stackByOptions={alertsStackByOptions}
-        startDate={from}
-        title={i18n.ALERTS_GRAPH_TITLE}
-        subtitle={getSubtitle}
-        type={HostsType.page}
-        updateDateRange={updateDateRangeCallback}
-      />
-    );
-  }
-);
+  return (
+    <MatrixHistogramContainer
+      endDate={to}
+      filterQuery={convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      })}
+      headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
+      id={ID}
+      setQuery={setQuery}
+      sourceId="default"
+      startDate={from}
+      type={HostsType.page}
+      {...alertsByCategoryHistogramConfigs}
+    />
+  );
+};
 
-AlertsByCategory.displayName = 'AlertsByCategory';
+AlertsByCategoryComponent.displayName = 'AlertsByCategoryComponent';
+
+export const AlertsByCategory = React.memo(AlertsByCategoryComponent);

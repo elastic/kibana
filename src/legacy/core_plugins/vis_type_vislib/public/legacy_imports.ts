@@ -17,16 +17,10 @@
  * under the License.
  */
 
-export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
-export { Schemas } from 'ui/vis/editors/default/schemas';
-export { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
-export { ColorSchema, ColorSchemas, colorSchemas, getHeatmapColors } from 'ui/color_maps';
-export { AggConfig, Vis, VisParams } from 'ui/vis';
-export { AggType } from 'ui/agg_types';
+export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
 // @ts-ignore
-export { SimpleEmitter } from 'ui/utils/simple_emitter';
+export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore
-export { Binder } from 'ui/binder';
-export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
-// @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

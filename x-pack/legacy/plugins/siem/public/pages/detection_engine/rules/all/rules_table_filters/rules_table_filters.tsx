@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
@@ -21,6 +22,8 @@ import { TagsFilterPopover } from './tags_filter_popover';
 
 interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
+  rulesCustomInstalled: number | null;
+  rulesInstalled: number | null;
 }
 
 /**
@@ -29,7 +32,11 @@ interface RulesTableFiltersProps {
  *
  * @param onFilterChanged change listener to be notified on filter changes
  */
-const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps) => {
+const RulesTableFiltersComponent = ({
+  onFilterChanged,
+  rulesCustomInstalled,
+  rulesInstalled,
+}: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
@@ -53,6 +60,15 @@ const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps)
     setShowElasticRules(false);
   }, [setShowElasticRules, showCustomRules, setShowCustomRules]);
 
+  const handleSelectedTags = useCallback(
+    newTags => {
+      if (!isEqual(newTags, selectedTags)) {
+        setSelectedTags(newTags);
+      }
+    },
+    [selectedTags]
+  );
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
@@ -68,9 +84,10 @@ const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps)
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover
-            tags={tags}
-            onSelectedTagsChanged={setSelectedTags}
             isLoading={isLoadingTags}
+            onSelectedTagsChanged={handleSelectedTags}
+            selectedTags={selectedTags}
+            tags={tags}
           />
         </EuiFilterGroup>
       </EuiFlexItem>
@@ -84,13 +101,17 @@ const RulesTableFiltersComponent = ({ onFilterChanged }: RulesTableFiltersProps)
             withNext
           >
             {i18n.ELASTIC_RULES}
+            {rulesInstalled != null ? ` (${rulesInstalled})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={showCustomRules}
             onClick={handleCustomRulesClick}
             data-test-subj="show-custom-rules-filter-button"
           >
-            {i18n.CUSTOM_RULES}
+            <>
+              {i18n.CUSTOM_RULES}
+              {rulesCustomInstalled != null ? ` (${rulesCustomInstalled})` : ''}
+            </>
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>

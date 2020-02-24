@@ -36,6 +36,8 @@ const registerHandlers = () => {
     2: 'update',
     3: 'get',
     4: 'delete',
+    5: 'pause',
+    6: 'resume',
   };
 
   const server = {
@@ -225,6 +227,84 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       const response = await routeHandler({ params: { id: 'a,b' } });
 
       expect(response.itemsDeleted).toEqual(['a']);
+      expect(response.errors[0].id).toEqual('b');
+    });
+  });
+
+  describe('pause()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.pause;
+    });
+
+    it('accept a single item', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a' } });
+
+      expect(response.itemsPaused).toEqual(['a']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of items to pause', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a,b,c' } });
+
+      expect(response.itemsPaused).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: 'a,b' } });
+
+      expect(response.itemsPaused).toEqual(['a']);
+      expect(response.errors[0].id).toEqual('b');
+    });
+  });
+
+  describe('resume()', () => {
+    beforeEach(() => {
+      resetHttpRequestResponses();
+      routeHandler = routeHandlers.resume;
+    });
+
+    it('accept a single item', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a' } });
+
+      expect(response.itemsResumed).toEqual(['a']);
+      expect(response.errors).toEqual([]);
+    });
+
+    it('should accept a list of items to pause', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+
+      const response = await routeHandler({ params: { id: 'a,b,c' } });
+
+      expect(response.itemsResumed).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should catch error and return them in array', async () => {
+      const error = new Error('something went wrong');
+      error.response = '{ "error": {} }';
+
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(error);
+
+      const response = await routeHandler({ params: { id: 'a,b' } });
+
+      expect(response.itemsResumed).toEqual(['a']);
       expect(response.errors[0].id).toEqual('b');
     });
   });

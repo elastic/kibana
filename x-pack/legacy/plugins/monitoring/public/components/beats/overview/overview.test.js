@@ -14,6 +14,12 @@ jest.mock('../../', () => ({
   MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
 }));
 
+jest.mock('../../../np_imports/ui/chrome', () => {
+  return {
+    getBasePath: () => '',
+  };
+});
+
 import { BeatsOverview } from './overview';
 
 describe('Overview', () => {

@@ -31,7 +31,12 @@ export const DEFAULT_API_VERSION = 'master';
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
-const configSchema = schema.object({
+/**
+ * Validation schema for elasticsearch service config. It can be reused when plugins allow users
+ * to specify a local elasticsearch config.
+ * @public
+ */
+export const configSchema = schema.object({
   sniffOnStart: schema.boolean({ defaultValue: false }),
   sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
     defaultValue: false,
@@ -103,7 +108,19 @@ const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-  ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
+  ignoreVersionMismatch: schema.conditional(
+    schema.contextRef('dev'),
+    false,
+    schema.boolean({
+      validate: rawValue => {
+        if (rawValue === true) {
+          return '"ignoreVersionMismatch" can only be set to true in development mode';
+        }
+      },
+      defaultValue: false,
+    }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -136,6 +153,10 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
   deprecations,
 };
 
+/**
+ * Wrapper of config schema.
+ * @public
+ */
 export class ElasticsearchConfig {
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.

@@ -30,6 +30,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { ControlEditor } from './control_editor';
 import {
   addControl,
@@ -42,8 +44,6 @@ import {
   ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
-import { VisOptionsProps } from '../../legacy_imports';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ControlsTabUiState {

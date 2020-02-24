@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { registerTestBed } from '../../../../../../../test_utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+const startMock = coreMock.createStart();
+
 jest.mock('ui/new_platform');
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => {},
-  breadcrumbs: { set: () => {} },
-  getInjected: key => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {},
-      };
-    }
-  },
-}));
 
 jest.mock('../../services', () => {
   const services = require.requireActual('../../services');
@@ -40,7 +32,16 @@ const defaultProps = {
   isLoading: false,
 };
 
-const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
+const services = {
+  setBreadcrumbs: startMock.chrome.setBreadcrumbs,
+};
+const Component = props => (
+  <KibanaContextProvider services={services}>
+    <JobList {...props} />
+  </KibanaContextProvider>
+);
+
+const initTestBed = registerTestBed(Component, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
@@ -53,21 +54,21 @@ describe('<JobList />', () => {
     const { component, exists } = initTestBed({ isLoading: true });
 
     expect(exists('jobListLoading')).toBeTruthy();
-    expect(component.find('JobTableUi').length).toBeFalsy();
+    expect(component.find('JobTable').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
     const { component, exists } = initTestBed({ hasJobs: true });
 
     expect(exists('jobListLoading')).toBeFalsy();
-    expect(component.find('JobTableUi').length).toBeTruthy();
+    expect(component.find('JobTable').length).toBeTruthy();
   });
 
   describe('when there is an API error', () => {
     const { exists, find } = initTestBed({
       jobLoadError: {
         status: 400,
-        data: { statusCode: 400, error: 'Houston we got a problem.' },
+        body: { statusCode: 400, error: 'Houston we got a problem.' },
       },
     });
 

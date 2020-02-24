@@ -6,7 +6,7 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { OverviewHostData } from '../../../../graphql/types';
@@ -117,11 +117,24 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
     id: 'filebeatSystemModule',
   },
   {
-    count: data.winlogbeat ?? 0,
+    count: data.winlogbeatSecurity ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatSecurityTitle"
+        defaultMessage="Security"
+      />
     ),
-    id: 'winlogbeat',
+    id: 'winlogbeatSecurity',
+  },
+  {
+    count: data.winlogbeatMWSysmonOperational ?? 0,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+        defaultMessage="Microsoft-Windows-Sysmon/Operational"
+      />
+    ),
+    id: 'winlogbeatMWSysmonOperational',
   },
 ];
 
@@ -182,7 +195,7 @@ const hostStatGroups: StatGroup[] = [
         defaultMessage="Winlogbeat"
       />
     ),
-    statIds: ['winlogbeat'],
+    statIds: ['winlogbeatSecurity', 'winlogbeatMWSysmonOperational'],
   },
 ];
 
@@ -190,7 +203,11 @@ const Title = styled.div`
   margin-left: 24px;
 `;
 
-export const OverviewHostStats = React.memo<OverviewHostProps>(({ data, loading }) => {
+const AccordionContent = styled.div`
+  margin-top: 8px;
+`;
+
+const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading }) => {
   const allHostStats = getOverviewHostStats(data);
   const allHostStatsCount = allHostStats.reduce((total, stat) => total + stat.count, 0);
 
@@ -200,56 +217,55 @@ export const OverviewHostStats = React.memo<OverviewHostProps>(({ data, loading 
         const statsForGroup = allHostStats.filter(s => statGroup.statIds.includes(s.id));
         const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
 
-        const accordionButton = useMemo(
-          () => (
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText>{statGroup.name}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <StatValue
-                  count={statsForGroupCount}
-                  isGroupStat={true}
-                  isLoading={loading}
-                  max={allHostStatsCount}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          [statGroup, statsForGroupCount, loading, allHostStatsCount]
-        );
-
         return (
           <React.Fragment key={statGroup.groupId}>
+            <EuiHorizontalRule margin="xs" />
             <EuiAccordion
               id={`host-stat-accordion-group${statGroup.groupId}`}
-              buttonContent={accordionButton}
-              buttonContentClassName="accordion-button"
-            >
-              {statsForGroup.map(stat => (
-                <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+              buttonContent={
+                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="s">
-                      <Title>{stat.title}</Title>
-                    </EuiText>
+                    <EuiText>{statGroup.name}</EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem data-test-subj={`host-stat-${stat.id}`} grow={false}>
+                  <EuiFlexItem grow={false}>
                     <StatValue
-                      count={stat.count}
-                      isGroupStat={false}
+                      count={statsForGroupCount}
+                      isGroupStat={true}
                       isLoading={loading}
-                      max={statsForGroupCount}
+                      max={allHostStatsCount}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ))}
+              }
+              buttonContentClassName="accordion-button"
+            >
+              <AccordionContent>
+                {statsForGroup.map(stat => (
+                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="s">
+                        <Title>{stat.title}</Title>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem data-test-subj={`host-stat-${stat.id}`} grow={false}>
+                      <StatValue
+                        count={stat.count}
+                        isGroupStat={false}
+                        isLoading={loading}
+                        max={statsForGroupCount}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
+              </AccordionContent>
             </EuiAccordion>
-            {i !== hostStatGroups.length - 1 && <EuiHorizontalRule margin="xs" />}
           </React.Fragment>
         );
       })}
     </HostStatsContainer>
   );
-});
+};
 
-OverviewHostStats.displayName = 'OverviewHostStats';
+OverviewHostStatsComponent.displayName = 'OverviewHostStatsComponent';
+
+export const OverviewHostStats = React.memo(OverviewHostStatsComponent);

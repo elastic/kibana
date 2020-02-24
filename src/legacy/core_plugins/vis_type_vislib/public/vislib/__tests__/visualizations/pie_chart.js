@@ -22,13 +22,13 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-
-import fixtures from 'fixtures/fake_hierarchical_data';
+import { threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
+import { start as visualizationsStart } from '../../../../../visualizations/public/np_ready/public/legacy';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
-import { Vis, tabifyAggResponse } from '../../../legacy_imports';
+import { tabifyAggResponse } from '../../../legacy_imports';
+import { vislibSlicesResponseHandler } from '../../response_handler';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -130,10 +130,10 @@ describe('No global chart settings', function() {
     chart1 = getVis(visLibParams1);
     mockUiState = getMockUiState();
     indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-    responseHandler = vislibSlicesResponseHandlerProvider().handler;
+    responseHandler = vislibSlicesResponseHandler;
 
     let id1 = 1;
-    stubVis1 = new Vis(indexPattern, {
+    stubVis1 = new visualizationsStart.Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg,
     });
@@ -147,7 +147,7 @@ describe('No global chart settings', function() {
   });
 
   beforeEach(async () => {
-    const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, {
+    const table1 = tabifyAggResponse(stubVis1.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
     data1 = await responseHandler(table1, rowAggDimensions);
@@ -219,10 +219,10 @@ describe('Vislib PieChart Class Test Suite', function() {
         vis = getVis(visLibParams);
         mockUiState = getMockUiState();
         indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-        responseHandler = vislibSlicesResponseHandlerProvider().handler;
+        responseHandler = vislibSlicesResponseHandler;
 
         let id = 1;
-        stubVis = new Vis(indexPattern, {
+        stubVis = new visualizationsStart.Vis(indexPattern, {
           type: 'pie',
           aggs: dataAgg,
         });
@@ -234,7 +234,7 @@ describe('Vislib PieChart Class Test Suite', function() {
       });
 
       beforeEach(async () => {
-        const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, {
+        const table = tabifyAggResponse(stubVis.aggs, threeTermBuckets, {
           metricsAtAllLevels: true,
         });
         data = await responseHandler(table, dataDimensions);

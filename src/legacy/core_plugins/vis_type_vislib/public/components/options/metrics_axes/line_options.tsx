@@ -22,7 +22,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { Vis } from '../../../legacy_imports';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { SeriesParam } from '../../../types';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../common';
 import { SetChart } from './chart_options';

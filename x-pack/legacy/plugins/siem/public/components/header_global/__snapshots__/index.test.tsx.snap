@@ -9,62 +9,11 @@ exports[`HeaderGlobal it renders 1`] = `
     justifyContent="spaceBetween"
     wrap={true}
   >
-    <FlexItem>
-      <EuiFlexGroup
-        alignItems="center"
-        responsive={false}
-      >
-        <FlexItem
-          grow={false}
-        >
-          <EuiLink
-            href="#/link-to/overview"
-          >
-            <EuiIcon
-              aria-label="SIEM"
-              size="l"
-              type="securityAnalyticsApp"
-            />
-          </EuiLink>
-        </FlexItem>
-        <FlexItem
-          component="nav"
-        >
-          <WithSource
-            sourceId="default"
-          >
-            <Component />
-          </WithSource>
-        </FlexItem>
-      </EuiFlexGroup>
-    </FlexItem>
-    <FlexItem
-      grow={false}
+    <WithSource
+      sourceId="default"
     >
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        wrap={true}
-      >
-        <FlexItem
-          grow={false}
-        >
-          <MlPopover />
-        </FlexItem>
-        <FlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="add-data"
-            href="kibana#home/tutorial_directory/siem"
-            iconType="plusInCircle"
-          >
-            Add data
-          </EuiButtonEmpty>
-        </FlexItem>
-      </EuiFlexGroup>
-    </FlexItem>
+      <Component />
+    </WithSource>
   </EuiFlexGroup>
 </Wrapper>
 `;

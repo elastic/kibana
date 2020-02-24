@@ -5,15 +5,11 @@
  */
 
 import * as Rx from 'rxjs';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-} from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
+import { ReportingCore } from '../../../../server';
+import { PNG_JOB_TYPE } from '../../../../common/constants';
+import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
@@ -25,12 +21,15 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingCore,
   server: ServerFacade,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
 ) {
+  const browserDriverFactory = await reporting.getBrowserDriverFactory();
   const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);

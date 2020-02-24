@@ -10,13 +10,14 @@ import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { isRumAgentName } from '../../../../../../../common/agent_name';
+import { isRumAgentName } from '../../../../../../../../../../plugins/apm/common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCount } from '../../ErrorCount';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
-import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID } from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { SyncBadge } from './SyncBadge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -231,6 +232,7 @@ export function WaterfallItem({
           </ErrorOverviewLink>
         ) : null}
         <Duration item={item} />
+        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
       </ItemText>
     </Container>
   );

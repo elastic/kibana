@@ -50,13 +50,21 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     }),
     euiIconType: '/plugins/kibana/home/tutorial_resources/logos/stan.svg',
     artifacts: {
-      dashboards: [],
+      dashboards: [
+        {
+          id: 'dbf2e220-37ce-11ea-a9c8-152a657da3ab',
+          linkLabel: i18n.translate('home.tutorials.stanMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Stan metrics dashboard',
+          }),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-stan.html',
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

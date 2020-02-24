@@ -30,7 +30,6 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'ui/color_maps';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';
@@ -41,9 +40,7 @@ import { localApplicationService } from 'plugins/kibana/local_application_servic
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
-uiModules
-  .get('kibana')
-  .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+npStart.plugins.kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
 
 localApplicationService.attachToAngular(routes);
 
@@ -56,10 +53,12 @@ chrome.setRootController('kibana', function() {
 
 uiModules.get('kibana').run(showAppRedirectNotification);
 
-// If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
-// show that dashboard, otherwise, we'll show the default dasbhoard landing page.
+/**
+ * If there is a configured `kibana.defaultAppId`, and it is a dashboard ID, we'll
+ * show that dashboard, otherwise, we'll show the default dasbhoard landing page.
+ */
 function defaultUrl() {
-  const defaultAppId = chrome.getInjected('kbnDefaultAppId', '');
+  const defaultAppId = npStart.plugins.kibanaLegacy.config.defaultAppId || '';
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());
   return isDashboardId ? `/${defaultAppId}` : DashboardConstants.LANDING_PAGE_PATH;
 }

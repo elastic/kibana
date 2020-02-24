@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
+export function getOtherCategoryLabel() {
+  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
+    defaultMessage: 'Other',
+  });
+}
+
 export function getComputedFieldName(styleName, fieldName) {
   return `${getComputedFieldNamePrefix(fieldName)}__${styleName}`;
 }
@@ -40,4 +48,25 @@ export function scaleValue(value, range) {
   }
 
   return (value - range.min) / range.delta;
+}
+
+export function assignCategoriesToPalette({ categories, paletteValues }) {
+  const stops = [];
+  let fallback = null;
+
+  if (categories && categories.length && paletteValues && paletteValues.length) {
+    const maxLength = Math.min(paletteValues.length, categories.length + 1);
+    fallback = paletteValues[maxLength - 1];
+    for (let i = 0; i < maxLength - 1; i++) {
+      stops.push({
+        stop: categories[i].key,
+        style: paletteValues[i],
+      });
+    }
+  }
+
+  return {
+    stops,
+    fallback,
+  };
 }

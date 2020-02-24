@@ -13,7 +13,7 @@ export const TACTIC = i18n.translate('xpack.siem.detectionEngine.mitreAttack.tac
 export const TECHNIQUE = i18n.translate(
   'xpack.siem.detectionEngine.mitreAttack.techniquesDescription',
   {
-    defaultMessage: 'technique',
+    defaultMessage: 'techniques',
   }
 );
 

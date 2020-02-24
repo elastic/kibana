@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ColorSchemas } from './legacy_imports';
 import { Range } from '../../../../plugins/expressions/public';
 import { SchemaConfig } from '../../visualizations/public';
 import { ColorModes, Labels, Style } from '../../vis_type_vislib/public';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export const visType = 'metric';
 

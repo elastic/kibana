@@ -7,23 +7,19 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
 
-import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
+import { Filter, esQuery } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
 import { HeaderSection } from '../../../../components/header_section';
-import { DispatchUpdateTimeline } from '../../../../components/open_timeline/types';
 import { combineQueries } from '../../../../components/timeline/helpers';
-import { TimelineNonEcsData } from '../../../../graphql/types';
 import { useKibana } from '../../../../lib/kibana';
-import { inputsSelectors, State } from '../../../../store';
-import { InputsRange } from '../../../../store/inputs/model';
+import { inputsSelectors, State, inputsModel } from '../../../../store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
+import { TimelineModel } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useApolloClient } from '../../../../utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
@@ -46,43 +42,16 @@ import {
   CreateTimelineProps,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
-  UpdateSignalsStatus,
+  UpdateSignalsStatusCallback,
   UpdateSignalsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
-const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
-
-interface ReduxProps {
-  globalQuery: Query;
-  globalFilters: esFilters.Filter[];
-  deletedEventIds: string[];
-  isSelectAllChecked: boolean;
-  loadingEventIds: string[];
-  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-}
-
-interface DispatchProps {
-  clearEventsDeleted?: ActionCreator<{ id: string }>;
-  clearEventsLoading?: ActionCreator<{ id: string }>;
-  clearSelected?: ActionCreator<{ id: string }>;
-  setEventsDeleted?: ActionCreator<{
-    id: string;
-    eventIds: string[];
-    isDeleted: boolean;
-  }>;
-  setEventsLoading?: ActionCreator<{
-    id: string;
-    eventIds: string[];
-    isLoading: boolean;
-  }>;
-  updateTimelineIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
-  updateTimeline: DispatchUpdateTimeline;
-}
+export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
 interface OwnProps {
   canUserCRUD: boolean;
-  defaultFilters?: esFilters.Filter[];
+  defaultFilters?: Filter[];
   hasIndexWrite: boolean;
   from: number;
   loading: boolean;
@@ -90,14 +59,14 @@ interface OwnProps {
   to: number;
 }
 
-type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
+type SignalsTableComponentProps = OwnProps & PropsFromRedux;
 
 const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-  defaultFilters = [],
+  defaultFilters,
   from,
   globalFilters,
   globalQuery,
@@ -118,7 +87,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
+  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+    signalsIndex !== '' ? [signalsIndex] : []
+  );
   const kibana = useKibana();
 
   const getGlobalQuery = useCallback(() => {
@@ -128,7 +99,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         dataProviders: [],
         indexPattern: indexPatterns,
         browserFields,
-        filters: globalFilters,
+        filters: isEmpty(defaultFilters)
+          ? globalFilters
+          : [...(defaultFilters ?? []), ...globalFilters],
         kqlQuery: globalQuery,
         kqlMode: globalQuery.language,
         start: from,
@@ -207,8 +180,8 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     setShowClearSelectionAction(true);
   }, [setSelectAll, setShowClearSelectionAction]);
 
-  const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
-    async ({ signalIds, status }: UpdateSignalsStatusProps) => {
+  const updateSignalsStatusCallback: UpdateSignalsStatusCallback = useCallback(
+    async (refetchQuery: inputsModel.Refetch, { signalIds, status }: UpdateSignalsStatusProps) => {
       await updateSignalStatusAction({
         query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
         signalIds: Object.keys(selectedEventIds),
@@ -216,6 +189,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
       });
+      refetchQuery();
     },
     [
       getGlobalQuery,
@@ -228,7 +202,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   // Callback for creating the SignalUtilityBar which receives totalCount from EventsViewer component
   const utilityBarCallback = useCallback(
-    (totalCount: number) => {
+    (refetchQuery: inputsModel.Refetch, totalCount: number) => {
       return (
         <SignalsUtilityBar
           canUserCRUD={canUserCRUD}
@@ -240,7 +214,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
           selectedEventIds={selectedEventIds}
           showClearSelection={showClearSelectionAction}
           totalCount={totalCount}
-          updateSignalsStatus={updateSignalsStatusCallback}
+          updateSignalsStatus={updateSignalsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
@@ -283,13 +257,16 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   );
 
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
-  const defaultFiltersMemo = useMemo(
-    () => [
-      ...defaultFilters,
-      ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
-    ],
-    [defaultFilters, filterGroup]
-  );
+  const defaultFiltersMemo = useMemo(() => {
+    if (isEmpty(defaultFilters)) {
+      return filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters;
+    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
+      return [
+        ...defaultFilters,
+        ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
+      ];
+    }
+  }, [defaultFilters, filterGroup]);
 
   const timelineTypeContext = useMemo(
     () => ({
@@ -302,6 +279,11 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       selectAll: canUserCRUD ? selectAll : false,
     }),
     [additionalActions, canUserCRUD, selectAll]
+  );
+
+  const headerFilterGroup = useMemo(
+    () => <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
+    [onFilterGroupChangedCallback]
   );
 
   if (loading || isEmpty(signalsIndex)) {
@@ -319,9 +301,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultModel={signalsDefaultModel}
       end={to}
-      headerFilterGroup={
-        <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-      }
+      headerFilterGroup={headerFilterGroup}
       id={SIGNALS_PAGE_TIMELINE_ID}
       start={from}
       timelineTypeContext={timelineTypeContext}
@@ -338,9 +318,8 @@ const makeMapStateToProps = () => {
       getTimeline(state, SIGNALS_PAGE_TIMELINE_ID) ?? timelineDefaults;
     const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
 
-    const globalInputs: InputsRange = getGlobalInputs(state);
+    const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
-
     return {
       globalQuery: query,
       globalFilters: filters,
@@ -382,7 +361,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const SignalsTable = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(React.memo(SignalsTableComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const SignalsTable = connector(React.memo(SignalsTableComponent));

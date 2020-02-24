@@ -111,7 +111,7 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
   };
 
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
+  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
     version.firstSeen,
     version.lastSeen,

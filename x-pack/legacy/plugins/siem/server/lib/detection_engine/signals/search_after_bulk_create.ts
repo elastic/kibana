@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
-import { AlertServices } from '../../../../../alerting/server/types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -19,8 +19,10 @@ interface SearchAfterAndBulkCreateParams {
   id: string;
   signalsIndex: string;
   name: string;
+  createdAt: string;
   createdBy: string;
   updatedBy: string;
+  updatedAt: string;
   interval: string;
   enabled: boolean;
   pageSize: number;
@@ -38,8 +40,10 @@ export const searchAfterAndBulkCreate = async ({
   signalsIndex,
   filter,
   name,
+  createdAt,
   createdBy,
   updatedBy,
+  updatedAt,
   interval,
   enabled,
   pageSize,
@@ -58,7 +62,9 @@ export const searchAfterAndBulkCreate = async ({
     id,
     signalsIndex,
     name,
+    createdAt,
     createdBy,
+    updatedAt,
     updatedBy,
     interval,
     enabled,
@@ -118,7 +124,9 @@ export const searchAfterAndBulkCreate = async ({
         id,
         signalsIndex,
         name,
+        createdAt,
         createdBy,
+        updatedAt,
         updatedBy,
         interval,
         enabled,

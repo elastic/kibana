@@ -38,9 +38,9 @@ import {
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
-export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createLineVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'line',
   title: i18n.translate('visTypeVislib.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',

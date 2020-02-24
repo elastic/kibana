@@ -6,8 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/network';
 import {
@@ -38,21 +37,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface UsersTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: UsersSortField;
-}
-
-interface UsersTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type UsersTableProps = OwnProps & UsersTableReduxProps & UsersTableDispatchProps;
+type UsersTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -159,9 +144,15 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const UsersTable = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   updateNetworkTable: networkActions.updateNetworkTable,
-})(UsersTableComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const UsersTable = connector(UsersTableComponent);
 
 const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   switch (sortField.field) {
