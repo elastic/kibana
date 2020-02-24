@@ -379,17 +379,17 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {post} /api/ml/anomaly_detectors/:jobId/results/buckets  Obtain bucket scores for the specified job ID
-   * @apiName GetOverallBuckets
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/buckets/:timestamp  Obtain bucket scores for the specified job ID
+   * @apiName GetBuckets
    * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
    *
    * @apiParam {String} jobId Job ID.
-   * @apiParam {String} timestamp.
+   * @apiParam {String} timestamp (optional).
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} buckets
    */
-  router.post(
+  router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/buckets/{timestamp?}',
       validate: {
@@ -429,7 +429,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {post} /api/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
    * @apiName GetOverallBuckets
    * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
    *
@@ -438,7 +438,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} overall_buckets
    */
-  router.post(
+  router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
       validate: {

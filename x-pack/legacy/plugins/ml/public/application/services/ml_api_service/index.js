@@ -199,7 +199,7 @@ export const ml = {
     const data = pick(obj, ['topN', 'bucketSpan', 'start', 'end']);
     return http({
       url: `${basePath()}/anomaly_detectors/${obj.jobId}/results/overall_buckets`,
-      method: 'POST',
+      method: 'GET',
       data,
     });
   },

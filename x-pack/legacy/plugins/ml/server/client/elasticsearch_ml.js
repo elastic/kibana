@@ -472,7 +472,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         },
       },
     ],
-    method: 'POST',
+    method: 'GET',
   });
 
   ml.overallBuckets = ca({
@@ -484,7 +484,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         },
       },
     },
-    method: 'POST',
+    method: 'GET',
   });
 
   ml.privilegeCheck = ca({
