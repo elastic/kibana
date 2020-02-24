@@ -60,9 +60,5 @@ function getProcessors(results: any) {
 }
 
 function getUserDetails(username: string | null) {
-  if (username !== null) {
-    return [`  username: "${username}"`, '  password: "<password>"'];
-  } else {
-    return [];
-  }
+  return username !== null ? [`  username: "${username}"`, '  password: "<password>"'] : [];
 }
