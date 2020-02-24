@@ -8,12 +8,7 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-interface Props {
-  down: number;
-  total: number;
-}
-
-export const SnapshotHeading = ({ total }: Props) => {
+export const SnapshotHeading = ({ total }: { total: number }) => {
   const monitorsText =
     total === 1
       ? i18n.translate('xpack.uptime.snapshot.monitor', { defaultMessage: 'Monitor' })

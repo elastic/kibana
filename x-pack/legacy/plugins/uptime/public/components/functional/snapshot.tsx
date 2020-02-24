@@ -28,11 +28,11 @@ interface SnapshotComponentProps {
  */
 export const SnapshotComponent: React.FC<SnapshotComponentProps> = ({ count, height, loading }) => (
   <ChartWrapper loading={loading} height={height}>
-    <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
+    <SnapshotHeading total={count.total} />
     <EuiSpacer size="xs" />
     <DonutChart
-      up={get<number>(count, 'up', 0)}
-      down={get<number>(count, 'down', 0)}
+      up={count.up}
+      down={count.down}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />
