@@ -38,6 +38,7 @@ import { uiMetricService } from './ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { Template } from '../../../common/types';
+import { doMappingsHaveType } from '../components/mappings_editor';
 
 let httpClient: ng.IHttpService;
 
@@ -229,10 +230,14 @@ export function loadIndexTemplate(name: Template['name']) {
 }
 
 export async function saveTemplate(template: Template, isClone?: boolean) {
+  const includeTypeName = doMappingsHaveType(template.mappings);
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates`,
     method: 'put',
     body: JSON.stringify(template),
+    query: {
+      include_type_name: includeTypeName,
+    },
   });
 
   const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
@@ -243,11 +248,15 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
 }
 
 export async function updateTemplate(template: Template) {
+  const includeTypeName = doMappingsHaveType(template.mappings);
   const { name } = template;
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
+    query: {
+      include_type_name: includeTypeName,
+    },
   });
 
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);

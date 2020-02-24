@@ -5,13 +5,17 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
-import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import {
+  ColumnHeaderOptions,
+  KqlMode,
+  SubsetTimelineModel,
+  TimelineModel,
+} from '../../store/timeline/model';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
@@ -35,11 +39,11 @@ export interface OwnProps {
   headerFilterGroup?: React.ReactNode;
   pageFilters?: esFilters.Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
-  utilityBar?: (totalCount: number) => React.ReactNode;
+  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 interface StateReduxProps {
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   filters: esFilters.Filter[];
   isLive: boolean;
@@ -57,7 +61,7 @@ interface StateReduxProps {
 interface DispatchProps {
   createTimeline: ActionCreator<{
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     itemsPerPage?: number;
     sort?: Sort;
     showCheckboxes?: boolean;
@@ -76,13 +80,17 @@ interface DispatchProps {
     itemsPerPage: number;
   }>;
   upsertColumn: ActionCreator<{
-    column: ColumnHeader;
+    column: ColumnHeaderOptions;
     id: string;
     index: number;
   }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
+
+const defaultTimelineTypeContext = {
+  loadingText: i18n.LOADING_EVENTS,
+};
 
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
@@ -99,16 +107,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
-  pageFilters = [],
+  pageFilters,
   query,
   removeColumn,
   start,
   showCheckboxes,
   showRowRenderers,
   sort,
-  timelineTypeContext = {
-    loadingText: i18n.LOADING_EVENTS,
-  },
+  timelineTypeContext = defaultTimelineTypeContext,
   updateItemsPerPage,
   upsertColumn,
   utilityBar,
@@ -132,7 +138,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const toggleColumn = useCallback(
-    (column: ColumnHeader) => {
+    (column: ColumnHeaderOptions) => {
       const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
       if (!exists && upsertColumn != null) {
@@ -153,18 +159,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [columns, id, upsertColumn, removeColumn]
   );
 
+  const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+
   return (
     <InspectButtonContainer>
       <EventsViewer
-        browserFields={browserFields ?? {}}
+        browserFields={browserFields}
         columns={columns}
         id={id}
         dataProviders={dataProviders!}
         deletedEventIds={deletedEventIds}
         end={end}
-        filters={filters}
+        filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
-        indexPattern={indexPatterns ?? { fields: [], title: '' }}
+        indexPattern={indexPatterns}
         isLive={isLive}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
@@ -186,7 +194,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, pageFilters = [], defaultModel }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const {
@@ -205,7 +213,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
-      filters: [...getGlobalFiltersQuerySelector(state), ...pageFilters],
+      filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,

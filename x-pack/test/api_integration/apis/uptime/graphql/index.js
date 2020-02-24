@@ -14,6 +14,5 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./monitor_charts'));
     loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./ping_list'));
-    loadTestFile(require.resolve('./snapshot_histogram'));
   });
 }

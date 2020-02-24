@@ -28,5 +28,10 @@ export const registerRollupSearchStrategy = (kbnServer, server) =>
       RollupSearchCapabilities
     );
 
-    addSearchStrategy(new RollupSearchStrategy(server));
+    addSearchStrategy(
+      new RollupSearchStrategy({
+        ...server,
+        newPlatform: kbnServer.newPlatform,
+      })
+    );
   });

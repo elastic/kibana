@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
@@ -27,12 +26,17 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
     text: 'event.dataset',
     value: 'event.dataset',
   },
+  {
+    text: 'event.module',
+    value: 'event.module',
+  },
 ];
 
 export const EventsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
+  pageFilters,
   setQuery,
   skip,
   startDate,
@@ -65,12 +69,12 @@ export const EventsQueryTabBody = ({
         updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
       />
-      <EuiSpacer size="l" />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
         id={HOSTS_PAGE_TIMELINE_ID}
         start={startDate}
+        pageFilters={pageFilters}
       />
     </>
   );

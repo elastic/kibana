@@ -14,13 +14,18 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
 import { Alert } from '../../../../../alerting/server/types';
 
-export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
+export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
+  id: string | undefined;
+  rule_id: RuleAlertParams['ruleId'] | undefined;
+};
+
+export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
   id: string | undefined;
   rule_id: RuleAlertParams['ruleId'] | undefined;
 };
@@ -32,6 +37,14 @@ export interface FindParamsRest {
   sort_order: 'asc' | 'desc';
   fields: string[];
   filter: string;
+}
+
+export interface PatchRulesRequest extends RequestFacade {
+  payload: PatchRuleAlertParamsRest;
+}
+
+export interface BulkPatchRulesRequest extends RequestFacade {
+  payload: PatchRuleAlertParamsRest[];
 }
 
 export interface UpdateRulesRequest extends RequestFacade {
@@ -153,7 +166,12 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type UpdateRuleParams = Partial<RuleAlertParams> & {
+export type PatchRuleParams = Partial<RuleAlertParams> & {
+  id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
+} & Clients;
+
+export type UpdateRuleParams = RuleAlertParams & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
@@ -163,7 +181,7 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type RuleParams = RuleAlertParams & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;

@@ -7,8 +7,7 @@
 import { ActionCreator } from 'typescript-fsa';
 
 import { AllTimelinesVariables } from '../../containers/timeline/all';
-import { TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 
 /** The users who added a timeline to favorites */
@@ -168,7 +167,7 @@ export interface OpenTimelineDispatchProps {
   updateTimeline: DispatchUpdateTimeline;
   createNewTimeline: ActionCreator<{
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }>;
   updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;

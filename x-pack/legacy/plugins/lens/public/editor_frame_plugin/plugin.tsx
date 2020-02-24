@@ -70,6 +70,7 @@ export class EditorFramePlugin {
     plugins.embeddable.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
+        plugins.data.query.timefilter.timefilter,
         plugins.chrome,
         plugins.expressions.ExpressionRenderer,
         plugins.data.indexPatterns

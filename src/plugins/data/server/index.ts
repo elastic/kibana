@@ -49,6 +49,7 @@ export {
   TimeRange,
   // utils
   parseInterval,
+  isNestedField,
 } from '../common';
 
 /**
@@ -71,7 +72,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DEFAULT_CONVERTER_COLOR,
   DurationFormat,
@@ -92,5 +92,7 @@ export {
   getKbnFieldType,
   getKbnTypeNames,
 } from '../common';
+
+export { DateFormat } from './field_formats/converters';
 
 export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };

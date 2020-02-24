@@ -1,16 +1,25 @@
 {
-  "description": "Linux: Strace Activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Strace runs in a privileged context and can be used to escape restrictive environments by instantiating a shell in order to elevate privileges or move laterally.",
+  "false_positives": [
+    "Strace is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or SREs engaged in debugging or system call tracing."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
   "language": "kuery",
-  "name": "Linux: Strace Activity",
+  "max_signals": 100,
+  "name": "Strace Process Activity",
   "query": "process.name: strace and event.action:executed",
-  "risk_score": 50,
+  "references": [
+    "https://en.wikipedia.org/wiki/Strace"
+  ],
+  "risk_score": 21,
   "rule_id": "d6450d4e-81c6-46a3-bd94-079886318ed5",
   "severity": "low",
-  "to": "now",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
   "type": "query",
   "version": 1
 }

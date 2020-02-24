@@ -169,6 +169,30 @@ export class HotPhase extends PureComponent {
                             defaultMessage: 'megabytes',
                           }),
                         },
+                        {
+                          value: 'b',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.bytesLabel', {
+                            defaultMessage: 'bytes',
+                          }),
+                        },
+                        {
+                          value: 'kb',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.kilobytesLabel', {
+                            defaultMessage: 'kilobytes',
+                          }),
+                        },
+                        {
+                          value: 'tb',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.terabytesLabel', {
+                            defaultMessage: 'terabytes',
+                          }),
+                        },
+                        {
+                          value: 'pb',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.petabytesLabel', {
+                            defaultMessage: 'petabytes',
+                          }),
+                        },
                       ]}
                     />
                   </ErrableFormRow>
@@ -253,6 +277,45 @@ export class HotPhase extends PureComponent {
                           text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
                             defaultMessage: 'hours',
                           }),
+                        },
+                        {
+                          value: 'm',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.minutesLabel', {
+                            defaultMessage: 'minutes',
+                          }),
+                        },
+                        {
+                          value: 's',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.secondsLabel', {
+                            defaultMessage: 'seconds',
+                          }),
+                        },
+                        {
+                          value: 'ms',
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel',
+                            {
+                              defaultMessage: 'milliseconds',
+                            }
+                          ),
+                        },
+                        {
+                          value: 'micros',
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel',
+                            {
+                              defaultMessage: 'microseconds',
+                            }
+                          ),
+                        },
+                        {
+                          value: 'nanos',
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel',
+                            {
+                              defaultMessage: 'nanoseconds',
+                            }
+                          ),
                         },
                       ]}
                     />

@@ -38,7 +38,7 @@ const truncateThreshold = 200;
 
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
@@ -92,7 +92,7 @@ const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number
 export interface JobTableProps {
   isLoading: boolean;
   jobs: SiemJob[];
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {

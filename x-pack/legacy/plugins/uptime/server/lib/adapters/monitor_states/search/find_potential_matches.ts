@@ -25,7 +25,6 @@ export const findPotentialMatches = async (
   size: number
 ) => {
   const queryResult = await query(queryContext, searchAfter, size);
-
   const checkGroups = new Set<string>();
   const monitorIds: string[] = [];
   get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {

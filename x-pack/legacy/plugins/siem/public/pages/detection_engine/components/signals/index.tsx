@@ -20,10 +20,10 @@ import { DispatchUpdateTimeline } from '../../../../components/open_timeline/typ
 import { combineQueries } from '../../../../components/timeline/helpers';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { useKibana } from '../../../../lib/kibana';
-import { inputsSelectors, State } from '../../../../store';
-import { InputsRange } from '../../../../store/inputs/model';
+import { inputsSelectors, State, inputsModel } from '../../../../store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
+import { TimelineModel } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useApolloClient } from '../../../../utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
@@ -46,12 +46,12 @@ import {
   CreateTimelineProps,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
-  UpdateSignalsStatus,
+  UpdateSignalsStatusCallback,
   UpdateSignalsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
-const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
+export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
 interface ReduxProps {
   globalQuery: Query;
@@ -97,7 +97,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-  defaultFilters = [],
+  defaultFilters,
   from,
   globalFilters,
   globalQuery,
@@ -118,7 +118,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
+  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+    signalsIndex !== '' ? [signalsIndex] : []
+  );
   const kibana = useKibana();
 
   const getGlobalQuery = useCallback(() => {
@@ -128,7 +130,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         dataProviders: [],
         indexPattern: indexPatterns,
         browserFields,
-        filters: globalFilters,
+        filters: isEmpty(defaultFilters)
+          ? globalFilters
+          : [...(defaultFilters ?? []), ...globalFilters],
         kqlQuery: globalQuery,
         kqlMode: globalQuery.language,
         start: from,
@@ -207,8 +211,8 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     setShowClearSelectionAction(true);
   }, [setSelectAll, setShowClearSelectionAction]);
 
-  const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
-    async ({ signalIds, status }: UpdateSignalsStatusProps) => {
+  const updateSignalsStatusCallback: UpdateSignalsStatusCallback = useCallback(
+    async (refetchQuery: inputsModel.Refetch, { signalIds, status }: UpdateSignalsStatusProps) => {
       await updateSignalStatusAction({
         query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
         signalIds: Object.keys(selectedEventIds),
@@ -216,6 +220,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
       });
+      refetchQuery();
     },
     [
       getGlobalQuery,
@@ -228,7 +233,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   // Callback for creating the SignalUtilityBar which receives totalCount from EventsViewer component
   const utilityBarCallback = useCallback(
-    (totalCount: number) => {
+    (refetchQuery: inputsModel.Refetch, totalCount: number) => {
       return (
         <SignalsUtilityBar
           canUserCRUD={canUserCRUD}
@@ -240,7 +245,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
           selectedEventIds={selectedEventIds}
           showClearSelection={showClearSelectionAction}
           totalCount={totalCount}
-          updateSignalsStatus={updateSignalsStatusCallback}
+          updateSignalsStatus={updateSignalsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
@@ -283,13 +288,16 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   );
 
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
-  const defaultFiltersMemo = useMemo(
-    () => [
-      ...defaultFilters,
-      ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
-    ],
-    [defaultFilters, filterGroup]
-  );
+  const defaultFiltersMemo = useMemo(() => {
+    if (isEmpty(defaultFilters)) {
+      return filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters;
+    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
+      return [
+        ...defaultFilters,
+        ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
+      ];
+    }
+  }, [defaultFilters, filterGroup]);
 
   const timelineTypeContext = useMemo(
     () => ({
@@ -302,6 +310,11 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       selectAll: canUserCRUD ? selectAll : false,
     }),
     [additionalActions, canUserCRUD, selectAll]
+  );
+
+  const headerFilterGroup = useMemo(
+    () => <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
+    [onFilterGroupChangedCallback]
   );
 
   if (loading || isEmpty(signalsIndex)) {
@@ -319,9 +332,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultModel={signalsDefaultModel}
       end={to}
-      headerFilterGroup={
-        <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-      }
+      headerFilterGroup={headerFilterGroup}
       id={SIGNALS_PAGE_TIMELINE_ID}
       start={from}
       timelineTypeContext={timelineTypeContext}
@@ -338,9 +349,8 @@ const makeMapStateToProps = () => {
       getTimeline(state, SIGNALS_PAGE_TIMELINE_ID) ?? timelineDefaults;
     const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
 
-    const globalInputs: InputsRange = getGlobalInputs(state);
+    const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
-
     return {
       globalQuery: query,
       globalFilters: filters,

@@ -13,10 +13,10 @@ import {
 } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { updateRules } from '../../rules/update_rules';
 
 export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -43,7 +43,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
             description,
@@ -69,10 +69,11 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             tags,
             to,
             type,
-            threats,
+            threat,
             references,
             version,
           } = payloadRule;
+          const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -80,11 +81,12 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
               timelineId,
@@ -102,7 +104,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               tags,
               to,
               type,
-              threats,
+              threat,
               references,
               version,
             });

@@ -85,7 +85,7 @@ export const MetricsExplorerChart = ({
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
             <ChartTitle>
-              <EuiToolTip content={title}>
+              <EuiToolTip content={title} anchorClassName="metricsExplorerTitleAnchor">
                 <span>{title}</span>
               </EuiToolTip>
             </ChartTitle>
@@ -117,7 +117,7 @@ export const MetricsExplorerChart = ({
         </EuiFlexGroup>
       )}
       <div className="infrastructureChart" style={{ height, width }}>
-        {series.rows.length > 0 ? (
+        {metrics.length && series.rows.length > 0 ? (
           <Chart>
             {metrics.map((metric, id) => (
               <MetricExplorerSeriesChart
@@ -158,7 +158,7 @@ export const MetricsExplorerChart = ({
 };
 
 const ChartTitle = euiStyled.div`
-  width: 100%
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../../types';
@@ -39,13 +38,18 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         },
       },
     },
-    async handler(request: RequestFacade) {
+    async handler(request: RequestFacade, headers) {
       try {
         const index = getIndex(request, server);
         const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (!indexExists) {
-          return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
+          return headers
+            .response({
+              message: `index: "${index}" does not exist`,
+              status_code: 404,
+            })
+            .code(404);
         } else {
           await deleteAllIndex(callWithRequest, `${index}-*`);
           const policyExists = await getPolicyExists(callWithRequest, index);
@@ -59,7 +63,13 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
           return { acknowledged: true };
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

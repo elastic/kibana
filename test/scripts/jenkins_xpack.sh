@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-export TEST_BROWSER_HEADLESS=1
+source test/scripts/jenkins_test_setup.sh
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"

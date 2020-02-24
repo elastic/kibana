@@ -73,7 +73,10 @@ describe('extractMappingsDefinition', () => {
       },
     };
 
-    expect(extractMappingsDefinition(mappings)).toBe(mappings.type2);
+    expect(extractMappingsDefinition(mappings)).toEqual({
+      type: 'type2',
+      mappings: mappings.type2,
+    });
   });
 
   test('should detect that the mappings has one type and return its mapping definition', () => {
@@ -97,7 +100,37 @@ describe('extractMappingsDefinition', () => {
       },
     };
 
-    expect(extractMappingsDefinition(mappings)).toBe(mappings.myType);
+    expect(extractMappingsDefinition(mappings)).toEqual({
+      type: 'myType',
+      mappings: mappings.myType,
+    });
+  });
+
+  test('should detect that the mappings has one custom type whose name matches a mappings definition parameter', () => {
+    const mappings = {
+      dynamic: {
+        _source: {
+          excludes: [],
+          includes: [],
+          enabled: true,
+        },
+        _meta: {},
+        _routing: {
+          required: false,
+        },
+        dynamic: true,
+        properties: {
+          title: {
+            type: 'keyword',
+          },
+        },
+      },
+    };
+
+    expect(extractMappingsDefinition(mappings)).toEqual({
+      type: 'dynamic',
+      mappings: mappings.dynamic,
+    });
   });
 
   test('should detect that the mappings has one type at root level', () => {
@@ -123,6 +156,6 @@ describe('extractMappingsDefinition', () => {
       },
     };
 
-    expect(extractMappingsDefinition(mappings)).toBe(mappings);
+    expect(extractMappingsDefinition(mappings)).toEqual({ mappings });
   });
 });

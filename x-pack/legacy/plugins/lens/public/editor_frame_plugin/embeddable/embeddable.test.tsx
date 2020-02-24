@@ -8,6 +8,7 @@ import { Embeddable } from './embeddable';
 import { ExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
   isAvailable: false,
@@ -44,6 +45,7 @@ describe('embeddable', () => {
 
   it('should render expression with expression renderer', () => {
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -66,6 +68,7 @@ describe('embeddable', () => {
     ];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -93,6 +96,7 @@ describe('embeddable', () => {
     ];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',
@@ -119,6 +123,7 @@ describe('embeddable', () => {
     ];
 
     const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
         editUrl: '',

@@ -52,7 +52,7 @@ export const visDataRoutes = (
         );
       }
       try {
-        const results = await getVisData(requestContext, request.body, framework);
+        const results = await getVisData(requestContext, request.body, framework, request);
         return response.ok({ body: results });
       } catch (error) {
         return response.internalError({

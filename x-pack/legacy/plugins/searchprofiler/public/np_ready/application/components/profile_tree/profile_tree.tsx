@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IndexDetails } from './index_details';
 import { ShardDetails } from './shard_details';
 import { initDataFor } from './init_data';
-import { Targets, ShardSerialized } from '../../types';
+import { Targets, ShardSerialized, Index } from '../../types';
 import { HighlightContextProvider, OnHighlightChangeArgs } from './highlight_context';
 
 export interface Props {
@@ -24,7 +24,14 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
     return null;
   }
 
-  const sortedIndices = initDataFor(target)(data);
+  let sortedIndices: Index[];
+  try {
+    sortedIndices = initDataFor(target)(data);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    return null;
+  }
 
   return (
     <HighlightContextProvider onHighlight={onHighlight}>

@@ -10,6 +10,7 @@ import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 
 import { AppApolloClient } from '../lib/lib';
+import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
 import { timelineSelectors } from './timeline';
 import { inputsSelectors } from './inputs';
@@ -42,7 +43,11 @@ export const createStore = (
     }
   );
 
-  store = createReduxStore(reducer, state, composeEnhancers(applyMiddleware(epicMiddleware)));
+  store = createReduxStore(
+    reducer,
+    state,
+    composeEnhancers(applyMiddleware(epicMiddleware, telemetryMiddleware))
+  );
 
   epicMiddleware.run(createRootEpic<State>());
 

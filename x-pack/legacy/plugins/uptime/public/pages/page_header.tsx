@@ -67,7 +67,7 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <EuiTitle>
             <h1>{headerText}</h1>

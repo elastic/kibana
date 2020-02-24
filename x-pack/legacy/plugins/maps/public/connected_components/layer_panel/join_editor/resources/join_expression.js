@@ -23,6 +23,7 @@ import { getTermsFields } from '../../../../index_pattern_util';
 import { indexPatternService } from '../../../../kibana_services';
 
 import { npStart } from 'ui/new_platform';
+import { isNestedField } from '../../../../../../../../../src/plugins/data/public';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 export class JoinExpression extends Component {
@@ -134,7 +135,7 @@ export class JoinExpression extends Component {
     }
 
     const filterStringOrNumberFields = field => {
-      return field.type === 'string' || field.type === 'number';
+      return (field.type === 'string' && !isNestedField(field)) || field.type === 'number';
     };
 
     return (

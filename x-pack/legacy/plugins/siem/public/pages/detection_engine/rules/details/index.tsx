@@ -24,7 +24,11 @@ import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import {
+  getEditRuleUrl,
+  getRulesUrl,
+  DETECTION_ENGINE_PAGE_NAME,
+} from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { useRule } from '../../../../containers/detection_engine/rules';
@@ -50,7 +54,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -109,6 +113,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
     hasIndexWrite,
@@ -119,21 +124,16 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
-    rule,
-    detailsView: true,
-  });
+  const { aboutRuleData, defineRuleData, scheduleRuleData } =
+    rule != null
+      ? getStepsData({
+          rule,
+          detailsView: true,
+        })
+      : { aboutRuleData: null, defineRuleData: null, scheduleRuleData: null };
   const [lastSignals] = useSignalInfo({ ruleId });
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  }
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -217,6 +217,10 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [rule, ruleDetailTab]
   );
 
+  const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
+    signalIndexName,
+  ]);
+
   const updateDateRangeCallback = useCallback(
     (min: number, max: number) => {
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -233,15 +237,19 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     [ruleEnabled, setRuleEnabled]
   );
 
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  }
+
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
       {userHasNoPermissions && <ReadOnlyCallOut />}
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <GlobalTime>
-              {({ to, from }) => (
+              {({ to, from, deleteQuery, setQuery }) => (
                 <StickyContainer>
                   <FiltersGlobal>
                     <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -250,7 +258,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                   <WrapperPage>
                     <DetectionEngineHeaderPage
                       backOptions={{
-                        href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
+                        href: getRulesUrl(),
                         text: i18n.BACK_TO_RULES,
                       }}
                       border
@@ -284,7 +292,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                             <EuiFlexItem grow={false}>
                               <EuiButton
-                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
+                                href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="visControls"
                                 isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                               >
@@ -348,9 +356,12 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
                         </EuiFlexGroup>
                         <EuiSpacer />
                         <SignalsHistogramPanel
+                          deleteQuery={deleteQuery}
                           filters={signalMergedFilters}
                           query={query}
                           from={from}
+                          signalIndexName={signalIndexName}
+                          setQuery={setQuery}
                           stackByOptions={signalsHistogramOptions}
                           to={to}
                           updateDateRange={updateDateRangeCallback}

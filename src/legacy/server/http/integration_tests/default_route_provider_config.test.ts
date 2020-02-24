@@ -30,6 +30,7 @@ describe('default route provider', () => {
       server: {
         defaultRoute: '/app/some/default/route',
       },
+      migrations: { skip: true },
     });
 
     await root.setup();

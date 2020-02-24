@@ -49,6 +49,8 @@ export {
   TimeRange,
 } from '../common';
 
+export { DateFormat } from './field_formats/converters';
+
 /**
  * Static code to be shared externally
  * @public
@@ -68,7 +70,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DEFAULT_CONVERTER_COLOR,
   DurationFormat,
@@ -92,6 +93,7 @@ export {
   getKbnTypeNames,
   // utils
   parseInterval,
+  isNestedField,
 } from '../common';
 
 // Export plugin after all other imports

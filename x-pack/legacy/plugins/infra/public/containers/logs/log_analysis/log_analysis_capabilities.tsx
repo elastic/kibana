@@ -48,13 +48,22 @@ export const useLogAnalysisCapabilities = () => {
     fetchMlCapabilitiesRequest.state,
   ]);
 
+  const hasLogAnalysisSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
+  const hasLogAnalysisReadCapabilities = mlCapabilities.capabilities.canGetJobs;
+  const hasLogAnalysisCapabilites =
+    mlCapabilities.isPlatinumOrTrialLicense && mlCapabilities.mlFeatureEnabledInSpace;
+
   return {
-    hasLogAnalysisCapabilites: mlCapabilities.capabilities.canCreateJob,
+    hasLogAnalysisCapabilites,
+    hasLogAnalysisReadCapabilities,
+    hasLogAnalysisSetupCapabilities,
     isLoading,
   };
 };
 
-export const LogAnalysisCapabilities = createContainer(useLogAnalysisCapabilities);
+export const [LogAnalysisCapabilitiesProvider, useLogAnalysisCapabilitiesContext] = createContainer(
+  useLogAnalysisCapabilities
+);
 
 const initialMlCapabilities = {
   capabilities: {

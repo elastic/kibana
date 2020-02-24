@@ -84,7 +84,8 @@ export const getSupportedUrlParams = (params: {
     ),
     absoluteDateRangeEnd: parseAbsoluteDate(
       dateRangeEnd || DATE_RANGE_END,
-      ABSOLUTE_DATE_RANGE_END
+      ABSOLUTE_DATE_RANGE_END,
+      { roundUp: true }
     ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),

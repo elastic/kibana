@@ -1,27 +1,22 @@
 {
   "description": "Identifies processes running in a temporary folder. This is sometimes done by adversaries to hide malware.",
-  "enabled": false,
   "false_positives": [
-    "Build systems like Jenkins may start processes in the /tmp directory."
+    "Build systems, like Jenkins, may start processes in the `/tmp` directory. These  can be exempted by name or by username."
   ],
-  "from": "now-6m",
-  "immutable": true,
   "index": [
     "auditbeat-*"
   ],
-  "interval": "5m",
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Unusual Process Execution - Temp",
   "query": "process.working_directory: /tmp and event.action:executed",
-  "risk_score": 25,
+  "risk_score": 47,
   "rule_id": "df959768-b0c9-4d45-988c-5606a2be8e5a",
-  "severity": "low",
+  "severity": "medium",
   "tags": [
-    "EIA",
-    "auditbeat"
+    "Elastic",
+    "Linux"
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

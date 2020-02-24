@@ -47,7 +47,7 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          onClick={[MockFunction]}
+          onClick={[Function]}
         >
           Cancel
         </EuiButtonEmpty>

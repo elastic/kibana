@@ -5,14 +5,14 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { isFunction, countBy } from 'lodash/fp';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError } from './utils';
+import { transformOrBulkError, getDuplicates } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
   callWithRequestFactory,
@@ -47,98 +47,109 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
+      const ruleDefinitions = request.payload;
+      const mappedDuplicates = countBy('rule_id', ruleDefinitions);
+      const dupes = getDuplicates(mappedDuplicates);
+
       const rules = await Promise.all(
-        request.payload.map(async payloadRule => {
-          const {
-            created_at: createdAt,
-            description,
-            enabled,
-            false_positives: falsePositives,
-            from,
-            query,
-            language,
-            output_index: outputIndex,
-            saved_id: savedId,
-            meta,
-            filters,
-            rule_id: ruleId,
-            index,
-            interval,
-            max_signals: maxSignals,
-            risk_score: riskScore,
-            name,
-            severity,
-            tags,
-            threats,
-            to,
-            type,
-            updated_at: updatedAt,
-            references,
-            timeline_id: timelineId,
-            timeline_title: timelineTitle,
-            version,
-          } = payloadRule;
-          const ruleIdOrUuid = ruleId ?? uuid.v4();
-          try {
-            const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-            const callWithRequest = callWithRequestFactory(request, server);
-            const indexExists = await getIndexExists(callWithRequest, finalIndex);
-            if (!indexExists) {
-              return createBulkErrorObject({
-                ruleId: ruleIdOrUuid,
-                statusCode: 400,
-                message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-              });
-            }
-            if (ruleId != null) {
-              const rule = await readRules({ alertsClient, ruleId });
-              if (rule != null) {
-                return createBulkErrorObject({
-                  ruleId,
-                  statusCode: 409,
-                  message: `rule_id: "${ruleId}" already exists`,
-                });
-              }
-            }
-            const createdRule = await createRules({
-              alertsClient,
-              actionsClient,
-              createdAt,
+        ruleDefinitions
+          .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
+          .map(async payloadRule => {
+            const {
               description,
               enabled,
-              falsePositives,
+              false_positives: falsePositives,
               from,
-              immutable: false,
               query,
               language,
-              outputIndex: finalIndex,
-              savedId,
-              timelineId,
-              timelineTitle,
+              output_index: outputIndex,
+              saved_id: savedId,
               meta,
               filters,
-              ruleId: ruleIdOrUuid,
+              rule_id: ruleId,
               index,
               interval,
-              maxSignals,
-              riskScore,
+              max_signals: maxSignals,
+              risk_score: riskScore,
               name,
               severity,
               tags,
+              threat,
               to,
               type,
-              threats,
-              updatedAt,
               references,
+              timeline_id: timelineId,
+              timeline_title: timelineTitle,
               version,
-            });
-            return transformOrBulkError(ruleIdOrUuid, createdRule);
-          } catch (err) {
-            return transformBulkError(ruleIdOrUuid, err);
-          }
-        })
+            } = payloadRule;
+            const ruleIdOrUuid = ruleId ?? uuid.v4();
+            try {
+              const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
+              const callWithRequest = callWithRequestFactory(request, server);
+              const indexExists = await getIndexExists(callWithRequest, finalIndex);
+              if (!indexExists) {
+                return createBulkErrorObject({
+                  ruleId: ruleIdOrUuid,
+                  statusCode: 400,
+                  message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+                });
+              }
+              if (ruleId != null) {
+                const rule = await readRules({ alertsClient, ruleId });
+                if (rule != null) {
+                  return createBulkErrorObject({
+                    ruleId,
+                    statusCode: 409,
+                    message: `rule_id: "${ruleId}" already exists`,
+                  });
+                }
+              }
+              const createdRule = await createRules({
+                alertsClient,
+                actionsClient,
+                description,
+                enabled,
+                falsePositives,
+                from,
+                immutable: false,
+                query,
+                language,
+                outputIndex: finalIndex,
+                savedId,
+                timelineId,
+                timelineTitle,
+                meta,
+                filters,
+                ruleId: ruleIdOrUuid,
+                index,
+                interval,
+                maxSignals,
+                riskScore,
+                name,
+                severity,
+                tags,
+                to,
+                type,
+                threat,
+                references,
+                version,
+              });
+              return transformOrBulkError(ruleIdOrUuid, createdRule);
+            } catch (err) {
+              return transformBulkError(ruleIdOrUuid, err);
+            }
+          })
       );
-      return rules;
+      return [
+        ...rules,
+        ...dupes.map(ruleId =>
+          createBulkErrorObject({
+            ruleId,
+            statusCode: 409,
+            message: `rule_id: "${ruleId}" already exists`,
+          })
+        ),
+      ];
     },
   };
 };

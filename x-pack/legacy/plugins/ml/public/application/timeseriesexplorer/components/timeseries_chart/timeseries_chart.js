@@ -231,8 +231,8 @@ const TimeseriesChartIntl = injectI18n(
       this.renderFocusChart();
     }
 
-    componentDidUpdate() {
-      if (this.props.renderFocusChartOnly === false) {
+    componentDidUpdate(prevProps) {
+      if (this.props.renderFocusChartOnly === false || prevProps.svgWidth !== this.props.svgWidth) {
         this.renderChart();
         this.drawContextChartSelection();
       }
@@ -433,7 +433,7 @@ const TimeseriesChartIntl = injectI18n(
       focusLoadTo = Math.min(focusLoadTo, contextXMax);
 
       if (focusLoadFrom !== contextXMin || focusLoadTo !== contextXMax) {
-        this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+        this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo));
         const newSelectedBounds = {
           min: moment(new Date(focusLoadFrom)),
           max: moment(focusLoadFrom),
@@ -447,6 +447,10 @@ const TimeseriesChartIntl = injectI18n(
         };
         if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
           this.selectedBounds = newSelectedBounds;
+          this.setContextBrushExtent(
+            new Date(contextXScaleDomain[0]),
+            new Date(contextXScaleDomain[1])
+          );
           if (this.contextChartInitialized === false) {
             this.contextChartInitialized = true;
             contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
@@ -1191,36 +1195,29 @@ const TimeseriesChartIntl = injectI18n(
           '<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>'
         );
 
-      const showBrush = show => {
-        if (show === true) {
-          const brushExtent = brush.extent();
-          mask.reveal(brushExtent);
-          leftHandle.attr('x', contextXScale(brushExtent[0]) - 10);
-          rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
-
-          topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
-          // Use Math.max(0, ...) to make sure we don't end up
-          // with a negative width which would cause an SVG error.
-          topBorder.attr(
-            'width',
-            Math.max(0, contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2)
-          );
-        }
-
-        this.setBrushVisibility(show);
-      };
-
-      showBrush(!brush.empty());
-
       function brushing() {
+        const brushExtent = brush.extent();
+        mask.reveal(brushExtent);
+        leftHandle.attr('x', contextXScale(brushExtent[0]) - 10);
+        rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
+
+        topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
+        // Use Math.max(0, ...) to make sure we don't end up
+        // with a negative width which would cause an SVG error.
+        const topBorderWidth = Math.max(
+          0,
+          contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2
+        );
+        topBorder.attr('width', topBorderWidth);
+
         const isEmpty = brush.empty();
-        showBrush(!isEmpty);
+        d3.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
       }
+      brushing();
 
       const that = this;
       function brushed() {
         const isEmpty = brush.empty();
-
         const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
         const selectionMin = selectedBounds[0].getTime();
         const selectionMax = selectedBounds[1].getTime();
@@ -1234,8 +1231,6 @@ const TimeseriesChartIntl = injectI18n(
           return;
         }
 
-        showBrush(!isEmpty);
-
         // Set the color of the swimlane cells according to whether they are inside the selection.
         contextGroup.selectAll('.swimlane-cell').style('fill', d => {
           const cellMs = d.date.getTime();
@@ -1248,26 +1243,6 @@ const TimeseriesChartIntl = injectI18n(
 
         that.selectedBounds = { min: moment(selectionMin), max: moment(selectionMax) };
         contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
-      }
-    };
-
-    setBrushVisibility = show => {
-      const mask = this.mask;
-
-      if (mask !== undefined) {
-        const visibility = show ? 'visible' : 'hidden';
-        mask.style('visibility', visibility);
-
-        d3.selectAll('.brush').style('visibility', visibility);
-
-        const brushHandles = d3.selectAll('.brush-handle-inner');
-        brushHandles.style('visibility', visibility);
-
-        const topBorder = d3.selectAll('.top-border');
-        topBorder.style('visibility', visibility);
-
-        const border = d3.selectAll('.chart-border-highlight');
-        border.style('visibility', visibility);
       }
     };
 
@@ -1381,21 +1356,18 @@ const TimeseriesChartIntl = injectI18n(
 
     // Sets the extent of the brush on the context chart to the
     // supplied from and to Date objects.
-    setContextBrushExtent = (from, to, fireEvent) => {
+    setContextBrushExtent = (from, to) => {
       const brush = this.brush;
       const brushExtent = brush.extent();
 
       const newExtent = [from, to];
-      if (
-        newExtent[0].getTime() === brushExtent[0].getTime() &&
-        newExtent[1].getTime() === brushExtent[1].getTime()
-      ) {
-        fireEvent = false;
-      }
-
       brush.extent(newExtent);
       brush(d3.select('.brush'));
-      if (fireEvent) {
+
+      if (
+        newExtent[0].getTime() !== brushExtent[0].getTime() ||
+        newExtent[1].getTime() !== brushExtent[1].getTime()
+      ) {
         brush.event(d3.select('.brush'));
       }
     };
@@ -1416,7 +1388,7 @@ const TimeseriesChartIntl = injectI18n(
         to = Math.min(minBoundsMs + millis, maxBoundsMs);
       }
 
-      this.setContextBrushExtent(new Date(from), new Date(to), true);
+      this.setContextBrushExtent(new Date(from), new Date(to));
     }
 
     showFocusChartTooltip(marker, circle) {
@@ -1623,8 +1595,20 @@ const TimeseriesChartIntl = injectI18n(
         });
       }
 
+      let xOffset = LINE_CHART_ANOMALY_RADIUS * 2;
+
+      // When the annotation area is hovered
+      if (circle.tagName.toLowerCase() === 'rect') {
+        const x = Number(circle.getAttribute('x'));
+        if (x < 0) {
+          // The beginning of the annotation area is outside of the focus chart,
+          // hence we need to adjust the x offset of a tooltip.
+          xOffset = Math.abs(x);
+        }
+      }
+
       mlChartTooltipService.show(tooltipData, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
+        x: xOffset,
         y: 0,
       });
     }

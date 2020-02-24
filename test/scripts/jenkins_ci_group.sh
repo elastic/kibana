@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 
-source test/scripts/jenkins_test_setup.sh
-
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
-  node scripts/build --debug --oss;
-else
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_WORKER_NUMBER}
-  cp -R "$installDir" "$destDir"
-
-  export KIBANA_INSTALL_DIR="$destDir"
-fi
+source test/scripts/jenkins_test_setup_oss.sh
 
 checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 

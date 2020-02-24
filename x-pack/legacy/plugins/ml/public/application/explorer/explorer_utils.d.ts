@@ -35,10 +35,15 @@ export declare const getDefaultSwimlaneData: () => SwimlaneData;
 
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 
+export declare const getSelectionJobIds: (
+  selectedCells: AppStateSelectedCells | undefined,
+  selectedJobs: ExplorerJob[]
+) => string[];
+
 export declare const getSelectionInfluencers: (
   selectedCells: AppStateSelectedCells | undefined,
   fieldName: string
-) => any[];
+) => string[];
 
 interface SelectionTimeRange {
   earliestMs: number;

@@ -5,6 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -13,10 +14,9 @@ import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { KqlMode } from '../../store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { HeaderSection } from '../header_section';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
 import { StatefulBody } from '../timeline/body/stateful_body';
@@ -34,6 +34,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
+import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -48,7 +49,7 @@ const StyledEuiPanel = styled(EuiPanel)`
 
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
   end: number;
@@ -66,8 +67,8 @@ interface Props {
   start: number;
   sort: Sort;
   timelineTypeContext: TimelineTypeContextProps;
-  toggleColumn: (column: ColumnHeader) => void;
-  utilityBar?: (totalCount: number) => React.ReactNode;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
+  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -160,7 +161,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                     totalCountMinusDeleted
                   ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
-                  // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
                   return (
                     <>
                       <HeaderSection
@@ -171,7 +171,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                         {headerFilterGroup}
                       </HeaderSection>
 
-                      {utilityBar?.(totalCountMinusDeleted)}
+                      {utilityBar?.(refetch, totalCountMinusDeleted)}
 
                       <div
                         data-test-subj={`events-container-loading-${loading}`}
@@ -234,15 +234,15 @@ const EventsViewerComponent: React.FC<Props> = ({
 export const EventsViewer = React.memo(
   EventsViewerComponent,
   (prevProps, nextProps) =>
-    prevProps.browserFields === nextProps.browserFields &&
+    isEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
-    isEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
-    prevProps.indexPattern === nextProps.indexPattern &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     prevProps.isLive === nextProps.isLive &&
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&

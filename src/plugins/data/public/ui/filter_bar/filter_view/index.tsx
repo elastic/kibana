@@ -57,6 +57,7 @@ export const FilterView: FC<Props> = ({
   return (
     <EuiBadge
       title={title}
+      color="hollow"
       iconType="cross"
       iconSide="right"
       closeButtonProps={{

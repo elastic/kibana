@@ -1,20 +1,20 @@
 {
-  "description": "Identifies use of wmic for shadow copy deletion on endpoints. This commonly occurs in tandem with ransomware or other destructive attacks.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Identifies use of wmic.exe for shadow copy deletion on endpoints. This commonly occurs in tandem with ransomware or other destructive attacks.",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "Volume Shadow Copy Deletion via WMIC",
-  "query": "  event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"wmic.exe\" and process.args:(\"shadowcopy\" and \"delete\")",
-  "risk_score": 75,
+  "query": "  event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"WMIC.exe\" and process.args:(\"shadowcopy\" and \"delete\")",
+  "risk_score": 73,
   "rule_id": "dc9c1f74-dac3-48e3-b47f-eb79db358f57",
   "severity": "high",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1107",
           "name": "File Deletion",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

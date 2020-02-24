@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import dateMath from '@elastic/datemath';
 import { get, pick } from 'lodash/fp';
+import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -22,7 +24,7 @@ export const getStepsData = ({
   rule,
   detailsView = false,
 }: {
-  rule: Rule | null;
+  rule: Rule;
   detailsView?: boolean;
 }): GetStepsData => {
   const defineRuleData: DefineStepRule | null =
@@ -41,9 +43,9 @@ export const getStepsData = ({
     rule != null
       ? {
           isNew: false,
-          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
+          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
           ...(detailsView ? { name: '' } : {}),
-          threats: rule.threats as IMitreEnterpriseAttack[],
+          threat: rule.threat as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
           timeline: {
@@ -52,15 +54,25 @@ export const getStepsData = ({
           },
         }
       : null;
+
+  const from = dateMath.parse(rule.from) ?? moment();
+  const interval = dateMath.parse(`now-${rule.interval}`) ?? moment();
+
+  const fromDuration = moment.duration(interval.diff(from));
+  let fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
+
+  if (fromDuration.asSeconds() < 60) {
+    fromHumanize = `${Math.floor(fromDuration.asSeconds())}s`;
+  } else if (fromDuration.asMinutes() < 60) {
+    fromHumanize = `${Math.floor(fromDuration.asMinutes())}m`;
+  }
+
   const scheduleRuleData: ScheduleStepRule | null =
     rule != null
       ? {
           isNew: false,
           ...pick(['enabled', 'interval'], rule),
-          from:
-            rule?.meta?.from != null
-              ? rule.meta.from.replace('now-', '')
-              : rule.from.replace('now-', ''),
+          from: fromHumanize,
         }
       : null;
 
@@ -126,3 +138,13 @@ export const setFieldValue = (
       form.setFieldValue(key, val);
     }
   });
+
+export const redirectToDetections = (
+  isSignalIndexExists: boolean | null,
+  isAuthenticated: boolean | null,
+  hasEncryptionKey: boolean | null
+) =>
+  isSignalIndexExists != null &&
+  isAuthenticated != null &&
+  hasEncryptionKey != null &&
+  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);

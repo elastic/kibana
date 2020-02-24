@@ -62,13 +62,11 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
       component={RedirectToDetectionEnginePage}
       exact
       path={`${match.url}/:pageName(${SiemPageName.detections})`}
-      strict
     />
     <Route
       component={RedirectToDetectionEnginePage}
       exact
       path={`${match.url}/:pageName(${SiemPageName.detections})/:tabName(${DetectionEngineTab.alerts}|${DetectionEngineTab.signals})`}
-      strict
     />
     <Route
       component={RedirectToRulesPage}

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, HTMLAttributes } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import React, { FC, HTMLAttributes } from 'react';
+import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
   /**
@@ -31,7 +31,7 @@ export const ChartWrapper: FC<Props> = ({
   const opacity = loading === true ? 0.3 : 1;
 
   return (
-    <Fragment>
+    <EuiErrorBoundary>
       <div
         style={{
           height,
@@ -53,6 +53,6 @@ export const ChartWrapper: FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </Fragment>
+    </EuiErrorBoundary>
   );
 };

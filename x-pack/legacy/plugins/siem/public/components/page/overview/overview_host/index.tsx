@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,7 +42,7 @@ export interface OwnProps {
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
-type OverviewHostProps = OwnProps;
+export type OverviewHostProps = OwnProps;
 
 const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   endDate,
@@ -56,6 +57,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
       <InspectButtonContainer>
         <EuiPanel>
           <OverviewHostQuery
+            data-test-subj="overview-host-query"
             endDate={endDate}
             filterQuery={filterQuery}
             sourceId="default"
@@ -71,17 +73,20 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
               return (
                 <>
                   <HeaderSection
-                    border
                     id={OverviewHostQueryId}
                     subtitle={
-                      <FormattedMessage
-                        defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
-                        id="xpack.siem.overview.overviewHost.hostsSubtitle"
-                        values={{
-                          formattedHostEventsCount,
-                          hostEventsCount,
-                        }}
-                      />
+                      !isEmpty(overviewHost) ? (
+                        <FormattedMessage
+                          defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
+                          id="xpack.siem.overview.overviewHost.hostsSubtitle"
+                          values={{
+                            formattedHostEventsCount,
+                            hostEventsCount,
+                          }}
+                        />
+                      ) : (
+                        <>{''}</>
+                      )
                     }
                     title={
                       <FormattedMessage

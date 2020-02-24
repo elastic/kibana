@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../alerting/server/types';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { RuleParams } from './types';
+import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 
 export const createRules = ({
@@ -32,12 +33,12 @@ export const createRules = ({
   name,
   severity,
   tags,
-  threats,
+  threat,
   to,
   type,
   references,
   version,
-}: RuleParams) => {
+}: CreateRuleParams): Promise<Alert> => {
   return alertsClient.create({
     data: {
       name,
@@ -45,7 +46,6 @@ export const createRules = ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
-        createdAt: new Date().toISOString(),
         description,
         ruleId,
         index,
@@ -63,10 +63,9 @@ export const createRules = ({
         maxSignals,
         riskScore,
         severity,
-        threats,
+        threat,
         to,
         type,
-        updatedAt: new Date().toISOString(),
         references,
         version,
       },

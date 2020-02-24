@@ -1,0 +1,78 @@
+[[release-highlights-7.6.0]]
+== 7.6.0 release highlights
+++++
+<titleabbrev>7.6.0</titleabbrev>
+++++
+
+Explore the new features in Kibana 7.6.
+
+//NOTE: The notable-highlights tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+// tag::notable-highlights[]
+
+[cols="50, 50"]
+|===
+
+a| *Elastic&nbsp;Maps improvements*
+
+Color the data points on your map based on the discrete values in a categorical field.
+Add text labels to give your viewers more information about the data you’re
+overlaying on your maps.
+
+| image:release-notes/images/7-6-maps-category.png[Categorical styling in Maps]
+
+a| *Embeddable maps in Canvas*
+
+Incorporate a geospatial perspective into a Canvas workpad.
+
+| image:release-notes/images/7-6-canvas-map.png[Embedded maps in Canvas]
+
+
+a| *Lens improvements*
+
+Use scripted fields in your visualizations, just like any other field in the index.
+Rapidly reset a layer
+with a single click instead of removing data fields one at a time.
+
+| image:release-notes/images/7-6-lens-reset-layer.png[Scripted fields in Lens]
+
+a| *Nested field support*
+
+Query on nested fields using KQL.
+You can query for a user whose first name is Tom and whose
+last name is Hanks, or a user whose first name is Tom and last name is Smith.
+{kibana-ref}/kuery-query.html[Our documentation] contains examples for you to follow.
+
+| image:release-notes/images/7-6-nested-field.png[Nested field]
+
+a| *Machine learning improvements*
+
+Explore the results of your
+{ml-docs}/dfa-classification.html[{classification}] and
+{ml-docs}/dfa-regression.html[{regression}] {dfanalytics-jobs} in {kib}.
+Use a new wizard to create
+{ml-docs}/ml-configuring-categories.html[categorization {anomaly-jobs}]. If you
+use APM, there are also new pre-configured {anomaly-jobs}.
+
+| image:release-notes/images/7.6-classification.png[Classification results]
+
+|===
+
+[float]
+=== Learn more
+
+Get more details on these features in the https://www.elastic.co/blog/kibana-7-6-0-released[{kib} 7.6 release blog].
+For a complete list of enhancements and other changes, check out the
+{kibana-ref}/release-notes-7.6.0.html[{kib} 7.6 release notes].
+
+// end::notable-highlights[]
+
+[float]
+=== Give 7.6 a try
+
+Try 7.6 now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].

@@ -13,7 +13,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
@@ -37,7 +37,7 @@ interface DispatchProps {
     columnId: string;
   }>;
   upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
+    column: ColumnHeaderOptions;
     id: string;
     index: number;
   }>;
@@ -137,7 +137,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
      * columns in the timeline, this function dispatches the action that
      * causes the timeline display those columns.
      */
-    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeader[]) => {
+    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
       onUpdateColumns(columns); // show the category columns in the timeline
     }, []);
 

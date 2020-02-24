@@ -262,7 +262,7 @@ export class ApplicationService {
       currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
-        getAppUrl(availableMounters, appId, path),
+        http.basePath.prepend(getAppUrl(availableMounters, appId, path)),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
         const app = applications$.value.get(appId);
         if (app && app.status !== AppStatus.accessible) {

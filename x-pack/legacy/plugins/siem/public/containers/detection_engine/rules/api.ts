@@ -149,7 +149,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
   const response = await fetch(
     `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
-      method: 'PUT',
+      method: 'PATCH',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
@@ -217,6 +217,8 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
           immutable: undefined,
           last_success_at: undefined,
           last_success_message: undefined,
+          last_failure_at: undefined,
+          last_failure_message: undefined,
           status: undefined,
           status_date: undefined,
         }))
@@ -389,6 +391,7 @@ export const getPrePackagedRulesStatus = async ({
 }: {
   signal: AbortSignal;
 }): Promise<{
+  rules_custom_installed: number;
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;

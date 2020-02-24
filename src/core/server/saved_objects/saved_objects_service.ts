@@ -18,7 +18,7 @@
  */
 
 import { CoreService } from 'src/core/types';
-import { first } from 'rxjs/operators';
+import { first, filter, take } from 'rxjs/operators';
 import {
   SavedObjectsClient,
   SavedObjectsSchema,
@@ -186,6 +186,7 @@ export class SavedObjectsService
   private migrator: KibanaMigrator | undefined;
   private logger: Logger;
   private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;
+  private setupDeps: SavedObjectsSetupDeps | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -196,6 +197,8 @@ export class SavedObjectsService
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
+
+    this.setupDeps = setupDeps;
 
     const {
       savedObjectSchemas: savedObjectsSchemasDefinition,
@@ -223,14 +226,14 @@ export class SavedObjectsService
       savedObjectMappings,
       savedObjectMigrations,
       savedObjectValidations,
-      logger: this.coreContext.logger.get('migrations'),
+      logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
       config: setupDeps.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations'),
+        this.logger,
         migrationsRetryDelay
       ),
     }));
@@ -287,7 +290,23 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
-    await this.migrator!.runMigrations(skipMigrations);
+
+    if (skipMigrations) {
+      this.logger.warn(
+        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
+      );
+    } else {
+      this.logger.info(
+        'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
+      );
+      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+        filter(nodes => nodes.isCompatible),
+        take(1)
+      ).toPromise();
+
+      this.logger.info('Starting saved objects migrations');
+      await this.migrator!.runMigrations();
+    }
 
     return {
       migrator: this.migrator!,

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MonitorList component renders a no items message when no data is provided 1`] = `
+exports[`MonitorListPagination component renders a no items message when no data is provided 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -24,17 +24,27 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
           },
           Object {
             "align": "center",
@@ -52,6 +62,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }
@@ -77,6 +88,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
+          pagination=""
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -85,6 +97,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         <OverviewPageLink
           dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
+          pagination=""
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -92,7 +105,7 @@ exports[`MonitorList component renders a no items message when no data is provid
 </Fragment>
 `;
 
-exports[`MonitorList component renders the monitor list 1`] = `
+exports[`MonitorListPagination component renders the monitor list 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -116,17 +129,27 @@ exports[`MonitorList component renders the monitor list 1`] = `
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
-            "width": "20%",
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "30%",
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
           },
           Object {
             "align": "center",
@@ -144,6 +167,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "",
             "render": [Function],
             "sortable": true,
+            "width": "24px",
           },
         ]
       }

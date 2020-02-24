@@ -67,6 +67,7 @@ export class RenderedElementComponent extends PureComponent<Props> {
         done: () => {},
         onDestroy: () => {},
         onResize: () => {},
+        getElementId: () => '',
         setFilter: () => {},
         getFilter: () => '',
         onEmbeddableInputChange: () => {},

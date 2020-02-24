@@ -12,12 +12,12 @@ import { ActionCreator } from 'typescript-fsa';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { EventType, KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
+import { ColumnHeaderOptions, EventType, KqlMode, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 
-import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
@@ -40,7 +40,7 @@ export interface OwnProps {
 
 interface StateReduxProps {
   activePage?: number;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   eventType: EventType;
   end: number;
@@ -60,7 +60,7 @@ interface StateReduxProps {
 interface DispatchProps {
   createTimeline?: ActionCreator<{
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }>;
   addProvider?: ActionCreator<{
@@ -79,7 +79,7 @@ interface DispatchProps {
   updateColumns?: ActionCreator<{
     id: string;
     category: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
   }>;
   updateProviders?: ActionCreator<{
     id: string;
@@ -128,7 +128,7 @@ interface DispatchProps {
     providerId: string;
   }>;
   upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
+    column: ColumnHeaderOptions;
     id: string;
     index: number;
   }>;
@@ -166,7 +166,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const [loading, signalIndexExists, signalIndexName] = useSignalIndex();
+    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
     const indexToAdd = useMemo<string[]>(() => {
       if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
@@ -233,7 +233,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     const toggleColumn = useCallback(
-      (column: ColumnHeader) => {
+      (column: ColumnHeaderOptions) => {
         const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
         if (!exists && upsertColumn != null) {

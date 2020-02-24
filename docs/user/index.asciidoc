@@ -38,14 +38,6 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
-include::{kib-repo-dir}/spaces/index.asciidoc[]
-
-include::security/index.asciidoc[]
-
-include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
-
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
-
 include::reporting/index.asciidoc[]
 
 include::api.asciidoc[]

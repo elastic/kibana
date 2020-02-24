@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, mergeMap, toArray } from 'rxjs/operators';
+import { first, concatMap, take, toArray, mergeMap } from 'rxjs/operators';
 import { ServerFacade, CaptureConfig, HeadlessChromiumDriverFactory } from '../../../../types';
 import { ScreenshotResults, ScreenshotObservableOpts } from './types';
 import { injectCustomCss } from './inject_css';
@@ -37,12 +37,11 @@ export function screenshotsObservableFactory(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
     );
-
     return Rx.from(urls).pipe(
-      mergeMap(url => {
+      concatMap(url => {
         return create$.pipe(
           mergeMap(({ driver, exit$ }) => {
-            const screenshot$ = Rx.of(driver).pipe(
+            const screenshot$ = Rx.of(1).pipe(
               mergeMap(() => openUrl(driver, url, conditionalHeaders, logger)),
               mergeMap(() => skipTelemetry(driver, logger)),
               mergeMap(() => scanPage(driver, layout, logger)),
@@ -85,10 +84,11 @@ export function screenshotsObservableFactory(
             );
 
             return Rx.race(screenshot$, exit$);
-          })
+          }),
+          first()
         );
       }),
-      first(),
+      take(urls.length),
       toArray()
     );
   };

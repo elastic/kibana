@@ -15,10 +15,16 @@ import {
   mlTimefilterTimeChange$,
 } from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
+import { useUrlState } from '../../../util/url_state';
 
 interface Duration {
   start: string;
   end: string;
+}
+
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
 }
 
 function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
@@ -40,9 +46,17 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 
 export const TopNav: FC = () => {
   const { chrome, timefilter, timeHistory } = useUiContext();
+  const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
 
-  const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
+  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
+    globalState?.refreshInterval ?? timefilter.getRefreshInterval()
+  );
+  useEffect(() => {
+    setGlobalState({ refreshInterval });
+    timefilter.setRefreshInterval(refreshInterval);
+  }, [refreshInterval?.pause, refreshInterval?.value]);
+
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
@@ -96,20 +110,13 @@ export const TopNav: FC = () => {
   }
 
   function updateInterval({
-    isPaused,
-    refreshInterval: interval,
+    isPaused: pause,
+    refreshInterval: value,
   }: {
     isPaused: boolean;
     refreshInterval: number;
   }) {
-    const newInterval = {
-      pause: isPaused,
-      value: interval,
-    };
-    // Update timefilter for controllers listening for changes
-    timefilter.setRefreshInterval(newInterval);
-    // Update state
-    setRefreshInterval(newInterval);
+    setRefreshInterval({ pause, value });
   }
 
   return (

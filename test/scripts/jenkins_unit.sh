@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
-export TEST_BROWSER_HEADLESS=1
+source test/scripts/jenkins_test_setup.sh
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

@@ -125,6 +125,28 @@ export const createMockServerWithoutActionOrAlertClientDecoration = (
   };
 };
 
+export const createMockServerWithoutSavedObjectDecoration = (
+  config: Record<string, string> = defaultConfig
+) => {
+  const serverWithoutSavedObjectClient = new Hapi.Server({
+    port: 0,
+  });
+
+  serverWithoutSavedObjectClient.config = () => createMockKibanaConfig(config);
+
+  const actionsClient = actionsClientMock.create();
+  const alertsClient = alertsClientMock.create();
+
+  serverWithoutSavedObjectClient.decorate('request', 'getAlertsClient', () => alertsClient);
+  serverWithoutSavedObjectClient.decorate('request', 'getActionsClient', () => actionsClient);
+  serverWithoutSavedObjectClient.plugins.spaces = { getSpaceId: () => 'default' };
+  return {
+    serverWithoutSavedObjectClient: serverWithoutSavedObjectClient as ServerFacade & Hapi.Server,
+    alertsClient,
+    actionsClient,
+  };
+};
+
 export const getMockIndexName = () =>
   jest.fn().mockImplementation(() => ({
     callWithRequest: jest.fn().mockImplementationOnce(() => 'index-name'),

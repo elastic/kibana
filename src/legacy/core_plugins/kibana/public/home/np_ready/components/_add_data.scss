@@ -1,7 +1,21 @@
 .homAddData__card {
-  max-width: 250px;
+  max-width: 225px;
   border: none;
   box-shadow: none;
+}
+
+.homAddData__cardDivider {
+  position: relative;
+
+  &:after {
+    position: absolute;
+    content: '';
+    width: 1px;
+    right: -$euiSizeS;
+    top: 0;
+    bottom: 0;
+    background: $euiBorderColor;
+  }
 }
 
 .homAddData__icon {
@@ -27,6 +41,20 @@
 @include euiBreakpoint('xs', 's') {
   .homeAddData__flexGroup {
     flex-wrap: wrap;
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .homAddData__flexTablet {
+    flex-direction: column;
+  }
+
+  .homAddData__card {
+    max-width: none;
+  }
+
+  .homAddData__cardDivider:after {
+    display: none;
   }
 }
 

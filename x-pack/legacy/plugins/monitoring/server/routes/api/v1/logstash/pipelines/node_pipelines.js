@@ -78,22 +78,8 @@ export function logstashNodePipelinesRoute(server) {
         sort,
         queryText
       );
-
-      // Just the IDs for the rest
-      const pipelineIds = pageOfPipelines.map(pipeline => pipeline.id);
-
-      const metricOptions = {
-        pageOfPipelines,
-      };
-
       try {
-        const pipelineData = await getPipelines(
-          req,
-          lsIndexPattern,
-          pipelineIds,
-          metricSet,
-          metricOptions
-        );
+        const pipelineData = await getPipelines(req, lsIndexPattern, pageOfPipelines, metricSet);
         const response = await processPipelinesAPIResponse(
           {
             pipelines: pipelineData,

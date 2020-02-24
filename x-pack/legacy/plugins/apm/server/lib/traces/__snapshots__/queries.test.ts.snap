@@ -3,6 +3,15 @@
 exports[`trace queries fetches a trace 1`] = `
 Object {
   "body": Object {
+    "aggs": Object {
+      "by_transaction_id": Object {
+        "terms": Object {
+          "execution_hint": "map",
+          "field": "transaction.id",
+          "size": "myIndex",
+        },
+      },
+    },
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -12,12 +21,8 @@ Object {
             },
           },
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "span",
-                "transaction",
-                "error",
-              ],
+            "term": Object {
+              "processor.event": "error",
             },
           },
           Object {
@@ -30,36 +35,19 @@ Object {
             },
           },
         ],
-        "should": Object {
-          "exists": Object {
-            "field": "parent.id",
+        "must_not": Object {
+          "terms": Object {
+            "error.log.level": Array [
+              "debug",
+              "info",
+              "warning",
+            ],
           },
         },
       },
     },
     "size": "myIndex",
-    "sort": Array [
-      Object {
-        "_score": Object {
-          "order": "asc",
-        },
-      },
-      Object {
-        "transaction.duration.us": Object {
-          "order": "desc",
-        },
-      },
-      Object {
-        "span.duration.us": Object {
-          "order": "desc",
-        },
-      },
-    ],
-    "track_total_hits": true,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-  ],
+  "index": "myIndex",
 }
 `;

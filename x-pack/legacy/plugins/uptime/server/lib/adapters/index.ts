@@ -8,5 +8,5 @@ export * from './framework';
 export * from './monitor_states';
 export * from './monitors';
 export * from './pings';
-export * from './saved_objects';
+export * from './stub_index_pattern';
 export * from './telemetry';

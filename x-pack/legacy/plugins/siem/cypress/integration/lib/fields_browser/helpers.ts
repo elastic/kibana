@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FIELDS_BROWSER_CONTAINER,
-  FIELDS_BROWSER_FILTER_INPUT,
-  TIMELINE_FIELDS_BUTTON,
-} from './selectors';
+import { FIELDS_BROWSER_CONTAINER, FIELDS_BROWSER_FILTER_INPUT } from './selectors';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
   hostExistsQuery,
   toggleTimelineVisibility,
 } from '../timeline/helpers';
-import { TIMELINE_DATA_PROVIDERS } from '../timeline/selectors';
+import { TIMELINE_DATA_PROVIDERS, TIMELINE_FIELDS_BUTTON } from '../timeline/selectors';
 
 /** Opens the timeline's Field Browser */
 export const openTimelineFieldsBrowser = () => {

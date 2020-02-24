@@ -8,6 +8,7 @@ import { Legacy } from 'kibana';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
+  usingEphemeralEncryptionKey: boolean;
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
     elasticsearch: Legacy.Server['plugins']['elasticsearch'];

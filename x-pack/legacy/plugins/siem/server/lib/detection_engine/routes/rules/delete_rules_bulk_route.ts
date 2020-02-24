@@ -27,49 +27,51 @@ export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
       },
       payload: queryRulesBulkSchema,
     },
-  },
-  async handler(request: QueryBulkRequest, headers) {
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
-    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-      ? request.getSavedObjectsClient()
-      : null;
-    if (!alertsClient || !actionsClient || !savedObjectsClient) {
-      return headers.response().code(404);
-    }
-    const rules = Promise.all(
-      request.payload.map(async payloadRule => {
-        const { id, rule_id: ruleId } = payloadRule;
-        const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
-        try {
-          const rule = await deleteRules({
-            actionsClient,
-            alertsClient,
-            id,
-            ruleId,
-          });
-          if (rule != null) {
-            const ruleStatuses = await savedObjectsClient.find<
-              IRuleSavedAttributesSavedObjectAttributes
-            >({
-              type: ruleStatusSavedObjectType,
-              perPage: 6,
-              search: rule.id,
-              searchFields: ['alertId'],
+    async handler(request: QueryBulkRequest, headers) {
+      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+      const actionsClient = isFunction(request.getActionsClient)
+        ? request.getActionsClient()
+        : null;
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
+        return headers.response().code(404);
+      }
+      const rules = await Promise.all(
+        request.payload.map(async payloadRule => {
+          const { id, rule_id: ruleId } = payloadRule;
+          const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
+          try {
+            const rule = await deleteRules({
+              actionsClient,
+              alertsClient,
+              id,
+              ruleId,
             });
-            ruleStatuses.saved_objects.forEach(async obj =>
-              savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
-            );
-            return transformOrBulkError(idOrRuleIdOrUnknown, rule);
-          } else {
-            return getIdBulkError({ id, ruleId });
+            if (rule != null) {
+              const ruleStatuses = await savedObjectsClient.find<
+                IRuleSavedAttributesSavedObjectAttributes
+              >({
+                type: ruleStatusSavedObjectType,
+                perPage: 6,
+                search: rule.id,
+                searchFields: ['alertId'],
+              });
+              ruleStatuses.saved_objects.forEach(async obj =>
+                savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+              );
+              return transformOrBulkError(idOrRuleIdOrUnknown, rule);
+            } else {
+              return getIdBulkError({ id, ruleId });
+            }
+          } catch (err) {
+            return transformBulkError(idOrRuleIdOrUnknown, err);
           }
-        } catch (err) {
-          return transformBulkError(idOrRuleIdOrUnknown, err);
-        }
-      })
-    );
-    return rules;
+        })
+      );
+      return rules;
+    },
   },
 };
 

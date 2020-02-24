@@ -59,12 +59,6 @@ describe('KibanaMigrator', () => {
   });
 
   describe('runMigrations', () => {
-    it('resolves isMigrated if migrations were skipped', async () => {
-      const skipMigrations = true;
-      const result = await new KibanaMigrator(mockOptions()).runMigrations(skipMigrations);
-      expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
-    });
-
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));

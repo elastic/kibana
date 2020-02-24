@@ -24,7 +24,12 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
   display: flex;
   flex-grow: 1;
 
+  > * {
+    max-width: 100%;
+  }
+
   .${BUTTON_CLASS} {
+    pointer-events: none;
     opacity: 0;
     transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
@@ -33,6 +38,7 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
     show &&
     css`
       &:hover .${BUTTON_CLASS} {
+        pointer-events: auto;
         opacity: 1;
       }
     `}

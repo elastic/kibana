@@ -35,6 +35,7 @@ interface HttpDeps {
 export class HttpService implements CoreService<HttpSetup, HttpStart> {
   private readonly anonymousPaths = new AnonymousPathsService();
   private readonly loadingCount = new LoadingCountService();
+  private service?: HttpSetup;
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
@@ -42,7 +43,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
 
-    return {
+    this.service = {
       basePath,
       anonymousPaths: this.anonymousPaths.setup({ basePath }),
       intercept: fetchService.intercept.bind(fetchService),
@@ -56,10 +57,16 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       put: fetchService.put.bind(fetchService),
       ...loadingCount,
     };
+
+    return this.service;
   }
 
-  public start(deps: HttpDeps) {
-    return this.setup(deps);
+  public start() {
+    if (!this.service) {
+      throw new Error(`HttpService#setup() must be called first!`);
+    }
+
+    return this.service;
   }
 
   public stop() {

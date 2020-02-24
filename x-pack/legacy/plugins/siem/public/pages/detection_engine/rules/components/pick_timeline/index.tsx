@@ -65,6 +65,7 @@ export const PickTimeline = ({
     >
       <SearchTimelineSuperSelect
         isDisabled={isDisabled}
+        hideUntitled={true}
         timelineId={timelineId}
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}

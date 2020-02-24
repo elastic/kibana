@@ -29,6 +29,7 @@ import {
   esQuery,
   esKuery,
 } from '../../../../../../../../src/plugins/data/public';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -41,6 +42,7 @@ import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
+import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
@@ -102,6 +104,23 @@ export const Page: FC = () => {
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
 
+  const [globalState, setGlobalState] = useUrlState('_g');
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+  }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
+
+  const [lastRefresh, setLastRefresh] = useState(0);
+
   useEffect(() => {
     if (currentIndexPattern.timeFieldName !== undefined) {
       timefilter.enableTimeRangeSelector();
@@ -138,9 +157,15 @@ export const Page: FC = () => {
     mlNodesAvailable() &&
     currentIndexPattern.timeFieldName !== undefined;
 
-  const [searchString, setSearchString] = useState(defaults.searchString);
-  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState(defaults.searchQueryLanguage);
+  const {
+    searchQuery: initSearchQuery,
+    searchString: initSearchString,
+    queryLanguage: initQueryLanguage,
+  } = extractSearchData(currentSavedSearch);
+
+  const [searchString, setSearchString] = useState(initSearchString);
+  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
+  const [searchQueryLanguage] = useState(initQueryLanguage);
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -175,36 +200,21 @@ export const Page: FC = () => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(loadOverallStats);
+    ).subscribe(() => {
+      setGlobalState({
+        time: timefilter.getTime(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      });
+      setLastRefresh(Date.now());
+    });
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
   });
 
   useEffect(() => {
-    // Check for a saved search being passed in.
-    if (currentSavedSearch !== null) {
-      const { query } = getQueryFromSavedSearch(currentSavedSearch);
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
-      const qryString = query.query;
-      let qry;
-      if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
-      }
-
-      setSearchQuery(qry);
-      setSearchString(qryString);
-      setSearchQueryLanguage(queryLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
     loadOverallStats();
-  }, [searchQuery, samplerShardSize]);
+  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
@@ -227,13 +237,51 @@ export const Page: FC = () => {
     createNonMetricCards();
   }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
 
+  /**
+   * Extract query data from the saved search object.
+   */
+  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
+    if (!savedSearch) {
+      return {
+        searchQuery: defaults.searchQuery,
+        searchString: defaults.searchString,
+        queryLanguage: defaults.searchQueryLanguage,
+      };
+    }
+
+    const { query } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+    const qryString = query.query;
+    let qry;
+    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(qryString);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    } else {
+      qry = esQuery.luceneStringToDsl(qryString);
+      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+    }
+
+    return {
+      searchQuery: qry,
+      searchString: qryString,
+      queryLanguage,
+    };
+  }
+
   async function loadOverallStats() {
     const tf = timefilter as any;
     let earliest;
     let latest;
+
+    const activeBounds = tf.getActiveBounds();
+
+    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
+      return;
+    }
+
     if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
+      earliest = activeBounds.min.valueOf();
+      latest = activeBounds.max.valueOf();
     }
 
     try {

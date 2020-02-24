@@ -19,6 +19,7 @@ import {
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { TEST_BOUNDARY } from './utils';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -34,11 +35,11 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
   enabled: true,
@@ -69,11 +70,11 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
@@ -84,7 +85,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestP
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
-  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
@@ -102,6 +103,14 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
+  url: DETECTION_ENGINE_RULES_URL,
+  payload: {
+    ...typicalPayload(),
+  },
+});
+
+export const getPatchRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
@@ -126,6 +135,12 @@ export const getReadBulkRequest = (): ServerInjectOptions => ({
 
 export const getUpdateBulkRequest = (): ServerInjectOptions => ({
   method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  payload: [typicalPayload()],
+});
+
+export const getPatchBulkRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
   payload: [typicalPayload()],
 });
@@ -209,6 +224,24 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
+export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
+export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
+  headers: {
+    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
+  },
+  payload,
+});
+
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
   url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
@@ -269,8 +302,6 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
-    createdAt: '2019-12-13T16:40:33.400Z',
-    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -298,7 +329,7 @@ export const getResult = (): RuleAlertType => ({
     severity: 'high',
     to: 'now',
     type: 'query',
-    threats: [
+    threat: [
       {
         framework: 'MITRE ATT&CK',
         tactic: {
@@ -306,7 +337,7 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        techniques: [
+        technique: [
           {
             id: 'T1499',
             name: 'endpoint denial of service',
@@ -392,6 +423,7 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   is_authenticated: false,
+  has_encryption_key: true,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

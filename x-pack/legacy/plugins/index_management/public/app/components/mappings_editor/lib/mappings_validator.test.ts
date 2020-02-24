@@ -18,6 +18,24 @@ describe('Mappings configuration validator', () => {
     });
   });
 
+  it('should detect valid mappings configuration', () => {
+    const mappings = {
+      _source: {
+        includes: [],
+        excludes: [],
+        enabled: true,
+      },
+      _meta: {},
+      _routing: {
+        required: false,
+      },
+      dynamic: true,
+    };
+
+    const { errors } = validateMappings(mappings);
+    expect(errors).toBe(undefined);
+  });
+
   it('should strip out unknown configuration', () => {
     const mappings = {
       dynamic: true,
@@ -30,6 +48,7 @@ describe('Mappings configuration validator', () => {
         excludes: ['abc'],
       },
       properties: { title: { type: 'text' } },
+      dynamic_templates: [],
       unknown: 123,
     };
 
@@ -37,7 +56,7 @@ describe('Mappings configuration validator', () => {
 
     const { unknown, ...expected } = mappings;
     expect(value).toEqual(expected);
-    expect(errors).toBe(undefined);
+    expect(errors).toEqual([{ code: 'ERR_CONFIG', configName: 'unknown' }]);
   });
 
   it('should strip out invalid configuration and returns the errors for each of them', () => {
@@ -47,9 +66,8 @@ describe('Mappings configuration validator', () => {
       dynamic_date_formats: false, // wrong format
       _source: {
         enabled: true,
-        includes: 'abc',
+        unknownProp: 'abc', // invalid
         excludes: ['abc'],
-        wrong: 123, // parameter not allowed
       },
       properties: 'abc',
     };
@@ -59,10 +77,10 @@ describe('Mappings configuration validator', () => {
     expect(value).toEqual({
       dynamic: true,
       properties: {},
+      dynamic_templates: [],
     });
 
     expect(errors).not.toBe(undefined);
-    expect(errors!.length).toBe(3);
     expect(errors!).toEqual([
       { code: 'ERR_CONFIG', configName: '_source' },
       { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },

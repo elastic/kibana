@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -86,7 +85,6 @@ export const AuthenticationsQueryTabBody = ({
         type={hostsModel.HostsType.page}
         updateDateRange={updateDateRange}
       />
-      <EuiSpacer size="l" />
       <AuthenticationsQuery
         endDate={endDate}
         filterQuery={filterQuery}
