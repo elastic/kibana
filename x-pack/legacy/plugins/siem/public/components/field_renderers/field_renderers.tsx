@@ -205,15 +205,15 @@ type RowItemTypes = string | ReputationLinkSetting;
 interface DefaultFieldRendererOverflowProps {
   rowItems: string[] | ReputationLinkSetting[];
   idPrefix: string;
-  render?: (item: string | ReputationLinkSetting) => React.ReactNode;
+  render?: (item: RowItemTypes) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
 
-interface MoreContainerProps<T = RowItemTypes> {
+interface MoreContainerProps {
   idPrefix: string;
-  render?: (item: T) => React.ReactNode;
-  rowItems: T[];
+  render?: (item: RowItemTypes) => React.ReactNode;
+  rowItems: RowItemTypes[];
   moreMaxHeight: string;
   overflowIndexStart: number;
 }
@@ -245,7 +245,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     const [isOpen, setIsOpen] = useState(false);
     return (
       <EuiFlexItem grow={false}>
-        {rowItems != null && rowItems?.length > overflowIndexStart && (
+        {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
             button={
