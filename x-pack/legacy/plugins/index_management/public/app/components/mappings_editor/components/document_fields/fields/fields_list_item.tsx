@@ -21,6 +21,7 @@ import {
   CHILD_FIELD_INDENT_SIZE,
   LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
 } from '../../../constants';
+import { ChainedMultifieldsWarning } from '../../chained_multifields_warning';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
@@ -33,6 +34,7 @@ interface Props {
   isHighlighted: boolean;
   isDimmed: boolean;
   isLastItem: boolean;
+  isChainedMultifieldsWarningVisible: boolean;
   childFieldsArray: NormalizedField[];
   maxNestedDepth: number;
   addField(): void;
@@ -49,6 +51,7 @@ function FieldListItemComponent(
     isDimmed,
     isCreateFieldFormVisible,
     areActionButtonsVisible,
+    isChainedMultifieldsWarningVisible,
     isLastItem,
     childFieldsArray,
     maxNestedDepth,
@@ -273,6 +276,8 @@ function FieldListItemComponent(
           </EuiFlexGroup>
         </div>
       </div>
+
+      {isExpanded && isChainedMultifieldsWarningVisible && <ChainedMultifieldsWarning />}
 
       {Boolean(childFieldsArray.length) && isExpanded && (
         <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} />
