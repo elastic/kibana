@@ -38,7 +38,10 @@
 import { modifyUrl } from '../../utils';
 
 export class BasePath {
-  constructor(private readonly basePath: string = '') {}
+  constructor(
+    private readonly basePath: string = '',
+    public readonly serverBasePath: string = basePath
+  ) {}
 
   public get = () => {
     return this.basePath;

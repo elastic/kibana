@@ -108,7 +108,7 @@ export const useLogColumnsConfigurationFormState = ({
 
   const moveLogColumn = useCallback(
     (sourceIndex, destinationIndex) => {
-      if (destinationIndex >= 0 && sourceIndex < formState.logColumns.length - 1) {
+      if (destinationIndex >= 0 && sourceIndex <= formState.logColumns.length - 1) {
         const newLogColumns = [...formState.logColumns];
         newLogColumns.splice(destinationIndex, 0, newLogColumns.splice(sourceIndex, 1)[0]);
         setFormStateChanges(changes => ({
