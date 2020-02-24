@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { RoleComboBox } from '.';
 import { EuiComboBox } from '@elastic/eui';
