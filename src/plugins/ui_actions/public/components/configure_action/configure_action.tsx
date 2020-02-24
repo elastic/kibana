@@ -25,5 +25,15 @@ export interface ConfigureActionProps {
 }
 
 export const ConfigureAction: React.FC<ConfigureActionProps> = ({ action }) => {
-  return <div>test...</div>;
+  if (!action.ReactCollectConfig) {
+    return <div>no config collection possible</div>;
+  }
+
+  return (
+    <div>
+      <div>
+        ID: <code>{action.id}</code>
+      </div>
+    </div>
+  );
 };

@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { ConfigureAction } from '.';
-import { createSampleGoToUrlAction } from '../../tests';
-import { ActionInternal } from '../../actions';
+import { ActionDefinition } from '../../actions';
 
-const action = new ActionInternal(createSampleGoToUrlAction());
+interface Config {
+  url: string;
+  openInNewTab: boolean;
+}
 
-storiesOf('components/ConfigureAction', module).add('default', () => (
-  <ConfigureAction action={action} />
-));
+export const SAMPLE_GO_TO_URL_ACTION = 'SAMPLE_GO_TO_URL_ACTION';
+
+export const createSampleGoToUrlAction = (): ActionDefinition<object, void, Config> => {
+  return {
+    id: SAMPLE_GO_TO_URL_ACTION,
+    execute() {},
+  };
+};

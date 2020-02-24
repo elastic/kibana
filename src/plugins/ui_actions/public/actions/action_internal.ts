@@ -31,6 +31,10 @@ export class ActionInternal<A extends AnyActionDefinition>
   public readonly factoryId: string = this.definition.factoryId || '';
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+  public readonly CollectConfig? = this.definition.CollectConfig;
+  public readonly ReactCollectConfig? = this.CollectConfig
+    ? uiToReactComponent(this.CollectConfig)
+    : undefined;
 
   public get order() {
     return this.state.get().order;
