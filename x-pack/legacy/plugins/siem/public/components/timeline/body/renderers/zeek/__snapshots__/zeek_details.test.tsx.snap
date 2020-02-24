@@ -3359,6 +3359,7 @@ tr:hover .c3:focus::before {
                                             >
                                               <div>
                                                 <Memo(ReputationLinkComponent)
+                                                  data-test-subj="reputationLinkSha"
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   overflowIndexStart={1}
                                                   showDomain={true}
@@ -3388,28 +3389,6 @@ tr:hover .c3:focus::before {
                                                                 className="euiFlexGroup euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                                               />
                                                             </EuiFlexGroup>
-                                                          </div>
-                                                        </EuiFlexItem>
-                                                        <EuiFlexItem
-                                                          grow={false}
-                                                        >
-                                                          <div
-                                                            className="euiFlexItem euiFlexItem--flexGrowZero"
-                                                          >
-                                                            <DefaultFieldRendererOverflow
-                                                              idPrefix="moreReputationLink"
-                                                              moreMaxHeight="200px"
-                                                              overflowIndexStart={1}
-                                                              render={[Function]}
-                                                            >
-                                                              <EuiFlexItem
-                                                                grow={false}
-                                                              >
-                                                                <div
-                                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                                                                />
-                                                              </EuiFlexItem>
-                                                            </DefaultFieldRendererOverflow>
                                                           </div>
                                                         </EuiFlexItem>
                                                       </div>

@@ -239,11 +239,10 @@ const ReputationLinkComponent: React.FC<{
             {ipReputationLinks
               ?.slice(0, overflowIndexStart)
               .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} key={`reputationLink-${id}`}>
                   <ExternalLink
                     allItemsLimit={ipReputationLinks.length}
                     idx={id}
-                    key={`reputationLink-${id}`}
                     overflowIndexStart={overflowIndexStart}
                     url={urlTemplate}
                     data-test-subj="externalLinkComponent"
@@ -254,27 +253,29 @@ const ReputationLinkComponent: React.FC<{
               ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DefaultFieldRendererOverflow
-            rowItems={ipReputationLinks}
-            idPrefix="moreReputationLink"
-            render={rowItem => {
-              return (
-                isReputationLink(rowItem) && (
-                  <ExternalLink
-                    url={rowItem.url_template}
-                    overflowIndexStart={overflowIndexStart}
-                    allItemsLimit={allItemsLimit}
-                  >
-                    <>{rowItem.name ?? domain}</>
-                  </ExternalLink>
-                )
-              );
-            }}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={overflowIndexStart}
-          />
-        </EuiFlexItem>
+        {ipReputationLinks.length && (
+          <EuiFlexItem grow={false}>
+            <DefaultFieldRendererOverflow
+              rowItems={ipReputationLinks}
+              idPrefix="moreReputationLink"
+              render={rowItem => {
+                return (
+                  isReputationLink(rowItem) && (
+                    <ExternalLink
+                      url={rowItem.url_template}
+                      overflowIndexStart={overflowIndexStart}
+                      allItemsLimit={allItemsLimit}
+                    >
+                      <>{rowItem.name ?? domain}</>
+                    </ExternalLink>
+                  )
+                );
+              }}
+              moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+              overflowIndexStart={overflowIndexStart}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </section>
   );

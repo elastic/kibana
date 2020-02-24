@@ -82,7 +82,7 @@ describe('ZeekSignature', () => {
 
     test('should render', () => {
       const wrapper = shallow(<TotalVirusLinkSha value={'abc'} />);
-      expect(wrapper.find(ReputationLink).exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="reputationLinkSha"]').exists()).toBeTruthy();
     });
   });
 
