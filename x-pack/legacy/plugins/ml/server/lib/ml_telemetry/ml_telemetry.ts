@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
-import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
+import {
+  SavedObjectAttributes,
+  SavedObjectsServiceStart,
+  ISavedObjectsRepository,
+} from 'src/core/server';
 
-export interface MlTelemetry {
+export interface MlTelemetry extends SavedObjectAttributes {
   file_data_visualizer: {
     index_creation_count: number;
   };
@@ -29,35 +31,22 @@ export function createMlTelemetry(count: number = 0): MlTelemetry {
 }
 // savedObjects
 export function storeMlTelemetry(
-  elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsLegacyService,
+  internalRepository: ISavedObjectsRepository,
   mlTelemetry: MlTelemetry
 ): void {
-  const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
-  savedObjectsClient.create('ml-telemetry', mlTelemetry, {
+  internalRepository.create('ml-telemetry', mlTelemetry, {
     id: ML_TELEMETRY_DOC_ID,
     overwrite: true,
   });
 }
-// needs savedObjects and elasticsearchPlugin
-export function getSavedObjectsClient(
-  elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsLegacyService
-): any {
-  const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  return new SavedObjectsClient(internalRepository);
-}
 
 export async function incrementFileDataVisualizerIndexCreationCount(
-  elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsLegacyService
+  savedObjects: SavedObjectsServiceStart
 ): Promise<void> {
-  const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
-
+  const internalRepository = await savedObjects.createInternalRepository();
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    const { attributes } = await internalRepository.get('telemetry', 'telemetry');
+
     if (attributes.enabled === false) {
       return;
     }
@@ -70,7 +59,7 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   let indicesCount = 1;
 
   try {
-    const { attributes } = (await savedObjectsClient.get(
+    const { attributes } = (await internalRepository.get(
       'ml-telemetry',
       ML_TELEMETRY_DOC_ID
     )) as MlTelemetrySavedObject;
@@ -80,5 +69,5 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   }
 
   const mlTelemetry = createMlTelemetry(indicesCount);
-  storeMlTelemetry(elasticsearchPlugin, savedObjects, mlTelemetry);
+  storeMlTelemetry(internalRepository, mlTelemetry);
 }
