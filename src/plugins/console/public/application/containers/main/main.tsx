@@ -124,7 +124,7 @@ export function Main() {
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <Editor loading={!done} />
+              <Editor />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

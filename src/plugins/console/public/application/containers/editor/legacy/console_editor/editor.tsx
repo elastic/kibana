@@ -67,6 +67,23 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
+/**
+ * The current editor implementation does a bad job of cleaning up listeners,
+ * even though we are calling "destroy" on the editor upon re-creating this component.
+ *
+ * We still see calls to on mouse scroll events after mounting a second instance.
+ *
+ * The solution here is to manually create the div element that the editor mounts
+ * to then call ".remove()" on that to forcibly clean up any remaining listeners.
+ */
+const createEditorElement = () => {
+  const el = document.createElement('div');
+  el.id = 'ConAppEditor';
+  el.className = 'conApp__editorContent';
+  el.setAttribute('data-test-subj', 'request-editor');
+  return el;
+};
+
 function EditorUI({ textObject }: EditorProps) {
   const {
     services: { history, notifications },
@@ -79,23 +96,28 @@ function EditorUI({ textObject }: EditorProps) {
   const sendCurrentRequestToES = useSendCurrentRequestToES();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
+  const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
+
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
 
   const openDocumentation = useCallback(async () => {
-    const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
+    const documentation = await getDocumentation(editorInstance!, docLinkVersion);
     if (!documentation) {
       return;
     }
     window.open(documentation, '_blank');
-  }, [docLinkVersion]);
+  }, [docLinkVersion, editorInstance]);
 
   useEffect(() => {
-    editorInstanceRef.current = senseEditor.create(editorRef.current!);
-    const editor = editorInstanceRef.current;
+    editorRef.current = createEditorElement();
+    const element = editorRef.current;
+    const mountPoint = document.querySelector('#conAppEditorMount')!;
+    mountPoint.appendChild(element);
+    const editor = senseEditor.create(element);
+    setEditorInstance(senseEditor.create(element));
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
@@ -182,29 +204,34 @@ function EditorUI({ textObject }: EditorProps) {
       unsubscribeResizer();
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
-      editorInstanceRef.current!.getCoreEditor().destroy();
-      editorInstanceRef.current = null;
+
+      editor.getCoreEditor().destroy();
+      // See the description of createEditorElement above for why we do this.
+      element.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveCurrentTextObject, textObject.id, history, setInputEditor]);
 
   useEffect(() => {
-    const { current: editor } = editorInstanceRef;
-    applyCurrentSettings(editor!.getCoreEditor(), settings);
-    // Preserve legacy focus behavior after settings have updated.
-    editor!
-      .getCoreEditor()
-      .getContainer()
-      .focus();
-  }, [settings]);
+    if (editorInstance) {
+      applyCurrentSettings(editorInstance.getCoreEditor(), settings);
+      // Preserve legacy focus behavior after settings have updated.
+      editorInstance!
+        .getCoreEditor()
+        .getContainer()
+        .focus();
+    }
+  }, [settings, editorInstance]);
 
   useEffect(() => {
-    registerCommands({
-      senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, [sendCurrentRequestToES, openDocumentation]);
+    if (editorInstance) {
+      registerCommands({
+        senseEditor: editorInstance,
+        sendCurrentRequestToES,
+        openDocumentation,
+      });
+    }
+  }, [sendCurrentRequestToES, openDocumentation, editorInstance]);
 
   return (
     <div style={abs} className="conApp">
@@ -237,13 +264,13 @@ function EditorUI({ textObject }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
+                return editorInstance!.getRequestsAsCURL(elasticsearchUrl);
               }}
               getDocumentation={() => {
-                return getDocumentation(editorInstanceRef.current!, docLinkVersion);
+                return getDocumentation(editorInstance!, docLinkVersion);
               }}
               autoIndent={(event: any) => {
-                autoIndent(editorInstanceRef.current!, event);
+                autoIndent(editorInstance!, event);
               }}
               addNotification={({ title }) => notifications.toasts.add({ title })}
             />
@@ -255,14 +282,7 @@ function EditorUI({ textObject }: EditorProps) {
         satisfy Axe. */}
 
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label className="conApp__textAreaLabelHack">
-          <div
-            ref={editorRef}
-            id="ConAppEditor"
-            className="conApp__editorContent"
-            data-test-subj="request-editor"
-          />
-        </label>
+        <label id="conAppEditorMount" className="conApp__textAreaLabelHack" />
       </div>
     </div>
   );
