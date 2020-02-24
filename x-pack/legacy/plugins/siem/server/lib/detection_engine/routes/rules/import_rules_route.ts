@@ -104,7 +104,6 @@ export const createImportRulesRoute = (
                   // early with the error and an (unknown) for the ruleId
                   resolve(
                     createBulkErrorObject({
-                      ruleId: '(unknown)',
                       statusCode: 400,
                       message: parsedRule.message,
                     })

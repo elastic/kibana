@@ -20,6 +20,8 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {
     const props = {

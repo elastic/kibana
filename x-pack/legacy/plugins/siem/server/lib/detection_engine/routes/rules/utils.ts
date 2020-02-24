@@ -64,9 +64,16 @@ export const getIdBulkError = ({
   id: string | undefined | null;
   ruleId: string | undefined | null;
 }): BulkError => {
-  if (id != null) {
+  if (id != null && ruleId != null) {
     return createBulkErrorObject({
-      ruleId: id,
+      id,
+      ruleId,
+      statusCode: 404,
+      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
+    });
+  } else if (id != null) {
+    return createBulkErrorObject({
+      id,
       statusCode: 404,
       message: `id: "${id}" not found`,
     });
@@ -78,7 +85,6 @@ export const getIdBulkError = ({
     });
   } else {
     return createBulkErrorObject({
-      ruleId: '(unknown id)',
       statusCode: 404,
       message: `id or rule_id should have been defined`,
     });
