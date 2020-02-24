@@ -19,24 +19,37 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
+import useObservable from 'react-use/lib/useObservable';
 import { ConfigureAction } from '.';
 import { createSampleGoToUrlAction } from '../../tests';
 import { ActionInternal } from '../../actions';
 
 const action = new ActionInternal(createSampleGoToUrlAction());
+const actionWithPresetConfig = new ActionInternal(createSampleGoToUrlAction());
+actionWithPresetConfig.state.transitions.setConfig({
+  url: 'http://google.com',
+  openInNewTab: true,
+});
 const actionMissingCollectConfig = new ActionInternal({
   ...createSampleGoToUrlAction(),
   CollectConfig: undefined,
 });
 
-storiesOf('components/ConfigureAction', module)
-  .add('default', () => (
+const DemoDefault: React.FC = () => {
+  useObservable(action.state.state$);
+
+  return (
     <div>
       <ConfigureAction action={action} />
       <br />
       <hr />
       <br />
-      <pre>{JSON.stringify(action.state.get(), null, 4)}</pre>
+      <pre>{JSON.stringify(action.serialize(), null, 4)}</pre>
     </div>
-  ))
+  );
+};
+
+storiesOf('components/ConfigureAction', module)
+  .add('default', () => <DemoDefault />)
+  .add('with preset config', () => <ConfigureAction action={actionWithPresetConfig} />)
   .add('missing CollectConfig', () => <ConfigureAction action={actionMissingCollectConfig} />);
