@@ -1,0 +1,268 @@
+ debg Loading config file from "/Users/rashmikulkarni/my_workspace/kibana/test/functional/config.js"
+ debg Loading config file from "/Users/rashmikulkarni/my_workspace/kibana/test/common/config.js"
+ info Config loaded
+ debg randomness seed: 1581574541350
+ debg [webdriver] Creating session
+ debg ====================================================creating roles and users=========================
+ debg creating role test_logstash_reader
+ debg creating role test_shakespeare_reader
+ info Remote initialized: chrome 79.0.3945.130
+ info Chromedriver version: 79.0.3945.36 (3582db32b33893869b8c1339e8f4d9ed1816f143-refs/branch-heads/3945@{#614}), w3c=false, codeCoverage=false
+ debg creating role test_testhuge_reader
+ debg creating role test_alias_reader
+ debg creating role kibana_sample_admin
+ debg creating role kibana_date_nanos
+ debg creating role kibana_date_nanos_custom
+ debg creating role kibana_large_strings
+ debg creating role kibana_time_zones
+ debg creating role long_window_logstash
+ debg creating role animals
+ debg deleting user test_user
+ debg default roles = test_logstash_reader,kibana_user
+ debg creating user test_user
+ debg applying update to kibana config: {"accessibility:disableAnimations":true,"dateFormat:tz":"UTC","telemetry:optIn":false,"pageNavigation":"individual"}
+ info Starting tests
+
+ └-: discover app
+   └-> "before all" hook
+   └-> "before all" hook
+   └-: date_nanos_mixed
+     └-> "before all" hook
+     └-> "before all" hook
+       │ info [date_nanos_mixed] Loading "mappings.json"
+       │ info [date_nanos_mixed] Loading "data.json"
+       │ info [date_nanos_mixed] Created index "timestamp-millis"
+       │ debg [date_nanos_mixed] "timestamp-millis" settings {"index":{"number_of_replicas":"1","number_of_shards":"1"}}
+       │ info [date_nanos_mixed] Created index "timestamp-nanos"
+       │ debg [date_nanos_mixed] "timestamp-nanos" settings {"index":{"number_of_replicas":"1","number_of_shards":"1"}}
+       │ info [date_nanos_mixed] Indexed 2 docs into "timestamp-millis"
+       │ info [date_nanos_mixed] Indexed 2 docs into "timestamp-nanos"
+       │ info [date_nanos_mixed] Indexed 2 docs into ".kibana"
+       │ info Creating index .kibana_3.
+       │ info Migrating .kibana_2 saved objects to .kibana_3
+       │ debg Migrating saved objects sample-data-telemetry:flights, sample-data-telemetry:logs, space:default, sample-data-telemetry:ecommerce, index-pattern:timestamp-*, search:82116b30-d407-11e9-8004-932185690e7b, maps-telemetry:maps-telemetry, config:8.0.0
+       │ info Pointing alias .kibana to .kibana_3.
+       │ info Finished in 724ms.
+       │ debg replacing kibana config doc: {"defaultIndex":"timestamp-*"}
+       │ debg navigating to discover url: http://localhost:5620/app/kibana#/discover
+       │ debg Navigate to: http://localhost:5620/app/kibana#/discover
+       │ debg ... sleep(700) start
+       │ debg browser[INFO] http://localhost:5620/login?next=%2Fapp%2Fkibana%3F_t%3D1581574571028#/discover 350 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'unsafe-eval' 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.
+       │
+       │ debg browser[INFO] http://localhost:5620/bundles/app/login/bootstrap.js 8:19 "^ A single error about an inline script not firing due to content security policy is expected!"
+       │ debg ... sleep(700) end
+       │ debg returned from get, calling refresh
+       │ debg browser[INFO] http://localhost:5620/login?next=%2Fapp%2Fkibana%3F_t%3D1581574571028#/discover 350 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'unsafe-eval' 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.
+       │
+       │ debg browser[INFO] http://localhost:5620/bundles/app/login/bootstrap.js 8:19 "^ A single error about an inline script not firing due to content security policy is expected!"
+       │ debg currentUrl = http://localhost:5620/login?next=%2Fapp%2Fkibana%3F_t%3D1581574571028#/discover
+       │          appUrl = http://localhost:5620/app/kibana#/discover
+       │ debg Find.findByCssSelector('[data-test-subj="kibanaChrome"]') with timeout=60000
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 199:24 "Testbed plugin set up. uiProp: 'Accessible from client'"
+       │ debg browser[INFO] webpack://%5Bname%5D/./node_modules/elasticsearch-browser/elasticsearch.js? 31638:15 "INFO: 2020-02-13T06:16:17Z
+       │        Adding connection to http://localhost:5620/elasticsearch
+       │
+       │      "
+       │ debg browser[DEBUG] http://localhost:5620/bundles/commons.bundle.js 3155:16 "Reporting user-agent."
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 222:14 "Testbed plugin started"
+       │ debg Found login page
+       │ debg TestSubjects.setValue(loginUsername, test_user)
+       │ debg TestSubjects.click(loginUsername)
+       │ debg Find.clickByCssSelector('[data-test-subj="loginUsername"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="loginUsername"]') with timeout=10000
+       │ debg TestSubjects.setValue(loginPassword, changeme)
+       │ debg TestSubjects.click(loginPassword)
+       │ debg Find.clickByCssSelector('[data-test-subj="loginPassword"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="loginPassword"]') with timeout=10000
+       │ debg TestSubjects.click(loginSubmit)
+       │ debg Find.clickByCssSelector('[data-test-subj="loginSubmit"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="loginSubmit"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)') with timeout=20000
+       │ debg browser[INFO] http://localhost:5620/app/kibana?_t=1581574571028#/discover 350 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'unsafe-eval' 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.
+       │
+       │ debg browser[INFO] http://localhost:5620/bundles/app/kibana/bootstrap.js 8:19 "^ A single error about an inline script not firing due to content security policy is expected!"
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 199:24 "Testbed plugin set up. uiProp: 'Accessible from client'"
+       │ debg browser[INFO] webpack://%5Bname%5D/./node_modules/elasticsearch-browser/elasticsearch.js? 31638:15 "INFO: 2020-02-13T06:16:21Z
+       │        Adding connection to http://localhost:5620/elasticsearch
+       │
+       │      "
+       │ debg browser[DEBUG] http://localhost:5620/bundles/commons.bundle.js 3155:16 "Reporting user-agent."
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 222:14 "Testbed plugin started"
+       │ debg browser[INFO] http://localhost:5620/app/kibana?_t=1581574582806#/discover 350 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'unsafe-eval' 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.
+       │
+       │ debg browser[INFO] http://localhost:5620/bundles/app/kibana/bootstrap.js 8:19 "^ A single error about an inline script not firing due to content security policy is expected!"
+       │ debg Finished login process currentUrl = http://localhost:5620/app/kibana#/discover
+       │ debg TestSubjects.find(kibanaChrome)
+       │ debg Find.findByCssSelector('[data-test-subj="kibanaChrome"]') with timeout=10000
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 199:24 "Testbed plugin set up. uiProp: 'Accessible from client'"
+       │ debg browser[INFO] webpack://%5Bname%5D/./node_modules/elasticsearch-browser/elasticsearch.js? 31638:15 "INFO: 2020-02-13T06:16:25Z
+       │        Adding connection to http://localhost:5620/elasticsearch
+       │
+       │      "
+       │ debg browser[DEBUG] http://localhost:5620/bundles/commons.bundle.js 3155:16 "Reporting user-agent."
+       │ debg browser[INFO] http://localhost:5620/bundles/plugin/testbed.bundle.js 222:14 "Testbed plugin started"
+       │ debg ... sleep(501) start
+       │ debg ... sleep(501) end
+       │ debg in navigateTo url = http://localhost:5620/app/kibana#/discover?_g=()&_a=(columns:!(_source),index:%27timestamp-*%27,interval:auto,query:(language:kuery,query:%27%27),sort:!())
+       │ debg --- retry.try error: URL changed, waiting for it to settle
+       │ debg ... sleep(501) start
+       │ debg ... sleep(501) end
+       │ debg in navigateTo url = http://localhost:5620/app/kibana#/discover?_g=()&_a=(columns:!(_source),index:%27timestamp-*%27,interval:auto,query:(language:kuery,query:%27%27),sort:!())
+       │ debg TestSubjects.exists(statusPageContainer)
+       │ debg Find.existsByDisplayedByCssSelector('[data-test-subj="statusPageContainer"]') with timeout=2500
+       │ debg --- retry.tryForTime error: [data-test-subj="statusPageContainer"] is not displayed
+       │ debg Setting absolute range to Jan 1, 2019 @ 00:00:00.000 to Jan 1, 2019 @ 23:59:59.999
+       │ debg TestSubjects.exists(superDatePickerToggleQuickMenuButton)
+       │ debg Find.existsByDisplayedByCssSelector('[data-test-subj="superDatePickerToggleQuickMenuButton"]') with timeout=20000
+       │ debg TestSubjects.exists(superDatePickerShowDatesButton)
+       │ debg Find.existsByDisplayedByCssSelector('[data-test-subj="superDatePickerShowDatesButton"]') with timeout=2500
+       │ debg TestSubjects.click(superDatePickerShowDatesButton)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerShowDatesButton"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerShowDatesButton"]') with timeout=10000
+       │ debg TestSubjects.exists(superDatePickerstartDatePopoverButton)
+       │ debg Find.existsByDisplayedByCssSelector('[data-test-subj="superDatePickerstartDatePopoverButton"]') with timeout=2500
+       │ debg TestSubjects.click(superDatePickerendDatePopoverButton)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerendDatePopoverButton"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerendDatePopoverButton"]') with timeout=10000
+       │ debg Find.findByCssSelector('div.euiPopover__panel-isOpen') with timeout=10000
+       │ debg TestSubjects.click(superDatePickerAbsoluteTab)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteTab"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteTab"]') with timeout=10000
+       │ERROR browser[SEVERE] http://localhost:5620/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js 423865:14 "Warning: Failed prop type: The prop `initialSelectedTab.name` is marked as required in `EuiTabbedContent`, but its value is `undefined`.
+       │          in EuiTabbedContent (created by EuiDatePopoverContent)
+       │          in EuiDatePopoverContent (created by EuiDatePopoverButton)
+       │          in div (created by EuiMutationObserver)
+       │          in EuiMutationObserver (created by EuiPopover)
+       │          in div (created by EuiPanel)
+       │          in EuiPanel (created by EuiPopover)
+       │          in div (created by FocusLock)
+       │          in FocusLock (created by EuiFocusTrap)
+       │          in div (created by OutsideEventDetector)
+       │          in OutsideEventDetector (created by EuiFocusTrap)
+       │          in EuiOutsideClickDetector (created by EuiFocusTrap)
+       │          in EuiFocusTrap (created by EuiPopover)
+       │          in EuiPortal (created by EuiPopover)
+       │          in div (created by EuiPopover)
+       │          in EuiOutsideClickDetector (created by EuiPopover)
+       │          in EuiPopover (created by EuiDatePopoverButton)
+       │          in EuiDatePopoverButton (created by Context.Consumer)
+       │          in div (created by EuiDatePickerRange)
+       │          in EuiDatePickerRange (created by Context.Consumer)
+       │          in div (created by EuiFormControlLayout)
+       │          in div (created by EuiFormControlLayout)
+       │          in EuiFormControlLayout (created by EuiSuperDatePicker)
+       │          in div (created by EuiFlexItem)
+       │          in EuiFlexItem (created by EuiSuperDatePicker)
+       │          in div (created by EuiFlexGroup)
+       │          in EuiFlexGroup (created by EuiSuperDatePicker)
+       │          in EuiSuperDatePicker (created by QueryBarTopRowUI)
+       │          in div (created by EuiFlexItem)
+       │          in EuiFlexItem (created by QueryBarTopRowUI)
+       │          in div (created by EuiFlexGroup)
+       │          in EuiFlexGroup (created by QueryBarTopRowUI)
+       │          in div (created by EuiFlexItem)
+       │          in EuiFlexItem (created by QueryBarTopRowUI)
+       │          in div (created by EuiFlexGroup)
+       │          in EuiFlexGroup (created by QueryBarTopRowUI)
+       │          in QueryBarTopRowUI (created by InjectIntl(QueryBarTopRowUI))
+       │          in InjectIntl(QueryBarTopRowUI) (created by SearchBarUI)
+       │          in div (created by SearchBarUI)
+       │          in SearchBarUI (created by EnhancedType)
+       │          in EnhancedType (created by InjectIntl(EnhancedType))
+       │          in InjectIntl(EnhancedType)
+       │          in Provider
+       │          in Unknown (created by TopNavMenu)
+       │          in span (created by TopNavMenu)
+       │          in PseudoLocaleWrapper (created by I18nProvider)
+       │          in IntlProvider (created by I18nProvider)
+       │          in I18nProvider (created by TopNavMenu)
+       │          in TopNavMenu
+       │          in Unknown (created by ContextWrapper)
+       │          in EuiContext (created by I18nContext)
+       │          in PseudoLocaleWrapper (created by I18nProvider)
+       │          in IntlProvider (created by I18nProvider)
+       │          in I18nProvider (created by I18nContext)
+       │          in I18nContext (created by ContextWrapper)
+       │          in ContextWrapper"
+       │ debg TestSubjects.click(superDatePickerAbsoluteDateInput)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg TestSubjects.setValue(superDatePickerAbsoluteDateInput, Jan 1, 2019 @ 23:59:59.999)
+       │ debg TestSubjects.click(superDatePickerAbsoluteDateInput)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg ... sleep(500) start
+       │ debg ... sleep(500) end
+       │ debg TestSubjects.click(superDatePickerstartDatePopoverButton)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerstartDatePopoverButton"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerstartDatePopoverButton"]') with timeout=10000
+       │ debg Find.waitForElementStale with timeout=10000
+       │ debg Find.findByCssSelector('div.euiPopover__panel-isOpen') with timeout=10000
+       │ debg TestSubjects.click(superDatePickerAbsoluteTab)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteTab"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteTab"]') with timeout=10000
+       │ debg TestSubjects.click(superDatePickerAbsoluteDateInput)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg TestSubjects.setValue(superDatePickerAbsoluteDateInput, Jan 1, 2019 @ 00:00:00.000)
+       │ debg TestSubjects.click(superDatePickerAbsoluteDateInput)
+       │ debg Find.clickByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="superDatePickerAbsoluteDateInput"]') with timeout=10000
+       │ debg TestSubjects.exists(superDatePickerApplyTimeButton)
+       │ debg Find.existsByDisplayedByCssSelector('[data-test-subj="superDatePickerApplyTimeButton"]') with timeout=2500
+       │ debg --- retry.tryForTime error: [data-test-subj="superDatePickerApplyTimeButton"] is not displayed
+       │ debg TestSubjects.click(querySubmitButton)
+       │ debg Find.clickByCssSelector('[data-test-subj="querySubmitButton"]') with timeout=10000
+       │ debg Find.findByCssSelector('[data-test-subj="querySubmitButton"]') with timeout=10000
+       │ debg Find.waitForElementStale with timeout=10000
+       │ debg TestSubjects.exists(globalLoadingIndicator-hidden)
+       │ debg Find.existsByCssSelector('[data-test-subj="globalLoadingIndicator-hidden"]') with timeout=100000
+     └-> shows a list of records of indices with date & date_nanos fields in the right order
+       └-> "before each" hook: global before each
+       │ debg Find.findByCssSelector('tr.kbnDocTable__row:nth-child(1)') with timeout=10000
+       │ info Taking screenshot "/Users/rashmikulkarni/my_workspace/kibana/test/functional/screenshots/failure/discover app date_nanos_mixed shows a list of records of indices with date _ date_nanos fields in the right order.png"
+       │ info Current URL is: http://localhost:5620/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:%272019-01-01T00:00:00.000Z%27,to:%272019-01-01T23:59:59.999Z%27))&_a=(columns:!(_source),index:%27timestamp-*%27,interval:auto,query:(language:kuery,query:%27%27),sort:!())
+       │ info Saving page source to: /Users/rashmikulkarni/my_workspace/kibana/test/functional/failure_debug/html/discover app date_nanos_mixed shows a list of records of indices with date _ date_nanos fields in the right order.html
+
+  1) discover app
+       date_nanos_mixed
+         shows a list of records of indices with date & date_nanos fields in the right order:
+     TimeoutError: Waiting for element to be located By(css selector, tr.kbnDocTable__row:nth-child(1))
+Wait timed out after 10004ms
+      at /Users/rashmikulkarni/my_workspace/kibana/node_modules/selenium-webdriver/lib/webdriver.js:841:17
+      at process._tickCallback (internal/process/next_tick.js:68:7)
+
+       └- ✖ fail: "discover app date_nanos_mixed shows a list of records of indices with date & date_nanos fields in the right order"
+       │
+     └-> "after all" hook: unloadMakelogs
+       │ info [date_nanos_mixed] Unloading indices from "mappings.json"
+       │ info [date_nanos_mixed] Deleted existing index "timestamp-millis"
+       │ info [date_nanos_mixed] Deleted existing index "timestamp-nanos"
+       │ info [date_nanos_mixed] Unloading indices from "data.json"
+     └-> "after all" hook
+   └-> "after all" hook: unloadMakelogs
+     │ info [logstash_functional] Unloading indices from "mappings.json"
+     │ info [logstash_functional] Unloading indices from "data.json.gz"
+   └-> "after all" hook
+
+
+0 passing (1.0m)
+1 failing
+
+
+<--- Last few GCs --->
+
+[44535:0x104000c00]    83225 ms: Mark-sweep 763.3 (1159.6) -> 763.3 (1079.1) MB, 162.6 / 0.0 ms  (average mu = 0.957, current mu = 0.000) last resort GC in old space requested
+[44535:0x104000c00]    83387 ms: Mark-sweep 763.3 (1079.1) -> 763.3 (1042.6) MB, 161.5 / 0.0 ms  (average mu = 0.912, current mu = 0.000) last resort GC in old space requested
+
+
+<--- JS stacktrace --->
+
+==== JS stack trace =========================================
+
+    0: ExitFrame [pc: 0xa75ec5dbe3d]
+Security context: 0x276d7179e6e9 <JSObject>
+    1: byteLength(aka byteLength) [0x276d61ff97f9] [buffer.js:531] [bytecode=0x276dcb3781a9 offset=204](this=0x276d1aa026f1 <undefined>,string=0x276d8d88a309 <Very long string[234905773]>,encoding=0x276d717bea01 <String[4]: utf8>)
+    2: arguments adaptor frame: 3->2
+    3: fromString(aka fromString) [0x276da9b93581] [buffer.js:342] [bytecode=0x276dcb3722c1 o...
+
