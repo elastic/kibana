@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { PersistedStateError } from './errors';
 import { PersistedState } from './persisted_state';
 
@@ -246,21 +245,23 @@ describe('Persisted State Provider', () => {
 
   describe('events', () => {
     let persistedState: PersistedState;
-    let emmiter: any;
+    let emitSpy: jest.SpyInstance;
 
     const getByType = (type: string): any[] => {
-      return emmiter.getCalls().filter((call: any) => {
-        return call.args[0] === type;
-      });
+      return emitSpy.mock.calls.filter(([callType]) => callType === type);
     };
 
     const watchEmitter = (state: any) => {
-      return sinon.spy(state, 'emit');
+      return jest.spyOn(state, 'emit');
     };
 
     beforeEach(() => {
       persistedState = new PersistedState({ checker: { events: 'event tests' } });
-      emmiter = watchEmitter(persistedState);
+      emitSpy = watchEmitter(persistedState);
+    });
+
+    afterEach(() => {
+      emitSpy.mockRestore();
     });
 
     test('should emit set when setting values', () => {

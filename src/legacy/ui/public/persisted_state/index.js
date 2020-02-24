@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PersistedState } from './persisted_state.js';
+export { PersistedState } from './persisted_state';
