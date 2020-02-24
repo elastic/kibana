@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { tabifyGetColumns, AggColumn } from './get_columns';
+import { tabifyGetColumns } from './get_columns';
 import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
+import { TabbedAggColumn } from './types';
 
 jest.mock('ui/new_platform');
 
@@ -140,7 +141,7 @@ describe('get columns', () => {
       false
     );
 
-    function checkColumns(column: AggColumn, i: number) {
+    function checkColumns(column: TabbedAggColumn, i: number) {
       expect(column).toHaveProperty('aggConfig');
 
       switch (i) {
