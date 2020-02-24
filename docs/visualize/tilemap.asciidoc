@@ -14,7 +14,7 @@ Visualize supports the following types of maps:
 NOTE: Visualize maps have been replaced with <<maps>>, which offers more functionality.
 
 [float]
-[[tilemap]]
+[[coordinate-map]]
 === Coordinate map
 
 Use a coordinate map when your data set includes latitude and longitude values. For example, use a coordinate map to see the varying popularity of destination airports using the sample flight data.
