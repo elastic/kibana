@@ -14,6 +14,7 @@ export interface EsNames {
   alias: string;
   ilmPolicy: string;
   indexPattern: string;
+  indexPatternWithVersion: string;
   initialIndex: string;
   indexTemplate: string;
 }
@@ -24,8 +25,9 @@ export function getEsNames(baseName: string): EsNames {
   return {
     base: baseName,
     alias: eventLogNameWithVersion,
-    ilmPolicy: `${eventLogNameWithVersion}-policy`,
+    ilmPolicy: `${eventLogName}-policy`,
     indexPattern: `${eventLogName}-*`,
+    indexPatternWithVersion: `${eventLogNameWithVersion}-*`,
     initialIndex: `${eventLogNameWithVersion}-000001`,
     indexTemplate: `${eventLogNameWithVersion}-template`,
   };

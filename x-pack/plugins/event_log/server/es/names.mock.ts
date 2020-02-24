@@ -10,8 +10,9 @@ const createNamesMock = () => {
   const mock: jest.Mocked<EsNames> = {
     base: '.kibana',
     alias: '.kibana-event-log-8.0.0',
-    ilmPolicy: '.kibana-event-log-8.0.0-policy',
+    ilmPolicy: '.kibana-event-log-policy',
     indexPattern: '.kibana-event-log-*',
+    indexPatternWithVersion: '.kibana-event-log-8.0.0-*',
     initialIndex: '.kibana-event-log-8.0.0-000001',
     indexTemplate: '.kibana-event-log-8.0.0-template',
   };

@@ -17,8 +17,9 @@ describe('getEsNames()', () => {
     const esNames = getEsNames(base);
     expect(esNames.base).toEqual(base);
     expect(esNames.alias).toEqual(`${base}-event-log-${version}`);
-    expect(esNames.ilmPolicy).toEqual(`${base}-event-log-${version}-policy`);
+    expect(esNames.ilmPolicy).toEqual(`${base}-event-log-policy`);
     expect(esNames.indexPattern).toEqual(`${base}-event-log-*`);
+    expect(esNames.indexPatternWithVersion).toEqual(`${base}-event-log-${version}-*`);
     expect(esNames.initialIndex).toEqual(`${base}-event-log-${version}-000001`);
     expect(esNames.indexTemplate).toEqual(`${base}-event-log-${version}-template`);
   });

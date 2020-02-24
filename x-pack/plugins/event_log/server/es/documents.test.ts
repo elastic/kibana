@@ -22,7 +22,7 @@ describe('getIndexTemplate()', () => {
 
   test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames);
-    expect(indexTemplate.index_patterns).toEqual([esNames.indexPattern]);
+    expect(indexTemplate.index_patterns).toEqual([esNames.indexPatternWithVersion]);
     expect(indexTemplate.settings.number_of_shards).toBeGreaterThanOrEqual(0);
     expect(indexTemplate.settings.number_of_replicas).toBeGreaterThanOrEqual(0);
     expect(indexTemplate.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
