@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  applyTransformConfigToDetailsState,
-  getDefaultStepDetailsState,
-  StepDetailsForm,
-} from './step_details_form';
-export { StepDetailsSummary } from './step_details_summary';
+export { CloneTransformSection } from './clone_transform_section';
