@@ -17,29 +17,30 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
-import { Mutable } from '@kbn/utility-types';
-import { Action, ActionContext, AnyActionDefinition, ActionConfig } from './action';
+import { Action, ActionContext, AnyActionDefinition } from './action';
 import { AbstractPresentable } from '../util/abstract_presentable';
+import { createActionStateContainer, ActionState } from './action_state_container';
 
 export class ActionInternal<A extends AnyActionDefinition>
   implements Action<ActionContext<A>>, AbstractPresentable<ActionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
-  public readonly order: number = this.definition.order || 0;
   public readonly type: string = this.definition.type || '';
   public readonly factoryId: string = this.definition.factoryId || '';
   public readonly MenuItem? = this.definition.MenuItem;
+  public get order() {
+    return this.state.get().order;
+  }
 
-  /**
-   * Current config of the dynamic action.
-   */
-  public config: ActionConfig<A> = this.definition.defaultConfig || undefined;
+  public readonly state = createActionStateContainer({
+    name: '',
+    order: this.definition.order || 0,
+    config: this.definition.defaultConfig || {},
+  });
 
   public execute(context: ActionContext<A>) {
-    return this.definition.execute(context, this.config);
+    return this.definition.execute(context, this.state.get().config);
   }
 
   public getIconType(context: ActionContext<A>): string | undefined {
@@ -63,18 +64,19 @@ export class ActionInternal<A extends AnyActionDefinition>
   }
 
   serialize(): SerializedAction {
-    const serialized: Mutable<SerializedAction> = {
+    const state = this.state.get();
+    const serialized: SerializedAction = {
       factoryId: this.factoryId,
       id: this.id,
       type: this.type || '',
-      config: this.config,
+      state,
     };
 
-    if (typeof this.definition.order !== 'undefined') {
-      serialized.order = this.order;
-    }
-
     return serialized;
+  }
+
+  deserialize({ state }: SerializedAction) {
+    this.state.set(state);
   }
 }
 
@@ -84,6 +86,5 @@ export interface SerializedAction<Config extends object = object> {
   readonly factoryId: string;
   readonly id: string;
   readonly type: string;
-  readonly order?: number;
-  readonly config: Config;
+  readonly state: ActionState<Config>;
 }
