@@ -29,19 +29,24 @@ export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
         value={name}
         disabled={onNameChange === noop}
         onChange={event => onNameChange(event.target.value)}
+        data-test-subj="dynamicActionNameInput"
       />
+    </EuiFormRow>
+  );
+
+  const triggerPicker = <div>Trigger Picker will be here</div>;
+  const actionPicker = (
+    <EuiFormRow label={txtDrilldownAction}>
+      <DrilldownPicker />
     </EuiFormRow>
   );
 
   return (
     <>
       <DrilldownHelloBar />
-      <EuiForm>
-        {nameFragment}
-        <EuiFormRow label={txtDrilldownAction}>
-          <DrilldownPicker />
-        </EuiFormRow>
-      </EuiForm>
+      <EuiForm>{nameFragment}</EuiForm>
+      {triggerPicker}
+      {actionPicker}
     </>
   );
 };
