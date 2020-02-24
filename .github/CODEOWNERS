@@ -54,6 +54,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
@@ -185,3 +186,10 @@
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
+
+# SIEM
+/x-pack/legacy/plugins/siem/ @elastic/siem
+/x-pack/plugins/siem/ @elastic/siem
+/x-pack/test/detection_engine_api_integration @elastic/siem
+/x-pack/test/api_integration/apis/siem @elastic/siem
+/x-pack/plugins/case @elastic/siem
