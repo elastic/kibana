@@ -25,5 +25,5 @@ export {
   isDateHistogramBucketAggConfig,
   setBounds,
 } from '../../../ui/public/agg_types';
-import '../../../ui/public/directives/bind';
+// import '../../../ui/public/directives/bind';
 export { createSavedSearchesLoader } from '../../kibana/public/discover/saved_searches/';
