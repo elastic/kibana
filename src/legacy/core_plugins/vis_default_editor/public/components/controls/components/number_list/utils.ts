@@ -147,7 +147,7 @@ export {
   getRange,
   validateValue,
   validateOrder,
-  getDuplicateIndices as validateUniqueness,
+  getDuplicateIndices,
   getNextModel,
   getInitModelList,
   getUpdatedModels,

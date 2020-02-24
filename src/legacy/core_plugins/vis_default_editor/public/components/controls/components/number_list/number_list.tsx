@@ -28,7 +28,7 @@ import {
   EMPTY_STRING,
   getRange,
   validateOrder,
-  validateUniqueness,
+  getDuplicateIndices,
   validateValue,
   getNextModel,
   getInitModelList,
@@ -82,7 +82,7 @@ function NumberList({
       );
     }
     if (disallowDuplicates) {
-      const duplicateModelIndices = validateUniqueness(numberArray);
+      const duplicateModelIndices = getDuplicateIndices(numberArray);
       if (duplicateModelIndices.length) {
         individualModelErrorMessage = i18n.translate(
           'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
