@@ -36,6 +36,7 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 import { SavedSearch } from './np_ready/types';
 import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
+import { VisualizationsStart } from '../../../visualizations/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -56,6 +57,7 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
+  visualizations: VisualizationsStart;
 }
 export async function buildServices(
   core: CoreStart,
@@ -89,5 +91,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    visualizations: plugins.visualizations,
   };
 }

@@ -16,6 +16,9 @@ import {
   NetworkPageModel,
   NetworkTableType,
   NetworkType,
+  TopCountriesQuery,
+  TlsQuery,
+  HttpQuery,
 } from './model';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
@@ -41,7 +44,7 @@ const selectTopNFlowByType = (
 
 export const topNFlowSelector = () =>
   createSelector(selectTopNFlowByType, topNFlowQueries => topNFlowQueries);
-const selectTlsByType = (state: State, networkType: NetworkType) => {
+const selectTlsByType = (state: State, networkType: NetworkType): TlsQuery => {
   const tlsType = networkType === NetworkType.page ? NetworkTableType.tls : IpDetailsTableType.tls;
   return (
     get([networkType, 'queries', tlsType], state.network) ||
@@ -55,7 +58,7 @@ const selectTopCountriesByType = (
   state: State,
   networkType: NetworkType,
   flowTarget: FlowTargetSourceDest
-) => {
+): TopCountriesQuery => {
   const ft =
     flowTarget === FlowTargetSourceDest.source ? 'topCountriesSource' : 'topCountriesDestination';
   const nFlowType =
@@ -70,7 +73,7 @@ const selectTopCountriesByType = (
 export const topCountriesSelector = () =>
   createSelector(selectTopCountriesByType, topCountriesQueries => topCountriesQueries);
 
-const selectHttpByType = (state: State, networkType: NetworkType) => {
+const selectHttpByType = (state: State, networkType: NetworkType): HttpQuery => {
   const httpType =
     networkType === NetworkType.page ? NetworkTableType.http : IpDetailsTableType.http;
   return (

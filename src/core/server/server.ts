@@ -42,7 +42,7 @@ import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
-import { config as savedObjectsConfig } from './saved_objects';
+import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils';
 import { ContextService } from './context';
@@ -132,6 +132,7 @@ export class Server {
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
+      http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
       legacyPlugins,
     });
@@ -257,6 +258,7 @@ export class Server {
       [devConfig.path, devConfig.schema],
       [kibanaConfig.path, kibanaConfig.schema],
       [savedObjectsConfig.path, savedObjectsConfig.schema],
+      [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
 

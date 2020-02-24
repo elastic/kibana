@@ -18,6 +18,7 @@ import {
   selectField,
   deselectField,
   GraphState,
+  GraphStore,
 } from '../../state_management';
 import { WorkspaceField } from '../../types';
 
@@ -35,6 +36,7 @@ export function FieldManagerComponent(props: {
   deselectField: (fieldName: string) => void;
   pickerOpen: boolean;
   setPickerOpen: (open: boolean) => void;
+  store?: GraphStore; // only for testing purpose
 }) {
   return (
     <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">

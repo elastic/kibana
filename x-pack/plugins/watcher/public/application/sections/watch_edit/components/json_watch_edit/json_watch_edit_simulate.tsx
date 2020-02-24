@@ -40,6 +40,8 @@ import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
+import { useXJsonMode } from './use_x_json_mode';
+
 const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
   text: ACTION_MODES[mode],
   value: ACTION_MODES[mode],
@@ -93,6 +95,8 @@ export const JsonWatchEditSimulate = ({
     alternativeInput,
     ignoreCondition,
   } = executeDetails;
+
+  const { setXJson, convertToJson, xJsonMode, xJson } = useXJsonMode(alternativeInput);
 
   const columns = [
     {
@@ -294,7 +298,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionActionModesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -323,7 +326,6 @@ export const JsonWatchEditSimulate = ({
           }
         >
           <EuiFormRow
-            describedByIds={['simulateExecutionActionModesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.actionModesFieldLabel',
               {
@@ -342,7 +344,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionInputOverridesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -361,7 +362,6 @@ export const JsonWatchEditSimulate = ({
         >
           <ErrableFormRow
             id="executeWatchJson"
-            describedByIds={['simulateExecutionInputOverridesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
               {
@@ -375,22 +375,23 @@ export const JsonWatchEditSimulate = ({
           >
             <EuiCodeEditor
               fullWidth
-              mode="json"
+              mode={xJsonMode}
               width="100%"
               height="200px"
-              theme="github"
+              theme="textmate"
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
                 {
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={alternativeInput}
-              onChange={(json: string) => {
+              value={xJson}
+              onChange={(xjson: string) => {
+                setXJson(xjson);
                 setExecuteDetails(
                   new ExecuteDetails({
                     ...executeDetails,
-                    alternativeInput: json,
+                    alternativeInput: convertToJson(xjson),
                   })
                 );
               }}

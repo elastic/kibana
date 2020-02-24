@@ -19,7 +19,7 @@ export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsTa
 });
 
 export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
-  defaultMessage: 'External alerts count',
+  defaultMessage: 'External alert count',
 });
 
 export const ALERTS_STACK_BY_MODULE = i18n.translate(
