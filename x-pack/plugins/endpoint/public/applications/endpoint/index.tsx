@@ -8,16 +8,14 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, Switch, BrowserRouter, useLocation } from 'react-router-dom';
-import { Provider, useDispatch } from 'react-redux';
+import { Route, Switch, BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import { Store } from 'redux';
-import { memo } from 'react';
+import { RouteCapture } from './view/route_capture';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
 import { PolicyList } from './view/policy';
-import { AppAction } from './store/action';
-import { EndpointAppLocation } from './types';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -32,13 +30,6 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
     ReactDOM.unmountComponentAtNode(element);
   };
 }
-
-const RouteCapture = memo(({ children }) => {
-  const location: EndpointAppLocation = useLocation();
-  const dispatch: (action: AppAction) => unknown = useDispatch();
-  dispatch({ type: 'userChangedUrl', payload: location });
-  return <>{children}</>;
-});
 
 interface RouterProps {
   basename: string;
