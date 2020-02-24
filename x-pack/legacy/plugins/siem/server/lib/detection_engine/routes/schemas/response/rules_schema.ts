@@ -43,6 +43,8 @@ import {
   status_date,
   last_success_at,
   last_success_message,
+  last_failure_at,
+  last_failure_message,
   version,
   filters,
   meta,
@@ -102,13 +104,12 @@ export const dependentRulesSchema = t.partial({
  * Instead use dependentRulesSchema and check_type_dependents for how to do those.
  */
 export const partialRulesSchema = t.partial({
-  // TODO: We need type dependents on these 4 where either they all show up or none
-  // of them show up? I need to talk to Devin
   status: job_status,
   status_date,
   last_success_at,
   last_success_message,
-
+  last_failure_at,
+  last_failure_message,
   filters,
   meta,
   index,

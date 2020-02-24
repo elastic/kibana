@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 export type IsoDateStringC = t.Type<string, string, unknown>;
 
@@ -15,7 +16,7 @@ export type IsoDateStringC = t.Type<string, string, unknown>;
 export const IsoDateString: IsoDateStringC = new t.Type<string, string, unknown>(
   'IsoDateString',
   t.string.is,
-  (input, context) => {
+  (input, context): Either<t.Errors, string> => {
     if (typeof input === 'string') {
       try {
         const parsed = new Date(input);

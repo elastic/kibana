@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 export type PositiveIntegerGreaterThanZeroC = t.Type<number, number, unknown>;
 
@@ -20,7 +21,7 @@ export const PositiveIntegerGreaterThanZero: PositiveIntegerGreaterThanZeroC = n
 >(
   'PositiveIntegerGreaterThanZero',
   t.number.is,
-  (input, context) => {
+  (input, context): Either<t.Errors, number> => {
     return typeof input === 'number' && Number.isSafeInteger(input) && input >= 1
       ? t.success(input)
       : t.failure(input, context);

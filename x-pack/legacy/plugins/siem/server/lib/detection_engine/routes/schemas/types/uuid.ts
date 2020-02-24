@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 export type UUIDC = t.Type<string, string, unknown>;
 
@@ -18,7 +19,7 @@ const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const UUID: UUIDC = new t.Type<string, string, unknown>(
   'UUID',
   t.string.is,
-  (input, context) => {
+  (input, context): Either<t.Errors, string> => {
     return typeof input === 'string' && regex.test(input)
       ? t.success(input)
       : t.failure(input, context);

@@ -91,18 +91,22 @@ export const threat_tactic = t.type({
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
 export const threat_technique_reference = t.string;
-export const threat_technique = t.type({
-  id: threat_technique_id,
-  name: threat_technique_name,
-  reference: threat_technique_reference,
-});
+export const threat_technique = t.exact(
+  t.type({
+    id: threat_technique_id,
+    name: threat_technique_name,
+    reference: threat_technique_reference,
+  })
+);
 export const threat_techniques = t.array(threat_technique);
 export const threat = t.array(
-  t.type({
-    framework: threat_framework,
-    tactic: threat_tactic,
-    technique: threat_techniques,
-  })
+  t.exact(
+    t.type({
+      framework: threat_framework,
+      tactic: threat_tactic,
+      technique: threat_techniques,
+    })
+  )
 );
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
@@ -111,6 +115,8 @@ export const created_by = t.string;
 export const version = Version;
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
+export const last_failure_at = IsoDateString;
+export const last_failure_message = t.string;
 export const status_date = IsoDateString;
 export const rules_installed = PositiveInteger;
 export const rules_updated = PositiveInteger;

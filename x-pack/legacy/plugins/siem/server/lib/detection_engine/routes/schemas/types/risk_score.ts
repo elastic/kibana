@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 export type RiskScoreC = t.Type<number, number, unknown>;
 
@@ -16,7 +17,7 @@ export type RiskScoreC = t.Type<number, number, unknown>;
 export const RiskScore: RiskScoreC = new t.Type<number, number, unknown>(
   'RiskScore',
   t.number.is,
-  (input, context) => {
+  (input, context): Either<t.Errors, number> => {
     return typeof input === 'number' && Number.isSafeInteger(input) && input >= 0 && input <= 100
       ? t.success(input)
       : t.failure(input, context);
