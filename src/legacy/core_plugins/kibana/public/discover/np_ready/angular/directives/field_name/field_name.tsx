@@ -64,7 +64,9 @@ export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIcon
         />
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
-        <span className="dscFieldName__displayName eui-textTruncate">{displayName}</span>
+        <span className="dscFieldName__displayName eui-textTruncate" title={displayName}>
+          {displayName}
+        </span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
