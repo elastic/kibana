@@ -104,8 +104,6 @@ export const ProcessEventDot = styled(
             dominantBaseline="middle"
             fontSize="3"
             fill={NamedColors.empty}
-            stroke={NamedColors.strokeBehindEmpty}
-            strokeWidth=".35"
             paintOrder="stroke"
             tabIndex={-1}
           >
@@ -121,8 +119,6 @@ export const ProcessEventDot = styled(
                 dominantBaseline="middle"
                 fontSize="1.25"
                 fill={NamedColors.empty}
-                stroke={NamedColors.strokeBehindEmpty}
-                strokeWidth=".25"
                 paintOrder="stroke"
                 style={{ textTransform: 'uppercase' }}
               >
