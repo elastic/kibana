@@ -195,7 +195,7 @@ describe('convertLegacyTypes', () => {
     expect(Object.keys(converted[1]!.migrations!)).toEqual(Object.keys(migrationsB));
   });
 
-  it('migrates the migration to the new format', () => {
+  it('converts the migration to the new format', () => {
     const legacyMigration = jest.fn();
     const migrationsA = {
       '1.0.0': legacyMigration,

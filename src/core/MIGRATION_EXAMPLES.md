@@ -889,7 +889,7 @@ export class MyPlugin implements Plugin {
 
 ### Changes in structure compared to legacy
 
-The NP `registerType` expected input is very close to the legacy format, However there are some minor changes:
+The NP `registerType` expected input is very close to the legacy format. However, there are some minor changes:
 
 - The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceAgnostic`
 
