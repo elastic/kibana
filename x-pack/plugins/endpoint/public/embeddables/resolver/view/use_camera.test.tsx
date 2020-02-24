@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
- */
 import React from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
 import { useCamera } from './use_camera';
