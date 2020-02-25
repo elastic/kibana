@@ -245,23 +245,20 @@ const ReputationLinkComponent: React.FC<{
         data-test-subj="reputationLinkGroup"
       >
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="none" justifyContent="center">
-            {ipReputationLinks
-              ?.slice(0, overflowIndexStart)
-              .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
-                <EuiFlexItem grow={false} key={`reputationLink-${id}`}>
-                  <ExternalLink
-                    allItemsLimit={ipReputationLinks.length}
-                    idx={id}
-                    overflowIndexStart={overflowIndexStart}
-                    url={urlTemplate}
-                    data-test-subj="externalLinkComponent"
-                  >
-                    <>{showDomain ? domain : name ?? domain}</>
-                  </ExternalLink>
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
+          {ipReputationLinks
+            ?.slice(0, overflowIndexStart)
+            .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
+              <ExternalLink
+                allItemsLimit={ipReputationLinks.length}
+                idx={id}
+                overflowIndexStart={overflowIndexStart}
+                url={urlTemplate}
+                data-test-subj="externalLinkComponent"
+                key={`reputationLink-${id}`}
+              >
+                <>{showDomain ? domain : name ?? domain}</>
+              </ExternalLink>
+            ))}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
