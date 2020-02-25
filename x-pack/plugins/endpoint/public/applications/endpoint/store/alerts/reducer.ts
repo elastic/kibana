@@ -33,6 +33,8 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       ...state,
       alerts,
       pageSize,
+      // request_page_index is optional because right now we support both
+      // simple and cursor based pagination.
       pageIndex: pageIndex || 0,
       total,
     };

@@ -52,6 +52,8 @@ export const mockAlertResultList: (options?: {
         },
       },
       thread: {},
+      prev: null,
+      next: null,
     });
   }
   const mock: AlertResultList = {
