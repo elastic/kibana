@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.7>>
 * <<release-notes-6.8.6>>
 * <<release-notes-6.8.5>>
 * <<release-notes-6.8.4>>
@@ -93,6 +94,17 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.8.7]]
+== {kib} 6.8.7
+
+[float]
+[[bug-6.8.7]]
+=== Bug fixes
+Operations::
+* Updates Node.js to version 10.19.0 {pull}56940[#56940]
+Platform::
+* Limits fetching index patterns {pull}56603[#56603]
+
 
 [[release-notes-6.8.6]]
 == {kib} 6.8.6
@@ -101,12 +113,12 @@ This section summarizes the changes in each release.
 [[bug-6.8.6]]
 === Bug fix
 Maps::
-* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map 
-visualizations. An attacker could create a malicious visualization that 
-executes JavaScript in a victim’s browser when the visualization, or dashboard 
-containing the visualization, was viewed. Since Kibana 6.7.0, Content Security 
-Policy (CSP), which prevents attackers from using this flaw, is enabled by 
-default. However, an attacker can still inject arbitrary HTML into the page. 
+* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map
+visualizations. An attacker could create a malicious visualization that
+executes JavaScript in a victim’s browser when the visualization, or dashboard
+containing the visualization, was viewed. Since Kibana 6.7.0, Content Security
+Policy (CSP), which prevents attackers from using this flaw, is enabled by
+default. However, an attacker can still inject arbitrary HTML into the page.
 See https://www.elastic.co/community/security/, CVE-2019-7621.
 * Sanitizes attribution {pull}52309[#52309]
 
