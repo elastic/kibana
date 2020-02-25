@@ -36,7 +36,7 @@ describe('SavedObjects /_migrate endpoint', () => {
 
   it('calls runMigrations on the migrator with rerun=true when accessed', async () => {
     await kbnTestServer.request
-      .post(root, '/api/saved_objects/_migrate')
+      .post(root, '/internal/saved_objects/_migrate')
       .send({})
       .expect(200);
 
@@ -46,14 +46,14 @@ describe('SavedObjects /_migrate endpoint', () => {
 
   it('calls runMigrations multiple time when multiple access', async () => {
     await kbnTestServer.request
-      .post(root, '/api/saved_objects/_migrate')
+      .post(root, '/internal/saved_objects/_migrate')
       .send({})
       .expect(200);
 
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
 
     await kbnTestServer.request
-      .post(root, '/api/saved_objects/_migrate')
+      .post(root, '/internal/saved_objects/_migrate')
       .send({})
       .expect(200);
 
