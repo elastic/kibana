@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { left, Either, fold } from 'fp-ts/lib/Either';
+import { left, Either, fold, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 /**
@@ -43,7 +43,7 @@ export const exactCheck = <T>(
       const error: t.Errors = [validationError];
       return left(error);
     } else {
-      return decoded;
+      return right(decodedValue);
     }
   };
   return pipe(decoded, fold(onLeft, onRight));
