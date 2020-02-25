@@ -6,7 +6,7 @@
 import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 
 import expect from '@kbn/expect';
-import { ElasticsearchAlertsAdapter } from './elasticsearch_adapter';
+import { ElasticsearchMatrixHistogramAdapter } from './elasticsearch_adapter';
 import {
   mockRequest,
   mockOptions,
@@ -15,7 +15,7 @@ import {
   mockAlertsHistogramDataFormattedResponse,
 } from './mock';
 
-jest.mock('./query.dsl', () => {
+jest.mock('./query_alerts.dsl', () => {
   return {
     buildAlertsHistogramQuery: jest.fn(() => mockAlertsHistogramQueryDsl),
   };
@@ -37,8 +37,8 @@ describe('alerts elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
       }));
 
-      const EsNetworkTimelineAlerts = new ElasticsearchAlertsAdapter(mockFramework);
-      const data = await EsNetworkTimelineAlerts.getAlertsHistogramData(
+      const adapter = new ElasticsearchMatrixHistogramAdapter(mockFramework);
+      const data = await adapter.getHistogramData(
         (mockRequest as unknown) as FrameworkRequest,
         (mockOptions as unknown) as MatrixHistogramRequestOptions
       );

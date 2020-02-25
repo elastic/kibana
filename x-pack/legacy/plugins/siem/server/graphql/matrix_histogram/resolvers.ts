@@ -4,36 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alerts } from '../../lib/alerts';
+import { MatrixHistogram } from '../../lib/matrix_histogram';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 
-export interface AlertsResolversDeps {
-  alerts: Alerts;
+export interface MatrixHistogramResolversDeps {
+  matrixHistogram: MatrixHistogram;
 }
 
-type QueryAlertsHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AlertsHistogramResolver>,
+type QueryMatrixHistogramResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
   QuerySourceResolver
 >;
 
-export const createAlertsResolvers = (
-  libs: AlertsResolversDeps
+export const createMatrixHistogramResolvers = (
+  libs: MatrixHistogramResolversDeps
 ): {
   Source: {
-    AlertsHistogram: QueryAlertsHistogramResolver;
+    MatrixHistogram: QueryMatrixHistogramResolver;
   };
 } => ({
   Source: {
-    async AlertsHistogram(source, args, { req }, info) {
+    async MatrixHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
-        defaultIndex: args.defaultIndex,
         stackByField: args.stackByField,
+        histogramType: args.histogramType,
       };
-      return libs.alerts.getAlertsHistogramData(req, options);
+      return libs.matrixHistogram.getMatrixHistogramData(req, options);
     },
   },
 });
