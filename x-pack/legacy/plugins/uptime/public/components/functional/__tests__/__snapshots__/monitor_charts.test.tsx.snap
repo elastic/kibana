@@ -51,8 +51,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     }
   }
 >
-  <MonitorChartsComponent
-    danger="dangerColor"
+  <Component
     data={
       Object {
         "monitorChartsData": Object {
@@ -181,10 +180,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       }
     }
     loading={false}
-    mean="mean"
     monitorId="something"
-    range="range"
-    success="success"
   />
 </ContextProvider>
 `;

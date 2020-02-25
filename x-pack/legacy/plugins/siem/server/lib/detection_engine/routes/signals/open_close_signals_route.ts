@@ -28,7 +28,7 @@ export const setSignalsStatusRouteDef = (
         payload: setSignalsStatusSchema,
       },
     },
-    async handler(request: SignalsStatusRequest) {
+    async handler(request: SignalsStatusRequest, headers) {
       const { signal_ids: signalIds, query, status } = request.payload;
       const { clusterClient, spacesClient } = await getClients(request);
       const index = getIndex(spacesClient.getSpaceId, config);
@@ -45,7 +45,7 @@ export const setSignalsStatusRouteDef = (
         };
       }
       try {
-        return clusterClient.callAsCurrentUser('updateByQuery', {
+        const updateByQueryResponse = await clusterClient.callAsCurrentUser('updateByQuery', {
           index,
           body: {
             script: {
@@ -56,9 +56,15 @@ export const setSignalsStatusRouteDef = (
           },
           ignoreUnavailable: true,
         });
-      } catch (exc) {
-        // error while getting or updating signal with id: id in signal index .siem-signals
-        return transformError(exc);
+        return updateByQueryResponse;
+      } catch (err) {
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

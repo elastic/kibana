@@ -17,7 +17,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { StatusData } from '../../../../common/graphql/types';
+import { StatusData } from '../../../../common/types';
 import { getChartDateLabel } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
 

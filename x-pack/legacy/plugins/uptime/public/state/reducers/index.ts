@@ -12,6 +12,7 @@ import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
+import { monitorDurationReducer } from './monitor_duration';
 import { mlJobsReducer } from './ml_anomaly';
 
 export const rootReducer = combineReducers({
@@ -23,4 +24,5 @@ export const rootReducer = combineReducers({
   indexPattern: indexPatternReducer,
   ping: pingReducer,
   ml: mlJobsReducer,
+  monitorDuration: monitorDurationReducer,
 });

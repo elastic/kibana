@@ -16,12 +16,7 @@ import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
-import {
-  asDuration,
-  asPercent,
-  toMicroseconds,
-  tpmUnit
-} from '../../../../utils/formatters';
+import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
 
 function LoadingSpinner() {
   return (
@@ -70,7 +65,7 @@ export function ServiceMetricList({
         }
       ),
       description: isNumber(avgTransactionDuration)
-        ? asDuration(toMicroseconds(avgTransactionDuration, 'milliseconds'))
+        ? asDuration(avgTransactionDuration)
         : null
     },
     {
