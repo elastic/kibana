@@ -189,4 +189,8 @@ export abstract class Embeddable<
 
     this.onResetInput(newInput);
   }
+
+  public supportedTriggers() {
+    return [];
+  }
 }
