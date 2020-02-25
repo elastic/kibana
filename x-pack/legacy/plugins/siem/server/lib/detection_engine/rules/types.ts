@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { LegacyRequest } from '../../../types';
-import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-import { Alert } from '../../../../../alerting/server/types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
@@ -195,10 +195,6 @@ export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
 };
 
 export const isRuleStatusSavedObjectType = (

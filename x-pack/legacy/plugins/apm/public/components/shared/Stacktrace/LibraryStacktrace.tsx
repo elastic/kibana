@@ -8,7 +8,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { Stackframe } from './Stackframe';
 import { px, unit } from '../../../style/variables';
 

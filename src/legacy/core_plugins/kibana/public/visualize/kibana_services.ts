@@ -35,8 +35,8 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plu
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { Chrome } from './legacy_imports';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -47,7 +47,6 @@ export interface VisualizeKibanaServices {
   embeddable: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: Chrome;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
@@ -61,6 +60,8 @@ export interface VisualizeKibanaServices {
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
   I18nContext: I18nStart['Context'];
+  setActiveUrl: (newUrl: string) => void;
+  DefaultVisualizationEditor: typeof DefaultEditorController;
 }
 
 let services: VisualizeKibanaServices | null = null;

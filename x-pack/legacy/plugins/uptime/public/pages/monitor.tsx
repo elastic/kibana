@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
-import { useTrackPageview } from '../../../infra/public';
+import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
 
 export const MonitorPage = () => {
