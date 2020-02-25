@@ -22,6 +22,7 @@ export interface LicenseCheckResult {
 }
 
 export interface PluginsSetup {
+  cloud: any;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;

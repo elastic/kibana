@@ -12,9 +12,11 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-import { isSecurityDisabled } from '../../lib/security_utils';
-
-export function estimateBucketSpanFactory(callAsCurrentUser, callAsInternalUser, xpackMainPlugin) {
+export function estimateBucketSpanFactory(
+  callAsCurrentUser,
+  callAsInternalUser,
+  isSecurityDisabled
+) {
   const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
   const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
 
@@ -384,7 +386,7 @@ export function estimateBucketSpanFactory(callAsCurrentUser, callAsInternalUser,
           });
       }
 
-      if (isSecurityDisabled(xpackMainPlugin)) {
+      if (isSecurityDisabled) {
         getBucketSpanEstimation();
       } else {
         // if security is enabled, check that the user has permission to

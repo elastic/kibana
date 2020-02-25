@@ -18,11 +18,11 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
-import { checkLicense } from '../lib/check_license';
+// import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
+// import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-import { LICENSE_TYPE } from '../../common/constants/license';
+// import { LICENSE_TYPE } from '../../common/constants/license';
 import { annotationRoutes } from '../routes/annotations';
 import { jobRoutes } from '../routes/anomaly_detectors';
 import { dataFeedRoutes } from '../routes/datafeeds';
@@ -130,23 +130,23 @@ export class Plugin {
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
-    xpackMainPlugin.status.once('green', () => {
-      // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
-      const mlFeature = xpackMainPlugin.info.feature(pluginId);
-      mlFeature.registerLicenseCheckResultsGenerator(checkLicense);
+    // xpackMainPlugin.status.once('green', () => {
+    //   // Register a function that is called whenever the xpack info changes,
+    //   // to re-compute the license check results for this plugin
+    //   const mlFeature = xpackMainPlugin.info.feature(pluginId);
+    //   mlFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-      // Add links to the Kibana sample data sets if ml is enabled
-      // and there is a full license (trial or platinum).
-      if (mlFeature.isEnabled() === true && plugins.home) {
-        const licenseCheckResults = mlFeature.getLicenseCheckResults();
-        if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
-          addLinksToSampleDatasets({
-            addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
-          });
-        }
-      }
-    });
+    //   // Add links to the Kibana sample data sets if ml is enabled
+    //   // and there is a full license (trial or platinum).
+    //   if (mlFeature.isEnabled() === true && plugins.home) {
+    //     const licenseCheckResults = mlFeature.getLicenseCheckResults();
+    //     if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
+    //       addLinksToSampleDatasets({
+    //         addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
+    //       });
+    //     }
+    //   }
+    // });
 
     xpackMainPlugin.registerFeature({
       id: 'ml',

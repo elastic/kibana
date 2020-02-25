@@ -51,7 +51,7 @@ export async function validateBucketSpan(
   job,
   duration,
   callAsInternalUser,
-  xpackMainPlugin
+  isSecurityDisabled
 ) {
   validateJobObject(job);
 
@@ -124,7 +124,7 @@ export async function validateBucketSpan(
         estimateBucketSpanFactory(
           callWithRequest,
           callAsInternalUser,
-          xpackMainPlugin
+          isSecurityDisabled
         )(data)
           .then(resolve)
           // this catch gets triggered when the estimation code runs without error

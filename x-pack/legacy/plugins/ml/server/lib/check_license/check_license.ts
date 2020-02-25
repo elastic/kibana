@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LICENSE_TYPE } from '../../../common/constants/license';
-import { XPackInfo } from '../../../../../../legacy/plugins/xpack_main/server/lib/xpack_info';
+import { LicenseCheckResult } from '../../new_platform/plugin';
 
 interface Response {
   isAvailable: boolean;
@@ -17,10 +17,10 @@ interface Response {
   message?: string;
 }
 
-export function checkLicense(xpackLicenseInfo: XPackInfo): Response {
+export function checkLicense(licenseCheckResult: LicenseCheckResult): Response {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Machine Learning UI
-  if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
+  if (!licenseCheckResult.isAvailable) {
     return {
       isAvailable: false,
       showLinks: true,
@@ -35,7 +35,7 @@ export function checkLicense(xpackLicenseInfo: XPackInfo): Response {
     };
   }
 
-  const featureEnabled = xpackLicenseInfo.feature('ml').isEnabled();
+  const featureEnabled = licenseCheckResult.isEnabled;
   if (!featureEnabled) {
     return {
       isAvailable: false,
@@ -49,10 +49,11 @@ export function checkLicense(xpackLicenseInfo: XPackInfo): Response {
 
   const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];
 
-  const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_FULL_LICENSE_MODES);
+  const isLicenseModeValid =
+    licenseCheckResult.type && VALID_FULL_LICENSE_MODES.includes(licenseCheckResult.type);
   const licenseType = isLicenseModeValid === true ? LICENSE_TYPE.FULL : LICENSE_TYPE.BASIC;
-  const isLicenseActive = xpackLicenseInfo.license.isActive();
-  const licenseTypeName = xpackLicenseInfo.license.getType();
+  const isLicenseActive = licenseCheckResult.isActive;
+  const licenseTypeName = licenseCheckResult.type;
 
   // Platinum or trial license is valid but not active, i.e. expired
   if (licenseType === LICENSE_TYPE.FULL && isLicenseActive === false) {

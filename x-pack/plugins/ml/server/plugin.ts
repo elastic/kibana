@@ -5,12 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, IScopedClusterClient, PluginInitializerContext } from 'src/core/server'; // Logger
+import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } from 'src/core/server';
 import { LicenseCheckResult, PLUGIN_ID, PluginsSetup } from './types';
 
 // @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from '../../../legacy/plugins/ml/server/client/elasticsearch_ml';
-// import { makeMlUsageCollector } from '../../../legacy/plugins/ml/server/lib/ml_telemetry';
+import { makeMlUsageCollector } from '../../../legacy/plugins/ml/server/lib/ml_telemetry';
+import { initMlServerLog } from '../../../legacy/plugins/ml/server/client/log';
 
 import { annotationRoutes } from '../../../legacy/plugins/ml/server/routes/annotations';
 import { calendars } from '../../../legacy/plugins/ml/server/routes/calendars';
@@ -25,12 +26,10 @@ import { indicesRoutes } from '../../../legacy/plugins/ml/server/routes/indices'
 import { jobAuditMessagesRoutes } from '../../../legacy/plugins/ml/server/routes/job_audit_messages';
 import { jobRoutes } from '../../../legacy/plugins/ml/server/routes/anomaly_detectors';
 import { jobServiceRoutes } from '../../../legacy/plugins/ml/server/routes/job_service';
-// validation routes still use xpack plugin and legacy config
-// import { jobValidationRoutes } from '../../../legacy/plugins/ml/server/routes/job_validation';
+import { jobValidationRoutes } from '../../../legacy/plugins/ml/server/routes/job_validation';
 import { notificationRoutes } from '../../../legacy/plugins/ml/server/routes/notification_settings';
 import { resultsServiceRoutes } from '../../../legacy/plugins/ml/server/routes/results_service';
-// system routes still use xpackMainPlugin, -> NP cloud, spaces
-// import { systemRoutes } from '../../../legacy/plugins/ml/server/routes/system';
+import { systemRoutes } from '../../../legacy/plugins/ml/server/routes/system';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -42,7 +41,8 @@ declare module 'kibana/server' {
 
 export class MlServerPlugin {
   private readonly pluginId: string = PLUGIN_ID;
-  // private log: Logger;
+  private log: Logger;
+  private version: string;
 
   private licenseCheckResults: LicenseCheckResult = {
     isAvailable: false,
@@ -51,7 +51,8 @@ export class MlServerPlugin {
     isSecurityDisabled: false,
   };
   constructor(ctx: PluginInitializerContext) {
-    // this.log = ctx.logger.get();
+    this.log = ctx.logger.get();
+    this.version = ctx.env.packageInfo.version; // or should it be branch to correspond to docs?
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
@@ -84,6 +85,7 @@ export class MlServerPlugin {
     const mlClient = coreSetup.elasticsearch.createClient('ml', {
       plugins: [elasticsearchJsPlugin],
     });
+
     coreSetup.http.registerRouteHandlerContext('ml', (context, request) => {
       return {
         mlClient: mlClient.asScoped(request),
@@ -110,8 +112,16 @@ export class MlServerPlugin {
     jobServiceRoutes(routeInit);
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
-
-    // makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
+    jobValidationRoutes({ ...routeInit, version: this.version });
+    systemRoutes({
+      ...routeInit,
+      spacesPlugin: plugins.spaces,
+      cloud: plugins.cloud,
+    });
+    initMlServerLog({ log: this.log });
+    coreSetup.getStartServices().then(([core]) => {
+      makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
+    });
 
     plugins.licensing.license$.subscribe(async (license: any) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');

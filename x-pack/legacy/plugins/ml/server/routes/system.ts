@@ -13,7 +13,7 @@ import { mlLog } from '../client/log';
 import { privilegesProvider } from '../lib/check_privileges';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
-import { RouteInitialization } from '../new_platform/plugin';
+import { LicenseCheckResult, RouteInitialization } from '../new_platform/plugin';
 
 /**
  * System routes
@@ -21,10 +21,10 @@ import { RouteInitialization } from '../new_platform/plugin';
 export function systemRoutes({
   getLicenseCheckResults,
   router,
-  xpackMainPlugin, // TODO: this needs to be replaced with NP
   spacesPlugin,
   cloud,
 }: RouteInitialization) {
+  let cachedLicenseCheckResult: LicenseCheckResult;
   const { isSecurityDisabled } = getLicenseCheckResults();
 
   async function getNodeCount(context: RequestHandlerContext) {
@@ -121,28 +121,34 @@ export function systemRoutes({
         }),
       },
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
-      try {
-        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
-        // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } =
-          spacesPlugin !== undefined
-            ? spacesUtilsProvider(spacesPlugin, (request as unknown) as Request)
-            : { isMlEnabledInSpace: async () => true };
+    licensePreRoutingFactory(
+      () => {
+        cachedLicenseCheckResult = getLicenseCheckResults();
+        return cachedLicenseCheckResult;
+      },
+      async (context, request, response) => {
+        try {
+          const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
+          // if spaces is disabled force isMlEnabledInSpace to be true
+          const { isMlEnabledInSpace } =
+            spacesPlugin !== undefined
+              ? spacesUtilsProvider(spacesPlugin, (request as unknown) as Request)
+              : { isMlEnabledInSpace: async () => true };
 
-        const { getPrivileges } = privilegesProvider(
-          context.ml!.mlClient.callAsCurrentUser,
-          xpackMainPlugin,
-          isMlEnabledInSpace,
-          ignoreSpaces
-        );
-        return response.ok({
-          body: await getPrivileges(),
-        });
-      } catch (error) {
-        return response.customError(wrapError(error));
+          const { getPrivileges } = privilegesProvider(
+            context.ml!.mlClient.callAsCurrentUser,
+            cachedLicenseCheckResult,
+            isMlEnabledInSpace,
+            ignoreSpaces
+          );
+          return response.ok({
+            body: await getPrivileges(),
+          });
+        } catch (error) {
+          return response.customError(wrapError(error));
+        }
       }
-    })
+    )
   );
 
   /**

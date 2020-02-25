@@ -24,7 +24,7 @@ export async function validateJob(
   payload,
   kbnVersion = 'current',
   callAsInternalUser,
-  xpackMainPlugin
+  isSecurityDisabled
 ) {
   const messages = getMessages();
 
@@ -112,7 +112,7 @@ export async function validateJob(
           job,
           duration,
           callAsInternalUser,
-          xpackMainPlugin
+          isSecurityDisabled
         ))
       );
       validationMessages.push(...(await validateTimeRange(callWithRequest, job, duration)));

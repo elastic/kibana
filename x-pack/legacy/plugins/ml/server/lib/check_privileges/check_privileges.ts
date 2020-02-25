@@ -6,11 +6,10 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
-import { XPackMainPlugin } from '../../../../xpack_main/server/xpack_main';
-import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';
 import { checkLicense } from '../check_license';
 import { LICENSE_TYPE } from '../../../common/constants/license';
+import { LicenseCheckResult } from '../../new_platform/plugin';
 
 import { mlPrivileges } from './privileges';
 
@@ -25,7 +24,7 @@ interface Response {
 
 export function privilegesProvider(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  xpackMainPlugin: XPackMainPlugin,
+  licenseCheckResult: LicenseCheckResult,
   isMlEnabledInSpace: () => Promise<boolean>,
   ignoreSpaces: boolean = false
 ) {
@@ -35,8 +34,8 @@ export function privilegesProvider(
     const privileges = getDefaultPrivileges();
 
     const upgradeInProgress = await isUpgradeInProgress();
-    const securityDisabled = isSecurityDisabled(xpackMainPlugin);
-    const license = checkLicense(xpackMainPlugin.info);
+    const securityDisabled = licenseCheckResult.isSecurityDisabled;
+    const license = checkLicense(licenseCheckResult);
     const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
     const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 

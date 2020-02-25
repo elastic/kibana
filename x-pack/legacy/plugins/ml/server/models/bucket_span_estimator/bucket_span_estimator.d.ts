@@ -10,5 +10,5 @@ import { BucketSpanEstimatorData } from '../../../public/application/services/ml
 export function estimateBucketSpanFactory(
   callAsCurrentUser: APICaller,
   callAsInternalUser: APICaller,
-  xpackMainPlugin: any
+  isSecurityDisabled: boolean
 ): (config: BucketSpanEstimatorData) => Promise<any>;

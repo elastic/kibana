@@ -6,12 +6,12 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { plugin } from './server/new_platform';
-import { CloudSetup } from '../../../plugins/cloud/server';
+import { Server } from 'src/legacy/server/kbn_server'; // KbnServer
+// import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+// import { plugin } from './server/new_platform';
+// import { CloudSetup } from '../../../plugins/cloud/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { MlInitializerContext, MlCoreSetup } from './server/new_platform/plugin';
+// import { MlInitializerContext, MlCoreSetup } from './server/new_platform/plugin';
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
 
@@ -57,42 +57,39 @@ export const ml = (kibana: any) => {
     },
 
     async init(server: MlServer) {
-      const kbnServer = (server as unknown) as KbnServer;
-
-      const initializerContext = ({
-        legacyConfig: server.config(),
-        logger: {
-          get(...contextParts: string[]) {
-            return kbnServer.newPlatform.coreContext.logger.get('plugins', 'ml', ...contextParts);
-          },
-        },
-      } as unknown) as MlInitializerContext;
-
-      const core: MlCoreSetup = {
-        injectUiAppVars: server.injectUiAppVars,
-        http: kbnServer.newPlatform.setup.core.http,
-        coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
-      };
-      const {
-        usageCollection,
-        cloud,
-        home,
-        security,
-        licensing,
-      } = kbnServer.newPlatform.setup.plugins;
-      const plugins = {
-        licensing,
-        security,
-        xpackMain: server.plugins.xpack_main,
-        spaces: server.plugins.spaces,
-        home,
-        usageCollection: usageCollection as UsageCollectionSetup,
-        cloud: cloud as CloudSetup,
-        ml: this,
-      };
-
-      plugin(initializerContext).setup(core, plugins);
+      // const kbnServer = (server as unknown) as KbnServer;
+      // const initializerContext = ({
+      //   legacyConfig: server.config(),
+      //   logger: {
+      //     get(...contextParts: string[]) {
+      //       return kbnServer.newPlatform.coreContext.logger.get('plugins', 'ml', ...contextParts);
+      //     },
+      //   },
+      // } as unknown) as MlInitializerContext;
+      // const core: MlCoreSetup = {
+      //   injectUiAppVars: server.injectUiAppVars,
+      //   http: kbnServer.newPlatform.setup.core.http,
+      //   coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
+      //   elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
+      // };
+      // const {
+      //   usageCollection,
+      //   cloud,
+      //   home,
+      //   security,
+      //   licensing,
+      // } = kbnServer.newPlatform.setup.plugins;
+      // const plugins = {
+      //   licensing,
+      //   security,
+      //   xpackMain: server.plugins.xpack_main,
+      //   spaces: server.plugins.spaces,
+      //   home,
+      //   usageCollection: usageCollection as UsageCollectionSetup,
+      //   cloud: cloud as CloudSetup,
+      //   ml: this,
+      // };
+      // plugin(initializerContext).setup(core, plugins);
     },
   });
 };

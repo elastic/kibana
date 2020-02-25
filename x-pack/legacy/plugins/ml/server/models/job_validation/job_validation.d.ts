@@ -15,5 +15,5 @@ export function validateJob(
   payload: ValidateJobPayload,
   kbnVersion: string,
   callAsInternalUser: APICaller,
-  xpackMainPlugin: any
+  isSecurityDisabled: boolean
 ): string[];
