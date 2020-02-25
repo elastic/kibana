@@ -6,26 +6,36 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AssetReference, Installation, KibanaAssetType } from '../../../types';
+import { AssetReference, Installation, KibanaAssetType, CallESAsCurrentUser } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation } from './index';
+import { installTemplates } from '../elasticsearch/template/install';
+import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
+  callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const registryPackageInfo = await Registry.fetchInfo(pkgkey);
 
+  const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
+  const installTemplatePromises = installTemplates(registryPackageInfo, callCluster);
   const installIndexPatternsPromise = installIndexPatterns(savedObjectsClient, pkgkey);
-
-  const installAssetsPromise = installAssets({
+  const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgkey,
   });
 
-  const res = await Promise.all([installIndexPatternsPromise, installAssetsPromise]);
+  const res = await Promise.all([
+    installIndexPatternsPromise,
+    installKibanaAssetsPromise,
+    installPipelinePromises,
+    installTemplatePromises,
+  ]);
   // save the response of assets that were installed and return
   const toSave = res[1];
 
@@ -35,14 +45,13 @@ export async function installPackage(options: {
     pkgkey,
     toSave,
   });
-
   return toSave;
 }
 
 // the function which how to install each of the various asset types
 // TODO: make it an exhaustive list
 // e.g. switch statement with cases for each enum key returning `never` for default case
-export async function installAssets(options: {
+export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
 }) {

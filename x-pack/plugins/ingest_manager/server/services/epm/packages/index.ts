@@ -23,7 +23,7 @@ export {
   SearchParams,
 } from './get';
 
-export { installAssets, installPackage } from './install';
+export { installKibanaAssets, installPackage } from './install';
 export { removeInstallation } from './remove';
 
 export class PackageNotInstalledError extends Error {

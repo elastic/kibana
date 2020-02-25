@@ -7,9 +7,28 @@
 import { AssetReference, Dataset, RegistryPackage, IngestAssetType } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
-import { getPipelineNameForInstallation } from '../ingest_pipeline/ingest_pipelines';
+import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 
+export const installTemplates = async (
+  registryPackage: RegistryPackage,
+  callCluster: CallESAsCurrentUser
+) => {
+  const datasets = registryPackage.datasets;
+  if (datasets) {
+    return datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
+      acc.push(
+        installTemplateForDataset({
+          pkg: registryPackage,
+          callCluster,
+          dataset,
+        })
+      );
+      return acc;
+    }, []);
+  }
+  return [];
+};
 /**
  * installTemplatesForDataset installs one template for each dataset
  *
@@ -20,27 +39,30 @@ export async function installTemplateForDataset({
   pkg,
   callCluster,
   dataset,
-  datasourceName,
 }: {
   pkg: RegistryPackage;
   callCluster: CallESAsCurrentUser;
   dataset: Dataset;
-  datasourceName: string;
-}) {
+}): Promise<AssetReference> {
   const fields = await loadFieldsFromYaml(pkg, dataset.name);
-  return installTemplate({ callCluster, fields, dataset, datasourceName });
+  return installTemplate({
+    callCluster,
+    fields,
+    dataset,
+    packageVersion: pkg.version,
+  });
 }
 
 export async function installTemplate({
   callCluster,
   fields,
   dataset,
-  datasourceName,
+  packageVersion,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
   dataset: Dataset;
-  datasourceName: string;
+  packageVersion: string;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
   const templateName = generateTemplateName(dataset);
@@ -50,7 +72,7 @@ export async function installTemplate({
       pipelineName: dataset.ingest_pipeline,
       dataset,
       packageName: dataset.package,
-      datasourceName,
+      packageVersion,
     });
   }
   const template = getTemplate(templateName + '-*', mappings, pipelineName);

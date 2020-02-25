@@ -9,6 +9,7 @@ import {
   Dataset,
   ElasticsearchAssetType,
   IngestAssetType,
+  RegistryPackage,
 } from '../../../../types';
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../../../types';
@@ -18,6 +19,30 @@ interface RewriteSubstitution {
   target: string;
   templateFunction: string;
 }
+
+export const installPipelines = async (
+  registryPackage: RegistryPackage,
+  callCluster: CallESAsCurrentUser
+) => {
+  const datasets = registryPackage.datasets;
+  if (datasets) {
+    return datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
+      if (dataset.ingest_pipeline) {
+        acc.push(
+          installPipelinesForDataset({
+            pkgkey: Registry.pkgToPkgKey(registryPackage),
+            dataset,
+            callCluster,
+            packageName: registryPackage.name,
+            packageVersion: registryPackage.version,
+          })
+        );
+      }
+      return acc;
+    }, []);
+  }
+  return [];
+};
 
 export function rewriteIngestPipeline(
   pipeline: string,
@@ -44,14 +69,14 @@ export async function installPipelinesForDataset({
   callCluster,
   pkgkey,
   dataset,
-  datasourceName,
   packageName,
+  packageVersion,
 }: {
   callCluster: CallESAsCurrentUser;
   pkgkey: string;
   dataset: Dataset;
-  datasourceName: string;
   packageName: string;
+  packageVersion: string;
 }): Promise<AssetReference[]> {
   const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
     isDatasetPipeline(entry, dataset.name)
@@ -64,8 +89,8 @@ export async function installPipelinesForDataset({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataset,
-      datasourceName,
       packageName,
+      packageVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
     pipelines.push({
@@ -157,13 +182,13 @@ const getNameAndExtension = (
 export const getPipelineNameForInstallation = ({
   pipelineName,
   dataset,
-  datasourceName,
   packageName,
+  packageVersion,
 }: {
   pipelineName: string;
   dataset: Dataset;
-  datasourceName: string;
   packageName: string;
+  packageVersion: string;
 }): string => {
-  return `${dataset.type}-${packageName}-${datasourceName}-${dataset.name}-${pipelineName}`;
+  return `${dataset.type}-${dataset.name}-${packageVersion}-${pipelineName}`;
 };
