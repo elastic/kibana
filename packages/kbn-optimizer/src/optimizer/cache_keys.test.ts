@@ -42,8 +42,10 @@ jest.mock('execa');
 
 jest.mock('fs', () => {
   const realFs = jest.requireActual('fs');
-  jest.spyOn(realFs, 'readFile');
-  return realFs;
+  return {
+    ...realFs,
+    readFile: jest.fn(realFs.readFile),
+  };
 });
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());

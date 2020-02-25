@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisType } from './types';
+import { VisType } from './vis_types';
 import { IAggConfigs } from '../../legacy_imports';
 import { Status } from './legacy/update_status';
 
