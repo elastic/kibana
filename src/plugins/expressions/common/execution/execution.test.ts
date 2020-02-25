@@ -236,6 +236,40 @@ describe('Execution', () => {
       expect(typeof result).toBe('object');
       expect((result as AbortSignal).aborted).toBe(false);
     });
+
+    test('can abort an expression', async () => {
+      const execution = createExecution('sleep 10');
+      execution.start();
+
+      execution.cancel();
+      const result = await execution.result;
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: 'The expression was aborted.',
+          name: 'AbortError',
+        },
+      });
+    });
+
+    test('can abort an expression which has function running mid flight', async () => {
+      const execution = createExecution('sleep 300');
+      execution.start();
+
+      await new Promise(r => setTimeout(r, 1));
+
+      execution.cancel();
+      const result = await execution.result;
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: 'The expression was aborted.',
+          name: 'AbortError',
+        },
+      });
+    });
   });
 
   describe('expression execution', () => {

@@ -58,6 +58,12 @@ const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   data: new DataAdapter(),
 });
 
+const createAbortErrorValue = () =>
+  createError({
+    message: 'The expression was aborted.',
+    name: 'AbortError',
+  });
+
 export class Execution<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
@@ -69,7 +75,7 @@ export class Execution<
   /**
    * Dynamic state of the execution.
    */
-  public readonly state: ExecutionContainer<Output>;
+  public readonly state: ExecutionContainer<Output | ExpressionValueError>;
 
   /**
    * Initial input of the execution.
@@ -98,7 +104,7 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  private readonly firstResultFuture = new Defer<Output>();
+  private readonly firstResultFuture = new Defer<Output | ExpressionValueError>();
 
   /**
    * Contract is a public representation of `Execution` instances. Contract we
@@ -113,7 +119,7 @@ export class Execution<
 
   public readonly expression: string;
 
-  public get result(): Promise<unknown> {
+  public get result(): Promise<Output | ExpressionValueError> {
     return this.firstResultFuture.promise;
   }
 
@@ -133,7 +139,7 @@ export class Execution<
     this.expression = params.expression || formatExpression(params.ast!);
     const ast = params.ast || parseExpression(this.expression);
 
-    this.state = createExecutionContainer<Output>({
+    this.state = createExecutionContainer<Output | ExpressionValueError>({
       ...executor.state.get(),
       state: 'not-started',
       ast,
@@ -156,6 +162,7 @@ export class Execution<
    */
   cancel() {
     this.abortController.abort();
+    this.firstResultFuture.resolve(createAbortErrorValue());
   }
 
   /**
@@ -187,14 +194,10 @@ export class Execution<
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
     if (!chainArr.length) return input;
 
+    const isAborted = () => this.context.abortSignal && this.context.abortSignal.aborted;
+
     for (const link of chainArr) {
-      // if execution was aborted return error
-      if (this.context.abortSignal && this.context.abortSignal.aborted) {
-        return createError({
-          message: 'The expression was aborted.',
-          name: 'AbortError',
-        });
-      }
+      if (isAborted()) return createAbortErrorValue();
 
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
@@ -210,9 +213,11 @@ export class Execution<
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
+        if (isAborted()) return createAbortErrorValue();
         args = resolvedArgs;
         timeStart = this.params.debug ? performance.now() : 0;
         const output = await this.invokeFunction(fn, input, resolvedArgs);
+        if (isAborted()) return createAbortErrorValue();
 
         if (this.params.debug) {
           const timeEnd: number = performance.now();
