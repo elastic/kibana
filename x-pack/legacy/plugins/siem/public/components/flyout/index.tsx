@@ -60,10 +60,14 @@ export const FlyoutComponent = React.memo<Props>(
     usersViewing,
     width,
   }) => {
-    const onClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
+    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
+      timelineId,
     ]);
-    const onOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [showTimeline]);
+    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+      showTimeline,
+      timelineId,
+    ]);
 
     return (
       <>
@@ -71,7 +75,7 @@ export const FlyoutComponent = React.memo<Props>(
           <Pane
             flyoutHeight={flyoutHeight}
             headerHeight={headerHeight}
-            onClose={onClose}
+            onClose={handleClose}
             timelineId={timelineId}
             usersViewing={usersViewing}
             width={width}
@@ -83,7 +87,7 @@ export const FlyoutComponent = React.memo<Props>(
           dataProviders={dataProviders!}
           show={!show}
           timelineId={timelineId}
-          onOpen={onOpen}
+          onOpen={handleOpen}
         />
       </>
     );

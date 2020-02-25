@@ -5,10 +5,10 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { BrowserFields } from '../../containers/source';

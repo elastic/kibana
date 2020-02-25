@@ -234,8 +234,4 @@ export const TimelineComponent: React.FC<Props> = ({
   );
 };
 
-TimelineComponent.displayName = 'TimelineComponent';
-
 export const Timeline = React.memo(TimelineComponent);
-
-Timeline.displayName = 'Timeline';

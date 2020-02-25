@@ -9,6 +9,7 @@ import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
 import { useMemo } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
+
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';

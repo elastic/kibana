@@ -11,9 +11,9 @@ import {
   FetchMoreQueryOptions,
   OperationVariables,
 } from '@apollo/client';
-import { isEqual } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
 import React from 'react';
+import memoizeOne from 'memoize-one';
+import deepEqual from 'fast-deep-equal';
 
 import { ESQuery } from '../../common/typed_json';
 import { inputsModel } from '../store/model';
@@ -90,7 +90,7 @@ export class QueryTemplatePaginated<
   public isItAValidLoading(loading: boolean, variables: TVariables, networkStatus: NetworkStatus) {
     if (
       !this.myLoading &&
-      (!isEqual(variables, this.queryVariables) || networkStatus === NetworkStatus.refetch) &&
+      (!deepEqual(variables, this.queryVariables) || networkStatus === NetworkStatus.refetch) &&
       loading
     ) {
       this.myLoading = true;

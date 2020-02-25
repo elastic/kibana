@@ -45,6 +45,12 @@ export const HostsTabs = memo<HostsTabsProps>(
       },
       [setAbsoluteRangeDatePicker]
     );
+    const updateDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
     const tabProps = {
       deleteQuery,
@@ -55,6 +61,7 @@ export const HostsTabs = memo<HostsTabsProps>(
       startDate: from,
       type,
       narrowDateRange,
+      updateDateRange,
     };
 
     return (
