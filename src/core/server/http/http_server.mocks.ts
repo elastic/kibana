@@ -33,7 +33,7 @@ import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
-interface RequestFixtureOptions {
+interface RequestFixtureOptions<P = any, Q = any, B = any> {
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -43,13 +43,13 @@ interface RequestFixtureOptions {
   socket?: Socket;
   routeTags?: string[];
   validation?: {
-    params?: Type<any>;
-    body?: Type<any>;
-    query?: Type<any>;
+    params?: Type<P>;
+    query?: Type<Q>;
+    body?: Type<B>;
   };
 }
 
-function createKibanaRequestMock({
+function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -59,10 +59,10 @@ function createKibanaRequestMock({
   socket = new Socket(),
   routeTags,
   validation = {},
-}: RequestFixtureOptions = {}) {
+}: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
-  return KibanaRequest.from(
+  return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
       headers,
       params,
