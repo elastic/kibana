@@ -9,6 +9,9 @@ import { omit } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesRoute } from './create_rules_route';
+import * as createRules from '../../rules/create_rules';
+import * as readRules from '../../rules/read_rules';
+import * as utils from './utils';
 
 import {
   getFindResult,
@@ -29,8 +32,12 @@ describe('create_rules', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
@@ -129,6 +136,45 @@ describe('create_rules', () => {
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
+    });
+
+    test('catches error if createRules throws error', async () => {
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(createRules, 'createRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getCreateRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
+    });
+
+    test('catches error if transform returns null', async () => {
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(utils, 'transform').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getCreateRequest());
+      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(statusCode).toBe(500);
+    });
+
+    test('returns 409 if duplicate rule_ids found in rule saved objects', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
+        return getResult();
+      });
+      const { payload } = await server.inject(getCreateRequest());
+      const output = JSON.parse(payload);
+      expect(output.status_code).toEqual(409);
     });
   });
 });
