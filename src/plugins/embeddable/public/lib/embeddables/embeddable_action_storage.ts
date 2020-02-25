@@ -111,11 +111,16 @@ export class EmbeddableActionStorage implements ActionStorage {
     return event;
   }
 
+  private __list() {
+    const input = this.embbeddable.getInput();
+    return (input.events || []) as SerializedEvent[];
+  }
+
   async count(): Promise<number> {
-    throw new Error('not implemented');
+    return this.__list().length;
   }
 
   async list(): Promise<SerializedEvent[]> {
-    throw new Error('not implemented');
+    return this.__list();
   }
 }

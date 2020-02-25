@@ -433,4 +433,104 @@ describe('EmbeddableActionStorage', () => {
       expect(event12).not.toEqual(event2);
     });
   });
+
+  describe('.count()', () => {
+    test('method exists', () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+      expect(typeof storage.count).toBe('function');
+    });
+
+    test('returns 0 when storage is empty', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const count = await storage.count();
+
+      expect(count).toBe(0);
+    });
+
+    test('returns correct number of events in storage', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      expect(await storage.count()).toBe(0);
+
+      await storage.create({
+        eventId: 'EVENT_ID1',
+        triggerId: 'TRIGGER-ID1',
+        action: {} as any,
+      });
+
+      expect(await storage.count()).toBe(1);
+
+      await storage.create({
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID1',
+        action: {} as any,
+      });
+
+      expect(await storage.count()).toBe(2);
+
+      await storage.remove('EVENT_ID1');
+
+      expect(await storage.count()).toBe(1);
+
+      await storage.remove('EVENT_ID2');
+
+      expect(await storage.count()).toBe(0);
+    });
+  });
+
+  describe('.list()', () => {
+    test('method exists', () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+      expect(typeof storage.list).toBe('function');
+    });
+
+    test('returns empty array when storage is empty', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const list = await storage.list();
+
+      expect(list).toEqual([]);
+    });
+
+    test('returns correct list of events in storage', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event1: SerializedEvent = {
+        eventId: 'EVENT_ID1',
+        triggerId: 'TRIGGER-ID1',
+        action: {} as any,
+      };
+
+      const event2: SerializedEvent = {
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID1',
+        action: {} as any,
+      };
+
+      expect(await storage.list()).toEqual([]);
+
+      await storage.create(event1);
+
+      expect(await storage.list()).toEqual([event1]);
+
+      await storage.create(event2);
+
+      expect(await storage.list()).toEqual([event1, event2]);
+
+      await storage.remove('EVENT_ID1');
+
+      expect(await storage.list()).toEqual([event2]);
+
+      await storage.remove('EVENT_ID2');
+
+      expect(await storage.list()).toEqual([]);
+    });
+  });
 });
