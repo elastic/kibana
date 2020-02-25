@@ -6,20 +6,10 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-<<<<<<< HEAD
-import { MonitorPage, NotFoundPage, OverviewPage, SettingsPage } from './pages';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { UMUpdateBreadcrumbs } from './lib/lib';
-
-export const MONITOR_ROUTE = '/monitor/:monitorId?';
-export const OVERVIEW_ROUTE = '/';
-export const SETTINGS_ROUTE = '/settings';
-=======
 import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { OverviewPage } from './components/connected/pages/overview_container';
 import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common/constants';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
->>>>>>> origin/master
 
 interface RouterProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
