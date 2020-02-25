@@ -35,6 +35,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       locations: schema.arrayOf(schema.string()),
     }),
   },
+  defaultActionGroupId: 'down-monitor',
   actionGroups: [
     {
       id: 'down-monitor',
