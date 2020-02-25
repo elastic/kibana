@@ -17,21 +17,31 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../plugins/data/public';
+import { KibanaDatatable } from '../../../../../../plugins/expressions/public';
+import { esFilters, Filter } from '../../../../../../plugins/data/public';
 import { deserializeAggConfig } from '../../search/expressions/utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
+
+type Table = Pick<KibanaDatatable, 'rows' | 'columns'>;
+
+interface EventData {
+  table: Table;
+  column: number;
+  row: number;
+  value: any;
+}
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
  *
- * @param  {object} table - tabified table data
+ * @param  {Table} table - tabified table data
  * @param  {number} columnIndex - current column index
  * @param  {number} rowIndex - current row index
  * @return {array} - array of terms to filter against
  */
-const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
+const getOtherBucketFilterTerms = (table: Table, columnIndex: number, rowIndex: number) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -42,7 +52,7 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms = rows.map(row => row[table.columns[columnIndex].id]);
+  const terms: any[] = rows.map(row => row[table.columns[columnIndex].id]);
 
   return [
     ...new Set(
@@ -59,22 +69,27 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
  * Assembles the filters needed to apply filtering against a specific cell value, while accounting
  * for cases like if the value is a terms agg in an `__other__` or `__missing__` bucket.
  *
- * @param  {object} table - tabified table data
+ * @param  {Table} table - tabified table data
  * @param  {number} columnIndex - current column index
  * @param  {number} rowIndex - current row index
  * @param  {string} cellValue - value of the current cell
- * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
+ * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = async (table, columnIndex, rowIndex) => {
-  if (!table || !table.columns || !table.columns[columnIndex]) return;
+const createFilter = async (table: Table, columnIndex: number, rowIndex: number) => {
+  if (!table || !table.columns || !table.columns[columnIndex]) {
+    return;
+  }
   const column = table.columns[columnIndex];
+  if (!column.meta || !column.meta.indexPatternId) {
+    return;
+  }
   const aggConfig = deserializeAggConfig({
     type: column.meta.type,
-    aggConfigParams: column.meta.aggConfigParams,
+    aggConfigParams: column.meta.aggConfigParams ? column.meta.aggConfigParams : {},
     indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
   });
-  let filter = [];
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+  let filter: Filter[] = [];
+  const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -85,6 +100,10 @@ const createFilter = async (table, columnIndex, rowIndex) => {
     filter = aggConfig.createFilter(value);
   }
 
+  if (!filter) {
+    return;
+  }
+
   if (!Array.isArray(filter)) {
     filter = [filter];
   }
@@ -92,16 +111,16 @@ const createFilter = async (table, columnIndex, rowIndex) => {
   return filter;
 };
 
-const createFiltersFromEvent = async event => {
-  const filters = [];
-  const dataPoints = event.data || [event];
+const createFiltersFromEvent = async (event: any) => {
+  const filters: Filter[] = [];
+  const dataPoints: EventData[] = event.data || [event];
 
   await Promise.all(
     dataPoints
       .filter(point => point)
       .map(async val => {
         const { table, column, row } = val;
-        const filter = await createFilter(table, column, row);
+        const filter: Filter[] = (await createFilter(table, column, row)) || [];
         if (filter) {
           filter.forEach(f => {
             if (event.negate) {
