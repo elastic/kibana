@@ -11,6 +11,10 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '../../../../../src/core/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -26,6 +30,7 @@ export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -33,6 +38,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   uiActions: UiActionsStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 

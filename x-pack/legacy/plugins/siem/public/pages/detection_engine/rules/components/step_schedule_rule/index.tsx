@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable @kbn/eslint/no-restricted-paths
+
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+
+import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
+
+import { useKibana } from '../../../../../lib/kibana';
+import {
+  AlertAction,
+  Alert,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
@@ -38,6 +49,29 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   setStepData,
   setForm,
 }) => {
+  const actionTypes = [
+    { id: '.email', name: 'Email', enabled: true },
+    { id: '.index', name: 'Index', enabled: true },
+    { id: '.pagerduty', name: 'PagerDuty', enabled: true },
+    { id: '.server-log', name: 'Server log', enabled: true },
+    { id: '.servicenow', name: 'servicenow', enabled: true },
+    { id: '.slack', name: 'Slack', enabled: true },
+    { id: '.webhook', name: 'Webhook', enabled: true },
+    { id: '.example-action', name: 'Example Action', enabled: true },
+  ];
+  const { http, docLinks, triggers_actions_ui } = useKibana().services;
+  const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+  const [alert, setAlert] = useState<Alert>(({
+    params: {},
+    consumer: 'siem',
+    alertTypeId: '.siem',
+    schedule: {
+      interval: '1m',
+    },
+    actions: [],
+    tags: [],
+  } as unknown) as Alert);
+
   const [myStepData, setMyStepData] = useState<ScheduleStepRule>(stepScheduleDefaultValue);
 
   const { form } = useForm({
@@ -107,6 +141,26 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
           />
         </Form>
       </StepContentWrapper>
+
+      <ActionForm
+        actions={alert.actions}
+        messageVariables={['test var1', 'test var2']}
+        defaultActionGroupId={'default'}
+        setActionIdByIndex={(id: string, index: number) => {
+          alert.actions[index].id = id;
+        }}
+        setAlertProperty={(updatedActions: AlertAction[]) => {
+          setAlert({ ...alert, actions: updatedActions });
+        }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setActionParamsProperty={(key: string, value: any, index: number) =>
+          (alert.actions[index] = { ...alert.actions[index], [key]: value })
+        }
+        http={http}
+        actionTypeRegistry={actionTypeRegistry}
+        actionTypes={actionTypes}
+        defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+      />
 
       {!isUpdateView && (
         <>

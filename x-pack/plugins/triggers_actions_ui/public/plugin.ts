@@ -22,7 +22,10 @@ export interface TriggersAndActionsUIPublicPluginSetup {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
 
-export type Start = void;
+export interface TriggersAndActionsUIPublicPluginStart {
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+}
 
 interface PluginsStart {
   data: DataPublicPluginStart;
@@ -30,7 +33,12 @@ interface PluginsStart {
   management: ManagementStart;
 }
 
-export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup, Start> {
+export class Plugin
+  implements
+    CorePlugin<
+      TriggersAndActionsUIPublicPluginSetup,
+      TriggersAndActionsUIPublicPluginStart | undefined
+    > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
@@ -57,7 +65,10 @@ export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup,
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart) {
+  public start(
+    core: CoreStart,
+    plugins: PluginsStart
+  ): TriggersAndActionsUIPublicPluginStart | undefined {
     const { capabilities } = core.application;
 
     const canShowActions = hasShowActionsCapability(capabilities);
@@ -95,6 +106,11 @@ export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup,
         return () => {};
       },
     });
+
+    return {
+      actionTypeRegistry: this.actionTypeRegistry,
+      alertTypeRegistry: this.alertTypeRegistry,
+    };
   }
 
   public stop() {}

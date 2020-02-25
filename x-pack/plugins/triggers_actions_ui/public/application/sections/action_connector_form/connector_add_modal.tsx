@@ -36,7 +36,6 @@ interface ConnectorAddModalProps {
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications?: Pick<
     ToastsApi,
