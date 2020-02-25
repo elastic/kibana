@@ -317,7 +317,7 @@ Management::
 * Handle double quote special case {pull}54474[#54474]
 * Fixes handling of bad profile data and update tab behavior {pull}55806[#55806]
 * Fixes icon path in tutorial introduction {pull}49684[#49684]
-* Fixes editor to support mappings types {pull}55804[#55804]
+* Fixes index templates editor to support mappings types {pull}55804[#55804]
 Maps::
 * Fixes regression preventing maps telemetry from populating &amp; remove task manager logic {pull}52834[#52834]
 * Categorical palettes {pull}54918[#54918]
