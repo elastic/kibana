@@ -97,7 +97,18 @@ export class EmbeddableActionStorage implements ActionStorage {
   }
 
   async read(eventId: string): Promise<SerializedEvent> {
-    throw new Error('not implemented');
+    const input = this.embbeddable.getInput();
+    const events = (input.events || []) as SerializedEvent[];
+    const event = events.find(ev => eventId === ev.eventId);
+
+    if (!event) {
+      throw new Error(
+        `[ENOENT]: Event with [eventId = ${eventId}] could not be found in ` +
+          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+      );
+    }
+
+    return event;
   }
 
   async count(): Promise<number> {

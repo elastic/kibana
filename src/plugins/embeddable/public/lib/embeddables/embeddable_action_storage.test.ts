@@ -343,4 +343,94 @@ describe('EmbeddableActionStorage', () => {
       );
     });
   });
+
+  describe('.read()', () => {
+    test('method exists', () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+      expect(typeof storage.read).toBe('function');
+    });
+
+    test('can read an existing event out of storage', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event: SerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+
+      await storage.create(event);
+      const event2 = await storage.read(event.eventId);
+
+      expect(event2).toEqual(event);
+    });
+
+    test('throws when reading from empty storage', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const [, error] = await of(storage.read('EVENT_ID'));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatchInlineSnapshot(
+        `"[ENOENT]: Event with [eventId = EVENT_ID] could not be found in [embeddable.id = test, embeddable.title = undefined]."`
+      );
+    });
+
+    test('throws when reading event with ID not existing in storage', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event: SerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+
+      await storage.create(event);
+      const [, error] = await of(storage.read('WRONG_ID'));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatchInlineSnapshot(
+        `"[ENOENT]: Event with [eventId = WRONG_ID] could not be found in [embeddable.id = test, embeddable.title = undefined]."`
+      );
+    });
+
+    test('returns correct event when multiple events are stored', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event1: SerializedEvent = {
+        eventId: 'EVENT_ID1',
+        triggerId: 'TRIGGER-ID1',
+        action: {} as any,
+      };
+      const event2: SerializedEvent = {
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID2',
+        action: {} as any,
+      };
+      const event3: SerializedEvent = {
+        eventId: 'EVENT_ID3',
+        triggerId: 'TRIGGER-ID3',
+        action: {} as any,
+      };
+
+      await storage.create(event1);
+      await storage.create(event2);
+      await storage.create(event3);
+
+      const event12 = await storage.read(event1.eventId);
+      const event22 = await storage.read(event2.eventId);
+      const event32 = await storage.read(event3.eventId);
+
+      expect(event12).toEqual(event1);
+      expect(event22).toEqual(event2);
+      expect(event32).toEqual(event3);
+
+      expect(event12).not.toEqual(event2);
+    });
+  });
 });
