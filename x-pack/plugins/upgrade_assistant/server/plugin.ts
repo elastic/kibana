@@ -14,7 +14,7 @@ import {
   ElasticsearchServiceSetup,
   SavedObjectsClient,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from '../../../../src/core/server';
 
 import { CloudSetup } from '../../cloud/server';
 import { LicensingPluginSetup } from '../../licensing/server';
