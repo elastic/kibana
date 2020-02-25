@@ -26,6 +26,7 @@ export interface ActionState<Config extends object> {
 }
 
 export interface ActionStateTransitions<Config extends object> {
+  setName: (state: ActionState<Config>) => (name: string) => ActionState<Config>;
   setConfig: (state: ActionState<Config>) => (config: Config) => ActionState<Config>;
 }
 
@@ -42,6 +43,7 @@ export const defaultState: ActionState<object> = {
 };
 
 const pureTransitions: ActionStateTransitions<any> = {
+  setName: state => name => ({ ...state, name }),
   setConfig: state => config => ({ ...state, config }),
 };
 
