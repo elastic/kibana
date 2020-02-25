@@ -7,51 +7,47 @@
 **_Explore and visualize your data and manage all things Elastic Stack._**
 
 Whether you’re a user or admin, {kib} makes your data actionable by providing
-three key functions:
+three key functions. Kibana is:
 
-* **{kib} is an open-source analytics and visualization platform.**
+* **An open-source analytics and visualization platform.**
 Use {kib} to explore your {es} data, and then build beautiful visualizations and dashboards.
 
-* **{kib} is a UI for managing {es} clusters.**
-Manage your security settings, assign user roles, monitor the Stack,
-ingest and roll up your data...the list goes on.
+* **A UI for managing the Elastic Stack.**
+Manage your security settings, assign user roles, take snapshots, roll up your data,
+and more &mdash; all from the convenience of a {kib} UI.
 
-* **{kib} is a centralized hub for our solutions.** &mdash; From log analytics to
+* **A centralized hub for Elastic's solutions.** From log analytics to
 document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
 
 [role="screenshot"]
 image::images/intro-kibana.png[]
 
 [float]
-[[where-to-start-kibana]]
-=== Where do I start?
-
-There is no faster way to try out {kib} than with our hosted {es} Service.
-https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial]
-and start exploring data in minutes.
-
-You can also install {kib} on your own &mdash; no code, no additional
-infrastructure required. If you don’t have {es}, you’ll need that too.
-Think of Elasticsearch as the engine that stores and processes the data, with {kib} sitting on top.
-
-[float]
 [[get-data-into-kibana]]
-=== Try {kib} with our data sets and tutorials
+=== Get data into {kib}
 
-Our <<add-sample-data, sample data sets>> enable you to take {kib} for a test ride without having
-to go through the process of loading data yourself. Or, try our <<getting-started, built-in tutorials>>,
-which can help you quickly set up data flows between your app and the Elastic Stack.
+{kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
+and processes the data, with {kib} sitting on top.
 
+{kib} offers multiple ways to get data in:
+
+* Add a <<add-sample-data, sample data set>> and take {kib} for a test drive without loading data yourself.
+* Follow one of our built-in tutorials to set up a data flow between your app and the Elastic Stack.
+(If a tutorial doesn’t exist for your data, go to the
+{beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
+in the {beats} family.)
++
 [role="screenshot"]
 image::images/intro-data-tutorial.png[]
 
-With both scenarios, you get data, index patterns, visualizations, and dashboards.
-<<index-patterns, Index patterns>> are key to Kibana &mdash; they identify which
-{es} indices contain the data that you want to work with.
+* Use the upload file feature and upload your own data.
+* Use the {es} {ref}/docs-bulk.html[bulk] API to load your own data set.
 
-If a tutorial doesn’t exist for your data, go to the
-{beats-ref}/beats-reference.html[Beats overview] to learn about other data shippers
-in the {beats} family.
+Before you can start working with data, you must have an <<index-patterns, index pattern>>.  This pattern
+tells {kib} which {es} indices you want to explore.
+Index patterns are included in our sample data sets
+and built-in tutorials. Or, you can create one at any time in **Management.**
+
 
 [float]
 [[explore-and-query]]
@@ -81,10 +77,6 @@ change in real time.
 [role="screenshot"]
 image::images/intro-dashboard.png[]
 
-[float]
-[[more-ways-to-visualize]]
-=== Even more ways to visualize
-
 {kib} also has these features that address specific visualization needs.
 
 * <<lens, Lens>> provides a drag-and-drop experience that helps
@@ -94,7 +86,7 @@ for quick switching between visualization types.
 
 * <<canvas, Canvas>> gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
-needed to impress your CEO or to captivate people with a big-screen display..
+needed to impress your CEO or to captivate people with a big-screen display.
 
 * <<maps, Elastic Maps>> enables you to ask (and answer) meaningful
 questions of your location-based data. Elastic Maps supports multiple
@@ -134,7 +126,7 @@ dashboards in one space, but full access to all of Kibana’s features in anothe
 
 <<management, Management>> provides guided processes for managing all
 things Elastic Stack &mdash; indices, clusters, licenses, UI settings, index patterns,
-spaces, and more. Want to update your {es} indices? Set user roles and privileges?
+and more. Want to update your {es} indices? Set user roles and privileges?
 Turn on dark mode? Kibana has UIs for all that.
 
 [role="screenshot"]
@@ -144,7 +136,7 @@ image::images/intro-management.png[]
 [[extend-your-use-case]]
 === Extend your use case...or add a new one
 
-As a hub for our https://www.elastic.co/products/[solutions], {kib}
+As a hub for Elastic's https://www.elastic.co/products/[solutions], {kib}
 can help you find security vulnerabilities,
 monitor performance, and address your business needs. Get alerted if a key
 metric spikes. Detect anomalous behavior or forecast future spikes. Root out
@@ -152,9 +144,14 @@ bottlenecks in your application code. Kibana doesn’t limit or dictate how you 
 
 [float]
 [[try-kibana]]
-=== Give Kibana a try
+=== Give {kib} a try
 
-Grab an installation of {kib} and start working with your data.
+There is no faster way to try out {kib} than with our hosted {es} Service.
+https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial]
+and start exploring data in minutes.
+
+You can also install {kib} on your own &mdash; no code, no additional
+infrastructure required.
+
 Our <<tutorial-build-dashboard, Getting Started>> and in-product guidance can
-help you get up and running, faster. Use the Help menu for any questions or
-feedback you might have.
+help you get up and running, faster. Our Help menu has options if you have questions or feedback.
