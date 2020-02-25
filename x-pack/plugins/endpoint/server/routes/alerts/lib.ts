@@ -3,15 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SearchResponse } from 'elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 import { esKuery, esQuery } from '../../../../../../src/plugins/data/server';
-import { Direction, EndpointAppConstants } from '../../../common/types';
+import { AlertData, Direction, EndpointAppConstants } from '../../../common/types';
 import {
   AlertSearchQuery,
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
 } from './types';
+
+function reverseSortDirection(order: Direction): Direction {
+  if (order === Direction.asc) {
+    return Direction.desc;
+  }
+  return Direction.asc;
+}
 
 function buildQuery(query: AlertSearchQuery): JsonObject {
   const queries: JsonObject[] = [];
@@ -72,19 +81,20 @@ function buildSort(query: AlertSearchQuery): AlertSort {
 
   if (query.searchBefore) {
     // Reverse sort order for search_before functionality
-    if (query.order === Direction.asc) {
-      sort[0][query.sort].order = Direction.desc;
-      sort[1]['event.id'].order = Direction.desc;
-    } else {
-      sort[0][query.sort].order = Direction.asc;
-      sort[1]['event.id'].order = Direction.asc;
-    }
+    const newDirection = reverseSortDirection(query.order);
+    sort[0][query.sort].order = newDirection;
+    sort[1]['event.id'].order = newDirection;
   }
 
   return sort;
 }
 
-export const buildAlertSearchQuery = async (query: AlertSearchQuery): Promise<JsonObject> => {
+/**
+ * Builds a request body for Elasticsearch, given a set of query params.
+ **/
+const buildAlertSearchQuery = async (
+  query: AlertSearchQuery
+): Promise<AlertSearchRequestWrapper> => {
   let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
 
   // Calculate minimum total hits set to indicate there's a next page
@@ -119,5 +129,25 @@ export const buildAlertSearchQuery = async (query: AlertSearchQuery): Promise<Js
     reqWrapper.from = query.fromIndex;
   }
 
-  return (reqWrapper as unknown) as JsonObject;
+  return reqWrapper;
+};
+
+/**
+ * Makes a request to Elasticsearch, given an `AlertSearchRequestWrapper`.
+ **/
+export const searchESForAlerts = async (
+  dataClient: IScopedClusterClient,
+  query: AlertSearchQuery
+): Promise<SearchResponse<AlertData>> => {
+  const reqWrapper = await buildAlertSearchQuery(query);
+  const response = (await dataClient.callAsCurrentUser('search', reqWrapper)) as SearchResponse<
+    AlertData
+  >;
+
+  // Reverse the hits if we used `search_before`.
+  if (query.searchBefore !== undefined) {
+    response.hits.hits.reverse();
+  }
+
+  return response;
 };

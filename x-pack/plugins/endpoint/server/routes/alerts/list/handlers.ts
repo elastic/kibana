@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { AlertData } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
-import { buildAlertSearchQuery } from '../lib';
+import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertListRequestQuery } from './types';
 
@@ -21,15 +19,7 @@ export const alertListHandlerWrapper = function(
   ) => {
     try {
       const reqData = await getRequestData(req, endpointAppContext);
-
-      const reqWrapper = await buildAlertSearchQuery(reqData);
-      endpointAppContext.logFactory.get('alerts').debug('ES query: ' + JSON.stringify(reqWrapper));
-
-      const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
-        'search',
-        reqWrapper
-      )) as SearchResponse<AlertData>;
-
+      const response = await searchESForAlerts(ctx.core.elasticsearch.dataClient, reqData);
       const mappedBody = await mapToAlertResultList(ctx, endpointAppContext, reqData, response);
       return res.ok({ body: mappedBody });
     } catch (err) {

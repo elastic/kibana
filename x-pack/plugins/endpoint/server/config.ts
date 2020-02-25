@@ -28,12 +28,10 @@ export const EndpointConfigSchema = schema.object({
   alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
   alertResultListDefaultSort: schema.string({ defaultValue: '@timestamp' }),
   alertResultListDefaultOrder: schema.string({ defaultValue: Direction.desc }),
-  // TODO: how to make this configurable?
-  /*
-  alertResultListDefaultDateRange: schema.string({
-    defaultValue: encode({ from: 'now-2y', to: 'now' }),
+  alertResultListDefaultDateRange: schema.object({
+    from: schema.string({ defaultValue: 'now-15m' }),
+    to: schema.string({ defaultValue: 'now' }),
   }),
-  */
 });
 
 export function createConfig$(context: PluginInitializerContext) {

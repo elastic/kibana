@@ -37,7 +37,9 @@ export const getRequestData = async (
       request.query.filters !== undefined
         ? ((decode(request.query.filters) as unknown) as Filter[])
         : ([] as Filter[]),
-    dateRange: (decode(request.query.date_range) as unknown) as TimeRange,
+    dateRange: (decode(
+      request.query.date_range || JSON.stringify(config.alertResultListDefaultDateRange)
+    ) as unknown) as TimeRange,
 
     // Paging
     pageIndex: request.query.page_index,
@@ -77,14 +79,8 @@ export async function mapToAlertResultList(
       .warn('Total hits not counted accurately. Pagination numbers may be inaccurate.');
   }
 
-  const hits: AlertHits = searchResponse.hits.hits;
-
-  if (reqData.searchBefore !== undefined) {
-    // Reverse the hits if we used `search_before`.
-    hits.reverse();
-  }
-
   const config = await endpointAppContext.config();
+  const hits: AlertHits = searchResponse.hits.hits;
   const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
   function mapHit(entry: AlertDataWrapper): AlertData {

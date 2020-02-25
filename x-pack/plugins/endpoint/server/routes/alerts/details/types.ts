@@ -11,7 +11,7 @@ import { GetResponse, SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'src/core/server';
 import { AlertData, AlertHits, Direction, Maybe } from '../../../../common/types';
 import { EndpointConfigType } from '../../../config';
-import { buildAlertSearchQuery } from '../lib';
+import { searchESForAlerts } from '../lib';
 import { AlertSearchQuery, Pagination, SearchCursor } from '../types';
 import { BASE_ALERTS_ROUTE } from '..';
 
@@ -51,12 +51,10 @@ export class AlertDetailsPagination extends Pagination<
       reqData.searchBefore = cursor;
     }
 
-    const reqWrapper = await buildAlertSearchQuery(reqData);
-    const response = (await this.requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
-      'search',
-      reqWrapper
-    )) as SearchResponse<AlertData>;
-
+    const response = await searchESForAlerts(
+      this.requestContext.core.elasticsearch.dataClient,
+      reqData
+    );
     return response;
   }
 

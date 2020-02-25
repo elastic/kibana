@@ -192,7 +192,7 @@ export const AlertIndex = memo(() => {
 
   const pagination = useMemo(() => {
     return {
-      pageIndex,
+      pageIndex: pageIndex || 0,
       pageSize,
       pageSizeOptions: [10, 20, 50],
       onChangeItemsPerPage,

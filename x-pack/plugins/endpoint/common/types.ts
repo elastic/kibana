@@ -7,7 +7,7 @@
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
-export type Immutable<T> = T extends undefined | null | boolean | string | number
+export type Immutable<T> = T extends undefined | null | boolean | string | number | Date
   ? T
   : T extends Array<infer U>
   ? ImmutableArray<U>
