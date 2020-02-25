@@ -17,8 +17,22 @@
  * under the License.
  */
 
-export * from './action';
-export * from './action_internal';
-export * from './action_contract';
-export * from './create_action';
-export * from './incompatible_action_error';
+import { ActionInternal } from './action_internal';
+import { AnyActionDefinition } from './action';
+
+/**
+ * Action representation that is exposed out to other plugins.
+ */
+export type ActionContract<A extends AnyActionDefinition> = Pick<
+  ActionInternal<A>,
+  | 'id'
+  | 'type'
+  | 'order'
+  | 'getIconType'
+  | 'getDisplayName'
+  | 'isCompatible'
+  | 'getHref'
+  | 'execute'
+>;
+
+export type AnyActionContract = ActionContract<any>;

@@ -33,6 +33,7 @@ export {
   IncompatibleActionError,
   ActionDefinition as UiActionsActionDefinition,
   ActionInternal as UiActionsActionInternal,
+  ActionContract as UiActionsActionContract,
 } from './actions';
 export { CollectConfigProps as UiActionsCollectConfigProps } from './util';
 export { buildContextMenuForActions } from './context_menu';

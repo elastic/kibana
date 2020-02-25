@@ -18,10 +18,11 @@
  */
 
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
-import { ActionDefinition, ActionInternal, AnyActionInternal } from '../actions';
+import { ActionDefinition, ActionInternal } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { AnyActionContract } from '../actions/action_contract';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -69,7 +70,7 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A) => {
+  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A): void => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
@@ -93,7 +94,7 @@ export class UiActionsService {
     }
   };
 
-  public readonly detachAction = (triggerId: string, actionId: string) => {
+  public readonly detachAction = (triggerId: string, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -110,14 +111,14 @@ export class UiActionsService {
     );
   };
 
-  public readonly getTriggerActions = (triggerId: string): AnyActionInternal[] => {
+  public readonly getTriggerActions = (triggerId: string): AnyActionContract[] => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId))
-      .filter(Boolean) as AnyActionInternal[];
+      .filter(Boolean) as AnyActionContract[];
 
     return actions;
   };
@@ -125,12 +126,12 @@ export class UiActionsService {
   public readonly getTriggerCompatibleActions = async <C>(
     triggerId: string,
     context: C
-  ): Promise<AnyActionInternal[]> => {
+  ): Promise<AnyActionContract[]> => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
       actions.map(action => action.isCompatible(context as any))
     );
-    return actions.reduce<AnyActionInternal[]>(
+    return actions.reduce<AnyActionContract[]>(
       (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
       []
     );
