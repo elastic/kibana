@@ -10,9 +10,10 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
+import { LicenseCheckResult } from './plugin';
 
 export const licensePreRoutingFactory = (
-  getLicenseCheckResults: any,
+  getLicenseCheckResults: () => LicenseCheckResult,
   handler: RequestHandler<any, any, any>
 ): RequestHandler<any, any, any> => {
   // License checking and enable/disable logic
@@ -24,10 +25,11 @@ export const licensePreRoutingFactory = (
     const licenseCheckResults = getLicenseCheckResults();
 
     if (!licenseCheckResults.isAvailable) {
-      return response.forbidden({
+      return response.customError({
         body: {
-          message: licenseCheckResults.message,
+          message: licenseCheckResults.message || '',
         },
+        statusCode: 403,
       });
     }
 
