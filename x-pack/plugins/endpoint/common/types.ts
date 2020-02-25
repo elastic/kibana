@@ -22,11 +22,14 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+export type Maybe<T> = T | void;
+
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
   static EVENT_INDEX_NAME = 'endpoint-events-*';
+  static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
    */
@@ -52,22 +55,22 @@ export interface AlertResultList {
   /**
    * The index of the requested page, starting at 0.
    */
-  request_page_index: number | null | undefined;
+  request_page_index: Maybe<number>;
 
   /**
    * The offset of the requested page, starting at 0.
    */
-  result_from_index: number | null | undefined;
+  result_from_index: Maybe<number>;
 
   /**
    * A cursor-based URL for the next page.
    */
-  next: string | null | undefined;
+  next: Maybe<string>;
 
   /**
    * A cursor-based URL for the previous page.
    */
-  prev: string | null | undefined;
+  prev: Maybe<string>;
 }
 
 export interface EndpointResultList {
@@ -108,6 +111,10 @@ export interface AlertData {
     pid: number;
   };
   thread: {};
+
+  // Alert Details Pagination
+  next?: string;
+  prev?: string;
 }
 
 export interface EndpointMetadata {

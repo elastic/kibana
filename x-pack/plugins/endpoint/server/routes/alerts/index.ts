@@ -11,7 +11,7 @@ import { alertListReqSchema } from './list/schemas';
 import { alertDetailsReqSchema } from './details/schemas';
 import { alertDetailsHandlerWrapper } from './details/handlers';
 
-const BASE_ALERTS_ROUTE = `${EndpointAppConstants.BASE_API_URL}/alerts`;
+export const BASE_ALERTS_ROUTE = `${EndpointAppConstants.BASE_API_URL}/alerts`;
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(

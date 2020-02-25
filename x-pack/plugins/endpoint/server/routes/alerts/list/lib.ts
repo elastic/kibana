@@ -3,36 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get } from 'lodash';
-import { encode, decode, RisonValue } from 'rison-node';
+import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Filter, TimeRange, esQuery, esKuery } from '../../../../../../../src/plugins/data/server';
+import { RequestHandlerContext } from 'src/core/server';
+import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
 import {
-  EndpointAppConstants,
-  AlertData,
   AlertDataWrapper,
+  AlertData,
   AlertHits,
   AlertResultList,
   Direction,
   ESTotal,
 } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
-import {
-  AlertListRequestQuery,
-  AlertListRequestQueryInternal,
-  AlertListRequest,
-  AlertListESRequestBody,
-  AlertListSort,
-} from './types';
+import { AlertSearchQuery } from '../types';
+import { AlertListRequestQuery, AlertListPagination } from './types';
 
 export const getRequestData = async (
   request: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
   endpointAppContext: EndpointAppContext
-): Promise<AlertListRequestQueryInternal> => {
+): Promise<AlertSearchQuery> => {
   const config = await endpointAppContext.config();
-  const reqData: AlertListRequestQueryInternal = {
+  const reqData: AlertSearchQuery = {
     // Defaults not enforced by schema
     pageSize: request.query.page_size || config.alertResultListDefaultPageSize,
     sort: request.query.sort || config.alertResultListDefaultSort,
@@ -49,7 +42,7 @@ export const getRequestData = async (
     // Paging
     pageIndex: request.query.page_index,
     searchAfter: request.query.after,
-    searchBefore: request.query?.before,
+    searchBefore: request.query.before,
   };
 
   if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
@@ -57,161 +50,25 @@ export const getRequestData = async (
     if (reqData.pageIndex === undefined) {
       reqData.pageIndex = config.alertResultListDefaultFirstPageIndex;
     }
-    reqData.fromIndex = reqData.pageIndex! * reqData.pageSize;
+    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
   }
 
   return reqData;
 };
 
-export function buildQuery(reqData: AlertListRequestQueryInternal): JsonObject {
-  const queries: JsonObject[] = [];
-
-  if (reqData.filters.length > 0) {
-    const filtersQuery = esQuery.buildQueryFromFilters(reqData.filters, undefined);
-    queries.push((filtersQuery.filter as unknown) as JsonObject);
-  }
-
-  if (reqData.query) {
-    queries.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(reqData.query)));
-  }
-
-  if (reqData.dateRange) {
-    const dateRangeFilter: JsonObject = {
-      range: {
-        ['@timestamp']: {
-          gte: reqData.dateRange.from,
-          lte: reqData.dateRange.to,
-        },
-      },
-    };
-
-    queries.push(dateRangeFilter);
-  }
-
-  // Optimize
-  if (queries.length > 1) {
-    return {
-      bool: {
-        must: queries,
-      },
-    };
-  } else if (queries.length === 1) {
-    return queries[0];
-  }
-
-  return {
-    match_all: {},
-  };
-}
-
-export function buildSort(reqData: AlertListRequestQueryInternal): AlertListSort {
-  const sort: AlertListSort = [
-    // User-defined primary sort, with default to `@timestamp`
-    {
-      [reqData.sort]: {
-        order: reqData.order,
-      },
-    },
-    // Secondary sort for tie-breaking
-    {
-      'event.id': {
-        order: reqData.order,
-      },
-    },
-  ];
-
-  if (reqData.searchBefore) {
-    // Reverse sort order for search_before functionality
-    if (reqData.order === Direction.asc) {
-      sort[0][reqData.sort].order = Direction.desc;
-      sort[1]['event.id'].order = Direction.desc;
-    } else {
-      sort[0][reqData.sort].order = Direction.asc;
-      sort[1]['event.id'].order = Direction.asc;
-    }
-  }
-
-  return sort;
-}
-
-export const buildAlertListESQuery = async (
-  reqData: AlertListRequestQueryInternal
-): Promise<JsonObject> => {
-  const DEFAULT_TOTAL_HITS = 10000;
-  let totalHitsMin: number = DEFAULT_TOTAL_HITS;
-
-  // Calculate minimum total hits set to indicate there's a next page
-  if (reqData.fromIndex) {
-    totalHitsMin = Math.max(reqData.fromIndex + reqData.pageSize * 2, DEFAULT_TOTAL_HITS);
-  }
-
-  const reqBody: AlertListESRequestBody = {
-    track_total_hits: totalHitsMin,
-    query: buildQuery(reqData),
-    sort: buildSort(reqData),
-  };
-
-  if (reqData.searchAfter) {
-    reqBody.search_after = reqData.searchAfter;
-  }
-
-  if (reqData.searchBefore) {
-    reqBody.search_after = reqData.searchBefore;
-  }
-
-  const reqWrapper: AlertListRequest = {
-    size: reqData.pageSize,
-    index: EndpointAppConstants.ALERT_INDEX_NAME,
-    body: reqBody,
-  };
-
-  if (reqData.fromIndex) {
-    reqWrapper.from = reqData.fromIndex;
-  }
-
-  return (reqWrapper as unknown) as JsonObject;
-};
-
-function getPageUrl(reqData: AlertListRequestQueryInternal): string {
-  let pageUrl: string = '/api/endpoint/alerts?';
-
-  if (reqData.query) {
-    pageUrl += `query=${reqData.query}&`;
-  }
-
-  if (reqData.filters.length > 0) {
-    pageUrl += `filters=${encode((reqData.filters as unknown) as RisonValue)}&`;
-  }
-
-  pageUrl += `date_range=${encode((reqData.dateRange as unknown) as RisonValue)}&`;
-
-  if (reqData.sort !== undefined) {
-    pageUrl += `sort=${reqData.sort}&`;
-  }
-
-  if (reqData.order !== undefined) {
-    pageUrl += `order=${reqData.order}&`;
-  }
-
-  pageUrl += `page_size=${reqData.pageSize}&`;
-
-  // NOTE: `search_after` and `search_before` are appended later.
-
-  return pageUrl.slice(0, -1); // strip trailing `&`
-}
-
-export function mapToAlertResultList(
+export async function mapToAlertResultList(
+  reqCtx: RequestHandlerContext,
   endpointAppContext: EndpointAppContext,
-  reqData: AlertListRequestQueryInternal,
+  reqData: AlertSearchQuery,
   searchResponse: SearchResponse<AlertData>
-): AlertResultList {
+): Promise<AlertResultList> {
   let totalNumberOfAlerts: number = 0;
   let totalIsLowerBound: boolean = false;
 
-  // This case is due to: https://github.com/elastic/kibana/issues/56694
-  const total: ESTotal = (searchResponse?.hits?.total as unknown) as ESTotal;
-  totalNumberOfAlerts = total?.value || 0;
-  totalIsLowerBound = total?.relation === 'gte' || false;
+  // The cast below is due to: https://github.com/elastic/kibana/issues/56694
+  const total: ESTotal = (searchResponse.hits.total as unknown) as ESTotal;
+  totalNumberOfAlerts = total.value || 0;
+  totalIsLowerBound = total.relation === 'gte' || false;
 
   if (totalIsLowerBound) {
     // This shouldn't happen, as we always try to fetch enough hits to satisfy the current request and the next page.
@@ -220,35 +77,15 @@ export function mapToAlertResultList(
       .warn('Total hits not counted accurately. Pagination numbers may be inaccurate.');
   }
 
-  const hits: AlertHits = searchResponse?.hits?.hits;
-  const hitLen: number = hits.length;
+  const hits: AlertHits = searchResponse.hits.hits;
 
   if (reqData.searchBefore !== undefined) {
     // Reverse the hits if we used `search_before`.
     hits.reverse();
   }
 
-  const pageUrl: string = getPageUrl(reqData);
-
-  let next: string | null = null;
-  let prev: string | null = null;
-
-  if (reqData.searchBefore !== undefined) {
-    // Reverse the hits if we used `search_before`.
-    hits.reverse();
-  }
-
-  if (hitLen > 0 && hitLen <= reqData.pageSize) {
-    const lastCustomSortValue: string = get(hits[hitLen - 1]._source, reqData.sort) as string;
-    const lastEventId: string = hits[hitLen - 1]._source.event.id;
-    next = pageUrl + '&after=' + lastCustomSortValue + '&after=' + lastEventId;
-  }
-
-  if (hitLen > 0) {
-    const firstCustomSortValue: string = get(hits[0]._source, reqData.sort) as string;
-    const firstEventId: string = hits[0]._source.event.id;
-    prev = pageUrl + '&before=' + firstCustomSortValue + '&before=' + firstEventId;
-  }
+  const config = await endpointAppContext.config();
+  const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
   function mapHit(entry: AlertDataWrapper): AlertData {
     return {
@@ -261,8 +98,8 @@ export function mapToAlertResultList(
     request_page_size: reqData.pageSize,
     request_page_index: reqData.pageIndex,
     result_from_index: reqData.fromIndex,
-    next,
-    prev,
+    next: await pagination.getNextUrl(),
+    prev: await pagination.getPrevUrl(),
     alerts: hits.map(mapHit),
     total: totalNumberOfAlerts,
   };

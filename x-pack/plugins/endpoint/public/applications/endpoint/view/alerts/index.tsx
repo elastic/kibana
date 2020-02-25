@@ -120,7 +120,7 @@ export const AlertIndex = memo(() => {
   const datesForRows: Map<AlertData, Date> = useMemo(() => {
     return new Map(
       alertListData.map(alertData => {
-        return [alertData, new Date(alertData['@timestamp'])];
+        return [alertData, alertData['@timestamp']];
       })
     );
   }, [alertListData]);
@@ -156,7 +156,7 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'host_name') {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        const date = datesForRows.get(row)!;
+        const date = datesForRows.get(row as AlertData)!;
         if (date && isFinite(date.getTime())) {
           return (
             <FormattedDate

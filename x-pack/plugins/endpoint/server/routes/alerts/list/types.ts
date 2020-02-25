@@ -3,9 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Direction } from '../../../../common/types';
+import { get } from 'lodash';
+import { RisonValue, encode } from 'rison-node';
+import { RequestHandlerContext } from 'src/core/server';
+import { AlertHits, Direction, Maybe } from '../../../../common/types';
+import { EndpointConfigType } from '../../../config';
+import { AlertSearchQuery, Pagination } from '../types';
+import { BASE_ALERTS_ROUTE } from '..';
 
 /**
  * Request params for alert queries.
@@ -14,71 +18,78 @@ import { Direction } from '../../../../common/types';
  */
 export interface AlertListRequestQuery {
   page_index?: number;
-  page_size?: number;
+  page_size: number;
   query?: string;
   filters?: string;
   date_range: string;
-  sort?: string;
-  order?: Direction;
+  sort: string;
+  order: Direction;
   after?: [any, any];
   before?: [any, any];
 }
 
 /**
- * Request metadata for additional context.
- *
- * Internal use: contains the validated request parameters for use
- * by the application. Keys are camel-cased and do not necessarily
- * match the names of the request parameters that were passed in.
- *
- * Some additional metadata, such as `pageUrl` might be contained in
- * here as well.
+ * Pagination class for alert list.
  */
-export interface AlertListRequestQueryInternal {
-  pageSize: number;
-  pageIndex?: number | null | undefined;
-  fromIndex?: number | null | undefined;
-  query?: string | null | undefined;
-  filters: Filter[];
-  dateRange?: TimeRange;
-  sort: string;
-  order: Direction;
-  searchAfter?: [string, string];
-  searchBefore?: [string, string];
-  next?: string | null | undefined;
-  prev?: string | null | undefined;
-}
+export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits> {
+  protected hitLen: number;
 
-/**
- * Sort parameters for alerts in ES.
- */
-export interface AlertListSortParam {
-  [key: string]: {
-    order: Direction;
-  };
-}
+  constructor(
+    config: EndpointConfigType,
+    requestContext: RequestHandlerContext,
+    state: AlertSearchQuery,
+    data: AlertHits
+  ) {
+    super(config, requestContext, state, data);
+    this.hitLen = data.length;
+  }
 
-/**
- * Sort array for alert list.
- */
-export type AlertListSort = [AlertListSortParam, AlertListSortParam];
+  protected getBasePaginationParams(): string {
+    let pageParams: string = '';
+    if (this.state.query) {
+      pageParams += `query=${this.state.query}&`;
+    }
 
-/**
- * Request body for alerts.
- */
-export interface AlertListESRequestBody {
-  track_total_hits: number;
-  query: JsonObject;
-  sort: AlertListSort;
-  search_after?: [string, string];
-}
+    if (this.state.filters !== undefined && this.state.filters.length > 0) {
+      pageParams += `filters=${encode((this.state.filters as unknown) as RisonValue)}&`;
+    }
 
-/**
- * Request for alerts.
- */
-export interface AlertListRequest {
-  index: string;
-  size: number;
-  from?: number;
-  body: AlertListESRequestBody;
+    pageParams += `date_range=${encode((this.state.dateRange as unknown) as RisonValue)}&`;
+
+    if (this.state.sort !== undefined) {
+      pageParams += `sort=${this.state.sort}&`;
+    }
+
+    if (this.state.order !== undefined) {
+      pageParams += `order=${this.state.order}&`;
+    }
+
+    pageParams += `page_size=${this.state.pageSize}&`;
+
+    // NOTE: `search_after` and `search_before` are appended later.
+    return pageParams.slice(0, -1); // strip trailing `&`
+  }
+
+  async getNextUrl(): Promise<Maybe<string>> {
+    let url: Maybe<string>;
+    if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
+      const lastCustomSortValue: string = get(
+        this.data[this.hitLen - 1]._source,
+        this.state.sort
+      ) as string;
+      const lastEventId: string = this.data[this.hitLen - 1]._source.event.id;
+      url = `${BASE_ALERTS_ROUTE}?${this.getBasePaginationParams()}&after=${lastCustomSortValue}&after=${lastEventId}`;
+    }
+    return url;
+  }
+
+  async getPrevUrl(): Promise<Maybe<string>> {
+    let url: Maybe<string>;
+    if (this.hitLen > 0) {
+      const firstCustomSortValue: string = get(this.data[0]._source, this.state.sort) as string;
+      const firstEventId: string = this.data[0]._source.event.id;
+      url = `${BASE_ALERTS_ROUTE}?${this.getBasePaginationParams()}&before=${firstCustomSortValue}&before=${firstEventId}`;
+    }
+    return url;
+  }
 }

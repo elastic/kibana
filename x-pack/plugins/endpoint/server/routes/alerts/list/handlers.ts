@@ -7,7 +7,8 @@ import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { AlertData } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
-import { getRequestData, buildAlertListESQuery, mapToAlertResultList } from './lib';
+import { buildAlertSearchQuery } from '../lib';
+import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertListRequestQuery } from './types';
 
 export const alertListHandlerWrapper = function(
@@ -21,7 +22,7 @@ export const alertListHandlerWrapper = function(
     try {
       const reqData = await getRequestData(req, endpointAppContext);
 
-      const reqWrapper = await buildAlertListESQuery(reqData);
+      const reqWrapper = await buildAlertSearchQuery(reqData);
       endpointAppContext.logFactory.get('alerts').debug('ES query: ' + JSON.stringify(reqWrapper));
 
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
@@ -29,7 +30,7 @@ export const alertListHandlerWrapper = function(
         reqWrapper
       )) as SearchResponse<AlertData>;
 
-      const mappedBody = mapToAlertResultList(endpointAppContext, reqData, response);
+      const mappedBody = await mapToAlertResultList(ctx, endpointAppContext, reqData, response);
       return res.ok({ body: mappedBody });
     } catch (err) {
       return res.internalError({ body: err });

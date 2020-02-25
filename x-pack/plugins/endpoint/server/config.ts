@@ -6,6 +6,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PluginInitializerContext } from 'kibana/server';
+import { Direction } from '../common/types';
 
 export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
   ? P
@@ -26,7 +27,7 @@ export const EndpointConfigSchema = schema.object({
   alertResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
   alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
   alertResultListDefaultSort: schema.string({ defaultValue: '@timestamp' }),
-  alertResultListDefaultOrder: schema.string({ defaultValue: 'desc' }),
+  alertResultListDefaultOrder: schema.string({ defaultValue: Direction.desc }),
   // TODO: how to make this configurable?
   /*
   alertResultListDefaultDateRange: schema.string({

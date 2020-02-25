@@ -14,9 +14,9 @@ const initialState = (): AlertListState => {
     request_page_size: 10,
     request_page_index: 0,
     result_from_index: 0,
-    next: null,
-    prev: null,
     total: 0,
+    next: undefined,
+    prev: undefined,
     location: undefined,
   };
 };
