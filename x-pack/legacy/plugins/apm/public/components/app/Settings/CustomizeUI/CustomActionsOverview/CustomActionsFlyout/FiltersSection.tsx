@@ -16,11 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useRef } from 'react';
+import { CustomActionFormData } from '.';
 
-export interface Filter {
-  key: string;
-  value: string;
-}
+type FiltersType = CustomActionFormData['filters'];
 
 const DEFAULT_OPTION = {
   value: 'DEFAULT',
@@ -39,16 +37,14 @@ const filterOptions = [
 ];
 
 export const FiltersSection = ({
-  filters = [{ key: '', value: '' }],
+  filters,
   onChange
 }: {
-  filters: Filter[];
-  onChange?: (filters: Filter[]) => void;
+  filters: FiltersType;
+  onChange: (filters: FiltersType) => void;
 }) => {
   const handleAddFilter = () => {
-    if (typeof onChange === 'function') {
-      onChange([...filters, { key: '', value: '' }]);
-    }
+    onChange([...filters, ['', '']]);
   };
 
   return (
@@ -110,10 +106,10 @@ const AddFilterButton = ({
   </EuiButtonEmpty>
 );
 
-const getSelectOptions = (filters: Filter[], idx: number) => {
+const getSelectOptions = (filters: FiltersType, idx: number) => {
   return filterOptions.filter(option => {
     const indexUsedFilter = filters.findIndex(
-      _filter => _filter.key === option.value
+      filter => filter[0] === option.value
     );
     // Filter out all items already added, besides the one selected in the current filter.
     return indexUsedFilter === -1 || idx === indexUsedFilter;
@@ -124,20 +120,18 @@ const Filters = ({
   filters,
   onChange
 }: {
-  filters: Filter[];
-  onChange?: (filters: Filter[]) => void;
+  filters: FiltersType;
+  onChange: (filters: FiltersType) => void;
 }) => {
   const filterValueRefs = useRef<HTMLInputElement[]>([]);
 
-  const onChangeFilter = (filter: Filter, idx: number) => {
+  const onChangeFilter = (filter: FiltersType[0], idx: number) => {
     if (filterValueRefs.current[idx]) {
       filterValueRefs.current[idx].focus();
     }
     const copyOfFilters = [...filters];
     copyOfFilters[idx] = filter;
-    if (typeof onChange === 'function') {
-      onChange(copyOfFilters);
-    }
+    onChange(copyOfFilters);
   };
 
   const onRemoveFilter = (idx: number) => {
@@ -146,16 +140,16 @@ const Filters = ({
     // When empty, means that it was the last filter that got removed,
     // so instead of showing an empty list, will add a new empty filter.
     if (isEmpty(copyOfFilters)) {
-      copyOfFilters.push({ key: '', value: '' });
+      copyOfFilters.push(['', '']);
     }
-    if (typeof onChange === 'function') {
-      onChange(copyOfFilters);
-    }
+
+    onChange(copyOfFilters);
   };
 
   return (
     <>
-      {filters.map((filter: Filter, idx: number) => {
+      {filters.map((filter, idx) => {
+        const [key, value] = filter;
         const filterId = `filter-${idx}`;
         const selectOptions = getSelectOptions(filters, idx);
         return (
@@ -165,39 +159,30 @@ const Filters = ({
                 id={filterId}
                 fullWidth
                 options={selectOptions}
-                value={filter.key}
+                value={key}
                 prepend={i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyout.filters.prepend',
                   {
                     defaultMessage: 'Field'
                   }
                 )}
-                onChange={e =>
-                  onChangeFilter(
-                    { key: e.target.value, value: filter.value },
-                    idx
-                  )
-                }
+                onChange={e => onChangeFilter([e.target.value, value], idx)}
                 isInvalid={
-                  !isEmpty(filter.value) &&
-                  (isEmpty(filter.key) || filter.key === DEFAULT_OPTION.value)
+                  !isEmpty(value) &&
+                  (isEmpty(key) || key === DEFAULT_OPTION.value)
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
+                fullWidth
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={e =>
-                  onChangeFilter(
-                    { key: filter.key, value: e.target.value },
-                    idx
-                  )
-                }
-                value={filter.value}
-                isInvalid={!isEmpty(filter.key) && isEmpty(filter.value)}
+                onChange={e => onChangeFilter([key, e.target.value], idx)}
+                value={value}
+                isInvalid={!isEmpty(key) && isEmpty(value)}
                 inputRef={ref => {
                   if (ref) {
                     filterValueRefs.current.push(ref);
@@ -211,7 +196,7 @@ const Filters = ({
               <EuiButtonEmpty
                 iconType="trash"
                 onClick={() => onRemoveFilter(idx)}
-                disabled={!filter.key && filters.length === 1}
+                disabled={!key && filters.length === 1}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

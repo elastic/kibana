@@ -16,12 +16,12 @@ import { DeleteButton } from './DeleteButton';
 
 export const FlyoutFooter = ({
   onClose,
-  isLoading,
+  isSaving,
   onDelete,
   customActionId
 }: {
   onClose: () => void;
-  isLoading: boolean;
+  isSaving: boolean;
   onDelete: () => void;
   customActionId?: string;
 }) => {
@@ -49,7 +49,7 @@ export const FlyoutFooter = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiButton fill type="submit" isLoading={isLoading}>
+              <EuiButton fill type="submit" isLoading={isSaving}>
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyout.save',
                   {

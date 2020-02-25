@@ -20,7 +20,7 @@ import { CustomAction } from '../../../../../../../../../../plugins/apm/server/l
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
 import { ActionSection } from './ActionSection';
-import { Filter, FiltersSection } from './FiltersSection';
+import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { saveCustomAction } from './saveCustomAction';
 
@@ -32,29 +32,20 @@ interface Props {
 }
 
 export interface CustomActionFormData extends Omit<CustomAction, 'filters'> {
-  filters: Filter[];
+  filters: Array<[string, string]>;
 }
 
-const convertFiltersToArray = (filters?: CustomAction['filters']) => {
-  if (filters && Object.keys(filters).length) {
-    return Object.keys(filters).map(key => {
-      return { key, value: filters[key] || '' };
-    });
+const convertFiltersToArray = (filters: CustomAction['filters'] = {}) => {
+  const convertedFilters = Object.entries(filters);
+  // When convertedFilters is empty, initiate the filters filled with one item.
+  if (isEmpty(convertedFilters)) {
+    convertedFilters.push(['', '']);
   }
+  return convertedFilters;
 };
 
-const convertFiltersToObject = (
-  filters: CustomActionFormData['filters']
-): CustomAction['filters'] => {
-  if (filters && filters.length) {
-    return filters
-      .filter(({ key, value }) => !isEmpty(key) && !isEmpty(value))
-      .reduce((acc: Record<string, string>, { key, value }) => {
-        acc[key] = value;
-        return acc;
-      }, {}) as CustomAction['filters'];
-  }
-};
+const convertFiltersToObject = (filters: CustomActionFormData['filters']) =>
+  Object.fromEntries(filters);
 
 export const CustomActionsFlyout = ({
   onClose,
@@ -63,8 +54,9 @@ export const CustomActionsFlyout = ({
   onDelete
 }: Props) => {
   const callApmApiFromHook = useCallApmApi();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
+
   const { register, handleSubmit, errors, control, watch } = useForm<
     CustomActionFormData
   >({
@@ -75,7 +67,7 @@ export const CustomActionsFlyout = ({
   });
 
   const onSubmit = async (customAction: CustomActionFormData) => {
-    setIsLoading(true);
+    setIsSaving(true);
     await saveCustomAction({
       callApmApi: callApmApiFromHook,
       customAction: {
@@ -85,7 +77,7 @@ export const CustomActionsFlyout = ({
       },
       toasts
     });
-    setIsLoading(false);
+    setIsSaving(false);
     onSave();
   };
   // Watch for any change on filters to render the component
@@ -127,6 +119,7 @@ export const CustomActionsFlyout = ({
             <EuiSpacer size="l" />
 
             <Controller
+              // @ts-ignore: onChange function property will be automatically handled by react-hook-form Controller.
               as={<FiltersSection filters={filters} />}
               name="filters"
               control={control}
@@ -135,7 +128,7 @@ export const CustomActionsFlyout = ({
 
           <FlyoutFooter
             onClose={onClose}
-            isLoading={isLoading}
+            isSaving={isSaving}
             onDelete={onDelete}
             customActionId={customActionSelected?.id}
           />
