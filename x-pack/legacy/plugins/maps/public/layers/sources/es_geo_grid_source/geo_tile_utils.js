@@ -118,17 +118,3 @@ export function expandToTileBoundaries(extent, zoom) {
     maxLat: tileToLatitude(upperLeftY, tileCount),
   };
 }
-
-export function getTileCountInExtent(extent, zoom) {
-  const tileCount = getTileCount(zoom);
-
-  const upperLeftX = longitudeToTile(extent.minLon, tileCount);
-  const upperLeftY = latitudeToTile(Math.min(extent.maxLat, 90), tileCount);
-  const lowerRightX = longitudeToTile(extent.maxLon, tileCount);
-  const lowerRightY = latitudeToTile(Math.max(extent.minLat, -90), tileCount);
-
-  const tilesY = Math.abs(upperLeftY - lowerRightY);
-  const tilesX = Math.abs(upperLeftX - lowerRightX);
-
-  return tilesX * tilesY;
-}
