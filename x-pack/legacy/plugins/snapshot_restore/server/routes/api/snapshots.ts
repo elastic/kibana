@@ -22,6 +22,7 @@ export function registerSnapshotsRoutes({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
 
       const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
+
       let policies: string[] = [];
 
       // Attempt to retrieve policies
@@ -38,16 +39,27 @@ export function registerSnapshotsRoutes({
        * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
        */
 
-      const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
-        repository: '_all',
-      });
+      let repositoryNames: string[];
 
-      const repositoryNames = Object.keys(repositoriesByName);
-
-      if (repositoryNames.length === 0) {
-        return res.ok({
-          body: { snapshots: [], errors: [], repositories: [], policies },
+      try {
+        const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
+          repository: '_all',
         });
+        repositoryNames = Object.keys(repositoriesByName);
+
+        if (repositoryNames.length === 0) {
+          return res.ok({
+            body: { snapshots: [], errors: [], repositories: [], policies },
+          });
+        }
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        return res.internalError({ body: e });
       }
 
       const snapshots: SnapshotDetails[] = [];
