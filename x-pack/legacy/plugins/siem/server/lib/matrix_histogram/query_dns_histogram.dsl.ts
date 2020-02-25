@@ -5,30 +5,9 @@
  */
 
 import { createQueryFilterClauses, calculateTimeSeriesInterval } from '../../utils/build_query';
-import { buildTimelineQuery } from '../events/query.dsl';
-import { RequestOptions, MatrixHistogramRequestOptions } from '../framework';
+import { MatrixHistogramRequestOptions } from '../framework';
 
-export const buildAlertsQuery = (options: RequestOptions) => {
-  const eventsQuery = buildTimelineQuery(options);
-  const eventsFilter = eventsQuery.body.query.bool.filter;
-  const alertsFilter = [
-    ...createQueryFilterClauses({ match: { 'event.kind': { query: 'alert' } } }),
-  ];
-
-  return {
-    ...eventsQuery,
-    body: {
-      ...eventsQuery.body,
-      query: {
-        bool: {
-          filter: [...eventsFilter, ...alertsFilter],
-        },
-      },
-    },
-  };
-};
-
-export const buildAlertsHistogramQuery = ({
+export const buildDnsHistogramQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
@@ -39,24 +18,6 @@ export const buildAlertsHistogramQuery = ({
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'event.kind': 'alert',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
     {
       range: {
         [timestamp]: {
@@ -74,25 +35,29 @@ export const buildAlertsHistogramQuery = ({
       date_histogram: {
         field: histogramTimestampField,
         fixed_interval: interval,
-        min_doc_count: 0,
-        extended_bounds: {
-          min: from,
-          max: to,
-        },
       },
     };
+
     return {
-      alertsByModuleGroup: {
-        terms: {
-          field: stackByField,
-          missing: 'All others',
-          order: {
-            _count: 'desc',
-          },
-          size: 10,
-        },
+      NetworkDns: {
+        ...dateHistogram,
         aggs: {
-          alerts: dateHistogram,
+          dns: {
+            terms: {
+              field: stackByField,
+              order: {
+                orderAgg: 'desc',
+              },
+              size: 10,
+            },
+            aggs: {
+              orderAgg: {
+                cardinality: {
+                  field: 'dns.question.name',
+                },
+              },
+            },
+          },
         },
       },
     };
