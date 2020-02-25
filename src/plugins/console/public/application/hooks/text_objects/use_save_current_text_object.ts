@@ -23,32 +23,32 @@ import { useEditorActionContext, useEditorReadContext, useServicesContext } from
 
 const WAIT_MS = 500;
 
-export const useSaveCurrentTextObject = () => {
+export const useSequencedSaveTextObject = () => {
   const promiseChainRef = useRef(Promise.resolve());
 
   const {
     services: { objectStorageClient },
   } = useServicesContext();
 
-  const { currentTextObjectId, textObjects } = useEditorReadContext();
+  const { textObjects } = useEditorReadContext();
   const dispatch = useEditorActionContext();
-  const currentTextObject = textObjects[currentTextObjectId];
 
   return useCallback(
     throttle(
-      (text: string) => {
+      (id: string, text: string) => {
         const { current: promise } = promiseChainRef;
-        if (!currentTextObject) return;
-        const nextTextObject = { ...currentTextObject, text, updatedAt: Date.now() };
-        promise.finally(() =>
-          objectStorageClient.text.update(nextTextObject).then(() => {
-            dispatch({ type: 'textObject.upsert', payload: nextTextObject });
-          })
-        );
+        const textObject = textObjects[id];
+        if (!textObject) return;
+        const nextTextObject = { ...textObject, text, updatedAt: Date.now() };
+        // Update local reference
+        dispatch({ type: 'textObject.upsert', payload: nextTextObject });
+        // Update remote
+        // TODO: Handle when we are not able to save to remote
+        promise.finally(() => objectStorageClient.text.update(nextTextObject));
       },
       WAIT_MS,
       { trailing: true }
     ),
-    [objectStorageClient, currentTextObjectId]
+    [objectStorageClient]
   );
 };

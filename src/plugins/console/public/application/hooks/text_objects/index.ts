@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { useSaveCurrentTextObject } from './use_save_current_text_object';
+export { useSequencedSaveTextObject } from './use_save_current_text_object';
 export { useTextObjectsCRUD } from './use_text_objects_crud';

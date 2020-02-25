@@ -42,7 +42,7 @@ import { applyCurrentSettings } from './apply_editor_settings';
 import {
   useSendCurrentRequestToES,
   useSetInputEditor,
-  useSaveCurrentTextObject,
+  useSequencedSaveTextObject,
 } from '../../../../hooks';
 
 import * as senseEditor from '../../../../models/sense_editor';
@@ -109,7 +109,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
     const { settings } = useEditorReadContext();
     const setInputEditor = useSetInputEditor();
     const sendCurrentRequestToES = useSendCurrentRequestToES();
-    const saveCurrentTextObject = useSaveCurrentTextObject();
+    const saveTextObject = useSequencedSaveTextObject();
 
     const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
 
@@ -203,7 +203,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       function saveCurrentState() {
         try {
           const content = editor.getCoreEditor().getValue();
-          saveCurrentTextObject(content);
+          saveTextObject(textObject.id, content);
         } catch (e) {
           // Ignoring saving error
         }
@@ -229,7 +229,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
         element.remove();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [saveCurrentTextObject, textObject.id, history, setInputEditor]);
+    }, [saveTextObject, textObject.id, history, setInputEditor]);
 
     // Effect #2
     // Apply user settings to current editor instance
