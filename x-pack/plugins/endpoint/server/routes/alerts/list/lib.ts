@@ -9,10 +9,9 @@ import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
 import { Filter, TimeRange } from '../../../../../../../src/plugins/data/server';
 import {
-  AlertDataWrapper,
   AlertData,
-  AlertHits,
   AlertResultList,
+  AlertHits,
   Direction,
   ESTotal,
 } from '../../../../common/types';
@@ -80,10 +79,10 @@ export async function mapToAlertResultList(
   }
 
   const config = await endpointAppContext.config();
-  const hits: AlertHits = searchResponse.hits.hits;
+  const hits = searchResponse.hits.hits;
   const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
-  function mapHit(entry: AlertDataWrapper): AlertData {
+  function mapHit(entry: AlertHits[0]): AlertData {
     return {
       id: entry._id,
       ...entry._source,

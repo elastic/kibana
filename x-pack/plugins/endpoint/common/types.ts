@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
+
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
@@ -22,7 +24,7 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export type Maybe<T> = T | void;
+export type Maybe<T> = T | undefined;
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
@@ -55,22 +57,22 @@ export interface AlertResultList {
   /**
    * The index of the requested page, starting at 0.
    */
-  request_page_index: Maybe<number>;
+  request_page_index?: number;
 
   /**
    * The offset of the requested page, starting at 0.
    */
-  result_from_index: Maybe<number>;
+  result_from_index?: number;
 
   /**
    * A cursor-based URL for the next page.
    */
-  next: Maybe<string>;
+  next?: string;
 
   /**
    * A cursor-based URL for the previous page.
    */
-  prev: Maybe<string>;
+  prev?: string;
 }
 
 export interface EndpointResultList {
@@ -150,12 +152,7 @@ export interface ESTotal {
   relation: string;
 }
 
-export interface AlertDataWrapper {
-  _id: string;
-  _source: AlertData;
-}
-
-export type AlertHits = AlertDataWrapper[];
+export type AlertHits = SearchResponse<AlertData>['hits']['hits'];
 
 export enum Direction {
   asc = 'asc',
