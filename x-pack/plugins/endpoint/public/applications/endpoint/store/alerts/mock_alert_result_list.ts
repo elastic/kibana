@@ -26,7 +26,7 @@ export const mockAlertResultList: (options?: {
   const alerts = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     alerts.push({
-      '@timestamp': new Date(1542341895000),
+      '@timestamp': 1542341895000,
       id: 'xDUYMHABAJk0XnHd8rrd',
       agent: {
         id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',

@@ -88,7 +88,7 @@ export interface EndpointResultList {
 
 export interface AlertData {
   id: string;
-  '@timestamp': Date;
+  '@timestamp': number;
   agent: {
     id: string;
     version: string;

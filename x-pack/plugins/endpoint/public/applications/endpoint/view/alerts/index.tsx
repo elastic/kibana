@@ -120,7 +120,7 @@ export const AlertIndex = memo(() => {
   const datesForRows: Map<AlertData, Date> = useMemo(() => {
     return new Map(
       alertListData.map(alertData => {
-        return [alertData, alertData['@timestamp']];
+        return [alertData, new Date(alertData['@timestamp'])];
       })
     );
   }, [alertListData]);
@@ -156,8 +156,8 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'host_name') {
         return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        const date = datesForRows.get(row as AlertData)!;
-        if (date && isFinite(date)) {
+        const date = datesForRows.get(row)!;
+        if (date && isFinite(date.getTime())) {
           return (
             <FormattedDate
               value={date}
@@ -192,7 +192,7 @@ export const AlertIndex = memo(() => {
 
   const pagination = useMemo(() => {
     return {
-      pageIndex: pageIndex || 0,
+      pageIndex,
       pageSize,
       pageSizeOptions: [10, 20, 50],
       onChangeItemsPerPage,

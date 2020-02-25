@@ -11,12 +11,9 @@ import { AppAction } from '../action';
 const initialState = (): AlertListState => {
   return {
     alerts: [],
-    request_page_size: 10,
-    request_page_index: 0,
-    result_from_index: 0,
+    pageSize: 10,
+    pageIndex: 0,
     total: 0,
-    next: undefined,
-    prev: undefined,
     location: undefined,
   };
 };
@@ -26,9 +23,18 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
   action
 ) => {
   if (action.type === 'serverReturnedAlertsData') {
+    const {
+      alerts,
+      request_page_size: pageSize,
+      request_page_index: pageIndex,
+      total,
+    } = action.payload;
     return {
       ...state,
-      ...action.payload,
+      alerts,
+      pageSize,
+      pageIndex: pageIndex || 0,
+      total,
     };
   } else if (action.type === 'userChangedUrl') {
     return {
