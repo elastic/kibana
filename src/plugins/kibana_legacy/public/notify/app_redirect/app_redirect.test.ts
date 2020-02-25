@@ -17,17 +17,12 @@
  * under the License.
  */
 
+import { ILocationService } from 'angular';
+import { ToastsStart } from '../../../../../core/public';
 import { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
 
 let isToastAdded = false;
-
-jest.mock('../toasts', () => ({
-  toastNotifications: {
-    addDanger: () => {
-      isToastAdded = true;
-    },
-  },
-}));
+const toasts: ToastsStart = {} as ToastsStart;
 
 describe('addAppRedirectMessageToUrl', () => {
   test('adds a message to the URL', () => {
@@ -39,20 +34,29 @@ describe('addAppRedirectMessageToUrl', () => {
 describe('showAppRedirectNotification', () => {
   beforeEach(() => {
     isToastAdded = false;
+    toasts.addDanger = (): any => {
+      isToastAdded = true;
+    };
   });
 
   test(`adds a toast when there's a message in the URL`, () => {
-    showAppRedirectNotification({
-      search: () => ({ app_redirect_message: 'redirect message' }),
-    });
+    showAppRedirectNotification(
+      {
+        search: () => ({ app_redirect_message: 'redirect message' }),
+      } as ILocationService,
+      toasts
+    );
 
     expect(isToastAdded).toBe(true);
   });
 
   test(`doesn't add a toast when there's no message in the URL`, () => {
-    showAppRedirectNotification({
-      search: () => ({ app_redirect_message: '' }),
-    });
+    showAppRedirectNotification(
+      {
+        search: () => ({ app_redirect_message: '' }),
+      } as ILocationService,
+      toasts
+    );
 
     expect(isToastAdded).toBe(false);
   });
