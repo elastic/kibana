@@ -14,6 +14,13 @@ interface NodeStats {
   totalAlerts: number;
 }
 
+interface NodePagination {
+  nextChild?: string | null;
+  nextEvent?: string | null;
+  nextAncestor?: string | null;
+  nextAlert?: string | null;
+}
+
 interface Node {
   id: string;
   children: Node[];
@@ -21,12 +28,7 @@ interface Node {
   alerts: ResolverEvent[];
   lifecycle: ResolverEvent[];
   parent?: Node | null;
-  pagination: {
-    nextChild?: string | null;
-    nextEvent?: string | null;
-    nextAncestor?: string | null;
-    nextAlert?: string | null;
-  };
+  pagination: NodePagination;
   stats?: NodeStats;
 }
 
@@ -216,7 +218,7 @@ export class Tree {
 
   private paginate(
     grouper: ExtractFunction,
-    attribute: string,
+    attribute: keyof NodePagination,
     totals: Record<string, number>,
     records: ResolverEvent[]
   ) {
@@ -227,7 +229,7 @@ export class Tree {
           // if we have any results, attempt to build a pagination cursor, the function
           // below hands back a null value if no cursor is necessary because we have
           // all of the records.
-          (this.cache[id].pagination as any)[attribute] = buildPaginationCursor(total, grouped[id]);
+          this.cache[id].pagination[attribute] = buildPaginationCursor(total, grouped[id]);
         }
       }
     });
