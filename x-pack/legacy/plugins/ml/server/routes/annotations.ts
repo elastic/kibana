@@ -18,7 +18,7 @@ import {
   deleteAnnotationSchema,
   getAnnotationsSchema,
   indexAnnotationSchema,
-} from '../new_platform/annotations_schema';
+} from './schemas/annotations_schema';
 
 import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 

@@ -15,7 +15,7 @@ import {
   categoryExamplesSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
-} from '../new_platform/results_service_schema';
+} from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {

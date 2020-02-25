@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-import { createFilterSchema, updateFilterSchema } from '../new_platform/filters_schema';
+import { createFilterSchema, updateFilterSchema } from './schemas/filters_schema';
 import { FilterManager, FormFilter } from '../models/filter';
 
 // TODO - add function for returning a list of just the filter IDs.

@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-import { calendarSchema } from '../new_platform/calendars_schema';
+import { calendarSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
 function getAllCalendars(context: RequestHandlerContext) {
