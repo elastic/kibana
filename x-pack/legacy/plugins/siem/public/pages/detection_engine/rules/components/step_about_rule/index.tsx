@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';

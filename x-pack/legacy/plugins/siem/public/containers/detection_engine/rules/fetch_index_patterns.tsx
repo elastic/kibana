@@ -6,7 +6,7 @@
 
 import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
@@ -30,7 +30,7 @@ interface FetchIndexPatternReturn {
   indexPatterns: IIndexPattern;
 }
 
-type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
+export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();

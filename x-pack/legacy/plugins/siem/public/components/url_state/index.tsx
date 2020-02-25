@@ -7,7 +7,7 @@
 import React from 'react';
 import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { timelineActions } from '../../store/actions';
 import { RouteSpyState } from '../../utils/route/types';

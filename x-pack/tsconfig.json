@@ -37,7 +37,6 @@
       ],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "fixtures/*": ["src/fixtures/*"],
-      "fast-deep-equal/*": ["typings/fast_deep_equal.d.ts"]
     },
     "types": [
       "node",

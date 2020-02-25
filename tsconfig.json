@@ -14,7 +14,6 @@
         "src/test_utils/public/*"
       ],
       "fixtures/*": ["src/fixtures/*"],
-      "fast-deep-equal/*": ["typings/fast_deep_equal.d.ts"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';

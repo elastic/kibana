@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import {
   IIndexPattern,

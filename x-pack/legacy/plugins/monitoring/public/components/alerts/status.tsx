@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-import { Alert } from '../../../../alerting/server/types';
+import { Alert } from '../../../../../../plugins/alerting/common';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { AlertsConfiguration } from './configuration';

@@ -13,7 +13,7 @@ import {
 } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';

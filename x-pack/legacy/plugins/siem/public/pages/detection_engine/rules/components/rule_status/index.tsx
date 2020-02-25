@@ -13,7 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { useRuleStatus, RuleInfoStatus } from '../../../../../containers/detection_engine/rules';
 import { FormattedDate } from '../../../../../components/formatted_date';

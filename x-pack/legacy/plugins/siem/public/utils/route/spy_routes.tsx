@@ -7,7 +7,7 @@
 import * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';

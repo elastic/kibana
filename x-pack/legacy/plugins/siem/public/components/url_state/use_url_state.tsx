@@ -6,7 +6,7 @@
 
 import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
 import { useApolloClient } from '../../utils/apollo_context';

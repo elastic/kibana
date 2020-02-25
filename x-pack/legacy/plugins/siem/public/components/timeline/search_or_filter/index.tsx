@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
@@ -22,7 +22,8 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, timelineDefaults, TimelineModel, EventType } from '../../../store/timeline/model';
+import { KqlMode, TimelineModel, EventType } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 

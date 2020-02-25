@@ -8,7 +8,7 @@ import { ApolloQueryResult, NetworkStatus } from 'apollo-client';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { ESQuery } from '../../common/typed_json';
 import { inputsModel } from '../store/model';

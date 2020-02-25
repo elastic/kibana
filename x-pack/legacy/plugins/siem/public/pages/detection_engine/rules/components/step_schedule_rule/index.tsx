@@ -6,7 +6,7 @@
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';

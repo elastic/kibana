@@ -8,7 +8,7 @@ import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Filter,

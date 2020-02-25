@@ -6,7 +6,7 @@
 
 import { Dispatch } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { KueryFilterQuery } from '../../store';
 import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../store/timeline/actions';

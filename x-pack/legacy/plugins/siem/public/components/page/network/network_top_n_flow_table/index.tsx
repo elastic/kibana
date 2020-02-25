@@ -6,7 +6,7 @@
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/actions';
 import {

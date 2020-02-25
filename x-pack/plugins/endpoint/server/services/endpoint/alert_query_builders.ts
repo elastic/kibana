@@ -7,9 +7,9 @@ import { KibanaRequest } from 'kibana/server';
 import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext, AlertRequestParams, JSONish } from '../../types';
 
-export const buildAlertListESQuery = async (
+export const buildAlertListESQuery: (
   pagingProperties: Record<string, number>
-): Promise<JSONish> => {
+) => JSONish = pagingProperties => {
   const DEFAULT_TOTAL_HITS = 10000;
 
   // Calculate minimum total hits set to indicate there's a next page
@@ -22,7 +22,15 @@ export const buildAlertListESQuery = async (
     body: {
       track_total_hits: totalHitsMin,
       query: {
-        match_all: {},
+        bool: {
+          must: [
+            {
+              match: {
+                'event.kind': 'alert',
+              },
+            },
+          ],
+        },
       },
       sort: [
         {
