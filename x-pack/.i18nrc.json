@@ -39,8 +39,8 @@
     "xpack.spaces": ["legacy/plugins/spaces", "plugins/spaces"],
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.transform": "legacy/plugins/transform",
-    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
+    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
     "xpack.watcher": "plugins/watcher"
   },
