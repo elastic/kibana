@@ -41,7 +41,6 @@ export default function({ getService, getPageObjects }) {
     this.tags('smoke');
 
     before(async () => {
-      await esArchiver.unload('logstash_functional');
       await esArchiver.load('dashboard/current/kibana');
       await security.testUser.setRoles(['kibana_user', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
