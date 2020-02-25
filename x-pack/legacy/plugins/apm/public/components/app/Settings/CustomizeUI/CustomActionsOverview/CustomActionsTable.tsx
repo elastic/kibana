@@ -84,7 +84,7 @@ export const CustomActionsTable = ({
       columns={columns}
       initialPageSize={10}
       initialSortField="@timestamp"
-      initialSortDirection="asc"
+      initialSortDirection="desc"
     />
   );
 };

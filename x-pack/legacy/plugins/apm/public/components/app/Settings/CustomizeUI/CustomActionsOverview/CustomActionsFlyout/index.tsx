@@ -44,8 +44,14 @@ const convertFiltersToArray = (filters: CustomAction['filters'] = {}) => {
   return convertedFilters;
 };
 
-const convertFiltersToObject = (filters: CustomActionFormData['filters']) =>
-  Object.fromEntries(filters);
+const convertFiltersToObject = (filters: CustomActionFormData['filters']) => {
+  const convertedFilters = Object.fromEntries(
+    filters.filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
+  );
+  if (!isEmpty(convertedFilters)) {
+    return convertedFilters;
+  }
+};
 
 export const CustomActionsFlyout = ({
   onClose,
@@ -54,8 +60,15 @@ export const CustomActionsFlyout = ({
   onDelete
 }: Props) => {
   const callApmApiFromHook = useCallApmApi();
-  const [isSaving, setIsSaving] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
+  const [isSaving, setIsSaving] = useState(false);
+
+  // form fields
+  const [label, setLabel] = useState(customActionSelected?.label || '');
+  const [url, setUrl] = useState(customActionSelected?.url || '');
+  const [filters, setFilters] = useState(
+    convertFiltersToArray(customActionSelected?.filters)
+  );
 
   const { register, handleSubmit, errors, control, watch } = useForm<
     CustomActionFormData
@@ -66,26 +79,28 @@ export const CustomActionsFlyout = ({
     }
   });
 
-  const onSubmit = async (customAction: CustomActionFormData) => {
+  const onSubmit = async (
+    event:
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     setIsSaving(true);
     await saveCustomAction({
+      id: customActionSelected?.id,
+      label,
+      url,
+      filters: convertFiltersToObject(filters),
       callApmApi: callApmApiFromHook,
-      customAction: {
-        ...customActionSelected,
-        ...customAction,
-        filters: convertFiltersToObject(customAction.filters)
-      },
       toasts
     });
     setIsSaving(false);
     onSave();
   };
-  // Watch for any change on filters to render the component
-  const filters = watch('filters');
 
   return (
     <EuiPortal>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={onSubmit}>
         <EuiFlyout ownFocus onClose={onClose} size="m">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
@@ -114,16 +129,17 @@ export const CustomActionsFlyout = ({
 
             <EuiSpacer size="l" />
 
-            <ActionSection register={register} errors={errors} />
+            <ActionSection
+              errors={errors}
+              label={label}
+              onChangeLabel={setLabel}
+              url={url}
+              onChangeUrl={setUrl}
+            />
 
             <EuiSpacer size="l" />
 
-            <Controller
-              // @ts-ignore: onChange function property will be automatically handled by react-hook-form Controller.
-              as={<FiltersSection filters={filters} />}
-              name="filters"
-              control={control}
-            />
+            <FiltersSection filters={filters} onChangeFilters={setFilters} />
           </EuiFlyoutBody>
 
           <FlyoutFooter

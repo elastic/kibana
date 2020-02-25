@@ -20,6 +20,7 @@ export const listCustomActionsRoute = createRoute(core => ({
 
 const payload = t.intersection([
   t.type({
+    actionId: t.string,
     label: t.string,
     url: t.string
   }),

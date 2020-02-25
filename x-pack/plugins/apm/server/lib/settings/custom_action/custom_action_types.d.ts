@@ -9,7 +9,7 @@ export interface CustomAction {
   '@timestamp': number;
   label: string;
   url: string;
-  actionId: 'trace';
+  actionId: string;
   filters?: {
     [key: string]: string;
   };

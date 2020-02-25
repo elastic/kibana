@@ -3,56 +3,64 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import {
-  ValidationOptions,
-  FormContextValues,
-  NestDataObject
-} from 'react-hook-form';
-import {
-  EuiTitle,
+  EuiFieldText,
+  EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiFieldText,
-  EuiFormRow
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import React from 'react';
+import { NestDataObject } from 'react-hook-form';
 import { CustomActionFormData } from './';
 
-interface ActionField {
+interface InputField {
   name: keyof CustomActionFormData;
   label: string;
   helpText: string;
   placeholder: string;
-  validations: ValidationOptions;
+  onChange: (value: string) => void;
+  value?: string;
 }
 
-const actionFields: ActionField[] = [
-  {
-    name: 'label',
-    label: 'Label',
-    helpText:
-      'This is the label shown in the actions context menu. Keep it as short as possible.',
-    placeholder: 'e.g. Support tickets',
-    validations: { required: true }
-  },
-  {
-    name: 'url',
-    label: 'URL',
-    helpText:
-      'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
-    placeholder: 'e.g. https://www.elastic.co/',
-    validations: { required: true }
-  }
-];
-
-interface ActionSectionProps {
-  register: FormContextValues['register'];
+interface Props {
   errors: NestDataObject<CustomActionFormData>;
+  label?: string;
+  onChangeLabel: (label: string) => void;
+  url?: string;
+  onChangeUrl: (url: string) => void;
 }
 
-export const ActionSection = ({ register, errors }: ActionSectionProps) => {
+export const ActionSection = ({
+  errors,
+  label,
+  onChangeLabel,
+  url,
+  onChangeUrl
+}: Props) => {
+  const inputFields: InputField[] = [
+    {
+      name: 'label',
+      label: 'Label',
+      helpText:
+        'This is the label shown in the actions context menu. Keep it as short as possible.',
+      placeholder: 'e.g. Support tickets',
+      value: label,
+      onChange: onChangeLabel
+    },
+    {
+      name: 'url',
+      label: 'URL',
+      helpText:
+        'Add fieldname variables to your URL to apply values e.g. {{trace.id}}. TODO: Learn more in the docs.',
+      placeholder: 'e.g. https://www.elastic.co/',
+      value: url,
+      onChange: onChangeUrl
+    }
+  ];
+
   return (
     <>
       <EuiTitle size="xs">
@@ -66,7 +74,7 @@ export const ActionSection = ({ register, errors }: ActionSectionProps) => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
-      {actionFields.map((field: ActionField) => {
+      {inputFields.map(field => {
         return (
           <EuiFormRow
             fullWidth
@@ -85,11 +93,12 @@ export const ActionSection = ({ register, errors }: ActionSectionProps) => {
             }
           >
             <EuiFieldText
-              inputRef={register(field.validations)}
               placeholder={field.placeholder}
               name={field.name}
               fullWidth
               isInvalid={!isEmpty(errors[field.name])}
+              value={field.value}
+              onChange={e => field.onChange(e.target.value)}
             />
           </EuiFormRow>
         );

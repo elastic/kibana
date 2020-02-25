@@ -36,15 +36,48 @@ const filterOptions = [
   { value: 'transaction.name', text: 'transaction.name' }
 ];
 
+const getSelectOptions = (filters: FiltersType, idx: number) => {
+  return filterOptions.filter(option => {
+    const indexUsedFilter = filters.findIndex(
+      filter => filter[0] === option.value
+    );
+    // Filter out all items already added, besides the one selected in the current filter.
+    return indexUsedFilter === -1 || idx === indexUsedFilter;
+  });
+};
+
 export const FiltersSection = ({
   filters,
-  onChange
+  onChangeFilters
 }: {
   filters: FiltersType;
-  onChange: (filters: FiltersType) => void;
+  onChangeFilters: (filters: FiltersType) => void;
 }) => {
+  const filterValueRefs = useRef<HTMLInputElement[]>([]);
+
+  const onChangeFilter = (filter: FiltersType[0], idx: number) => {
+    if (filterValueRefs.current[idx]) {
+      filterValueRefs.current[idx].focus();
+    }
+    const copyOfFilters = [...filters];
+    copyOfFilters[idx] = filter;
+    onChangeFilters(copyOfFilters);
+  };
+
+  const onRemoveFilter = (idx: number) => {
+    const copyOfFilters = [...filters];
+    copyOfFilters.splice(idx, 1);
+    // When empty, means that it was the last filter that got removed,
+    // so instead of showing an empty list, will add a new empty filter.
+    if (isEmpty(copyOfFilters)) {
+      copyOfFilters.push(['', '']);
+    }
+
+    onChangeFilters(copyOfFilters);
+  };
+
   const handleAddFilter = () => {
-    onChange([...filters, ['', '']]);
+    onChangeFilters([...filters, ['', '']]);
   };
 
   return (
@@ -72,82 +105,6 @@ export const FiltersSection = ({
 
       <EuiSpacer size="s" />
 
-      <Filters filters={filters} onChange={onChange} />
-
-      <EuiSpacer size="xs" />
-
-      <AddFilterButton
-        onClick={handleAddFilter}
-        // Disable button when user has already added all items available
-        isDisabled={filters.length === filterOptions.length - 1}
-      />
-    </>
-  );
-};
-
-const AddFilterButton = ({
-  onClick,
-  isDisabled
-}: {
-  onClick: () => void;
-  isDisabled: boolean;
-}) => (
-  <EuiButtonEmpty
-    iconType="plusInCircle"
-    onClick={onClick}
-    disabled={isDisabled}
-  >
-    {i18n.translate(
-      'xpack.apm.settings.customizeUI.customActions.flyout.filters.addAnotherFilter',
-      {
-        defaultMessage: 'Add another filter'
-      }
-    )}
-  </EuiButtonEmpty>
-);
-
-const getSelectOptions = (filters: FiltersType, idx: number) => {
-  return filterOptions.filter(option => {
-    const indexUsedFilter = filters.findIndex(
-      filter => filter[0] === option.value
-    );
-    // Filter out all items already added, besides the one selected in the current filter.
-    return indexUsedFilter === -1 || idx === indexUsedFilter;
-  });
-};
-
-const Filters = ({
-  filters,
-  onChange
-}: {
-  filters: FiltersType;
-  onChange: (filters: FiltersType) => void;
-}) => {
-  const filterValueRefs = useRef<HTMLInputElement[]>([]);
-
-  const onChangeFilter = (filter: FiltersType[0], idx: number) => {
-    if (filterValueRefs.current[idx]) {
-      filterValueRefs.current[idx].focus();
-    }
-    const copyOfFilters = [...filters];
-    copyOfFilters[idx] = filter;
-    onChange(copyOfFilters);
-  };
-
-  const onRemoveFilter = (idx: number) => {
-    const copyOfFilters = [...filters];
-    copyOfFilters.splice(idx, 1);
-    // When empty, means that it was the last filter that got removed,
-    // so instead of showing an empty list, will add a new empty filter.
-    if (isEmpty(copyOfFilters)) {
-      copyOfFilters.push(['', '']);
-    }
-
-    onChange(copyOfFilters);
-  };
-
-  return (
-    <>
       {filters.map((filter, idx) => {
         const [key, value] = filter;
         const filterId = `filter-${idx}`;
@@ -202,6 +159,35 @@ const Filters = ({
           </EuiFlexGroup>
         );
       })}
+
+      <EuiSpacer size="xs" />
+
+      <AddFilterButton
+        onClick={handleAddFilter}
+        // Disable button when user has already added all items available
+        isDisabled={filters.length === filterOptions.length - 1}
+      />
     </>
   );
 };
+
+const AddFilterButton = ({
+  onClick,
+  isDisabled
+}: {
+  onClick: () => void;
+  isDisabled: boolean;
+}) => (
+  <EuiButtonEmpty
+    iconType="plusInCircle"
+    onClick={onClick}
+    disabled={isDisabled}
+  >
+    {i18n.translate(
+      'xpack.apm.settings.customizeUI.customActions.flyout.filters.addAnotherFilter',
+      {
+        defaultMessage: 'Add another filter'
+      }
+    )}
+  </EuiButtonEmpty>
+);

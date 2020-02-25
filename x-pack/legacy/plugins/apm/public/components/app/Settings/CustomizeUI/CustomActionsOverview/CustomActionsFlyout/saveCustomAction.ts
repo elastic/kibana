@@ -9,21 +9,33 @@ import { NotificationsStart } from 'kibana/public';
 import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { APMClient } from '../../../../../../services/rest/createCallApmApi';
 
-export const saveCustomAction = async ({
+export async function saveCustomAction({
+  id,
+  label,
+  url,
+  filters,
   callApmApi,
-  customAction,
   toasts
 }: {
+  id?: string;
+  label: string;
+  url: string;
+  filters?: CustomAction['filters'];
   callApmApi: APMClient;
-  customAction: CustomAction;
   toasts: NotificationsStart['toasts'];
-}) => {
-  if (customAction?.id) {
+}) {
+  const customAction = {
+    actionId: 'trace',
+    label,
+    url,
+    filters
+  };
+  if (id) {
     await callApmApi({
       pathname: '/api/apm/settings/custom-actions/{id}',
       method: 'PUT',
       params: {
-        path: { id: customAction.id },
+        path: { id },
         body: customAction
       }
     });
@@ -50,4 +62,4 @@ export const saveCustomAction = async ({
       )
     });
   }
-};
+}
