@@ -5,7 +5,7 @@
  */
 
 import React, { createContext } from 'react';
-import { useRequest } from '../../../services/http/use_request';
+import { useRequest } from '../../../hooks';
 import { hasPrivilegeFactory, Capabilities, Privileges } from './common';
 
 interface Authorization {
