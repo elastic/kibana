@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { isRight } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { UMServerLibs } from '../../lib/lib';
+import { DynamicSettings, DynamicSettingsType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { UMRestApiRouteFactory } from '..';
+import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
+
+export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'GET',
+  path: '/api/uptime/dynamic_settings',
+  validate: false,
+  options: {
+    tags: ['access:uptime'],
+  },
+  handler: async ({ dynamicSettings }, _context, _request, response): Promise<any> => {
+    return response.ok({
+      body: dynamicSettings,
+    });
+  },
+});
+
+export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'POST',
+  path: '/api/uptime/dynamic_settings',
+  validate: {
+    body: schema.object({}, { allowUnknowns: true }),
+  },
+  options: {
+    tags: ['access:uptime'],
+  },
+  handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
+    const decoded = DynamicSettingsType.decode(request.body);
+    if (isRight(decoded)) {
+      const newSettings: DynamicSettings = decoded.right;
+      await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, newSettings);
+
+      return response.ok({
+        body: {
+          success: true,
+        },
+      });
+    } else {
+      const error = PathReporter.report(decoded).join(', ');
+      // TODO determine if we really need a rich type here. response.badRequest only wants to return
+      // a single string, but we may want to return individual errors for form fields, which would mean
+      // returning a 200 with our own error thing on top of it.
+      // That said, a 400 is considered more restful per https://stackoverflow.com/questions/3290182/rest-http-status-codes-for-failed-validation-or-invalid-duplicate
+      // that said, lots of debate here
+      return response.badRequest({
+        body: error,
+      });
+    }
+  },
+});
