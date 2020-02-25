@@ -224,23 +224,10 @@ export function validateFeature(feature: FeatureConfig) {
     validateManagementEntry(privilegeId, privilegeDefinition.management);
   });
 
-  // Seed this list with the "fixed" set of primary/minimal feature privileges.
-  // This initial set is fixed because the primary feature privileges are currently required to
-  // be "all" and "read". Security, when enabled, will add "minimal" versions of these two privileges
-  // in order to support sub-feature privileges.
-  // This set should be reevaluated If/when the primary feature privileges support flexible definitions beyond "all" and "read".
-  const seenPrivilegeIds: Set<string> = new Set(['all', 'read', 'minimal_all', 'minimal_read']);
-
   const subFeatureEntries = feature.subFeatures ?? [];
   subFeatureEntries.forEach(subFeature => {
     subFeature.privilegeGroups.forEach(subFeaturePrivilegeGroup => {
       subFeaturePrivilegeGroup.privileges.forEach(subFeaturePrivilege => {
-        if (seenPrivilegeIds.has(subFeaturePrivilege.id)) {
-          throw new Error(
-            `Feature already has a privilege with ID '${subFeaturePrivilege.id}'. Sub feature '${subFeature.name}' cannot also specify this.`
-          );
-        }
-        seenPrivilegeIds.add(subFeaturePrivilege.id);
         validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
