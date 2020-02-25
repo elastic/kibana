@@ -3,30 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { get } from 'lodash';
 import { RisonValue, encode } from 'rison-node';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertHits, Direction, Maybe } from '../../../../common/types';
-import { EndpointConfigType } from '../../../config';
-import { AlertSearchQuery, Pagination } from '../types';
-import { BASE_ALERTS_ROUTE } from '..';
-
-/**
- * Request params for alert queries.
- *
- * Must match exactly the values that the API receives.
- */
-export interface AlertListRequestQuery {
-  page_index?: number;
-  page_size: number;
-  query?: string;
-  filters?: string;
-  date_range: string;
-  sort: string;
-  order: Direction;
-  after?: [any, any];
-  before?: [any, any];
-}
+import { AlertHits, Maybe } from '../../../../../common/types';
+import { EndpointConfigType } from '../../../../config';
+import { AlertSearchQuery } from '../../types';
+import { Pagination } from '../../lib';
+import { BASE_ALERTS_ROUTE } from '../..';
 
 /**
  * Pagination class for alert list.

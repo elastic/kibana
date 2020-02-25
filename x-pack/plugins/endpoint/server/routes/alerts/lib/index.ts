@@ -5,15 +5,17 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
-import { esKuery, esQuery } from '../../../../../../src/plugins/data/server';
-import { AlertData, Direction, EndpointAppConstants } from '../../../common/types';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { esKuery, esQuery } from '../../../../../../../src/plugins/data/server';
+import { AlertData, Direction, EndpointAppConstants } from '../../../../common/types';
 import {
   AlertSearchQuery,
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
-} from './types';
+} from '../types';
+
+export { Pagination } from './pagination';
 
 function reverseSortDirection(order: Direction): Direction {
   if (order === Direction.asc) {

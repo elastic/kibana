@@ -3,26 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandlerContext } from 'src/core/server';
 import { Filter, TimeRange } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
-import { Direction, Maybe } from '../../../common/types';
-import { EndpointConfigType } from '../../config';
-
-/**
- * Abstract Pagination class for determining next/prev urls,
- * among other things.
- */
-export abstract class Pagination<T, Z> {
-  constructor(
-    protected config: EndpointConfigType,
-    protected requestContext: RequestHandlerContext,
-    protected state: T,
-    protected data: Z
-  ) {}
-  abstract async getNextUrl(): Promise<Maybe<string>>;
-  abstract async getPrevUrl(): Promise<Maybe<string>>;
-}
+import { Direction } from '../../../common/types';
 
 /**
  * Sort parameters for alerts in ES.
@@ -77,4 +60,28 @@ export interface AlertSearchRequestWrapper {
   size: number;
   from?: number;
   body: AlertSearchRequest;
+}
+
+/**
+ * Request params for alert details.
+ */
+export interface AlertDetailsRequestParams {
+  id: string;
+}
+
+/**
+ * Request params for alert queries.
+ *
+ * Must match exactly the values that the API receives.
+ */
+export interface AlertListRequestQuery {
+  page_index?: number;
+  page_size: number;
+  query?: string;
+  filters?: string;
+  date_range: string;
+  sort: string;
+  order: Direction;
+  after?: [any, any];
+  before?: [any, any];
 }

@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { alertDetailsReqSchema } from './schemas';
-export { alertDetailsHandlerWrapper } from './handlers';
+export { AlertDetailsPagination } from './pagination';

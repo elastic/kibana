@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { RequestHandlerContext } from 'src/core/server';
+import { EndpointConfigType } from '../../../config';
+import { Maybe } from '../../../../common/types';
+
+/**
+ * Abstract Pagination class for determining next/prev urls,
+ * among other things.
+ */
+export abstract class Pagination<T, Z> {
+  constructor(
+    protected config: EndpointConfigType,
+    protected requestContext: RequestHandlerContext,
+    protected state: T,
+    protected data: Z
+  ) {}
+  abstract async getNextUrl(): Promise<Maybe<string>>;
+  abstract async getPrevUrl(): Promise<Maybe<string>>;
+}

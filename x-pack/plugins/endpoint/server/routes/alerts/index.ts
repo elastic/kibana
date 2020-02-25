@@ -6,10 +6,8 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../../types';
 import { EndpointAppConstants } from '../../../common/types';
-import { alertListHandlerWrapper } from './list/handlers';
-import { alertListReqSchema } from './list/schemas';
-import { alertDetailsReqSchema } from './details/schemas';
-import { alertDetailsHandlerWrapper } from './details/handlers';
+import { alertListHandlerWrapper, alertListReqSchema } from './list';
+import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
 
 export const BASE_ALERTS_ROUTE = `${EndpointAppConstants.BASE_API_URL}/alerts`;
 

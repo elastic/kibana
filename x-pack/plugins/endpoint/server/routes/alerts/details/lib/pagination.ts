@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * Request params for alert details.
- */
 import { GetResponse, SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertData, AlertHits, Direction, Maybe } from '../../../../common/types';
-import { EndpointConfigType } from '../../../config';
-import { searchESForAlerts } from '../lib';
-import { AlertSearchQuery, Pagination, SearchCursor } from '../types';
-import { BASE_ALERTS_ROUTE } from '..';
-
-export interface AlertDetailsRequestParams {
-  id: string;
-}
+import { AlertData, AlertHits, Direction, Maybe } from '../../../../../common/types';
+import { EndpointConfigType } from '../../../../config';
+import { searchESForAlerts, Pagination } from '../../lib';
+import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
+import { BASE_ALERTS_ROUTE } from '../..';
 
 /**
  * Pagination class for alert details.

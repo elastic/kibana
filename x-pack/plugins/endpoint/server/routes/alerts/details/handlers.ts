@@ -7,7 +7,8 @@ import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { AlertData, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
-import { AlertDetailsPagination, AlertDetailsRequestParams } from './types';
+import { AlertDetailsRequestParams } from '../types';
+import { AlertDetailsPagination } from './lib';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext

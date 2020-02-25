@@ -1,0 +1,2072 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "test_alert_data",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "long"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "type": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "version": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "endgame": {
+          "properties": {
+            "data": {
+              "properties": {
+                "alert_details": {
+                  "properties": {
+                    "acting_process": {
+                      "properties": {
+                        "authenticode": {
+                          "properties": {
+                            "cert_signer": {
+                              "properties": {
+                                "issuer_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "serial_number": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "subject_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "cert_timestamp": {
+                              "properties": {
+                                "issuer_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "serial_number": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "subject_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "timestamp_string": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "more_info_link": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "program_name": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "publisher_link": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "cmdline": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "create_time": {
+                          "type": "long"
+                        },
+                        "domain": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "exe": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "hashes": {
+                          "properties": {
+                            "md5": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "sha1": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "sha256": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "imphash": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "is_sensor": {
+                          "type": "boolean"
+                        },
+                        "malware_classification": {
+                          "properties": {
+                            "identifier": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "score": {
+                              "type": "long"
+                            },
+                            "threshold": {
+                              "type": "long"
+                            },
+                            "version": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "md5": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "modules": {
+                          "properties": {
+                            "architecture": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "authenticode": {
+                              "properties": {
+                                "cert_signer": {
+                                  "properties": {
+                                    "issuer_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "serial_number": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "subject_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    }
+                                  }
+                                },
+                                "cert_timestamp": {
+                                  "properties": {
+                                    "issuer_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "serial_number": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "subject_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "timestamp_string": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    }
+                                  }
+                                },
+                                "more_info_link": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "program_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "publisher_link": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "compile_time": {
+                              "type": "long"
+                            },
+                            "hashes": {
+                              "properties": {
+                                "imphash": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "md5": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "sha1": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "sha256": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "malware_classification": {
+                              "properties": {
+                                "identifier": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "score": {
+                                  "type": "long"
+                                },
+                                "threshold": {
+                                  "type": "long"
+                                },
+                                "version": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "mapped_address": {
+                              "type": "long"
+                            },
+                            "mapped_size": {
+                              "type": "long"
+                            },
+                            "path": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "signature_signer": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "signature_status": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "name": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "parent_exe": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "parent_name": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "pid": {
+                          "type": "long"
+                        },
+                        "ppid": {
+                          "type": "long"
+                        },
+                        "primary_token": {
+                          "properties": {
+                            "domain": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "integrity_level": {
+                              "type": "long"
+                            },
+                            "integrity_level_name": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "is_appcontainer": {
+                              "type": "boolean"
+                            },
+                            "privileges": {
+                              "properties": {
+                                "description": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "sid": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "type": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "user": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "services": {
+                          "properties": {
+                            "name": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "sha1": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "sha256": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "sid": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "signature_signer": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "signature_status": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "threads": {
+                          "properties": {
+                            "create_time": {
+                              "type": "long"
+                            },
+                            "entrypoint": {
+                              "type": "long"
+                            },
+                            "thread_id": {
+                              "type": "long"
+                            },
+                            "up_time": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "unique_pid": {
+                          "type": "long"
+                        },
+                        "unique_ppid": {
+                          "type": "long"
+                        },
+                        "up_time": {
+                          "type": "long"
+                        },
+                        "user": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "acting_thread": {
+                      "properties": {
+                        "call_stack": {
+                          "properties": {
+                            "instruction_pointer": {
+                              "type": "long"
+                            },
+                            "memory_section": {
+                              "properties": {
+                                "memory_address": {
+                                  "type": "long"
+                                },
+                                "memory_size": {
+                                  "type": "long"
+                                },
+                                "protection": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "module_path": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "symbol_info": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "create_time": {
+                          "type": "long"
+                        },
+                        "service_name": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "thread_id": {
+                          "type": "long"
+                        },
+                        "thread_start_address": {
+                          "type": "long"
+                        },
+                        "thread_start_address_module": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "target_process": {
+                      "properties": {
+                        "authenticode": {
+                          "properties": {
+                            "cert_signer": {
+                              "properties": {
+                                "issuer_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "serial_number": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "subject_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "cert_timestamp": {
+                              "properties": {
+                                "issuer_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "serial_number": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "subject_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "timestamp_string": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "more_info_link": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "program_name": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "publisher_link": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "cmdline": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "create_time": {
+                          "type": "long"
+                        },
+                        "defense_evasions": {
+                          "properties": {
+                            "call_stack": {
+                              "properties": {
+                                "instruction_pointer": {
+                                  "type": "long"
+                                },
+                                "memory_section": {
+                                  "properties": {
+                                    "memory_address": {
+                                      "type": "long"
+                                    },
+                                    "memory_size": {
+                                      "type": "long"
+                                    },
+                                    "protection": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    }
+                                  }
+                                },
+                                "module_path": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "symbol_info": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "evasion_subtype": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "evasion_type": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "instruction_pointer": {
+                              "type": "long"
+                            },
+                            "memory_sections": {
+                              "properties": {
+                                "memory_address": {
+                                  "type": "long"
+                                },
+                                "memory_size": {
+                                  "type": "long"
+                                },
+                                "protection": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "thread_info": {
+                              "properties": {
+                                "thread_id": {
+                                  "type": "long"
+                                },
+                                "thread_start_address": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "total_memory_size": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "domain": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "exe": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "hashes": {
+                          "properties": {
+                            "md5": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "sha1": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "sha256": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "imphash": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "is_sensor": {
+                          "type": "boolean"
+                        },
+                        "malware_classification": {
+                          "properties": {
+                            "identifier": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "score": {
+                              "type": "long"
+                            },
+                            "threshold": {
+                              "type": "long"
+                            },
+                            "version": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "md5": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "modules": {
+                          "properties": {
+                            "architecture": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "authenticode": {
+                              "properties": {
+                                "cert_signer": {
+                                  "properties": {
+                                    "issuer_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "serial_number": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "subject_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    }
+                                  }
+                                },
+                                "cert_timestamp": {
+                                  "properties": {
+                                    "issuer_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "serial_number": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "subject_name": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    },
+                                    "timestamp_string": {
+                                      "fields": {
+                                        "keyword": {
+                                          "ignore_above": 256,
+                                          "type": "keyword"
+                                        }
+                                      },
+                                      "type": "text"
+                                    }
+                                  }
+                                },
+                                "more_info_link": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "program_name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "publisher_link": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "compile_time": {
+                              "type": "long"
+                            },
+                            "hashes": {
+                              "properties": {
+                                "imphash": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "md5": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "sha1": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "sha256": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "malware_classification": {
+                              "properties": {
+                                "identifier": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "score": {
+                                  "type": "long"
+                                },
+                                "threshold": {
+                                  "type": "long"
+                                },
+                                "version": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "mapped_address": {
+                              "type": "long"
+                            },
+                            "mapped_size": {
+                              "type": "long"
+                            },
+                            "path": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "signature_signer": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "signature_status": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "name": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "parent_exe": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "parent_name": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "pid": {
+                          "type": "long"
+                        },
+                        "ppid": {
+                          "type": "long"
+                        },
+                        "primary_token": {
+                          "properties": {
+                            "domain": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "integrity_level": {
+                              "type": "long"
+                            },
+                            "integrity_level_name": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "is_appcontainer": {
+                              "type": "boolean"
+                            },
+                            "privileges": {
+                              "properties": {
+                                "description": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                },
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "name": {
+                                  "fields": {
+                                    "keyword": {
+                                      "ignore_above": 256,
+                                      "type": "keyword"
+                                    }
+                                  },
+                                  "type": "text"
+                                }
+                              }
+                            },
+                            "sid": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "type": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            },
+                            "user": {
+                              "fields": {
+                                "keyword": {
+                                  "ignore_above": 256,
+                                  "type": "keyword"
+                                }
+                              },
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "sha1": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "sha256": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "sid": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "signature_signer": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "signature_status": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "threads": {
+                          "properties": {
+                            "create_time": {
+                              "type": "long"
+                            },
+                            "entrypoint": {
+                              "type": "long"
+                            },
+                            "thread_id": {
+                              "type": "long"
+                            },
+                            "up_time": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "unique_pid": {
+                          "type": "long"
+                        },
+                        "unique_ppid": {
+                          "type": "long"
+                        },
+                        "up_time": {
+                          "type": "long"
+                        },
+                        "user": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    }
+                  }
+                },
+                "captured_file": {
+                  "type": "boolean"
+                },
+                "file_extension": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "file_name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "file_operation": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "file_owner": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "file_size": {
+                  "type": "long"
+                },
+                "hashes": {
+                  "properties": {
+                    "imphash": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "md5": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "sha1": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "sha256": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "is_signature_trusted": {
+                  "type": "boolean"
+                },
+                "malware_classification": {
+                  "properties": {
+                    "compressed_malware_features": {
+                      "properties": {
+                        "data_buffer": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        },
+                        "decompressed_size": {
+                          "type": "long"
+                        },
+                        "encoding": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "identifier": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "prevention_threshold": {
+                      "type": "float"
+                    },
+                    "score": {
+                      "type": "long"
+                    },
+                    "threshold": {
+                      "type": "float"
+                    },
+                    "version": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "matched_user_blacklist_rule_type": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "matched_user_blacklist_rule_value": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "pid": {
+                  "type": "long"
+                },
+                "ppid": {
+                  "type": "long"
+                },
+                "quarantine_result": {
+                  "properties": {
+                    "alert_correlation_id": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "local_code": {
+                      "type": "long"
+                    },
+                    "local_msg": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "quarantine_path": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "system_code": {
+                      "type": "long"
+                    },
+                    "system_msg": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "signature_signer": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "temp_file_path": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "timestamp": {
+                  "properties": {
+                    "accessed": {
+                      "type": "long"
+                    },
+                    "created": {
+                      "type": "long"
+                    },
+                    "modified": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "user_blacklisted": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "event_subtype_full": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "event_type_full": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "metadata": {
+              "properties": {
+                "beta_alert": {
+                  "type": "boolean"
+                },
+                "chunk_id": {
+                  "type": "long"
+                },
+                "collection_time": {
+                  "type": "long"
+                },
+                "correlation_id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "destination_plugin": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "final": {
+                  "type": "boolean"
+                },
+                "is_alert": {
+                  "type": "boolean"
+                },
+                "key": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "message_id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "origination_task_id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "os_type": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "priority": {
+                  "type": "long"
+                },
+                "result": {
+                  "properties": {
+                    "local_code": {
+                      "type": "long"
+                    },
+                    "local_msg": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    },
+                    "system_code": {
+                      "type": "long"
+                    },
+                    "system_msg": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "semantic_version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "sensor_version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "task_id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "type": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "opcode": {
+              "type": "long"
+            },
+            "serial_event_id": {
+              "type": "long"
+            },
+            "timestamp": {
+              "type": "long"
+            },
+            "timestamp_utc": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "dataset": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "kind": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "module": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "hostname": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ip": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "os": {
+              "properties": {
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "platform": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "labels": {
+          "properties": {
+            "account_id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "endpoint_id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "group": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
