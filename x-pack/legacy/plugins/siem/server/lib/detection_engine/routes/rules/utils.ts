@@ -62,9 +62,16 @@ export const getIdBulkError = ({
   id: string | undefined | null;
   ruleId: string | undefined | null;
 }): BulkError => {
-  if (id != null) {
+  if (id != null && ruleId != null) {
     return createBulkErrorObject({
-      ruleId: id,
+      id,
+      ruleId,
+      statusCode: 404,
+      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
+    });
+  } else if (id != null) {
+    return createBulkErrorObject({
+      id,
       statusCode: 404,
       message: `id: "${id}" not found`,
     });
@@ -76,7 +83,6 @@ export const getIdBulkError = ({
     });
   } else {
     return createBulkErrorObject({
-      ruleId: '(unknown id)',
       statusCode: 404,
       message: `id or rule_id should have been defined`,
     });
@@ -174,9 +180,7 @@ export const transform = (
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
-  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
     return null;
@@ -189,7 +193,7 @@ export const transformOrBulkError = (
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
       return transformAlertToRule(alert);

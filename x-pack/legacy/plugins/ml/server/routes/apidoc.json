@@ -92,6 +92,22 @@
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
-    "ValidateJob"
+    "ValidateJob",
+    "NotificationSettings",
+    "GetNotificationSettings",
+    "DatafeedService",
+    "GetDatafeeds",
+    "GetDatafeed",
+    "GetDatafeedsStats",
+    "GetDatafeedStats",
+    "CreateDatafeed",
+    "UpdateDatafeed",
+    "DeleteDatafeed",
+    "StartDatafeed",
+    "StopDatafeed",
+    "PreviewDatafeed",
+    "FieldsService",
+    "GetCardinalityOfFields",
+    "GetTimeFieldRange"
   ]
 }
