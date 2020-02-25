@@ -10,10 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
-import {
-  ViewSourceConfigurationButton,
-  ViewSourceConfigurationButtonHrefBase,
-} from '../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface InvalidNodeErrorProps {
@@ -59,10 +56,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <ViewSourceConfigurationButton
-              data-test-subj="configureSourceButton"
-              hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
-            >
+            <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
               <FormattedMessage
                 id="xpack.infra.configureSourceActionLabel"
                 defaultMessage="Change source configuration"
