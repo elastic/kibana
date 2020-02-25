@@ -210,7 +210,7 @@ export function createFieldChooserDirective($location, config, $route) {
           const mapAppParams = new URLSearchParams();
 
           // Copy global state
-          const locationSplit = window.location.href.split('?');
+          const locationSplit = window.location.href.split('discover?');
           if (locationSplit.length > 1) {
             const discoverParams = new URLSearchParams(locationSplit[1]);
             mapAppParams.set('_g', discoverParams.get('_g'));
