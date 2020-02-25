@@ -38,12 +38,18 @@ export const duplicateRulesAction = async (
 ) => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
-    const duplicatedRules = await duplicateRules({ rules });
+    const response = await duplicateRules({ rules });
+    const { errors } = bucketRulesResponse(response);
+    if (errors.length > 0) {
+      displayErrorToast(
+        i18n.DUPLICATE_RULE_ERROR,
+        errors.map(e => e.error.message),
+        dispatchToaster
+      );
+    } else {
+      displaySuccessToast(i18n.SUCCESSFULLY_DUPLICATED_RULES(ruleIds.length), dispatchToaster);
+    }
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-    displaySuccessToast(
-      i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
-      dispatchToaster
-    );
   } catch (e) {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
     displayErrorToast(i18n.DUPLICATE_RULE_ERROR, [e.message], dispatchToaster);

@@ -19,7 +19,7 @@ export type ReturnRules = [
   (refreshPrePackagedRule?: boolean) => void
 ];
 
-interface UseRules {
+export interface UseRules {
   pagination: PaginationOptions;
   filterOptions: FilterOptions;
   refetchPrePackagedRulesStatus?: () => void;
@@ -95,6 +95,7 @@ export const useRules = ({
     filterOptions.tags?.sort().join(),
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,
+    refetchPrePackagedRulesStatus,
   ]);
 
   return [loading, rules, reFetchRules.current];

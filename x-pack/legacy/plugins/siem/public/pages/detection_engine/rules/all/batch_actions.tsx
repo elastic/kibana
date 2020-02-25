@@ -99,7 +99,7 @@ export const getBatchItems = ({
           dispatch,
           dispatchToaster
         );
-        reFetchRules();
+        reFetchRules(true);
       }}
     >
       {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
@@ -112,7 +112,7 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         await deleteRulesAction(selectedRuleIds, dispatch, dispatchToaster);
-        reFetchRules();
+        reFetchRules(true);
       }}
     >
       {i18n.BATCH_ACTION_DELETE_SELECTED}

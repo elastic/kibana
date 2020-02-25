@@ -57,7 +57,7 @@ const initialState: State = {
     perPage: 20,
     total: 0,
   },
-  rules: null,
+  rules: [],
   selectedRuleIds: [],
 };
 
@@ -141,7 +141,7 @@ export const AllRules = React.memo<AllRulesProps>(
             loadingRuleIds,
             selectedRuleIds,
             reFetchRules: reFetchRulesData,
-            rules: rules ?? [],
+            rules,
           })}
         />
       ),
@@ -163,17 +163,19 @@ export const AllRules = React.memo<AllRulesProps>(
     );
 
     const columns = useMemo(() => {
-      return getColumns(
+      return getColumns({
         dispatch,
         dispatchToaster,
         history,
         hasNoPermissions,
-        loadingRulesAction != null &&
+        loadingRuleIds:
+          loadingRulesAction != null &&
           (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
-          ? loadingRuleIds
-          : []
-      );
-    }, [dispatch, dispatchToaster, history, loadingRuleIds, loadingRulesAction]);
+            ? loadingRuleIds
+            : [],
+        reFetchRules: reFetchRulesData,
+      });
+    }, [dispatch, dispatchToaster, history, loadingRuleIds, loadingRulesAction, reFetchRulesData]);
 
     useEffect(() => {
       if (reFetchRulesData != null) {
@@ -198,9 +200,9 @@ export const AllRules = React.memo<AllRulesProps>(
       () => ({
         selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
         onSelectionChange: (selected: Rule[]) =>
-          dispatch({ type: 'seletedRuleIds', ids: selected.map(r => r.id) }),
+          dispatch({ type: 'selectedRuleIds', ids: selected.map(r => r.id) }),
       }),
-      []
+      [loadingRuleIds]
     );
 
     const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
@@ -225,6 +227,7 @@ export const AllRules = React.memo<AllRulesProps>(
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ruleIds={exportRuleIds}
           onExportComplete={exportCount => {
+            dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
             dispatchToaster({
               type: 'addToaster',
               toast: {
@@ -240,20 +243,15 @@ export const AllRules = React.memo<AllRulesProps>(
 
         <Panel loading={loading || isLoadingRules}>
           <>
-            {((rulesCustomInstalled && rulesCustomInstalled > 0) ||
-              (rulesInstalled != null && rulesInstalled > 0)) && (
-              <HeaderSection split title={i18n.ALL_RULES}>
-                <RulesTableFilters
-                  onFilterChanged={onFilterChangedCallback}
-                  rulesCustomInstalled={rulesCustomInstalled}
-                  rulesInstalled={rulesInstalled}
-                />
-              </HeaderSection>
-            )}
-            {initLoading && (
-              <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-            )}
-            {(loading || isLoadingRules) && !initLoading && (
+            <HeaderSection split title={i18n.ALL_RULES}>
+              <RulesTableFilters
+                onFilterChanged={onFilterChangedCallback}
+                rulesCustomInstalled={rulesCustomInstalled}
+                rulesInstalled={rulesInstalled}
+              />
+            </HeaderSection>
+
+            {(loading || isLoadingRules || loadingRuleIds.length > 0) && !initLoading && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
             {rulesCustomInstalled != null &&
@@ -265,53 +263,54 @@ export const AllRules = React.memo<AllRulesProps>(
                   userHasNoPermissions={hasNoPermissions}
                 />
               )}
-            {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && (
-              <>
-                <UtilityBar border>
-                  <UtilityBarSection>
-                    <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
-                    </UtilityBarGroup>
 
-                    <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
-                      {!hasNoPermissions && (
-                        <UtilityBarAction
-                          iconSide="right"
-                          iconType="arrowDown"
-                          popoverContent={getBatchItemsPopoverContent}
-                        >
-                          {i18n.BATCH_ACTIONS}
-                        </UtilityBarAction>
-                      )}
-                      <UtilityBarAction
-                        iconSide="right"
-                        iconType="refresh"
-                        onClick={() => reFetchRulesData(true)}
-                      >
-                        {i18n.REFRESH}
-                      </UtilityBarAction>
-                    </UtilityBarGroup>
-                  </UtilityBarSection>
-                </UtilityBar>
+            <UtilityBar border>
+              <UtilityBarSection>
+                <UtilityBarGroup>
+                  <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                </UtilityBarGroup>
 
-                <EuiBasicTable
-                  columns={columns}
-                  isSelectable={!hasNoPermissions ?? false}
-                  itemId="id"
-                  items={rules ?? []}
-                  noItemsMessage={emptyPrompt}
-                  onChange={tableOnChangeCallback}
-                  pagination={{
-                    pageIndex: pagination.page - 1,
-                    pageSize: pagination.perPage,
-                    totalItemCount: pagination.total,
-                    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-                  }}
-                  sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
-                  selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
-                />
-              </>
+                <UtilityBarGroup>
+                  <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
+                  {!hasNoPermissions && (
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  )}
+                  <UtilityBarAction
+                    iconSide="right"
+                    iconType="refresh"
+                    onClick={() => reFetchRulesData(true)}
+                  >
+                    {i18n.REFRESH}
+                  </UtilityBarAction>
+                </UtilityBarGroup>
+              </UtilityBarSection>
+            </UtilityBar>
+            {initLoading && (
+              <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+            )}
+            {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading && (
+              <EuiBasicTable
+                columns={columns}
+                isSelectable={!hasNoPermissions ?? false}
+                itemId="id"
+                items={rules ?? []}
+                noItemsMessage={emptyPrompt}
+                onChange={tableOnChangeCallback}
+                pagination={{
+                  pageIndex: pagination.page - 1,
+                  pageSize: pagination.perPage,
+                  totalItemCount: pagination.total,
+                  pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                }}
+                sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+              />
             )}
           </>
         </Panel>

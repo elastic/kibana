@@ -17,14 +17,14 @@ export interface State {
   loadingRuleIds: string[];
   loadingRulesAction: LoadingRuleAction;
   pagination: PaginationOptions;
-  rules: Rule[] | null;
+  rules: Rule[];
   selectedRuleIds: string[];
 }
 
 export type Action =
   | { type: 'exportRuleIds'; ids: string[] }
   | { type: 'loadingRuleIds'; ids: string[]; actionType: LoadingRuleAction }
-  | { type: 'seletedRuleIds'; ids: string[] }
+  | { type: 'selectedRuleIds'; ids: string[] }
   | { type: 'setRules'; rules: Rule[] }
   | { type: 'updateRules'; rules: Rule[] }
   | { type: 'updatePagination'; pagination: Partial<PaginationOptions> }
@@ -48,11 +48,13 @@ export const allRulesReducer = (state: State, action: Action): State => {
     case 'loadingRuleIds': {
       return {
         ...state,
-        loadingRuleIds: action.ids,
+        loadingRuleIds: action.actionType == null ? [] : [...state.loadingRuleIds, ...action.ids],
         loadingRulesAction: action.actionType,
+        // TODO when EuiBasicTable will give us away to clear selections
+        // selectedRuleIds: action.actionType == null ? [] : state.selectedRuleIds,
       };
     }
-    case 'seletedRuleIds': {
+    case 'selectedRuleIds': {
       return {
         ...state,
         selectedRuleIds: action.ids,
@@ -62,15 +64,18 @@ export const allRulesReducer = (state: State, action: Action): State => {
       return {
         ...state,
         rules: action.rules,
+        selectedRuleIds: [],
+        loadingRuleIds: [],
+        loadingRulesAction: null,
       };
     }
     case 'updateRules': {
       if (state.rules != null) {
-        const ruleIds = state.rules.map(r => r.rule_id);
-        const updatedRules = action.rules.reverse().reduce((rules, updatedRule) => {
+        const ruleIds = state.rules.map(r => r.id);
+        const updatedRules = action.rules.reduce((rules, updatedRule) => {
           let newRules = rules;
-          if (ruleIds.includes(updatedRule.rule_id)) {
-            newRules = newRules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r));
+          if (ruleIds.includes(updatedRule.id)) {
+            newRules = newRules.map(r => (updatedRule.id === r.id ? updatedRule : r));
           } else {
             newRules = [...newRules, updatedRule];
           }
@@ -80,7 +85,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
         return {
           ...state,
           rules: updatedRules,
-          selectedRuleIds: [],
+          loadingRuleIds: [],
           loadingRulesAction: null,
         };
       }

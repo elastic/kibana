@@ -37,7 +37,8 @@ import { Action } from './reducer';
 const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
-  history: H.History
+  history: H.History,
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void
 ) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
@@ -50,8 +51,10 @@ const getActions = (
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: Rule) =>
-      duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster),
+    onClick: (rowItem: Rule) => {
+      duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
+      reFetchRules(true);
+    },
   },
   {
     description: i18n.EXPORT_RULE,
@@ -64,20 +67,33 @@ const getActions = (
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: Rule) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
+    onClick: (rowItem: Rule) => {
+      deleteRulesAction([rowItem.id], dispatch, dispatchToaster);
+      reFetchRules(true);
+    },
   },
 ];
 
 type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
+interface GetColumns {
+  dispatch: React.Dispatch<Action>;
+  dispatchToaster: Dispatch<ActionToaster>;
+  history: H.History;
+  hasNoPermissions: boolean;
+  loadingRuleIds: string[];
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+}
+
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const getColumns = (
-  dispatch: React.Dispatch<Action>,
-  dispatchToaster: Dispatch<ActionToaster>,
-  history: H.History,
-  hasNoPermissions: boolean,
-  loadingRuleIds: string[]
-): RulesColumns[] => {
+export const getColumns = ({
+  dispatch,
+  dispatchToaster,
+  history,
+  hasNoPermissions,
+  loadingRuleIds,
+  reFetchRules,
+}: GetColumns): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
       field: 'name',
@@ -164,7 +180,7 @@ export const getColumns = (
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, dispatchToaster, history),
+      actions: getActions(dispatch, dispatchToaster, history, reFetchRules),
       width: '40px',
     } as EuiTableActionsColumnType<Rule>,
   ];
