@@ -325,7 +325,7 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/maps/es_geo_grid_source.js"
+        "test/functional/apps/maps/es_geo_grid_source.js"
       ],
       "tags": [
         "functional.apps.maps.es_geo_grid_source"
@@ -335,7 +335,7 @@
     {
       "config": "test/reporting/configs/chromium_functional.js",
       "files": [
-        "x-pack/test/reporting/functional/reporting.js"
+        "test/reporting/functional/reporting.js"
       ],
       "tags": [
         "reporting.functional.reporting"
@@ -345,10 +345,10 @@
     {
       "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
       "files": [
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/copy_to_space.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/create.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/delete.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/update.ts"
+        "test/spaces_api_integration/security_and_spaces/apis/copy_to_space.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/create.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/delete.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/update.ts"
       ],
       "tags": [
         "spaces_api_integration.security_and_spaces.apis.copy_to_space",
@@ -361,10 +361,10 @@
     {
       "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
       "files": [
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/copy_to_space.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/create.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/delete.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/update.ts"
+        "test/spaces_api_integration/security_and_spaces/apis/copy_to_space.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/create.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/delete.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/update.ts"
       ],
       "tags": [
         "spaces_api_integration.security_and_spaces.apis.copy_to_space",
@@ -377,23 +377,23 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/advanced_job.ts",
-        "x-pack/test/functional/apps/infra/log_entry_rate_tab.ts",
-        "x-pack/test/functional/apps/infra/link_to.ts",
-        "x-pack/test/functional/apps/infra/log_entry_categories_tab.ts",
-        "x-pack/test/functional/apps/endpoint/landing_page.ts",
-        "x-pack/test/functional/apps/remote_clusters/home_page.ts",
-        "x-pack/test/functional/apps/index_lifecycle_management/home_page.ts",
-        "x-pack/test/functional/apps/cross_cluster_replication/home_page.ts",
-        "x-pack/test/functional/apps/index_management/home_page.ts",
-        "x-pack/test/functional/apps/license_management/home_page.ts",
-        "x-pack/test/functional/apps/uptime/monitor.ts",
-        "x-pack/test/functional/apps/status_page/status_page.ts",
-        "x-pack/test/functional/apps/maps/embeddable/tooltip_filter_actions.js",
-        "x-pack/test/functional/apps/maps/full_screen_mode.js",
-        "x-pack/test/functional/apps/uptime/locations.ts",
-        "x-pack/test/functional/apps/dev_tools/searchprofiler_editor.ts",
-        "x-pack/test/functional/apps/machine_learning/pages.ts"
+        "test/functional/apps/machine_learning/anomaly_detection/advanced_job.ts",
+        "test/functional/apps/infra/log_entry_rate_tab.ts",
+        "test/functional/apps/infra/link_to.ts",
+        "test/functional/apps/infra/log_entry_categories_tab.ts",
+        "test/functional/apps/endpoint/landing_page.ts",
+        "test/functional/apps/remote_clusters/home_page.ts",
+        "test/functional/apps/index_lifecycle_management/home_page.ts",
+        "test/functional/apps/cross_cluster_replication/home_page.ts",
+        "test/functional/apps/index_management/home_page.ts",
+        "test/functional/apps/license_management/home_page.ts",
+        "test/functional/apps/uptime/monitor.ts",
+        "test/functional/apps/status_page/status_page.ts",
+        "test/functional/apps/maps/embeddable/tooltip_filter_actions.js",
+        "test/functional/apps/maps/full_screen_mode.js",
+        "test/functional/apps/uptime/locations.ts",
+        "test/functional/apps/dev_tools/searchprofiler_editor.ts",
+        "test/functional/apps/machine_learning/pages.ts"
       ],
       "tags": [
         "functional.apps.machine_learning.anomaly_detection.advanced_job",
@@ -419,13 +419,13 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
-        "x-pack/test/functional/apps/rollup_job/rollup_jobs.js",
-        "x-pack/test/functional/apps/monitoring/enable_monitoring/index.js",
-        "x-pack/test/functional/apps/endpoint/feature_controls/endpoint_spaces.ts",
-        "x-pack/test/functional/apps/security/role_mappings.ts",
-        "x-pack/test/functional/apps/lens/lens_reporting.ts",
-        "x-pack/test/functional/apps/visualize/hybrid_visualization.ts"
+        "test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
+        "test/functional/apps/rollup_job/rollup_jobs.js",
+        "test/functional/apps/monitoring/enable_monitoring/index.js",
+        "test/functional/apps/endpoint/feature_controls/endpoint_spaces.ts",
+        "test/functional/apps/security/role_mappings.ts",
+        "test/functional/apps/lens/lens_reporting.ts",
+        "test/functional/apps/visualize/hybrid_visualization.ts"
       ],
       "tags": [
         "functional.apps.machine_learning.anomaly_detection.saved_search_job",
@@ -441,9 +441,9 @@
     {
       "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
       "files": [
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/resolve_copy_to_space_conflicts.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/get.ts"
+        "test/spaces_api_integration/security_and_spaces/apis/resolve_copy_to_space_conflicts.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/get.ts"
       ],
       "tags": [
         "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
@@ -455,9 +455,9 @@
     {
       "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
       "files": [
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/resolve_copy_to_space_conflicts.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
-        "x-pack/test/spaces_api_integration/security_and_spaces/apis/get.ts"
+        "test/spaces_api_integration/security_and_spaces/apis/resolve_copy_to_space_conflicts.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/get_all.ts",
+        "test/spaces_api_integration/security_and_spaces/apis/get.ts"
       ],
       "tags": [
         "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts",
@@ -469,14 +469,14 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/dashboard_mode/dashboard_view_mode.js",
-        "x-pack/test/functional/apps/monitoring/kibana/overview.js",
-        "x-pack/test/functional/apps/uptime/feature_controls/uptime_spaces.ts",
-        "x-pack/test/functional/apps/monitoring/beats/overview.js",
-        "x-pack/test/functional/apps/monitoring/beats/listing.js",
-        "x-pack/test/functional/apps/monitoring/beats/cluster.js",
-        "x-pack/test/functional/apps/infra/feature_controls/logs_spaces.ts",
-        "x-pack/test/functional/apps/index_patterns/feature_controls/index_patterns_spaces.ts"
+        "test/functional/apps/dashboard_mode/dashboard_view_mode.js",
+        "test/functional/apps/monitoring/kibana/overview.js",
+        "test/functional/apps/uptime/feature_controls/uptime_spaces.ts",
+        "test/functional/apps/monitoring/beats/overview.js",
+        "test/functional/apps/monitoring/beats/listing.js",
+        "test/functional/apps/monitoring/beats/cluster.js",
+        "test/functional/apps/infra/feature_controls/logs_spaces.ts",
+        "test/functional/apps/index_patterns/feature_controls/index_patterns_spaces.ts"
       ],
       "tags": [
         "functional.apps.dashboard_mode.dashboard_view_mode",
@@ -493,10 +493,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/maps/import_geojson/file_indexing_panel.js",
-        "x-pack/test/functional/apps/maps/saved_object_management.js",
-        "x-pack/test/functional/apps/monitoring/beats/beat_detail.js",
-        "x-pack/test/functional/apps/monitoring/time_filter.js"
+        "test/functional/apps/maps/import_geojson/file_indexing_panel.js",
+        "test/functional/apps/maps/saved_object_management.js",
+        "test/functional/apps/monitoring/beats/beat_detail.js",
+        "test/functional/apps/monitoring/time_filter.js"
       ],
       "tags": [
         "functional.apps.maps.import_geojson.file_indexing_panel",
@@ -509,11 +509,11 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/security/field_level_security.js",
-        "x-pack/test/functional/apps/maps/documents_source/search_hits.js",
-        "x-pack/test/functional/apps/visualize/feature_controls/visualize_spaces.ts",
-        "x-pack/test/functional/apps/maps/embeddable/embeddable_state.js",
-        "x-pack/test/functional/apps/monitoring/kibana/instances.js"
+        "test/functional/apps/security/field_level_security.js",
+        "test/functional/apps/maps/documents_source/search_hits.js",
+        "test/functional/apps/visualize/feature_controls/visualize_spaces.ts",
+        "test/functional/apps/maps/embeddable/embeddable_state.js",
+        "test/functional/apps/monitoring/kibana/instances.js"
       ],
       "tags": [
         "functional.apps.security.field_level_security",
@@ -527,26 +527,26 @@
     {
       "config": "test/alerting_api_integration/security_and_spaces/config.ts",
       "files": [
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/alerts.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/update.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/find.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/find.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/disable.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/delete.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/update_api_key.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/execute.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/get.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/list_alert_types.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/list_action_types.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/email.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/server_log.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/slack.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/pagerduty.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/servicenow.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/es_index.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/create.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/webhook.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/mute_all.ts"
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/alerts.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/update.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/find.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/find.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/disable.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/delete.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/update_api_key.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/execute.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/get.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/list_alert_types.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/list_action_types.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/email.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/server_log.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/slack.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/pagerduty.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/servicenow.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/es_index.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/create.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/builtin_action_types/webhook.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/mute_all.ts"
       ],
       "tags": [
         "alerting_api_integration.security_and_spaces.tests.alerting.alerts",
@@ -575,12 +575,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/multi_metric_job.ts",
-        "x-pack/test/functional/apps/security/rbac_phase1.js",
-        "x-pack/test/functional/apps/monitoring/elasticsearch/overview.js",
-        "x-pack/test/functional/apps/monitoring/kibana/instance.js",
-        "x-pack/test/functional/apps/snapshot_restore/home_page.ts",
-        "x-pack/test/functional/apps/graph/feature_controls/graph_spaces.ts"
+        "test/functional/apps/machine_learning/anomaly_detection/multi_metric_job.ts",
+        "test/functional/apps/security/rbac_phase1.js",
+        "test/functional/apps/monitoring/elasticsearch/overview.js",
+        "test/functional/apps/monitoring/kibana/instance.js",
+        "test/functional/apps/snapshot_restore/home_page.ts",
+        "test/functional/apps/graph/feature_controls/graph_spaces.ts"
       ],
       "tags": [
         "functional.apps.machine_learning.anomaly_detection.multi_metric_job",
@@ -595,10 +595,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/maps/joins.js",
-        "x-pack/test/functional/apps/spaces/spaces_selection.ts",
-        "x-pack/test/functional/apps/visualize/feature_controls/visualize_security.ts",
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/single_metric_viewer.ts"
+        "test/functional/apps/maps/joins.js",
+        "test/functional/apps/spaces/spaces_selection.ts",
+        "test/functional/apps/visualize/feature_controls/visualize_security.ts",
+        "test/functional/apps/machine_learning/anomaly_detection/single_metric_viewer.ts"
       ],
       "tags": [
         "functional.apps.maps.joins",
@@ -611,10 +611,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/saved_objects_management/feature_controls/saved_objects_management_security.ts",
-        "x-pack/test/functional/apps/infra/feature_controls/infrastructure_security.ts",
-        "x-pack/test/functional/apps/logstash/pipeline_list.js",
-        "x-pack/test/functional/apps/monitoring/elasticsearch/index_detail.js"
+        "test/functional/apps/saved_objects_management/feature_controls/saved_objects_management_security.ts",
+        "test/functional/apps/infra/feature_controls/infrastructure_security.ts",
+        "test/functional/apps/logstash/pipeline_list.js",
+        "test/functional/apps/monitoring/elasticsearch/index_detail.js"
       ],
       "tags": [
         "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security",
@@ -627,11 +627,11 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/population_job.ts",
-        "x-pack/test/functional/apps/graph/graph.ts",
-        "x-pack/test/functional/apps/security/doc_level_security_roles.js",
-        "x-pack/test/functional/apps/spaces/enter_space.ts",
-        "x-pack/test/functional/apps/monitoring/elasticsearch/indices.js"
+        "test/functional/apps/machine_learning/anomaly_detection/population_job.ts",
+        "test/functional/apps/graph/graph.ts",
+        "test/functional/apps/security/doc_level_security_roles.js",
+        "test/functional/apps/spaces/enter_space.ts",
+        "test/functional/apps/monitoring/elasticsearch/indices.js"
       ],
       "tags": [
         "functional.apps.machine_learning.anomaly_detection.population_job",
@@ -645,10 +645,10 @@
     {
       "config": "test/functional_with_es_ssl/config.ts",
       "files": [
-        "x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/alerts.ts",
-        "x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/details.ts",
-        "x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/home_page.ts",
-        "x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors.ts"
+        "test/functional_with_es_ssl/apps/triggers_actions_ui/alerts.ts",
+        "test/functional_with_es_ssl/apps/triggers_actions_ui/details.ts",
+        "test/functional_with_es_ssl/apps/triggers_actions_ui/home_page.ts",
+        "test/functional_with_es_ssl/apps/triggers_actions_ui/connectors.ts"
       ],
       "tags": [
         "functional_with_es_ssl.apps.triggers_actions_ui.alerts",
@@ -661,12 +661,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/canvas/feature_controls/canvas_security.ts",
-        "x-pack/test/functional/apps/advanced_settings/feature_controls/advanced_settings_security.ts",
-        "x-pack/test/functional/apps/logstash/pipeline_create.js",
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/anomaly_explorer.ts",
-        "x-pack/test/functional/apps/machine_learning/feature_controls/ml_spaces.ts",
-        "x-pack/test/functional/apps/rollup_job/hybrid_index_pattern.js"
+        "test/functional/apps/canvas/feature_controls/canvas_security.ts",
+        "test/functional/apps/advanced_settings/feature_controls/advanced_settings_security.ts",
+        "test/functional/apps/logstash/pipeline_create.js",
+        "test/functional/apps/machine_learning/anomaly_detection/anomaly_explorer.ts",
+        "test/functional/apps/machine_learning/feature_controls/ml_spaces.ts",
+        "test/functional/apps/rollup_job/hybrid_index_pattern.js"
       ],
       "tags": [
         "functional.apps.canvas.feature_controls.canvas_security",
@@ -681,12 +681,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/spaces/feature_controls/spaces_security.ts",
-        "x-pack/test/functional/apps/maps/sample_data.js",
-        "x-pack/test/functional/apps/monitoring/cluster/alerts.js",
-        "x-pack/test/functional/apps/security/users.js",
-        "x-pack/test/functional/apps/infra/metrics_source_configuration.ts",
-        "x-pack/test/functional/apps/monitoring/feature_controls/monitoring_spaces.ts"
+        "test/functional/apps/spaces/feature_controls/spaces_security.ts",
+        "test/functional/apps/maps/sample_data.js",
+        "test/functional/apps/monitoring/cluster/alerts.js",
+        "test/functional/apps/security/users.js",
+        "test/functional/apps/infra/metrics_source_configuration.ts",
+        "test/functional/apps/monitoring/feature_controls/monitoring_spaces.ts"
       ],
       "tags": [
         "functional.apps.spaces.feature_controls.spaces_security",
@@ -701,10 +701,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/maps/feature_controls/maps_spaces.ts",
-        "x-pack/test/functional/apps/discover/feature_controls/discover_security.ts",
-        "x-pack/test/functional/apps/maps/feature_controls/maps_security.ts",
-        "x-pack/test/functional/apps/dashboard/feature_controls/dashboard_security.ts"
+        "test/functional/apps/maps/feature_controls/maps_spaces.ts",
+        "test/functional/apps/discover/feature_controls/discover_security.ts",
+        "test/functional/apps/maps/feature_controls/maps_security.ts",
+        "test/functional/apps/dashboard/feature_controls/dashboard_security.ts"
       ],
       "tags": [
         "functional.apps.maps.feature_controls.maps_spaces",
@@ -717,10 +717,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/infra/logs_source_configuration.ts",
-        "x-pack/test/functional/apps/monitoring/elasticsearch/shards.js",
-        "x-pack/test/functional/apps/watcher/watcher_test.js",
-        "x-pack/test/functional/apps/spaces/copy_saved_objects.ts"
+        "test/functional/apps/infra/logs_source_configuration.ts",
+        "test/functional/apps/monitoring/elasticsearch/shards.js",
+        "test/functional/apps/watcher/watcher_test.js",
+        "test/functional/apps/spaces/copy_saved_objects.ts"
       ],
       "tags": [
         "functional.apps.infra.logs_source_configuration",
@@ -733,11 +733,11 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/monitoring/logstash/pipelines.js",
-        "x-pack/test/functional/apps/monitoring/cluster/overview.js",
-        "x-pack/test/functional/apps/machine_learning/anomaly_detection/single_metric_job.ts",
-        "x-pack/test/functional/apps/maps/embeddable/dashboard.js",
-        "x-pack/test/functional/apps/machine_learning/feature_controls/ml_security.ts"
+        "test/functional/apps/monitoring/logstash/pipelines.js",
+        "test/functional/apps/monitoring/cluster/overview.js",
+        "test/functional/apps/machine_learning/anomaly_detection/single_metric_job.ts",
+        "test/functional/apps/maps/embeddable/dashboard.js",
+        "test/functional/apps/machine_learning/feature_controls/ml_security.ts"
       ],
       "tags": [
         "functional.apps.monitoring.logstash.pipelines",
@@ -751,12 +751,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/discover/feature_controls/discover_spaces.ts",
-        "x-pack/test/functional/apps/security/secure_roles_perm.js",
-        "x-pack/test/functional/apps/dev_tools/feature_controls/dev_tools_security.ts",
-        "x-pack/test/functional/apps/monitoring/feature_controls/monitoring_security.ts",
-        "x-pack/test/functional/apps/machine_learning/data_frame_analytics/outlier_detection_creation.ts",
-        "x-pack/test/functional/apps/apm/feature_controls/apm_spaces.ts"
+        "test/functional/apps/discover/feature_controls/discover_spaces.ts",
+        "test/functional/apps/security/secure_roles_perm.js",
+        "test/functional/apps/dev_tools/feature_controls/dev_tools_security.ts",
+        "test/functional/apps/monitoring/feature_controls/monitoring_security.ts",
+        "test/functional/apps/machine_learning/data_frame_analytics/outlier_detection_creation.ts",
+        "test/functional/apps/apm/feature_controls/apm_spaces.ts"
       ],
       "tags": [
         "functional.apps.discover.feature_controls.discover_spaces",
@@ -771,12 +771,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/monitoring/elasticsearch/nodes.js",
-        "x-pack/test/functional/apps/maps/documents_source/top_hits.js",
-        "x-pack/test/functional/apps/dashboard_mode/dashboard_empty_screen.js",
-        "x-pack/test/functional/apps/lens/smokescreen.ts",
-        "x-pack/test/functional/apps/timelion/feature_controls/timelion_security.ts",
-        "x-pack/test/functional/apps/transform/creation_index_pattern.ts"
+        "test/functional/apps/monitoring/elasticsearch/nodes.js",
+        "test/functional/apps/maps/documents_source/top_hits.js",
+        "test/functional/apps/dashboard_mode/dashboard_empty_screen.js",
+        "test/functional/apps/lens/smokescreen.ts",
+        "test/functional/apps/timelion/feature_controls/timelion_security.ts",
+        "test/functional/apps/transform/creation_index_pattern.ts"
       ],
       "tags": [
         "functional.apps.monitoring.elasticsearch.nodes",
@@ -791,8 +791,8 @@
     {
       "config": "test/reporting/configs/generate_api.js",
       "files": [
-        "x-pack/test/reporting/api/generate/csv_saved_search.ts",
-        "x-pack/test/reporting/api/generate/csv_job_params.ts"
+        "test/reporting/api/generate/csv_saved_search.ts",
+        "test/reporting/api/generate/csv_job_params.ts"
       ],
       "tags": [
         "reporting.api.generate.csv_saved_search",
@@ -803,12 +803,12 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/canvas/custom_elements.ts",
-        "x-pack/test/functional/apps/advanced_settings/feature_controls/advanced_settings_spaces.ts",
-        "x-pack/test/functional/apps/monitoring/cluster/list.js",
-        "x-pack/test/functional/apps/security/management.js",
-        "x-pack/test/functional/apps/rollup_job/tsvb.js",
-        "x-pack/test/functional/apps/machine_learning/data_visualizer/index_data_visualizer.ts"
+        "test/functional/apps/canvas/custom_elements.ts",
+        "test/functional/apps/advanced_settings/feature_controls/advanced_settings_spaces.ts",
+        "test/functional/apps/monitoring/cluster/list.js",
+        "test/functional/apps/security/management.js",
+        "test/functional/apps/rollup_job/tsvb.js",
+        "test/functional/apps/machine_learning/data_visualizer/index_data_visualizer.ts"
       ],
       "tags": [
         "functional.apps.canvas.custom_elements",
@@ -823,15 +823,15 @@
     {
       "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_create.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/export.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/delete.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/import.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/create.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/resolve_import_errors.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/find.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_update.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/get.ts"
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_create.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/export.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/delete.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/import.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/create.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/find.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_update.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/get.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_and_spaces.apis.bulk_create",
@@ -849,16 +849,16 @@
     {
       "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_create.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_get.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/delete.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/import.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/create.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/resolve_import_errors.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/find.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_update.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/update.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/get.ts"
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_create.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_get.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/delete.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/import.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/create.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/find.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_update.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/update.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/get.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_and_spaces.apis.bulk_create",
@@ -877,13 +877,13 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/dashboard/feature_controls/dashboard_spaces.ts",
-        "x-pack/test/functional/apps/graph/feature_controls/graph_security.ts",
-        "x-pack/test/functional/apps/maps/documents_source/docvalue_fields.js",
-        "x-pack/test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
-        "x-pack/test/functional/apps/security/user_email.js",
-        "x-pack/test/functional/apps/infra/feature_controls/logs_security.ts",
-        "x-pack/test/functional/apps/uptime/overview.ts"
+        "test/functional/apps/dashboard/feature_controls/dashboard_spaces.ts",
+        "test/functional/apps/graph/feature_controls/graph_security.ts",
+        "test/functional/apps/maps/documents_source/docvalue_fields.js",
+        "test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
+        "test/functional/apps/security/user_email.js",
+        "test/functional/apps/infra/feature_controls/logs_security.ts",
+        "test/functional/apps/uptime/overview.ts"
       ],
       "tags": [
         "functional.apps.dashboard.feature_controls.dashboard_spaces",
@@ -899,13 +899,13 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/maps/add_layer_panel.js",
-        "x-pack/test/functional/apps/security/security.ts",
-        "x-pack/test/functional/apps/infra/feature_controls/infrastructure_spaces.ts",
-        "x-pack/test/functional/apps/monitoring/elasticsearch/node_detail.js",
-        "x-pack/test/functional/apps/maps/import_geojson/add_layer_import_panel.js",
-        "x-pack/test/functional/apps/machine_learning/data_frame_analytics/regression_creation.ts",
-        "x-pack/test/functional/apps/timelion/feature_controls/timelion_spaces.ts"
+        "test/functional/apps/maps/add_layer_panel.js",
+        "test/functional/apps/security/security.ts",
+        "test/functional/apps/infra/feature_controls/infrastructure_spaces.ts",
+        "test/functional/apps/monitoring/elasticsearch/node_detail.js",
+        "test/functional/apps/maps/import_geojson/add_layer_import_panel.js",
+        "test/functional/apps/machine_learning/data_frame_analytics/regression_creation.ts",
+        "test/functional/apps/timelion/feature_controls/timelion_spaces.ts"
       ],
       "tags": [
         "functional.apps.maps.add_layer_panel",
@@ -921,7 +921,7 @@
     {
       "config": "test/reporting/configs/chromium_api.js",
       "files": [
-        "x-pack/test/reporting/api/usage.js"
+        "test/reporting/api/usage.js"
       ],
       "tags": [
         "reporting.api.usage"
@@ -931,14 +931,14 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/transform/creation_saved_search.ts",
-        "x-pack/test/functional/apps/canvas/smoke_test.js",
-        "x-pack/test/functional/apps/index_patterns/feature_controls/index_patterns_security.ts",
-        "x-pack/test/functional/apps/maps/layer_errors.js",
-        "x-pack/test/functional/apps/canvas/expression.ts",
-        "x-pack/test/functional/apps/machine_learning/data_frame_analytics/classification_creation.ts",
-        "x-pack/test/functional/apps/grok_debugger/grok_debugger.js",
-        "x-pack/test/functional/apps/dev_tools/feature_controls/dev_tools_spaces.ts"
+        "test/functional/apps/transform/creation_saved_search.ts",
+        "test/functional/apps/canvas/smoke_test.js",
+        "test/functional/apps/index_patterns/feature_controls/index_patterns_security.ts",
+        "test/functional/apps/maps/layer_errors.js",
+        "test/functional/apps/canvas/expression.ts",
+        "test/functional/apps/machine_learning/data_frame_analytics/classification_creation.ts",
+        "test/functional/apps/grok_debugger/grok_debugger.js",
+        "test/functional/apps/dev_tools/feature_controls/dev_tools_spaces.ts"
       ],
       "tags": [
         "functional.apps.transform.creation_saved_search",
@@ -955,10 +955,10 @@
     {
       "config": "test/functional/config.js",
       "files": [
-        "x-pack/test/functional/apps/canvas/feature_controls/canvas_spaces.ts",
-        "x-pack/test/functional/apps/infra/home_page.ts",
-        "x-pack/test/functional/apps/apm/feature_controls/apm_security.ts",
-        "x-pack/test/functional/apps/uptime/feature_controls/uptime_security.ts"
+        "test/functional/apps/canvas/feature_controls/canvas_spaces.ts",
+        "test/functional/apps/infra/home_page.ts",
+        "test/functional/apps/apm/feature_controls/apm_security.ts",
+        "test/functional/apps/uptime/feature_controls/uptime_security.ts"
       ],
       "tags": [
         "functional.apps.canvas.feature_controls.canvas_spaces",
@@ -971,17 +971,17 @@
     {
       "config": "test/saved_object_api_integration/security_only/config_basic.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_create.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/import.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/find.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/delete.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_update.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/create.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/update.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/get.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/export.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_get.ts"
+        "test/saved_object_api_integration/security_only/apis/bulk_create.ts",
+        "test/saved_object_api_integration/security_only/apis/import.ts",
+        "test/saved_object_api_integration/security_only/apis/find.ts",
+        "test/saved_object_api_integration/security_only/apis/delete.ts",
+        "test/saved_object_api_integration/security_only/apis/bulk_update.ts",
+        "test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/security_only/apis/create.ts",
+        "test/saved_object_api_integration/security_only/apis/update.ts",
+        "test/saved_object_api_integration/security_only/apis/get.ts",
+        "test/saved_object_api_integration/security_only/apis/export.ts",
+        "test/saved_object_api_integration/security_only/apis/bulk_get.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_only.apis.bulk_create",
@@ -1001,17 +1001,17 @@
     {
       "config": "test/saved_object_api_integration/security_only/config_trial.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_create.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/import.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/find.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/delete.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_update.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/create.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/update.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/get.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/export.ts",
-        "x-pack/test/saved_object_api_integration/security_only/apis/bulk_get.ts"
+        "test/saved_object_api_integration/security_only/apis/bulk_create.ts",
+        "test/saved_object_api_integration/security_only/apis/import.ts",
+        "test/saved_object_api_integration/security_only/apis/find.ts",
+        "test/saved_object_api_integration/security_only/apis/delete.ts",
+        "test/saved_object_api_integration/security_only/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/security_only/apis/bulk_update.ts",
+        "test/saved_object_api_integration/security_only/apis/create.ts",
+        "test/saved_object_api_integration/security_only/apis/update.ts",
+        "test/saved_object_api_integration/security_only/apis/get.ts",
+        "test/saved_object_api_integration/security_only/apis/export.ts",
+        "test/saved_object_api_integration/security_only/apis/bulk_get.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_only.apis.bulk_create",
@@ -1031,13 +1031,13 @@
     {
       "config": "test/spaces_api_integration/spaces_only/config.ts",
       "files": [
-        "x-pack/test/spaces_api_integration/spaces_only/apis/copy_to_space.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/resolve_copy_to_space_conflicts.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/get.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/delete.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/update.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/create.ts",
-        "x-pack/test/spaces_api_integration/spaces_only/apis/get_all.ts"
+        "test/spaces_api_integration/spaces_only/apis/copy_to_space.ts",
+        "test/spaces_api_integration/spaces_only/apis/resolve_copy_to_space_conflicts.ts",
+        "test/spaces_api_integration/spaces_only/apis/get.ts",
+        "test/spaces_api_integration/spaces_only/apis/delete.ts",
+        "test/spaces_api_integration/spaces_only/apis/update.ts",
+        "test/spaces_api_integration/spaces_only/apis/create.ts",
+        "test/spaces_api_integration/spaces_only/apis/get_all.ts"
       ],
       "tags": [
         "spaces_api_integration.spaces_only.apis.copy_to_space",
@@ -1053,7 +1053,7 @@
     {
       "config": "test/upgrade_assistant_integration/config.js",
       "files": [
-        "x-pack/test/upgrade_assistant_integration/upgrade_assistant/reindexing.js"
+        "test/upgrade_assistant_integration/upgrade_assistant/reindexing.js"
       ],
       "tags": [
         "upgrade_assistant_integration.upgrade_assistant.reindexing"
@@ -1063,8 +1063,8 @@
     {
       "config": "test/plugin_api_integration/config.js",
       "files": [
-        "x-pack/test/plugin_api_integration/test_suites/task_manager/task_manager_integration.js",
-        "x-pack/test/plugin_api_integration/test_suites/encrypted_saved_objects/encrypted_saved_objects_api.ts"
+        "test/plugin_api_integration/test_suites/task_manager/task_manager_integration.js",
+        "test/plugin_api_integration/test_suites/encrypted_saved_objects/encrypted_saved_objects_api.ts"
       ],
       "tags": [
         "plugin_api_integration.task_manager.task_manager_integration",
@@ -1075,157 +1075,157 @@
     {
       "config": "test/api_integration/config.js",
       "files": [
-        "x-pack/test/api_integration/apis/infra/metadata.ts",
-        "x-pack/test/api_integration/apis/logstash/pipelines/list.js",
-        "x-pack/test/api_integration/apis/infra/sources.ts",
-        "x-pack/test/api_integration/apis/siem/saved_objects/timeline.ts",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/nodes.js",
-        "x-pack/test/api_integration/apis/endpoint/endpoints.ts",
-        "x-pack/test/api_integration/apis/monitoring/logstash/pipelines.js",
-        "x-pack/test/api_integration/apis/monitoring/logstash/multicluster_pipelines.js",
-        "x-pack/test/api_integration/apis/infra/log_entries.ts",
-        "x-pack/test/api_integration/apis/lens/existing_fields.ts",
-        "x-pack/test/api_integration/apis/lens/field_stats.ts",
-        "x-pack/test/api_integration/apis/siem/saved_objects/notes.ts",
-        "x-pack/test/api_integration/apis/infra/waffle.ts",
-        "x-pack/test/api_integration/apis/management/advanced_settings/feature_controls.ts",
-        "x-pack/test/api_integration/apis/apm/feature_controls.ts",
-        "x-pack/test/api_integration/apis/siem/saved_objects/pinned_events.ts",
-        "x-pack/test/api_integration/apis/uptime/rest/snapshot.ts",
-        "x-pack/test/api_integration/apis/siem/overview_network.ts",
-        "x-pack/test/api_integration/apis/infra/feature_controls.ts",
-        "x-pack/test/api_integration/apis/infra/log_summary.ts",
-        "x-pack/test/api_integration/apis/monitoring/beats/overview.js",
-        "x-pack/test/api_integration/apis/beats/assign_tags_to_beats.js",
-        "x-pack/test/api_integration/apis/infra/ip_to_hostname.ts",
-        "x-pack/test/api_integration/apis/console/feature_controls.ts",
-        "x-pack/test/api_integration/apis/infra/log_item.ts",
-        "x-pack/test/api_integration/apis/infra/log_entry_highlights.ts",
-        "x-pack/test/api_integration/apis/beats/remove_tags_from_beats.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/overview.js",
-        "x-pack/test/api_integration/apis/beats/enroll_beat.js",
-        "x-pack/test/api_integration/apis/uptime/graphql/monitor_states.ts",
-        "x-pack/test/api_integration/apis/siem/feature_controls.ts",
-        "x-pack/test/api_integration/apis/uptime/feature_controls.ts",
-        "x-pack/test/api_integration/apis/logstash/pipeline/delete.js",
-        "x-pack/test/api_integration/apis/ml/calculate_model_memory_limit.ts",
-        "x-pack/test/api_integration/apis/ml/bucket_span_estimator.ts",
-        "x-pack/test/api_integration/apis/telemetry/telemetry.js",
-        "x-pack/test/api_integration/apis/lens/telemetry.ts",
-        "x-pack/test/api_integration/apis/apm/agent_configuration.ts",
-        "x-pack/test/api_integration/apis/kibana/kql_telemetry/kql_telemetry.js",
-        "x-pack/test/api_integration/apis/infra/log_analysis.ts",
-        "x-pack/test/api_integration/apis/beats/create_enrollment_tokens.js",
-        "x-pack/test/api_integration/apis/logstash/pipeline/save.js",
-        "x-pack/test/api_integration/apis/short_urls/feature_controls.ts",
-        "x-pack/test/api_integration/apis/beats/set_tag.js",
-        "x-pack/test/api_integration/apis/management/rollup/rollup.js",
-        "x-pack/test/api_integration/apis/siem/kpi_network.ts",
-        "x-pack/test/api_integration/apis/security/change_password.ts",
-        "x-pack/test/api_integration/apis/spaces/get_active_space.ts",
-        "x-pack/test/api_integration/apis/siem/network_top_n_flow.ts",
-        "x-pack/test/api_integration/apis/monitoring/cluster/list.js",
-        "x-pack/test/api_integration/apis/monitoring/cluster/overview.js",
-        "x-pack/test/api_integration/apis/siem/network_dns.ts",
-        "x-pack/test/api_integration/apis/siem/kpi_hosts.ts",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/indices.js",
-        "x-pack/test/api_integration/apis/logstash/pipeline/load.js",
-        "x-pack/test/api_integration/apis/kibana/stats/stats.js",
-        "x-pack/test/api_integration/apis/logstash/pipelines/delete.js",
-        "x-pack/test/api_integration/apis/telemetry/opt_in.ts",
-        "x-pack/test/api_integration/apis/siem/overview_host.ts",
-        "x-pack/test/api_integration/apis/telemetry/telemetry_local.js",
-        "x-pack/test/api_integration/apis/endpoint/alerts.ts",
-        "x-pack/test/api_integration/apis/infra/metrics_explorer.ts",
-        "x-pack/test/api_integration/apis/siem/timeline_details.ts",
-        "x-pack/test/api_integration/apis/beats/get_beat.js",
-        "x-pack/test/api_integration/apis/management/cross_cluster_replication/follower_indices.js",
-        "x-pack/test/api_integration/apis/management/index_management/indices.js",
-        "x-pack/test/api_integration/apis/uptime/graphql/ping_list.ts",
-        "x-pack/test/api_integration/apis/uptime/graphql/doc_count.js",
-        "x-pack/test/api_integration/apis/management/index_lifecycle_management/indices.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/node_detail_advanced.js",
-        "x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js",
-        "x-pack/test/api_integration/apis/siem/tls.ts",
-        "x-pack/test/api_integration/apis/siem/authentications.ts",
-        "x-pack/test/api_integration/apis/siem/hosts.ts",
-        "x-pack/test/api_integration/apis/monitoring/logstash/node_detail.js",
-        "x-pack/test/api_integration/apis/beats/update_beat.js",
-        "x-pack/test/api_integration/apis/endpoint/resolver.ts",
-        "x-pack/test/api_integration/apis/xpack_main/settings/settings.js",
-        "x-pack/test/api_integration/apis/es/has_privileges.js",
-        "x-pack/test/api_integration/apis/uptime/graphql/monitor_charts.js",
-        "x-pack/test/api_integration/apis/infra/metrics.ts",
-        "x-pack/test/api_integration/apis/features/features/features.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/es_and_kibana_mb.js",
-        "x-pack/test/api_integration/apis/security/roles.js",
-        "x-pack/test/api_integration/apis/spaces/space_attributes.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/security.js",
-        "x-pack/test/api_integration/apis/monitoring/beats/list.js",
-        "x-pack/test/api_integration/apis/monitoring/beats/detail.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/ccr_shard.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/ccr.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/index_detail.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch/node_detail.js",
-        "x-pack/test/api_integration/apis/security/basic_login.js",
-        "x-pack/test/api_integration/apis/uptime/get_all_pings.js",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/detect_logstash_management.js",
-        "x-pack/test/api_integration/apis/management/remote_clusters/remote_clusters.js",
-        "x-pack/test/api_integration/apis/logstash/cluster/load.js",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/ccs.js",
-        "x-pack/test/api_integration/apis/siem/sources.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/detect_beats_management.js",
-        "x-pack/test/api_integration/apis/monitoring/apm/instance.js",
-        "x-pack/test/api_integration/apis/monitoring/apm/instances.js",
-        "x-pack/test/api_integration/apis/monitoring/apm/overview.js",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/detect_beats.js",
-        "x-pack/test/api_integration/apis/spaces/saved_objects.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/es_and_kibana_exclusive_mb.js",
-        "x-pack/test/api_integration/apis/security/session.ts",
-        "x-pack/test/api_integration/apis/security/privileges.ts",
-        "x-pack/test/api_integration/apis/telemetry/telemetry_optin_notice_seen.ts",
-        "x-pack/test/api_integration/apis/security/index_fields.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/kibana_exclusive_mb.js",
-        "x-pack/test/api_integration/apis/security/builtin_es_privileges.ts",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/kibana_mb.js",
-        "x-pack/test/api_integration/apis/es/post_privileges.js",
-        "x-pack/test/api_integration/apis/siem/timeline.ts",
-        "x-pack/test/api_integration/apis/management/rollup/rollup_search.js",
-        "x-pack/test/api_integration/apis/siem/uncommon_processes.ts",
-        "x-pack/test/api_integration/apis/siem/users.ts",
-        "x-pack/test/api_integration/apis/monitoring/logs/multiple_clusters.js",
-        "x-pack/test/api_integration/apis/monitoring/logs/cluster.js",
-        "x-pack/test/api_integration/apis/monitoring/logs/index_detail.js",
-        "x-pack/test/api_integration/apis/monitoring/logs/node_detail.js",
-        "x-pack/test/api_integration/apis/infra/logs_without_millis.ts",
-        "x-pack/test/api_integration/apis/monitoring/standalone_cluster/cluster.js",
-        "x-pack/test/api_integration/apis/monitoring/standalone_cluster/clusters.js",
-        "x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js",
-        "x-pack/test/api_integration/apis/uptime/rest/monitor_latest_status.ts",
-        "x-pack/test/api_integration/apis/uptime/rest/selected_monitor.ts",
-        "x-pack/test/api_integration/apis/uptime/rest/ping_histogram.ts",
-        "x-pack/test/api_integration/apis/maps/index_settings.js",
-        "x-pack/test/api_integration/apis/maps/migrations.js",
-        "x-pack/test/api_integration/apis/management/index_management/mapping.js",
-        "x-pack/test/api_integration/apis/monitoring/logstash/nodes.js",
-        "x-pack/test/api_integration/apis/monitoring/logstash/overview.js",
-        "x-pack/test/api_integration/apis/management/index_management/settings.js",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/detect_apm.js",
-        "x-pack/test/api_integration/apis/management/index_management/stats.js",
-        "x-pack/test/api_integration/apis/management/index_management/templates.js",
-        "x-pack/test/api_integration/apis/management/index_lifecycle_management/policies.js",
-        "x-pack/test/api_integration/apis/management/index_lifecycle_management/templates.js",
-        "x-pack/test/api_integration/apis/monitoring/kibana/instance.js",
-        "x-pack/test/api_integration/apis/monitoring/kibana/listing.js",
-        "x-pack/test/api_integration/apis/monitoring/kibana/overview.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_interval.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_enabled.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch_settings/check_nodes.js",
-        "x-pack/test/api_integration/apis/monitoring/elasticsearch_settings/check_cluster.js",
-        "x-pack/test/api_integration/apis/management/cross_cluster_replication/auto_follow_pattern.js",
-        "x-pack/test/api_integration/apis/management/index_lifecycle_management/nodes.js",
-        "x-pack/test/api_integration/apis/beats/list_beats.js",
-        "x-pack/test/api_integration/apis/monitoring/setup/collection/detect_logstash.js"
+        "test/api_integration/apis/infra/metadata.ts",
+        "test/api_integration/apis/logstash/pipelines/list.js",
+        "test/api_integration/apis/infra/sources.ts",
+        "test/api_integration/apis/siem/saved_objects/timeline.ts",
+        "test/api_integration/apis/monitoring/elasticsearch/nodes.js",
+        "test/api_integration/apis/endpoint/endpoints.ts",
+        "test/api_integration/apis/monitoring/logstash/pipelines.js",
+        "test/api_integration/apis/monitoring/logstash/multicluster_pipelines.js",
+        "test/api_integration/apis/infra/log_entries.ts",
+        "test/api_integration/apis/lens/existing_fields.ts",
+        "test/api_integration/apis/lens/field_stats.ts",
+        "test/api_integration/apis/siem/saved_objects/notes.ts",
+        "test/api_integration/apis/infra/waffle.ts",
+        "test/api_integration/apis/management/advanced_settings/feature_controls.ts",
+        "test/api_integration/apis/apm/feature_controls.ts",
+        "test/api_integration/apis/siem/saved_objects/pinned_events.ts",
+        "test/api_integration/apis/uptime/rest/snapshot.ts",
+        "test/api_integration/apis/siem/overview_network.ts",
+        "test/api_integration/apis/infra/feature_controls.ts",
+        "test/api_integration/apis/infra/log_summary.ts",
+        "test/api_integration/apis/monitoring/beats/overview.js",
+        "test/api_integration/apis/beats/assign_tags_to_beats.js",
+        "test/api_integration/apis/infra/ip_to_hostname.ts",
+        "test/api_integration/apis/console/feature_controls.ts",
+        "test/api_integration/apis/infra/log_item.ts",
+        "test/api_integration/apis/infra/log_entry_highlights.ts",
+        "test/api_integration/apis/beats/remove_tags_from_beats.js",
+        "test/api_integration/apis/monitoring/elasticsearch/overview.js",
+        "test/api_integration/apis/beats/enroll_beat.js",
+        "test/api_integration/apis/uptime/graphql/monitor_states.ts",
+        "test/api_integration/apis/siem/feature_controls.ts",
+        "test/api_integration/apis/uptime/feature_controls.ts",
+        "test/api_integration/apis/logstash/pipeline/delete.js",
+        "test/api_integration/apis/ml/calculate_model_memory_limit.ts",
+        "test/api_integration/apis/ml/bucket_span_estimator.ts",
+        "test/api_integration/apis/telemetry/telemetry.js",
+        "test/api_integration/apis/lens/telemetry.ts",
+        "test/api_integration/apis/apm/agent_configuration.ts",
+        "test/api_integration/apis/kibana/kql_telemetry/kql_telemetry.js",
+        "test/api_integration/apis/infra/log_analysis.ts",
+        "test/api_integration/apis/beats/create_enrollment_tokens.js",
+        "test/api_integration/apis/logstash/pipeline/save.js",
+        "test/api_integration/apis/short_urls/feature_controls.ts",
+        "test/api_integration/apis/beats/set_tag.js",
+        "test/api_integration/apis/management/rollup/rollup.js",
+        "test/api_integration/apis/siem/kpi_network.ts",
+        "test/api_integration/apis/security/change_password.ts",
+        "test/api_integration/apis/spaces/get_active_space.ts",
+        "test/api_integration/apis/siem/network_top_n_flow.ts",
+        "test/api_integration/apis/monitoring/cluster/list.js",
+        "test/api_integration/apis/monitoring/cluster/overview.js",
+        "test/api_integration/apis/siem/network_dns.ts",
+        "test/api_integration/apis/siem/kpi_hosts.ts",
+        "test/api_integration/apis/monitoring/elasticsearch/indices.js",
+        "test/api_integration/apis/logstash/pipeline/load.js",
+        "test/api_integration/apis/kibana/stats/stats.js",
+        "test/api_integration/apis/logstash/pipelines/delete.js",
+        "test/api_integration/apis/telemetry/opt_in.ts",
+        "test/api_integration/apis/siem/overview_host.ts",
+        "test/api_integration/apis/telemetry/telemetry_local.js",
+        "test/api_integration/apis/endpoint/alerts.ts",
+        "test/api_integration/apis/infra/metrics_explorer.ts",
+        "test/api_integration/apis/siem/timeline_details.ts",
+        "test/api_integration/apis/beats/get_beat.js",
+        "test/api_integration/apis/management/cross_cluster_replication/follower_indices.js",
+        "test/api_integration/apis/management/index_management/indices.js",
+        "test/api_integration/apis/uptime/graphql/ping_list.ts",
+        "test/api_integration/apis/uptime/graphql/doc_count.js",
+        "test/api_integration/apis/management/index_lifecycle_management/indices.js",
+        "test/api_integration/apis/monitoring/elasticsearch/node_detail_advanced.js",
+        "test/api_integration/apis/management/rollup/index_patterns_extensions.js",
+        "test/api_integration/apis/siem/tls.ts",
+        "test/api_integration/apis/siem/authentications.ts",
+        "test/api_integration/apis/siem/hosts.ts",
+        "test/api_integration/apis/monitoring/logstash/node_detail.js",
+        "test/api_integration/apis/beats/update_beat.js",
+        "test/api_integration/apis/endpoint/resolver.ts",
+        "test/api_integration/apis/xpack_main/settings/settings.js",
+        "test/api_integration/apis/es/has_privileges.js",
+        "test/api_integration/apis/uptime/graphql/monitor_charts.js",
+        "test/api_integration/apis/infra/metrics.ts",
+        "test/api_integration/apis/features/features/features.ts",
+        "test/api_integration/apis/monitoring/setup/collection/es_and_kibana_mb.js",
+        "test/api_integration/apis/security/roles.js",
+        "test/api_integration/apis/spaces/space_attributes.ts",
+        "test/api_integration/apis/monitoring/setup/collection/security.js",
+        "test/api_integration/apis/monitoring/beats/list.js",
+        "test/api_integration/apis/monitoring/beats/detail.js",
+        "test/api_integration/apis/monitoring/elasticsearch/ccr_shard.js",
+        "test/api_integration/apis/monitoring/elasticsearch/ccr.js",
+        "test/api_integration/apis/monitoring/elasticsearch/index_detail.js",
+        "test/api_integration/apis/monitoring/elasticsearch/node_detail.js",
+        "test/api_integration/apis/security/basic_login.js",
+        "test/api_integration/apis/uptime/get_all_pings.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_logstash_management.js",
+        "test/api_integration/apis/management/remote_clusters/remote_clusters.js",
+        "test/api_integration/apis/logstash/cluster/load.js",
+        "test/api_integration/apis/monitoring/setup/collection/ccs.js",
+        "test/api_integration/apis/siem/sources.ts",
+        "test/api_integration/apis/monitoring/setup/collection/detect_beats_management.js",
+        "test/api_integration/apis/monitoring/apm/instance.js",
+        "test/api_integration/apis/monitoring/apm/instances.js",
+        "test/api_integration/apis/monitoring/apm/overview.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_beats.js",
+        "test/api_integration/apis/spaces/saved_objects.ts",
+        "test/api_integration/apis/monitoring/setup/collection/es_and_kibana_exclusive_mb.js",
+        "test/api_integration/apis/security/session.ts",
+        "test/api_integration/apis/security/privileges.ts",
+        "test/api_integration/apis/telemetry/telemetry_optin_notice_seen.ts",
+        "test/api_integration/apis/security/index_fields.ts",
+        "test/api_integration/apis/monitoring/setup/collection/kibana_exclusive_mb.js",
+        "test/api_integration/apis/security/builtin_es_privileges.ts",
+        "test/api_integration/apis/monitoring/setup/collection/kibana_mb.js",
+        "test/api_integration/apis/es/post_privileges.js",
+        "test/api_integration/apis/siem/timeline.ts",
+        "test/api_integration/apis/management/rollup/rollup_search.js",
+        "test/api_integration/apis/siem/uncommon_processes.ts",
+        "test/api_integration/apis/siem/users.ts",
+        "test/api_integration/apis/monitoring/logs/multiple_clusters.js",
+        "test/api_integration/apis/monitoring/logs/cluster.js",
+        "test/api_integration/apis/monitoring/logs/index_detail.js",
+        "test/api_integration/apis/monitoring/logs/node_detail.js",
+        "test/api_integration/apis/infra/logs_without_millis.ts",
+        "test/api_integration/apis/monitoring/standalone_cluster/cluster.js",
+        "test/api_integration/apis/monitoring/standalone_cluster/clusters.js",
+        "test/api_integration/apis/monitoring/common/mappings_exist.js",
+        "test/api_integration/apis/uptime/rest/monitor_latest_status.ts",
+        "test/api_integration/apis/uptime/rest/selected_monitor.ts",
+        "test/api_integration/apis/uptime/rest/ping_histogram.ts",
+        "test/api_integration/apis/maps/index_settings.js",
+        "test/api_integration/apis/maps/migrations.js",
+        "test/api_integration/apis/management/index_management/mapping.js",
+        "test/api_integration/apis/monitoring/logstash/nodes.js",
+        "test/api_integration/apis/monitoring/logstash/overview.js",
+        "test/api_integration/apis/management/index_management/settings.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_apm.js",
+        "test/api_integration/apis/management/index_management/stats.js",
+        "test/api_integration/apis/management/index_management/templates.js",
+        "test/api_integration/apis/management/index_lifecycle_management/policies.js",
+        "test/api_integration/apis/management/index_lifecycle_management/templates.js",
+        "test/api_integration/apis/monitoring/kibana/instance.js",
+        "test/api_integration/apis/monitoring/kibana/listing.js",
+        "test/api_integration/apis/monitoring/kibana/overview.js",
+        "test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_interval.js",
+        "test/api_integration/apis/monitoring/elasticsearch_settings/set_collection_enabled.js",
+        "test/api_integration/apis/monitoring/elasticsearch_settings/check_nodes.js",
+        "test/api_integration/apis/monitoring/elasticsearch_settings/check_cluster.js",
+        "test/api_integration/apis/management/cross_cluster_replication/auto_follow_pattern.js",
+        "test/api_integration/apis/management/index_lifecycle_management/nodes.js",
+        "test/api_integration/apis/beats/list_beats.js",
+        "test/api_integration/apis/monitoring/setup/collection/detect_logstash.js"
       ],
       "tags": [
         "api_integration.apis.infra.metadata",
@@ -1385,17 +1385,17 @@
     {
       "config": "test/saved_object_api_integration/spaces_only/config.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/bulk_create.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/bulk_update.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/delete.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/update.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/import.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/resolve_import_errors.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/create.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/get.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/find.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/export.ts",
-        "x-pack/test/saved_object_api_integration/spaces_only/apis/bulk_get.ts"
+        "test/saved_object_api_integration/spaces_only/apis/bulk_create.ts",
+        "test/saved_object_api_integration/spaces_only/apis/bulk_update.ts",
+        "test/saved_object_api_integration/spaces_only/apis/delete.ts",
+        "test/saved_object_api_integration/spaces_only/apis/update.ts",
+        "test/saved_object_api_integration/spaces_only/apis/import.ts",
+        "test/saved_object_api_integration/spaces_only/apis/resolve_import_errors.ts",
+        "test/saved_object_api_integration/spaces_only/apis/create.ts",
+        "test/saved_object_api_integration/spaces_only/apis/get.ts",
+        "test/saved_object_api_integration/spaces_only/apis/find.ts",
+        "test/saved_object_api_integration/spaces_only/apis/export.ts",
+        "test/saved_object_api_integration/spaces_only/apis/bulk_get.ts"
       ],
       "tags": [
         "saved_object_api_integration.spaces_only.apis.bulk_create",
@@ -1415,8 +1415,8 @@
     {
       "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/update.ts",
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/bulk_get.ts"
+        "test/saved_object_api_integration/security_and_spaces/apis/update.ts",
+        "test/saved_object_api_integration/security_and_spaces/apis/bulk_get.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_and_spaces.apis.update",
@@ -1427,31 +1427,31 @@
     {
       "config": "test/alerting_api_integration/spaces_only/config.ts",
       "files": [
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/type_not_enabled.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/alerts_space1.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/alerts_default_space.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/get_alert_state.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/execute.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/disable.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/delete.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/enable.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/find.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/get.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/update_api_key.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/update.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/create.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/delete.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/find.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/unmute_instance.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/unmute_all.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/update.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/get.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/mute_instance.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/mute_all.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/builtin_action_types/es_index.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/create.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/alerting/list_alert_types.ts",
-        "x-pack/test/alerting_api_integration/spaces_only/tests/actions/list_action_types.ts"
+        "test/alerting_api_integration/spaces_only/tests/actions/type_not_enabled.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/alerts_space1.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/alerts_default_space.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/get_alert_state.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/execute.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/disable.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/delete.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/enable.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/find.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/get.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/update_api_key.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/update.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/create.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/delete.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/find.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/unmute_instance.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/unmute_all.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/update.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/get.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/mute_instance.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/mute_all.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/builtin_action_types/es_index.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/create.ts",
+        "test/alerting_api_integration/spaces_only/tests/alerting/list_alert_types.ts",
+        "test/alerting_api_integration/spaces_only/tests/actions/list_action_types.ts"
       ],
       "tags": [
         "alerting_api_integration.spaces_only.tests.actions.type_not_enabled",
@@ -1485,7 +1485,7 @@
     {
       "config": "test/pki_api_integration/config.ts",
       "files": [
-        "x-pack/test/pki_api_integration/apis/security/pki_auth.ts"
+        "test/pki_api_integration/apis/security/pki_auth.ts"
       ],
       "tags": [
         "pki_api_integration.apis.security.pki_auth"
@@ -1495,7 +1495,7 @@
     {
       "config": "test/kerberos_api_integration/config.ts",
       "files": [
-        "x-pack/test/kerberos_api_integration/apis/security/kerberos_login.ts"
+        "test/kerberos_api_integration/apis/security/kerberos_login.ts"
       ],
       "tags": [
         "kerberos_api_integration.apis.security.kerberos_login"
@@ -1505,7 +1505,7 @@
     {
       "config": "test/kerberos_api_integration/anonymous_access.config.ts",
       "files": [
-        "x-pack/test/kerberos_api_integration/apis/security/kerberos_login.ts"
+        "test/kerberos_api_integration/apis/security/kerberos_login.ts"
       ],
       "tags": [
         "kerberos_api_integration.apis.security.kerberos_login"
@@ -1515,7 +1515,7 @@
     {
       "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
       "files": [
-        "x-pack/test/saved_object_api_integration/security_and_spaces/apis/export.ts"
+        "test/saved_object_api_integration/security_and_spaces/apis/export.ts"
       ],
       "tags": [
         "saved_object_api_integration.security_and_spaces.apis.export"
@@ -1525,7 +1525,7 @@
     {
       "config": "test/saml_api_integration/config.ts",
       "files": [
-        "x-pack/test/saml_api_integration/apis/security/saml_login.ts"
+        "test/saml_api_integration/apis/security/saml_login.ts"
       ],
       "tags": [
         "saml_api_integration.apis.security.saml_login"
@@ -1535,15 +1535,15 @@
     {
       "config": "test/alerting_api_integration/security_and_spaces/config.ts",
       "files": [
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/get_alert_state.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/enable.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/get.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/update.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/mute_instance.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/actions/delete.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/unmute_all.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/unmute_instance.ts",
-        "x-pack/test/alerting_api_integration/security_and_spaces/tests/alerting/create.ts"
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/get_alert_state.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/enable.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/get.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/update.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/mute_instance.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/actions/delete.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/unmute_all.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/unmute_instance.ts",
+        "test/alerting_api_integration/security_and_spaces/tests/alerting/create.ts"
       ],
       "tags": [
         "alerting_api_integration.security_and_spaces.tests.alerting.get_alert_state",
@@ -1561,7 +1561,7 @@
     {
       "config": "test/oidc_api_integration/config.ts",
       "files": [
-        "x-pack/test/oidc_api_integration/apis/authorization_code_flow/oidc_auth.js"
+        "test/oidc_api_integration/apis/authorization_code_flow/oidc_auth.js"
       ],
       "tags": [
         "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
@@ -1571,7 +1571,7 @@
     {
       "config": "test/licensing_plugin/config.public.ts",
       "files": [
-        "x-pack/test/licensing_plugin/public/updates.ts"
+        "test/licensing_plugin/public/updates.ts"
       ],
       "tags": [
         "licensing_plugin.public.updates"
@@ -1581,9 +1581,9 @@
     {
       "config": "test/licensing_plugin/config.ts",
       "files": [
-        "x-pack/test/licensing_plugin/server/updates.ts",
-        "x-pack/test/licensing_plugin/server/info.ts",
-        "x-pack/test/licensing_plugin/server/header.ts"
+        "test/licensing_plugin/server/updates.ts",
+        "test/licensing_plugin/server/info.ts",
+        "test/licensing_plugin/server/header.ts"
       ],
       "tags": [
         "licensing_plugin.server.updates",
@@ -1595,7 +1595,7 @@
     {
       "config": "test/licensing_plugin/config.legacy.ts",
       "files": [
-        "x-pack/test/licensing_plugin/legacy/updates.ts"
+        "test/licensing_plugin/legacy/updates.ts"
       ],
       "tags": [
         "licensing_plugin.legacy.updates"
@@ -1605,7 +1605,7 @@
     {
       "config": "test/plugin_functional/config.ts",
       "files": [
-        "x-pack/test/plugin_functional/test_suites/resolver"
+        "test/plugin_functional/test_suites/resolver"
       ],
       "tags": [
         "plugin_functional.resolver"
@@ -1615,7 +1615,7 @@
     {
       "config": "test/functional/config_security_basic.js",
       "files": [
-        "x-pack/test/functional/apps/security/basic_license/role_mappings.ts"
+        "test/functional/apps/security/basic_license/role_mappings.ts"
       ],
       "tags": [
         "functional.apps.security.basic_license.role_mappings"
@@ -1625,10 +1625,10 @@
     {
       "config": "test/token_api_integration/config.js",
       "files": [
-        "x-pack/test/token_api_integration/auth/session.js",
-        "x-pack/test/token_api_integration/auth/header.js",
-        "x-pack/test/token_api_integration/auth/logout.js",
-        "x-pack/test/token_api_integration/auth/login.js"
+        "test/token_api_integration/auth/session.js",
+        "test/token_api_integration/auth/header.js",
+        "test/token_api_integration/auth/logout.js",
+        "test/token_api_integration/auth/login.js"
       ],
       "tags": [
         "token_api_integration.auth.session",
@@ -1641,9 +1641,9 @@
     {
       "config": "test/ui_capabilities/security_and_spaces/config.ts",
       "files": [
-        "x-pack/test/ui_capabilities/security_and_spaces/tests/catalogue.ts",
-        "x-pack/test/ui_capabilities/security_and_spaces/tests/nav_links.ts",
-        "x-pack/test/ui_capabilities/security_and_spaces/tests/foo.ts"
+        "test/ui_capabilities/security_and_spaces/tests/catalogue.ts",
+        "test/ui_capabilities/security_and_spaces/tests/nav_links.ts",
+        "test/ui_capabilities/security_and_spaces/tests/foo.ts"
       ],
       "tags": [
         "ui_capabilities.security_and_spaces.tests.catalogue",
@@ -1655,9 +1655,9 @@
     {
       "config": "test/ui_capabilities/security_only/config.ts",
       "files": [
-        "x-pack/test/ui_capabilities/security_only/tests/catalogue.ts",
-        "x-pack/test/ui_capabilities/security_only/tests/foo.ts",
-        "x-pack/test/ui_capabilities/security_only/tests/nav_links.ts"
+        "test/ui_capabilities/security_only/tests/catalogue.ts",
+        "test/ui_capabilities/security_only/tests/foo.ts",
+        "test/ui_capabilities/security_only/tests/nav_links.ts"
       ],
       "tags": [
         "ui_capabilities.security_only.tests.catalogue",
@@ -1669,13 +1669,13 @@
     {
       "config": "test/api_integration/config_security_basic.js",
       "files": [
-        "x-pack/test/api_integration/apis/security/change_password.ts",
-        "x-pack/test/api_integration/apis/security/basic_login.js",
-        "x-pack/test/api_integration/apis/security/roles.js",
-        "x-pack/test/api_integration/apis/security/session.ts",
-        "x-pack/test/api_integration/apis/security/privileges.ts",
-        "x-pack/test/api_integration/apis/security/index_fields.ts",
-        "x-pack/test/api_integration/apis/security/builtin_es_privileges.ts"
+        "test/api_integration/apis/security/change_password.ts",
+        "test/api_integration/apis/security/basic_login.js",
+        "test/api_integration/apis/security/roles.js",
+        "test/api_integration/apis/security/session.ts",
+        "test/api_integration/apis/security/privileges.ts",
+        "test/api_integration/apis/security/index_fields.ts",
+        "test/api_integration/apis/security/builtin_es_privileges.ts"
       ],
       "tags": [
         "api_integration.apis.security.change_password",
@@ -1691,7 +1691,7 @@
     {
       "config": "test/oidc_api_integration/implicit_flow.config.ts",
       "files": [
-        "x-pack/test/oidc_api_integration/apis/implicit_flow/oidc_auth.ts"
+        "test/oidc_api_integration/apis/implicit_flow/oidc_auth.ts"
       ],
       "tags": [
         "oidc_api_integration.apis.implicit_flow.oidc_auth"
@@ -1701,9 +1701,9 @@
     {
       "config": "test/ui_capabilities/spaces_only/config.ts",
       "files": [
-        "x-pack/test/ui_capabilities/spaces_only/tests/catalogue.ts",
-        "x-pack/test/ui_capabilities/spaces_only/tests/foo.ts",
-        "x-pack/test/ui_capabilities/spaces_only/tests/nav_links.ts"
+        "test/ui_capabilities/spaces_only/tests/catalogue.ts",
+        "test/ui_capabilities/spaces_only/tests/foo.ts",
+        "test/ui_capabilities/spaces_only/tests/nav_links.ts"
       ],
       "tags": [
         "ui_capabilities.spaces_only.tests.catalogue",
@@ -1787,16 +1787,16 @@
     {
       "config": "test/functional/config.firefox.js",
       "files": [
-        "x-pack/test/functional/apps/logstash/pipeline_list.js",
-        "x-pack/test/functional/apps/infra/log_entry_categories_tab.ts",
-        "x-pack/test/functional/apps/infra/log_entry_rate_tab.ts",
-        "x-pack/test/functional/apps/infra/link_to.ts",
-        "x-pack/test/functional/apps/remote_clusters/home_page.ts",
-        "x-pack/test/functional/apps/cross_cluster_replication/home_page.ts",
-        "x-pack/test/functional/apps/index_lifecycle_management/home_page.ts",
-        "x-pack/test/functional/apps/status_page/status_page.ts",
-        "x-pack/test/functional/apps/grok_debugger/grok_debugger.js",
-        "x-pack/test/functional/apps/index_management/home_page.ts"
+        "test/functional/apps/logstash/pipeline_list.js",
+        "test/functional/apps/infra/log_entry_categories_tab.ts",
+        "test/functional/apps/infra/log_entry_rate_tab.ts",
+        "test/functional/apps/infra/link_to.ts",
+        "test/functional/apps/remote_clusters/home_page.ts",
+        "test/functional/apps/cross_cluster_replication/home_page.ts",
+        "test/functional/apps/index_lifecycle_management/home_page.ts",
+        "test/functional/apps/status_page/status_page.ts",
+        "test/functional/apps/grok_debugger/grok_debugger.js",
+        "test/functional/apps/index_management/home_page.ts"
       ],
       "tags": [
         "functional.apps.logstash.pipeline_list",
@@ -1815,11 +1815,11 @@
     {
       "config": "test/functional/config.firefox.js",
       "files": [
-        "x-pack/test/functional/apps/spaces/spaces_selection.ts",
-        "x-pack/test/functional/apps/infra/home_page.ts",
-        "x-pack/test/functional/apps/security/users.js",
-        "x-pack/test/functional/apps/infra/metrics_source_configuration.ts",
-        "x-pack/test/functional/apps/snapshot_restore/home_page.ts"
+        "test/functional/apps/spaces/spaces_selection.ts",
+        "test/functional/apps/infra/home_page.ts",
+        "test/functional/apps/security/users.js",
+        "test/functional/apps/infra/metrics_source_configuration.ts",
+        "test/functional/apps/snapshot_restore/home_page.ts"
       ],
       "tags": [
         "functional.apps.spaces.spaces_selection",
@@ -1833,10 +1833,10 @@
     {
       "config": "test/functional/config.firefox.js",
       "files": [
-        "x-pack/test/functional/apps/logstash/pipeline_create.js",
-        "x-pack/test/functional/apps/machine_learning/pages.ts",
-        "x-pack/test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
-        "x-pack/test/functional/apps/transform/creation_index_pattern.ts"
+        "test/functional/apps/logstash/pipeline_create.js",
+        "test/functional/apps/machine_learning/pages.ts",
+        "test/functional/apps/upgrade_assistant/upgrade_assistant.ts",
+        "test/functional/apps/transform/creation_index_pattern.ts"
       ],
       "tags": [
         "functional.apps.logstash.pipeline_create",
@@ -1849,9 +1849,9 @@
     {
       "config": "test/functional/config.firefox.js",
       "files": [
-        "x-pack/test/functional/apps/security/security.ts",
-        "x-pack/test/functional/apps/security/user_email.js",
-        "x-pack/test/functional/apps/canvas/smoke_test.js"
+        "test/functional/apps/security/security.ts",
+        "test/functional/apps/security/user_email.js",
+        "test/functional/apps/canvas/smoke_test.js"
       ],
       "tags": [
         "functional.apps.security.security",
@@ -1863,10 +1863,10 @@
     {
       "config": "test/functional/config.firefox.js",
       "files": [
-        "x-pack/test/functional/apps/transform/creation_saved_search.ts",
-        "x-pack/test/functional/apps/spaces/enter_space.ts",
-        "x-pack/test/functional/apps/watcher/watcher_test.js",
-        "x-pack/test/functional/apps/infra/logs_source_configuration.ts"
+        "test/functional/apps/transform/creation_saved_search.ts",
+        "test/functional/apps/spaces/enter_space.ts",
+        "test/functional/apps/watcher/watcher_test.js",
+        "test/functional/apps/infra/logs_source_configuration.ts"
       ],
       "tags": [
         "functional.apps.transform.creation_saved_search",
