@@ -78,7 +78,22 @@ export class EmbeddableActionStorage implements ActionStorage {
   }
 
   async remove(eventId: string) {
-    throw new Error('not implemented');
+    const input = this.embbeddable.getInput();
+    const events = (input.events || []) as SerializedEvent[];
+    const index = events.findIndex(event => eventId === event.eventId);
+
+    if (index === -1) {
+      throw new Error(
+        `[ENOENT]: Event with [eventId = ${eventId}] could not be ` +
+          `removed as it does not exist in ` +
+          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+      );
+    }
+
+    this.embbeddable.updateInput({
+      ...input,
+      events: [...events.slice(0, index), ...events.slice(index + 1)],
+    });
   }
 
   async read(eventId: string): Promise<SerializedEvent> {
