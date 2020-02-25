@@ -48,10 +48,12 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
 
   const onClickSubmit = useCallback(
     (newTitle: string): void => {
-      onSubmit(newTitle);
+      if (newTitle !== title) {
+        onSubmit(newTitle);
+      }
       setEditMode(false);
     },
-    [changedTitle]
+    [changedTitle, title]
   );
 
   return editMode ? (
@@ -66,15 +68,17 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
+            color="secondary"
             fill
+            iconType="save"
             onClick={() => onClickSubmit(changedTitle as string)}
-            data-test-subj="editable-title-submit-btn"
+            size="s"
           >
             {i18n.SAVE}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} data-test-subj="editable-title-cancel-btn">
+          <EuiButtonEmpty iconType="cross" onClick={onCancel} size="s">
             {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>

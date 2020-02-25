@@ -69,7 +69,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
   const [isEditTags, setIsEditTags] = useState(false);
   const [tags, setTags] = useState(data.tags);
-  const [title, setTitle] = useState(data.title);
 
   const onUpdateField = useCallback(
     (newUpdateKey: keyof Case, updateValue: string | string[]) => {
@@ -104,7 +103,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           return null;
       }
     },
-    [dispatchUpdateCaseProperty, title]
+    [dispatchUpdateCaseProperty, data.title]
   );
 
   const onSetIsCaseOpen = useCallback(() => setIsCaseOpen(!isCaseOpen), [
@@ -151,21 +150,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
   ];
 
-  const onSubmit = useCallback(
-    newTitle => {
-      onUpdateField('title', newTitle);
-      setTitle(newTitle);
-    },
-    [title]
-  );
-
-  const titleNode = (
-    <EditableTitle
-      isLoading={isLoading && updateKey === 'title'}
-      title={title}
-      onSubmit={onSubmit}
-    />
-  );
+  const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [data.title]);
 
   return (
     <>
@@ -176,8 +161,14 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             text: i18n.BACK_TO_ALL,
           }}
           data-test-subj="case-view-title"
-          titleNode={titleNode}
-          title={title}
+          titleNode={
+            <EditableTitle
+              isLoading={isLoading && updateKey === 'title'}
+              title={data.title}
+              onSubmit={onSubmit}
+            />
+          }
+          title={data.title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -245,7 +236,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                 data-test-subj="case-view-tag-list"
                 tags={tags}
                 iconAction={{
-                  'aria-label': title,
+                  'aria-label': 'tags',
                   iconType: 'pencil',
                   onSubmit: newTags => onUpdateField('tags', newTags),
                   onClick: isEdit => setIsEditTags(isEdit),
