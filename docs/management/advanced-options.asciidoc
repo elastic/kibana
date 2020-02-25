@@ -55,7 +55,7 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `format:currency:defaultPattern`:: The default <<numeral, numeral pattern>> format for the "currency" format.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "\_default_".
-`format:number:defaultLocale`:: The <<numeral, numeral patteern>> locale.
+`format:number:defaultLocale`:: The <<numeral, numeral pattern>> locale.
 `format:number:defaultPattern`:: The <<numeral, numeral pattern>> for the "number" format.
 `format:percent:defaultPattern`:: The <<numeral, numeral pattern>> for the "percent" format.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
