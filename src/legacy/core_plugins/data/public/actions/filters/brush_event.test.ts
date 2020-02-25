@@ -69,12 +69,6 @@ describe('brushEvent', () => {
         ordered: {
           date: false,
         },
-        indexPattern: {
-          title: 'pattern',
-          fields: [],
-          id: 'logstash-*',
-          timeFieldName: 'time',
-        },
         series: [
           {
             values: [

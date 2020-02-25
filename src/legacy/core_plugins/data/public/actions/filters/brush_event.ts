@@ -19,13 +19,8 @@
 
 import { get, last } from 'lodash';
 import moment from 'moment';
-import {
-  esFilters,
-  IFieldType,
-  RangeFilterParams,
-  IIndexPattern,
-} from '../../../../../../plugins/data/public';
-import { deserializeAggConfig } from '../../search';
+import { esFilters, IFieldType, RangeFilterParams } from '../../../../../../plugins/data/public';
+import { deserializeAggConfig } from '../../search/expressions/utils';
 // should be removed after moving into new platform plugins data folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
@@ -36,7 +31,6 @@ export interface BrushEvent {
       date: boolean;
     };
     series: Array<Record<string, any>>;
-    indexPattern: IIndexPattern;
   };
   range: number[];
 }
