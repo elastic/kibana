@@ -25,6 +25,8 @@ import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import fieldChooserTemplate from './field_chooser.html';
 import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
+import chrome from 'ui/chrome';
+import { getServices } from '../../../kibana_services';
 
 export function createFieldChooserDirective($location, config, $route) {
   return {
@@ -181,9 +183,26 @@ export function createFieldChooserDirective($location, config, $route) {
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
+      function getMapsAppUrl() {
+        const services = getServices();
+        const mapsAppVisAlias = services.visualizations.types.getAliases().find(({ name }) => {
+          return name === 'maps';
+        });
+        return mapsAppVisAlias ? mapsAppVisAlias.aliasUrl : null;
+      }
+
+      function isFieldVisualizable(field) {
+
+      }
+
       function getVisualizeUrl(field) {
         if (!$scope.state) {
           return '';
+        }
+
+        const mapsAppUrl = getMapsAppUrl();
+        if (mapsAppUrl && field.type === 'geo_point' || field.type === 'geo_shape') {
+          return chrome.addBasePath(mapsAppUrl);
         }
 
         let agg = {};
