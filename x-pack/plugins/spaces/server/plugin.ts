@@ -13,7 +13,10 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { createDefaultSpace } from './lib/create_default_space';
@@ -49,6 +52,10 @@ export interface PluginsSetup {
   security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+}
+
+export interface PluginsStart {
+  features: FeaturesPluginStart;
 }
 
 export interface SpacesPluginSetup {
@@ -98,7 +105,7 @@ export class Plugin {
   public async start() {}
 
   public async setup(
-    core: CoreSetup<PluginsSetup>,
+    core: CoreSetup<PluginsStart>,
     plugins: PluginsSetup
   ): Promise<SpacesPluginSetup> {
     const service = new SpacesService(this.log, this.getLegacyAPI);
@@ -134,7 +141,6 @@ export class Plugin {
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
-      getLegacyAPI: this.getLegacyAPI,
       spacesService,
       features: plugins.features,
     });

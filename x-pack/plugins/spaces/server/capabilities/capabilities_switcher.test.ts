@@ -11,7 +11,7 @@ import { Capabilities, CoreSetup } from 'src/core/server';
 import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { PluginsSetup } from '../plugin';
+import { PluginsStart } from '../plugin';
 
 const features: Feature[] = [
   {
@@ -112,7 +112,7 @@ const setup = (space: Space) => {
   const logger = loggingServiceMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
-    (coreSetup as unknown) as CoreSetup<PluginsSetup>,
+    (coreSetup as unknown) as CoreSetup<PluginsStart>,
     spacesService,
     logger
   );

@@ -8,10 +8,10 @@ import { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { SpacesServiceSetup } from '../spaces_service';
-import { PluginsSetup } from '../plugin';
+import { PluginsStart } from '../plugin';
 
 export function setupCapabilitiesSwitcher(
-  core: CoreSetup<PluginsSetup>,
+  core: CoreSetup<PluginsStart>,
   spacesService: SpacesServiceSetup,
   logger: Logger
 ): CapabilitiesSwitcher {

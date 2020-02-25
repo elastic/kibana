@@ -7,11 +7,11 @@
 import { CoreSetup, Logger } from 'src/core/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
-import { PluginsSetup } from '../plugin';
+import { PluginsStart } from '../plugin';
 import { SpacesServiceSetup } from '../spaces_service';
 
 export const setupCapabilities = (
-  core: CoreSetup<PluginsSetup>,
+  core: CoreSetup<PluginsStart>,
   spacesService: SpacesServiceSetup,
   logger: Logger
 ) => {
