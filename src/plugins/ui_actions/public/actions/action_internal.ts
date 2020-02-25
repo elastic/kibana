@@ -51,7 +51,7 @@ export class ActionInternal<A extends AnyActionDefinition>
     config: this.definition.defaultConfig || {},
   });
 
-  public execute(context: ActionExecutionContext<A>) {
+  public execute(context: ActionExecutionContext<A>): ReturnType<A['execute']> {
     return this.definition.execute(context, this.contract);
   }
 
