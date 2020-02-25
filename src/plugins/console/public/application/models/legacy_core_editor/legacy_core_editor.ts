@@ -219,8 +219,13 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   off(event: EditorEvent, listener: () => void) {
-    if (event === 'changeSelection') {
+    if (event === 'changeCursor') {
+      this.editor.getSession().selection.off(event, listener);
+    } else if (event === 'changeSelection') {
       this.editor.off(event, listener);
+    } else {
+      // .off is not documented in types for getSession but does exist
+      (this.editor.getSession() as any).off(event, listener);
     }
   }
 

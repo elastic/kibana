@@ -17,7 +17,15 @@
  * under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  CSSProperties,
+  FunctionComponent,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -75,6 +83,12 @@ const DEFAULT_INPUT_VALUE = `GET _search
  *
  * The solution here is to manually create the div element that the editor mounts
  * to then call ".remove()" on that to forcibly clean up any remaining listeners.
+ *
+ * In theory we could just unregister all listeners and avoid need to re-create the
+ * entire editor after loading a new text object, but doing a hard refresh will
+ * ensure we don't have stale editor state (like text annotations) that we forgot
+ * to clean up or other listener memory leaks. If re-instantiating becomes a problem
+ * each time we open a new text object then this can be revisited.
  */
 const createEditorElement = () => {
   const el = document.createElement('div');
@@ -84,208 +98,219 @@ const createEditorElement = () => {
   return el;
 };
 
-function EditorUI({ textObject }: EditorProps) {
-  const {
-    services: { history, notifications },
-    docLinkVersion,
-    elasticsearchUrl,
-  } = useServicesContext();
+export const Editor: FunctionComponent<EditorProps> = memo(
+  ({ textObject }) => {
+    const {
+      services: { history, notifications },
+      docLinkVersion,
+      elasticsearchUrl,
+    } = useServicesContext();
 
-  const { settings } = useEditorReadContext();
-  const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
-  const saveCurrentTextObject = useSaveCurrentTextObject();
+    const { settings } = useEditorReadContext();
+    const setInputEditor = useSetInputEditor();
+    const sendCurrentRequestToES = useSendCurrentRequestToES();
+    const saveCurrentTextObject = useSaveCurrentTextObject();
 
-  const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
+    const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
 
-  const editorRef = useRef<HTMLDivElement | null>(null);
+    const editorRef = useRef<HTMLDivElement | null>(null);
 
-  const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea);
+    const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
+    useUIAceKeyboardMode(textArea);
 
-  const openDocumentation = useCallback(async () => {
-    const documentation = await getDocumentation(editorInstance!, docLinkVersion);
-    if (!documentation) {
-      return;
-    }
-    window.open(documentation, '_blank');
-  }, [docLinkVersion, editorInstance]);
-
-  useEffect(() => {
-    editorRef.current = createEditorElement();
-    const element = editorRef.current;
-    const mountPoint = document.querySelector('#conAppEditorMount')!;
-    mountPoint.appendChild(element);
-    const editor = senseEditor.create(element);
-    setEditorInstance(senseEditor.create(element));
-
-    const readQueryParams = () => {
-      const [, queryString] = (window.location.hash || '').split('?');
-
-      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
-    };
-
-    const loadBufferFromRemote = (url: string) => {
-      if (/^https?:\/\//.test(url)) {
-        const loadFrom: Record<string, any> = {
-          url,
-          // Having dataType here is required as it doesn't allow jQuery to `eval` content
-          // coming from the external source thereby preventing XSS attack.
-          dataType: 'text',
-          kbnXsrfToken: false,
-        };
-
-        if (/https?:\/\/api\.github\.com/.test(url)) {
-          loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
-        }
-
-        // Fire and forget.
-        $.ajax(loadFrom).done(async data => {
-          const coreEditor = editor.getCoreEditor();
-          await editor.update(data, true);
-          editor.moveToNextRequestEdge(false);
-          coreEditor.clearSelection();
-          editor.highlightCurrentRequestsAndUpdateActionBar();
-          coreEditor.getContainer().focus();
-        });
-      }
-    };
-
-    // Support for loading a console snippet from a remote source, like support docs.
-    const onHashChange = debounce(() => {
-      const { load_from: url } = readQueryParams();
-      if (!url) {
+    const openDocumentation = useCallback(async () => {
+      const documentation = await getDocumentation(editorInstance!, docLinkVersion);
+      if (!documentation) {
         return;
       }
-      loadBufferFromRemote(url);
-    }, 200);
-    window.addEventListener('hashchange', onHashChange);
+      window.open(documentation, '_blank');
+    }, [docLinkVersion, editorInstance]);
 
-    const initialQueryParams = readQueryParams();
+    // Effect #1
+    // - Instantiate the text editor and mount it to the DOM
+    // - Register all listeners relevant to editing text like autosave
+    // - Determine from where we need to be loading the initial buffer content
+    useEffect(() => {
+      editorRef.current = createEditorElement();
+      const element = editorRef.current;
+      const mountPoint = document.querySelector('#conAppEditorMount')!;
+      mountPoint.appendChild(element);
+      const editor = senseEditor.create(element);
+      setEditorInstance(editor);
 
-    if (initialQueryParams.load_from) {
-      loadBufferFromRemote(initialQueryParams.load_from);
-    } else {
-      editor.update(textObject.text || DEFAULT_INPUT_VALUE);
-    }
+      const readQueryParams = () => {
+        const [, queryString] = (window.location.hash || '').split('?');
 
-    function setupAutosave() {
-      let timer: number;
-      const saveDelay = 500;
+        return parse(queryString || '', { sort: false }) as Required<QueryParams>;
+      };
 
-      editor.getCoreEditor().on('change', () => {
-        if (timer) {
-          clearTimeout(timer);
+      const loadBufferFromRemote = (url: string) => {
+        if (/^https?:\/\//.test(url)) {
+          const loadFrom: Record<string, any> = {
+            url,
+            // Having dataType here is required as it doesn't allow jQuery to `eval` content
+            // coming from the external source thereby preventing XSS attack.
+            dataType: 'text',
+            kbnXsrfToken: false,
+          };
+
+          if (/https?:\/\/api\.github\.com/.test(url)) {
+            loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
+          }
+
+          // Fire and forget.
+          $.ajax(loadFrom).done(async data => {
+            const coreEditor = editor.getCoreEditor();
+            await editor.update(data, true);
+            await editor.moveToNextRequestEdge(false);
+            coreEditor.clearSelection();
+            await editor.highlightCurrentRequestsAndUpdateActionBar();
+            coreEditor.getContainer().focus();
+          });
         }
-        timer = window.setTimeout(saveCurrentState, saveDelay);
-      });
-    }
+      };
 
-    function saveCurrentState() {
-      try {
-        const content = editor.getCoreEditor().getValue();
-        saveCurrentTextObject(content);
-      } catch (e) {
-        // Ignoring saving error
+      // Support for loading a console snippet from a remote source, like support docs.
+      const onHashChange = debounce(() => {
+        const { load_from: url } = readQueryParams();
+        if (!url) {
+          return;
+        }
+        loadBufferFromRemote(url);
+      }, 200);
+      window.addEventListener('hashchange', onHashChange);
+
+      const initialQueryParams = readQueryParams();
+
+      if (initialQueryParams.load_from) {
+        loadBufferFromRemote(initialQueryParams.load_from);
+      } else {
+        editor.update(textObject.text || DEFAULT_INPUT_VALUE);
       }
-    }
 
-    setInputEditor(editor);
-    setTextArea(editorRef.current!.querySelector('textarea'));
+      function setupAutosave() {
+        let timer: number;
+        const saveDelay = 500;
 
-    mappings.retrieveAutoCompleteInfo();
+        editor.getCoreEditor().on('change', () => {
+          if (timer) {
+            clearTimeout(timer);
+          }
+          timer = window.setTimeout(saveCurrentState, saveDelay);
+        });
+      }
 
-    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-    setupAutosave();
+      function saveCurrentState() {
+        try {
+          const content = editor.getCoreEditor().getValue();
+          saveCurrentTextObject(content);
+        } catch (e) {
+          // Ignoring saving error
+        }
+      }
 
-    editor.init();
+      setInputEditor(editor);
+      setTextArea(editorRef.current!.querySelector('textarea'));
 
-    return () => {
-      unsubscribeResizer();
-      mappings.clearSubscriptions();
-      window.removeEventListener('hashchange', onHashChange);
+      mappings.retrieveAutoCompleteInfo();
 
-      editor.getCoreEditor().destroy();
-      // See the description of createEditorElement above for why we do this.
-      element.remove();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saveCurrentTextObject, textObject.id, history, setInputEditor]);
+      const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
+      setupAutosave();
 
-  useEffect(() => {
-    if (editorInstance) {
-      applyCurrentSettings(editorInstance.getCoreEditor(), settings);
-      // Preserve legacy focus behavior after settings have updated.
-      editorInstance!
-        .getCoreEditor()
-        .getContainer()
-        .focus();
-    }
-  }, [settings, editorInstance]);
+      editor.init();
 
-  useEffect(() => {
-    if (editorInstance) {
-      registerCommands({
-        senseEditor: editorInstance,
-        sendCurrentRequestToES,
-        openDocumentation,
-      });
-    }
-  }, [sendCurrentRequestToES, openDocumentation, editorInstance]);
+      return () => {
+        unsubscribeResizer();
+        mappings.clearSubscriptions();
+        window.removeEventListener('hashchange', onHashChange);
 
-  return (
-    <div style={abs} className="conApp">
-      <div className="conApp__editor">
-        <ul className="conApp__autoComplete" id="autocomplete" />
-        <EuiFlexGroup
-          className="conApp__editorActions"
-          id="ConAppEditorActions"
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiFlexItem>
-            <EuiToolTip
-              content={i18n.translate('console.sendRequestButtonTooltip', {
-                defaultMessage: 'Click to send request',
-              })}
-            >
-              <button
-                onClick={sendCurrentRequestToES}
-                data-test-subj="sendRequestButton"
-                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+        editor.getCoreEditor().destroy();
+        // See the description of createEditorElement above for why we do this.
+        element.remove();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [saveCurrentTextObject, textObject.id, history, setInputEditor]);
+
+    // Effect #2
+    // Apply user settings to current editor instance
+    useEffect(() => {
+      if (editorInstance) {
+        applyCurrentSettings(editorInstance.getCoreEditor(), settings);
+        // Preserve legacy focus behavior after settings have updated.
+        editorInstance!
+          .getCoreEditor()
+          .getContainer()
+          .focus();
+      }
+    }, [settings, editorInstance]);
+
+    // Effect #3
+    // Register keyboard shortcuts
+    useEffect(() => {
+      if (editorInstance) {
+        registerCommands({
+          senseEditor: editorInstance,
+          sendCurrentRequestToES,
+          openDocumentation,
+        });
+      }
+    }, [sendCurrentRequestToES, openDocumentation, editorInstance]);
+
+    return (
+      <div style={abs} className="conApp">
+        <div className="conApp__editor">
+          <ul className="conApp__autoComplete" id="autocomplete" />
+          <EuiFlexGroup
+            className="conApp__editorActions"
+            id="ConAppEditorActions"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiFlexItem>
+              <EuiToolTip
+                content={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
                 })}
-                className="conApp__editorActionButton conApp__editorActionButton--success"
               >
-                <EuiIcon type="play" />
-              </button>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ConsoleMenu
-              getCurl={() => {
-                return editorInstance!.getRequestsAsCURL(elasticsearchUrl);
-              }}
-              getDocumentation={() => {
-                return getDocumentation(editorInstance!, docLinkVersion);
-              }}
-              autoIndent={(event: any) => {
-                autoIndent(editorInstance!, event);
-              }}
-              addNotification={({ title }) => notifications.toasts.add({ title })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                <button
+                  onClick={sendCurrentRequestToES}
+                  data-test-subj="sendRequestButton"
+                  aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                    defaultMessage: 'Click to send request',
+                  })}
+                  className="conApp__editorActionButton conApp__editorActionButton--success"
+                >
+                  <EuiIcon type="play" />
+                </button>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ConsoleMenu
+                getCurl={() => {
+                  return editorInstance!.getRequestsAsCURL(elasticsearchUrl);
+                }}
+                getDocumentation={() => {
+                  return getDocumentation(editorInstance!, docLinkVersion);
+                }}
+                autoIndent={(event: any) => {
+                  autoIndent(editorInstance!, event);
+                }}
+                addNotification={({ title }) => notifications.toasts.add({ title })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
+          {/* Axe complains about Ace's textarea element missing a label, which interferes with our
         automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
         satisfy Axe. */}
 
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label id="conAppEditorMount" className="conApp__textAreaLabelHack" />
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label id="conAppEditorMount" className="conApp__textAreaLabelHack" />
+        </div>
       </div>
-    </div>
-  );
-}
-
-export const Editor = React.memo(EditorUI);
+    );
+  },
+  ({ textObject: { id: previousId } }, { textObject: { id: nextId } }) => {
+    return previousId === nextId;
+  }
+);
