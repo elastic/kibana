@@ -13,6 +13,7 @@ import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { configUtilsMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
+import { LICENSE_TYPE } from '../../licensing/common/types';
 
 import {
   elasticsearchServiceMock,
@@ -65,6 +66,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -100,6 +102,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -140,6 +143,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -233,6 +237,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -346,6 +351,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -407,6 +413,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -440,6 +447,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({

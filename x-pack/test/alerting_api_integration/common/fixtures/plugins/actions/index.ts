@@ -6,6 +6,7 @@
 import Hapi from 'hapi';
 import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../plugins/actions/server/plugin';
 import { ActionType } from '../../../../../../plugins/actions/server';
+import { LICENSE_TYPE } from '../../../../../../plugins/licensing/common/types';
 
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -43,6 +44,7 @@ export default function(kibana: any) {
       const notEnabledActionType: ActionType = {
         id: 'test.not-enabled',
         name: 'Test: Not Enabled',
+        minimumLicenseRequired: LICENSE_TYPE.basic,
         async executor() {
           return { status: 'ok', actionId: '' };
         },

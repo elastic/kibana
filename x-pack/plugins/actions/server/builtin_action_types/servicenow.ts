@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { postServiceNow } from './lib/post_servicenow';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
@@ -90,6 +91,7 @@ export function getActionType({
   return {
     id: '.servicenow',
     name: 'servicenow',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

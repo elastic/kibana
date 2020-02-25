@@ -15,6 +15,7 @@ import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -118,6 +119,7 @@ export function getActionType(params: GetActionTypeParams): ActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),

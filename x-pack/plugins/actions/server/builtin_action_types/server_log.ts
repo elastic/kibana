@@ -11,6 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 const ACTION_NAME = 'Server log';
 
@@ -38,6 +39,7 @@ export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.server-log',
     name: ACTION_NAME,
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     validate: {
       params: ParamsSchema,
     },

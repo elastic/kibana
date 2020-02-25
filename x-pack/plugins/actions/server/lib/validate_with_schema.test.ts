@@ -8,13 +8,19 @@ import { schema } from '@kbn/config-schema';
 
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 const executor: ExecutorType = async options => {
   return { status: 'ok', actionId: options.actionId };
 };
 
 test('should validate when there are no validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
+    executor,
+  };
   const testValue = { any: ['old', 'thing'] };
 
   const result = validateConfig(actionType, testValue);
@@ -22,7 +28,13 @@ test('should validate when there are no validators', () => {
 });
 
 test('should validate when there are no individual validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor, validate: {} };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
+    executor,
+    validate: {},
+  };
 
   let result;
   const testValue = { any: ['old', 'thing'] };
@@ -42,6 +54,7 @@ test('should validate when validators return incoming value', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     executor,
     validate: {
       params: selfValidator,
@@ -69,6 +82,7 @@ test('should validate when validators return different values', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     executor,
     validate: {
       params: selfValidator,
@@ -99,6 +113,7 @@ test('should throw with expected error when validators fail', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     executor,
     validate: {
       params: erroringValidator,
@@ -127,6 +142,7 @@ test('should work with @kbn/config-schema', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     executor,
     validate: {
       params: testSchema,

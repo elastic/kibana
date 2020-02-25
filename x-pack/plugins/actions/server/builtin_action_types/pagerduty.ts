@@ -11,6 +11,7 @@ import { postPagerduty } from './lib/post_pagerduty';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -96,6 +97,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.pagerduty',
+    minimumLicenseRequired: LICENSE_TYPE.basic,
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),

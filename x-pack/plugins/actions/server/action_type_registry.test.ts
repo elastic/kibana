@@ -9,6 +9,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
 import { configUtilsMock } from './actions_config.mock';
+import { LICENSE_TYPE } from '../../licensing/common/types';
 
 const mockTaskManager = taskManagerMock.setup();
 const actionTypeRegistryParams = {
@@ -31,6 +32,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -55,12 +57,14 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        minimumLicenseRequired: LICENSE_TYPE.basic,
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -73,6 +77,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -94,6 +99,7 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -120,6 +126,7 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -144,6 +151,7 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      minimumLicenseRequired: LICENSE_TYPE.basic,
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
