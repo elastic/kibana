@@ -13,9 +13,8 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
+import React, { useState } from 'react';
 import { CustomAction } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_action/custom_action_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useCallApmApi } from '../../../../../../hooks/useCallApmApi';
@@ -70,14 +69,7 @@ export const CustomActionsFlyout = ({
     convertFiltersToArray(customActionSelected?.filters)
   );
 
-  const { register, handleSubmit, errors, control, watch } = useForm<
-    CustomActionFormData
-  >({
-    defaultValues: {
-      ...customActionSelected,
-      filters: convertFiltersToArray(customActionSelected?.filters)
-    }
-  });
+  const isFormValid = !!label && !!url;
 
   const onSubmit = async (
     event:
@@ -130,7 +122,6 @@ export const CustomActionsFlyout = ({
             <EuiSpacer size="l" />
 
             <ActionSection
-              errors={errors}
               label={label}
               onChangeLabel={setLabel}
               url={url}
@@ -143,6 +134,7 @@ export const CustomActionsFlyout = ({
           </EuiFlyoutBody>
 
           <FlyoutFooter
+            isSaveButtonEnabled={isFormValid}
             onClose={onClose}
             isSaving={isSaving}
             onDelete={onDelete}

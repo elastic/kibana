@@ -11,9 +11,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React from 'react';
-import { NestDataObject } from 'react-hook-form';
 import { CustomActionFormData } from './';
 
 interface InputField {
@@ -26,7 +24,6 @@ interface InputField {
 }
 
 interface Props {
-  errors: NestDataObject<CustomActionFormData>;
   label?: string;
   onChangeLabel: (label: string) => void;
   url?: string;
@@ -34,7 +31,6 @@ interface Props {
 }
 
 export const ActionSection = ({
-  errors,
   label,
   onChangeLabel,
   url,
@@ -96,7 +92,6 @@ export const ActionSection = ({
               placeholder={field.placeholder}
               name={field.name}
               fullWidth
-              isInvalid={!isEmpty(errors[field.name])}
               value={field.value}
               onChange={e => field.onChange(e.target.value)}
             />

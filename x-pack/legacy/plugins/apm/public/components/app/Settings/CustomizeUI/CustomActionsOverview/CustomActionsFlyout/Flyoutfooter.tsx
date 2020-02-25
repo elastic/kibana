@@ -18,12 +18,14 @@ export const FlyoutFooter = ({
   onClose,
   isSaving,
   onDelete,
-  customActionId
+  customActionId,
+  isSaveButtonEnabled
 }: {
   onClose: () => void;
   isSaving: boolean;
   onDelete: () => void;
   customActionId?: string;
+  isSaveButtonEnabled: boolean;
 }) => {
   return (
     <EuiFlyoutFooter>
@@ -49,7 +51,12 @@ export const FlyoutFooter = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiButton fill type="submit" isLoading={isSaving}>
+              <EuiButton
+                fill
+                type="submit"
+                isLoading={isSaving}
+                isDisabled={!isSaveButtonEnabled}
+              >
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customActions.flyout.save',
                   {
