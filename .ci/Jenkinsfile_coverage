@@ -86,6 +86,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   """
                   echo "### About to upload the static site per this TIME_STAMP: ${TIME_STAMP}"
 
+                  echo "### The following may be used to build a url to the historical ci run."
+                  echo "### env.BUILD_URL: ${env.BUILD_URL}"
+                  echo "### env.JOB_URL: ${env.JOB_URL}"
+
                   """,
                   "### Upload Code Coverage Static Site"
                 )
