@@ -5,6 +5,6 @@
   "configPath": ["demoSearch"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "data_enhanced"],
+  "requiredPlugins": ["data"],
   "optionalPlugins": []
 }
