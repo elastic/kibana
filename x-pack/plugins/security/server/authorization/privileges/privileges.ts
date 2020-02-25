@@ -60,15 +60,17 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           ];
         }
 
-        for (const featurePrivilege of featurePrivilegeIterator(feature, {
-          augmentWithSubFeaturePrivileges: false,
-        })) {
-          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
-            actions.login,
-            actions.version,
-            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
-            ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
-          ];
+        if (feature.subFeatures?.length > 0) {
+          for (const featurePrivilege of featurePrivilegeIterator(feature, {
+            augmentWithSubFeaturePrivileges: false,
+          })) {
+            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+              actions.login,
+              actions.version,
+              ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+              ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
+            ];
+          }
         }
 
         for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {

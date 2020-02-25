@@ -17,9 +17,7 @@ export function* featurePrivilegeIterator(
   feature: Feature,
   options: IteratorOptions
 ): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
-  if (feature.privileges === 'none') return;
-
-  for (const entry of Object.entries(feature.privileges)) {
+  for (const entry of Object.entries(feature.privileges ?? {})) {
     const [privilegeId, privilege] = entry;
 
     if (options.predicate && !options.predicate(privilegeId, privilege)) {

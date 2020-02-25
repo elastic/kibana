@@ -39,7 +39,7 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
     };
   }
 
-  const featurePrivileges = feature.privileges === 'none' ? [] : Object.values(feature.privileges);
+  const featurePrivileges = Object.values(feature.privileges ?? {});
   if (feature.subFeatures) {
     featurePrivileges.push(
       ...feature.subFeatures.map(sf => sf.privilegeGroups.map(pg => pg.privileges)).flat(2)

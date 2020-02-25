@@ -179,7 +179,6 @@ Array [
       "api": Array [],
       "app": Array [
         "kibana",
-        "createShortURLs",
       ],
       "catalogue": Array [
         "discover",
@@ -208,7 +207,6 @@ Array [
     "privilege": Object {
       "app": Array [
         "kibana",
-        "createShortURLs",
       ],
       "catalogue": Array [
         "discover",

@@ -53,14 +53,7 @@ describe('features', () => {
         actions.ui.get('navLinks', 'kibana:foo'),
         actions.allHack,
       ],
-      minimal_all: [
-        actions.login,
-        actions.version,
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.allHack,
-      ],
       read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
-      minimal_read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
     });
   });
 
@@ -136,9 +129,7 @@ describe('features', () => {
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
       all: [...expectedAllPrivileges],
-      minimal_all: [...expectedAllPrivileges],
       read: [...expectedReadPrivileges],
-      minimal_read: [...expectedReadPrivileges],
     });
   });
 
@@ -236,9 +227,7 @@ describe('features', () => {
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
       all: [...expectedAllPrivileges],
-      minimal_all: [...expectedAllPrivileges],
       read: [...expectedReadPrivileges],
-      minimal_read: [...expectedReadPrivileges],
     });
   });
 
@@ -249,7 +238,7 @@ describe('features', () => {
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: 'none',
+        privileges: null,
       }),
     ];
 
@@ -490,7 +479,7 @@ describe('features', () => {
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
-          privileges: 'none',
+          privileges: null,
           reserved: {
             privilege: {
               savedObject: {
@@ -669,7 +658,7 @@ describe('reserved', () => {
         management: {
           foo: ['management-1', 'management-2'],
         },
-        privileges: 'none',
+        privileges: null,
         reserved: {
           privilege: {
             savedObject: {
@@ -707,7 +696,7 @@ describe('reserved', () => {
         management: {
           foo: ['ignore-me-1', 'ignore-me-2'],
         },
-        privileges: 'none',
+        privileges: null,
         reserved: {
           privilege: {
             app: ['app-1', 'app-2'],
@@ -751,7 +740,7 @@ describe('reserved', () => {
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: 'none',
+        privileges: null,
         reserved: {
           privilege: {
             savedObject: {

@@ -13,7 +13,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -150,12 +150,12 @@ describe('FeatureRegistry', () => {
     );
   });
 
-  it(`does not allow sub-features to be registered when no primary privileges are registered`, () => {
+  it(`does not allow sub-features to be registered when no primary privileges are not registered`, () => {
     const feature: IFeature = {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
       subFeatures: [
         {
           name: 'my sub feature',
@@ -213,12 +213,8 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
-    if (result[0].privileges === 'none') {
-      expect(result[0].privileges).toHaveProperty('all');
-      expect(result[0].privileges).toHaveProperty('read');
-      // makes TS happy below. The expect clauses above are guaranteed to throw.
-      return;
-    }
+    expect(result[0].privileges).toHaveProperty('all');
+    expect(result[0].privileges).toHaveProperty('read');
 
     const allPrivilege = result[0].privileges?.all;
     expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
@@ -251,12 +247,8 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
-    if (result[0].privileges === 'none') {
-      expect(result[0].privileges).toHaveProperty('all');
-      expect(result[0].privileges).toHaveProperty('read');
-      // makes TS happy below. The expect clauses above are guaranteed to throw.
-      return;
-    }
+    expect(result[0].privileges).toHaveProperty('all');
+    expect(result[0].privileges).toHaveProperty('read');
 
     const allPrivilege = result[0].privileges?.all;
     const readPrivilege = result[0].privileges?.read;
@@ -269,7 +261,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'foo',
         privilege: {
@@ -318,12 +310,9 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
-    if (result[0].privileges === 'none') {
-      expect(result[0].privileges).toHaveProperty('all');
-      expect(result[0].privileges).toHaveProperty('read');
-      // makes TS happy below. The expect clauses above are guaranteed to throw.
-      return;
-    }
+    expect(result[0].privileges).toHaveProperty('all');
+    expect(result[0].privileges).toHaveProperty('read');
+
     const allPrivilege = result[0].privileges!.all;
     const readPrivilege = result[0].privileges!.read;
     expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
@@ -336,14 +325,14 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
     };
 
     const duplicateFeature: IFeature = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -363,7 +352,7 @@ describe('FeatureRegistry', () => {
           name: 'some feature',
           navLinkId: prohibitedChars,
           app: [],
-          privileges: 'none',
+          privileges: null,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -378,7 +367,7 @@ describe('FeatureRegistry', () => {
             kibana: [prohibitedChars],
           },
           app: [],
-          privileges: 'none',
+          privileges: null,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -391,7 +380,7 @@ describe('FeatureRegistry', () => {
           name: 'some feature',
           catalogue: [prohibitedChars],
           app: [],
-          privileges: 'none',
+          privileges: null,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -405,7 +394,7 @@ describe('FeatureRegistry', () => {
           id: prohibitedId,
           name: 'some feature',
           app: [],
-          privileges: 'none',
+          privileges: null,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -432,7 +421,7 @@ describe('FeatureRegistry', () => {
 
     const featureRegistry = new FeatureRegistry();
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"privileges\\" fails because [\\"privileges\\" must be a string, \\"foo\\" is not allowed]"`
+      `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
     );
   });
 
@@ -528,7 +517,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['bar'],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -554,7 +543,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['foo', 'bar', 'baz'],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -674,7 +663,7 @@ describe('FeatureRegistry', () => {
       name: 'Test Feature',
       app: [],
       catalogue: ['bar'],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -702,7 +691,7 @@ describe('FeatureRegistry', () => {
       name: 'Test Feature',
       app: [],
       catalogue: ['foo', 'bar', 'baz'],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -848,7 +837,7 @@ describe('FeatureRegistry', () => {
       management: {
         kibana: ['hey'],
       },
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -882,7 +871,7 @@ describe('FeatureRegistry', () => {
       management: {
         kibana: ['hey', 'hey-there'],
       },
-      privileges: 'none',
+      privileges: null,
       reserved: {
         description: 'something',
         privilege: {
@@ -1036,13 +1025,13 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
-      privileges: 'none',
+      privileges: null,
     };
     const feature2: IFeature = {
       id: 'test-feature-2',
       name: 'Test Feature 2',
       app: [],
-      privileges: 'none',
+      privileges: null,
     };
 
     const featureRegistry = new FeatureRegistry();

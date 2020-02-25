@@ -99,15 +99,14 @@ const schema = Joi.object({
     .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
-  privileges: Joi.alternatives(
-    Joi.string().allow('none'),
-    Joi.object({
-      all: privilegeSchema,
-      read: privilegeSchema,
-    })
-  ).required(),
+  privileges: Joi.object({
+    all: privilegeSchema,
+    read: privilegeSchema,
+  })
+    .allow(null)
+    .required(),
   subFeatures: Joi.when('privileges', {
-    is: 'none',
+    is: null,
     then: Joi.array()
       .items(subFeatureSchema)
       .max(0),
@@ -128,19 +127,19 @@ export function validateFeature(feature: IFeature) {
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [] } = feature;
 
-  const featureApps = new Set(app);
+  const unseenApps = new Set(app);
 
   const managementSets = Object.entries(management).map(entry => [
     entry[0],
     new Set(entry[1]),
   ]) as Array<[string, Set<string>]>;
 
-  const featureManagement = new Map<string, Set<string>>(managementSets);
+  const unseenManagement = new Map<string, Set<string>>(managementSets);
 
-  const featureCatalogue = new Set(catalogue);
+  const unseenCatalogue = new Set(catalogue);
 
   function validateAppEntry(privilegeId: string, entry: string[] = []) {
-    entry.forEach(privilegeApp => featureApps.delete(privilegeApp));
+    entry.forEach(privilegeApp => unseenApps.delete(privilegeApp));
 
     const unknownAppEntries = difference(entry, app);
     if (unknownAppEntries.length > 0) {
@@ -153,7 +152,7 @@ export function validateFeature(feature: IFeature) {
   }
 
   function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
-    entry.forEach(privilegeCatalogue => featureCatalogue.delete(privilegeCatalogue));
+    entry.forEach(privilegeCatalogue => unseenCatalogue.delete(privilegeCatalogue));
 
     const unknownCatalogueEntries = difference(entry || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
@@ -170,11 +169,11 @@ export function validateFeature(feature: IFeature) {
     managementEntry: Record<string, string[]> = {}
   ) {
     Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
-      if (featureManagement.has(managementSectionId)) {
+      if (unseenManagement.has(managementSectionId)) {
         managementSectionEntry.forEach(entry => {
-          featureManagement.get(managementSectionId)!.delete(entry);
-          if (featureManagement.get(managementSectionId)?.size === 0) {
-            featureManagement.delete(managementSectionId);
+          unseenManagement.get(managementSectionId)!.delete(entry);
+          if (unseenManagement.get(managementSectionId)?.size === 0) {
+            unseenManagement.delete(managementSectionId);
           }
         });
       }
@@ -202,7 +201,7 @@ export function validateFeature(feature: IFeature) {
   }
 
   const privilegeEntries: Array<[string, FeatureKibanaPrivileges]> = [];
-  if (feature.privileges !== 'none') {
+  if (feature.privileges) {
     privilegeEntries.push(...Object.entries(feature.privileges));
   }
   if (feature.reserved) {
@@ -249,28 +248,28 @@ export function validateFeature(feature: IFeature) {
     });
   });
 
-  if (featureApps.size > 0) {
+  if (unseenApps.size > 0) {
     throw new Error(
       `Feature ${
         feature.id
       } specifies app entries which are not granted to any privileges: ${Array.from(
-        featureApps.values()
+        unseenApps.values()
       ).join(',')}`
     );
   }
 
-  if (featureCatalogue.size > 0) {
+  if (unseenCatalogue.size > 0) {
     throw new Error(
       `Feature ${
         feature.id
       } specifies catalogue entries which are not granted to any privileges: ${Array.from(
-        featureCatalogue.values()
+        unseenCatalogue.values()
       ).join(',')}`
     );
   }
 
-  if (featureManagement.size > 0) {
-    const ungrantedManagement = Array.from(featureManagement.entries()).reduce((acc, entry) => {
+  if (unseenManagement.size > 0) {
+    const ungrantedManagement = Array.from(unseenManagement.entries()).reduce((acc, entry) => {
       const values = Array.from(entry[1].values()).map(
         managementPage => `${entry[0]}.${managementPage}`
       );

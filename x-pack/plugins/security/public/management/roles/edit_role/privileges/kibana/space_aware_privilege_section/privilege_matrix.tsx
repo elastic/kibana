@@ -135,7 +135,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
             defaultMessage: 'Base privilege',
           }),
           app: [],
-          privileges: 'none',
+          privileges: null,
         },
         role,
       },

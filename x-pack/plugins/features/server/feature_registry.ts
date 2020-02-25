@@ -37,13 +37,9 @@ export class FeatureRegistry {
 }
 
 function applyAutomaticPrivilegeGrants(feature: IFeature): IFeature {
-  let allPrivilege;
-  let readPrivilege;
-  if (feature.privileges !== 'none') {
-    allPrivilege = feature.privileges.all;
-    readPrivilege = feature.privileges.read;
-  }
-  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : undefined;
+  const allPrivilege = feature.privileges?.all;
+  const readPrivilege = feature.privileges?.read;
+  const reservedPrivilege = feature.reserved?.privilege;
 
   applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
   applyAutomaticReadPrivilegeGrants(readPrivilege);

@@ -12,7 +12,7 @@ describe('featurePrivilegeIterator', () => {
     const feature = new Feature({
       id: 'foo',
       name: 'foo',
-      privileges: 'none',
+      privileges: null,
       app: [],
     });
 

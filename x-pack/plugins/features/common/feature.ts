@@ -98,12 +98,10 @@ export interface IFeature {
    * ```
    * @see FeatureKibanaPrivileges
    */
-  privileges:
-    | {
-        all: FeatureKibanaPrivileges;
-        read: FeatureKibanaPrivileges;
-      }
-    | 'none';
+  privileges: {
+    all: FeatureKibanaPrivileges;
+    read: FeatureKibanaPrivileges;
+  } | null;
 
   /**
    * Optional sub-feature privilege definitions. This can only be specified if `privileges` are are also defined.

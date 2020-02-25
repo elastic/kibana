@@ -18,14 +18,14 @@ const features: IFeature[] = [
     name: 'Feature 1',
     icon: 'spacesApp',
     app: [],
-    privileges: 'none',
+    privileges: null,
   },
   {
     id: 'feature-2',
     name: 'Feature 2',
     icon: 'spacesApp',
     app: [],
-    privileges: 'none',
+    privileges: null,
   },
 ];
 

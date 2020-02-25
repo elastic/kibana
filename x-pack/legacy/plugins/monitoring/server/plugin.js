@@ -92,7 +92,7 @@ export class Plugin {
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
-      privileges: 'none',
+      privileges: null,
       reserved: {
         privilege: {
           app: ['monitoring', 'kibana'],

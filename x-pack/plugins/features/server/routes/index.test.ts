@@ -21,7 +21,7 @@ describe('GET /api/features', () => {
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
-      privileges: 'none',
+      privileges: null,
     });
 
     featureRegistry.register({
@@ -29,7 +29,7 @@ describe('GET /api/features', () => {
       name: 'Licensed Feature',
       app: ['bar-app'],
       validLicenses: ['gold'],
-      privileges: 'none',
+      privileges: null,
     });
 
     const routerMock = httpServiceMock.createRouter();
@@ -64,7 +64,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": "none",
+                "privileges": null,
               },
               Object {
                 "app": Array [
@@ -72,7 +72,7 @@ describe('GET /api/features', () => {
                 ],
                 "id": "licensed_feature",
                 "name": "Licensed Feature",
-                "privileges": "none",
+                "privileges": null,
                 "validLicenses": Array [
                   "gold",
                 ],
@@ -99,7 +99,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": "none",
+                "privileges": null,
               },
             ],
           },
@@ -123,7 +123,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": "none",
+                "privileges": null,
               },
             ],
           },
@@ -147,7 +147,7 @@ describe('GET /api/features', () => {
                 "app": Array [],
                 "id": "feature_1",
                 "name": "Feature 1",
-                "privileges": "none",
+                "privileges": null,
               },
               Object {
                 "app": Array [
@@ -155,7 +155,7 @@ describe('GET /api/features', () => {
                 ],
                 "id": "licensed_feature",
                 "name": "Licensed Feature",
-                "privileges": "none",
+                "privileges": null,
                 "validLicenses": Array [
                   "gold",
                 ],
