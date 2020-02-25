@@ -314,7 +314,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
               })}
             </label>
           </EuiScreenReaderOnly>
-          <div id="conAppEditorMount" />
+          <div id="conAppEditorMount" className="conApp__editorContentContainer" />
         </div>
       </div>
     );
