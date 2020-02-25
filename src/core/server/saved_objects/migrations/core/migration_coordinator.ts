@@ -97,6 +97,11 @@ export async function coordinateMigration({
           `restarting Kibana.`
       );
       await waitForMigration(isMigrated, pollInterval);
+      return {
+        alias: index,
+        status: 'skipped',
+        reason: `another kibana instance appears to be migrating ${index}`,
+      };
     }
     throw error;
   }
