@@ -22,6 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../ui_actions';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -190,7 +191,7 @@ export abstract class Embeddable<
     this.onResetInput(newInput);
   }
 
-  public supportedTriggers() {
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
     return [];
   }
 }

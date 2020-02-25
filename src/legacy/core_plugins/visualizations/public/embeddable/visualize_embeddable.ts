@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Values } from '@kbn/utility-types';
 import _, { get } from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
@@ -47,6 +48,7 @@ import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/publ
 import { SavedObject } from '../../../../../plugins/saved_objects/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
+import { VIS_EVENT_TO_TRIGGER, VisEventToTrigger } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -399,4 +401,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       ...this.uiState.toJSON(),
     });
   };
+
+  public supportedTriggers() {
+    const supportedVisEvents = Object.keys(this.vis.API.events).sort() as Array<
+      keyof VisEventToTrigger
+    >;
+    const supportedTriggers = supportedVisEvents
+      .map<Values<VisEventToTrigger>>(visEvent => VIS_EVENT_TO_TRIGGER[visEvent])
+      .filter(Boolean) as Array<Values<VisEventToTrigger>>;
+
+    return supportedTriggers;
+  }
 }
