@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
 import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
+import { clamp } from '../../../elasticsearch_geo_utils';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
 
@@ -77,20 +78,14 @@ function rowToGeometry({ gridKey, gridCentroid, renderAs }) {
     };
   }
 
-  // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
+  // see https://github.com/elastic/elasticsearch/issues/24694 for why clamp is used
   const pointCoordinates = [
-    clampGrid(gridCentroid.location.lon, left, right),
-    clampGrid(gridCentroid.location.lat, bottom, top),
+    clamp(gridCentroid.location.lon, left, right),
+    clamp(gridCentroid.location.lat, bottom, top),
   ];
 
   return {
     type: 'Point',
     coordinates: pointCoordinates,
   };
-}
-
-function clampGrid(val, min, max) {
-  if (val > max) val = max;
-  else if (val < min) val = min;
-  return val;
 }
