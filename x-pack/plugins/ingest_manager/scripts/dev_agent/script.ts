@@ -40,9 +40,8 @@ run(
     log.info('Enrolled with sucess', agent);
 
     while (!closing) {
-      await new Promise((resolve, reject) =>
-        setTimeout(() => checkin(kibanaUrl, agent, log).then(resolve, reject), CHECKIN_INTERVAL)
-      );
+      await checkin(kibanaUrl, agent, log);
+      await new Promise((resolve, reject) => setTimeout(() => resolve(), CHECKIN_INTERVAL));
     }
   },
   {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -11,12 +11,7 @@ import {
   EuiCopy,
   EuiFieldText,
   EuiPopover,
-  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from '../';
-import * as MAC_COMMANDS from './mac_commands';
 import { EnrollmentAPIKey } from '../../../../../../types';
 
 // No need for i18n as these are platform names
@@ -24,44 +19,6 @@ const PLATFORMS = {
   macos: 'macOS',
   windows: 'Windows',
   linux: 'Linux',
-};
-
-// Manual instructions based on platform
-const PLATFORM_INSTRUCTIONS: {
-  [key: string]: ManualEnrollmentInstructions;
-} = {
-  macos: [
-    {
-      title: i18n.translate(
-        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepOneTitle',
-        {
-          defaultMessage: 'Download and install Elastic Agent',
-        }
-      ),
-      textPre: 'Lorem ipsum instructions here.',
-      commands: MAC_COMMANDS.INSTALL,
-    },
-    {
-      title: i18n.translate(
-        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepTwoTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: 'Modify the configuration file to set the connection information:',
-      commands: MAC_COMMANDS.CONFIG,
-      commandsLang: 'yaml',
-    },
-    {
-      title: i18n.translate(
-        'xpack.ingestManager.agentEnrollment.typeShell.manualInstall.stepThreeTitle',
-        {
-          defaultMessage: 'Start the agent',
-        }
-      ),
-      commands: MAC_COMMANDS.START,
-    },
-  ],
 };
 
 interface Props {
@@ -78,7 +35,6 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   // Platform state
   const [currentPlatform, setCurrentPlatform] = useState<keyof typeof PLATFORMS>('macos');
   const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);
-  const [isManualInstallationOpen, setIsManualInstallationOpen] = useState<boolean>(false);
 
   // Build quick installation command
   const quickInstallInstructions = `${
@@ -88,7 +44,7 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
 
   return (
-    <Fragment>
+    <>
       <EuiFieldText
         readOnly
         value={quickInstallInstructions}
@@ -125,41 +81,10 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
         }
         append={
           <EuiCopy textToCopy={quickInstallInstructions}>
-            {copy => (
-              <EuiButtonEmpty onClick={copy} color="primary" size="s">
-                <FormattedMessage
-                  id="xpack.ingestManager.agentEnrollment.copyInstructionsButtonText"
-                  defaultMessage="copy"
-                />
-              </EuiButtonEmpty>
-            )}
+            {copy => <EuiButtonEmpty onClick={copy} color="primary" iconType={'copy'} />}
           </EuiCopy>
         }
       />
-
-      <EuiSpacer size="m" />
-
-      <EuiButtonEmpty
-        onClick={() => setIsManualInstallationOpen(!isManualInstallationOpen)}
-        iconType={isManualInstallationOpen ? 'arrowUp' : 'arrowDown'}
-        iconSide="right"
-        size="xs"
-        flush="left"
-      >
-        <FormattedMessage
-          id="xpack.ingestManager.agentEnrollment.manualInstructionsToggleLinkText"
-          defaultMessage="Manual installation"
-        />
-      </EuiButtonEmpty>
-
-      {isManualInstallationOpen ? (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <ManualEnrollmentSteps
-            instructions={PLATFORM_INSTRUCTIONS[currentPlatform] || PLATFORM_INSTRUCTIONS.macos}
-          />
-        </Fragment>
-      ) : null}
-    </Fragment>
+    </>
   );
 };

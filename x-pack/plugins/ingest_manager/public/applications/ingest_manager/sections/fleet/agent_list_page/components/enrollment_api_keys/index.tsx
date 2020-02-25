@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { EuiBasicTable, EuiButtonEmpty, EuiSpacer, EuiPopover } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonEmpty, EuiSpacer, EuiPopover, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { usePagination, sendRequest } from '../../../../../hooks';
@@ -95,24 +95,21 @@ export const EnrollmentApiKeysTable: React.FunctionComponent<{
   );
 };
 
-const CreateApiKeyButton: React.FunctionComponent<{ onChange: () => void }> = ({ onChange }) => {
+export const CreateApiKeyButton: React.FunctionComponent<{ onChange: () => void }> = ({
+  onChange,
+}) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <EuiPopover
       ownFocus
       button={
-        <EuiButtonEmpty
-          onClick={() => setIsOpen(true)}
-          color="text"
-          iconType={'plusInCircle'}
-          size="xs"
-        >
+        <EuiLink onClick={() => setIsOpen(true)} color="primary">
           <FormattedMessage
             id="xpack.ingestManager.enrollmentApiKeyList.createNewButton"
             defaultMessage="Create a new key"
           />
-        </EuiButtonEmpty>
+        </EuiLink>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
