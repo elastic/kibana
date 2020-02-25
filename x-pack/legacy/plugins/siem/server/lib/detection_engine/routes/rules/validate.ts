@@ -70,7 +70,7 @@ export const transformValidateBulkError = (
   ruleStatus?: unknown
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       const transformed = transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
       const [validated, errors] = validate(transformed, rulesSchema);
       if (errors != null || validated == null) {
