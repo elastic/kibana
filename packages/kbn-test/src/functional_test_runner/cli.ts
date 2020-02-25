@@ -52,6 +52,9 @@ export function runFtrCli() {
             include: toArray(flags['include-tag'] as string | string[]),
             exclude: toArray(flags['exclude-tag'] as string | string[]),
           },
+          testrailOpts: {
+            testrail: flags.testrail,
+          },
           updateBaselines: flags.updateBaselines,
           excludeTestFiles: flags.exclude || undefined,
         }
@@ -105,7 +108,15 @@ export function runFtrCli() {
     {
       flags: {
         string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag', 'kibana-install-dir'],
-        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
+        boolean: [
+          'bail',
+          'invert',
+          'test-stats',
+          'updateBaselines',
+          'throttle',
+          'headless',
+          'testrail',
+        ],
         default: {
           config: 'test/functional/config.js',
           debug: true,
@@ -123,6 +134,7 @@ export function runFtrCli() {
         --kibana-install-dir  directory where the Kibana install being tested resides
         --throttle         enable network throttling in Chrome browser
         --headless         run browser in headless mode
+        --testrail         report pass/fail to testrail
       `,
       },
     }

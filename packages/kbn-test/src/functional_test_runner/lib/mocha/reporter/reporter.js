@@ -29,12 +29,21 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 
+// import Testrail from 'testrail-api';
+//
+// const testrail = new Testrail({
+//   host: 'https://elastic.testrail.io',
+//   user: '',
+//   password: '',
+// });
+
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const failureMetadata = getService('failureMetadata');
   let originalLogWriters;
   let reporterCaptureStartTime;
+  const results = [];
 
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
@@ -146,6 +155,15 @@ export function MochaReporterProvider({ getService }) {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
       log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
+      const testrailId = test.title.match(/c(\d+)/i);
+
+      if (config.get('testrailOpts.testrail') && testrailId != null) {
+        const result = {
+          case_id: parseInt(testrailId[1]),
+          status_id: 1,
+        };
+        results.push(result);
+      }
     };
 
     onFail = runnable => {
@@ -181,6 +199,14 @@ export function MochaReporterProvider({ getService }) {
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
       // them here. Tests will re-capture the snapshot in `onTestEnd()`
       snapshotLogsForRunnable(runnable);
+      const testrailId = test.title.match(/c(\d+)/i);
+      if (config.get('testrailOpts.testrail') && testrailId != null) {
+        const result = {
+          case_id: parseInt(testrailId[1]),
+          status_id: 5,
+        };
+        results.push(result);
+      }
     };
 
     onEnd = () => {
@@ -189,6 +215,15 @@ export function MochaReporterProvider({ getService }) {
       }
 
       writeEpilogue(log, this.stats);
+
+      if (config.get('testrailOpts.testrail')) {
+        // const projectId = 2;
+        // const suiteId = 23;
+        console.log(results);
+        // create a testrun in testrail
+
+        // write results to testrail
+      }
     };
   };
 }

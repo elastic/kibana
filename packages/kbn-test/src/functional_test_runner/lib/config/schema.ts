@@ -129,6 +129,12 @@ export const schema = Joi.object()
       })
       .default(),
 
+    testrailOpts: Joi.object()
+      .keys({
+        testrail: Joi.boolean().default(false),
+      })
+      .default(),
+
     updateBaselines: Joi.boolean().default(false),
 
     browser: Joi.object()

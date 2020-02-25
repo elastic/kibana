@@ -16,7 +16,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('endpoint');
     });
 
-    it('Loads the endpoint app', async () => {
+    it('C471 Loads the endpoint app', async () => {
       const welcomeEndpointMessage = await pageObjects.endpoint.welcomeEndpointTitle();
       expect(welcomeEndpointMessage).to.be('Hello World');
     });
