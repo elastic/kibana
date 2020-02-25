@@ -66,12 +66,6 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           className="conApp__fileTree__entry__nameInput"
           inputRef={(ref: HTMLInputElement) => ref?.focus()}
           compressed
-          onKeyDown={event => {
-            if (event.keyCode === 13 /* Enter */) {
-              event.preventDefault();
-              handleSubmit();
-            }
-          }}
           onBlur={() => handleSubmit()}
           onChange={event => {
             setNameValue(event.target.value);
@@ -85,6 +79,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
   const renderEntry = () => (
     <EuiFlexItem>
       <EuiText
+        className="conApp__fileTree__entry__fileName"
         aria-label={i18n.translate('console.fileTree.fileEntryName', {
           defaultMessage: '{name}',
           values: { name },
@@ -93,12 +88,10 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
       >
         <span
           tabIndex={0}
-          onFocus={event => {
-            if (canEdit) {
-              event.stopPropagation();
+          onKeyDown={event => {
+            if (event.keyCode === 13 /* Enter */) {
               event.preventDefault();
-              setIsEditing(true);
-              setNameValue(name);
+              onSelect(id);
             }
           }}
         >
@@ -113,25 +106,54 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
       justifyContent="center"
       alignItems="center"
       gutterSize="none"
-      className={className}
+      className={'conApp__fileTree__entry ' + className}
       onClick={() => onSelect(id)}
     >
       {isEditing ? renderInputField() : renderEntry()}
-      {canDelete && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            tabIndex={0}
-            aria-label={i18n.translate('console.fileTree.deleteButtonLabel', {
-              defaultMessage: 'Delete {name}',
-              values: { name },
-            })}
-            className="conApp__fileTree__entry__deleteActionButton"
-            onClick={() => onDelete(id)}
-            color="danger"
-            iconType="trash"
-          />
-        </EuiFlexItem>
-      )}
+      {/* File Actions */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          {canEdit && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                tabIndex={0}
+                aria-label={i18n.translate('console.fileTree.editButtonLabel', {
+                  defaultMessage: 'Edit {name}',
+                  values: { name },
+                })}
+                className="conApp__fileTree__entry__actionButton"
+                onClick={(event: React.MouseEvent) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setIsEditing(true);
+                  setNameValue(name);
+                }}
+                color="primary"
+                iconType="pencil"
+              />
+            </EuiFlexItem>
+          )}
+          {canDelete && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                tabIndex={0}
+                aria-label={i18n.translate('console.fileTree.deleteButtonLabel', {
+                  defaultMessage: 'Delete {name}',
+                  values: { name },
+                })}
+                onClick={(event: React.MouseEvent) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onDelete(id);
+                }}
+                className="conApp__fileTree__entry__actionButton"
+                color="danger"
+                iconType="trash"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -27,27 +27,36 @@
       background-color: $euiColorMediumShade;
     }
 
-
-    @mixin transitionToShowDeleteActionButton {
+    @mixin transitionToShowActionButton {
       transition: opacity .2s;
       opacity: 100%;
     }
 
-
-    &:hover &__deleteActionButton {
-      @include transitionToShowDeleteActionButton
+    &:hover &__actionButton {
+      @include transitionToShowActionButton
     }
 
+    &:focus &__actionButton {
+      @include transitionToShowActionButton
+    }
 
-    &__deleteActionButton {
+    &__actionButton {
       // Default is hidden
       opacity: 0;
       &:focus {
-        @include transitionToShowDeleteActionButton
+        @include transitionToShowActionButton
       }
     }
 
+    &__fileName {
+      cursor: pointer;
+    }
+
     &:hover {
+      background-color: $euiColorLightShade;
+    }
+
+    &:focus {
       background-color: $euiColorLightShade;
     }
   }

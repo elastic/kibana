@@ -108,7 +108,6 @@ export const FileTree: FunctionComponent = () => {
                   id,
                   className: classNames({
                     conApp__fileTree__scratchPadEntry: isScratchPad,
-                    conApp__fileTree__entry: true,
                     'conApp__fileTree__entry--selected': id === currentTextObjectId,
                   }),
                   name: isScratchPad ? 'Default' : name ?? `Untitled`,
