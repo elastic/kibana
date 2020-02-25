@@ -360,9 +360,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
       },
-      extraHandlers: {
-        uiState: this.uiState,
-      },
+      uiState: this.uiState,
     };
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
