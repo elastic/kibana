@@ -6,18 +6,13 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AgentEventsTable, AgentDetailSection } from './components';
 import { AgentRefreshContext } from './hooks';
 import { Loading } from '../../../components';
 import { useGetOneAgent } from '../../../hooks';
-
-export const Layout: React.FunctionComponent = ({ children }) => (
-  <EuiPageBody>
-    <EuiPageContent>{children}</EuiPageContent>
-  </EuiPageBody>
-);
+import { WithHeaderLayout } from '../../../layouts';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -33,7 +28,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   if (agentRequest.error) {
     return (
-      <Layout>
+      <WithHeaderLayout>
         <EuiCallOut
           title={i18n.translate('xpack.ingestManager.agentDetails.unexceptedErrorTitle', {
             defaultMessage: 'An error happened while loading the agent',
@@ -45,18 +40,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             <EuiText>{agentRequest.error.message}</EuiText>
           </p>
         </EuiCallOut>
-      </Layout>
+      </WithHeaderLayout>
     );
   }
 
   if (!agentRequest.data) {
     return (
-      <Layout>
+      <WithHeaderLayout>
         <FormattedMessage
           id="xpack.ingestManager.agentDetails.agentNotFoundErrorTitle"
           defaultMessage="Agent Not found"
         />
-      </Layout>
+      </WithHeaderLayout>
     );
   }
 
@@ -64,11 +59,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   return (
     <AgentRefreshContext.Provider value={{ refresh: () => agentRequest.sendRequest() }}>
-      <Layout>
-        <AgentDetailSection agent={agent} />
-        <EuiSpacer size="xl" />
+      <WithHeaderLayout leftColumn={<AgentDetailSection agent={agent} />}>
         <AgentEventsTable agent={agent} />
-      </Layout>
+      </WithHeaderLayout>
     </AgentRefreshContext.Provider>
   );
 };

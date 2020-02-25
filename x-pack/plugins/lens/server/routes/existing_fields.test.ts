@@ -91,6 +91,8 @@ describe('buildFieldList', () => {
     type: 'indexpattern',
     attributes: {
       title: 'testpattern',
+      type: 'type',
+      typeMeta: 'typemeta',
       fields: JSON.stringify([
         { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
         { name: 'bar' },

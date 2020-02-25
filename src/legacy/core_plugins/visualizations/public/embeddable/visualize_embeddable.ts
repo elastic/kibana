@@ -22,10 +22,9 @@ import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/types';
-import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { EmbeddableVisTriggerContext } from 'src/plugins/embeddable/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -41,10 +40,11 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  valueClickTrigger,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedObject } from '../../../../../plugins/saved_objects/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
 
@@ -68,7 +68,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -79,7 +79,7 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
-  appState?: AppState;
+  appState?: { save(): void };
   uiState?: PersistedState;
 }
 
@@ -95,7 +95,7 @@ type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.Expressi
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private savedVisualization: VisSavedObject;
-  private appState: AppState | undefined;
+  private appState: { save(): void } | undefined;
   private uiState: PersistedState;
   private timeRange?: TimeRange;
   private query?: Query;
@@ -302,13 +302,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
-
-          npStart.plugins.uiActions.executeTriggerActions(eventName, {
+          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
+            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
-          });
+          };
+          npStart.plugins.uiActions.getTrigger(triggerId).exec(context);
         }
       })
     );
@@ -368,9 +369,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
       },
-      extraHandlers: {
-        uiState: this.uiState,
-      },
+      uiState: this.uiState,
     };
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
@@ -389,7 +388,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   private handleVisUpdate = async () => {
     if (this.appState) {
-      this.appState.vis = this.savedVisualization.vis.getState();
       this.appState.save();
     }
 
