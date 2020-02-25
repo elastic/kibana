@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  // @ts-ignore
+  EuiSearchBar,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import { useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
@@ -20,6 +25,19 @@ export function Home() {
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const state = useHomeState();
+  const searchBar = (
+    <EuiSearchBar
+      query={state.searchTerm}
+      key="search-input"
+      box={{
+        placeholder: 'Find a new package, or one you already use.',
+        incremental: true,
+      }}
+      onChange={({ queryText: userInput }: { queryText: string }) => {
+        state.setSearchTerm(userInput);
+      }}
+    />
+  );
   const body = state.searchTerm ? (
     <SearchPackages
       searchTerm={state.searchTerm}
@@ -54,6 +72,8 @@ export function Home() {
       //   },
       // ]}
     >
+      {searchBar}
+      <EuiSpacer size="m" />
       {body}
     </WithHeaderLayout>
   );

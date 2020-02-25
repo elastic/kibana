@@ -4,36 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  // @ts-ignore
-  EuiSearchBar,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 import { useLinks } from '../../hooks';
 
-/*
-const [searchTerm, setSearchTerm] = useState('');
-  const searchBar = (
-    <EuiSearchBar
-      query={searchTerm}
-      key="search-input"
-      box={{
-        placeholder: 'Find a new package, or one you already use.',
-        incremental: true,
-      }}
-      onChange={({ queryText: userInput }: { queryText: string }) => {
-        setSearchTerm(userInput);
-        onSearch(userInput);
-      }}
-    />
-  );
-  */
 export function HeroCopy() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" justifyContent="center">
