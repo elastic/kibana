@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
 import { deleteAll, download, untar } from '../lib';
 
 const BASE_URL = `https://storage.googleapis.com/native-modules`;
@@ -34,7 +37,22 @@ const packages = [
   },
 ];
 
+async function getInstalledVersion(config, packageName) {
+  const packageJSONPath = config.resolveFromRepo(
+    path.join('node_modules', packageName, 'package.json')
+  );
+  const buffer = await util.promisify(fs.readFile)(packageJSONPath);
+  const packageJSON = JSON.parse(buffer);
+  return packageJSON.version;
+}
+
 async function patchModule(config, log, build, platform, pkg) {
+  const installedVersion = await getInstalledVersion(config, pkg.name);
+  if (installedVersion !== pkg.version) {
+    throw new Error(
+      `Can't patch ${pkg.name}'s native module, we were expecting version ${pkg.version} and found ${installedVersion}`
+    );
+  }
   const platformName = platform.getName();
   const archiveName = `${pkg.version}-${platformName}.tar.gz`;
   const downloadUrl = `${BASE_URL}/${pkg.name}/${archiveName}`;
