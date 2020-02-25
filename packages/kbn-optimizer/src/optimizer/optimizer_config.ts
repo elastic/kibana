@@ -25,6 +25,15 @@ import { Bundle, WorkerConfig } from '../common';
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getBundles } from './get_bundles';
 
+function pickMaxWorkerCount(dist: boolean) {
+  // don't break if cpus() returns nothing, or an empty array
+  const cpuCount = Math.max(Os.cpus()?.length, 1);
+  // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
+  const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
+  // ensure we always have at least two workers
+  return Math.max(maxWorkers, 2);
+}
+
 interface Options {
   /** absolute path to root of the repo/build */
   repoRoot: string;
@@ -110,7 +119,7 @@ export class OptimizerConfig {
 
     const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
       ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? Math.max(Math.ceil(Math.max(Os.cpus()?.length, 1) / 3), 2);
+      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }
