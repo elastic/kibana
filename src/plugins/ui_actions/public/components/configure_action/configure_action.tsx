@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { EuiForm } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
 import { AnyActionInternal } from '../../actions';
 import { ErrorConfigureAction } from '../error_configure_action';
 import { txtMissingCollectConfig } from './i18n';
+import { useContainerState } from '../../../../kibana_utils/common';
 
 export interface ConfigureActionProps {
   context?: unknown;
@@ -30,7 +30,7 @@ export interface ConfigureActionProps {
 }
 
 export const ConfigureAction: React.FC<ConfigureActionProps> = ({ context, action }) => {
-  const actionState = useObservable(action.state.state$, action.state.get());
+  const { config } = useContainerState(action.state);
 
   if (!action.ReactCollectConfig) {
     return <ErrorConfigureAction action={action} msg={txtMissingCollectConfig} />;
@@ -40,7 +40,7 @@ export const ConfigureAction: React.FC<ConfigureActionProps> = ({ context, actio
     <EuiForm>
       <action.ReactCollectConfig
         context={context}
-        config={actionState.config}
+        config={config}
         onConfig={action.state.transitions.setConfig}
       />
     </EuiForm>
