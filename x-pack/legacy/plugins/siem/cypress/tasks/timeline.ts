@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
+
 import {
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
@@ -27,6 +29,10 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
+    .click()
+    .invoke('text')
+    .should('not.equal', 'Updating');
 };
 
 export const addNameToTimeline = (name: string) => {

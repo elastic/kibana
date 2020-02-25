@@ -5,6 +5,7 @@
  */
 
 import {
+  DATE_PICKER_APPLY_BUTTON_TIMELINE,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
@@ -258,6 +259,9 @@ describe('url state', () => {
       cy.visit('/app/kibana');
       cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
       cy.contains('a', 'SIEM');
+      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
+        .invoke('text')
+        .should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
     });
   });
