@@ -24,7 +24,6 @@ import {
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-  addAppRedirectMessageToUrl,
 } from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -37,6 +36,7 @@ import { checkLicense } from '../../../../plugins/graph/common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { addAppRedirectMessageToUrl } from '../../../../../src/plugins/kibana_legacy/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

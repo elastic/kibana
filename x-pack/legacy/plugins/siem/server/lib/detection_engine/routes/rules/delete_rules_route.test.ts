@@ -7,6 +7,8 @@
 import { ServerInjectOptions } from 'hapi';
 import { omit } from 'lodash/fp';
 import { deleteRulesRoute } from './delete_rules_route';
+import * as utils from './utils';
+import * as deleteRules from '../../rules/delete_rules';
 
 import {
   getFindResult,
@@ -25,7 +27,12 @@ describe('delete_rules', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
@@ -72,6 +79,32 @@ describe('delete_rules', () => {
       deleteRulesRoute(route, getClients);
       const { statusCode } = await inject(getDeleteRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('returns 500 when transform fails', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.savedObjectsClient.delete.mockResolvedValue({});
+      jest.spyOn(utils, 'transform').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getDeleteRequest());
+      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(statusCode).toBe(500);
+    });
+
+    test('catches error if deleteRules throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.savedObjectsClient.delete.mockResolvedValue({});
+      jest.spyOn(deleteRules, 'deleteRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getDeleteRequestById());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 

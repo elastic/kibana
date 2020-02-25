@@ -5,8 +5,9 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, isEqual, uniqWith } from 'lodash/fp';
+import { isEmpty, uniqWith } from 'lodash/fp';
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';
@@ -115,7 +116,7 @@ const IpAdressesWithPorts = React.memo<{
 
   return (
     <EuiFlexGroup gutterSize="none">
-      {uniqWith(isEqual, ipPortPairs).map(
+      {uniqWith(deepEqual, ipPortPairs).map(
         ipPortPair =>
           ipPortPair.ip != null && (
             <EuiFlexItem grow={false} key={ipPortPair.ip}>
