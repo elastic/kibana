@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { UpgradeAssistantTabs } from './tabs';
 import { LoadingState } from './types';
 

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kibanaResponseFactory } from '../../../../../src/core/server';
-import { savedObjectsServiceMock } from '../../../../../src/core/server/saved_objects/saved_objects_service.mock';
+import { kibanaResponseFactory } from 'src/core/server';
+import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 

@@ -6,13 +6,13 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { renderApp } from './application/render_app';
-
 import { CloudSetup } from '../../cloud/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
+
+import { renderApp } from './application/render_app';
 
 interface Dependencies {
   cloud: CloudSetup;

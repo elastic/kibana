@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'src/core/server';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;

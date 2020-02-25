@@ -22,7 +22,7 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
       },
     },
     async (ctx, request, response) => {
-      const { cluster, indices, overview } = request.body as any;
+      const { cluster, indices, overview } = request.body;
       try {
         return response.ok({
           body: await upsertUIOpenOption({
@@ -51,7 +51,7 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
       },
     },
     async (ctx, request, response) => {
-      const { close, open, start, stop } = request.body as any;
+      const { close, open, start, stop } = request.body;
       try {
         return response.ok({
           body: await upsertUIReindexOption({

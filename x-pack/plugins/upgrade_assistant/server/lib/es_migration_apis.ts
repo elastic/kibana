@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'src/core/server';
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 

@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'kibana/server';
+import { Logger, ElasticsearchServiceSetup, SavedObjectsClient } from 'src/core/server';
 import { ReindexStatus } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
@@ -62,9 +62,14 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params as any;
         const { client } = savedObjects;
-        const callCluster = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callCluster);
-        const reindexService = reindexServiceFactory(callCluster, reindexActions, log, licensing);
+        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+        const reindexService = reindexServiceFactory(
+          callAsCurrentUser,
+          reindexActions,
+          log,
+          licensing
+        );
 
         try {
           if (!(await reindexService.hasRequiredPrivileges(indexName))) {
@@ -118,9 +123,14 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { client } = savedObjects;
         const { indexName } = request.params as any;
-        const callCluster = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callCluster);
-        const reindexService = reindexServiceFactory(callCluster, reindexActions, log, licensing);
+        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+        const reindexService = reindexServiceFactory(
+          callAsCurrentUser,
+          reindexActions,
+          log,
+          licensing
+        );
 
         try {
           const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
@@ -177,9 +187,14 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params as any;
         const { client } = savedObjects;
-        const callCluster = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callCluster);
-        const reindexService = reindexServiceFactory(callCluster, reindexActions, log, licensing);
+        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+        const reindexService = reindexServiceFactory(
+          callAsCurrentUser,
+          reindexActions,
+          log,
+          licensing
+        );
 
         try {
           await reindexService.cancelReindexing(indexName);

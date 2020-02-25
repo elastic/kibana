@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';

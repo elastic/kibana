@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { UPGRADE_ASSISTANT_DOC_ID, UPGRADE_ASSISTANT_TYPE } from '../../../common/types';
 import { upsertUIReindexOption } from './es_ui_reindex_apis';
 

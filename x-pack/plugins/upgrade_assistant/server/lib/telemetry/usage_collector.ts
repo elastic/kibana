@@ -10,7 +10,7 @@ import {
   ElasticsearchServiceSetup,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
@@ -38,9 +38,9 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(callCluster: APICaller): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): Promise<boolean> {
   try {
-    const loggerDeprecationCallResult = await callCluster('cluster.getSettings', {
+    const loggerDeprecationCallResult = await callAsCurrentUser('cluster.getSettings', {
       includeDefaults: true,
     });
 
@@ -60,8 +60,8 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const callCluster = adminClient.callAsInternalUser.bind(adminClient);
-  const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callCluster);
+  const callAsInternalUser = adminClient.callAsInternalUser.bind(adminClient);
+  const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callAsInternalUser);
 
   const getTelemetrySavedObject = (
     upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null

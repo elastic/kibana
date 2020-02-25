@@ -5,7 +5,7 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from '../../../../../src/core/server';
+import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
 import { CURRENT_VERSION } from '../../common/version';
 import {
   esVersionCheck,

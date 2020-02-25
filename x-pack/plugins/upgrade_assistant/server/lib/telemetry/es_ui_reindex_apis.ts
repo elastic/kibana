@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsServiceStart } from 'kibana/server';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import {
   UIReindex,
   UIReindexOption,
@@ -13,20 +13,20 @@ import {
 } from '../../../common/types';
 
 interface IncrementUIReindexOptionDependencies {
-  uiOpenOptionCounter: UIReindexOption;
+  uiReindexOptionCounter: UIReindexOption;
   savedObjects: SavedObjectsServiceStart;
 }
 
 async function incrementUIReindexOptionCounter({
   savedObjects,
-  uiOpenOptionCounter,
+  uiReindexOptionCounter,
 }: IncrementUIReindexOptionDependencies) {
   const internalRepository = savedObjects.createInternalRepository();
 
   await internalRepository.incrementCounter(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID,
-    `ui_reindex.${uiOpenOptionCounter}`
+    `ui_reindex.${uiReindexOptionCounter}`
   );
 }
 
@@ -40,19 +40,19 @@ export async function upsertUIReindexOption({
   savedObjects,
 }: UpsertUIReindexOptionDepencies): Promise<UIReindex> {
   if (close) {
-    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'close' });
+    await incrementUIReindexOptionCounter({ savedObjects, uiReindexOptionCounter: 'close' });
   }
 
   if (open) {
-    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'open' });
+    await incrementUIReindexOptionCounter({ savedObjects, uiReindexOptionCounter: 'open' });
   }
 
   if (start) {
-    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'start' });
+    await incrementUIReindexOptionCounter({ savedObjects, uiReindexOptionCounter: 'start' });
   }
 
   if (stop) {
-    await incrementUIReindexOptionCounter({ savedObjects, uiOpenOptionCounter: 'stop' });
+    await incrementUIReindexOptionCounter({ savedObjects, uiReindexOptionCounter: 'stop' });
   }
 
   return {

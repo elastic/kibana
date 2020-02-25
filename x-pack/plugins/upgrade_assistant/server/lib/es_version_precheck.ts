@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'kibana/server';
+} from 'src/core/server';
 import { CURRENT_VERSION } from '../../common/version';
 
 /**

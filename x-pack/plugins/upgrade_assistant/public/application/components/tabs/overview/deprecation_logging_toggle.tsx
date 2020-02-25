@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'src/core/public';
 
 import { LoadingState } from '../../types';
 

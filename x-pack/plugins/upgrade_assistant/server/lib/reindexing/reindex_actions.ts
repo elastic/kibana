@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 
-import { SavedObjectsFindResponse, SavedObjectsClientContract, APICaller } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObjectsClientContract, APICaller } from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -110,7 +110,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  esAPICaller: APICaller
+  callAsUser: APICaller
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -229,7 +229,7 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const flatSettings = (await esAPICaller('transport.request', {
+      const flatSettings = (await callAsUser('transport.request', {
         path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
       })) as { [indexName: string]: FlatSettings };
 

@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { Logger } from 'src/core/server';
+import { loggingServiceMock } from 'src/core/server/mocks';
+
 import {
   IndexGroup,
   ReindexOperation,
@@ -11,18 +15,16 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { Logger } from 'kibana/server';
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+import { licensingMock } from '../../../../licensing/server/mocks';
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
 import {
   isMlIndex,
   isWatcherIndex,
   ReindexService,
   reindexServiceFactory,
 } from './reindex_service';
-import { licensingMock } from '../../../../licensing/server/mocks';
-import { LicensingPluginSetup } from '../../../../licensing/server';
-import { BehaviorSubject } from 'rxjs';
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;

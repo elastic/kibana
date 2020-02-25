@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { UpgradeAssistantServerPlugin } from './plugin';
 import { configSchema } from '../common/config';
 

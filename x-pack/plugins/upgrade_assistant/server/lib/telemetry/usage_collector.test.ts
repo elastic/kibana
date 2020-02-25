@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
-import { IClusterClient } from 'kibana/server';
+import { IClusterClient } from 'src/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests

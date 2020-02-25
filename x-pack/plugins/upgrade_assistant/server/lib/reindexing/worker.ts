@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'kibana/server';
+import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
 
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
@@ -161,10 +161,10 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
 
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callCluster = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
-    const actions = reindexActionsFactory(this.client, callCluster);
+    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
 
-    const service = reindexServiceFactory(callCluster, actions, this.log, this.licensing);
+    const service = reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

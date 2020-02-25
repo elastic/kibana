@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { kibanaResponseFactory } from '../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 

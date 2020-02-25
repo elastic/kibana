@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, Logger, SavedObjectsServiceStart } from 'kibana/server';
+import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
 import { CloudSetup } from '../../cloud/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
