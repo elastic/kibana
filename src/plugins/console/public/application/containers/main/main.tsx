@@ -99,6 +99,7 @@ export function Main() {
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="conApp__tabsExtension">
               <NetworkRequestStatusBar
+                className="conApp__networkRequestBar"
                 requestInProgress={requestInProgress}
                 requestResult={
                   lastDatum

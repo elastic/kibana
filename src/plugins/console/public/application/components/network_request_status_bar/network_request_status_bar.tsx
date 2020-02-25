@@ -39,6 +39,7 @@ export interface Props {
     // The time, in milliseconds, that the last request took
     timeElapsedMs: number;
   };
+  className?: string;
 }
 
 const mapStatusCodeToBadgeColor = (statusCode: number) => {
@@ -64,6 +65,7 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
 export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
   requestInProgress,
   requestResult,
+  className,
 }) => {
   let content: React.ReactNode = null;
 
@@ -126,6 +128,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
       direction="row"
       gutterSize="s"
       responsive={false}
+      className={className || ''}
     >
       {content}
     </EuiFlexGroup>

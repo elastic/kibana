@@ -81,7 +81,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
             onFilter();
           }}
           color="ghost"
-          aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
+          aria-label={i18n.translate('console.fileTree.forms.createSearchToggleAriaLabel', {
             defaultMessage: 'Toggle file filter',
           })}
           iconType="search"
