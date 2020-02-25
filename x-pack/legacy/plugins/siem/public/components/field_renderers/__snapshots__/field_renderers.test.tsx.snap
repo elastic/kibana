@@ -123,6 +123,7 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   onDragEnd={[MockFunction]}
 >
   <Memo(ReputationLinkComponent)
+    direction="column"
     domain="10.10.10.10"
   />
 </DragDropContext>

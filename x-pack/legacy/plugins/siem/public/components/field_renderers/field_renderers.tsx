@@ -132,7 +132,7 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.
 export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 
 export const reputationRenderer = (ip: string): React.ReactElement => (
-  <ReputationLink domain={ip} />
+  <ReputationLink domain={ip} direction="column" />
 );
 
 interface DefaultFieldRendererProps {

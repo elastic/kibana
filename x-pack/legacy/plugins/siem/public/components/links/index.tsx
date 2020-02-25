@@ -39,6 +39,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
   </EuiLink>
 );
 
+const whitelistUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{
   url: string;
   children?: React.ReactNode;
@@ -56,7 +57,8 @@ export const ExternalLink = React.memo<{
     const lastVisibleItemIndex = overflowIndexStart - 1;
     const lastItemIndex = allItemsLimit - 1;
     const lastIndexToShow = Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex));
-    return url && !isUrlInvalid(url) && children ? (
+    const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+    return url && inWhitelist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
           {children}
@@ -206,11 +208,13 @@ const ReputationLinkComponent: React.FC<{
   allItemsLimit?: number;
   showDomain?: boolean;
   domain: string;
+  direction?: 'row' | 'column';
 }> = ({
   overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
   allItemsLimit = DEFAULT_NUMBER_OF_LINK,
   showDomain = false,
   domain,
+  direction = 'row',
 }) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
     IP_REPUTATION_LINKS_SETTING
@@ -236,12 +240,12 @@ const ReputationLinkComponent: React.FC<{
       <EuiFlexGroup
         gutterSize="none"
         justifyContent="center"
-        direction="row"
+        direction="column"
         alignItems="center"
         data-test-subj="reputationLinkGroup"
       >
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="none" justifyContent="center" direction="row">
+          <EuiFlexGroup gutterSize="none" justifyContent="center" direction={direction}>
             {ipReputationLinks
               ?.slice(0, overflowIndexStart)
               .map(({ name, url_template: urlTemplate }: ReputationLinkSetting, id) => (
