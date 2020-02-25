@@ -251,28 +251,33 @@ function discoverController(
   const appStateUnsubscribe = appStateContainer.subscribe(async newState => {
     const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState($scope.state);
-    let fetchData = false;
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
         $scope.state = { ...newState };
 
-        if (!_.isEqual(newStatePartial.query, getPreviousAppState().query)) {
-          fetchData = true;
-        }
+        // detect changes that should trigger fetching of new data
+        const queryChanged = !_.isEqual(newStatePartial.query, getPreviousAppState().query);
 
-        if (oldStatePartial.savedQuery !== newStatePartial.savedQuery) {
-          if (newStatePartial.savedQuery) {
+        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
+        const sortChanged = !_.isEqual(currentSort, newStatePartial.sort);
+        const savedQueryChanged = oldStatePartial.savedQuery !== newStatePartial.savedQuery;
+
+        if (savedQueryChanged) {
+          if (
+            newStatePartial.savedQuery &&
+            (!$scope.savedQuery || $scope.savedQuery.id !== newStatePartial.savedQuery)
+          ) {
+            // savedQuery was only changed in url which means it has to be fetched
             $scope.savedQuery = await data.query.savedQueries.getSavedQuery(
               newStatePartial.savedQuery
             );
             updateStateFromSavedQuery($scope.savedQuery);
-          } else {
-            delete $scope.savedQuery;
+          } else if ($scope.savedQuery && typeof newStatePartial.savedQuery === 'undefined') {
+            $scope.savedQuery = undefined;
           }
-          fetchData = true;
         }
-        if (fetchData) {
+        if (queryChanged || sortChanged || savedQueryChanged) {
           $fetchObservable.next();
         } else {
           $scope.$digest();
@@ -691,17 +696,6 @@ function discoverController(
           },
         })
       );
-      $scope.$watchCollection('state.sort', function(sort) {
-        if (!sort) return;
-
-        // get the current sort from searchSource as array of arrays
-        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
-        // if the searchSource doesn't know, tell it so
-        if (!_.isEqual(sort, currentSort)) {
-          setAppState({ sort });
-          $fetchObservable.next();
-        }
-      });
 
       $scope.$watch('opts.timefield', function(timefield) {
         $scope.enableTimeRangeSelector = !!timefield;
@@ -969,8 +963,8 @@ function discoverController(
       .setField('filter', filterManager.getFilters());
   });
 
-  $scope.setSortOrder = function setSortOrder(sortPair) {
-    $scope.state.sort = sortPair;
+  $scope.setSortOrder = function setSortOrder(sort) {
+    setAppState({ sort });
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -1017,24 +1011,22 @@ function discoverController(
 
   $scope.onSavedQuerySaved = savedQuery => {
     $scope.savedQuery = savedQuery;
-    $scope.state.savedQuery = savedQuery.id;
     updateStateFromSavedQuery(savedQuery);
-    $fetchObservable.next();
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
     $scope.savedQuery = { ...savedQuery };
-    $scope.state.savedQuery = savedQuery.id;
     updateStateFromSavedQuery(savedQuery);
-    $fetchObservable.next();
   };
 
   $scope.onSavedQueryCleared = () => {
-    $scope.savedQuery = undefined;
-    const query = { ...$scope.state.query, ...{ query: '', filters: [] } };
-    $scope.state.query = query;
-    setAppState({ query });
-    $fetchObservable.next();
+    //reset filters and query string, remove savedQuery from state
+    const state = {
+      ...appStateContainer.getState(),
+      ...{ query: { ...$scope.state.query, ...{ query: '' } }, filters: [] },
+    };
+    delete state.savedQuery;
+    appStateContainer.set(state);
   };
 
   async function setupVisualization() {
