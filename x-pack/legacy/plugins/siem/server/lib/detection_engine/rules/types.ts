@@ -197,10 +197,6 @@ export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAle
   return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
-};
-
 export const isRuleStatusSavedObjectType = (
   obj: unknown
 ): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {

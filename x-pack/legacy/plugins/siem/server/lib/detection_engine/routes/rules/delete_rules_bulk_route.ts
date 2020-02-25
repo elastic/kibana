@@ -60,7 +60,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
               ruleStatuses.saved_objects.forEach(async obj =>
                 savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
               );
-              return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
+              return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

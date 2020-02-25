@@ -43,8 +43,7 @@ export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
-export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
+export { VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/';
 export {
   configureAppAngularModule,
   ensureDefaultIndexPattern,
