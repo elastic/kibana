@@ -21,6 +21,7 @@ import { ShardsResponse } from '../../../types';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 import { TEST_BOUNDARY } from './utils';
+import { requestMock } from './request';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -118,10 +119,12 @@ export const getPatchRequest = (): ServerInjectOptions => ({
   },
 });
 
-export const getReadRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getReadRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
 export const getFindRequest = (): ServerInjectOptions => ({
   method: 'GET',
