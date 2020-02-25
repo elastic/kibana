@@ -25,12 +25,7 @@ export const licensePreRoutingFactory = (
     const licenseCheckResults = getLicenseCheckResults();
 
     if (!licenseCheckResults.isAvailable) {
-      return response.customError({
-        body: {
-          message: licenseCheckResults.message || '',
-        },
-        statusCode: 403,
-      });
+      return response.forbidden();
     }
 
     return handler(ctx, request, response);
