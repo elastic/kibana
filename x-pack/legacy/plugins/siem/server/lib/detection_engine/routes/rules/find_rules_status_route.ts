@@ -17,6 +17,7 @@ import {
   IRuleStatusAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { transformError } from '../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
@@ -59,33 +60,44 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
             "anotherAlertId": ...
         }
     */
-    const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
-      const lastFiveErrorsForId = await savedObjectsClient.find<
-        IRuleSavedAttributesSavedObjectAttributes
-      >({
-        type: ruleStatusSavedObjectType,
-        perPage: 6,
-        sortField: 'statusDate',
-        sortOrder: 'desc',
-        search: id,
-        searchFields: ['alertId'],
-      });
-      const accumulated = await acc;
-      const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
-        lastFiveErrorsForId.saved_objects[0]?.attributes
-      );
-      const failures = lastFiveErrorsForId.saved_objects
-        .slice(1)
-        .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
-      return {
-        ...accumulated,
-        [id]: {
-          current_status: currentStatus,
-          failures,
-        },
-      };
-    }, Promise.resolve<RuleStatusResponse>({}));
-    return statuses;
+
+    try {
+      const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
+        const lastFiveErrorsForId = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 6,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: id,
+          searchFields: ['alertId'],
+        });
+        const accumulated = await acc;
+        const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
+          lastFiveErrorsForId.saved_objects[0]?.attributes
+        );
+        const failures = lastFiveErrorsForId.saved_objects
+          .slice(1)
+          .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
+        return {
+          ...accumulated,
+          [id]: {
+            current_status: currentStatus,
+            failures,
+          },
+        };
+      }, Promise.resolve<RuleStatusResponse>({}));
+      return statuses;
+    } catch (err) {
+      const error = transformError(err);
+      return headers
+        .response({
+          message: error.message,
+          status_code: error.statusCode,
+        })
+        .code(error.statusCode);
+    }
   },
 };
 
