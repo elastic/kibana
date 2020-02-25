@@ -55,7 +55,11 @@ export const useDeleteTransforms = () => {
         title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
         }),
-        text: toMountPoint(<ToastNotificationText text={e} />),
+        text: toMountPoint(
+          <ToastNotificationText
+            text={e.message !== undefined ? e.message : JSON.stringify(e, null, 2)}
+          />
+        ),
       });
     }
   };

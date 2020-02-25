@@ -6,5 +6,10 @@
 
 export function XJsonMode() {}
 export function setDependencyCache() {}
+export const useRequest = () => ({
+  isLoading: false,
+  error: null,
+  data: undefined,
+});
 export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
 export const SORT_DIRECTION = { ASC: 'asc' };

@@ -7,9 +7,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-
 import { API_BASE_PATH } from '../../common/constants';
 
 import { setDependencyCache } from '../shared_imports';
@@ -17,20 +14,20 @@ import { AppDependencies } from '../shim';
 
 import { AuthorizationProvider } from './lib/authorization';
 
-const legacyBasePath = {
-  prepend: chrome.addBasePath,
-  get: chrome.getBasePath,
-  remove: () => {},
-};
-
 let DependenciesContext: React.Context<AppDependencies>;
 
 const setAppDependencies = (deps: AppDependencies) => {
+  const legacyBasePath = {
+    prepend: deps.core.http.basePath.prepend,
+    get: deps.core.http.basePath.get,
+    remove: () => {},
+  };
+
   setDependencyCache({
     autocomplete: deps.plugins.data.autocomplete,
-    docLinks: npStart.core.docLinks as any,
+    docLinks: deps.core.docLinks,
     basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
+    XSRF: deps.plugins.xsrfToken,
   });
   DependenciesContext = createContext<AppDependencies>(deps);
   return DependenciesContext.Provider;

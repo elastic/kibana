@@ -6,6 +6,7 @@
 
 import { npStart } from 'ui/new_platform';
 
+import chrome from 'ui/chrome';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
@@ -25,8 +26,10 @@ export type AppCore = Pick<
   Core,
   | 'chrome'
   | 'documentation'
+  | 'docLinks'
   | 'http'
   | 'i18n'
+  | 'injectedMetadata'
   | 'savedObjects'
   | 'uiSettings'
   | 'overlays'
@@ -42,6 +45,7 @@ export interface AppPlugins {
     getClient(): any;
     setClient(client: any): void;
   };
+  xsrfToken: string;
 }
 
 export interface AppDependencies {
@@ -141,6 +145,7 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
       uiMetric: {
         createUiStatsReporter,
       },
+      xsrfToken: chrome.getXsrfToken(),
     },
   };
 }
