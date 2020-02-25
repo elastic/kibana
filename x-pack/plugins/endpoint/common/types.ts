@@ -106,8 +106,8 @@ export interface AlertData {
     entity_id: string;
     parent?: {
       entity_id?: string;
-    }
-  },
+    };
+  };
   thread: {};
 }
 
@@ -164,7 +164,7 @@ export interface EndpointEvent {
   };
   ecs: {
     version: string;
-  }
+  };
   event: {
     category: string;
     type: string;
@@ -189,7 +189,6 @@ export interface EndpointEvent {
       entity_id?: string;
     };
   };
-  
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
