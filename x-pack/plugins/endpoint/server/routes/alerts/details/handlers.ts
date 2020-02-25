@@ -42,6 +42,9 @@ export const alertDetailsHandlerWrapper = function(
         },
       });
     } catch (err) {
+      if (err.status === 404) {
+        return res.notFound({ body: err });
+      }
       return res.internalError({ body: err });
     }
   };

@@ -27,6 +27,15 @@ function reverseSortDirection(order: Direction): Direction {
 function buildQuery(query: AlertSearchQuery): JsonObject {
   const queries: JsonObject[] = [];
 
+  // only alerts
+  queries.push({
+    term: {
+      'event.kind': {
+        value: 'alert',
+      },
+    },
+  });
+
   if (query.filters !== undefined && query.filters.length > 0) {
     const filtersQuery = esQuery.buildQueryFromFilters(query.filters, undefined);
     queries.push((filtersQuery.filter as unknown) as JsonObject);
@@ -146,8 +155,18 @@ export const searchESForAlerts = async (
     AlertData
   >;
 
-  // Reverse the hits if we used `search_before`.
+  // ES has some limitations in sorting undefined values, so we do some hackery here...
+  // hopefully there's a better way to do this.
   if (query.searchBefore !== undefined) {
+    for (const idx in response.hits.hits) {
+      if (response.hits.hits.hasOwnProperty(idx)) {
+        const hit = response.hits.hits[idx];
+        if (hit._source.thread?.id === undefined) {
+          response.hits.hits = response.hits.hits.slice(0, idx);
+          break;
+        }
+      }
+    }
     response.hits.hits.reverse();
   }
 

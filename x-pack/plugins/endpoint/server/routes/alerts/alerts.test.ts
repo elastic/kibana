@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// import { decode, encode } from 'rison-node';
 import { encode } from 'rison-node';
 import {
   IClusterClient,
@@ -25,7 +24,6 @@ import { SearchResponse } from 'elasticsearch';
 import { alertListReqSchema } from './list/schemas';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
-import * as data from '../../test_data/all_alerts_data.json';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -45,161 +43,6 @@ describe('test alerts route', () => {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
-  });
-
-  it('should return the latest of all alerts', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      path: '/api/endpoint/alerts',
-      query: {
-        date_range: encode({ from: 'now-2y', to: 'now' }),
-      },
-    });
-
-    const response: SearchResponse<AlertData> = (data as unknown) as SearchResponse<AlertData>;
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/alerts')
-    )!;
-
-    await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(routeConfig.options).toEqual({ authRequired: true });
-    expect(mockResponse.ok).toBeCalled();
-    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-
-    // NOTE: only check total in this test, as it's coming directly from the mocked ES
-    // response, and will be unreliable when filtering.
-    expect(alertResultList.total).toEqual(21);
-
-    expect(alertResultList.request_page_index).toEqual(0);
-    expect(alertResultList.result_from_index).toEqual(0);
-    expect(alertResultList.request_page_size).toEqual(10);
-  });
-
-  it('should not support POST requests for querying', async () => {
-    try {
-      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/alerts')
-      )!;
-    } catch (err) {
-      expect(err).toBeInstanceOf(TypeError);
-    }
-  });
-
-  it('should return alert results according to pagination params -- GET', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      path: '/api/endpoint/alerts',
-      query: {
-        date_range: encode({ from: 'now-2y', to: 'now' }),
-        page_size: 3,
-        page_index: 2,
-      },
-    });
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(data));
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/alerts')
-    )!;
-
-    await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(routeConfig.options).toEqual({ authRequired: true });
-    expect(mockResponse.ok).toBeCalled();
-    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-    expect(alertResultList.request_page_index).toEqual(2);
-    expect(alertResultList.result_from_index).toEqual(6);
-    expect(alertResultList.request_page_size).toEqual(3);
-  });
-
-  it('should accept rison-encoded `filters` and `date_range`', async () => {
-    const filters = (encode([
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'host.hostname',
-          params: {
-            query: 'HD-m3z-4c803698',
-          },
-        },
-        query: {
-          match_phrase: {
-            'host.hostname': 'HD-m3z-4c803698',
-          },
-        },
-        $state: {
-          store: 'appState',
-        },
-      },
-    ]) as unknown) as string;
-
-    const dateRange = (encode({
-      to: 'now',
-      from: 'now-15y',
-    }) as unknown) as string;
-
-    const mockRequest = httpServerMock.createKibanaRequest({
-      path: '/api/endpoint/alerts',
-      query: {
-        page_size: 10,
-        filters,
-        date_range: dateRange,
-      },
-    });
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(data));
-
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/alerts')
-    )!;
-
-    await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(routeConfig.options).toEqual({ authRequired: true });
-    expect(mockResponse.ok).toBeCalled();
-    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-    expect(alertResultList.request_page_index).toEqual(0);
-    expect(alertResultList.result_from_index).toEqual(0);
-    expect(alertResultList.request_page_size).toEqual(10);
-    expect(alertResultList.next).toEqual(
-      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&sort=@timestamp&order=desc&page_size=10&after=1542341895000&after=0c85aee2-07d8-4794-8b03-982de79a85aa`
-    );
-    expect(alertResultList.prev).toEqual(
-      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&date_range=(from:now-15y,to:now)&sort=@timestamp&order=desc&page_size=10&before=1542341895000&before=0c85aee2-07d8-4794-8b03-982de79a85aa`
-    );
   });
 
   it('should fail to validate when `page_size` is not a number', async () => {

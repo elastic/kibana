@@ -4,15 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect/expect.js';
+import { encode } from 'rison-node';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+
+  const nextPrevPrefixDateRange = "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)";
+  const nextPrevPrefixSort = 'sort=@timestamp';
+  const nextPrevPrefixOrder = 'order=desc';
+  const nextPrevPrefixPageSize = 'page_size=10';
+  const nextPrevPrefix = `${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
+
   describe('test alerts api', () => {
     describe('Tests for alerts API', () => {
       before(() => esArchiver.load('endpoint/alerts/api_feature'));
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
+
+      it('alerts api should not support post', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/alerts')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      });
+
       it('alerts api should return one entry for each alert with default paging', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts')
@@ -58,8 +75,6 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return `prev` and `next` using `after` and `before`.', async () => {
-        const prefix =
-          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
         const { body } = await supertest
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
@@ -68,16 +83,14 @@ export default function({ getService }: FtrProviderContext) {
         const lastTimestampFirstPage = body.alerts[9]['@timestamp'];
         const lastEventIdFirstPage = body.alerts[9].event.id;
         expect(body.next).to.eql(
-          `/api/endpoint/alerts?${prefix}&after=${lastTimestampFirstPage}&after=${lastEventIdFirstPage}`
+          `/api/endpoint/alerts?${nextPrevPrefix}&after=${lastTimestampFirstPage}&after=${lastEventIdFirstPage}`
         );
       });
 
-      it('alerts api should return data using `next`', async () => {
-        const prefix =
-          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
+      it('alerts api should return data using `next` link', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${prefix}&after=1542789412000&after=c710bf2d-8686-4038-a2a1-43bdecc06b2a`
+            `/api/endpoint/alerts?${nextPrevPrefix}&after=1542789412000&after=c710bf2d-8686-4038-a2a1-43bdecc06b2a`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -85,27 +98,94 @@ export default function({ getService }: FtrProviderContext) {
         const firstTimestampNextPage = body.alerts[0]['@timestamp'];
         const firstEventIdNextPage = body.alerts[0].event.id;
         expect(body.prev).to.eql(
-          `/api/endpoint/alerts?${prefix}&before=${firstTimestampNextPage}&before=${firstEventIdNextPage}`
+          `/api/endpoint/alerts?${nextPrevPrefix}&before=${firstTimestampNextPage}&before=${firstEventIdNextPage}`
         );
       });
 
-      it('alerts api should return data using `prev`', async () => {
-        const prefix =
-          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
+      it('alerts api should return data using `prev` link', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${prefix}&before=1542789412000&before=823d814d-fa0c-4e53-a94c-f6b296bb965b`
+            `/api/endpoint/alerts?${nextPrevPrefix}&before=1542789412000&before=823d814d-fa0c-4e53-a94c-f6b296bb965b`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.alerts.length).to.eql(10);
       });
 
-      it('alerts api should return alert details by id', async () => {});
+      it('alerts api should return no results when `before` is requested past beginning of first page', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefix}&before=1542789473000&before=ffae628e-6236-45ce-ba24-7351e0af219e`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(0);
+      });
 
-      it('alerts api should return data using `next` by custom sort parameter', async () => {});
+      it('alerts api should return no results when `after` is requested past end of last page', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefix}&after=1542341895000&after=01911945-48aa-478e-9712-f49c92a15f20`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(0);
+      });
 
-      it('alerts api should filter results of alert data', async () => {});
+      it('alerts api should return data using `before` by custom sort parameter', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&before=2180&before=8362fcde-0b10-476f-97a8-8d6a43865226`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(4);
+        expect(body.alerts[3].thread.id).to.eql(2824);
+      });
+
+      it('alerts api should return data using `after` by custom sort parameter', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&after=2180&after=8362fcde-0b10-476f-97a8-8d6a43865226`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.alerts.length).to.eql(10);
+        expect(body.alerts[0].thread.id).to.eql(1912);
+      });
+
+      it('alerts api should filter results of alert data', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?filters=${encode({
+              term: { 'process.uptime': { value: 1063 } },
+            })}`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.total).to.eql(132);
+        expect(body.alerts.length).to.eql(3);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+        expect(body.result_from_index).to.eql(0);
+      });
+
+      it('alerts api should return alert details by id', async () => {
+        const { body } = await supertest
+          .get('/api/endpoint/alerts/YjUYMHABAJk0XnHd6bqU')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.id).to.eql('YjUYMHABAJk0XnHd6bqU');
+        expect(body.next).to.eql(null); // last alert, no more beyond this
+        expect(body.prev).to.eql('/api/endpoint/alerts/XjUYMHABAJk0XnHd6boX');
+      });
+
+      it('alerts api should return 404 when alert is not found', async () => {
+        const { body } = await supertest
+          .get('/api/endpoint/alerts/does-not-exist')
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      });
     });
   });
 }
