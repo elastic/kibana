@@ -85,7 +85,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </EuiFormRow>
   <EuiSpacer
-    size="m"
+    size="xl"
   />
   <EuiSwitch
     label={
