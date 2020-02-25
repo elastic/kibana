@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
+import vega from 'vega/build-es5/vega.js';
 import { i18n } from '@kbn/i18n';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';

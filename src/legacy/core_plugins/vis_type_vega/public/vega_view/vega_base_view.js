@@ -20,8 +20,14 @@
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
+import {
+  scheme,
+  expressionFunction,
+  Warn,
+  loader as vegaLoader,
+  version as vegaVersion,
+} from 'vega/build-es5/vega.js';
+import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +36,7 @@ import { esFilters } from '../../../../../plugins/data/public';
 
 import { getEnableExternalUrls } from '../services';
 
-vega.scheme('elastic', VISUALIZATION_COLORS);
+scheme('elastic', VISUALIZATION_COLORS);
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -43,8 +49,8 @@ const vegaFunctions = {
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
-  if (!vega.expressionFunction(funcName)) {
-    vega.expressionFunction(funcName, function handlerFwd(...args) {
+  if (!expressionFunction(funcName)) {
+    expressionFunction(funcName, function handlerFwd(...args) {
       const view = this.context.dataflow;
       view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
     });
@@ -132,12 +138,12 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
-      logLevel: vega.Warn,
+      logLevel: Warn,
       renderer: this._parser.renderer,
     };
 
     // Override URL sanitizer to prevent external data loading (if disabled)
-    const loader = vega.loader();
+    const loader = vegaLoader();
     const originalSanitize = loader.sanitize.bind(loader);
     loader.sanitize = (uri, options) => {
       if (uri.bypassToken === bypassToken) {
@@ -370,8 +376,8 @@ export class VegaBaseView {
       }
       const debugObj = {};
       window.VEGA_DEBUG = debugObj;
-      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+      window.VEGA_DEBUG.VEGA_VERSION = vegaVersion;
+      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLiteVersion;
       window.VEGA_DEBUG.view = view;
       window.VEGA_DEBUG.vega_spec = spec;
       window.VEGA_DEBUG.vegalite_spec = vlspec;
