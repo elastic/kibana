@@ -50,6 +50,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -139,7 +140,7 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
+          savedVisualizations: visualizations.savedVisualizationsLoader,
           savedQueryService: dataStart.query.savedQueries,
           share,
           toastNotifications: coreStart.notifications.toasts,
@@ -150,6 +151,7 @@ export class VisualizePlugin implements Plugin {
           usageCollection,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
+          DefaultVisualizationEditor: DefaultEditorController,
         };
         setServices(deps);
 

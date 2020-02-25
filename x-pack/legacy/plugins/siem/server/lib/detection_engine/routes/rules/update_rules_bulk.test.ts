@@ -75,9 +75,9 @@ describe('update_rules_bulk', () => {
 
     test('returns 404 if alertClient is not available on the route', async () => {
       getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { route, inject } = createMockServer();
+      const { route } = createMockServer();
       updateRulesRoute(route, config, getClients);
-      const { statusCode } = await inject(getUpdateBulkRequest());
+      const { statusCode } = await server.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
