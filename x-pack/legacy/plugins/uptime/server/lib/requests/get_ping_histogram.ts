@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { parseFilterQuery, getFilterClause } from '../helper';
+import { getFilterClause } from '../helper';
 import { INDEX_NAMES, QUERY } from '../../../common/constants';
 import { HistogramQueryResult } from './types';
 import { HistogramResult } from '../../../common/types';
@@ -27,7 +27,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
 > = async ({ callES, from, to, filters, monitorId, statusFilter }) => {
-  const boolFilters = parseFilterQuery(filters);
+  const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
     additionalFilters.push({ match: { 'monitor.id': monitorId } });

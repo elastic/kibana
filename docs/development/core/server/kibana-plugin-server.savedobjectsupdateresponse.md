@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> 
+export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObject<T>, 'attributes' | 'references'> 
 ```
 
 ## Properties
