@@ -62,8 +62,6 @@ mentioned use "\_default_".
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `history:limit`:: In fields that have history, such as query inputs, show this many recent values.
-`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names,
-look for this many recent matching patterns from which to query the field mapping.
 `indexPattern:placeholder`:: The default placeholder value to use in Management > Index Patterns > Create Index Pattern.
 `metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields
 into the document when displaying it.
