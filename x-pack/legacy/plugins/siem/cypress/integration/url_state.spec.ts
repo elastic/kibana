@@ -240,7 +240,10 @@ describe('url state', () => {
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
-      .should('be.above', 0);
+      .then(strCount => {
+        const intCount = +strCount;
+        cy.wrap(intCount).should('be.above', 0);
+      });
 
     const timelineName = 'SIEM';
     addNameToTimeline(timelineName);
