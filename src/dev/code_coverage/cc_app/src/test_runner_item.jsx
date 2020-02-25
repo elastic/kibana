@@ -26,11 +26,11 @@ function timestamp(historicalItem) {
 }
 
 function href(type) {
-  const prefix = 'https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic%2Bkibana%2Bcode-coverage';
-  const postfix = `target/kibana-coverage/${type}-combined/index.html`;
-  return function hrefInner(historicalItem) {
-    return `${prefix}/${jobNum(historicalItem)}/${timestamp(historicalItem)}/${postfix}`;
-  }
+  const storeBucket = 'elastic-bekitzur-kibana-coverage-live';
+  const prefix = `https://storage.googleapis.com/${storeBucket}/jobs/elastic%2Bkibana%2Bcode-coverage`;
+  const postfix = `${type}-combined/index.html`;
+
+  return historicalItem => `${prefix}/${jobNum(historicalItem)}/${timestamp(historicalItem)}/${postfix}`;
 }
 
 function jobNum(historicalItem) {
