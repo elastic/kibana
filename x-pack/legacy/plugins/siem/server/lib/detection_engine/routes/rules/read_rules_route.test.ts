@@ -7,6 +7,9 @@
 import { ServerInjectOptions } from 'hapi';
 import { omit } from 'lodash/fp';
 
+import * as utils from './utils';
+import * as readRules from '../../rules/read_rules';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { readRulesRoute } from './read_rules_route';
 import {
@@ -24,8 +27,12 @@ describe('read_signals', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
@@ -49,6 +56,38 @@ describe('read_signals', () => {
       readRulesRoute(route, getClients);
       const { statusCode } = await inject(getReadRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('returns error if readRules returns null', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(readRules, 'readRules').mockResolvedValue(null);
+      const { payload, statusCode } = await server.inject(getReadRequest());
+      expect(JSON.parse(payload).message).toBe('rule_id: "rule-1" not found');
+      expect(statusCode).toBe(404);
+    });
+
+    test('returns 500 when transform fails', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(utils, 'transform').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getReadRequest());
+      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(statusCode).toBe(500);
+    });
+
+    test('catches error if readRules throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(readRules, 'readRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getReadRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
