@@ -160,7 +160,7 @@ This way we'll be able to control "who can see what" on a very granual basis. It
 
 ### 2. Local Pulse Service
 
-This refers to the plugin running in Kibana in each of our customers' deployments. It will be a core plugin in NP, available for all others plugins to get the existing channels to send pieces of data and subscribe to instructions.
+This refers to the plugin running in Kibana in each of our customers' deployments. It will be a core service in NP, available for all plugins to get the existing channels, to send pieces of data, and subscribe to instructions.
 
 The channel handlers are only defined inside the pulse context and are used to normalise the data for each channel before sending it to the remote service. The CODEOWNERS should notify the Pulse team every time there's an intended change in this context.
 
