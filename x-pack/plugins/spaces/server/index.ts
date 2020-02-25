@@ -16,6 +16,8 @@ import { Plugin } from './plugin';
 // end public contract exports
 
 export { SpacesPluginSetup } from './plugin';
+export { SpacesServiceSetup } from './spaces_service';
+export { Space } from '../common/model/space';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

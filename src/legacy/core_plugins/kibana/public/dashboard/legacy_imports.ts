@@ -24,45 +24,20 @@
  * directly where they are needed.
  */
 
-import chrome from 'ui/chrome';
-
-export const legacyChrome = chrome;
-export { State } from 'ui/state_management/state';
-export { AppState } from 'ui/state_management/app_state';
-export { AppStateClass } from 'ui/state_management/app_state';
-export { SaveOptions } from 'ui/saved_objects/saved_object';
 export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
-export { IPrivate } from 'ui/private';
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-// @ts-ignore
-export { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
-// @ts-ignore
-export { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-export { EventsProvider } from 'ui/events';
-export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
-export { configureAppAngularModule } from 'ui/legacy_compat';
-export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 export { IInjector } from 'ui/chrome';
-export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export {
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+  IPrivate,
+  migrateLegacyQuery,
+  PrivateProvider,
+  PromiseServiceCreator,
+} from '../../../../../plugins/kibana_legacy/public';

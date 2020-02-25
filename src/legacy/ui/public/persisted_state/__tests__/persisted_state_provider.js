@@ -27,26 +27,26 @@ import '..';
 
 let PersistedState;
 
-describe('Persisted State Provider', function () {
+describe('Persisted State Provider', function() {
   noDigestPromises.activateForSuite();
 
-  beforeEach(function () {
+  beforeEach(function() {
     ngMock.module('kibana');
 
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       PersistedState = $injector.get('PersistedState');
     });
   });
 
-  describe('state creation', function () {
+  describe('state creation', function() {
     let persistedState;
 
-    it('should create an empty state instance', function () {
+    it('should create an empty state instance', function() {
       persistedState = new PersistedState();
       expect(persistedState.get()).to.eql({});
     });
 
-    it('should create a state instance with data', function () {
+    it('should create a state instance with data', function() {
       const val = { red: 'blue' };
       persistedState = new PersistedState(val);
 
@@ -55,7 +55,7 @@ describe('Persisted State Provider', function () {
       expect(persistedState.get()).to.not.equal(val);
     });
 
-    it('should create a copy of the state passed in', function () {
+    it('should create a copy of the state passed in', function() {
       const val = { red: 'blue' };
       persistedState = new PersistedState(val);
 
@@ -63,20 +63,20 @@ describe('Persisted State Provider', function () {
       expect(persistedState.get()).to.not.equal(val);
     });
 
-    it('should throw if given an invalid value', function () {
-      const run = function () {
+    it('should throw if given an invalid value', function() {
+      const run = function() {
         const val = 'bananas';
         new PersistedState(val);
       };
 
-      expect(run).to.throwException(function (err) {
+      expect(run).to.throwException(function(err) {
         expect(err).to.be.a(PersistedStateError);
       });
     });
   });
 
-  describe('mutation', function () {
-    it('should not mutate the internal object', function () {
+  describe('mutation', function() {
+    it('should not mutate the internal object', function() {
       const persistedStateValue = { hello: 'world' };
       const insertedObj = { farewell: 'cruel world' };
       const persistedState = new PersistedState(persistedStateValue);
@@ -89,15 +89,15 @@ describe('Persisted State Provider', function () {
     });
   });
 
-  describe('JSON importing and exporting', function () {
+  describe('JSON importing and exporting', function() {
     let persistedStateValue;
 
-    beforeEach(function () {
+    beforeEach(function() {
       persistedStateValue = { one: 1, two: 2, 'meaning of life': 42 };
     });
 
-    describe('exporting state to JSON', function () {
-      it('should return the full JSON representation', function () {
+    describe('exporting state to JSON', function() {
+      it('should return the full JSON representation', function() {
         const persistedState = new PersistedState(persistedStateValue);
 
         const json = persistedState.toJSON();
@@ -105,8 +105,8 @@ describe('Persisted State Provider', function () {
       });
     });
 
-    describe('importing state from JSON string (hydration)', function () {
-      it('should set the state from JSON string input', function () {
+    describe('importing state from JSON string (hydration)', function() {
+      it('should set the state from JSON string input', function() {
         const stateJSON = JSON.stringify(persistedStateValue);
         const persistedState = new PersistedState();
         expect(persistedState.get()).to.eql({});
@@ -117,18 +117,18 @@ describe('Persisted State Provider', function () {
     });
   });
 
-  describe('get state', function () {
-    it('should perform deep gets with various formats', function () {
+  describe('get state', function() {
+    it('should perform deep gets with various formats', function() {
       const obj = {
         red: {
           green: {
-            blue: 'yellow'
-          }
+            blue: 'yellow',
+          },
         },
         orange: [1, 2, false, 4],
         purple: {
-          violet: ''
-        }
+          violet: '',
+        },
       };
       const persistedState = new PersistedState(obj);
       expect(persistedState.get()).to.eql(obj);
@@ -148,8 +148,10 @@ describe('Persisted State Provider', function () {
       expect(persistedState.get('purple')).to.eql({ violet: '' });
     });
 
-    it('should perform deep gets with arrays', function () {
-      const persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
+    it('should perform deep gets with arrays', function() {
+      const persistedState = new PersistedState({
+        hello: { nouns: ['world', 'humans', 'everyone'] },
+      });
 
       expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'humans', 'everyone'] } });
       expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'humans', 'everyone'] });
@@ -157,37 +159,37 @@ describe('Persisted State Provider', function () {
     });
   });
 
-  describe('set state', function () {
-    describe('path format support', function () {
-      it('should create deep objects from dot notation', function () {
+  describe('set state', function() {
+    describe('path format support', function() {
+      it('should create deep objects from dot notation', function() {
         const persistedState = new PersistedState();
         persistedState.set('one.two.three', 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
-      it('should create deep objects from array notation', function () {
+      it('should create deep objects from array notation', function() {
         const persistedState = new PersistedState();
         persistedState.set('one[two][three]', 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
-      it('should create deep objects from arrays', function () {
+      it('should create deep objects from arrays', function() {
         const persistedState = new PersistedState();
         persistedState.set(['one', 'two', 'three'], 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
-      it('should create deep objects with an existing path', function () {
+      it('should create deep objects with an existing path', function() {
         const persistedState = new PersistedState({}, 'deep.path');
         persistedState.set('green[red].blue', 4);
         expect(persistedState.get()).to.eql({ green: { red: { blue: 4 } } });
       });
     });
 
-    describe('simple replace operations', function () {
+    describe('simple replace operations', function() {
       let persistedState;
 
-      it('should replace value with string', function () {
+      it('should replace value with string', function() {
         persistedState = new PersistedState({ hello: 'world' });
         expect(persistedState.get()).to.eql({ hello: 'world' });
 
@@ -195,7 +197,7 @@ describe('Persisted State Provider', function () {
         expect(persistedState.get()).to.eql({ hello: 'fare thee well' });
       });
 
-      it('should replace value with array', function () {
+      it('should replace value with array', function() {
         persistedState = new PersistedState({ hello: ['world', 'everyone'] });
         expect(persistedState.get()).to.eql({ hello: ['world', 'everyone'] });
 
@@ -203,7 +205,7 @@ describe('Persisted State Provider', function () {
         expect(persistedState.get()).to.eql({ hello: ['people'] });
       });
 
-      it('should replace value with object', function () {
+      it('should replace value with object', function() {
         persistedState = new PersistedState({ hello: 'world' });
         expect(persistedState.get()).to.eql({ hello: 'world' });
 
@@ -211,7 +213,7 @@ describe('Persisted State Provider', function () {
         expect(persistedState.get()).to.eql({ hello: { message: 'fare thee well' } });
       });
 
-      it('should replace value with object, removing old properties', function () {
+      it('should replace value with object, removing old properties', function() {
         persistedState = new PersistedState({ hello: { message: 'world' } });
         expect(persistedState.get()).to.eql({ hello: { message: 'world' } });
 
@@ -220,10 +222,10 @@ describe('Persisted State Provider', function () {
       });
     });
 
-    describe('deep replace operations', function () {
+    describe('deep replace operations', function() {
       let persistedState;
 
-      it('should append to the object', function () {
+      it('should append to the object', function() {
         persistedState = new PersistedState({ hello: { message: 'world' } });
         expect(persistedState.get()).to.eql({ hello: { message: 'world' } });
 
@@ -231,7 +233,7 @@ describe('Persisted State Provider', function () {
         expect(persistedState.get()).to.eql({ hello: { message: 'world', length: 5 } });
       });
 
-      it('should change the value in the array', function () {
+      it('should change the value in the array', function() {
         persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
         persistedState.set('hello.nouns[1]', 'aliens');
 
@@ -242,19 +244,19 @@ describe('Persisted State Provider', function () {
     });
   });
 
-  describe('internal state tracking', function () {
-    it('should be an empty object', function () {
+  describe('internal state tracking', function() {
+    it('should be an empty object', function() {
       const persistedState = new PersistedState();
       expect(persistedState._defaultState).to.eql({});
     });
 
-    it('should store the default state value', function () {
+    it('should store the default state value', function() {
       const val = { one: 1, two: 2 };
       const persistedState = new PersistedState(val);
       expect(persistedState._defaultState).to.eql(val);
     });
 
-    it('should keep track of changes', function () {
+    it('should keep track of changes', function() {
       const val = { one: 1, two: 2 };
       const persistedState = new PersistedState(val);
 
@@ -264,51 +266,51 @@ describe('Persisted State Provider', function () {
     });
   });
 
-  describe('events', function () {
+  describe('events', function() {
     let persistedState;
     let emitter;
 
-    const getByType = function (type, spy) {
+    const getByType = function(type, spy) {
       spy = spy || emitter;
-      return spy.getCalls().filter(function (call) {
+      return spy.getCalls().filter(function(call) {
         return call.args[0] === type;
       });
     };
 
-    const watchEmitter = function (state) {
+    const watchEmitter = function(state) {
       return sinon.spy(state, 'emit');
     };
 
-    beforeEach(function () {
+    beforeEach(function() {
       persistedState = new PersistedState({ checker: { events: 'event tests' } });
       emitter = watchEmitter(persistedState);
     });
 
-    it('should emit set when setting values', function () {
+    it('should emit set when setting values', function() {
       expect(getByType('set')).to.have.length(0);
       persistedState.set('checker.time', 'now');
       expect(getByType('set')).to.have.length(1);
     });
 
-    it('should not emit when setting value silently', function () {
+    it('should not emit when setting value silently', function() {
       expect(getByType('set')).to.have.length(0);
       persistedState.setSilent('checker.time', 'now');
       expect(getByType('set')).to.have.length(0);
     });
 
-    it('should emit change when changing values', function () {
+    it('should emit change when changing values', function() {
       expect(getByType('change')).to.have.length(0);
       persistedState.set('checker.time', 'now');
       expect(getByType('change')).to.have.length(1);
     });
 
-    it('should not emit when changing values silently', function () {
+    it('should not emit when changing values silently', function() {
       expect(getByType('change')).to.have.length(0);
       persistedState.setSilent('checker.time', 'now');
       expect(getByType('change')).to.have.length(0);
     });
 
-    it('should not emit change when values are identical', function () {
+    it('should not emit change when values are identical', function() {
       expect(getByType('change')).to.have.length(0);
       // check both forms of setting the same value
       persistedState.set('checker', { events: 'event tests' });
@@ -317,7 +319,7 @@ describe('Persisted State Provider', function () {
       expect(getByType('change')).to.have.length(0);
     });
 
-    it('should emit change when values change', function () {
+    it('should emit change when values change', function() {
       expect(getByType('change')).to.have.length(0);
       persistedState.set('checker.events', 'i changed');
       expect(getByType('change')).to.have.length(1);

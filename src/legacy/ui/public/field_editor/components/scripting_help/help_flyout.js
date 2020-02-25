@@ -20,11 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
@@ -38,33 +34,33 @@ export const ScriptingHelpFlyout = ({
   script,
   executeScript,
 }) => {
-  const tabs = [{
-    id: 'syntax',
-    name: 'Syntax',
-    ['data-test-subj']: 'syntaxTab',
-    content: <ScriptingSyntax />,
-  }, {
-    id: 'test',
-    name: 'Preview results',
-    ['data-test-subj']: 'testTab',
-    content: (
-      <TestScript
-        indexPattern={indexPattern}
-        lang={lang}
-        name={name}
-        script={script}
-        executeScript={executeScript}
-      />
-    ),
-  }];
+  const tabs = [
+    {
+      id: 'syntax',
+      name: 'Syntax',
+      ['data-test-subj']: 'syntaxTab',
+      content: <ScriptingSyntax />,
+    },
+    {
+      id: 'test',
+      name: 'Preview results',
+      ['data-test-subj']: 'testTab',
+      content: (
+        <TestScript
+          indexPattern={indexPattern}
+          lang={lang}
+          name={name}
+          script={script}
+          executeScript={executeScript}
+        />
+      ),
+    },
+  ];
 
   return isVisible ? (
     <EuiFlyout onClose={onClose} data-test-subj="scriptedFieldsHelpFlyout">
       <EuiFlyoutBody>
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[0]}
-        />
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : null;

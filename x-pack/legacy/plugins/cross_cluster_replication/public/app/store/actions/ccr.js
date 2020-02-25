@@ -14,7 +14,5 @@ export const loadAutoFollowStats = () =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_STATS_LOAD,
     scope,
-    handler: async () => (
-      await loadAutoFollowStatsRequest()
-    ),
+    handler: async () => await loadAutoFollowStatsRequest(),
   });

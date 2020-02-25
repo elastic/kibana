@@ -15,6 +15,16 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
+// strExcludeDate is the concat results of the SnapshotName ...{...}>... without the date
+// This way we can check only the SnapshotName portion for lowercasing
+// For example: <logstash-{now/d}> would give strExcludeDate = <logstash->
+
+const isSnapshotNameNotLowerCase = (str: string): boolean => {
+  const strExcludeDate =
+    str.substring(0, str.search('{')) + str.substring(str.search('}>') + 1, str.length);
+  return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
+};
+
 export const validatePolicy = (
   policy: SlmPolicyPayload,
   validationHelperData: {
@@ -57,6 +67,14 @@ export const validatePolicy = (
     validation.errors.snapshotName.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameRequiredErrorMessage', {
         defaultMessage: 'Snapshot name is required.',
+      })
+    );
+  }
+
+  if (isSnapshotNameNotLowerCase(snapshotName)) {
+    validation.errors.snapshotName.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameLowerCaseErrorMessage', {
+        defaultMessage: 'Snapshot name needs to be lowercase.',
       })
     );
   }

@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -46,7 +47,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login(
           'global_advanced_settings_all_user',
           'global_advanced_settings_all_user-password',
@@ -62,14 +63,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Management']);
       });
 
@@ -125,9 +124,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Management']);
       });
 
@@ -178,19 +175,17 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Discover', 'Management']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
+      it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: 10000,
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
         });
       });
     });

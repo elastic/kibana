@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LicenseDashboard, UploadLicense } from './sections';
 import { Switch, Route } from 'react-router-dom';
-import { APP_PERMISSION } from '../../../common/constants';
+import { APP_PERMISSION, BASE_PATH } from '../../../common/constants';
 import { EuiPageBody, EuiEmptyPrompt, EuiText, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 
 export class App extends Component {
@@ -18,20 +18,20 @@ export class App extends Component {
   }
 
   render() {
-    const { hasPermission, permissionsLoading, permissionsError } = this.props;
+    const { hasPermission, permissionsLoading, permissionsError, telemetry } = this.props;
 
     if (permissionsLoading) {
       return (
         <EuiEmptyPrompt
           title={<EuiLoadingSpinner size="xl" />}
-          body={(
+          body={
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.licenseMgmt.app.loadingPermissionsDescription"
                 defaultMessage="Checking permissions…"
               />
             </EuiText>
-          )}
+          }
           data-test-subj="sectionLoading"
         />
       );
@@ -40,14 +40,18 @@ export class App extends Component {
     if (permissionsError) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.licenseMgmt.app.checkingPermissionsErrorMessage"
-            defaultMessage="Error checking permissions"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.app.checkingPermissionsErrorMessage"
+              defaultMessage="Error checking permissions"
+            />
+          }
           color="danger"
           iconType="alert"
         >
-          {permissionsError.data && permissionsError.data.message ? <div>{permissionsError.data.message}</div> : null}
+          {permissionsError.data && permissionsError.data.message ? (
+            <div>{permissionsError.data.message}</div>
+          ) : null}
         </EuiCallOut>
       );
     }
@@ -71,7 +75,7 @@ export class App extends Component {
                   id="xpack.licenseMgmt.app.deniedPermissionDescription"
                   defaultMessage="To use License Management, you must have {permissionType} privileges."
                   values={{
-                    permissionType: <strong>{APP_PERMISSION}</strong>
+                    permissionType: <strong>{APP_PERMISSION}</strong>,
                   }}
                 />
               </p>
@@ -81,13 +85,12 @@ export class App extends Component {
       );
     }
 
+    const withTelemetry = Component => props => <Component {...props} telemetry={telemetry} />;
     return (
       <EuiPageBody>
         <Switch>
-          <Route path={`/upload_license`} component={UploadLicense} />
-
-          {/* Match all */}
-          <Route component={LicenseDashboard} />
+          <Route path={`${BASE_PATH}upload_license`} component={withTelemetry(UploadLicense)} />
+          <Route path={BASE_PATH} component={withTelemetry(LicenseDashboard)} />
         </Switch>
       </EuiPageBody>
     );

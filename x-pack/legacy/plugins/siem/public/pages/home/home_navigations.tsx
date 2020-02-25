@@ -10,6 +10,7 @@ import {
   getNetworkUrl,
   getTimelinesUrl,
   getHostsUrl,
+  getCaseUrl,
 } from '../../components/link_to';
 import * as i18n from './translations';
 import { SiemPageName, SiemNavTab } from './types';
@@ -36,12 +37,12 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'network',
   },
-  [SiemPageName.detectionEngine]: {
-    id: SiemPageName.detectionEngine,
+  [SiemPageName.detections]: {
+    id: SiemPageName.detections,
     name: i18n.DETECTION_ENGINE,
     href: getDetectionEngineUrl(),
     disabled: false,
-    urlKey: 'detection-engine',
+    urlKey: 'detections',
   },
   [SiemPageName.timelines]: {
     id: SiemPageName.timelines,
@@ -49,5 +50,12 @@ export const navTabs: SiemNavTab = {
     href: getTimelinesUrl(),
     disabled: false,
     urlKey: 'timeline',
+  },
+  [SiemPageName.case]: {
+    id: SiemPageName.case,
+    name: i18n.CASE,
+    href: getCaseUrl(),
+    disabled: false,
+    urlKey: 'case',
   },
 };

@@ -22,7 +22,7 @@ import _ from 'lodash';
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',
   ARGUMENT_VALUE: 'argument_value',
-  FUNCTIONS: 'functions'
+  FUNCTIONS: 'functions',
 };
 
 export class Suggestions {
@@ -101,7 +101,7 @@ function getArgumentsHelp(functionHelp, functionArgs = []) {
   const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
 
   // ignore arguments that are already provided in function declaration
-  const functionArgNames = functionArgs.map((arg) => {
+  const functionArgNames = functionArgs.map(arg => {
     return arg.name;
   });
   return argsHelp.filter(arg => {
@@ -109,8 +109,13 @@ function getArgumentsHelp(functionHelp, functionArgs = []) {
   });
 }
 
-async function extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions) {
-  const activeFunc = result.functions.find((func) => {
+async function extractSuggestionsFromParsedResult(
+  result,
+  cursorPosition,
+  functionList,
+  argValueSuggestions
+) {
+  const activeFunc = result.functions.find(func => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
 
@@ -118,7 +123,7 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
     return;
   }
 
-  const functionHelp = functionList.find((func) => {
+  const functionHelp = functionList.find(func => {
     return func.name === activeFunc.function;
   });
 
@@ -130,14 +135,15 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
   }
 
   // return argument value suggestions when cursor is inside argument value
-  const activeArg = activeFunc.arguments.find((argument) => {
+  const activeArg = activeFunc.arguments.find(argument => {
     return inLocation(cursorPosition, argument.location);
   });
-  if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
-    const {
-      function: functionName,
-      arguments: functionArgs,
-    } = activeFunc;
+  if (
+    activeArg &&
+    activeArg.type === 'namedArg' &&
+    inLocation(cursorPosition, activeArg.value.location)
+  ) {
+    const { function: functionName, arguments: functionArgs } = activeFunc;
 
     const {
       name: argName,
@@ -146,16 +152,26 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
 
     let valueSuggestions;
     if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-      valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
+      valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(
+        functionName,
+        argName,
+        functionArgs,
+        partialInput
+      );
     } else {
-      const {
-        suggestions: staticSuggestions,
-      } = functionHelp.args.find((arg) => {
+      const { suggestions: staticSuggestions } = functionHelp.args.find(arg => {
         return arg.name === activeArg.name;
       });
-      valueSuggestions = argValueSuggestions.getStaticSuggestionsForInput(partialInput, staticSuggestions);
+      valueSuggestions = argValueSuggestions.getStaticSuggestionsForInput(
+        partialInput,
+        staticSuggestions
+      );
     }
-    return { list: valueSuggestions, location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
+    return {
+      list: valueSuggestions,
+      location: activeArg.value.location,
+      type: SUGGESTION_TYPE.ARGUMENT_VALUE,
+    };
   }
 
   // return argument suggestions
@@ -172,12 +188,22 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
   return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
 }
 
-export async function suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions) {
+export async function suggest(
+  expression,
+  functionList,
+  Parser,
+  cursorPosition,
+  argValueSuggestions
+) {
   try {
     const result = await Parser.parse(expression);
-    return await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
+    return await extractSuggestionsFromParsedResult(
+      result,
+      cursorPosition,
+      functionList,
+      argValueSuggestions
+    );
   } catch (e) {
-
     let message;
     try {
       // The grammar will throw an error containing a message if the expression is formatted
@@ -204,26 +230,23 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS };
       }
       case 'incompleteArgument': {
-        const {
-          currentFunction: functionName,
-          currentArgs: functionArgs,
-        } = message;
+        const { currentFunction: functionName, currentArgs: functionArgs } = message;
         const functionHelp = functionList.find(func => func.name === functionName);
         return {
           list: getArgumentsHelp(functionHelp, functionArgs),
           location: message.location,
-          type: SUGGESTION_TYPE.ARGUMENTS
+          type: SUGGESTION_TYPE.ARGUMENTS,
         };
       }
       case 'incompleteArgumentValue': {
-        const {
-          name: argName,
-          currentFunction: functionName,
-          currentArgs: functionArgs,
-        } = message;
+        const { name: argName, currentFunction: functionName, currentArgs: functionArgs } = message;
         let valueSuggestions = [];
         if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-          valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
+          valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(
+            functionName,
+            argName,
+            functionArgs
+          );
         } else {
           const functionHelp = functionList.find(func => func.name === functionName);
           if (functionHelp) {
@@ -236,17 +259,22 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return {
           list: valueSuggestions,
           location: { min: cursorPosition, max: cursorPosition },
-          type: SUGGESTION_TYPE.ARGUMENT_VALUE
+          type: SUGGESTION_TYPE.ARGUMENT_VALUE,
         };
       }
     }
   }
 }
 
-export function insertAtLocation(valueToInsert, destination, replacementRangeStart, replacementRangeEnd) {
+export function insertAtLocation(
+  valueToInsert,
+  destination,
+  replacementRangeStart,
+  replacementRangeEnd
+) {
   // Insert the value at a location caret within the destination.
   const prefix = destination.slice(0, replacementRangeStart);
-  const suffix =  destination.slice(replacementRangeEnd, destination.length);
+  const suffix = destination.slice(replacementRangeEnd, destination.length);
   const result = `${prefix}${valueToInsert}${suffix}`;
   return result;
 }

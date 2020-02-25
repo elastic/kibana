@@ -55,12 +55,12 @@ export class WMSCreateSourceEditor extends Component {
     const sourceConfig =
       serviceUrl && layers
         ? {
-          serviceUrl,
-          layers,
-          styles,
-          attributionText,
-          attributionUrl,
-        }
+            serviceUrl,
+            layers,
+            styles,
+            attributionText,
+            attributionUrl,
+          }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
   }, 2000);

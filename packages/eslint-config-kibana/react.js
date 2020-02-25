@@ -21,27 +21,14 @@ module.exports = {
   },
 
   rules: {
-    'jsx-quotes': ['error', 'prefer-double'],
     'react/jsx-uses-react': 'error',
     'react/react-in-jsx-scope': 'error',
     'react/jsx-uses-vars': 'error',
     'react/jsx-no-undef': 'error',
     'react/jsx-pascal-case': 'error',
-    'react/jsx-closing-bracket-location': ['error', 'line-aligned'],
-    'react/jsx-closing-tag-location': 'error',
-    'react/jsx-curly-spacing': ['error', 'never', { allowMultiline: true }],
-    'react/jsx-indent-props': ['error', 2],
-    'react/jsx-max-props-per-line': ['error', { maximum: 1, when: 'multiline' }],
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
     'react/no-danger': 'error',
     'react/self-closing-comp': 'error',
-    'react/jsx-wrap-multilines': ['error', {
-      declaration: true,
-      assignment: true,
-      return: true,
-      arrow: true,
-    }],
-    'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
     'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
     'jsx-a11y/accessible-emoji': 'error',
@@ -71,8 +58,6 @@ module.exports = {
     'jsx-a11y/role-supports-aria-props': 'error',
     'jsx-a11y/scope': 'error',
     'jsx-a11y/tabindex-no-positive': 'error',
-    'react/jsx-equals-spacing': ['error', 'never'],
-    'react/jsx-indent': ['error', 2],
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');

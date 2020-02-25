@@ -50,6 +50,13 @@ export const navTabsHostDetails = (
       urlKey: 'host',
       isDetailPage: true,
     },
+    [HostsTableType.alerts]: {
+      id: HostsTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
+      disabled: false,
+      urlKey: 'host',
+    },
   };
 
   return hasMlUserPermissions

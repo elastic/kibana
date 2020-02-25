@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { isCalendarInterval, leastCommonInterval } from './interval_helper';
 
 describe('interval_helper', () => {
@@ -25,7 +25,6 @@ describe('interval_helper', () => {
 
       test('should return false for "y" intervals and value !== 1', () =>
         expect(isCalendarInterval({ value: 4, unit: 'y' })).toBeFalsy());
-
     });
 
     describe('fixed intervals', () => {
@@ -57,7 +56,6 @@ describe('interval_helper', () => {
 
       test('should return false for "d" intervals and value !== 1', () =>
         expect(isCalendarInterval({ value: 4, unit: 'd' })).toBeFalsy());
-
     });
   });
 });

@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
+import deepEqual from 'fast-deep-equal';
 
-import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
 import {
-  esFilters,
+  Filter,
   IIndexPattern,
   FilterManager,
   Query,
   TimeHistory,
   TimeRange,
+  SavedQuery,
+  SearchBar,
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -30,7 +30,7 @@ export interface QueryBarComponentProps {
   isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   onChangedQuery: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
@@ -64,7 +64,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onSubmitQuery(payload.query);
         }
       },
@@ -73,7 +73,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !isEqual(payload.query, draftQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
           setDraftQuery(payload.query);
           onChangedQuery(payload.query);
         }
@@ -110,14 +110,14 @@ export const QueryBar = memo<QueryBarComponentProps>(
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
-      (newFilters: esFilters.Filter[]) => {
+      (newFilters: Filter[]) => {
         filterManager.setFilters(newFilters);
       },
       [filterManager]
     );
 
     const CustomButton = <>{null}</>;
-    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     const searchBarProps = savedQuery != null ? { savedQuery } : {};
 

@@ -51,8 +51,6 @@ exports[`TooltipHeader multiple features, multiple layers: locked should show pa
           aria-label="Filter results by layer"
           compressed={true}
           fullWidth={true}
-          hasNoInitialSelection={false}
-          isLoading={false}
           onChange={[Function]}
           options={
             Array [

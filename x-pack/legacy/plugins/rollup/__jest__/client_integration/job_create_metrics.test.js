@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -13,8 +14,6 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 5: Metrics', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
@@ -22,28 +21,24 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let goToStep;
   let table;
   let metrics;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
-    ({
-      find,
-      exists,
-      actions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      table,
-      metrics,
-    } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, metrics } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
@@ -117,7 +112,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
     describe('table', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -150,7 +145,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
   describe('fields list', () => {
     const addFieldToList = (type = 'numeric') => {
-      if(!exists('rollupJobMetricsFieldChooser-table')) {
+      if (!exists('rollupJobMetricsFieldChooser-table')) {
         find('rollupJobShowFieldChooserButton').simulate('click');
       }
       const { rows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
@@ -174,7 +169,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
     describe('when fields are added', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -183,16 +178,22 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         numericTypeMetrics.forEach(type => {
           try {
             expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
-          } catch(e) {
-            throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
+          } catch (e) {
+            throw new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`);
           }
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
+        const {
+          rows: [firstRow],
+        } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
-        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length + 1 /* add one for select all */);
+        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find(
+          'input'
+        );
+        expect(metricsCheckboxes.length).toBe(
+          numericTypeMetrics.length + 1 /* add one for select all */
+        );
       });
 
       it('should have "max", "min", & "value count" metrics for *date* fields', () => {
@@ -201,16 +202,22 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         dateTypeMetrics.forEach(type => {
           try {
             expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
-          } catch(e) {
-            throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
+          } catch (e) {
+            throw new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`);
           }
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
+        const {
+          rows: [firstRow],
+        } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
-        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length + 1 /* add one for select all */);
+        const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find(
+          'input'
+        );
+        expect(metricsCheckboxes.length).toBe(
+          dateTypeMetrics.length + 1 /* add one for select all */
+        );
       });
 
       it('should not allow to go to the next step if at least one metric type is not selected', () => {
@@ -221,7 +228,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
         const stepError = find('rollupJobCreateStepError');
         expect(stepError.length).toBeTruthy();
-        expect(stepError.text()).toEqual('Select metrics types for these fields or remove them: a-numericField.');
+        expect(stepError.text()).toEqual(
+          'Select metrics types for these fields or remove them: a-numericField.'
+        );
         expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
@@ -235,7 +244,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
         const columnsFirstRow = fieldListRows[0].columns;
         // The last column is the eui "actions" column
-        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button').last();
+        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper
+          .find('button')
+          .last();
         deleteButton.simulate('click');
 
         ({ rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList'));
@@ -249,7 +260,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       let getFieldListTableRows;
 
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
+
         await goToStep(5);
         await addFieldToList('numeric');
         await addFieldToList('date');
@@ -259,12 +271,12 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
         const inputs = fieldChooserColumn.reactWrapper.find('input');
-        inputs.forEach((input) => {
+        inputs.forEach(input => {
           expect(input.props().checked).toBe(expected);
         });
       };
 
-      it('should select all of the fields in a row',  async () => {
+      it('should select all of the fields in a row', async () => {
         // The last column is the eui "actions" column
         const selectAllCheckbox = getSelectAllInputForRow(0);
         selectAllCheckbox.simulate('change', { checked: true });
@@ -272,7 +284,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expectAllFieldChooserInputs(fieldChooserColumn, true);
       });
 
-      it('should deselect all of the fields in a row ',  async () => {
+      it('should deselect all of the fields in a row ', async () => {
         const selectAllCheckbox = getSelectAllInputForRow(0);
         selectAllCheckbox.simulate('change', { checked: true });
 
@@ -284,15 +296,15 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expectAllFieldChooserInputs(fieldChooserColumn, false);
       });
 
-      it('should select all of the metric types across rows (column-wise)',  () => {
+      it('should select all of the metric types across rows (column-wise)', () => {
         const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
         selectAllAvgCheckbox.first().simulate('change', { checked: true });
 
         const rows = getFieldListTableRows();
 
         rows
-          .filter((row) => {
-            const [, metricTypeCol ] = row.columns;
+          .filter(row => {
+            const [, metricTypeCol] = row.columns;
             return metricTypeCol.value === 'numeric';
           })
           .forEach((row, idx) => {
@@ -308,7 +320,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
           });
       });
 
-      it('should deselect all of the metric types across rows (column-wise)',  () => {
+      it('should deselect all of the metric types across rows (column-wise)', () => {
         const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
 
         // Select first, which adds metrics column-wise, and then de-select column-wise to ensure
@@ -319,7 +331,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const rows = getFieldListTableRows();
 
         rows.forEach((row, idx) => {
-          const [, metricTypeCol ] = row.columns;
+          const [, metricTypeCol] = row.columns;
           if (metricTypeCol.value !== 'numeric') {
             return;
           }
@@ -330,7 +342,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         });
       });
 
-      it('should correctly select across rows and columns',  async () => {
+      it('should correctly select across rows and columns', async () => {
         /**
          * Tricky test case where we want to determine that the column-wise and row-wise
          * selections are interacting correctly with each other.
@@ -352,9 +364,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
          */
 
         // 1.
-        find('rollupJobMetricsSelectAllCheckbox-avg').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-avg')
+          .first()
+          .simulate('change', { checked: true });
         // 2.
-        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max')
+          .first()
+          .simulate('change', { checked: true });
 
         const selectAllCheckbox = getSelectAllInputForRow(0);
 
@@ -365,26 +381,35 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         selectAllCheckbox.simulate('change', { checked: false });
 
         // 4.
-        expect(find('rollupJobMetricsSelectAllCheckbox-avg').first().props().checked).toBe(false);
-        expect(find('rollupJobMetricsSelectAllCheckbox-max').first().props().checked).toBe(false);
+        expect(
+          find('rollupJobMetricsSelectAllCheckbox-avg')
+            .first()
+            .props().checked
+        ).toBe(false);
+        expect(
+          find('rollupJobMetricsSelectAllCheckbox-max')
+            .first()
+            .props().checked
+        ).toBe(false);
 
         let rows = getFieldListTableRows();
         // 5.
         getSelectAllInputForRow(rows.length - 1).simulate('change', { checked: true });
 
         // 6.
-        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
-        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: false });
+        find('rollupJobMetricsSelectAllCheckbox-max')
+          .first()
+          .simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max')
+          .first()
+          .simulate('change', { checked: false });
 
         rows = getFieldListTableRows();
         const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
         // 7.
-        lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
+        lastRowFieldChooserColumn.reactWrapper.find('input').forEach(input => {
           const props = input.props();
-          if (
-            props['data-test-subj'].endsWith('max') ||
-            props['data-test-subj'].endsWith('All')
-          ) {
+          if (props['data-test-subj'].endsWith('max') || props['data-test-subj'].endsWith('All')) {
             expect(props.checked).toBe(false);
           } else {
             expect(props.checked).toBe(true);

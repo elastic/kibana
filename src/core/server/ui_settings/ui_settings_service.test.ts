@@ -22,7 +22,6 @@ import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock
 
 import { UiSettingsService } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
 import { savedObjectsClientMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 
@@ -69,27 +68,6 @@ describe('uiSettings', () => {
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
       });
 
-      it('passes overrides with deprecated "server.defaultRoute"', async () => {
-        const service = new UiSettingsService(coreContext);
-        const httpSetupWithDefaultRoute = httpServiceMock.createSetupContract();
-        httpSetupWithDefaultRoute.config.defaultRoute = '/defaultRoute';
-        const setup = await service.setup({ http: httpSetupWithDefaultRoute });
-        setup.asScopedToClient(savedObjectsClient);
-
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual({
-          ...overrides,
-          defaultRoute: '/defaultRoute',
-        });
-
-        expect(loggingServiceMock.collect(coreContext.logger).warn).toMatchInlineSnapshot(`
-          Array [
-            Array [
-              "Config key \\"server.defaultRoute\\" is deprecated. It has been replaced with \\"uiSettings.overrides.defaultRoute\\"",
-            ],
-          ]
-        `);
-      });
-
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
@@ -111,6 +89,42 @@ describe('uiSettings', () => {
         expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
           `"uiSettings for the key [foo] has been already registered"`
         );
+      });
+    });
+  });
+
+  describe('#start', () => {
+    describe('#asScopedToClient', () => {
+      it('passes saved object type "config" to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        await service.setup(setupDeps);
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
+      });
+
+      it('passes overrides to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        await service.setup(setupDeps);
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
+      });
+
+      it('passes a copy of set defaults to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        const setup = await service.setup(setupDeps);
+        setup.register(defaults);
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
     });
   });

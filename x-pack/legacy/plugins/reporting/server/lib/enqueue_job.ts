@@ -5,9 +5,11 @@
  */
 
 import { get } from 'lodash';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
+  EnqueueJobFn,
   ESQueueCreateJobFn,
   ImmediateCreateJobFn,
   Job,
@@ -18,6 +20,7 @@ import {
   QueueConfig,
   ConditionalHeaders,
 } from '../../types';
+import { ReportingCore } from '../core';
 
 interface ConfirmedJob {
   id: string;
@@ -26,16 +29,20 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export function enqueueJobFactory(server: ServerFacade) {
+export function enqueueJobFactory(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+): EnqueueJobFn {
+  const logger = parentLogger.clone(['queue-job']);
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
   const maxAttempts = captureConfig.maxAttempts;
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
-  const { exportTypesRegistry, queue: jobQueue } = server.plugins.reporting!;
 
   return async function enqueueJob<JobParamsType>(
-    parentLogger: Logger,
     exportTypeId: string,
     jobParams: JobParamsType,
     user: string,
@@ -44,9 +51,20 @@ export function enqueueJobFactory(server: ServerFacade) {
   ): Promise<Job> {
     type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
 
-    const logger = parentLogger.clone(['queue-job']);
-    const exportType = exportTypesRegistry.getById(exportTypeId);
-    const createJob = exportType.createJobFactory(server) as CreateJobFn;
+    const esqueue = await reporting.getEsqueue();
+    const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
+
+    if (exportType == null) {
+      throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
+    }
+
+    // TODO: the createJobFn should be unwrapped in the register method of the export types registry
+    const createJob = exportType.createJobFactory(
+      reporting,
+      server,
+      elasticsearch,
+      logger
+    ) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {
@@ -57,7 +75,7 @@ export function enqueueJobFactory(server: ServerFacade) {
     };
 
     return new Promise((resolve, reject) => {
-      const job = jobQueue.addJob(exportType.jobType, payload, options);
+      const job = esqueue.addJob(exportType.jobType, payload, options);
 
       job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob: ConfirmedJob) => {
         if (createdJob.id === job.id) {

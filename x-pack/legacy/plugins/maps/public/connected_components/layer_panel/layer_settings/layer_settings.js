@@ -6,13 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../components/validated_range';
 import { i18n } from '@kbn/i18n';

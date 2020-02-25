@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -21,7 +20,6 @@ import {
 import { ExperimentalBadge } from '../experimental_badge';
 
 export function WelcomeContent() {
-
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -29,7 +27,7 @@ export function WelcomeContent() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="m">
-          <h3>
+          <h1>
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.welcomeContent.visualizeDataFromLogFileTitle"
               defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
@@ -46,7 +44,7 @@ export function WelcomeContent() {
                 ),
               }}
             />
-          </h3>
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText>
@@ -138,7 +136,7 @@ export function WelcomeContent() {
                   >
                     GitHub
                   </EuiLink>
-                )
+                ),
               }}
             />
           </p>

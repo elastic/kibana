@@ -10,14 +10,16 @@ import { NoData } from '../';
 
 const enabler = {};
 
+jest.mock('../../../np_imports/ui/chrome', () => {
+  return {
+    getBasePath: () => '',
+  };
+});
+
 describe('NoData', () => {
   test('should show text next to the spinner while checking a setting', () => {
     const component = renderWithIntl(
-      <NoData
-        isLoading={true}
-        checkMessage="checking something to test"
-        enabler={enabler}
-      />
+      <NoData isLoading={true} checkMessage="checking something to test" enabler={enabler} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -29,7 +31,7 @@ describe('NoData', () => {
         reason={{
           property: 'xpack.monitoring.foo.bar',
           data: 'taco',
-          context: 'food'
+          context: 'food',
         }}
         enabler={enabler}
       />

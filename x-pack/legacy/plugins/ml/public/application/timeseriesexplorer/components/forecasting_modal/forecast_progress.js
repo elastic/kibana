@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Renders the progress of the various actions involved in running a forecast on an ML job.
  */
@@ -19,22 +17,17 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
-
 
 import { ProgressIcon } from './progress_icon';
 import { PROGRESS_STATES } from './progress_states';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
-export function ForecastProgress({
-  forecastProgress,
-  jobOpeningState,
-  jobClosingState }) {
+export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosingState }) {
   return (
     <div>
-      {jobOpeningState !== PROGRESS_STATES.UNSET &&
+      {jobOpeningState !== PROGRESS_STATES.UNSET && (
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -53,8 +46,8 @@ export function ForecastProgress({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </React.Fragment>
-      }
-      {forecastProgress !== PROGRESS_STATES.UNSET &&
+      )}
+      {forecastProgress !== PROGRESS_STATES.UNSET && (
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -67,26 +60,23 @@ export function ForecastProgress({
                 </h3>
               </EuiText>
             </EuiFlexItem>
-            {forecastProgress >= 0 &&
+            {forecastProgress >= 0 && (
               <EuiFlexItem>
-                <EuiToolTip
-                  position="top"
-                  content={forecastProgress + '%'}
-                >
+                <EuiToolTip position="top" content={forecastProgress + '%'}>
                   <EuiProgress size="l" value={forecastProgress} max={100} />
                 </EuiToolTip>
               </EuiFlexItem>
-            }
-            {forecastProgress === PROGRESS_STATES.ERROR &&
+            )}
+            {forecastProgress === PROGRESS_STATES.ERROR && (
               <EuiFlexItem grow={false}>
                 <ProgressIcon state={PROGRESS_STATES.ERROR} />
               </EuiFlexItem>
-            }
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </React.Fragment>
-      }
-      {jobClosingState !== PROGRESS_STATES.UNSET &&
+      )}
+      {jobClosingState !== PROGRESS_STATES.UNSET && (
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -104,7 +94,7 @@ export function ForecastProgress({
             </EuiFlexItem>
           </EuiFlexGroup>
         </React.Fragment>
-      }
+      )}
     </div>
   );
 }
@@ -112,6 +102,5 @@ export function ForecastProgress({
 ForecastProgress.propType = {
   forecastProgress: PropTypes.number,
   jobOpeningState: PropTypes.number,
-  jobClosingState: PropTypes.number
+  jobClosingState: PropTypes.number,
 };
-

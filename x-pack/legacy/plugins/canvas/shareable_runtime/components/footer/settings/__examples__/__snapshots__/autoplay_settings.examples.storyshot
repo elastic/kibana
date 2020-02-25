@@ -45,18 +45,22 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
             className="euiSwitch__track"
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
               xmlns="http://www.w3.org/2000/svg"
             />
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
@@ -65,13 +69,13 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           </span>
         </span>
       </button>
-      <p
+      <span
         className="euiSwitch__label"
         id="generated-id"
         onClick={[Function]}
       >
         Cycle Slides
-      </p>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -87,6 +91,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -133,6 +138,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
         >
           <div
             className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__fieldWrapper"
@@ -214,18 +220,22 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
             className="euiSwitch__track"
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
               xmlns="http://www.w3.org/2000/svg"
             />
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
@@ -234,13 +244,13 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           </span>
         </span>
       </button>
-      <p
+      <span
         className="euiSwitch__label"
         id="generated-id"
         onClick={[Function]}
       >
         Cycle Slides
-      </p>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -256,6 +266,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -302,6 +313,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
         >
           <div
             className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__fieldWrapper"
@@ -383,18 +395,22 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
             className="euiSwitch__track"
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
               xmlns="http://www.w3.org/2000/svg"
             />
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
@@ -403,13 +419,13 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           </span>
         </span>
       </button>
-      <p
+      <span
         className="euiSwitch__label"
         id="generated-id"
         onClick={[Function]}
       >
         Cycle Slides
-      </p>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -425,6 +441,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -471,6 +488,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
         >
           <div
             className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__fieldWrapper"

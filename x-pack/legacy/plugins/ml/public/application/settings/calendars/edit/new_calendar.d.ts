@@ -7,7 +7,7 @@
 import { FC } from 'react';
 
 declare const NewCalendar: FC<{
-  calendarId: string;
+  calendarId?: string;
   canCreateCalendar: boolean;
   canDeleteCalendar: boolean;
 }>;

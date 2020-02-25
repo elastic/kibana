@@ -31,7 +31,7 @@ export function reduceExportSpecs(pluginSpecs, reducers, defaults = {}) {
     const types = Object.keys(specsByType);
 
     return types.reduce((acc, type) => {
-      const reducer = (reducers[type] || reducers.unknown);
+      const reducer = reducers[type] || reducers.unknown;
 
       if (!reducer) {
         throw new Error(`Unknown export type ${type}`);
@@ -39,15 +39,9 @@ export function reduceExportSpecs(pluginSpecs, reducers, defaults = {}) {
 
       // convert specs to an array if not already one or
       // ignore the spec if it is undefined
-      const specs = [].concat(
-        specsByType[type] === undefined
-          ? []
-          : specsByType[type]
-      );
+      const specs = [].concat(specsByType[type] === undefined ? [] : specsByType[type]);
 
-      return specs.reduce((acc, spec) => (
-        reducer(acc, spec, type, pluginSpec)
-      ), acc);
+      return specs.reduce((acc, spec) => reducer(acc, spec, type, pluginSpec), acc);
     }, acc);
   }, defaults);
 }

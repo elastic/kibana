@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
-import { META_ID_ORIGIN_SUFFIX } from '../../../common/constants';
+import { META_ID_ORIGIN_SUFFIX, FORMATTERS_ID_ORIGIN_SUFFIX } from '../../../common/constants';
 
 export class InnerJoin {
-
   constructor(joinDescriptor, leftSource) {
     this._descriptor = joinDescriptor;
     const inspectorAdapters = leftSource.getInspectorAdapters();
     this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
-    this._leftField = this._descriptor.leftField ? leftSource.createField({ fieldName: joinDescriptor.leftField }) : null;
+    this._leftField = this._descriptor.leftField
+      ? leftSource.createField({ fieldName: joinDescriptor.leftField })
+      : null;
   }
 
   destroy() {
@@ -45,6 +45,10 @@ export class InnerJoin {
     return `${this.getSourceDataRequestId()}_${META_ID_ORIGIN_SUFFIX}`;
   }
 
+  getSourceFormattersDataRequestId() {
+    return `${this.getSourceDataRequestId()}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
+  }
+
   getLeftField() {
     return this._leftField;
   }
@@ -53,23 +57,26 @@ export class InnerJoin {
     const rightMetricFields = this._rightSource.getMetricFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
-      const metricPropertyKey  = rightMetricFields[j].getName();
+      const metricPropertyKey = rightMetricFields[j].getName();
       delete feature.properties[metricPropertyKey];
 
       // delete all dynamic properties for metric field
       const stylePropertyPrefix = getComputedFieldNamePrefix(metricPropertyKey);
       Object.keys(feature.properties).forEach(featurePropertyKey => {
-        if (featurePropertyKey.length >= stylePropertyPrefix.length &&
-          featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix) {
+        if (
+          featurePropertyKey.length >= stylePropertyPrefix.length &&
+          featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix
+        ) {
           delete feature.properties[featurePropertyKey];
         }
       });
     }
 
     const joinKey = feature.properties[this._leftField.getName()];
-    const coercedKey = typeof joinKey === 'undefined' || joinKey === null  ? null : joinKey.toString();
+    const coercedKey =
+      typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
     if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
-      Object.assign(feature.properties,  propertiesMap.get(coercedKey));
+      Object.assign(feature.properties, propertiesMap.get(coercedKey));
       return true;
     } else {
       return false;
@@ -89,15 +96,14 @@ export class InnerJoin {
   }
 
   getIndexPatternIds() {
-    return  this._rightSource.getIndexPatternIds();
+    return this._rightSource.getIndexPatternIds();
   }
 
   getQueryableIndexPatternIds() {
-    return  this._rightSource.getQueryableIndexPatternIds();
+    return this._rightSource.getQueryableIndexPatternIds();
   }
 
   getWhereQuery() {
     return this._rightSource.getWhereQuery();
   }
 }
-

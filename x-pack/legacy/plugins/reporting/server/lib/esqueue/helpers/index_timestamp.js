@@ -6,14 +6,7 @@
 
 import moment from 'moment';
 
-export const intervals = [
-  'year',
-  'month',
-  'week',
-  'day',
-  'hour',
-  'minute'
-];
+export const intervals = ['year', 'month', 'week', 'day', 'hour', 'minute'];
 
 export function indexTimestamp(intervalStr, separator = '-') {
   if (separator.match(/[a-z]/i)) throw new Error('Interval separator can not be a letter');

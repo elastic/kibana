@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { App, AppUnmount } from 'kibana/public';
+import { App, AppUnmount, AppMountDeprecated } from 'kibana/public';
 import { UIRoutes } from 'ui/routes';
 import { ILocationService, IScope } from 'angular';
 import { npStart } from 'ui/new_platform';
@@ -50,13 +50,13 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    npStart.plugins.kibana_legacy.getApps().forEach(app => {
+    npStart.plugins.kibanaLegacy.getApps().forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
-        template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
+        template: `<div class="kbnLocalApplicationWrapper" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
           let unmountHandler: AppUnmount | null = null;
@@ -68,7 +68,10 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            unmountHandler = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+            const params = { element, appBasePath: '', onAppLeave: () => undefined };
+            unmountHandler = isAppMountDeprecated(app.mount)
+              ? await app.mount({ core: npStart.core }, params)
+              : await app.mount(params);
             // immediately unmount app if scope got destroyed in the meantime
             if (isUnmounted) {
               unmountHandler();
@@ -76,9 +79,20 @@ export class LocalApplicationService {
           })();
         },
       });
+
+      if (app.updater$) {
+        app.updater$.subscribe(updater => {
+          const updatedFields = updater(app);
+          if (updatedFields && updatedFields.activeUrl) {
+            npStart.core.chrome.navLinks.update(app.navLinkId || app.id, {
+              url: updatedFields.activeUrl,
+            });
+          }
+        });
+      }
     });
 
-    npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+    npStart.plugins.kibanaLegacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
         resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();
@@ -90,3 +104,8 @@ export class LocalApplicationService {
 }
 
 export const localApplicationService = new LocalApplicationService();
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
+}

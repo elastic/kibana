@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import {  LAYER_TYPE, STYLE_TYPE } from '../constants';
+import { LAYER_TYPE, STYLE_TYPE } from '../constants';
 
 function isVectorLayer(layerDescriptor) {
   const layerType = _.get(layerDescriptor, 'type');
@@ -18,7 +18,7 @@ export function addFieldMetaOptions({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach((layerDescriptor) => {
+  layerList.forEach(layerDescriptor => {
     if (isVectorLayer(layerDescriptor) && _.has(layerDescriptor, 'style.properties')) {
       Object.values(layerDescriptor.style.properties).forEach(stylePropertyDescriptor => {
         if (stylePropertyDescriptor.type === STYLE_TYPE.DYNAMIC) {

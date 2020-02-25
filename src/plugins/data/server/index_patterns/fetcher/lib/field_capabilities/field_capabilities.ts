@@ -19,7 +19,7 @@
 
 import { defaults, indexBy, sortBy } from 'lodash';
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';

@@ -18,17 +18,18 @@ To create a region map, you configure an inner join that joins the result of an 
 and a reference vector file based on a shared key.
 
 [float]
-==== Data
+[[region-map-aggregation]]
+=== Supported aggregations
 
-[float]
-===== Metrics
+Region maps support the following aggregations:
 
-Select any of the supported _Metric_ or _Sibling Pipeline Aggregations_.
+* <<visualize-metric-aggregations,Metric>>
 
-[float]
-===== Buckets
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
 
-Configure a _Terms_ aggregation. The term is the _key_ that is used to join the results to the vector data on the map.
+* <<visualize-bucket-aggregations,Terms bucket aggregation>>
+
+Use the _key_ term to join the results to the vector data on the map.
 
 [float]
 ==== Options

@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { AuthenticatedUser } from './common/model';
+import { AuthenticatedUser } from '../../../plugins/security/public';
 
 /**
  * Public interface of the security plugin.

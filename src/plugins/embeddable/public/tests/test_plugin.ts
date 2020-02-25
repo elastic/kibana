@@ -19,8 +19,9 @@
 
 import { CoreSetup, CoreStart } from 'src/core/public';
 // eslint-disable-next-line
-import { uiActionsTestPlugin } from 'src/plugins/ui_actions/public/tests';
-import { IUiActionsApi } from 'src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { coreMock } from '../../../../core/public/mocks';
 import { EmbeddablePublicPlugin, IEmbeddableSetup, IEmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
@@ -29,14 +30,14 @@ export interface TestPluginReturn {
   coreStart: CoreStart;
   setup: IEmbeddableSetup;
   doStart: (anotherCoreStart?: CoreStart) => IEmbeddableStart;
-  uiActions: IUiActionsApi;
+  uiActions: UiActionsStart;
 }
 
 export const testPlugin = (
-  coreSetup: CoreSetup = {} as CoreSetup,
-  coreStart: CoreStart = {} as CoreStart
+  coreSetup: CoreSetup = coreMock.createSetup(),
+  coreStart: CoreStart = coreMock.createStart()
 ): TestPluginReturn => {
-  const uiActions = uiActionsTestPlugin(coreSetup, coreStart);
+  const uiActions = uiActionsPluginMock.createPlugin(coreSetup, coreStart);
   const initializerContext = {} as any;
   const plugin = new EmbeddablePublicPlugin(initializerContext);
   const setup = plugin.setup(coreSetup, { uiActions: uiActions.setup });

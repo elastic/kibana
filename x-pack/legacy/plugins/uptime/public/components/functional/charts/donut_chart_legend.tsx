@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 
 const LegendContainer = styled.div`
   max-width: 260px;
@@ -28,23 +28,25 @@ interface Props {
 export const DonutChartLegend = ({ down, up }: Props) => {
   const {
     colors: { gray, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
   return (
     <LegendContainer>
       <DonutChartLegendRow
         color={danger}
         content={down}
-        message={i18n.translate('xpack.uptime.donutChart.legend.downRowLabel', {
+        message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.downRowLabel', {
           defaultMessage: 'Down',
         })}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
         color={gray}
         content={up}
-        message={i18n.translate('xpack.uptime.donutChart.legend.upRowLabel', {
+        message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.upRowLabel', {
           defaultMessage: 'Up',
         })}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
       />
     </LegendContainer>
   );

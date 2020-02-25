@@ -23,17 +23,11 @@ import {
   defaultSearchQuery,
   SearchQuery,
 } from '../../../../common';
+import { LoadExploreDataArg } from '../../../../common/analytics';
 
 import { getOutlierScoreFieldName } from './common';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 export type TableItem = Record<string, any>;
-
-interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
-  searchQuery: SavedSearchQuery;
-}
 
 export interface UseExploreDataReturnType {
   errorMessage: string;
@@ -55,7 +49,12 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
+  const loadExploreData = async ({
+    field,
+    direction,
+    searchQuery,
+    requiresKeyword,
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -70,7 +69,7 @@ export const useExploreData = (
         if (field !== undefined) {
           body.sort = [
             {
-              [field]: {
+              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
                 order: direction,
               },
             },

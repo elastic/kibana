@@ -41,7 +41,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
 
   // global beforeEach hook in root suite triggers before all others
   mocha.suite.beforeEach('global before each', async function() {
-    await lifecycle.trigger('beforeEachTest', this.currentTest);
+    await lifecycle.beforeEachTest.trigger(this.currentTest);
   });
 
   loadTestFiles({

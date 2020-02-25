@@ -28,8 +28,6 @@ export function injectVars(server) {
   );
 
   return {
-    kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-    disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
     importAndExportableTypes,
     autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
     autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),

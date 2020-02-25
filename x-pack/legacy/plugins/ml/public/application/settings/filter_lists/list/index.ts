@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './directive';
+export { FilterLists } from './filter_lists';

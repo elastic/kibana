@@ -8,16 +8,14 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EntityCell } from './entity_cell';
 
-
 const defaultProps = {
   entityName: 'Test Name',
   entityValue: 'Test Value',
   filter: () => {},
-  wrapText: false
+  wrapText: false,
 };
 
 describe('EntityCell', () => {
-
   test('Icons are displayed when filter, entityName, and entityValue are defined', () => {
     const wrapper = mountWithIntl(<EntityCell {...defaultProps} />);
     const icons = wrapper.find('EuiButtonIcon');
@@ -32,5 +30,4 @@ describe('EntityCell', () => {
 
     expect(icons.length).toBe(0);
   });
-
 });

@@ -33,12 +33,11 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 import KbnServer from '../legacy/server/kbn_server';
 import { CallCluster } from '../legacy/core_plugins/elasticsearch';
 
-type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -77,6 +76,7 @@ export function createRootWithSettings(
       repl: false,
       basePath: false,
       optimize: false,
+      runExamples: false,
       oss: true,
       ...cliArgs,
     },
@@ -84,9 +84,9 @@ export function createRootWithSettings(
   });
 
   return new Root(
-    new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
-    ),
+    {
+      getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
+    },
     env
   );
 }
@@ -97,7 +97,7 @@ export function createRootWithSettings(
  * @param method
  * @param path
  */
-function getSupertest(root: Root, method: HttpMethod, path: string) {
+export function getSupertest(root: Root, method: HttpMethod, path: string) {
   const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)

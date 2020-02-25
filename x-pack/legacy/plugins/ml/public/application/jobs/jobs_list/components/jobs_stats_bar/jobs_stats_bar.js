@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { StatsBar } from '../../../../components/stats_bar';
 
@@ -13,50 +12,49 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 function createJobStats(jobsSummaryList) {
-
   const jobStats = {
     activeNodes: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML Nodes'
+        defaultMessage: 'Active ML Nodes',
       }),
       value: 0,
-      show: true
+      show: true,
     },
     total: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.totalJobsLabel', {
-        defaultMessage: 'Total jobs'
+        defaultMessage: 'Total jobs',
       }),
       value: 0,
-      show: true
+      show: true,
     },
     open: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.openJobsLabel', {
-        defaultMessage: 'Open jobs'
+        defaultMessage: 'Open jobs',
       }),
       value: 0,
-      show: true
+      show: true,
     },
     closed: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.closedJobsLabel', {
-        defaultMessage: 'Closed jobs'
+        defaultMessage: 'Closed jobs',
       }),
       value: 0,
-      show: true
+      show: true,
     },
     failed: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.failedJobsLabel', {
-        defaultMessage: 'Failed jobs'
+        defaultMessage: 'Failed jobs',
       }),
       value: 0,
-      show: false
+      show: false,
     },
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
-        defaultMessage: 'Active datafeeds'
+        defaultMessage: 'Active datafeeds',
       }),
       value: 0,
-      show: true
-    }
+      show: true,
+    },
   };
 
   if (jobsSummaryList === undefined) {
@@ -67,7 +65,7 @@ function createJobStats(jobsSummaryList) {
   const mlNodes = {};
   let failedJobs = 0;
 
-  jobsSummaryList.forEach((job) => {
+  jobsSummaryList.forEach(job => {
     if (job.jobState === JOB_STATE.OPENED) {
       jobStats.open.value++;
     } else if (job.jobState === JOB_STATE.CLOSED) {
@@ -103,12 +101,9 @@ function createJobStats(jobsSummaryList) {
 export const JobStatsBar = ({ jobsSummaryList }) => {
   const jobStats = createJobStats(jobsSummaryList);
 
-  return (
-    <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'}/>
-  );
+  return <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'} />;
 };
 
 JobStatsBar.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
 };
-

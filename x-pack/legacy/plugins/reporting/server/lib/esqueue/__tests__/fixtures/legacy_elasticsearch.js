@@ -1,10 +1,14 @@
-import { uniqueId, times, random } from 'lodash';
-import * as legacyElasticsearch from 'elasticsearch';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import { constants } from '../../constants';
+import { uniqueId, times, random } from 'lodash';
+import { errors as esErrors } from 'elasticsearch';
 
 export function ClientMock() {
-  this.callWithInternalUser = (endpoint, params = {}, ...rest) => {
+  this.callAsInternalUser = (endpoint, params = {}, ...rest) => {
     if (endpoint === 'indices.create') {
       return Promise.resolve({ acknowledged: true });
     }
@@ -21,12 +25,12 @@ export function ClientMock() {
         _seq_no: 1,
         _primary_term: 1,
         _shards: { total: shardCount, successful: shardCount, failed: 0 },
-        created: true
+        created: true,
       });
     }
 
     if (endpoint === 'get') {
-      if (params === legacyElasticsearch.errors.NotFound) return legacyElasticsearch.errors.NotFound;
+      if (params === esErrors.NotFound) return esErrors.NotFound;
 
       const _source = {
         jobtype: 'jobtype',
@@ -34,7 +38,7 @@ export function ClientMock() {
 
         payload: {
           id: 'sample-job-1',
-          now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)'
+          now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)',
         },
 
         priority: 10,
@@ -43,7 +47,7 @@ export function ClientMock() {
         attempts: 0,
         max_attempts: 3,
         status: 'pending',
-        ...(rest[0] || {})
+        ...(rest[0] || {}),
       };
 
       return Promise.resolve({
@@ -52,7 +56,7 @@ export function ClientMock() {
         _seq_no: params._seq_no || 1,
         _primary_term: params._primary_term || 1,
         found: true,
-        _source: _source
+        _source: _source,
       });
     }
 
@@ -68,8 +72,8 @@ export function ClientMock() {
           _source: {
             created_at: new Date().toString(),
             number: random(0, count, true),
-            ...source
-          }
+            ...source,
+          },
         };
       });
       return Promise.resolve({
@@ -78,13 +82,13 @@ export function ClientMock() {
         _shards: {
           total: 5,
           successful: 5,
-          failed: 0
+          failed: 0,
         },
         hits: {
           total: count,
           max_score: null,
-          hits: hits
-        }
+          hits: hits,
+        },
       });
     }
 
@@ -96,7 +100,7 @@ export function ClientMock() {
         _seq_no: params.if_seq_no + 1 || 2,
         _primary_term: params.if_primary_term + 1 || 2,
         _shards: { total: shardCount, successful: shardCount, failed: 0 },
-        created: true
+        created: true,
       });
     }
 

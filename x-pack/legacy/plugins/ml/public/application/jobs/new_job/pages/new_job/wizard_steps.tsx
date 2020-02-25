@@ -19,7 +19,7 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { DatafeedStep } from '../components/datafeed_step';
-import { useKibanaContext } from '../../../../contexts/kibana';
+import { useMlContext } from '../../../../contexts/ml';
 
 interface Props {
   currentStep: WIZARD_STEPS;
@@ -27,24 +27,24 @@ interface Props {
 }
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
   // store whether the advanced and additional sections have been expanded.
   // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
 
   function getSummaryStepTitle() {
-    if (kibanaContext.currentSavedSearch.id !== undefined) {
+    if (mlContext.currentSavedSearch !== null) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
-        values: { title: kibanaContext.currentSavedSearch.title },
+        values: { title: mlContext.currentSavedSearch.attributes.title as string },
       });
-    } else if (kibanaContext.currentIndexPattern.id !== undefined) {
+    } else if (mlContext.currentIndexPattern.id !== undefined) {
       return i18n.translate(
         'xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleIndexPattern',
         {
           defaultMessage: 'New job from index pattern {title}',
-          values: { title: kibanaContext.currentIndexPattern.title },
+          values: { title: mlContext.currentIndexPattern.title },
         }
       );
     }
@@ -143,7 +143,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
 const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
   return (
     <Fragment>
-      <EuiTitle>
+      <EuiTitle size="s">
         <h2 data-test-subj={dataTestSubj}>{children}</h2>
       </EuiTitle>
       <EuiSpacer />

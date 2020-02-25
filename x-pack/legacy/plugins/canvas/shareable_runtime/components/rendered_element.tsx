@@ -67,8 +67,11 @@ export class RenderedElementComponent extends PureComponent<Props> {
         done: () => {},
         onDestroy: () => {},
         onResize: () => {},
+        getElementId: () => '',
         setFilter: () => {},
         getFilter: () => '',
+        onEmbeddableInputChange: () => {},
+        onEmbeddableDestroyed: () => {},
       });
     } catch (e) {
       // eslint-disable-next-line no-console

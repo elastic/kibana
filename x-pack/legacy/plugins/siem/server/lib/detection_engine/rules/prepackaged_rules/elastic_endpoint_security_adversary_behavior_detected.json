@@ -1,0 +1,21 @@
+{
+  "description": "Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-660s",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Adversary Behavior - Detected - Elastic Endpoint",
+  "query": "event.kind:alert and event.module:endgame and event.action:rules_engine_event",
+  "risk_score": 47,
+  "rule_id": "77a3c3df-8ec4-4da4-b758-878f551dee69",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Endpoint"
+  ],
+  "type": "query",
+  "version": 1
+}

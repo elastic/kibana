@@ -15,16 +15,18 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
     type="iInCircle"
   >
     <EuiIconEmpty
-      aria-hidden="true"
+      aria-hidden={true}
       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
       focusable="false"
+      role="img"
       style={null}
     >
       <svg
-        aria-hidden="true"
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
         focusable="false"
         height={16}
+        role="img"
         style={null}
         viewBox="0 0 16 16"
         width={16}
@@ -157,6 +159,7 @@ Array [
                             class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
+                            role="img"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
@@ -217,6 +220,7 @@ Array [
                               class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
                               height="16"
+                              role="img"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
@@ -282,16 +286,18 @@ Array [
                         type="cross"
                       >
                         <EuiIconEmpty
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -388,16 +394,18 @@ Array [
           type="cross"
         >
           <EuiIconEmpty
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
+            role="img"
             style={null}
           >
             <svg
-              aria-hidden="true"
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
@@ -568,6 +576,7 @@ Array [
                             class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
+                            role="img"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
@@ -626,6 +635,7 @@ Array [
                               class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
                               height="16"
+                              role="img"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
@@ -689,16 +699,18 @@ Array [
                         type="cross"
                       >
                         <EuiIconEmpty
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -793,16 +805,18 @@ Array [
           type="cross"
         >
           <EuiIconEmpty
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
+            role="img"
             style={null}
           >
             <svg
-              aria-hidden="true"
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}

@@ -5,14 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('ProcessDraggable', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -26,7 +27,7 @@ describe('ProcessDraggable', () => {
           processPid={123}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns null if everything is null', () => {
@@ -60,7 +61,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process name if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -77,7 +78,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process executable if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -94,7 +95,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process pid if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -111,7 +112,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns just process name if process.pid and endgame.pid are NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -128,7 +129,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns just process executable if process.pid and endgame.pid are NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -145,7 +146,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process executable if everything else is an empty string or NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -162,7 +163,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns endgame.process_name if everything else is an empty string or NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -179,7 +180,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns endgame.process_name and endgame.pid if everything else is an empty string or undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -196,7 +197,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process pid if everything else is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -213,7 +214,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns endgame.pid if everything else is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -230,7 +231,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns pid and process name if everything is filled', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -247,7 +248,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process pid and executable and if process name and endgame process name are null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -264,7 +265,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns endgame pid and executable and if process name and endgame process name are null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -281,7 +282,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process pid and executable and if process name is undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -298,7 +299,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process pid and executable if process name is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -315,7 +316,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it prefers process.name when process.executable and endgame.process_name are also provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -332,7 +333,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it falls back to rendering process.executable when process.name is NOT provided, but process.executable and endgame.process_name are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -349,7 +350,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it falls back to rendering endgame.process_name when process.name and process.executable are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -366,7 +367,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it prefers process.pid when endgame.pid is also provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -383,7 +384,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it falls back to rendering endgame.pid when process.pid is NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -402,8 +403,10 @@ describe('ProcessDraggable', () => {
 });
 
 describe('ProcessDraggableWithNonExistentProcess', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text when all fields are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -420,7 +423,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when just endgamePid is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -437,7 +440,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when just endgameProcessName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -454,7 +457,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when just processExecutable is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -471,7 +474,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when just processName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -488,7 +491,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when just processPid is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -505,7 +508,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
   });
 
   test('it renders the expected text when all values are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"

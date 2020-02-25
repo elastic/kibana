@@ -1,9 +1,7 @@
 [[advanced-queries]]
 === Advanced queries
 
-When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
-It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
-
+When querying in the APM app, you're simply searching and selecting data from fields in Elasticsearch documents.
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
@@ -13,11 +11,48 @@ In the screenshot below, you can begin to see some of the transaction fields ava
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM app in Kibana]
 
 [float]
-==== Example queries
+==== Example APM app queries
 
 * Exclude response times slower than 2000 ms: `transaction.duration.us > 2000000`
 * Filter by response status code: `context.response.status_code >= 400`
 * Filter by single user ID: `context.user.id : 12`
-* View _all_ transactions for an endpoint, instead of just a sample - `processor.event: "transaction" AND transaction.name: "<TRANSACTION_NAME_HERE>"`
 
 TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities of the {kib} query language.
+
+[float]
+[[discover-advanced-queries]]
+=== Querying in the Discover app
+
+It may also be helpful to view your APM data in the {kibana-ref}/discover.html[Discover app].
+Querying documents in Discover works the same way as querying in the APM app,
+and all of the example queries listed above can also be used in the Discover app.
+
+[float]
+==== Example Discover app query
+
+One example where you may want to make use of the Discover app,
+is for viewing  _all_ transactions for an endpoint, instead of just a sample.
+
+TIP: Starting in v7.6, you can view 10 samples per bucket in the APM app, instead of just one.
+
+Use the APM app to find a transaction name and time bucket that you're interested in learning more about.
+Then, switch to the Discover app and make a search:
+
+["source","sh"]
+-----
+processor.event: "transaction" AND transaction.name: "<TRANSACTION_NAME_HERE>" and transaction.duration.us > 13000 and transaction.duration.us < 14000`
+-----
+
+In this example, we're interested in viewing all of the `APIRestController#customers` transactions
+that took between 13 and 14 milliseconds. Here's what Discover returns:
+
+[role="screenshot"]
+image::apm/images/advanced-discover.png[View all transactions in bucket]
+
+You can now explore the data until you find a specific transaction that you're interested in.
+Copy that transaction's `transaction.id`, and paste it into the APM app to view the data in the context of the APM app:
+
+[role="screenshot"]
+image::apm/images/specific-transaction-search.png[View specific transaction in apm app]
+[role="screenshot"]
+image::apm/images/specific-transaction.png[View specific transaction in apm app]

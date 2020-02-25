@@ -19,8 +19,4 @@
 
 import { uniq, map, size, flow } from 'lodash';
 
-export const areFieldsDifferent = name => series =>
-  flow(
-    uniq,
-    size
-  )(map(series, name)) > 1;
+export const areFieldsDifferent = name => series => flow(uniq, size)(map(series, name)) > 1;

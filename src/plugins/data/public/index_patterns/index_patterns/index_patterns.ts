@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   IUiSettingsClient,
-  HttpServiceBase,
+  HttpStart,
 } from 'src/core/public';
 
 import { createIndexPatternCache } from './_pattern_cache';
@@ -31,7 +30,9 @@ import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_c
 
 const indexPatternCache = createIndexPatternCache();
 
-export class IndexPatterns {
+type IndexPatternCachedFieldType = 'id' | 'title';
+
+export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
@@ -40,7 +41,7 @@ export class IndexPatterns {
   constructor(
     config: IUiSettingsClient,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase
+    http: HttpStart
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = config;
@@ -49,9 +50,9 @@ export class IndexPatterns {
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find({
+      await this.savedObjectsClient.find<Record<string, any>>({
         type: 'index-pattern',
-        fields: [],
+        fields: ['title'],
         perPage: 10000,
       })
     ).savedObjects;
@@ -64,7 +65,7 @@ export class IndexPatterns {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
+    return this.savedObjectsCache.map(obj => obj?.id);
   };
 
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
@@ -74,10 +75,10 @@ export class IndexPatterns {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
+    return this.savedObjectsCache.map(obj => obj?.attributes?.title);
   };
 
-  getFields = async (fields: string[], refresh: boolean = false) => {
+  getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -85,8 +86,10 @@ export class IndexPatterns {
       return [];
     }
     return this.savedObjectsCache.map((obj: Record<string, any>) => {
-      const result: Record<string, any> = {};
-      fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
+      const result: Partial<Record<IndexPatternCachedFieldType, string>> = {};
+      fields.forEach(
+        (f: IndexPatternCachedFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
+      );
       return result;
     });
   };
@@ -147,4 +150,4 @@ export class IndexPatterns {
   };
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
+export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

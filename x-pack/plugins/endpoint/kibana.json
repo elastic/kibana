@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "endpoint"],
-  "requiredPlugins": ["embeddable"],
+  "requiredPlugins": ["features", "embeddable"],
   "server": true,
   "ui": true
 }

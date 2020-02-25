@@ -7,9 +7,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 
 export function ExperimentalBadge({ tooltipContent }) {
   return (

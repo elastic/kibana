@@ -22,15 +22,16 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
-import { compareFilters } from './lib/compare_filters';
+import { COMPARE_ALL_OPTIONS, compareFilters } from './lib/compare_filters';
+import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
-import { esFilters } from '../../../common';
+import { FilterStateStore, Filter, isFilterPinned } from '../../../common';
 
 export class FilterManager {
-  private filters: esFilters.Filter[] = [];
+  private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: IUiSettingsClient;
@@ -39,57 +40,46 @@ export class FilterManager {
     this.uiSettings = uiSettings;
   }
 
-  private mergeIncomingFilters(partitionedFilters: PartitionedFilters): esFilters.Filter[] {
+  private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
     const globalFilters = partitionedFilters.globalFilters;
     const appFilters = partitionedFilters.appFilters;
 
     // existing globalFilters should be mutated by appFilters
+    // ignore original appFilters which are already inside globalFilters
+    const cleanedAppFilters: Filter[] = [];
     _.each(appFilters, function(filter, i) {
       const match = _.find(globalFilters, function(globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
-      // no match, do nothing
-      if (!match) return;
+      // no match, do continue with app filter
+      if (!match) {
+        return cleanedAppFilters.push(filter);
+      }
 
-      // matching filter in globalState, update global and remove from appState
+      // matching filter in globalState, update global and don't add from appState
       _.assign(match.meta, filter.meta);
-      appFilters.splice(i, 1);
     });
 
-    return FilterManager.mergeFilters(appFilters, globalFilters);
+    return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
   }
 
-  private static mergeFilters(
-    appFilters: esFilters.Filter[],
-    globalFilters: esFilters.Filter[]
-  ): esFilters.Filter[] {
+  private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
     return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
-  private static partitionFilters(filters: esFilters.Filter[]): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(filters, esFilters.isFilterPinned);
+  private static partitionFilters(filters: Filter[]): PartitionedFilters {
+    const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
     return {
       globalFilters,
       appFilters,
     };
   }
 
-  private handleStateUpdate(newFilters: esFilters.Filter[]) {
-    // global filters should always be first
+  private handleStateUpdate(newFilters: Filter[]) {
+    newFilters.sort(sortFilters);
 
-    newFilters.sort(({ $state: a }: esFilters.Filter, { $state: b }: esFilters.Filter): number => {
-      if (a!.store === b!.store) {
-        return 0;
-      } else {
-        return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
-          b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
-          ? -1
-          : 1;
-      }
-    });
-
-    const filtersUpdated = !_.isEqual(this.filters, newFilters);
+    const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_ALL_OPTIONS);
     const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;
@@ -131,7 +121,10 @@ export class FilterManager {
 
   /* Setters */
 
-  public addFilters(filters: esFilters.Filter[] | esFilters.Filter, pinFilterStatus?: boolean) {
+  public addFilters(
+    filters: Filter[] | Filter,
+    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+  ) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -140,15 +133,7 @@ export class FilterManager {
       return;
     }
 
-    if (pinFilterStatus === undefined) {
-      pinFilterStatus = this.uiSettings.get('filters:pinnedByDefault');
-    }
-
-    // Set the store of all filters. For now.
-    // In the future, all filters should come in with filter state store already set.
-    const store = pinFilterStatus
-      ? esFilters.FilterStateStore.GLOBAL_STATE
-      : esFilters.FilterStateStore.APP_STATE;
+    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
 
     FilterManager.setFiltersStore(filters, store);
 
@@ -164,14 +149,63 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public setFilters(newFilters: esFilters.Filter[]) {
+  public setFilters(
+    newFilters: Filter[],
+    pinFilterStatus: boolean = this.uiSettings.get('filters:pinnedByDefault')
+  ) {
+    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+
+    FilterManager.setFiltersStore(newFilters, store);
+
     const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
     this.handleStateUpdate(mergedFilters);
   }
 
-  public removeFilter(filter: esFilters.Filter) {
+  /**
+   * Sets new global filters and leaves app filters untouched,
+   * Removes app filters for which there is a duplicate within new global filters
+   * @param newGlobalFilters
+   */
+  public setGlobalFilters(newGlobalFilters: Filter[]) {
+    newGlobalFilters = mapAndFlattenFilters(newGlobalFilters);
+    FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE, true);
+    const { appFilters: currentAppFilters } = this.getPartitionedFilters();
+    // remove duplicates from current app filters, to make sure global will take precedence
+    const filteredAppFilters = currentAppFilters.filter(
+      appFilter => !newGlobalFilters.find(globalFilter => compareFilters(globalFilter, appFilter))
+    );
+    const newFilters = this.mergeIncomingFilters({
+      appFilters: filteredAppFilters,
+      globalFilters: newGlobalFilters,
+    });
+
+    this.handleStateUpdate(newFilters);
+  }
+
+  /**
+   * Sets new app filters and leaves global filters untouched,
+   * Removes app filters for which there is a duplicate within new global filters
+   * @param newAppFilters
+   */
+  public setAppFilters(newAppFilters: Filter[]) {
+    newAppFilters = mapAndFlattenFilters(newAppFilters);
+    FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE, true);
+    const { globalFilters: currentGlobalFilters } = this.getPartitionedFilters();
+    // remove duplicates from current global filters, to make sure app will take precedence
+    const filteredGlobalFilters = currentGlobalFilters.filter(
+      globalFilter => !newAppFilters.find(appFilter => compareFilters(appFilter, globalFilter))
+    );
+
+    const newFilters = this.mergeIncomingFilters({
+      globalFilters: filteredGlobalFilters,
+      appFilters: newAppFilters,
+    });
+    this.handleStateUpdate(newFilters);
+  }
+
+  public removeFilter(filter: Filter) {
     const filterIndex = _.findIndex(this.filters, item => {
       return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
     });
@@ -187,10 +221,15 @@ export class FilterManager {
     this.setFilters([]);
   }
 
-  public static setFiltersStore(filters: esFilters.Filter[], store: esFilters.FilterStateStore) {
-    _.map(filters, (filter: esFilters.Filter) => {
+  public static setFiltersStore(
+    filters: Filter[],
+    store: FilterStateStore,
+    shouldOverrideStore = false
+  ) {
+    _.map(filters, (filter: Filter) => {
       // Override status only for filters that didn't have state in the first place.
-      if (filter.$state === undefined) {
+      // or if shouldOverrideStore is explicitly true
+      if (shouldOverrideStore || filter.$state === undefined) {
         filter.$state = { store };
       }
     });

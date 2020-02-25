@@ -5,10 +5,8 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { clone } from 'lodash/fp';
-import * as React from 'react';
-import { ActionCreator } from 'typescript-fsa';
+import React from 'react';
 
 import { FlowDirection, FlowTarget } from '../../graphql/types';
 
@@ -22,16 +20,14 @@ describe('FlowTargetSelect Component', () => {
     selectedDirection: FlowDirection.uniDirectional,
     isLoading: false,
     selectedTarget: FlowTarget.source,
-    updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
-      flowTarget: FlowTarget;
-    }>,
+    updateFlowTargetAction: jest.fn(),
   };
 
   describe('rendering', () => {
     test('it renders the FlowTargetSelect', () => {
       const wrapper = shallow(<FlowTargetSelect {...mockProps} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
@@ -52,10 +48,7 @@ describe('FlowTargetSelect Component', () => {
 
     wrapper.update();
 
-    // @ts-ignore property mock does not exists
-    expect(mockProps.updateFlowTargetAction.mock.calls[0][0]).toEqual({
-      flowTarget: 'destination',
-    });
+    expect(mockProps.updateFlowTargetAction.mock.calls[0][0]).toEqual('destination');
   });
 
   test('when selectedDirection=unidirectional only source/destination are options', () => {

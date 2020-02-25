@@ -20,52 +20,60 @@ export function handleResponse(shardStats, indexUuid) {
       documents: get(primaries, 'docs.count'),
       dataSize: {
         primaries: get(primaries, 'store.size_in_bytes'),
-        total: get(total, 'store.size_in_bytes')
-      }
+        total: get(total, 'store.size_in_bytes'),
+      },
     };
 
     let indexSummary = {};
-    const _shardStats = get(shardStats, [ 'indices', indexUuid ]);
+    const _shardStats = get(shardStats, ['indices', indexUuid]);
     if (_shardStats) {
       const unassigned = _shardStats.unassigned;
       const unassignedShards = get(unassigned, 'primary', 0) + get(unassigned, 'replica', 0);
       indexSummary = {
         unassignedShards,
-        totalShards: get(_shardStats, 'primary', 0) + get(_shardStats, 'replica', 0) + unassignedShards,
-        status: _shardStats.status || i18n.translate('xpack.monitoring.es.indices.unknownStatusLabel', {
-          defaultMessage: 'Unknown' })
+        totalShards:
+          get(_shardStats, 'primary', 0) + get(_shardStats, 'replica', 0) + unassignedShards,
+        status:
+          _shardStats.status ||
+          i18n.translate('xpack.monitoring.es.indices.unknownStatusLabel', {
+            defaultMessage: 'Unknown',
+          }),
       };
     } else {
-      indexSummary = { status: i18n.translate('xpack.monitoring.es.indices.notAvailableStatusLabel', {
-        defaultMessage: 'Not Available' })
+      indexSummary = {
+        status: i18n.translate('xpack.monitoring.es.indices.notAvailableStatusLabel', {
+          defaultMessage: 'Not Available',
+        }),
       };
     }
 
     return {
       ...stats,
-      ...indexSummary
+      ...indexSummary,
     };
   };
 }
 
-export function getIndexSummary(req, esIndexPattern, shardStats, { clusterUuid, indexUuid, start, end }) {
+export function getIndexSummary(
+  req,
+  esIndexPattern,
+  shardStats,
+  { clusterUuid, indexUuid, start, end }
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndexSummary');
 
   const metric = ElasticsearchMetric.getMetricFields();
-  const filters = [
-    { term: { 'index_stats.index': indexUuid } }
-  ];
+  const filters = [{ term: { 'index_stats.index': indexUuid } }];
   const params = {
     index: esIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     body: {
       sort: { timestamp: { order: 'desc' } },
-      query: createQuery({ type: 'index_stats', start, end, clusterUuid, metric, filters })
-    }
+      query: createQuery({ type: 'index_stats', start, end, clusterUuid, metric, filters }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse(shardStats, indexUuid));
+  return callWithRequest(req, 'search', params).then(handleResponse(shardStats, indexUuid));
 }

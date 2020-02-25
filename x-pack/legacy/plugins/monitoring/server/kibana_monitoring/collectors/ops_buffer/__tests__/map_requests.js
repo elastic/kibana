@@ -23,22 +23,21 @@ describe('Map requests', () => {
         disconnects: 44,
         statusCodes: {
           '200': 2,
-          '201': 4
-        }
+          '201': 4,
+        },
       },
       '5605': {
         total: 1,
         disconnects: 0,
         statusCodes: {
-          '200': 20
-        }
-      }
+          '200': 20,
+        },
+      },
     };
     const expected = {
       total: 3,
       disconnects: 44,
     };
     expect(_.isEqual(mapRequests(requests), expected)).to.be(true);
-
   });
 });

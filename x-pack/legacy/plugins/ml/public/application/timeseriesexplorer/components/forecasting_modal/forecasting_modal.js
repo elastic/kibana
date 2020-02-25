@@ -11,16 +11,9 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButton,
-  EuiToolTip
-} from '@elastic/eui';
-
-import { timefilter } from 'ui/timefilter';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -33,15 +26,17 @@ import { PROGRESS_STATES } from './progress_states';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlForecastService } from '../../../services/forecast_service';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
-const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
+const FORECASTS_VIEW_MAX = 5; // Display links to a maximum of 5 forecasts.
 const FORECAST_DURATION_MAX_MS = FORECAST_DURATION_MAX_DAYS * 86400000;
-const WARN_NUM_PARTITIONS = 100;    // Warn about running a forecast with this number of field values.
-const FORECAST_STATS_POLL_FREQUENCY = 250;  // Frequency in ms at which to poll for forecast request stats.
+const WARN_NUM_PARTITIONS = 100; // Warn about running a forecast with this number of field values.
+const FORECAST_STATS_POLL_FREQUENCY = 250; // Frequency in ms at which to poll for forecast request stats.
 const WARN_NO_PROGRESS_MS = 120000; // If no progress in forecast request, abort check and warn.
 
 function getDefaultState() {
@@ -55,17 +50,17 @@ function getDefaultState() {
     newForecastDuration: '1d',
     isNewForecastDurationValid: true,
     newForecastDurationErrors: [],
-    messages: []
+    messages: [],
   };
 }
 
-export const ForecastingModal = injectI18n(class ForecastingModal extends Component {
+export class ForecastingModalUI extends Component {
   static propTypes = {
     isDisabled: PropTypes.bool,
     job: PropTypes.object,
     detectorIndex: PropTypes.number,
     entities: PropTypes.array,
-    loadForForecastId: PropTypes.func,
+    setForecastId: PropTypes.func,
   };
 
   constructor(props) {
@@ -79,58 +74,65 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
   addMessage = (message, status, clearFirst = false) => {
     const msg = { message, status };
 
-    this.setState((prevState) => ({
-      messages: clearFirst ? [msg] : [...prevState.messages, msg]
+    this.setState(prevState => ({
+      messages: clearFirst ? [msg] : [...prevState.messages, msg],
     }));
   };
 
-  viewForecast = (forecastId) => {
-    this.props.loadForForecastId(forecastId);
+  viewForecast = forecastId => {
+    this.props.setForecastId(forecastId);
     this.closeModal();
   };
 
-  onNewForecastDurationChange = (event) => {
-    const { intl } = this.props;
+  onNewForecastDurationChange = event => {
     const newForecastDurationErrors = [];
     let isNewForecastDurationValid = true;
     const duration = parseInterval(event.target.value);
-    if(duration === null) {
+    if (duration === null) {
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.invalidDurationFormatErrorMessage',
-          defaultMessage: 'Invalid duration format',
-        })
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.invalidDurationFormatErrorMessage',
+          {
+            defaultMessage: 'Invalid duration format',
+          }
+        )
       );
     } else if (duration.asMilliseconds() > FORECAST_DURATION_MAX_MS) {
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
-          defaultMessage: 'Forecast duration must not be greater than {maximumForecastDurationDays} days',
-        }, { maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS })
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
+          {
+            defaultMessage:
+              'Forecast duration must not be greater than {maximumForecastDurationDays} days',
+            values: { maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS },
+          }
+        )
       );
     } else if (duration.asMilliseconds() === 0) {
       isNewForecastDurationValid = false;
       newForecastDurationErrors.push(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeZeroErrorMessage',
-          defaultMessage: 'Forecast duration must not be zero',
-        })
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeZeroErrorMessage',
+          {
+            defaultMessage: 'Forecast duration must not be zero',
+          }
+        )
       );
     }
 
     this.setState({
       newForecastDuration: event.target.value,
       isNewForecastDurationValid,
-      newForecastDurationErrors
+      newForecastDurationErrors,
     });
   };
 
   checkJobStateAndRunForecast = () => {
     this.setState({
       isForecastRequested: true,
-      messages: []
+      messages: [],
     });
 
     // A forecast can only be run on an opened job,
@@ -145,61 +147,70 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
   openJobAndRunForecast = () => {
     // Opens a job in a 'closed' state prior to running a forecast.
     this.setState({
-      jobOpeningState: PROGRESS_STATES.WAITING
+      jobOpeningState: PROGRESS_STATES.WAITING,
     });
 
-    mlJobService.openJob(this.props.job.job_id)
+    mlJobService
+      .openJob(this.props.job.job_id)
       .then(() => {
         // If open was successful run the forecast, then close the job again.
         this.setState({
-          jobOpeningState: PROGRESS_STATES.DONE
+          jobOpeningState: PROGRESS_STATES.DONE,
         });
         this.runForecast(true);
       })
-      .catch((resp) => {
+      .catch(resp => {
         console.log('Time series forecast modal - could not open job:', resp);
         this.addMessage(
-          this.props.intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithOpeningJobBeforeRunningForecastErrorMessage',
-            defaultMessage: 'Error opening job before running forecast',
-          }),
+          i18n.translate(
+            'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithOpeningJobBeforeRunningForecastErrorMessage',
+            {
+              defaultMessage: 'Error opening job before running forecast',
+            }
+          ),
           MESSAGE_LEVEL.ERROR
         );
         this.setState({
-          jobOpeningState: PROGRESS_STATES.ERROR
+          jobOpeningState: PROGRESS_STATES.ERROR,
         });
       });
   };
 
   runForecastErrorHandler = (resp, closeJob) => {
-    const intl = this.props.intl;
-
     this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
     console.log('Time series forecast modal - error running forecast:', resp);
     if (resp && resp.message) {
       this.addMessage(resp.message, MESSAGE_LEVEL.ERROR, true);
     } else {
       this.addMessage(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.unexpectedResponseFromRunningForecastErrorMessage',
-          defaultMessage: 'Unexpected response from running forecast. The request may have failed.',
-        }),
-        MESSAGE_LEVEL.ERROR, true);
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.unexpectedResponseFromRunningForecastErrorMessage',
+          {
+            defaultMessage:
+              'Unexpected response from running forecast. The request may have failed.',
+          }
+        ),
+        MESSAGE_LEVEL.ERROR,
+        true
+      );
     }
 
     if (closeJob === true) {
       this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-      mlJobService.closeJob(this.props.job.job_id)
+      mlJobService
+        .closeJob(this.props.job.job_id)
         .then(() => {
           this.setState({ jobClosingState: PROGRESS_STATES.DONE });
         })
-        .catch((response) => {
+        .catch(response => {
           console.log('Time series forecast modal - could not close job:', response);
           this.addMessage(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobErrorMessage',
-              defaultMessage: 'Error closing job',
-            }),
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobErrorMessage',
+              {
+                defaultMessage: 'Error closing job',
+              }
+            ),
             MESSAGE_LEVEL.ERROR
           );
           this.setState({ jobClosingState: PROGRESS_STATES.ERROR });
@@ -207,17 +218,18 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     }
   };
 
-  runForecast = (closeJobAfterRunning) => {
+  runForecast = closeJobAfterRunning => {
     this.setState({
-      forecastProgress: 0
+      forecastProgress: 0,
     });
 
     // Always supply the duration to the endpoint in seconds as some of the moment duration
     // formats accepted by Kibana (w, M, y) are not valid formats in Elasticsearch.
     const durationInSeconds = parseInterval(this.state.newForecastDuration).asSeconds();
 
-    mlForecastService.runForecast(this.props.job.job_id, `${durationInSeconds}s`)
-      .then((resp) => {
+    mlForecastService
+      .runForecast(this.props.job.job_id, `${durationInSeconds}s`)
+      .then(resp => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
         // So wait for results and then refresh the dashboard to the end of the forecast.
         if (resp.forecast_id !== undefined) {
@@ -233,12 +245,12 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     // Obtain the stats for the forecast request and check forecast is progressing.
     // When the stats show the forecast is finished, load the
     // forecast results into the view.
-    const { intl } = this.props;
     let previousProgress = 0;
     let noProgressMs = 0;
     this.forecastChecker = setInterval(() => {
-      mlForecastService.getForecastRequestStats(this.props.job, forecastId)
-        .then((resp) => {
+      mlForecastService
+        .getForecastRequestStats(this.props.job, forecastId)
+        .then(resp => {
           // Get the progress (stats value is between 0 and 1).
           const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
           const status = _.get(resp, ['stats', 'forecast_status']);
@@ -253,8 +265,8 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
           }
 
           // Display any messages returned in the request stats.
-          let messages =  _.get(resp, ['stats', 'forecast_messages'], []);
-          messages = messages.map((message) => ({ message, status: MESSAGE_LEVEL.WARNING }));
+          let messages = _.get(resp, ['stats', 'forecast_messages'], []);
+          messages = messages.map(message => ({ message, status: MESSAGE_LEVEL.WARNING }));
           this.setState({ messages });
 
           if (status === FORECAST_REQUEST_STATE.FINISHED) {
@@ -262,32 +274,35 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
 
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              mlJobService.closeJob(this.props.job.job_id)
+              mlJobService
+                .closeJob(this.props.job.job_id)
                 .then(() => {
                   this.setState({
-                    jobClosingState: PROGRESS_STATES.DONE
+                    jobClosingState: PROGRESS_STATES.DONE,
                   });
-                  this.props.loadForForecastId(forecastId);
+                  this.props.setForecastId(forecastId);
                   this.closeAfterRunningForecast();
                 })
-                .catch((response) => {
+                .catch(response => {
                   // Load the forecast data in the main page,
                   // but leave this dialog open so the error can be viewed.
                   console.log('Time series forecast modal - could not close job:', response);
                   this.addMessage(
-                    intl.formatMessage({
-                      id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobAfterRunningForecastErrorMessage',
-                      defaultMessage: 'Error closing job after running forecast',
-                    }),
+                    i18n.translate(
+                      'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobAfterRunningForecastErrorMessage',
+                      {
+                        defaultMessage: 'Error closing job after running forecast',
+                      }
+                    ),
                     MESSAGE_LEVEL.ERROR
                   );
                   this.setState({
-                    jobClosingState: PROGRESS_STATES.ERROR
+                    jobClosingState: PROGRESS_STATES.ERROR,
                   });
-                  this.props.loadForForecastId(forecastId);
+                  this.props.setForecastId(forecastId);
                 });
             } else {
-              this.props.loadForForecastId(forecastId);
+              this.props.setForecastId(forecastId);
               this.closeAfterRunningForecast();
             }
           } else {
@@ -296,22 +311,27 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
             if (progress === previousProgress) {
               noProgressMs += FORECAST_STATS_POLL_FREQUENCY;
               if (noProgressMs > WARN_NO_PROGRESS_MS) {
-                console.log(`Forecast request has not progressed for ${WARN_NO_PROGRESS_MS}ms. Cancelling check.`);
+                console.log(
+                  `Forecast request has not progressed for ${WARN_NO_PROGRESS_MS}ms. Cancelling check.`
+                );
                 this.addMessage(
-                  intl.formatMessage({
-                    id: 'xpack.ml.timeSeriesExplorer.forecastingModal.noProgressReportedForNewForecastErrorMessage',
-                    defaultMessage: 'No progress reported for the new forecast for {WarnNoProgressMs}ms.' +
-                    'An error may have occurred whilst running the forecast.'
-                  }, { WarnNoProgressMs: WARN_NO_PROGRESS_MS }),
+                  i18n.translate(
+                    'xpack.ml.timeSeriesExplorer.forecastingModal.noProgressReportedForNewForecastErrorMessage',
+                    {
+                      defaultMessage:
+                        'No progress reported for the new forecast for {WarnNoProgressMs}ms.' +
+                        'An error may have occurred whilst running the forecast.',
+                      values: { WarnNoProgressMs: WARN_NO_PROGRESS_MS },
+                    }
+                  ),
                   MESSAGE_LEVEL.ERROR
                 );
 
                 // Try and load any results which may have been created.
-                this.props.loadForForecastId(forecastId);
+                this.props.setForecastId(forecastId);
                 this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
                 clearInterval(this.forecastChecker);
               }
-
             } else {
               if (progress > previousProgress) {
                 previousProgress = progress;
@@ -321,18 +341,23 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
               noProgressMs = 0;
             }
           }
-
-        }).catch((resp) => {
-          console.log('Time series forecast modal - error loading stats of forecast from elasticsearch:', resp);
+        })
+        .catch(resp => {
+          console.log(
+            'Time series forecast modal - error loading stats of forecast from elasticsearch:',
+            resp
+          );
           this.addMessage(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithLoadingStatsOfRunningForecastErrorMessage',
-              defaultMessage: 'Error loading stats of running forecast.',
-            }),
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithLoadingStatsOfRunningForecastErrorMessage',
+              {
+                defaultMessage: 'Error loading stats of running forecast.',
+              }
+            ),
             MESSAGE_LEVEL.ERROR
           );
           this.setState({
-            forecastProgress: PROGRESS_STATES.ERROR
+            forecastProgress: PROGRESS_STATES.ERROR,
           });
           clearInterval(this.forecastChecker);
         });
@@ -340,34 +365,33 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
   };
 
   openModal = () => {
-    const { intl } = this.props;
     const job = this.props.job;
 
     if (typeof job === 'object') {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
+      const { timefilter } = this.props.kibana.services.data.query.timefilter;
       const bounds = timefilter.getActiveBounds();
       const statusFinishedQuery = {
         term: {
-          forecast_status: FORECAST_REQUEST_STATE.FINISHED
-        }
+          forecast_status: FORECAST_REQUEST_STATE.FINISHED,
+        },
       };
-      mlForecastService.getForecastsSummary(
-        job,
-        statusFinishedQuery,
-        bounds.min.valueOf(),
-        FORECASTS_VIEW_MAX)
-        .then((resp) => {
+      mlForecastService
+        .getForecastsSummary(job, statusFinishedQuery, bounds.min.valueOf(), FORECASTS_VIEW_MAX)
+        .then(resp => {
           this.setState({
-            previousForecasts: resp.forecasts
+            previousForecasts: resp.forecasts,
           });
         })
-        .catch((resp) => {
+        .catch(resp => {
           console.log('Time series forecast modal - error obtaining forecasts summary:', resp);
           this.addMessage(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithObtainingListOfPreviousForecastsErrorMessage',
-              defaultMessage: 'Error obtaining list of previous forecasts',
-            }),
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithObtainingListOfPreviousForecastsErrorMessage',
+              {
+                defaultMessage: 'Error obtaining list of previous forecasts',
+              }
+            ),
             MESSAGE_LEVEL.ERROR
           );
         });
@@ -382,31 +406,37 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
           query: job.datafeed_config.query,
           timeFieldName: job.data_description.time_field,
           earliestMs: job.data_counts.earliest_record_timestamp,
-          latestMs: job.data_counts.latest_record_timestamp
+          latestMs: job.data_counts.latest_record_timestamp,
         })
-          .then((results) => {
+          .then(results => {
             let numPartitions = 1;
-            Object.values(results).forEach((cardinality) => {
+            Object.values(results).forEach(cardinality => {
               numPartitions = numPartitions * cardinality;
             });
             if (numPartitions > WARN_NUM_PARTITIONS) {
               this.addMessage(
-                intl.formatMessage({
-                  id: 'xpack.ml.timeSeriesExplorer.forecastingModal.dataContainsMorePartitionsMessage',
-                  defaultMessage: 'Note that this data contains more than {warnNumPartitions} ' +
-                  'partitions so running a forecast may take a long time and consume a high amount of resource',
-                }, { warnNumPartitions: WARN_NUM_PARTITIONS }),
+                i18n.translate(
+                  'xpack.ml.timeSeriesExplorer.forecastingModal.dataContainsMorePartitionsMessage',
+                  {
+                    defaultMessage:
+                      'Note that this data contains more than {warnNumPartitions} ' +
+                      'partitions so running a forecast may take a long time and consume a high amount of resource',
+                    values: { warnNumPartitions: WARN_NUM_PARTITIONS },
+                  }
+                ),
                 MESSAGE_LEVEL.WARNING
               );
             }
           })
-          .catch((resp) => {
-            console.log('Time series forecast modal - error obtaining cardinality of fields:', resp);
+          .catch(resp => {
+            console.log(
+              'Time series forecast modal - error obtaining cardinality of fields:',
+              resp
+            );
           });
       }
 
       this.setState({ isModalVisible: true });
-
     }
   };
 
@@ -433,22 +463,29 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     // Forecasting disabled if detector has an over field or job created < 6.1.0.
     let isForecastingDisabled = false;
     let forecastingDisabledMessage = null;
-    const { intl, job } = this.props;
+    const { job } = this.props;
     if (job !== undefined) {
       const detector = job.analysis_config.detectors[this.props.detectorIndex];
       const overFieldName = detector.over_field_name;
       if (overFieldName !== undefined) {
         isForecastingDisabled = true;
-        forecastingDisabledMessage = intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingNotAvailableForPopulationDetectorsMessage',
-          defaultMessage: 'Forecasting is not available for population detectors with an over field',
-        });
+        forecastingDisabledMessage = i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingNotAvailableForPopulationDetectorsMessage',
+          {
+            defaultMessage:
+              'Forecasting is not available for population detectors with an over field',
+          }
+        );
       } else if (isJobVersionGte(job, FORECAST_JOB_MIN_VERSION) === false) {
         isForecastingDisabled = true;
-        forecastingDisabledMessage = intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingOnlyAvailableForJobsCreatedInSpecifiedVersionMessage',
-          defaultMessage: 'Forecasting is only available for jobs created in version {minVersion} or later',
-        }, { minVersion: FORECAST_JOB_MIN_VERSION });
+        forecastingDisabledMessage = i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingOnlyAvailableForJobsCreatedInSpecifiedVersionMessage',
+          {
+            defaultMessage:
+              'Forecasting is only available for jobs created in version {minVersion} or later',
+            values: { minVersion: FORECAST_JOB_MIN_VERSION },
+          }
+        );
       }
     }
 
@@ -469,15 +506,14 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     return (
       <div>
         {isForecastingDisabled ? (
-          <EuiToolTip
-            position="left"
-            content={forecastingDisabledMessage}
-          >
+          <EuiToolTip position="left" content={forecastingDisabledMessage}>
             {forecastButton}
           </EuiToolTip>
-        ) : forecastButton}
+        ) : (
+          forecastButton
+        )}
 
-        {this.state.isModalVisible &&
+        {this.state.isModalVisible && (
           <Modal
             job={this.props.job}
             forecasts={this.state.previousForecasts}
@@ -494,8 +530,10 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
             jobClosingState={this.state.jobClosingState}
             messages={this.state.messages}
           />
-        }
+        )}
       </div>
     );
   }
-});
+}
+
+export const ForecastingModal = withKibana(ForecastingModalUI);

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -74,6 +74,13 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'action',
+                id: createdAction.id,
               });
               break;
             default:
@@ -163,11 +170,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "config" fails because ["config" must be an object]',
-                validation: {
-                  source: 'payload',
-                  keys: ['config'],
-                },
+                message: '[request body.config]: expected value of type [object] but got [null]',
               });
               break;
             default:
@@ -239,8 +242,8 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "name" fails because ["name" is required]',
-                validation: { source: 'payload', keys: ['name'] },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
+                // message: '[request body.config]: expected value of type [object] but got [null]',
               });
               break;
             default:

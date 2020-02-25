@@ -37,7 +37,7 @@ import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana');
 
-module.factory('PersistedState', ($injector) => {
+module.factory('PersistedState', $injector => {
   const Private = $injector.get('Private');
   const Events = Private(EventsProvider);
 
@@ -49,4 +49,3 @@ module.factory('PersistedState', ($injector) => {
     }
   };
 });
-

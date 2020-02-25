@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../draggables';

@@ -20,18 +20,26 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import React, { Component, MouseEvent } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { esFilters, utils, IIndexPattern } from '../..';
+import { IIndexPattern } from '../..';
+import {
+  Filter,
+  isFilterPinned,
+  getDisplayValueFromFilter,
+  toggleFilterNegated,
+  toggleFilterPinned,
+  toggleFilterDisabled,
+} from '../../../common';
 
 interface Props {
   id: string;
-  filter: esFilters.Filter;
+  filter: Filter;
   indexPatterns: IIndexPattern[];
   className?: string;
-  onUpdate: (filter: esFilters.Filter) => void;
+  onUpdate: (filter: Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
@@ -46,6 +54,13 @@ class FilterItemUI extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
+  private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
+    if (e.shiftKey) {
+      this.onToggleDisabled();
+    } else {
+      this.togglePopover();
+    }
+  };
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
@@ -54,13 +69,13 @@ class FilterItemUI extends Component<Props, State> {
       'globalFilterItem',
       {
         'globalFilterItem-isDisabled': disabled,
-        'globalFilterItem-isPinned': esFilters.isFilterPinned(filter),
+        'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
       this.props.className
     );
 
-    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
@@ -73,7 +88,7 @@ class FilterItemUI extends Component<Props, State> {
         valueLabel={valueLabel}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
-        onClick={this.togglePopover}
+        onClick={this.handleBadgeClick}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
       />
     );
@@ -83,7 +98,7 @@ class FilterItemUI extends Component<Props, State> {
         id: 0,
         items: [
           {
-            name: esFilters.isFilterPinned(filter)
+            name: isFilterPinned(filter)
               ? this.props.intl.formatMessage({
                   id: 'data.filter.filterBar.unpinFilterButtonLabel',
                   defaultMessage: 'Unpin',
@@ -201,23 +216,23 @@ class FilterItemUI extends Component<Props, State> {
     });
   };
 
-  private onSubmit = (filter: esFilters.Filter) => {
+  private onSubmit = (filter: Filter) => {
     this.closePopover();
     this.props.onUpdate(filter);
   };
 
   private onTogglePinned = () => {
-    const filter = esFilters.toggleFilterPinned(this.props.filter);
+    const filter = toggleFilterPinned(this.props.filter);
     this.props.onUpdate(filter);
   };
 
   private onToggleNegated = () => {
-    const filter = esFilters.toggleFilterNegated(this.props.filter);
+    const filter = toggleFilterNegated(this.props.filter);
     this.props.onUpdate(filter);
   };
 
   private onToggleDisabled = () => {
-    const filter = esFilters.toggleFilterDisabled(this.props.filter);
+    const filter = toggleFilterDisabled(this.props.filter);
     this.props.onUpdate(filter);
   };
 }

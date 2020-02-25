@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Builds the configuration object used to plot a chart showing anomalies
  * in the source metric data.
@@ -27,7 +25,7 @@ export function buildConfigFromDetector(job, detectorIndex) {
     metricFunction: mlFunctionToESAggregation(detector.function),
     timeField: job.data_description.time_field,
     interval: job.analysis_config.bucket_span,
-    datafeedConfig: job.datafeed_config
+    datafeedConfig: job.datafeed_config,
   };
 
   if (detector.field_name !== undefined) {
@@ -36,8 +34,11 @@ export function buildConfigFromDetector(job, detectorIndex) {
 
   // Extra checks if the job config uses a summary count field.
   const summaryCountFieldName = analysisConfig.summary_count_field_name;
-  if (config.metricFunction === 'count' && summaryCountFieldName !== undefined
-    && summaryCountFieldName !== 'doc_count') {
+  if (
+    config.metricFunction === 'count' &&
+    summaryCountFieldName !== undefined &&
+    summaryCountFieldName !== 'doc_count'
+  ) {
     // Check for a detector looking at cardinality (distinct count) using an aggregation.
     // The cardinality field will be in:
     // aggregations/<agg_name>/aggregations/<summaryCountFieldName>/cardinality/field
@@ -45,8 +46,13 @@ export function buildConfigFromDetector(job, detectorIndex) {
     let cardinalityField = undefined;
     const topAgg = _.get(job.datafeed_config, 'aggregations') || _.get(job.datafeed_config, 'aggs');
     if (topAgg !== undefined && _.values(topAgg).length > 0) {
-      cardinalityField = _.get(_.values(topAgg)[0], ['aggregations', summaryCountFieldName, 'cardinality', 'field']) ||
-        _.get(_.values(topAgg)[0], ['aggs', summaryCountFieldName, 'cardinality', 'field']);
+      cardinalityField =
+        _.get(_.values(topAgg)[0], [
+          'aggregations',
+          summaryCountFieldName,
+          'cardinality',
+          'field',
+        ]) || _.get(_.values(topAgg)[0], ['aggs', summaryCountFieldName, 'cardinality', 'field']);
     }
 
     if (detector.function === 'non_zero_count' && cardinalityField !== undefined) {

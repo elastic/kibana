@@ -18,22 +18,21 @@
  */
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   describe('core', () => {
     describe('request context', () => {
-      it('provides access to elasticsearch', async () => (
-        await supertest
-          .get('/requestcontext/elasticsearch')
-          .expect(200, 'Elasticsearch: true')
-      ));
+      it('provides access to elasticsearch', async () =>
+        await supertest.get('/requestcontext/elasticsearch').expect(200, 'Elasticsearch: true'));
 
-      it('provides access to SavedObjects client', async () => (
+      it('provides access to SavedObjects client', async () =>
         await supertest
           .get('/requestcontext/savedobjectsclient')
-          .expect(200, 'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}')
-      ));
+          .expect(
+            200,
+            'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}'
+          ));
     });
 
     describe('compression', () => {

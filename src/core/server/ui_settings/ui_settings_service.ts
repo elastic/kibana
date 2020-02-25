@@ -25,9 +25,13 @@ import { Logger } from '../logging';
 
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalHttpServiceSetup } from '../http';
-import { UiSettingsConfigType } from './ui_settings_config';
+import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
-import { InternalUiSettingsServiceSetup, UiSettingsParams } from './types';
+import {
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+  UiSettingsParams,
+} from './types';
 import { mapToObject } from '../../utils/';
 
 import { registerRoutes } from './routes';
@@ -37,41 +41,53 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class UiSettingsService implements CoreService<InternalUiSettingsServiceSetup> {
+export class UiSettingsService
+  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
+  private overrides: Record<string, any> = {};
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
-    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>('uiSettings');
+    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
   public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     registerRoutes(deps.http.createRouter(''));
     this.log.debug('Setting up ui settings service');
-    const overrides = await this.getOverrides(deps);
-    const { version, buildNum } = this.coreContext.env.packageInfo;
+    const config = await this.config$.pipe(first()).toPromise();
+    this.overrides = config.overrides;
 
     return {
       register: this.register.bind(this),
-      asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) => {
-        return new UiSettingsClient({
-          type: 'config',
-          id: version,
-          buildNum,
-          savedObjectsClient,
-          defaults: mapToObject(this.uiSettingsDefaults),
-          overrides,
-          log: this.log,
-        });
-      },
+      asScopedToClient: this.getScopedClientFactory(),
     };
   }
 
-  public async start() {}
+  public async start(): Promise<InternalUiSettingsServiceStart> {
+    return {
+      asScopedToClient: this.getScopedClientFactory(),
+    };
+  }
 
   public async stop() {}
+
+  private getScopedClientFactory(): (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => UiSettingsClient {
+    const { version, buildNum } = this.coreContext.env.packageInfo;
+    return (savedObjectsClient: SavedObjectsClientContract) =>
+      new UiSettingsClient({
+        type: 'config',
+        id: version,
+        buildNum,
+        savedObjectsClient,
+        defaults: mapToObject(this.uiSettingsDefaults),
+        overrides: this.overrides,
+        log: this.log,
+      });
+  }
 
   private register(settings: Record<string, UiSettingsParams> = {}) {
     Object.entries(settings).forEach(([key, value]) => {
@@ -80,20 +96,5 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
       }
       this.uiSettingsDefaults.set(key, value);
     });
-  }
-
-  private async getOverrides(deps: SetupDeps) {
-    const config = await this.config$.pipe(first()).toPromise();
-    const overrides: Record<string, any> = config.overrides;
-    // manually implemented deprecation until New platform Config service
-    // supports them https://github.com/elastic/kibana/issues/40255
-    if (typeof deps.http.config.defaultRoute !== 'undefined') {
-      overrides.defaultRoute = deps.http.config.defaultRoute;
-      this.log.warn(
-        'Config key "server.defaultRoute" is deprecated. It has been replaced with "uiSettings.overrides.defaultRoute"'
-      );
-    }
-
-    return overrides;
   }
 }

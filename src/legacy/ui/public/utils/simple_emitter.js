@@ -18,8 +18,6 @@
  */
 
 import _ from 'lodash';
-import { BaseObject } from './base_object';
-import { createLegacyClass } from './legacy_class';
 
 /**
  * Simple event emitter class used in the vislib. Calls
@@ -27,7 +25,6 @@ import { createLegacyClass } from './legacy_class';
  *
  * @class
  */
-createLegacyClass(SimpleEmitter).inherits(BaseObject);
 export function SimpleEmitter() {
   this._listeners = {};
 }
@@ -39,7 +36,7 @@ export function SimpleEmitter() {
  * @param  {function} handler
  * @return {SimpleEmitter} - this, for chaining
  */
-SimpleEmitter.prototype.on = function (name, handler) {
+SimpleEmitter.prototype.on = function(name, handler) {
   let handlers = this._listeners[name];
   if (!handlers) handlers = this._listeners[name] = [];
 
@@ -56,7 +53,7 @@ SimpleEmitter.prototype.on = function (name, handler) {
  *                              passed then all are removed
  * @return {SimpleEmitter} - this, for chaining
  */
-SimpleEmitter.prototype.off = function (name, handler) {
+SimpleEmitter.prototype.off = function(name, handler) {
   if (!this._listeners[name]) {
     return this;
   }
@@ -74,7 +71,7 @@ SimpleEmitter.prototype.off = function (name, handler) {
  *
  * @return {SimpleEmitter} - this, for chaining
  */
-SimpleEmitter.prototype.removeAllListeners = function () {
+SimpleEmitter.prototype.removeAllListeners = function() {
   this._listeners = {};
   return this;
 };
@@ -86,7 +83,7 @@ SimpleEmitter.prototype.removeAllListeners = function () {
  * @param  {*} [arg...] - any number of arguments that will be applied to each handler
  * @return {SimpleEmitter} - this, for chaining
  */
-SimpleEmitter.prototype.emit = _.restParam(function (name, args) {
+SimpleEmitter.prototype.emit = _.restParam(function(name, args) {
   if (!this._listeners[name]) return this;
   const listeners = this.listeners(name);
   let i = -1;
@@ -103,10 +100,14 @@ SimpleEmitter.prototype.emit = _.restParam(function (name, args) {
  *
  * @return {array[string]}
  */
-SimpleEmitter.prototype.activeEvents = function () {
-  return _.reduce(this._listeners, function (active, listeners, name) {
-    return active.concat(_.size(listeners) ? name : []);
-  }, []);
+SimpleEmitter.prototype.activeEvents = function() {
+  return _.reduce(
+    this._listeners,
+    function(active, listeners, name) {
+      return active.concat(_.size(listeners) ? name : []);
+    },
+    []
+  );
 };
 
 /**
@@ -115,7 +116,7 @@ SimpleEmitter.prototype.activeEvents = function () {
  * @param  {string} name
  * @return {array[function]}
  */
-SimpleEmitter.prototype.listeners = function (name) {
+SimpleEmitter.prototype.listeners = function(name) {
   return this._listeners[name] ? this._listeners[name].slice(0) : [];
 };
 
@@ -125,13 +126,16 @@ SimpleEmitter.prototype.listeners = function (name) {
  * @param  {string} [name] - optional event name to filter by
  * @return {number}
  */
-SimpleEmitter.prototype.listenerCount = function (name) {
+SimpleEmitter.prototype.listenerCount = function(name) {
   if (name) {
     return _.size(this._listeners[name]);
   }
 
-  return _.reduce(this._listeners, function (count, handlers) {
-    return count + _.size(handlers);
-  }, 0);
+  return _.reduce(
+    this._listeners,
+    function(count, handlers) {
+      return count + _.size(handlers);
+    },
+    0
+  );
 };
-

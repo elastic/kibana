@@ -19,18 +19,16 @@
 
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [
-      require.resolve('./apis'),
-    ],
+    testFiles: [require.resolve('./apis')],
     services,
     servers: commonConfig.get('servers'),
     junit: {
-      reportName: 'API Integration Tests'
+      reportName: 'API Integration Tests',
     },
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {

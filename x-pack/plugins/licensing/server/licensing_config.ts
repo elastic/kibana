@@ -5,11 +5,22 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-export const config = {
+const configSchema = schema.object({
+  api_polling_frequency: schema.duration({ defaultValue: '30s' }),
+});
+
+export type LicenseConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<LicenseConfigType> = {
   schema: schema.object({
-    pollingFrequency: schema.duration({ defaultValue: '30s' }),
+    api_polling_frequency: schema.duration({ defaultValue: '30s' }),
   }),
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot(
+      'xpack.xpack_main.xpack_api_polling_frequency_millis',
+      'xpack.licensing.api_polling_frequency'
+    ),
+  ],
 };
-
-export type LicenseConfigType = TypeOf<typeof config.schema>;

@@ -54,7 +54,15 @@ export function uncovertMetricNames(byDateBucketResponse) {
   for (const metricName of LISTING_METRICS_NAMES) {
     unconverted[metricName] = {
       buckets: byDateBucketResponse.buckets.map(bucket => {
-        const { key_as_string, key, doc_count, ...rest } = bucket; /* eslint-disable-line camelcase */
+        const {
+          // eslint-disable-next-line camelcase
+          key_as_string,
+          // eslint-disable-next-line camelcase
+          key,
+          // eslint-disable-next-line camelcase
+          doc_count,
+          ...rest
+        } = bucket;
         const metrics = Object.entries(rest).reduce((accum, [key, value]) => {
           if (key.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
             const name = key.split('__')[1];
@@ -64,12 +72,12 @@ export function uncovertMetricNames(byDateBucketResponse) {
         }, {});
 
         return {
-          key_as_string, /* eslint-disable-line camelcase */
+          key_as_string /* eslint-disable-line camelcase */,
           key,
-          doc_count, /* eslint-disable-line camelcase */
+          doc_count /* eslint-disable-line camelcase */,
           ...metrics,
         };
-      })
+      }),
     };
   }
   return unconverted;

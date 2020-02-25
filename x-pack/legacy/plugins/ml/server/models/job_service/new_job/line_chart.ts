@@ -6,9 +6,8 @@
 
 import { get } from 'lodash';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { callWithRequestType } from '../../../../common/types/kibana';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-
-export type callWithRequestType = (action: string, params: any) => Promise<any>;
 
 type DtrIndex = number;
 type TimeStamp = number;
@@ -127,6 +126,14 @@ function getSearchJsonFromConfig(
       },
     },
   };
+
+  if (query.bool === undefined) {
+    query.bool = {
+      must: [],
+    };
+  } else if (query.bool.must === undefined) {
+    query.bool.must = [];
+  }
 
   query.bool.must.push({
     range: {

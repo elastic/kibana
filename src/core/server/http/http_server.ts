@@ -32,10 +32,10 @@ import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
-import { AuthStateStorage, GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { HttpServiceSetup } from './types';
+import { HttpServiceSetup, HttpServerInfo } from './types';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -46,18 +46,26 @@ export interface HttpServerSetup {
    */
   registerRouter: (router: IRouter) => void;
   basePath: HttpServiceSetup['basePath'];
+  csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+  getAuthHeaders: GetAuthHeaders;
   auth: {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
-    getAuthHeaders: GetAuthHeaders;
   };
+  getServerInfo: () => HttpServerInfo;
 }
+
+/** @internal */
+export type LifecycleRegistrar = Pick<
+  HttpServerSetup,
+  'registerAuth' | 'registerOnPreAuth' | 'registerOnPostAuth' | 'registerOnPreResponse'
+>;
 
 export class HttpServer {
   private server?: Server;
@@ -109,11 +117,18 @@ export class HttpServer {
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
+      csp: config.csp,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
-        getAuthHeaders: this.authRequestHeaders.get,
       },
+      getAuthHeaders: this.authRequestHeaders.get,
+      getServerInfo: () => ({
+        name: config.name,
+        host: config.host,
+        port: config.port,
+        protocol: this.server!.info.protocol,
+      }),
       isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't

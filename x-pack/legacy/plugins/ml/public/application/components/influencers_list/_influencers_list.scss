@@ -15,23 +15,23 @@
   }
 
   .progress {
-    display:inline-block;
-    width: calc(100% - 34px); // SASSTODO: Calc porper value
+    display: inline-block;
+    width: calc(100% - 34px); // SASSTODO: Calc proper value
     height: 22px;
     min-width: 70px;
     margin-bottom: 0px;
     color: $euiColorDarkShade;
-    background-color : transparent;
+    background-color: transparent;
 
     .progress-bar-holder {
-      width: calc(100% - 28px); // SASSTODO: Calc porper value
+      width: calc(100% - 28px); // SASSTODO: Calc proper value
     }
 
     .progress-bar {
       height: $euiSizeXS / 2;
       margin-top: $euiSizeM;
       text-align: right;
-      line-height: 18px; // SASSTODO: Calc porper value
+      line-height: 18px; // SASSTODO: Calc proper value
       display: inline-block;
       transition: none;
     }
@@ -42,6 +42,7 @@
     .progress-bar {
       background-color: $mlColorCritical;
     }
+
     .score-label {
       border-color: $mlColorCritical;
     }
@@ -51,6 +52,7 @@
     .progress-bar {
       background-color: $mlColorMajor;
     }
+
     .score-label {
       border-color: $mlColorMajor;
     }
@@ -60,6 +62,7 @@
     .progress-bar {
       background-color: $mlColorMinor;
     }
+
     .score-label {
       border-color: $mlColorMinor;
     }
@@ -69,6 +72,7 @@
     .progress-bar {
       background-color: $mlColorWarning;
     }
+
     .score-label {
       border-color: $mlColorWarning;
     }
@@ -99,8 +103,7 @@
   }
 }
 
-  // SASSTODO: Can .eui-textBreakAll
+// SASSTODO: Can .eui-textBreakAll
 .ml-influencers-list-tooltip {
   word-break: break-all;
 }
-

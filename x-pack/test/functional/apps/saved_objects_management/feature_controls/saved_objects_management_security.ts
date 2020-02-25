@@ -44,7 +44,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_all_user', 'global_all_user-password', {
           expectSpaceSelector: false,
@@ -55,7 +55,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -162,7 +162,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_som_read_user', 'global_som_read_user-password', {
           expectSpaceSelector: false,
@@ -173,7 +173,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -281,7 +281,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -296,7 +296,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 

@@ -29,7 +29,7 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
 
   const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > indexLink-`;
 
-  return new class ElasticsearchIndices {
+  return new (class ElasticsearchIndices {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
@@ -64,7 +64,9 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
       const dataSizes = await testSubjects.getVisibleTextAll(SUBJ_INDICES_DATA_SIZES);
       const indexRates = await testSubjects.getVisibleTextAll(SUBJ_INDICES_INDEX_RATES);
       const searchRates = await testSubjects.getVisibleTextAll(SUBJ_INDICES_SEARCH_RATES);
-      const unassignedShardsCounts = await testSubjects.getVisibleTextAll(SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS);
+      const unassignedShardsCounts = await testSubjects.getVisibleTextAll(
+        SUBJ_INDICES_UNASSIGNED_SHARD_COUNTS
+      );
 
       // tuple-ize the icons and texts together into an array of objects
       const tableRows = await this.getRows();
@@ -80,7 +82,7 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
             indexRate: indexRates[current],
             searchRate: searchRates[current],
             unassignedShards: unassignedShardsCounts[current],
-          }
+          },
         ];
       }, []);
     }
@@ -88,6 +90,5 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
     clickRowByName(indexName) {
       return testSubjects.click(SUBJ_INDEX_LINK_PREFIX + indexName);
     }
-
-  };
+  })();
 }

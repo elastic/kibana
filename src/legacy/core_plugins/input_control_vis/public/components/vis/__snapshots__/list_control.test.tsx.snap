@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`disableMsg 1`] = `
+<FormRow
+  controlIndex={0}
+  disableMsg="control is disabled to test rendering when disabled"
+  id="mock-list-control"
+  label="list control"
+>
+  <EuiFieldText
+    disabled={true}
+    placeholder="Select..."
+  />
+</FormRow>
+`;
+
+exports[`renders ListControl 1`] = `
+<FormRow
+  controlIndex={0}
+  id="mock-list-control"
+  label="list control"
+>
+  <EuiComboBox
+    async={false}
+    compressed={false}
+    data-test-subj="listControlSelect0"
+    fullWidth={false}
+    isClearable={true}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "data-test-subj": "option_choice1",
+          "label": "choice1 + formatting",
+          "value": "choice1",
+        },
+        Object {
+          "data-test-subj": "option_choice2",
+          "label": "choice2 + formatting",
+          "value": "choice2",
+        },
+      ]
+    }
+    placeholder="Select..."
+    selectedOptions={Array []}
+    singleSelection={false}
+  />
+</FormRow>
+`;

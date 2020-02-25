@@ -6,13 +6,13 @@
 
 import { DefaultOperator } from 'elasticsearch';
 
-import { IndexPattern } from 'ui/index_patterns';
-
 import { dictionaryToArray } from '../../../common/types/common';
 import { SavedSearchQuery } from '../lib/kibana';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define/step_define_form';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import {
   getEsAggFromAggConfig,
@@ -53,6 +53,12 @@ export function isSimpleQuery(arg: any): arg is SimpleQuery {
   return arg.query_string !== undefined;
 }
 
+export const matchAllQuery = { match_all: {} };
+export function isMatchAllQuery(query: any): boolean {
+  return query.match_all !== undefined && Object.keys(query.match_all).length === 0;
+}
+
+export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
 export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }

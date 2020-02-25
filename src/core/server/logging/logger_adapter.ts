@@ -63,4 +63,8 @@ export class LoggerAdapter implements Logger {
   public log(record: LogRecord) {
     this.logger.log(record);
   }
+
+  public get(...contextParts: string[]): Logger {
+    return this.logger.get(...contextParts);
+  }
 }

@@ -9,10 +9,11 @@ import { emsRasterTileToEmsVectorTile } from './common/migrations/ems_raster_til
 import { topHitsTimeToSort } from './common/migrations/top_hits_time_to_sort';
 import { moveApplyGlobalQueryToSources } from './common/migrations/move_apply_global_query';
 import { addFieldMetaOptions } from './common/migrations/add_field_meta_options';
+import { migrateSymbolStyleDescriptor } from './common/migrations/migrate_symbol_style_descriptor';
 
 export const migrations = {
-  'map': {
-    '7.2.0': (doc) => {
+  map: {
+    '7.2.0': doc => {
       const { attributes, references } = extractReferences(doc);
 
       return {
@@ -21,7 +22,7 @@ export const migrations = {
         references,
       };
     },
-    '7.4.0': (doc) => {
+    '7.4.0': doc => {
       const attributes = emsRasterTileToEmsVectorTile(doc);
 
       return {
@@ -29,7 +30,7 @@ export const migrations = {
         attributes,
       };
     },
-    '7.5.0': (doc) => {
+    '7.5.0': doc => {
       const attributes = topHitsTimeToSort(doc);
 
       return {
@@ -37,7 +38,7 @@ export const migrations = {
         attributes,
       };
     },
-    '7.6.0': (doc) => {
+    '7.6.0': doc => {
       const attributesPhase1 = moveApplyGlobalQueryToSources(doc);
       const attributesPhase2 = addFieldMetaOptions({ attributes: attributesPhase1 });
 
@@ -45,6 +46,14 @@ export const migrations = {
         ...doc,
         attributes: attributesPhase2,
       };
-    }
+    },
+    '7.7.0': doc => {
+      const attributes = migrateSymbolStyleDescriptor(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
   },
 };

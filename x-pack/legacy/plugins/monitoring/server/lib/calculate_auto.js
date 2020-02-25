@@ -8,22 +8,22 @@ import moment from 'moment';
 
 const d = moment.duration;
 const roundingRules = [
-  [ d(500, 'ms'), d(100, 'ms') ],
-  [ d(5, 'second'), d(1, 'second') ],
-  [ d(7.5, 'second'), d(5, 'second') ],
-  [ d(15, 'second'), d(10, 'second') ],
-  [ d(45, 'second'), d(30, 'second') ],
-  [ d(3, 'minute'), d(1, 'minute') ],
-  [ d(9, 'minute'), d(5, 'minute') ],
-  [ d(20, 'minute'), d(10, 'minute') ],
-  [ d(45, 'minute'), d(30, 'minute') ],
-  [ d(2, 'hour'), d(1, 'hour') ],
-  [ d(6, 'hour'), d(3, 'hour') ],
-  [ d(24, 'hour'), d(12, 'hour') ],
-  [ d(1, 'week'), d(1, 'd') ],
-  [ d(3, 'week'), d(1, 'week') ],
-  [ d(1, 'year'), d(1, 'month') ],
-  [ Infinity, d(1, 'year') ]
+  [d(500, 'ms'), d(100, 'ms')],
+  [d(5, 'second'), d(1, 'second')],
+  [d(7.5, 'second'), d(5, 'second')],
+  [d(15, 'second'), d(10, 'second')],
+  [d(45, 'second'), d(30, 'second')],
+  [d(3, 'minute'), d(1, 'minute')],
+  [d(9, 'minute'), d(5, 'minute')],
+  [d(20, 'minute'), d(10, 'minute')],
+  [d(45, 'minute'), d(30, 'minute')],
+  [d(2, 'hour'), d(1, 'hour')],
+  [d(6, 'hour'), d(3, 'hour')],
+  [d(24, 'hour'), d(12, 'hour')],
+  [d(1, 'week'), d(1, 'd')],
+  [d(3, 'week'), d(1, 'week')],
+  [d(1, 'year'), d(1, 'month')],
+  [Infinity, d(1, 'year')],
 ];
 
 function find(rules, check) {
@@ -36,7 +36,9 @@ function find(rules, check) {
       const resp = check(rule[0], rule[1], target);
 
       if (resp == null) {
-        if (lastResp) { return lastResp; }
+        if (lastResp) {
+          return lastResp;
+        }
         break;
       }
 
@@ -48,9 +50,11 @@ function find(rules, check) {
     return moment.duration(ms, 'ms');
   }
 
-  return function (buckets, duration) {
+  return function(buckets, duration) {
     const interval = pick(buckets, duration);
-    if (interval) { return moment.duration(interval._data); }
+    if (interval) {
+      return moment.duration(interval._data);
+    }
   };
 }
 

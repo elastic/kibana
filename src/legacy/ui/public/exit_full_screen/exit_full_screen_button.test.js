@@ -17,40 +17,35 @@
  * under the License.
  */
 
-jest.mock('ui/chrome',
+jest.mock(
+  'ui/chrome',
   () => ({
     getKibanaVersion: () => '6.0.0',
     setVisible: () => {},
-  }), { virtual: true });
+  }),
+  { virtual: true }
+);
 
 import React from 'react';
 import { mountWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
 import chrome from 'ui/chrome';
 
-import {
-  ExitFullScreenButton,
-} from './exit_full_screen_button';
+import { ExitFullScreenButton } from './exit_full_screen_button';
 
 import { keyCodes } from '@elastic/eui';
 
-
 test('is rendered', () => {
-  const component = renderWithIntl(
-    <ExitFullScreenButton onExitFullScreenMode={() => {}}/>
-  );
+  const component = renderWithIntl(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 describe('onExitFullScreenMode', () => {
   test('is called when the button is pressed', () => {
     const onExitHandler = sinon.stub();
 
-    const component = mountWithIntl(
-      <ExitFullScreenButton onExitFullScreenMode={onExitHandler} />
-    );
+    const component = mountWithIntl(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
     component.find('button').simulate('click');
 
@@ -73,9 +68,7 @@ describe('chrome.setVisible', () => {
   test('is called with false when the component is rendered', () => {
     chrome.setVisible = sinon.stub();
 
-    const component = mountWithIntl(
-      <ExitFullScreenButton onExitFullScreenMode={() => {}} />
-    );
+    const component = mountWithIntl(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
 
     component.find('button').simulate('click');
 
@@ -84,9 +77,7 @@ describe('chrome.setVisible', () => {
   });
 
   test('is called with true the component is unmounted', () => {
-    const component = mountWithIntl(
-      <ExitFullScreenButton onExitFullScreenMode={() => {}} />
-    );
+    const component = mountWithIntl(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
 
     chrome.setVisible = sinon.stub();
     component.unmount();

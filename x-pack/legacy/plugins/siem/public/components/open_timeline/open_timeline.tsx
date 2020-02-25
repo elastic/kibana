@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
@@ -57,6 +57,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       />
 
       <TimelinesTable
+        actionTimelineToShow={
+          onDeleteSelected != null && deleteTimelines != null
+            ? ['delete', 'duplicate', 'selectable']
+            : ['duplicate', 'selectable']
+        }
         data-test-subj="timelines-table"
         deleteTimelines={deleteTimelines}
         defaultPageSize={defaultPageSize}
@@ -69,7 +74,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         pageIndex={pageIndex}
         pageSize={pageSize}
         searchResults={searchResults}
-        showExtendedColumnsAndActions={onDeleteSelected != null && deleteTimelines != null}
+        showExtendedColumns={true}
         sortDirection={sortDirection}
         sortField={sortField}
         totalSearchResultsCount={totalSearchResultsCount}

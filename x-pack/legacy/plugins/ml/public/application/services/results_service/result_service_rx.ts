@@ -14,7 +14,9 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import _ from 'lodash';
+import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
+import { JobId } from '../../jobs/new_job/common/job_creator/configs';
 import { ml } from '../ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CriteriaField } from './index';
@@ -26,6 +28,23 @@ interface ResultResponse {
 export interface MetricData extends ResultResponse {
   results: Record<string, any>;
 }
+
+export interface FieldDefinition {
+  /**
+   * Partition field name.
+   */
+  name: string | number;
+  /**
+   * Partitions field distinct values.
+   */
+  values: any[];
+}
+
+type FieldTypes = 'partition_field' | 'over_field' | 'by_field';
+
+export type PartitionFieldsDefinition = {
+  [field in FieldTypes]: FieldDefinition;
+};
 
 export function getMetricData(
   index: string,
@@ -531,4 +550,20 @@ export function getScheduledEventsByBucket(
         return obj;
       })
     );
+}
+
+export function fetchPartitionFieldsValues(
+  jobId: JobId,
+  searchTerm: Dictionary<string>,
+  criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
+  earliestMs: number,
+  latestMs: number
+) {
+  return ml.results.fetchPartitionFieldsValues(
+    jobId,
+    searchTerm,
+    criteriaFields,
+    earliestMs,
+    latestMs
+  );
 }

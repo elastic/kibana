@@ -4,7 +4,7 @@
 
 ## DiscoveredPlugin.configPath property
 
-Root configuration path used by the plugin, defaults to "id".
+Root configuration path used by the plugin, defaults to "id" in snake\_case format.
 
 <b>Signature:</b>
 

@@ -15,16 +15,10 @@
   position: relative;
   padding-left: $euiSizeXL;
   margin-bottom: $euiSizeL;
-
-  button {
-    // make buttons wrap lines like regular text
-    display: contents;
-  }
 }
 
 .gphGuidancePanel__item--disabled {
   color: $euiColorDarkShade;
-  pointer-events: none;
 
   button {
     color: $euiColorDarkShade !important;

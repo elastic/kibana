@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center; // Corrects horizontal centering in IE11
+  align-self: center; /* Corrects horizontal centering in IE11 */
 `;
 
 EmptyPrompt.displayName = 'EmptyPrompt';
@@ -43,11 +43,12 @@ export const EmptyPage = React.memo<EmptyPageProps>(
     ...rest
   }) => (
     <EmptyPrompt
+      iconType="securityAnalyticsApp"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               href={actionPrimaryUrl}
@@ -59,7 +60,7 @@ export const EmptyPage = React.memo<EmptyPageProps>(
           </EuiFlexItem>
 
           {actionSecondaryLabel && actionSecondaryUrl && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 href={actionSecondaryUrl}
                 iconType={actionSecondaryIcon}

@@ -19,22 +19,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '../../../../../common/constants';
 
 export class MetricsExpression extends Component {
-
   state = {
     isPopoverOpen: false,
   };
 
   _togglePopover = () => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
-  }
+  };
 
   _closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   _renderMetricsEditor = () => {
     if (!this.props.rightFields) {
@@ -55,7 +54,7 @@ export class MetricsExpression extends Component {
         onChange={this.props.onChange}
       />
     );
-  }
+  };
 
   render() {
     const metricExpressions = this.props.metrics
@@ -77,12 +76,15 @@ export class MetricsExpression extends Component {
 
         return `${type} ${field}`;
       });
-    const useMetricDescription = i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsDescription', {
-      defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
-      values: {
-        metricsLength: metricExpressions.length
+    const useMetricDescription = i18n.translate(
+      'xpack.maps.layerPanel.metricsExpression.useMetricsDescription',
+      {
+        defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
+        values: {
+          metricsLength: metricExpressions.length,
+        },
       }
-    });
+    );
     return (
       <EuiPopover
         id="metricsPopover"
@@ -128,7 +130,5 @@ MetricsExpression.propTypes = {
 };
 
 MetricsExpression.defaultProps = {
-  metrics: [
-    { type: METRIC_TYPE.COUNT }
-  ]
+  metrics: [{ type: METRIC_TYPE.COUNT }],
 };

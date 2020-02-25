@@ -15,13 +15,12 @@ const List = styled.ul`
   width: 100%;
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${theme.euiSizeXS};
-  box-shadow: 0px ${theme.euiSizeXS} ${theme.euiSizeXL}
-    ${rgba(theme.euiTextColor, 0.1)};
+  box-shadow: 0px ${theme.euiSizeXS} ${theme.euiSizeXL} ${rgba(theme.euiTextColor, 0.1)};
   position: absolute;
   background: #fff;
   z-index: 10;
   left: 0;
-  max-height: ${(theme.euiSize * 20)}px;
+  max-height: ${theme.euiSize * 20}px;
   overflow: scroll;
 `;
 
@@ -69,9 +68,7 @@ export class Suggestions extends Component {
       );
     });
 
-    return (
-      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
-    );
+    return <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>;
   }
 }
 
@@ -80,5 +77,5 @@ Suggestions.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
 };

@@ -11,8 +11,7 @@ import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 import { TimeBucketsInterval } from '../util/time_buckets';
 
 interface ClearedSelectedAnomaliesState {
-  anomalyChartRecords: [];
-  selectedCells: null;
+  selectedCells: undefined;
   viewByLoadedForTimeFormatted: null;
 }
 
@@ -36,10 +35,15 @@ export declare const getDefaultSwimlaneData: () => SwimlaneData;
 
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 
+export declare const getSelectionJobIds: (
+  selectedCells: AppStateSelectedCells | undefined,
+  selectedJobs: ExplorerJob[]
+) => string[];
+
 export declare const getSelectionInfluencers: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   fieldName: string
-) => any[];
+) => string[];
 
 interface SelectionTimeRange {
   earliestMs: number;
@@ -47,7 +51,7 @@ interface SelectionTimeRange {
 }
 
 export declare const getSelectionTimeRange: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   interval: number,
   bounds: TimeRangeBounds
 ) => SelectionTimeRange;
@@ -62,7 +66,7 @@ interface ViewBySwimlaneOptionsArgs {
   filterActive: boolean;
   filteredFields: any[];
   isAndOperator: boolean;
-  selectedCells: SelectedCells;
+  selectedCells: AppStateSelectedCells;
   selectedJobs: ExplorerJob[];
 }
 
@@ -94,7 +98,7 @@ declare interface SwimlaneBounds {
 }
 
 export declare const loadAnnotationsTableData: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
@@ -109,7 +113,7 @@ export declare interface AnomaliesTableData {
 }
 
 export declare const loadAnomaliesTableData: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
   dateFormatTz: any,
   interval: number,
@@ -125,7 +129,7 @@ export declare const loadDataForCharts: (
   earliestMs: number,
   latestMs: number,
   influencers: any[],
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   influencersFilterQuery: any
 ) => Promise<any[] | undefined>;
 
@@ -178,25 +182,17 @@ export declare const loadViewByTopFieldValuesForSelectedTime: (
   noInfluencersConfigured: boolean
 ) => Promise<any>;
 
-declare interface FilterData {
+export declare interface FilterData {
   influencersFilterQuery: any;
   filterActive: boolean;
   filteredFields: string[];
   queryString: string;
 }
 
-declare interface SelectedCells {
+export declare interface AppStateSelectedCells {
   type: string;
   lanes: string[];
   times: number[];
   showTopFieldValues: boolean;
   viewByFieldName: string;
 }
-
-export declare interface RestoredAppState {
-  selectedCells?: SelectedCells;
-  filterData: {} | FilterData;
-  viewBySwimlaneFieldName: string;
-}
-
-export declare const restoreAppState: (appState: any) => RestoredAppState;

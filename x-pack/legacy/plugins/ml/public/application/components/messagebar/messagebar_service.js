@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../util/dependency_cache';
 import { MLRequestFailure } from '../../util/ml_error';
 import { i18n } from '@kbn/i18n';
 
@@ -19,15 +18,16 @@ function errorNotify(text, resp) {
     err = new Error(text);
   }
 
+  const toastNotifications = getToastNotifications();
   toastNotifications.addError(new MLRequestFailure(err, resp), {
     title: i18n.translate('xpack.ml.messagebarService.errorTitle', {
       defaultMessage: 'An error has ocurred',
-    })
+    }),
   });
 }
 
 export const mlMessageBarService = {
   notify: {
-    error: errorNotify
-  }
+    error: errorNotify,
+  },
 };

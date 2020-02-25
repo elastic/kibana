@@ -6,10 +6,9 @@
 import _ from 'lodash';
 
 export class DataRequest {
-
   constructor(descriptor) {
     this._descriptor = {
-      ...descriptor
+      ...descriptor,
     };
   }
 
@@ -22,7 +21,9 @@ export class DataRequest {
   }
 
   getMeta() {
-    return this.hasData() ? _.get(this._descriptor, 'dataMeta', {}) : _.get(this._descriptor, 'dataMetaAtStart', {});
+    return this.hasData()
+      ? _.get(this._descriptor, 'dataMeta', {})
+      : _.get(this._descriptor, 'dataMetaAtStart', {});
   }
 
   hasData() {
@@ -40,7 +41,6 @@ export class DataRequest {
   getRequestToken() {
     return this._descriptor.dataRequestToken;
   }
-
 }
 
 export class DataRequestAbortError extends Error {
@@ -48,4 +48,3 @@ export class DataRequestAbortError extends Error {
     super();
   }
 }
-

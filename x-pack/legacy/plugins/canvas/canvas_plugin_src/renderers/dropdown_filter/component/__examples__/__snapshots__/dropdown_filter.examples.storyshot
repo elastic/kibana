@@ -16,9 +16,11 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
     </option>
   </select>
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
@@ -61,9 +63,11 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
     </option>
   </select>
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
@@ -107,9 +111,11 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
     </option>
   </select>
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
@@ -153,9 +159,11 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
     </option>
   </select>
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
@@ -181,9 +189,11 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
     </option>
   </select>
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}

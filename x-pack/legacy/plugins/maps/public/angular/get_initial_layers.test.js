@@ -21,50 +21,50 @@ describe('Saved object has layer list', () => {
     const layerListFromSavedObject = [
       {
         id: 'layerId',
-        type: 'mockLayer'
-      }
+        type: 'mockLayer',
+      },
     ];
     const layerListJSON = JSON.stringify(layerListFromSavedObject);
-    expect((getInitialLayers(layerListJSON))).toEqual(layerListFromSavedObject);
+    expect(getInitialLayers(layerListJSON)).toEqual(layerListFromSavedObject);
   });
 });
 
 describe('kibana.yml configured with map.tilemap.url', () => {
-
   beforeAll(() => {
     require('../meta').getKibanaTileMap = () => {
       return {
-        url: 'myTileUrl'
+        url: 'myTileUrl',
       };
     };
   });
 
   it('Should get initial layer with from Kibana tilemap data source', () => {
     const layers = getInitialLayers(layerListNotProvided);
-    expect(layers).toEqual([{
-      alpha: 1,
-      __dataRequests: [],
-      id: layers[0].id,
-      label: null,
-      maxZoom: 24,
-      minZoom: 0,
-      sourceDescriptor: {
-        type: 'KIBANA_TILEMAP'
+    expect(layers).toEqual([
+      {
+        alpha: 1,
+        __dataRequests: [],
+        id: layers[0].id,
+        label: null,
+        maxZoom: 24,
+        minZoom: 0,
+        sourceDescriptor: {
+          type: 'KIBANA_TILEMAP',
+        },
+        style: {},
+        type: 'TILE',
+        visible: true,
       },
-      style: {},
-      type: 'TILE',
-      visible: true,
-    }]);
+    ]);
   });
 });
 
 describe('EMS is enabled', () => {
-
   beforeAll(() => {
     require('../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('ui/chrome').getInjected = (key) => {
+    require('ui/chrome').getInjected = key => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -82,22 +82,24 @@ describe('EMS is enabled', () => {
 
   it('Should get initial layer with EMS tile source', () => {
     const layers = getInitialLayers(layerListNotProvided);
-    expect(layers).toEqual([{
-      alpha: 1,
-      __dataRequests: [],
-      id: layers[0].id,
-      label: null,
-      maxZoom: 24,
-      minZoom: 0,
-      source: undefined,
-      sourceDescriptor: {
-        isAutoSelect: true,
-        type: 'EMS_TMS'
+    expect(layers).toEqual([
+      {
+        alpha: 1,
+        __dataRequests: [],
+        id: layers[0].id,
+        label: null,
+        maxZoom: 24,
+        minZoom: 0,
+        source: undefined,
+        sourceDescriptor: {
+          isAutoSelect: true,
+          type: 'EMS_TMS',
+        },
+        style: {},
+        type: 'VECTOR_TILE',
+        visible: true,
       },
-      style: {},
-      type: 'VECTOR_TILE',
-      visible: true,
-    }]);
+    ]);
   });
 });
 
@@ -107,7 +109,7 @@ describe('EMS is not enabled', () => {
       return null;
     };
 
-    require('ui/chrome').getInjected = (key) => {
+    require('ui/chrome').getInjected = key => {
       switch (key) {
         case 'isEmsEnabled':
           return false;
@@ -118,6 +120,6 @@ describe('EMS is not enabled', () => {
   });
 
   it('Should return empty layer list since there are no configured tile layers', () => {
-    expect((getInitialLayers(layerListNotProvided))).toEqual([]);
+    expect(getInitialLayers(layerListNotProvided)).toEqual([]);
   });
 });

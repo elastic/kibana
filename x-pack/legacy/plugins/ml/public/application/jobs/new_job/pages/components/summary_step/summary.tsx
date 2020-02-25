@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -23,7 +23,7 @@ import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
@@ -38,6 +38,9 @@ import {
 import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
@@ -67,7 +70,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       setJobRunner(jr);
     } catch (error) {
       // catch and display all job creation errors
-      toastNotifications.addDanger({
+      const { toasts } = notifications;
+      toasts.addDanger({
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),
@@ -85,7 +89,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       advancedStartDatafeed(jobCreator);
     } catch (error) {
       // catch and display all job creation errors
-      toastNotifications.addDanger({
+      const { toasts } = notifications;
+      toasts.addDanger({
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),

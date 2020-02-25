@@ -25,8 +25,8 @@ import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
@@ -34,6 +34,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
+import { SyncBadge } from '../SyncBadge';
 
 function formatType(type: string) {
   switch (type) {
@@ -101,7 +102,7 @@ export function SpanFlyout({
   const dbContext = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = httpContext?.response.status_code;
+  const spanHttpStatusCode = httpContext?.response?.status_code;
   const spanHttpUrl = httpContext?.url?.original;
   const spanHttpMethod = httpContext?.method;
 
@@ -188,6 +189,7 @@ export function SpanFlyout({
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
                 )}
+                <SyncBadge sync={span.span.sync} />
               </>
             ]}
           />

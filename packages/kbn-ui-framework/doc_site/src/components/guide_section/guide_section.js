@@ -46,18 +46,10 @@ export class GuideSection extends Component {
 
   render() {
     return (
-      <div
-        id={this.getId()}
-        className="guideSection"
-      >
+      <div id={this.getId()} className="guideSection">
         <div className="guideSection__header">
-          <div className="guideSection__title">
-            {this.props.title}
-          </div>
-          <button
-            className="guideSection__sourceButton"
-            onClick={this.onClickSource}
-          >
+          <div className="guideSection__title">{this.props.title}</div>
+          <button className="guideSection__sourceButton" onClick={this.onClickSource}>
             <span className="fa fa-code" />
           </button>
         </div>

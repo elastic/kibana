@@ -19,45 +19,42 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs } from 'ui/agg_types/agg_configs';
+import { AggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import chrome from 'ui/chrome';
-import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import {
   KibanaContext,
   KibanaDatatable,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
-import { npStart } from 'ui/new_platform';
 import {
+  ISearchSource,
   SearchSource,
-  SearchSourceContract,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../ui/public/courier';
-// @ts-ignore
-import {
-  FilterBarQueryFilterProvider,
-  QueryFilter,
-} from '../../../../../ui/public/filter_manager/query_filter';
+  Query,
+  TimeRange,
+  Filter,
+  getTime,
+  FilterManager,
+} from '../../../../../../plugins/data/public';
 
-import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
+import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
-import { getTime } from '../../../../../ui/public/timefilter';
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
+import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
 import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
-  searchSource: SearchSourceContract;
-  aggs: AggConfigs;
+  searchSource: ISearchSource;
+  aggs: IAggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   forceFetch: boolean;
-  queryFilter: QueryFilter;
+  filterManager: FilterManager;
   uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters: Adapters;
@@ -68,7 +65,8 @@ export interface RequestHandlerParams {
 
 const name = 'esaggs';
 
-type Context = KibanaContext | null;
+type Input = KibanaContext | null;
+type Output = Promise<KibanaDatatable>;
 
 interface Arguments {
   index: string;
@@ -77,8 +75,6 @@ interface Arguments {
   includeFormatHints: boolean;
   aggConfigs: string;
 }
-
-type Return = Promise<KibanaDatatable>;
 
 const handleCourierRequest = async ({
   searchSource,
@@ -90,7 +86,7 @@ const handleCourierRequest = async ({
   partialRows,
   metricsAtAllLevels,
   inspectorAdapters,
-  queryFilter,
+  filterManager,
   abortSignal,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
@@ -216,19 +212,17 @@ const handleCourierRequest = async ({
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, queryFilter),
+    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
     { returnsFormattedValues: true }
   );
 
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
   name,
   type: 'kibana_datatable',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
@@ -258,11 +252,9 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       help: '',
     },
   },
-  async fn(context, args, { inspectorAdapters, abortSignal }) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private: Function = $injector.get('Private');
-    const { indexPatterns } = npStart.plugins.data;
-    const queryFilter = Private(FilterBarQueryFilterProvider);
+  async fn(input, args, { inspectorAdapters, abortSignal }) {
+    const indexPatterns = getIndexPatterns();
+    const { filterManager } = getQueryService();
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
@@ -276,14 +268,14 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const response = await handleCourierRequest({
       searchSource,
       aggs,
-      timeRange: get(context, 'timeRange', undefined),
-      query: get(context, 'query', undefined),
-      filters: get(context, 'filters', undefined),
+      timeRange: get(input, 'timeRange', undefined),
+      query: get(input, 'query', undefined),
+      filters: get(input, 'filters', undefined),
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters,
-      queryFilter,
+      inspectorAdapters: inspectorAdapters as Adapters,
+      filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
@@ -294,6 +286,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
+          meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

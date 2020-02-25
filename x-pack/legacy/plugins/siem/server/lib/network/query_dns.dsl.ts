@@ -64,6 +64,7 @@ export const buildDnsQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
+  stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
   const filter = [
@@ -87,7 +88,7 @@ export const buildDnsQuery = ({
         ...getCountAgg(),
         dns_name_query_count: {
           terms: {
-            field: 'dns.question.registered_domain',
+            field: stackByField,
             size: querySize,
             order: {
               ...getQueryOrder(networkDnsSortField),

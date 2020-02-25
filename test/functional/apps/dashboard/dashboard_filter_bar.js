@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -27,36 +27,36 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('Add a filter bar', function () {
+    describe('Add a filter bar', function() {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('should show on an empty dashboard', async function () {
+      it('should show on an empty dashboard', async function() {
         await PageObjects.dashboard.clickNewDashboard();
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
 
-      it ('should continue to show for visualizations with no search source', async () => {
+      it('should continue to show for visualizations with no search source', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
       });
     });
 
-    describe('filter editor field list', function () {
+    describe('filter editor field list', function() {
       this.tags(['skipFirefox']);
 
       before(async () => {
@@ -86,20 +86,20 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', function () {
+    describe('filter pills', function() {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are not selected by default', async function () {
+      it('are not selected by default', async function() {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(0);
       });
 
-      it('are added when a pie chart slice is clicked', async function () {
+      it('are added when a pie chart slice is clicked', async function() {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.filterOnPieSlice('4,886');
@@ -131,15 +131,15 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('saved search filtering', function () {
+    describe('saved search filtering', function() {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are added when a cell magnifying glass is clicked', async function () {
+      it('are added when a cell magnifying glass is clicked', async function() {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
         await testSubjects.click('docTableCellFilter');

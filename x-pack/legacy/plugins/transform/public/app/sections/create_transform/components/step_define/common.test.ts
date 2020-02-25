@@ -14,7 +14,7 @@ import {
 } from '../../../../common';
 
 import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './common';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {

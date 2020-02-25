@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -29,6 +29,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { ChromeService } from './chrome_service';
 import { App } from '../application';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -51,10 +52,13 @@ function defaultStartDeps(availableApps?: App[]) {
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   if (availableApps) {
-    deps.application.availableApps = new Map(availableApps.map(app => [app.id, app]));
+    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, App>>(
+      new Map(availableApps.map(app => [app.id, app]))
+    );
   }
 
   return deps;
@@ -211,14 +215,15 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps, currentAppId$ } = startDeps.application;
+      const { applications$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      [...availableApps.keys()].forEach(appId => currentAppId$.next(appId));
+      const availableApps = await applications$.pipe(take(1)).toPromise();
+      [...availableApps.keys()].forEach(appId => navigateToApp(appId));
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -233,14 +238,14 @@ describe('start', () => {
 
     it('changing visibility has no effect on chrome-hiding application', async () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
-      const { currentAppId$ } = startDeps.application;
+      const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      currentAppId$.next('alpha');
+      navigateToApp('alpha');
       chrome.setIsVisible(true);
       service.stop();
 

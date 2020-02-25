@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { timefilter } from 'ui/timefilter';
 import { isFullLicense } from '../license/check_license';
+import { useTimefilter } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -32,13 +32,13 @@ function startTrialDescription() {
     <span>
       <FormattedMessage
         id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
-        defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
+        defaultMessage="To experience the full Machine Learning features that a {subscriptionsLink} offers, start a 30-day trial."
         values={{
-          platinumSubscriptionLink: (
+          subscriptionsLink: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
-                id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
-                defaultMessage="Platinum subscription"
+                id="xpack.ml.datavisualizer.startTrial.subscriptionsLinkText"
+                defaultMessage="Platinum or Enterprise subscription"
               />
             </EuiLink>
           ),
@@ -49,25 +49,24 @@ function startTrialDescription() {
 }
 
 export const DatavisualizerSelector: FC = () => {
-  timefilter.disableTimeRangeSelector();
-  timefilter.disableAutoRefreshSelector();
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const startTrialVisible = isFullLicense() === false;
 
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <EuiPage restrictWidth={1000}>
+      <EuiPage restrictWidth={1000} data-test-subj="mlPageDataVisualizerSelector">
         <EuiPageBody>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
                     defaultMessage="Data Visualizer"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -145,7 +144,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#datavisualizer_index_select"
+                    href="#/datavisualizer_index_select"
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage

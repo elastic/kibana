@@ -28,10 +28,12 @@ describe('scrolltoActivedescendant directive', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject((_$compile_, _$rootScope_) => {
-    $compile = _$compile_;
-    $rootScope = _$rootScope_;
-  }));
+  beforeEach(
+    ngMock.inject((_$compile_, _$rootScope_) => {
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+    })
+  );
 
   it('should call scrollIntoView on aria-activedescendant changes', () => {
     const scope = $rootScope.$new();
@@ -51,5 +53,4 @@ describe('scrolltoActivedescendant directive', () => {
     scope.$digest();
     expect(child2[0].scrollIntoView.calledOnce).to.be.eql(true);
   });
-
 });

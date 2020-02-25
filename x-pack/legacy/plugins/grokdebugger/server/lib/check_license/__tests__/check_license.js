@@ -8,13 +8,12 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicense } from '../check_license';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   let mockLicenseInfo;
-  beforeEach(() => mockLicenseInfo = {});
+  beforeEach(() => (mockLicenseInfo = {}));
 
   describe('license information is undefined', () => {
-    beforeEach(() => mockLicenseInfo = undefined);
+    beforeEach(() => (mockLicenseInfo = undefined));
 
     it('should set enableLink to false', () => {
       expect(checkLicense(mockLicenseInfo).enableLink).to.be(false);
@@ -30,7 +29,7 @@ describe('check_license', function () {
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set enableLink to false', () => {
       expect(checkLicense(mockLicenseInfo).enableLink).to.be(false);
@@ -46,17 +45,20 @@ describe('check_license', function () {
   });
 
   describe('license information is available', () => {
-    beforeEach(() => mockLicenseInfo = {
-      isAvailable: () => true,
-      license: {
-        getType: () => 'foobar'
-      }
-    });
+    beforeEach(
+      () =>
+        (mockLicenseInfo = {
+          isAvailable: () => true,
+          license: {
+            getType: () => 'foobar',
+          },
+        })
+    );
 
     describe('& license is active', () => {
       beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
-      it ('should set enableLink to true', () => {
+      it('should set enableLink to true', () => {
         expect(checkLicense(mockLicenseInfo).enableLink).to.be(true);
       });
 
@@ -72,7 +74,7 @@ describe('check_license', function () {
     describe('& license is expired', () => {
       beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
-      it ('should set enableLink to false', () => {
+      it('should set enableLink to false', () => {
         expect(checkLicense(mockLicenseInfo).enableLink).to.be(false);
       });
 

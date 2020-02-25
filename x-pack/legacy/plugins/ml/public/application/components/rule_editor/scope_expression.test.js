@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
@@ -15,19 +14,13 @@ import { ScopeExpression } from './scope_expression';
 import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 
 describe('ScopeExpression', () => {
-
-  const testFilterListIds = [
-    'web_domains',
-    'safe_domains',
-    'uk_domains',
-  ];
+  const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];
   const updateScope = jest.fn(() => {});
 
   const requiredProps = {
     fieldName: 'domain',
     updateScope,
   };
-
 
   test('renders when no filter ID or type supplied', () => {
     const props = {
@@ -36,9 +29,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeExpression {...props} />
-    );
+    const component = shallowWithIntl(<ScopeExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -50,9 +41,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeExpression {...props} />
-    );
+    const component = shallowWithIntl(<ScopeExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -66,9 +55,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ScopeExpression {...props} />
-    );
+    const component = shallowWithIntl(<ScopeExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -82,12 +69,8 @@ describe('ScopeExpression', () => {
       enabled: false,
     };
 
-    const component = shallowWithIntl(
-      <ScopeExpression {...props} />
-    );
+    const component = shallowWithIntl(<ScopeExpression {...props} />);
 
     expect(component).toMatchSnapshot();
   });
-
-
 });

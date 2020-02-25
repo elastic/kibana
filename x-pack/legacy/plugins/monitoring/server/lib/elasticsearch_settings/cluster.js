@@ -36,8 +36,8 @@ export async function checkClusterSettings(req) {
     filter_path: [
       'persistent.xpack.monitoring',
       'transient.xpack.monitoring',
-      'defaults.xpack.monitoring'
-    ]
+      'defaults.xpack.monitoring',
+    ],
   });
 
   return handleResponse(response, isCloudEnabled);

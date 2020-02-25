@@ -5,9 +5,8 @@
  */
 
 import React, { FC } from 'react';
-import { LineSeries, getSpecId, ScaleType, CurveType } from '@elastic/charts';
-import { getCustomColor } from '../common/utils';
-import { seriesStyle, LINE_COLOR } from '../common/settings';
+import { LineSeries, ScaleType, CurveType } from '@elastic/charts';
+import { seriesStyle, useChartColors } from '../common/settings';
 
 interface Props {
   chartData: any[];
@@ -28,9 +27,10 @@ const scatterSeriesStyle = {
 };
 
 export const Scatter: FC<Props> = ({ chartData }) => {
+  const { LINE_COLOR } = useChartColors();
   return (
     <LineSeries
-      id={getSpecId(SPEC_ID)}
+      id={SPEC_ID}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={'time'}
@@ -39,7 +39,7 @@ export const Scatter: FC<Props> = ({ chartData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       lineSeriesStyle={scatterSeriesStyle}
-      customSeriesColors={getCustomColor(SPEC_ID, LINE_COLOR)}
+      customSeriesColors={[LINE_COLOR]}
     />
   );
 };

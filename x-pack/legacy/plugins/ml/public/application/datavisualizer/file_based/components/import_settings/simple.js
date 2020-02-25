@@ -4,25 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiCheckbox,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 
-export const SimpleSettings = injectI18n(function ({
+export const SimpleSettings = ({
   index,
   initialized,
   onIndexChange,
   createIndexPattern,
   onCreateIndexPatternChange,
   indexNameError,
-  intl,
-}) {
+}) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -36,18 +31,22 @@ export const SimpleSettings = injectI18n(function ({
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder={intl.formatMessage({
-            id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder',
-            defaultMessage: 'index name'
-          })}
+          placeholder={i18n.translate(
+            'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder',
+            {
+              defaultMessage: 'index name',
+            }
+          )}
           value={index}
-          disabled={(initialized === true)}
+          disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
-          aria-label={intl.formatMessage({
-            id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameAriaLabel',
-            defaultMessage: 'Index name, required field'
-          })}
+          aria-label={i18n.translate(
+            'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameAriaLabel',
+            {
+              defaultMessage: 'Index name, required field',
+            }
+          )}
         />
       </EuiFormRow>
 
@@ -61,10 +60,10 @@ export const SimpleSettings = injectI18n(function ({
             defaultMessage="Create index pattern"
           />
         }
-        checked={(createIndexPattern === true)}
-        disabled={(initialized === true)}
+        checked={createIndexPattern === true}
+        disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
       />
     </React.Fragment>
   );
-});
+};

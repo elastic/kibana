@@ -47,15 +47,18 @@ module.exports = async ({ config }) => {
   });
 
   // Parse props data for .tsx files
-  config.module.rules.push({
-    test: /\.tsx$/,
-    // Exclude example files, as we don't display props info for them
-    exclude: /\.examples.tsx$/,
-    use: [
-      // Parse TS comments to create Props tables in the UI
-      require.resolve('react-docgen-typescript-loader'),
-    ],
-  });
+  // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
+  // See: https://github.com/storybookjs/storybook/issues/7998
+  // 
+  // config.module.rules.push({
+  //   test: /\.tsx$/,
+  //   // Exclude example files, as we don't display props info for them
+  //   exclude: /\.examples.tsx$/,
+  //   use: [
+  //     // Parse TS comments to create Props tables in the UI
+  //     require.resolve('react-docgen-typescript-loader'),
+  //   ],
+  // });
 
   // Enable SASS, but exclude CSS Modules in Storybook
   config.module.rules.push({
@@ -170,6 +173,7 @@ module.exports = async ({ config }) => {
     '../tasks/mocks/uiNotifyFormatMsg'
   );
   config.resolve.alias['ui/notify'] = path.resolve(__dirname, '../tasks/mocks/uiNotify');
+  config.resolve.alias['ui/url/absolute_to_parsed_url'] = path.resolve(__dirname, '../tasks/mocks/uiAbsoluteToParsedUrl');
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');

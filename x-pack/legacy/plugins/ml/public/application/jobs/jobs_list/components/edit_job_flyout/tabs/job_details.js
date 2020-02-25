@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiComboBox } from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-class JobDetailsUI extends Component {
+export class JobDetails extends Component {
   constructor(props) {
     super(props);
 
@@ -39,20 +31,20 @@ class JobDetailsUI extends Component {
 
   componentDidMount() {
     // load groups to populate the select options
-    ml.jobs.groups()
-      .then((resp) => {
+    ml.jobs
+      .groups()
+      .then(resp => {
         const groups = resp.map(g => ({ label: g.id }));
         this.setState({ groups });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Could not load groups', error);
       });
   }
 
   static getDerivedStateFromProps(props) {
-    const selectedGroups = (props.jobGroups !== undefined) ?
-      props.jobGroups.map(g => ({ label: g })) :
-      [];
+    const selectedGroups =
+      props.jobGroups !== undefined ? props.jobGroups.map(g => ({ label: g })) : [];
 
     return {
       description: props.jobDescription,
@@ -63,17 +55,17 @@ class JobDetailsUI extends Component {
     };
   }
 
-  onDescriptionChange = (e) => {
+  onDescriptionChange = e => {
     this.setJobDetails({ jobDescription: e.target.value });
-  }
+  };
 
-  onMmlChange = (e) => {
+  onMmlChange = e => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
-  }
+  };
 
-  onGroupsChange = (selectedGroups) => {
+  onGroupsChange = selectedGroups => {
     this.setJobDetails({ jobGroups: selectedGroups.map(g => g.label) });
-  }
+  };
 
   onCreateGroup = (input, flattenedOptions) => {
     const normalizedSearchValue = input.trim().toLowerCase();
@@ -88,9 +80,11 @@ class JobDetailsUI extends Component {
 
     const groups = this.state.groups;
     // Create the option if it doesn't exist.
-    if (flattenedOptions.findIndex(option =>
-      option.label.trim().toLowerCase() === normalizedSearchValue
-    ) === -1) {
+    if (
+      flattenedOptions.findIndex(
+        option => option.label.trim().toLowerCase() === normalizedSearchValue
+      ) === -1
+    ) {
       groups.push(newGroup);
     }
 
@@ -116,50 +110,55 @@ class JobDetailsUI extends Component {
         <EuiSpacer size="m" />
         <EuiForm>
           <EuiFormRow
-            label={(<FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobDescriptionLabel"
-              defaultMessage="Job description"
-            />)}
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobDescriptionLabel"
+                defaultMessage="Job description"
+              />
+            }
           >
-            <EuiFieldText
-              value={description}
-              onChange={this.onDescriptionChange}
-            />
+            <EuiFieldText value={description} onChange={this.onDescriptionChange} />
           </EuiFormRow>
           <EuiFormRow
-            label={(<FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsLabel"
-              defaultMessage="Job groups"
-            />)}
-            isInvalid={(groupsValidationError !== '')}
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsLabel"
+                defaultMessage="Job groups"
+              />
+            }
+            isInvalid={groupsValidationError !== ''}
             error={groupsValidationError}
           >
             <EuiComboBox
-              placeholder={this.props.intl.formatMessage({
-                id: 'xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsPlaceholder',
-                defaultMessage: 'Select or create groups'
-              })}
+              placeholder={i18n.translate(
+                'xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsPlaceholder',
+                {
+                  defaultMessage: 'Select or create groups',
+                }
+              )}
               options={groups}
               selectedOptions={selectedGroups}
               onChange={this.onGroupsChange}
               onCreateOption={this.onCreateGroup}
               isClearable={true}
-              isInvalid={(groupsValidationError !== '')}
+              isInvalid={groupsValidationError !== ''}
               error={groupsValidationError}
             />
           </EuiFormRow>
           <EuiFormRow
-            label={(<FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabel"
-              defaultMessage="Model memory limit"
-            />)}
-            isInvalid={(mmlValidationError !== '')}
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabel"
+                defaultMessage="Model memory limit"
+              />
+            }
+            isInvalid={mmlValidationError !== ''}
             error={mmlValidationError}
           >
             <EuiFieldText
               value={mml}
               onChange={this.onMmlChange}
-              isInvalid={(mmlValidationError !== '')}
+              isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
             />
           </EuiFormRow>
@@ -168,11 +167,9 @@ class JobDetailsUI extends Component {
     );
   }
 }
-JobDetailsUI.propTypes = {
+JobDetails.propTypes = {
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
   setJobDetails: PropTypes.func.isRequired,
 };
-
-export const JobDetails = injectI18n(JobDetailsUI);

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
@@ -22,16 +20,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 import { EventsTable } from '../events_table';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-
-function EditHeader({
-  calendarId,
-  description
-}) {
+function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
       <EuiTitle>
@@ -44,16 +38,14 @@ function EditHeader({
         </h1>
       </EuiTitle>
       <EuiText>
-        <p>
-          {description}
-        </p>
+        <p>{description}</p>
       </EuiText>
-      <EuiSpacer size="l"/>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 }
 
-export const CalendarForm = injectI18n(function CalendarForm({
+export const CalendarForm = ({
   calendarId,
   canCreateCalendar,
   canDeleteCalendar,
@@ -76,20 +68,20 @@ export const CalendarForm = injectI18n(function CalendarForm({
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
-  intl
-}) {
-  const msg = intl.formatMessage({
-    id: 'xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription',
-    defaultMessage: 'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
-      'must start and end with an alphanumeric character'
+}) => {
+  const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
+    defaultMessage:
+      'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
+      'must start and end with an alphanumeric character',
   });
-  const helpText = (isNewCalendarIdValid === true && !isEdit) ? msg : undefined;
-  const error = (isNewCalendarIdValid === false && !isEdit) ? [msg] : undefined;
-  const saveButtonDisabled = (canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '');
+  const helpText = isNewCalendarIdValid === true && !isEdit ? msg : undefined;
+  const error = isNewCalendarIdValid === false && !isEdit ? [msg] : undefined;
+  const saveButtonDisabled =
+    canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '';
 
   return (
     <EuiForm>
-      {!isEdit &&
+      {!isEdit && (
         <Fragment>
           <EuiTitle>
             <h1>
@@ -99,12 +91,14 @@ export const CalendarForm = injectI18n(function CalendarForm({
               />
             </h1>
           </EuiTitle>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <EuiFormRow
-            label={<FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
-              defaultMessage="Calendar ID"
-            />}
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+                defaultMessage="Calendar ID"
+              />
+            }
             helpText={helpText}
             error={error}
             isInvalid={!isNewCalendarIdValid}
@@ -118,10 +112,12 @@ export const CalendarForm = injectI18n(function CalendarForm({
           </EuiFormRow>
 
           <EuiFormRow
-            label={<FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-              defaultMessage="Description"
-            />}
+            label={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+                defaultMessage="Description"
+              />
+            }
           >
             <EuiFieldText
               name="description"
@@ -131,17 +127,15 @@ export const CalendarForm = injectI18n(function CalendarForm({
             />
           </EuiFormRow>
         </Fragment>
-      }
-      {isEdit &&
-        <EditHeader
-          calendarId={calendarId}
-          description={description}
-        />}
+      )}
+      {isEdit && <EditHeader calendarId={calendarId} description={description} />}
       <EuiFormRow
-        label={<FormattedMessage
-          id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
-          defaultMessage="Jobs"
-        />}
+        label={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+            defaultMessage="Jobs"
+          />
+        }
       >
         <EuiComboBox
           options={jobIds}
@@ -152,10 +146,12 @@ export const CalendarForm = injectI18n(function CalendarForm({
       </EuiFormRow>
 
       <EuiFormRow
-        label={<FormattedMessage
-          id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-          defaultMessage="Groups"
-        />}
+        label={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+            defaultMessage="Groups"
+          />
+        }
       >
         <EuiComboBox
           onCreateOption={onCreateGroupOption}
@@ -169,10 +165,12 @@ export const CalendarForm = injectI18n(function CalendarForm({
       <EuiSpacer size="xl" />
 
       <EuiFormRow
-        label={<FormattedMessage
-          id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
-          defaultMessage="Events"
-        />}
+        label={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+            defaultMessage="Events"
+          />
+        }
         fullWidth
       >
         <EventsTable
@@ -188,10 +186,7 @@ export const CalendarForm = injectI18n(function CalendarForm({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            isDisabled={saving}
-            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
-          >
+          <EuiButton isDisabled={saving} href={'#/settings/calendars_list'}>
             <FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -205,21 +200,25 @@ export const CalendarForm = injectI18n(function CalendarForm({
             onClick={isEdit ? onEdit : onCreate}
             isDisabled={saveButtonDisabled}
           >
-            {saving ? (<FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.savingButtonLabel"
-              defaultMessage="Saving…"
-            />) : (<FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
-              defaultMessage="Save"
-            />)}
+            {saving ? (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.savingButtonLabel"
+                defaultMessage="Saving…"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
+                defaultMessage="Save"
+              />
+            )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
   );
-});
+};
 
-CalendarForm.WrappedComponent.propTypes = {
+CalendarForm.propTypes = {
   calendarId: PropTypes.string.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
   canDeleteCalendar: PropTypes.bool.isRequired,

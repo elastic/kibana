@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
-import {
-  elasticsearchJsPlugin
-} from '../elasticsearch_ml';
+import { elasticsearchJsPlugin } from '../elasticsearch_ml';
 
 describe('ML - Endpoints', () => {
-
   // Check all paths in the ML elasticsearchJsPlugin start with a leading forward slash
   // so they work if Kibana is run behind a reverse proxy
   const PATH_START = '/';
@@ -20,15 +15,15 @@ describe('ML - Endpoints', () => {
 
   // Stub objects
   const Client = {
-    prototype: {}
+    prototype: {},
   };
 
   const components = {
     clientAction: {
-      factory: function (obj) {
+      factory: function(obj) {
         // add each endpoint URL to a list
         if (obj.urls) {
-          obj.urls.forEach((url) => {
+          obj.urls.forEach(url => {
             urls.push(url.fmt);
           });
         }
@@ -38,10 +33,10 @@ describe('ML - Endpoints', () => {
       },
       namespaceFactory() {
         return {
-          prototype: {}
+          prototype: {},
         };
-      }
-    }
+      },
+    },
   };
 
   // Stub elasticsearchJsPlugin
@@ -49,10 +44,9 @@ describe('ML - Endpoints', () => {
 
   describe('paths', () => {
     it(`should start with ${PATH_START}`, () => {
-      urls.forEach((url) => {
+      urls.forEach(url => {
         expect(url[0]).to.eql(PATH_START);
       });
     });
   });
-
 });

@@ -193,6 +193,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
     <EuiBasicTable
       className="snapshotRestore__shardsTable"
       compressed={true}
+      // @ts-ignore `shards` is a Partial<> but this component treats a number of fields as required
       items={shards}
       columns={columns}
     />

@@ -21,7 +21,5 @@ import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugi
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {},
-  });
+  return new kibana.Plugin({});
 }

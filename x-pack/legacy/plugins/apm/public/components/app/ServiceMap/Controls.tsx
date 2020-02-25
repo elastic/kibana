@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import React, { useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
-import { FullscreenPanel } from './FullscreenPanel';
+import { animationOptions, nodeHeight } from './cytoscapeOptions';
 
-const Container = styled('div')`
+const ControlsContainer = styled('div')`
   left: ${theme.gutterTypes.gutterMedium};
   position: absolute;
   top: ${theme.gutterTypes.gutterSmall};
+  z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
 const Button = styled(EuiButtonIcon)`
@@ -57,6 +58,17 @@ export function Controls() {
     }
   }, [cy]);
 
+  function center() {
+    if (cy) {
+      const eles = cy.nodes();
+      cy.animate({
+        ...animationOptions,
+        center: { eles },
+        fit: { eles, padding: nodeHeight }
+      });
+    }
+  }
+
   function zoomIn() {
     doZoom(cy, increment);
   }
@@ -74,16 +86,18 @@ export function Controls() {
   const minZoom = cy.minZoom();
   const isMinZoom = zoom === minZoom;
   const increment = (maxZoom - minZoom) / steps;
-  const mapDomElement = cy.container();
   const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomIn', {
     defaultMessage: 'Zoom in'
   });
   const zoomOutLabel = i18n.translate('xpack.apm.serviceMap.zoomOut', {
     defaultMessage: 'Zoom out'
   });
+  const centerLabel = i18n.translate('xpack.apm.serviceMap.center', {
+    defaultMessage: 'Center'
+  });
 
   return (
-    <Container>
+    <ControlsContainer>
       <ZoomPanel hasShadow={true} paddingSize="none">
         <ZoomInButton
           aria-label={zoomInLabel}
@@ -102,7 +116,15 @@ export function Controls() {
           title={zoomOutLabel}
         />
       </ZoomPanel>
-      <FullscreenPanel element={mapDomElement} />
-    </Container>
+      <EuiPanel hasShadow={true} paddingSize="none">
+        <Button
+          aria-label={centerLabel}
+          color="text"
+          iconType="crosshairs"
+          onClick={center}
+          title={centerLabel}
+        />
+      </EuiPanel>
+    </ControlsContainer>
   );
 }

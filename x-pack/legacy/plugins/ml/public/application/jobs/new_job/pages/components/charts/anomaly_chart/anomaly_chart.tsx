@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { Chart, Settings, TooltipType } from '@elastic/charts';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
-import { Anomalies } from './anomalies';
+import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';
 import { Line } from './line';
 import { Scatter } from './scatter';

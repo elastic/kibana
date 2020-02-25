@@ -5,10 +5,9 @@
  */
 
 import { AuthenticationsData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated, RequestBasicOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 
 import { AuthenticationsAdapter } from './types';
-import { AuthenticationsOverTimeData } from '../../../public/graphql/types';
 
 export class Authentications {
   constructor(private readonly adapter: AuthenticationsAdapter) {}
@@ -18,12 +17,5 @@ export class Authentications {
     options: RequestOptionsPaginated
   ): Promise<AuthenticationsData> {
     return this.adapter.getAuthentications(req, options);
-  }
-
-  public async getAuthenticationsOverTime(
-    req: FrameworkRequest,
-    options: RequestBasicOptions
-  ): Promise<AuthenticationsOverTimeData> {
-    return this.adapter.getAuthenticationsOverTime(req, options);
   }
 }

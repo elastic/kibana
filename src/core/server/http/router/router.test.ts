@@ -20,6 +20,7 @@
 import { Router } from './router';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { schema } from '@kbn/config-schema';
+
 const logger = loggingServiceMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
@@ -38,12 +39,15 @@ describe('Router', () => {
       const router = new Router('', logger, enhanceWithContext);
       expect(() =>
         router.get(
-          // we use 'any' because validate requires @kbn/config-schema usage
-          { path: '/', validate: { params: { validate: () => 'error' } } } as any,
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: { params: { validate: () => 'error' } } as any,
+          },
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid schema declared with '@kbn/config-schema' package at key: [params]."`
+        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
       );
     });
 

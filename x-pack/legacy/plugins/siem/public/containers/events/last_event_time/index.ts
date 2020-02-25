@@ -7,11 +7,11 @@
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
+import { useUiSetting$ } from '../../../lib/kibana';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
 import { useApolloClient } from '../../../utils/apollo_context';
@@ -38,6 +38,7 @@ export function useLastEventTimeQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState<number | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
+  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const apolloClient = useApolloClient();
   async function fetchLastEventTime(signal: AbortSignal) {
     updateLoading(true);
@@ -50,7 +51,7 @@ export function useLastEventTimeQuery<TCache = object>(
             sourceId,
             indexKey,
             details,
-            defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+            defaultIndex,
           },
           context: {
             fetchOptions: {

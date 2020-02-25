@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { IndexPatternProvider } from '../types';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 export function createCachedIndexPatternProvider(
   indexPatternGetter: (id: string) => Promise<IndexPattern>

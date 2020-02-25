@@ -21,11 +21,11 @@ export function calculateIndicesTotals(indices) {
 
   // sum up the metrics of each data set
   return {
-    primary: metrics.reduce((sum, value) => (sum + value.primary), 0),
-    replica: metrics.reduce((sum, value) => (sum + value.replica), 0),
+    primary: metrics.reduce((sum, value) => sum + value.primary, 0),
+    replica: metrics.reduce((sum, value) => sum + value.replica, 0),
     unassigned: {
-      primary: metrics.reduce((sum, value) => (sum + value.unassignedPrimary), 0),
-      replica: metrics.reduce((sum, value) => (sum + value.unassignedReplica), 0),
-    }
+      primary: metrics.reduce((sum, value) => sum + value.unassignedPrimary, 0),
+      replica: metrics.reduce((sum, value) => sum + value.unassignedReplica, 0),
+    },
   };
 }

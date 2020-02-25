@@ -16,11 +16,14 @@ export default function alertingApiIntegrationTests({
   const esArchiver = getService('esArchiver');
 
   describe('alerting api integration spaces only', function() {
-    this.tags('ciGroup1');
+    this.tags('ciGroup3');
 
     before(async () => {
       for (const space of Object.values(Spaces)) {
-        await spacesService.create(space);
+        if (space.id === 'default') continue;
+
+        const { id, name, disabledFeatures } = space;
+        await spacesService.create({ id, name, disabledFeatures });
       }
     });
 

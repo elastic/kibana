@@ -8,13 +8,15 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { get } from 'lodash';
 
-export async function getPipelineStateDocument(req, logstashIndexPattern,
-  { clusterUuid, pipelineId, version }) {
-
+export async function getPipelineStateDocument(
+  req,
+  logstashIndexPattern,
+  { clusterUuid, pipelineId, version }
+) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const filters = [
     { term: { 'logstash_state.pipeline.id': pipelineId } },
-    { term: { 'logstash_state.pipeline.hash': version.hash } }
+    { term: { 'logstash_state.pipeline.hash': version.hash } },
   ];
 
   const query = createQuery({
@@ -26,7 +28,7 @@ export async function getPipelineStateDocument(req, logstashIndexPattern,
     type: 'logstash_state',
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
-    filters
+    filters,
   });
 
   const params = {
@@ -37,7 +39,7 @@ export async function getPipelineStateDocument(req, logstashIndexPattern,
       _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
       sort: { timestamp: { order: 'desc' } },
       query,
-      terminate_after: 1 // Safe to do because all these documents are functionally identical
+      terminate_after: 1, // Safe to do because all these documents are functionally identical
     },
   };
 

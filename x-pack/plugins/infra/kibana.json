@@ -1,5 +1,9 @@
 {
   "id": "infra",
   "version": "8.0.0",
-  "server": true
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["features", "apm", "usageCollection", "spaces", "home", "data", "data_enhanced", "metrics"],
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "infra"]
 }

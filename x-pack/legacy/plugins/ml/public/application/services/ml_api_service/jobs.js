@@ -4,133 +4,130 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
 import { http } from '../http_service';
 
-const basePath = chrome.addBasePath('/api/ml');
+import { basePath } from './index';
 
 export const jobs = {
-
   jobsSummary(jobIds) {
     return http({
-      url: `${basePath}/jobs/jobs_summary`,
+      url: `${basePath()}/jobs/jobs_summary`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   jobsWithTimerange(dateFormatTz) {
     return http({
-      url: `${basePath}/jobs/jobs_with_timerange`,
+      url: `${basePath()}/jobs/jobs_with_time_range`,
       method: 'POST',
       data: {
-        dateFormatTz
-      }
+        dateFormatTz,
+      },
     });
   },
 
   jobs(jobIds) {
     return http({
-      url: `${basePath}/jobs/jobs`,
+      url: `${basePath()}/jobs/jobs`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   groups() {
     return http({
-      url: `${basePath}/jobs/groups`,
+      url: `${basePath()}/jobs/groups`,
       method: 'GET',
     });
   },
 
   updateGroups(updatedJobs) {
     return http({
-      url: `${basePath}/jobs/update_groups`,
+      url: `${basePath()}/jobs/update_groups`,
       method: 'POST',
       data: {
         jobs: updatedJobs,
-      }
+      },
     });
   },
 
   forceStartDatafeeds(datafeedIds, start, end) {
     return http({
-      url: `${basePath}/jobs/force_start_datafeeds`,
+      url: `${basePath()}/jobs/force_start_datafeeds`,
       method: 'POST',
       data: {
         datafeedIds,
         start,
-        end
-      }
+        end,
+      },
     });
   },
 
   stopDatafeeds(datafeedIds) {
     return http({
-      url: `${basePath}/jobs/stop_datafeeds`,
+      url: `${basePath()}/jobs/stop_datafeeds`,
       method: 'POST',
       data: {
         datafeedIds,
-      }
+      },
     });
   },
 
   deleteJobs(jobIds) {
     return http({
-      url: `${basePath}/jobs/delete_jobs`,
+      url: `${basePath()}/jobs/delete_jobs`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   closeJobs(jobIds) {
     return http({
-      url: `${basePath}/jobs/close_jobs`,
+      url: `${basePath()}/jobs/close_jobs`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   jobAuditMessages(jobId, from) {
-    const jobIdString = (jobId !== undefined) ? `/${jobId}` : '';
-    const fromString = (from !== undefined) ? `?from=${from}` : '';
+    const jobIdString = jobId !== undefined ? `/${jobId}` : '';
+    const fromString = from !== undefined ? `?from=${from}` : '';
     return http({
-      url: `${basePath}/job_audit_messages/messages${jobIdString}${fromString}`,
+      url: `${basePath()}/job_audit_messages/messages${jobIdString}${fromString}`,
       method: 'GET',
     });
   },
 
   deletingJobTasks() {
     return http({
-      url: `${basePath}/jobs/deleting_jobs_tasks`,
+      url: `${basePath()}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
   },
 
   jobsExist(jobIds) {
     return http({
-      url: `${basePath}/jobs/jobs_exist`,
+      url: `${basePath()}/jobs/jobs_exist`,
       method: 'POST',
       data: {
         jobIds,
-      }
+      },
     });
   },
 
   newJobCaps(indexPatternTitle, isRollup = false) {
-    const isRollupString = (isRollup ===  true) ? `?rollup=true` : '';
+    const isRollupString = isRollup === true ? `?rollup=true` : '';
     return http({
-      url: `${basePath}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
+      url: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
       method: 'GET',
     });
   },
@@ -147,7 +144,7 @@ export const jobs = {
     splitFieldValue
   ) {
     return http({
-      url: `${basePath}/jobs/new_job_line_chart`,
+      url: `${basePath()}/jobs/new_job_line_chart`,
       method: 'POST',
       data: {
         indexPatternTitle,
@@ -158,8 +155,8 @@ export const jobs = {
         query,
         aggFieldNamePairs,
         splitFieldName,
-        splitFieldValue
-      }
+        splitFieldValue,
+      },
     });
   },
 
@@ -171,10 +168,10 @@ export const jobs = {
     intervalMs,
     query,
     aggFieldNamePairs,
-    splitFieldName,
+    splitFieldName
   ) {
     return http({
-      url: `${basePath}/jobs/new_job_population_chart`,
+      url: `${basePath()}/jobs/new_job_population_chart`,
       method: 'POST',
       data: {
         indexPatternTitle,
@@ -185,26 +182,63 @@ export const jobs = {
         query,
         aggFieldNamePairs,
         splitFieldName,
-      }
+      },
     });
   },
 
   getAllJobAndGroupIds() {
     return http({
-      url: `${basePath}/jobs/all_jobs_and_group_ids`,
+      url: `${basePath()}/jobs/all_jobs_and_group_ids`,
       method: 'GET',
     });
   },
 
   getLookBackProgress(jobId, start, end) {
     return http({
-      url: `${basePath}/jobs/look_back_progress`,
+      url: `${basePath()}/jobs/look_back_progress`,
       method: 'POST',
       data: {
         jobId,
         start,
         end,
-      }
+      },
+    });
+  },
+
+  categorizationFieldExamples(
+    indexPatternTitle,
+    query,
+    size,
+    field,
+    timeField,
+    start,
+    end,
+    analyzer
+  ) {
+    return http({
+      url: `${basePath()}/jobs/categorization_field_examples`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        query,
+        size,
+        field,
+        timeField,
+        start,
+        end,
+        analyzer,
+      },
+    });
+  },
+
+  topCategories(jobId, count) {
+    return http({
+      url: `${basePath()}/jobs/top_categories`,
+      method: 'POST',
+      data: {
+        jobId,
+        count,
+      },
     });
   },
 };

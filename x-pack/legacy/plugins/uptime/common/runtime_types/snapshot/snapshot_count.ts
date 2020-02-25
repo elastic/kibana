@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 
 export const SnapshotType = t.type({
   down: t.number,
-  mixed: t.number,
   total: t.number,
   up: t.number,
 });

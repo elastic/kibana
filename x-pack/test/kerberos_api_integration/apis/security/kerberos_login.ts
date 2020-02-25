@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -47,7 +47,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should reject API requests if client is not authenticated', async () => {
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
     });
@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
     it('does not prevent basic login', async () => {
       const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username, password })
         .expect(204);
@@ -67,13 +67,14 @@ export default function({ getService }: FtrProviderContext) {
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', cookie.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('initiating SPNEGO', () => {
@@ -98,7 +99,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('finishing SPNEGO', () => {
       it('should properly set cookie and authenticate user', async () => {
         const response = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -114,12 +115,12 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(sessionCookie);
 
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_user'],
+            roles: ['kibana_admin'],
             full_name: null,
             email: null,
             metadata: {
@@ -129,12 +130,13 @@ export default function({ getService }: FtrProviderContext) {
             enabled: true,
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
+            authentication_provider: 'kerberos',
           });
       });
 
       it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {
         const spnegoResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
@@ -143,7 +145,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail if SPNEGO token is rejected because of unknown reason', async () => {
         const spnegoResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', 'Negotiate (:I am malformed:)')
           .expect(500);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
@@ -156,7 +158,7 @@ export default function({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -169,7 +171,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should extend cookie on every successful non-system API call', async () => {
         const apiResponseOne = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -181,7 +183,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
 
         const apiResponseTwo = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -195,9 +197,9 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should not extend cookie for system API calls', async () => {
         const systemAPIResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -206,7 +208,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail and preserve session cookie if unsupported authentication schema is used', async () => {
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic a3JiNTprcmI1')
           .set('Cookie', sessionCookie.cookieString())
@@ -220,7 +222,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should redirect to `logged_out` page after successful logout', async () => {
         // First authenticate user to retrieve session cookie.
         const response = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -232,7 +234,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // And then log user out.
         const logoutResponse = await supertest
-          .get('/api/security/v1/logout')
+          .get('/api/security/logout')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -245,7 +247,7 @@ export default function({ getService }: FtrProviderContext) {
         // Token that was stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
@@ -259,7 +261,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
-        const logoutResponse = await supertest.get('/api/security/v1/logout').expect(302);
+        const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/');
@@ -271,7 +273,7 @@ export default function({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -292,7 +294,7 @@ export default function({ getService }: FtrProviderContext) {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -305,7 +307,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', refreshedCookie.cookieString())
           .expect(200);
@@ -335,7 +337,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', refreshedCookie.cookieString())
           .expect(200);
@@ -349,7 +351,7 @@ export default function({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -374,7 +376,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);

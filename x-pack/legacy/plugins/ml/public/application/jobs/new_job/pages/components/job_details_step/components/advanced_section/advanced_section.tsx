@@ -17,7 +17,7 @@ import { ModelPlotSwitch } from './components/model_plot';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 
 const ButtonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',

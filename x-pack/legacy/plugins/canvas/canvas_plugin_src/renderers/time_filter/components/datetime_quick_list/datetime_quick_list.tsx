@@ -8,7 +8,7 @@ import React, { ReactNode, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import 'react-datetime/css/react-datetime.css';
-import { UnitStrings } from '../../../../../i18n';
+import { UnitStrings } from '../../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;
 

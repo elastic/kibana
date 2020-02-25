@@ -26,10 +26,12 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
+import { AppCategory } from '../';
 
 /** @public */
 export interface LegacyNavLink {
   id: string;
+  category?: AppCategory;
   title: string;
   order: number;
   url: string;
@@ -52,6 +54,8 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
@@ -65,7 +69,10 @@ export interface InjectedMetadataParams {
     uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
     legacyMetadata: {
-      app: unknown;
+      app: {
+        id: string;
+        title: string;
+      };
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -75,6 +82,7 @@ export interface InjectedMetadataParams {
       basePath: string;
       serverName: string;
       devMode: boolean;
+      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -106,6 +114,10 @@ export class InjectedMetadataService {
     return {
       getBasePath: () => {
         return this.state.basePath;
+      },
+
+      getServerBasePath: () => {
+        return this.state.serverBasePath;
       },
 
       getKibanaVersion: () => {
@@ -154,6 +166,7 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getServerBasePath: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
@@ -167,7 +180,10 @@ export interface InjectedMetadataSetup {
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
+    app: {
+      id: string;
+      title: string;
+    };
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

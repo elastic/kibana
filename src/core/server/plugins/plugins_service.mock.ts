@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import { PluginsService } from './plugins_service';
+import { PluginsService, PluginsServiceSetup } from './plugins_service';
 
-type ServiceContract = PublicMethodsOf<PluginsService>;
-const createServiceMock = () => {
-  const mocked: jest.Mocked<ServiceContract> = {
-    discover: jest.fn(),
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  mocked.setup.mockResolvedValue({
-    contracts: new Map(),
-    uiPlugins: {
-      browserConfigs: new Map(),
-      internal: new Map(),
-      public: new Map(),
-    },
-  });
-  mocked.start.mockResolvedValue({ contracts: new Map() });
-  return mocked;
-};
+type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
+
+const createSetupContractMock = (): PluginsServiceSetup => ({
+  contracts: new Map(),
+  uiPlugins: {
+    browserConfigs: new Map(),
+    internal: new Map(),
+    public: new Map(),
+  },
+});
+const createStartContractMock = () => ({ contracts: new Map() });
+const createServiceMock = (): PluginsServiceMock => ({
+  discover: jest.fn(),
+  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
+  start: jest.fn().mockResolvedValue(createStartContractMock()),
+  stop: jest.fn(),
+});
 
 export const pluginServiceMock = {
   create: createServiceMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

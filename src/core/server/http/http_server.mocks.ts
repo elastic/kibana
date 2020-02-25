@@ -19,8 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
@@ -30,6 +29,9 @@ import {
   RouteMethod,
   KibanaResponseFactory,
 } from './router';
+import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -52,7 +54,8 @@ function createKibanaRequestMock({
   socket = new Socket(),
   routeTags,
 }: RequestFixtureOptions = {}) {
-  const queryString = querystring.stringify(query);
+  const queryString = stringify(query, { sort: false });
+
   return KibanaRequest.from(
     createRawRequestMock({
       headers,
@@ -77,7 +80,7 @@ function createKibanaRequestMock({
       body: schema.object({}, { allowUnknowns: true }),
       query: schema.object({}, { allowUnknowns: true }),
     }
-  ) as KibanaRequest<Readonly<{}>, Readonly<{}>, Readonly<{}>>;
+  );
 }
 
 type DeepPartial<T> = T extends any[]
@@ -137,9 +140,19 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   customError: jest.fn(),
 });
 
+type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreAuthToolkit>;
+
+const createToolkitMock = (): ToolkitMock => {
+  return {
+    next: jest.fn(),
+    rewriteUrl: jest.fn(),
+  };
+};
+
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
   createResponseFactory: createResponseFactoryMock,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
+  createToolkit: createToolkitMock,
 };

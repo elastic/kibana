@@ -115,6 +115,7 @@ export const BorderForm: FunctionComponent<Props> = ({
             onChange={borderColorChange}
             colors={colors}
             anchorPosition="upCenter"
+            ariaLabel={strings.getBorderTitle()}
           />
         </EuiFormRow>
       </EuiFlexItem>

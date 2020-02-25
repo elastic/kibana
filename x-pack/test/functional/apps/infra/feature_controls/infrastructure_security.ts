@@ -60,15 +60,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
         it(`shows 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -91,7 +89,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -106,12 +104,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -121,9 +121,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`metrics page is visible`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/infrastructure/metrics/host/demo-stack-redis-01',
+          '/detail/host/demo-stack-redis-01',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -175,15 +176,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
         it(`doesn't show 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -206,7 +205,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -221,12 +220,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -236,9 +237,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`metrics page is visible`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/infrastructure/metrics/host/demo-stack-redis-01',
+          '/detail/host/demo-stack-redis-01',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -300,7 +302,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`context menu allows user to view logs`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -366,7 +368,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`context menu allows user to view APM traces`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -417,54 +419,23 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show metrics navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`infrastructure root renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure home page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure landing page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`metrics page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraOps');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/metrics/host/demo-stack-redis-01',
+          '/inventory',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('~infraNotFoundPage');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

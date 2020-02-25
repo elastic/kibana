@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiBadgeProps, EuiToolTip, IconType } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -105,12 +105,9 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <Content
-              children={children}
-              field={field}
-              tooltipContent={tooltipContent}
-              value={value}
-            />
+            <Content field={field} tooltipContent={tooltipContent} value={value}>
+              {children}
+            </Content>
           )
         }
       />

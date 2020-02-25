@@ -35,7 +35,9 @@ const isWindows = /^win/.test(process.platform);
 
 // get the mode of a file as a string, like 777, or 644,
 function getCommonMode(path) {
-  return statSync(path).mode.toString(8).slice(-3);
+  return statSync(path)
+    .mode.toString(8)
+    .slice(-3);
 }
 
 function assertNonAbsoluteError(error) {
@@ -44,7 +46,6 @@ function assertNonAbsoluteError(error) {
 }
 
 describe('dev/build/lib/fs', () => {
-
   // ensure WORLD_EXECUTABLE is actually executable by all
   before(async () => {
     chmodSync(WORLD_EXECUTABLE, 0o777);
@@ -186,14 +187,18 @@ describe('dev/build/lib/fs', () => {
         resolve(destination, 'foo_dir/foo'),
       ]);
 
-      expect(getCommonMode(resolve(destination, 'bin/world_executable'))).to.be(isWindows ? '666' : '777');
-      expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).to.be(isWindows ? '666' : '644');
+      expect(getCommonMode(resolve(destination, 'bin/world_executable'))).to.be(
+        isWindows ? '666' : '777'
+      );
+      expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).to.be(
+        isWindows ? '666' : '644'
+      );
     });
 
     it('applies select globs if specified, ignores dot files', async () => {
       const destination = resolve(TMP, 'a/b/c/d');
       await copyAll(FIXTURES, destination, {
-        select: ['**/*bar*']
+        select: ['**/*bar*'],
       });
 
       try {
@@ -231,12 +236,11 @@ describe('dev/build/lib/fs', () => {
       expect(await read(resolve(destination, 'foo_dir/.bar'))).to.be('dotfile\n');
     });
 
-
     it('supports atime and mtime', async () => {
       const destination = resolve(TMP, 'a/b/c/d/e');
       const time = new Date(1425298511000);
       await copyAll(FIXTURES, destination, {
-        time
+        time,
       });
       const barTxt = statSync(resolve(destination, 'foo_dir/bar.txt'));
       const fooDir = statSync(resolve(destination, 'foo_dir'));
@@ -260,16 +264,17 @@ describe('dev/build/lib/fs', () => {
     });
 
     it('resolves with the sha1 hash of a file', async () => {
-      expect(await getFileHash(BAR_TXT_PATH, 'sha1'))
-        .to.be('e242ed3bffccdf271b7fbaf34ed72d089537b42f');
+      expect(await getFileHash(BAR_TXT_PATH, 'sha1')).to.be(
+        'e242ed3bffccdf271b7fbaf34ed72d089537b42f'
+      );
     });
     it('resolves with the sha256 hash of a file', async () => {
-      expect(await getFileHash(BAR_TXT_PATH, 'sha256'))
-        .to.be('7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730');
+      expect(await getFileHash(BAR_TXT_PATH, 'sha256')).to.be(
+        '7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730'
+      );
     });
     it('resolves with the md5 hash of a file', async () => {
-      expect(await getFileHash(BAR_TXT_PATH, 'md5'))
-        .to.be('c157a79031e1c40f85931829bc5fc552');
+      expect(await getFileHash(BAR_TXT_PATH, 'md5')).to.be('c157a79031e1c40f85931829bc5fc552');
     });
   });
 
@@ -313,7 +318,7 @@ describe('dev/build/lib/fs', () => {
 
       await untar(FOO_TAR_PATH, destination, {
         path: '/dev/null',
-        strip: 1
+        strip: 1,
       });
 
       expect(await read(resolve(destination, 'bar.txt'))).to.be('bar\n');

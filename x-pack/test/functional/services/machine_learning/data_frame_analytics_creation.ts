@@ -6,10 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommon } from './common';
 
-export function MachineLearningDataFrameAnalyticsCreationProvider({
-  getService,
-}: FtrProviderContext) {
+export function MachineLearningDataFrameAnalyticsCreationProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: MlCommon
+) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -58,6 +60,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
       await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutJobIdInput');
     },
 
+    async assertJobDescriptionInputExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsJobCreationJobDescription');
+    },
+
     async assertJobIdValue(expectedValue: string) {
       const actualJobId = await testSubjects.getAttribute(
         'mlAnalyticsCreateJobFlyoutJobIdInput',
@@ -69,11 +75,29 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
       );
     },
 
+    async assertJobDescriptionValue(expectedValue: string) {
+      const actualJobDescription = await testSubjects.getAttribute(
+        'mlDFAnalyticsJobCreationJobDescription',
+        'value'
+      );
+      expect(actualJobDescription).to.eql(
+        expectedValue,
+        `Job description should be '${expectedValue}' (got '${actualJobDescription}')`
+      );
+    },
+
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
+      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
+    },
+
+    async setJobDescription(jobDescription: string) {
+      await mlCommon.setValueWithChecks('mlDFAnalyticsJobCreationJobDescription', jobDescription, {
+        clearWithKeyboard: true,
+      });
+      await this.assertJobDescriptionValue(jobDescription);
     },
 
     async assertSourceIndexInputExists() {
@@ -114,9 +138,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
     },
 
     async setDestIndex(destIndex: string) {
-      await testSubjects.setValue('mlAnalyticsCreateJobFlyoutDestinationIndexInput', destIndex, {
-        clearWithKeyboard: true,
-      });
+      await mlCommon.setValueWithChecks(
+        'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
+        destIndex,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertDestIndexValue(destIndex);
     },
 
@@ -226,7 +254,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider({
     },
 
     async setModelMemory(modelMemory: string) {
-      await testSubjects.setValue('mlAnalyticsCreateJobFlyoutModelMemoryInput', modelMemory, {
+      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutModelMemoryInput', modelMemory, {
         clearWithKeyboard: true,
       });
       await this.assertModelMemoryValue(modelMemory);

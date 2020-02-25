@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
   Field,
@@ -15,9 +14,14 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+} from '../../../../../../common/constants/new_job';
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
@@ -26,7 +30,11 @@ export class MultiMetricJobCreator extends JobCreator {
   private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   }
@@ -84,12 +92,11 @@ export class MultiMetricJobCreator extends JobCreator {
       // not split field, use the default
       this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     } else {
-      const fieldNames = this._detectors.map(d => d.field_name).filter(fn => fn !== undefined);
       const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
         indexPattern: this._indexPatternTitle,
         splitFieldName: this._splitField.name,
         query: this._datafeed_config.query,
-        fieldNames,
+        fieldNames: this.fields.map(f => f.id),
         influencerNames: this._influencers,
         timeFieldName: this._job_config.data_description.time_field,
         earliestMs: this._start,
@@ -146,7 +153,7 @@ export class MultiMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     if (datafeed.aggregations !== undefined) {
       // if we've converting from a single metric job,

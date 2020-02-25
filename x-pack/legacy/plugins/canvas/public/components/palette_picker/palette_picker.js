@@ -12,9 +12,9 @@ import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';
 import { palettes } from '../../../common/lib/palettes';
 
-export const PalettePicker = ({ onChange, value, anchorPosition }) => {
+export const PalettePicker = ({ onChange, value, anchorPosition, ariaLabel }) => {
   const button = handleClick => (
-    <button style={{ width: '100%', height: 16 }} onClick={handleClick}>
+    <button aria-label={ariaLabel} style={{ width: '100%', height: 16 }} onClick={handleClick}>
       <PaletteSwatch colors={value.colors} gradient={value.gradient} />
     </button>
   );

@@ -11,33 +11,36 @@ export class RemoteClustersProvider extends PureComponent {
   state = {
     isLoading: true,
     error: null,
-    remoteClusters: []
-  }
+    remoteClusters: [],
+  };
 
   componentDidMount() {
     this.loadRemoteClusters();
   }
 
   loadRemoteClusters() {
-    const sortClusterByName = (remoteClusters) => (
+    const sortClusterByName = remoteClusters =>
       remoteClusters.sort((a, b) => {
-        if(a.name < b.name) { return -1; }
-        if(a.name > b.name) { return 1; }
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
         return 0;
-      })
-    );
+      });
     loadRemoteClusters()
       .then(sortClusterByName)
-      .then((remoteClusters) => {
+      .then(remoteClusters => {
         this.setState({
           isLoading: false,
-          remoteClusters
+          remoteClusters,
         });
       })
-      .catch((error) => {
+      .catch(error => {
         this.setState({
           isLoading: false,
-          error
+          error,
         });
       });
   }

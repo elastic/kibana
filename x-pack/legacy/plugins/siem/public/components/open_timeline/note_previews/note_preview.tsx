@@ -6,7 +6,7 @@
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { getEmptyValue, defaultToEmptyTag } from '../../empty_value';

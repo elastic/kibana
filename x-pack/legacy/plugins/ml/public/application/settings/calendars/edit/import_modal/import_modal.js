@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React, {
-  Component,
-  Fragment
-} from 'react';
+import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 import {
   EuiButton,
@@ -27,15 +23,16 @@ import {
 import { ImportedEvents } from '../imported_events';
 import { readFile, parseICSFile, filterEvents } from './utils';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const MAX_FILE_SIZE_MB = 100;
 
-export const ImportModal = injectI18n(class ImportModal extends Component {
+export class ImportModal extends Component {
   static propTypes = {
     addImportedEvents: PropTypes.func.isRequired,
     closeImportModal: PropTypes.func.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -50,15 +47,17 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
     };
   }
 
-  handleImport = async (loadedFile) => {
+  handleImport = async loadedFile => {
     const incomingFile = loadedFile[0];
-    const errorMessage = this.props.intl.formatMessage({
-      id: 'xpack.ml.calendarsEdit.importModal.couldNotParseICSFileErrorMessage',
-      defaultMessage: 'Could not parse ICS file.'
-    });
+    const errorMessage = i18n.translate(
+      'xpack.ml.calendarsEdit.importModal.couldNotParseICSFileErrorMessage',
+      {
+        defaultMessage: 'Could not parse ICS file.',
+      }
+    );
     let events = [];
 
-    if (incomingFile && incomingFile.size <= (MAX_FILE_SIZE_MB * 1000000)) {
+    if (incomingFile && incomingFile.size <= MAX_FILE_SIZE_MB * 1000000) {
       this.setState({ fileLoading: true, fileLoaded: true });
 
       try {
@@ -70,27 +69,27 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
           selectedEvents: filterEvents(events),
           fileLoading: false,
           errorMessage: null,
-          includePastEvents: false
+          includePastEvents: false,
         });
       } catch (error) {
         console.log(errorMessage, error);
         this.setState({ errorMessage, fileLoading: false });
       }
-    } else if (incomingFile && incomingFile.size > (MAX_FILE_SIZE_MB * 1000000)) {
+    } else if (incomingFile && incomingFile.size > MAX_FILE_SIZE_MB * 1000000) {
       this.setState({ fileLoading: false, errorMessage });
     } else {
       this.setState({ fileLoading: false, errorMessage: null });
     }
-  }
+  };
 
-  onEventDelete = (eventId) => {
+  onEventDelete = eventId => {
     this.setState(prevState => ({
       allImportedEvents: prevState.allImportedEvents.filter(event => event.event_id !== eventId),
       selectedEvents: prevState.selectedEvents.filter(event => event.event_id !== eventId),
     }));
-  }
+  };
 
-  onCheckboxToggle = (e) => {
+  onCheckboxToggle = e => {
     this.setState({
       includePastEvents: e.target.checked,
     });
@@ -100,15 +99,15 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
     const { allImportedEvents, selectedEvents, includePastEvents } = this.state;
     const eventsToImport = includePastEvents ? allImportedEvents : selectedEvents;
 
-    const events = eventsToImport.map((event) => ({
+    const events = eventsToImport.map(event => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time,
-      event_id: event.event_id
+      event_id: event.event_id,
     }));
 
     this.props.addImportedEvents(events);
-  }
+  };
 
   renderCallout = () => (
     <EuiCallOut color="danger">
@@ -117,14 +116,14 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
   );
 
   render() {
-    const { closeImportModal, intl } = this.props;
+    const { closeImportModal } = this.props;
     const {
       fileLoading,
       fileLoaded,
       allImportedEvents,
       selectedEvents,
       errorMessage,
-      includePastEvents
+      includePastEvents,
     } = this.state;
 
     let showRecurringWarning = false;
@@ -142,17 +141,11 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal
-          onClose={closeImportModal}
-          maxWidth={true}
-        >
+        <EuiModal onClose={closeImportModal} maxWidth={true}>
           <EuiModalHeader>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-            >
+            <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle >
+                <EuiModalHeaderTitle>
                   <FormattedMessage
                     id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
                     defaultMessage="Import events"
@@ -175,17 +168,18 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFilePicker
                   compressed
-                  initialPromptText={intl.formatMessage({
-                    id: 'xpack.ml.calendarsEdit.importModal.selectOrDragAndDropFilePromptText',
-                    defaultMessage: 'Select or drag and drop a file'
-                  })}
+                  initialPromptText={i18n.translate(
+                    'xpack.ml.calendarsEdit.importModal.selectOrDragAndDropFilePromptText',
+                    {
+                      defaultMessage: 'Select or drag and drop a file',
+                    }
+                  )}
                   onChange={this.handleImport}
                   disabled={fileLoading}
                 />
               </EuiFlexItem>
               {errorMessage !== null && this.renderCallout()}
-              {
-                allImportedEvents.length > 0 &&
+              {allImportedEvents.length > 0 && (
                 <ImportedEvents
                   events={importedEvents}
                   showRecurringWarning={showRecurringWarning}
@@ -193,14 +187,12 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
                   onCheckboxToggle={this.onCheckboxToggle}
                   onEventDelete={this.onEventDelete}
                 />
-              }
+              )}
             </EuiFlexGroup>
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={closeImportModal}
-            >
+            <EuiButtonEmpty onClick={closeImportModal}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -221,4 +213,4 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
       </Fragment>
     );
   }
-});
+}

@@ -9,7 +9,7 @@ import { getClustersSummary } from '../get_clusters_summary';
 
 const mockLog = jest.fn();
 const mockServer = {
-  log: mockLog
+  log: mockLog,
 };
 
 describe('getClustersSummary', () => {
@@ -28,14 +28,14 @@ describe('getClustersSummary', () => {
   it('should log and throw an exception if a cluster does not have a license', () => {
     const fakeClusters = clusters.map(cluster => ({
       ...cluster,
-      license: undefined
+      license: undefined,
     }));
 
     expect(() => getClustersSummary(mockServer, fakeClusters)).toThrow('Monitoring License Error');
     expect(mockLog).toHaveBeenCalledWith(
       ['error', 'monitoring'],
-      'Could not find license information for cluster = \'Custom name\'. ' +
-      'Please check the cluster\'s master node server logs for errors or warnings.'
+      "Could not find license information for cluster = 'Custom name'. " +
+        "Please check the cluster's master node server logs for errors or warnings."
     );
   });
 });

@@ -303,7 +303,7 @@ export function isRuleSupported(record) {
 // The input to toES and the output from toML correspond to the value of the
 // function_description field of anomaly records.
 export const aggregationTypeTransform = {
-  toES: function (oldAggType) {
+  toES: function(oldAggType) {
     let newAggType = oldAggType;
 
     if (newAggType === 'mean') {
@@ -316,7 +316,7 @@ export const aggregationTypeTransform = {
 
     return newAggType;
   },
-  toML: function (oldAggType) {
+  toML: function(oldAggType) {
     let newAggType = oldAggType;
 
     if (newAggType === 'avg') {

@@ -5,6 +5,9 @@
  */
 
 export const combineFiltersAndUserSearch = (filters: string, search: string) => {
+  if (!filters && !search) {
+    return '';
+  }
   if (!filters) return search;
   if (!search) return filters;
   return `(${filters}) and (${search})`;

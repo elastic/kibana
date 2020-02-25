@@ -18,19 +18,24 @@
  */
 
 import { Server } from 'http';
-
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
 import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
+import {
+  Router,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteValidationResultFactory,
+  RouteValidationFunction,
+} from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
@@ -47,8 +52,17 @@ const loggingService = loggingServiceMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+let certificate: string;
+let key: string;
+
+beforeAll(() => {
+  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
+  key = readFileSync(KBN_KEY_PATH, 'utf8');
+});
+
 beforeEach(() => {
   config = {
+    name: 'kibana',
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
@@ -60,10 +74,10 @@ beforeEach(() => {
     ...config,
     ssl: {
       enabled: true,
-      certificate: '/certificate',
+      certificate,
       cipherSuites: ['cipherSuite'],
       getSecureOptions: () => 0,
-      key: '/key',
+      key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
@@ -285,6 +299,229 @@ test('valid body', async () => {
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('valid body with validate function', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying params', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation = (
+    { bar, baz }: any = {},
+    { ok, badRequest }: RouteValidationResultFactory
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying validation handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    { bar, baz } = {},
+    { ok, badRequest }
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+// https://github.com/elastic/kibana/issues/47047
+test('not inline handler - KibanaRequest', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler = (
+    context: RequestHandlerContext,
+    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
+    });
+});
+
+test('not inline handler - RequestHandler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
+    context,
+    req,
+    res
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
 
@@ -831,130 +1068,6 @@ describe('setup contract', () => {
     });
   });
 
-  describe('#auth.isAuthenticated()', () => {
-    it('returns true if has been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: true });
-    });
-
-    it('returns false if has not been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-
-    it('returns false if no authorization mechanism has been registered', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-  });
-
-  describe('#auth.get()', () => {
-    it('returns authenticated status and allow associate auth state with request', async () => {
-      const user = { id: '42' };
-      const {
-        createCookieSessionStorageFactory,
-        registerRouter,
-        registerAuth,
-        server: innerServer,
-        auth,
-      } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-      registerAuth((req, res, toolkit) => {
-        sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-        return toolkit.authenticated({ state: user });
-      });
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { state: user, status: 'authenticated' });
-    });
-
-    it('returns correct authentication unknown status', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unknown' });
-    });
-
-    it('returns correct unauthenticated status', async () => {
-      const authenticate = jest.fn();
-
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      await registerAuth(authenticate);
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unauthenticated' });
-
-      expect(authenticate).not.toHaveBeenCalled();
-    });
-  });
-
   describe('#isTlsEnabled', () => {
     it('returns "true" if TLS enabled', async () => {
       const { isTlsEnabled } = await server.setup(configWithSSL);
@@ -963,6 +1076,39 @@ describe('setup contract', () => {
     it('returns "false" if TLS not enabled', async () => {
       const { isTlsEnabled } = await server.setup(config);
       expect(isTlsEnabled).toBe(false);
+    });
+  });
+
+  describe('#getServerInfo', () => {
+    it('returns correct information', async () => {
+      let { getServerInfo } = await server.setup(config);
+
+      expect(getServerInfo()).toEqual({
+        host: '127.0.0.1',
+        name: 'kibana',
+        port: 10002,
+        protocol: 'http',
+      });
+
+      ({ getServerInfo } = await server.setup({
+        ...config,
+        port: 12345,
+        name: 'custom-name',
+        host: 'localhost',
+      }));
+
+      expect(getServerInfo()).toEqual({
+        host: 'localhost',
+        name: 'custom-name',
+        port: 12345,
+        protocol: 'http',
+      });
+    });
+
+    it('returns correct protocol when ssl is enabled', async () => {
+      const { getServerInfo } = await server.setup(configWithSSL);
+
+      expect(getServerInfo().protocol).toEqual('https');
     });
   });
 });

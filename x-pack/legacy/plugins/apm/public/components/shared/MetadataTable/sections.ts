@@ -34,6 +34,14 @@ export const HOST: Section = {
   })
 };
 
+export const CLIENT: Section = {
+  key: 'client',
+  label: i18n.translate('xpack.apm.metadataTable.section.clientLabel', {
+    defaultMessage: 'Client'
+  }),
+  properties: ['ip']
+};
+
 export const CONTAINER: Section = {
   key: 'container',
   label: i18n.translate('xpack.apm.metadataTable.section.containerLabel', {
@@ -135,4 +143,21 @@ export const CUSTOM_ERROR: Section = {
 export const CUSTOM_TRANSACTION: Section = {
   key: 'transaction.custom',
   label: customLabel
+};
+
+const messageLabel = i18n.translate(
+  'xpack.apm.metadataTable.section.messageLabel',
+  {
+    defaultMessage: 'Message'
+  }
+);
+
+export const MESSAGE_TRANSACTION: Section = {
+  key: 'transaction.message',
+  label: messageLabel
+};
+
+export const MESSAGE_SPAN: Section = {
+  key: 'span.message',
+  label: messageLabel
 };

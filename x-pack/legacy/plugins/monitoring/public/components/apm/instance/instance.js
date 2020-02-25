@@ -13,9 +13,11 @@ import {
   EuiPage,
   EuiPageBody,
   EuiFlexGroup,
-  EuiPageContent
+  EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from './status';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
@@ -28,7 +30,6 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
     metrics.apm_requests,
     metrics.apm_transformations,
 
-
     metrics.apm_cpu,
     metrics.apm_memory,
 
@@ -38,10 +39,7 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
       <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
+        <MonitoringTimeseriesContainer series={data} {...props} />
       </EuiPanel>
     </EuiFlexItem>
   ));
@@ -49,12 +47,18 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instance.heading"
+              defaultMessage="APM Instance"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContent>
-          <Status stats={summary}/>
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <Status stats={summary} />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

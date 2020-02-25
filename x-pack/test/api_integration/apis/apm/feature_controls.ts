@@ -12,6 +12,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
+  const es = getService('legacyEs');
   const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
@@ -30,11 +31,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   interface Endpoint {
     req: {
       url: string;
-      method?: 'get' | 'post' | 'delete';
+      method?: 'get' | 'post' | 'delete' | 'put';
       body?: any;
     };
     expectForbidden: (result: any) => void;
     expectResponse: (result: any) => void;
+    onExpectationFail?: () => Promise<any>;
   }
   const endpoints: Endpoint[] = [
     {
@@ -139,10 +141,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       },
       expectForbidden: expect404,
       expectResponse: expect200,
+      onExpectationFail: async () => {
+        const res = await es.search({
+          index: '.apm-agent-configuration',
+        });
+
+        log.error(JSON.stringify(res, null, 2));
+      },
     },
   ];
 
-  const elasticsearchRole = {
+  const elasticsearchPrivileges = {
     indices: [
       { names: ['apm-*'], privileges: ['read', 'view_index_metadata'] },
       { names: ['.apm-agent-configuration'], privileges: ['read', 'write', 'view_index_metadata'] },
@@ -185,7 +194,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     const { statusCode, req } = response;
     if (statusCode !== 200) {
-      log.debug(`Endpoint: ${req.method} ${req.path}
+      throw new Error(`Endpoint: ${req.method} ${req.path}
       Status code: ${statusCode}
       Response: ${response.body.message}`);
     }
@@ -205,8 +214,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      log.debug(`hitting ${endpoint.req.url}`);
+      log.info(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
+      log.info(`Responded: ${endpoint.req.url}`);
+
       try {
         if (expectation === 'forbidden') {
           endpoint.expectForbidden(result);
@@ -214,6 +225,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
+        if (endpoint.onExpectationFail) {
+          await endpoint.onExpectationFail();
+        }
+
         const { statusCode, body, req } = result.response;
         throw new Error(
           `Endpoint: ${req.method} ${req.path}
@@ -227,25 +242,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   describe('apm feature controls', () => {
-    let res: any;
+    const config = {
+      service: { name: 'test-service' },
+      settings: { transaction_sample_rate: 0.5 },
+    };
     before(async () => {
-      log.debug('creating agent configuration');
-      res = await executeAsAdmin({
-        method: 'post',
-        url: '/api/apm/settings/agent-configuration/new',
-        body: {
-          service: { name: 'test-service' },
-          settings: { transaction_sample_rate: 0.5 },
-        },
+      log.info(`Creating agent configuration`);
+      await executeAsAdmin({
+        method: 'put',
+        url: '/api/apm/settings/agent-configuration',
+        body: config,
       });
+      log.info(`Agent configuration created`);
     });
 
     after(async () => {
-      log.debug('deleting agent configuration');
-      const configurationId = res.body._id;
+      log.info('deleting agent configuration');
       await executeAsAdmin({
         method: 'delete',
-        url: `/api/apm/settings/agent-configuration/${configurationId}`,
+        url: `/api/apm/settings/agent-configuration`,
+        body: {
+          service: config.service,
+        },
       });
     });
 
@@ -255,7 +273,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
         });
 
         await security.user.create(username, {
@@ -277,7 +295,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ base: ['all'], spaces: ['*'] }],
         });
 
@@ -301,7 +319,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ feature: { dashboard: ['all'] }, spaces: ['*'] }],
         });
 
@@ -339,7 +357,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           disabledFeatures: [],
         });
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [
             { feature: { apm: ['read'] }, spaces: [space1Id] },
             { feature: { dashboard: ['all'] }, spaces: [space2Id] },

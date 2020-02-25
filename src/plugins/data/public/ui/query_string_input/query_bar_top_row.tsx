@@ -26,24 +26,18 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
+  EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import {
-  IDataPluginServices,
-  IIndexPattern,
-  TimeRange,
-  TimeHistoryContract,
-  Query,
-  PersistedLog,
-  getQueryLog,
-  esKuery,
-} from '../..';
+import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
+import { doesKueryExpressionHaveLuceneSyntaxError } from '../../../common';
+import { PersistedLog, getQueryLog } from '../../query';
 
 interface Props {
   query?: Query;
@@ -56,7 +50,7 @@ interface Props {
   indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -297,7 +291,7 @@ function QueryBarTopRowUI(props: Props) {
       language === 'kuery' &&
       typeof query === 'string' &&
       (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
-      esKuery.doesKueryExpressionHaveLuceneSyntaxError(query)
+      doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
         title: intl.formatMessage({

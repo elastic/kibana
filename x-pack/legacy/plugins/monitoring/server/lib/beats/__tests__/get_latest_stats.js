@@ -13,27 +13,27 @@ describe('beats/get_latest_stats', () => {
       latestActive: [
         {
           range: 'last1m',
-          count: undefined
+          count: undefined,
         },
         {
           range: 'last5m',
-          count: undefined
+          count: undefined,
         },
         {
           range: 'last20m',
-          count: undefined
+          count: undefined,
         },
         {
           range: 'last1h',
-          count: undefined
+          count: undefined,
         },
         {
           range: 'last1d',
-          count: undefined
-        }
+          count: undefined,
+        },
       ],
       latestTypes: [],
-      latestVersions: []
+      latestVersions: [],
     });
   });
 
@@ -46,10 +46,10 @@ describe('beats/get_latest_stats', () => {
             { key: 'last5m', uuids: { buckets: new Array(11) } },
             { key: 'last20m', uuids: { buckets: new Array(12) } },
             { key: 'last1h', uuids: { buckets: new Array(13) } },
-            { key: 'last1d', uuids: { buckets: new Array(15) } }
-          ]
-        }
-      }
+            { key: 'last1d', uuids: { buckets: new Array(15) } },
+          ],
+        },
+      },
     };
 
     expect(handleResponse(response)).to.eql({
@@ -58,10 +58,10 @@ describe('beats/get_latest_stats', () => {
         { range: 'last5m', count: 11 },
         { range: 'last20m', count: 12 },
         { range: 'last1h', count: 13 },
-        { range: 'last1d', count: 15 }
+        { range: 'last1d', count: 15 },
       ],
       latestTypes: [],
-      latestVersions: []
+      latestVersions: [],
     });
   });
 });

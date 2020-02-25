@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', function () {
+  describe('Elasticsearch nodes listing', function() {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('skipCloud', function () {
+      describe('skipCloud', function() {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
@@ -93,7 +93,11 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
+          const tableData = [
+            { cpu: '2% \n3% max\n0% min' },
+            { cpu: '0% \n3% max\n0% min' },
+            { cpu: undefined },
+          ];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
           });
@@ -180,11 +184,7 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clickShardsCol();
 
         const nodesAll = await nodesList.getNodesAll();
-        const tableData = [
-          { shards: '38' },
-          { shards: '38' },
-          { shards: undefined },
-        ];
+        const tableData = [{ shards: '38' }, { shards: '38' }, { shards: undefined }];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].shards).to.be(tableData[node].shards);
         });
@@ -236,5 +236,4 @@ export default function ({ getService, getPageObjects }) {
       });
     });
   });
-
 }

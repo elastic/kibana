@@ -20,7 +20,8 @@ const TransactionOverviewLink = ({ serviceName, ...rest }: Props) => {
     'transactionResult',
     'host',
     'containerId',
-    'podName'
+    'podName',
+    'serviceVersion'
   );
 
   return (

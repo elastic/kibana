@@ -42,7 +42,7 @@ describe('OIDCAuthenticationProvider', () => {
 
   describe('`login` method', () => {
     it('redirects third party initiated login attempts to the OpenId Connect Provider.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
+      const request = httpServerMock.createKibanaRequest({ path: '/api/security/oidc/callback' });
 
       mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
         state: 'statevalue',
@@ -205,13 +205,14 @@ describe('OIDCAuthenticationProvider', () => {
     describe('authorization code flow', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
-          path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+          path: '/api/security/oidc/callback?code=somecodehere&state=somestatehere',
         }),
         attempt: {
           flow: OIDCAuthenticationFlow.AuthorizationCode,
-          authenticationResponseURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+          authenticationResponseURI:
+            '/api/security/oidc/callback?code=somecodehere&state=somestatehere',
         },
-        expectedRedirectURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        expectedRedirectURI: '/api/security/oidc/callback?code=somecodehere&state=somestatehere',
       }));
     });
 
@@ -219,14 +220,13 @@ describe('OIDCAuthenticationProvider', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
           path:
-            '/api/security/v1/oidc?authenticationResponseURI=http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+            '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
         }),
         attempt: {
           flow: OIDCAuthenticationFlow.Implicit,
-          authenticationResponseURI:
-            'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+          authenticationResponseURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',
         },
-        expectedRedirectURI: 'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+        expectedRedirectURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',
       }));
     });
   });
@@ -311,7 +311,7 @@ describe('OIDCAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -380,7 +380,7 @@ describe('OIDCAuthenticationProvider', () => {
       expect(authenticationResult.authHeaders).toEqual({
         authorization: 'Bearer new-access-token',
       });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
       expect(authenticationResult.state).toEqual({
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
@@ -492,7 +492,7 @@ describe('OIDCAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'oidc' });
       expect(authenticationResult.state).toBeUndefined();
     });
 

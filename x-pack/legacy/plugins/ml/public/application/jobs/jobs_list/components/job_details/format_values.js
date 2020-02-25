@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import numeral from '@elastic/numeral';
 import { formatDate } from '@elastic/eui/lib/services/format';
+import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';
-
 
 function formatData(txt) {
   return numeral(txt).format(DATA_FORMAT);
@@ -37,6 +36,8 @@ export function formatValues([key, value]) {
     case 'established_model_memory':
     case 'input_bytes':
     case 'model_bytes':
+    case 'model_bytes_exceeded':
+    case 'model_bytes_memory_limit':
       value = formatData(value);
       break;
 
@@ -55,7 +56,14 @@ export function formatValues([key, value]) {
     case 'total_over_field_count':
     case 'total_partition_field_count':
     case 'bucket_allocation_failures_count':
+    case 'search_count':
       value = toLocaleString(value);
+      break;
+
+    // numbers rounded to 3 decimal places
+    case 'average_search_time_per_bucket_ms':
+    case 'exponential_average_search_time_per_hour_ms':
+      value = typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
       break;
 
     default:
@@ -69,14 +77,16 @@ export function formatValues([key, value]) {
 // used to remove lists or nested objects from the job config when displaying it in the expanded row
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
-    .filter(k => (allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))))
-    .map((k) => {
+    .filter(
+      k => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
+    )
+    .map(k => {
       let item = obj[k];
       if (Array.isArray(item)) {
         item = item.join(', ');
       } else if (typeof obj[k] === 'object') {
         item = JSON.stringify(item);
       }
-      return ([k, item]);
+      return [k, item];
     });
 }

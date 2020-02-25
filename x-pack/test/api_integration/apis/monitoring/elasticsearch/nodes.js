@@ -10,7 +10,7 @@ import nodesListingFixtureRed from './fixtures/nodes_listing_red';
 import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup';
 import nodesListingFixturePagination from './fixtures/nodes_listing_pagination';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -19,11 +19,11 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-green-platinum';
       const timeRange = {
         min: '2018-02-13T17:04:50.000Z',
-        max: '2018-02-13T17:51:55.000Z'
+        max: '2018-02-13T17:51:55.000Z',
       };
       const pagination = {
         size: 10,
-        index: 0
+        index: 0,
       };
 
       before('load clusters archive', () => {
@@ -36,9 +36,7 @@ export default function ({ getService }) {
 
       it('should return data for 2 active nodes', async () => {
         const { body } = await supertest
-          .post(
-            '/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/elasticsearch/nodes'
-          )
+          .post('/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange, pagination })
           .expect(200);
@@ -50,11 +48,11 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-red-platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
-        max: '2017-10-06T20:15:30.000Z'
+        max: '2017-10-06T20:15:30.000Z',
       };
       const pagination = {
         size: 10,
-        index: 0
+        index: 0,
       };
 
       before('load clusters archive', () => {
@@ -67,9 +65,7 @@ export default function ({ getService }) {
 
       it('should return data for offline nodes', async () => {
         const { body } = await supertest
-          .post(
-            '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/nodes'
-          )
+          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange, pagination })
           .expect(200);
@@ -81,11 +77,11 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-green-trial-two-nodes-one-cgrouped';
       const timeRange = {
         min: '2018-02-13T19:18:02.000Z',
-        max: '2018-02-13T19:26:14.000Z'
+        max: '2018-02-13T19:26:14.000Z',
       };
       const pagination = {
         size: 10,
-        index: 0
+        index: 0,
       };
 
       before('load clusters archive', () => {
@@ -110,7 +106,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
-        max: '2019-10-03T19:41:13.132Z'
+        max: '2019-10-03T19:41:13.132Z',
       };
 
       before('load clusters archive', () => {
@@ -124,7 +120,7 @@ export default function ({ getService }) {
       it('should work with the default pagination', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const { body } = await supertest
@@ -141,7 +137,7 @@ export default function ({ getService }) {
       it('should work with going to page 2', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const { body: body1 } = await supertest
@@ -170,9 +166,8 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
-        max: '2019-10-03T19:41:13.132Z'
+        max: '2019-10-03T19:41:13.132Z',
       };
-
 
       before('load clusters archive', () => {
         return esArchiver.load(archive);
@@ -185,7 +180,7 @@ export default function ({ getService }) {
       it('should work with the default sorting', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const sort = {
@@ -218,7 +213,7 @@ export default function ({ getService }) {
       it('should work with sorting by cpu usage', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const sort = {
@@ -234,7 +229,7 @@ export default function ({ getService }) {
 
         const cpuUsage = body.nodes.map(node => ({
           name: node.name,
-          cpu_usage: node.node_cpu_utilization.summary
+          cpu_usage: node.node_cpu_utilization.summary,
         }));
         expect(cpuUsage).to.eql(nodesListingFixturePagination.sortByCpuUsage);
       });
@@ -242,7 +237,7 @@ export default function ({ getService }) {
       it('should work with sorting by load average', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const sort = {
@@ -258,7 +253,7 @@ export default function ({ getService }) {
 
         const loadAverage = body.nodes.map(node => ({
           name: node.name,
-          load_average: node.node_load_average.summary
+          load_average: node.node_load_average.summary,
         }));
         expect(loadAverage).to.eql(nodesListingFixturePagination.sortByLoadAverage);
       });
@@ -266,7 +261,7 @@ export default function ({ getService }) {
       it('should work with sorting by jvm memory', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const sort = {
@@ -282,7 +277,7 @@ export default function ({ getService }) {
 
         const jvmMemory = body.nodes.map(node => ({
           name: node.name,
-          jvm_memory: node.node_jvm_mem_percent.summary
+          jvm_memory: node.node_jvm_mem_percent.summary,
         }));
         expect(jvmMemory).to.eql(nodesListingFixturePagination.sortByJvmMemory);
       });
@@ -290,7 +285,7 @@ export default function ({ getService }) {
       it('should work with sorting by free space', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
 
         const sort = {
@@ -306,7 +301,7 @@ export default function ({ getService }) {
 
         const freeSpace = body.nodes.map(node => ({
           name: node.name,
-          free_space: node.node_free_space.summary
+          free_space: node.node_free_space.summary,
         }));
         expect(freeSpace).to.eql(nodesListingFixturePagination.sortByFreeSpace);
       });
@@ -316,7 +311,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
-        max: '2019-10-03T19:41:13.132Z'
+        max: '2019-10-03T19:41:13.132Z',
       };
 
       before('load clusters archive', () => {
@@ -330,7 +325,7 @@ export default function ({ getService }) {
       it('should work with a simple query', async () => {
         const pagination = {
           size: 10,
-          index: 0
+          index: 0,
         };
         const queryText = '41';
 

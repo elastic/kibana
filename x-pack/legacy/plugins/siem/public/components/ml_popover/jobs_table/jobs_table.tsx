@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+/* eslint-disable react/display-name */
+
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
+import { useBasePath } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SiemJob } from '../types';
@@ -36,7 +38,8 @@ const truncateThreshold = 200;
 
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
+  basePath: string
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
@@ -44,7 +47,7 @@ const getJobsTableColumns = (
       <JobNameWrapper>
         <EuiLink
           data-test-subj="jobs-table-link"
-          href={`${chrome.getBasePath()}/app/ml#/jobs?mlManagement=(jobId:${encodeURI(id)})`}
+          href={`${basePath}/app/ml#/jobs?mlManagement=(jobId:${encodeURI(id)})`}
           target="_blank"
         >
           <EuiText size="s">{id}</EuiText>
@@ -81,7 +84,7 @@ const getJobsTableColumns = (
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
-  },
+  } as const,
 ];
 
 const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>
@@ -90,11 +93,12 @@ const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number
 export interface JobTableProps {
   isLoading: boolean;
   jobs: SiemJob[];
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
+  const basePath = useBasePath();
   const pageSize = 5;
 
   const pagination = {
@@ -112,7 +116,7 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
     <EuiBasicTable
       data-test-subj="jobs-table"
       compressed={true}
-      columns={getJobsTableColumns(isLoading, onJobStateChange)}
+      columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
       noItemsMessage={<NoItemsMessage />}

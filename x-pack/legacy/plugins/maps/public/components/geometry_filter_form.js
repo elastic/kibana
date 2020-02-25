@@ -113,9 +113,9 @@ export class GeometryFilterForm extends Component {
     const spatialRelations = this.props.isFilterGeometryClosed
       ? Object.values(ES_SPATIAL_RELATIONS)
       : Object.values(ES_SPATIAL_RELATIONS).filter(relation => {
-        // can not filter by within relation when filtering geometry is not closed
-        return relation !== ES_SPATIAL_RELATIONS.WITHIN;
-      });
+          // can not filter by within relation when filtering geometry is not closed
+          return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+        });
     const options = spatialRelations.map(relation => {
       return {
         value: relation,

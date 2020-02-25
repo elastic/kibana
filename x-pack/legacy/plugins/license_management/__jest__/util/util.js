@@ -12,19 +12,16 @@ import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
-export const createMockLicense = (
-  type,
-  expiryDateInMillis = highExpirationMillis
-) => {
+export const createMockLicense = (type, expiryDateInMillis = highExpirationMillis) => {
   return {
     type,
     expiryDateInMillis,
-    isActive: new Date().getTime() < expiryDateInMillis
+    isActive: new Date().getTime() < expiryDateInMillis,
   };
 };
 export const getComponent = (initialState, Component) => {
   const services = {
-    http: httpServiceMock.createSetupContract()
+    http: httpServiceMock.createSetupContract(),
   };
   const store = licenseManagementStore(initialState, services);
   return mountWithIntl(

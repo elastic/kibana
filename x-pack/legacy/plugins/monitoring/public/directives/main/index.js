@@ -5,57 +5,60 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import {
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle
-} from '@elastic/eui';
+import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
-import 'ui/directives/kbn_href';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
+import { Subscription } from 'rxjs';
 
-const setOptions = (controller) => {
-  if (!controller.pipelineVersions || !controller.pipelineVersions.length || !controller.pipelineDropdownElement) {
+const setOptions = controller => {
+  if (
+    !controller.pipelineVersions ||
+    !controller.pipelineVersions.length ||
+    !controller.pipelineDropdownElement
+  ) {
     return;
   }
 
   render(
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiTitle style={{ maxWidth: 400, lineHeight: '40px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+        <EuiTitle
+          style={{ maxWidth: 400, lineHeight: '40px', overflow: 'hidden', whiteSpace: 'nowrap' }}
+        >
           <h2>{controller.pipelineId}</h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect
           value={controller.pipelineHash}
-          options={controller.pipelineVersions.map((option) => {
+          options={controller.pipelineVersions.map(option => {
             return {
-              text: i18n.translate('xpack.monitoring.logstashNavigation.pipelineVersionDescription',
+              text: i18n.translate(
+                'xpack.monitoring.logstashNavigation.pipelineVersionDescription',
                 {
-                  defaultMessage: 'Version active {relativeLastSeen} and first seen {relativeFirstSeen}',
+                  defaultMessage:
+                    'Version active {relativeLastSeen} and first seen {relativeFirstSeen}',
                   values: {
                     relativeLastSeen: option.relativeLastSeen,
-                    relativeFirstSeen: option.relativeFirstSeen
-                  }
+                    relativeFirstSeen: option.relativeFirstSeen,
+                  },
                 }
               ),
-              value: option.hash
+              value: option.hash,
             };
           })}
           onChange={controller.onChangePipelineHash}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
-    , controller.pipelineDropdownElement);
+    </EuiFlexGroup>,
+    controller.pipelineDropdownElement
+  );
 };
-
 
 /*
  * Manage data and provide helper methods for the "main" directive's template
@@ -72,6 +75,24 @@ export class MonitoringMainController {
     this.inBeats = false;
     this.inApm = false;
   }
+
+  addTimerangeObservers = () => {
+    this.subscriptions = new Subscription();
+
+    const refreshIntervalUpdated = () => {
+      const { value: refreshInterval, pause: isPaused } = timefilter.getRefreshInterval();
+      this.datePicker.onRefreshChange({ refreshInterval, isPaused }, true);
+    };
+
+    const timeUpdated = () => {
+      this.datePicker.onTimeUpdate({ dateRange: timefilter.getTime() }, true);
+    };
+
+    this.subscriptions.add(
+      timefilter.getRefreshIntervalUpdate$().subscribe(refreshIntervalUpdated)
+    );
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(timeUpdated));
+  };
 
   dropdownLoadedHandler() {
     this.pipelineDropdownElement = document.querySelector('#dropdown-elm');
@@ -99,7 +120,7 @@ export class MonitoringMainController {
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
-      this.inListing = this.name === 'listing';// || this.name === 'no-data';
+      this.inListing = this.name === 'listing'; // || this.name === 'no-data';
     }
 
     if (!this.inListing) {
@@ -110,32 +131,37 @@ export class MonitoringMainController {
     if (this.pipelineHash) {
       this.pipelineHashShort = shortenPipelineHash(this.pipelineHash);
       this.onChangePipelineHash = () => {
-        return this._kbnUrlService.changePath(`/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`);
+        return this._kbnUrlService.changePath(
+          `/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
+        );
       };
     }
 
     this.datePicker = {
       timeRange: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
-      onRefreshChange: ({ isPaused, refreshInterval }) => {
+      onRefreshChange: ({ isPaused, refreshInterval }, skipSet = false) => {
         this.datePicker.refreshInterval = {
           pause: isPaused,
           value: refreshInterval,
         };
-
-        timefilter.setRefreshInterval({
-          pause: isPaused,
-          value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value
-        });
+        if (!skipSet) {
+          timefilter.setRefreshInterval({
+            pause: isPaused,
+            value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value,
+          });
+        }
       },
-      onTimeUpdate: ({ dateRange }) => {
+      onTimeUpdate: ({ dateRange }, skipSet = false) => {
         this.datePicker.timeRange = {
-          ...dateRange
+          ...dateRange,
         };
-        timefilter.setTime(dateRange);
+        if (!skipSet) {
+          timefilter.setTime(dateRange);
+        }
         this._executorService.cancel();
         this._executorService.run();
-      }
+      },
     };
   }
 
@@ -145,7 +171,7 @@ export class MonitoringMainController {
   }
 
   // check whether to show ML tab
-  isMlSupported()  {
+  isMlSupported() {
     return this._licenseService.mlIsSupported();
   }
 
@@ -159,15 +185,18 @@ export class MonitoringMainController {
     if (data.totalUniqueInstanceCount === 0) {
       return true;
     }
-    if (data.totalUniqueInternallyCollectedCount === 0
-      && data.totalUniqueFullyMigratedCount === 0 && data.totalUniquePartiallyMigratedCount === 0) {
+    if (
+      data.totalUniqueInternallyCollectedCount === 0 &&
+      data.totalUniqueFullyMigratedCount === 0 &&
+      data.totalUniquePartiallyMigratedCount === 0
+    ) {
       return true;
     }
     return false;
   }
 }
 
-const uiModule = uiModules.get('plugins/monitoring/directives', []);
+const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
   const $executor = $injector.get('$executor');
 
@@ -179,13 +208,16 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      controller.addTimerangeObservers();
       initSetupModeState(scope, $injector, () => {
         controller.setup(getSetupObj());
       });
       if (!scope.cluster) {
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
-        scope.cluster = ($route.current.locals.clusters || []).find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
+        scope.cluster = ($route.current.locals.clusters || []).find(
+          cluster => cluster.cluster_uuid === globalState.cluster_uuid
+        );
       }
 
       function getSetupObj() {
@@ -205,9 +237,9 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
             pipelineId: attributes.pipelineId,
             pipelineHash: attributes.pipelineHash,
             pipelineVersions: get(scope, 'pageData.versions'),
-            isCcrEnabled: attributes.isCcrEnabled === 'true' || attributes.isCcrEnabled === true
+            isCcrEnabled: attributes.isCcrEnabled === 'true' || attributes.isCcrEnabled === true,
           },
-          clusterName: get(scope, 'cluster.cluster_name')
+          clusterName: get(scope, 'cluster.cluster_name'),
         };
       }
 
@@ -216,11 +248,15 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
       Object.keys(setupObj.attributes).forEach(key => {
         attributes.$observe(key, () => controller.setup(getSetupObj()));
       });
-      scope.$on('$destroy', () => controller.pipelineDropdownElement && unmountComponentAtNode(controller.pipelineDropdownElement));
+      scope.$on('$destroy', () => {
+        controller.pipelineDropdownElement &&
+          unmountComponentAtNode(controller.pipelineDropdownElement);
+        controller.subscriptions && controller.subscriptions.unsubscribe();
+      });
       scope.$watch('pageData.versions', versions => {
         controller.pipelineVersions = versions;
         setOptions(controller);
       });
-    }
+    },
   };
 });

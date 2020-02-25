@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const pieChart = getService('pieChart');
@@ -46,7 +46,7 @@ export default function ({ getService }) {
     });
 
     it('markdown', async () => {
-      await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+      await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     });
 
     it('saved search', async () => {

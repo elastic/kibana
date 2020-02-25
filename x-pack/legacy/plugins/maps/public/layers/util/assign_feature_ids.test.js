@@ -13,12 +13,12 @@ test('should provide unique id when feature.id is not provided', () => {
   const featureCollection = {
     features: [
       {
-        properties: {}
+        properties: {},
       },
       {
-        properties: {}
+        properties: {},
       },
-    ]
+    ],
   };
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
@@ -35,9 +35,9 @@ test('should preserve feature id when provided', () => {
     features: [
       {
         id: featureId,
-        properties: {}
-      }
-    ]
+        properties: {},
+      },
+    ],
   };
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
@@ -52,9 +52,9 @@ test('should preserve feature id for falsy value', () => {
     features: [
       {
         id: 0,
-        properties: {}
-      }
-    ]
+        properties: {},
+      },
+    ],
   };
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
@@ -70,9 +70,9 @@ test('should not modify original feature properties', () => {
     features: [
       {
         id: featureId,
-        properties: featureProperties
-      }
-    ]
+        properties: featureProperties,
+      },
+    ],
   };
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
@@ -80,4 +80,3 @@ test('should not modify original feature properties', () => {
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
   expect(featureProperties).not.toHaveProperty(FEATURE_ID_PROPERTY_NAME);
 });
-

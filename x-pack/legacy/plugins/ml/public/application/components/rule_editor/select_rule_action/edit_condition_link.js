@@ -4,40 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for quick edit of the numeric condition part of a rule,
  * containing a number field input for editing the condition value.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 
 import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
 import { formatValue } from '../../../formatters/format_value';
-import {
-  getAppliesToValueFromAnomaly,
-} from '../utils';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getAppliesToValueFromAnomaly } from '../utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const EditConditionLink = injectI18n(class EditConditionLink extends Component {
+export class EditConditionLink extends Component {
   static propTypes = {
     conditionIndex: PropTypes.number.isRequired,
     conditionValue: PropTypes.number.isRequired,
     appliesTo: PropTypes.oneOf([
       APPLIES_TO.ACTUAL,
       APPLIES_TO.TYPICAL,
-      APPLIES_TO.DIFF_FROM_TYPICAL
+      APPLIES_TO.DIFF_FROM_TYPICAL,
     ]),
     anomaly: PropTypes.object.isRequired,
     updateConditionValue: PropTypes.func.isRequired,
@@ -62,20 +52,19 @@ export const EditConditionLink = injectI18n(class EditConditionLink extends Comp
     this.state = { value };
   }
 
-  onChangeValue = (event) => {
+  onChangeValue = event => {
     const enteredValue = event.target.value;
     this.setState({
-      value: (enteredValue !== '') ? +enteredValue : '',
+      value: enteredValue !== '' ? +enteredValue : '',
     });
-  }
+  };
 
   onUpdateClick = () => {
     const { conditionIndex, updateConditionValue } = this.props;
     updateConditionValue(conditionIndex, this.state.value);
-  }
+  };
 
   render() {
-    const { intl } = this.props;
     const value = this.state.value;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -90,33 +79,34 @@ export const EditConditionLink = injectI18n(class EditConditionLink extends Comp
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="condition-edit-value-field">
           <EuiFieldNumber
-            placeholder={intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.editConditionLink.enterValuePlaceholder',
-              defaultMessage: 'Enter value'
-            })}
+            placeholder={i18n.translate(
+              'xpack.ml.ruleEditor.editConditionLink.enterValuePlaceholder',
+              {
+                defaultMessage: 'Enter value',
+              }
+            )}
             compressed={true}
             value={value}
             onChange={this.onChangeValue}
-            aria-label={intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.editConditionLink.enterNumericValueForConditionAriaLabel',
-              defaultMessage: 'Enter numeric value for condition'
-            })}
+            aria-label={i18n.translate(
+              'xpack.ml.ruleEditor.editConditionLink.enterNumericValueForConditionAriaLabel',
+              {
+                defaultMessage: 'Enter numeric value for condition',
+              }
+            )}
           />
         </EuiFlexItem>
-        {value !== '' &&
+        {value !== '' && (
           <EuiFlexItem grow={false}>
-            <EuiLink
-              size="s"
-              onClick={() => this.onUpdateClick()}
-            >
+            <EuiLink size="s" onClick={() => this.onUpdateClick()}>
               <FormattedMessage
                 id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
                 defaultMessage="Update"
               />
             </EuiLink>
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
     );
   }
-});
+}

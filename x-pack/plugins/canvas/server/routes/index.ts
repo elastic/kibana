@@ -5,6 +5,9 @@
  */
 
 import { IRouter, Logger } from 'src/core/server';
+import { initCustomElementsRoutes } from './custom_elements';
+import { initESFieldsRoutes } from './es_fields';
+import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 
 export interface RouteInitializerDeps {
@@ -13,5 +16,8 @@ export interface RouteInitializerDeps {
 }
 
 export function initRoutes(deps: RouteInitializerDeps) {
+  initCustomElementsRoutes(deps);
+  initESFieldsRoutes(deps);
+  initShareablesRoutes(deps);
   initWorkpadRoutes(deps);
 }

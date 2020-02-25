@@ -9,7 +9,7 @@
 ```ts
 import { createStateContainer, createStateContainerReactHelpers } from 'src/plugins/kibana_utils';
 
-const container = createStateContainer({}, {});
+const container = createStateContainer({});
 export const {
   Provider,
   Consumer,

@@ -25,8 +25,9 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
 interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
+  height: number;
   serviceName?: string;
-  style: CSSProperties;
+  style?: CSSProperties;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
@@ -54,10 +55,15 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 export function Cytoscape({
   children,
   elements,
+  height,
   serviceName,
   style
 }: CytoscapeProps) {
   const [ref, cy] = useCytoscape({ ...cytoscapeOptions, elements });
+
+  // Add the height to the div style. The height is a separate prop because it
+  // is required and can trigger rendering when changed.
+  const divStyle = { ...style, height };
 
   // Trigger a custom "data" event when data changes
   useEffect(() => {
@@ -69,23 +75,46 @@ export function Cytoscape({
 
   // Set up cytoscape event handlers
   useEffect(() => {
-    if (cy) {
-      cy.on('data', event => {
+    const dataHandler: cytoscape.EventHandler = event => {
+      if (cy) {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
+          cy.nodes().removeClass('primary');
           cy.getElementById(serviceName).addClass('primary');
         }
 
         if (event.cy.elements().length > 0) {
           cy.layout(cytoscapeOptions.layout as cytoscape.LayoutOptions).run();
         }
-      });
+      }
+    };
+    const mouseoverHandler: cytoscape.EventHandler = event => {
+      event.target.addClass('hover');
+      event.target.connectedEdges().addClass('nodeHover');
+    };
+    const mouseoutHandler: cytoscape.EventHandler = event => {
+      event.target.removeClass('hover');
+      event.target.connectedEdges().removeClass('nodeHover');
+    };
+
+    if (cy) {
+      cy.on('data', dataHandler);
+      cy.on('mouseover', 'edge, node', mouseoverHandler);
+      cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
+
+    return () => {
+      if (cy) {
+        cy.removeListener('data', undefined, dataHandler);
+        cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
+        cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
+      }
+    };
   }, [cy, serviceName]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
-      <div ref={ref} style={style}>
+      <div ref={ref} style={divStyle}>
         {children}
       </div>
     </CytoscapeContext.Provider>

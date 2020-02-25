@@ -23,7 +23,9 @@ import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { withTimeout } from '../../utils';
 
+const Sec = 1000;
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
@@ -85,14 +87,16 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.setup(
+      const contract = await withTimeout({
+        promise: plugin.setup(
           createPluginSetupContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
 
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -121,13 +125,16 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.start(
+      const contract = await withTimeout({
+        promise: plugin.start(
           createPluginStartContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
+
+      contracts.set(pluginName, contract);
     }
 
     return contracts;

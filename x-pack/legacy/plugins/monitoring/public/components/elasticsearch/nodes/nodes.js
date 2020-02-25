@@ -23,11 +23,36 @@ import {
   EuiCallOut,
   EuiButton,
   EuiText,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+
+const getNodeTooltip = node => {
+  const { nodeTypeLabel, nodeTypeClass } = node;
+
+  const nodeTypeLabelContent =
+    nodeTypeLabel ||
+    i18n.translate('xpack.monitoring.elasticsearch.nodes.unknownNodeTypeLabel', {
+      defaultMessage: 'Unknown',
+    });
+  const nodeTypeClassIcon = nodeTypeClass || 'empty';
+
+  if (nodeTypeLabel) {
+    return (
+      <>
+        <EuiToolTip position="bottom" content={nodeTypeLabelContent}>
+          <EuiIcon type={nodeTypeClassIcon} />
+        </EuiToolTip>{' '}
+        &nbsp;
+      </>
+    );
+  }
+  return null;
+};
 
 const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
@@ -86,10 +111,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         <div>
           <div className="monTableCell__name">
             <EuiText size="m">
-              <EuiToolTip position="bottom" content={node.nodeTypeLabel}>
-                {node.nodeTypeClass && <EuiIcon type={node.nodeTypeClass} />}
-              </EuiToolTip>
-              &nbsp;
+              {getNodeTooltip(node)}
               <span data-test-subj="name">{nameLink}</span>
             </EuiText>
           </div>
@@ -109,11 +131,11 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     render: value => {
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
-          defaultMessage: 'Online',
-        })
+            defaultMessage: 'Online',
+          })
         : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
-          defaultMessage: 'Offline',
-        });
+            defaultMessage: 'Offline',
+          });
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon isOnline={value} status={status} /> {status}
@@ -379,6 +401,14 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.nodes.heading"
+              defaultMessage="Elasticsearch nodes"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         {renderClusterStatus()}
         {setupModeCallout}
         <EuiPageContent>

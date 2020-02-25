@@ -38,7 +38,7 @@ export class User {
   public async create(username: string, user: any) {
     this.log.debug(`creating user ${username}`);
     const { data, status, statusText } = await this.axios.post(
-      `/api/security/v1/users/${username}`,
+      `/internal/security/users/${username}`,
       {
         username,
         ...user,
@@ -55,7 +55,7 @@ export class User {
   public async delete(username: string) {
     this.log.debug(`deleting user ${username}`);
     const { data, status, statusText } = await this.axios.delete(
-      `/api/security/v1/users/${username}`
+      `/internal/security/users/${username}`
     );
     if (status !== 204) {
       throw new Error(

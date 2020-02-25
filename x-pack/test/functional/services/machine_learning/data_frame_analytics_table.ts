@@ -26,6 +26,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .find('.euiTableCellContent')
             .text()
             .trim(),
+          description: $tr
+            .findTestSubject('mlAnalyticsTableColumnJobDescription')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
           sourceIndex: $tr
             .findTestSubject('mlAnalyticsTableColumnSourceIndex')
             .find('.euiTableCellContent')
@@ -71,6 +76,10 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return await tableListContainer.findByClassName('euiFieldSearch');
     }
 
+    async assertJobViewButtonExists() {
+      await testSubjects.existOrFail('mlAnalyticsJobViewButton');
+    }
+
     async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
       const searchBarInput = await this.getAnalyticsSearchInput();
       const actualSearchValue = await searchBarInput.getAttribute('value');
@@ -78,6 +87,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
         expectedSearchValue,
         `Analytics search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
       );
+    }
+
+    public async openResultsView() {
+      await this.assertJobViewButtonExists();
+      await testSubjects.click('mlAnalyticsJobViewButton');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
     }
 
     public async filterWithSearchString(filter: string) {

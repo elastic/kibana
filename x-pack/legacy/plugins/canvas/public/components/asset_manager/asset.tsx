@@ -92,7 +92,6 @@ export const Asset: FunctionComponent<Props> = props => {
         url={props.asset.value}
         fullScreenIconColor="dark"
         alt={strings.getThumbnailAltText()}
-        style={{ backgroundImage: `url(${props.asset.value})` }}
       />
     </div>
   );

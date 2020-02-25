@@ -33,7 +33,7 @@ class ReactVisController {
 
     const I18nContext = getI18n().Context;
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const Component = this.vis.type.visConfig.component;
       const config = getUISettings();
       render(
@@ -46,7 +46,9 @@ class ReactVisController {
             renderComplete={resolve}
             updateStatus={updateStatus}
           />
-        </I18nContext>, this.el);
+        </I18nContext>,
+        this.el
+      );
     });
   }
 
@@ -59,7 +61,7 @@ export class ReactVisType extends BaseVisType {
   constructor(opts) {
     super({
       ...opts,
-      visualization: ReactVisController
+      visualization: ReactVisController,
     });
 
     if (!this.visConfig.component) {

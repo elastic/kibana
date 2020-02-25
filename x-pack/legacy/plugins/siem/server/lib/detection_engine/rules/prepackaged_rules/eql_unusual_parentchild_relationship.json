@@ -1,0 +1,36 @@
+{
+  "description": "Identifies Windows programs run from unexpected parent processes. This could indicate masquerading or other strange activity on a system.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Unusual Parent-Child Relationship ",
+  "query": "   event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.executable:* and   (      (process.name:\"smss.exe\" and not process.parent.name:(\"System\" or \"smss.exe\")) or       (process.name:\"csrss.exe\" and not process.parent.name:(\"smss.exe\" or \"svchost.exe\")) or       (process.name:\"wininit.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"winlogon.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"lsass.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"LogonUI.exe\" and not process.parent.name:(\"winlogon.exe\" or \"wininit.exe\")) or       (process.name:\"services.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"svchost.exe\" and not process.parent.name:(\"services.exe\" or \"MsMpEng.exe\")) or      (process.name:\"spoolsv.exe\" and not process.parent.name:\"services.exe\") or       (process.name:\"taskhost.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"taskhostw.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"userinit.exe\" and not process.parent.name:(\"dwm.exe\" or \"winlogon.exe\"))    )",
+  "risk_score": 47,
+  "rule_id": "35df0dd8-092d-4a83-88c1-5151a804f31b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1093",
+          "name": "Process Hollowing",
+          "reference": "https://attack.mitre.org/techniques/T1093/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

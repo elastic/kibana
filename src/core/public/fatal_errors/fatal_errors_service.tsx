@@ -54,9 +54,18 @@ export interface FatalErrorsSetup {
   get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+/**
+ * FatalErrors stop the Kibana Public Core and displays a fatal error screen
+ * with details about the Kibana build and the error.
+ *
+ * @public
+ */
+export type FatalErrorsStart = FatalErrorsSetup;
+
 /** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private fatalErrors?: FatalErrorsSetup;
 
   /**
    *
@@ -82,7 +91,7 @@ export class FatalErrorsService {
         },
       });
 
-    const fatalErrorsSetup: FatalErrorsSetup = {
+    this.fatalErrors = {
       add: (error, source?) => {
         const errorInfo = getErrorInfo(error, source);
 
@@ -101,9 +110,17 @@ export class FatalErrorsService {
       },
     };
 
-    this.setupGlobalErrorHandlers(fatalErrorsSetup);
+    this.setupGlobalErrorHandlers(this.fatalErrors!);
 
-    return fatalErrorsSetup;
+    return this.fatalErrors!;
+  }
+
+  public start() {
+    const { fatalErrors } = this;
+    if (!fatalErrors) {
+      throw new Error('FatalErrorsService#setup() must be invoked before start.');
+    }
+    return fatalErrors;
   }
 
   private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {

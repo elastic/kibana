@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // Mock the services required for reading and writing job data.
 jest.mock('../../services/job_service', () => ({
   mlJobService: {
@@ -28,28 +27,32 @@ jest.mock('../../services/job_service', () => ({
               detector_index: 1,
               custom_rules: [
                 {
-                  actions: [
-                    'skip_result'
-                  ],
+                  actions: ['skip_result'],
                   conditions: [
                     {
                       applies_to: 'diff_from_typical',
                       operator: 'lte',
-                      value: 123
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+                      value: 123,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       };
-    }
-  }
+    },
+  },
 }));
 jest.mock('../../services/ml_api_service', () => 'ml');
 jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: () => true
+  checkPermission: () => true,
+}));
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
+  },
 }));
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -62,7 +65,7 @@ const NO_RULE_ANOMALY = {
   detectorIndex: 0,
   source: {
     function: 'mean',
-  }
+  },
 };
 
 const RULE_ANOMALY = {
@@ -70,22 +73,27 @@ const RULE_ANOMALY = {
   detectorIndex: 1,
   source: {
     function: 'max',
-  }
+  },
 };
 
 function prepareTest() {
-
   const setShowFunction = jest.fn(() => {});
   const unsetShowFunction = jest.fn(() => {});
 
   const requiredProps = {
     setShowFunction,
     unsetShowFunction,
+    kibana: {
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        },
+      },
+    },
   };
 
-  const component = (
-    <RuleEditorFlyout.WrappedComponent {...requiredProps} />
-  );
+  const component = <RuleEditorFlyout {...requiredProps} />;
 
   const wrapper = shallowWithIntl(component);
 
@@ -93,7 +101,6 @@ function prepareTest() {
 }
 
 describe('RuleEditorFlyout', () => {
-
   test(`don't render when not opened`, () => {
     const test1 = prepareTest();
     expect(test1.wrapper).toMatchSnapshot();
@@ -141,5 +148,4 @@ describe('RuleEditorFlyout', () => {
     test6.wrapper.update();
     expect(test6.wrapper).toMatchSnapshot();
   });
-
 });

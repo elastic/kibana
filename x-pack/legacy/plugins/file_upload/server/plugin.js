@@ -4,28 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getImportRouteHandler } from './routes/file_upload';
-import { MAX_BYTES } from '../common/constants/file_import';
+import { initRoutes } from './routes/file_upload';
+import { setElasticsearchClientServices, setInternalRepository } from './kibana_server_services';
 import { registerFileUploadUsageCollector } from './telemetry';
 
 export class FileUploadPlugin {
-  setup(core, plugins, __LEGACY) {
-    const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
-    const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
+  constructor() {
+    this.router = null;
+  }
 
-    // Set up route
-    __LEGACY.route({
-      method: 'POST',
-      path: '/api/fileupload/import',
-      handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
-      config: {
-        payload: { maxBytes: MAX_BYTES },
-      }
-    });
+  setup(core) {
+    setElasticsearchClientServices(core.elasticsearch);
+    this.router = core.http.createRouter();
+  }
 
-    registerFileUploadUsageCollector(plugins.usageCollection, {
-      elasticsearchPlugin,
-      getSavedObjectsRepository,
-    });
+  start(core, plugins) {
+    initRoutes(this.router, core.savedObjects.getSavedObjectsRepository);
+    setInternalRepository(core.savedObjects.createInternalRepository);
+
+    registerFileUploadUsageCollector(plugins.usageCollection);
   }
 }

@@ -49,7 +49,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_maps_all_user', 'global_maps_all_user-password', {
           expectSpaceSelector: false,
@@ -60,14 +60,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_maps_all_role'),
           security.user.delete('global_maps_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Maps', 'Management']);
       });
 
@@ -154,9 +152,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Maps', 'Management']);
       });
 
@@ -251,9 +247,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Discover', 'Management']);
       });
 

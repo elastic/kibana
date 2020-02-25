@@ -26,7 +26,7 @@ import { getShardNum } from './get_shard_num';
 
 const DEFAULT_PARAMS = {
   shards: 1,
-  shard_num: 1
+  shard_num: 1,
 };
 
 export function setupTestSharding() {
@@ -44,7 +44,9 @@ export function setupTestSharding() {
 
   const { shards: shardTotal, shard_num: shardNum } = params;
   if (shardNum < 1 || shardNum > shardTotal) {
-    throw new TypeError(`shard_num param of ${shardNum} must be greater 0 and less than the total, ${shardTotal}`);
+    throw new TypeError(
+      `shard_num param of ${shardNum} must be greater 0 and less than the total, ${shardTotal}`
+    );
   }
 
   // track and log the number of ignored describe calls

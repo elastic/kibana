@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -13,8 +14,6 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 4: Histogram', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
@@ -22,28 +21,24 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   let goToStep;
   let table;
   let form;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
-    ({
-      find,
-      exists,
-      actions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      table,
-      form,
-    } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   const numericFields = ['a-numericField', 'b-numericField'];
@@ -116,7 +111,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('when no histogram fields are availalbe', () => {
       it('should indicate it to the user', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: [] });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields: [] } });
         await goToStepAndOpenFieldChooser();
 
         const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
@@ -127,17 +122,14 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('when histogram fields are available', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields } });
         await goToStepAndOpenFieldChooser();
       });
 
       it('should display the histogram fields available', async () => {
         const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
-        expect(tableCellsValues).toEqual([
-          ['a-numericField'],
-          ['b-numericField'],
-        ]);
+        expect(tableCellsValues).toEqual([['a-numericField'], ['b-numericField']]);
       });
 
       it('should add histogram field to the field list when clicking on it', () => {
@@ -164,7 +156,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     it('should have a delete button on each row to remove an histogram field', async () => {
       // First let's add a term to the list
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields } });
       await goToStepAndOpenFieldChooser();
       const { rows: fieldChooserRows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');
@@ -191,7 +183,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields } });
       await goToStep(4);
       addHistogramFieldToList();
     });

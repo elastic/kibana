@@ -5,26 +5,26 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { createStore, State } from '../../../store';
-import { siemFilterManager } from '../../search_bar';
 import { AddFilterToGlobalSearchBar } from '.';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
-interface MockSiemFilterManager {
-  addFilters: (filters: esFilters.Filter[]) => void;
-}
-const mockSiemFilterManager: MockSiemFilterManager = siemFilterManager as MockSiemFilterManager;
-jest.mock('../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
 const mockAddFilters = jest.fn();
-mockSiemFilterManager.addFilters = mockAddFilters;
+jest.mock('../../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      data: {
+        query: {
+          filterManager: {
+            addFilters: mockAddFilters,
+          },
+        },
+      },
+    },
+  }),
+}));
 
 describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
@@ -32,6 +32,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
+    mockAddFilters.mockClear();
   });
 
   test('Rendering', async () => {
@@ -63,7 +64,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
       </AddFilterToGlobalSearchBar>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('Rendering tooltip', async () => {

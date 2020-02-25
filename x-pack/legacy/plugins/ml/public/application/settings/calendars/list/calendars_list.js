@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
@@ -13,6 +11,7 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EuiPage,
+  EuiPageBody,
   EuiPageContent,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
@@ -21,12 +20,13 @@ import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { toastNotifications } from 'ui/notify';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export const CalendarsList = injectI18n(class CalendarsList extends Component {
+export class CalendarsListUI extends Component {
   static propTypes = {
     canCreateCalendar: PropTypes.bool.isRequired,
     canDeleteCalendar: PropTypes.bool.isRequired,
@@ -40,7 +40,7 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
       isDestroyModalVisible: false,
       calendarId: null,
       selectedForDeletion: [],
-      nodesAvailable: mlNodesAvailable()
+      nodesAvailable: mlNodesAvailable(),
     };
   }
 
@@ -58,33 +58,33 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
     } catch (error) {
       console.log(error);
       this.setState({ loading: false });
-      toastNotifications.addDanger(
-        this.props.intl.formatMessage({
-          id: 'xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage',
-          defaultMessage: 'An error occurred loading the list of calendars.'
+      const { toasts } = this.props.kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage', {
+          defaultMessage: 'An error occurred loading the list of calendars.',
         })
       );
     }
-  }
+  };
 
   closeDestroyModal = () => {
     this.setState({ isDestroyModalVisible: false, calendarId: null });
-  }
+  };
 
   showDestroyModal = () => {
     this.setState({ isDestroyModalVisible: true });
-  }
+  };
 
-  setSelectedCalendarList = (selectedCalendars) => {
+  setSelectedCalendarList = selectedCalendars => {
     this.setState({ selectedForDeletion: selectedCalendars });
-  }
+  };
 
   deleteCalendars = () => {
     const { selectedForDeletion } = this.state;
 
     this.closeDestroyModal();
     deleteCalendars(selectedForDeletion, this.loadCalendars);
-  }
+  };
 
   addRequiredFieldsToList = (calendarsList = []) => {
     for (let i = 0; i < calendarsList.length; i++) {
@@ -93,19 +93,14 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
     }
 
     return calendarsList;
-  }
+  };
 
   componentDidMount() {
     this.loadCalendars();
   }
 
   render() {
-    const {
-      calendars,
-      selectedForDeletion,
-      loading,
-      nodesAvailable
-    } = this.state;
+    const { calendars, selectedForDeletion, loading, nodesAvailable } = this.state;
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
@@ -113,20 +108,26 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
       destroyModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={<FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle"
-              defaultMessage="Delete calendar"
-            />}
+            title={
+              <FormattedMessage
+                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle"
+                defaultMessage="Delete calendar"
+              />
+            }
             onCancel={this.closeDestroyModal}
             onConfirm={this.deleteCalendars}
-            cancelButtonText={<FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />}
-            confirmButtonText={<FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />}
+            cancelButtonText={
+              <FormattedMessage
+                id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            }
+            confirmButtonText={
+              <FormattedMessage
+                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
+                defaultMessage="Delete"
+              />
+            }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
@@ -136,7 +137,7 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
                 defaultMessage="Delete {calendarsCount, plural, one {this calendar} other {these calendars}}? {calendarsList}"
                 values={{
                   calendarsCount: selectedForDeletion.length,
-                  calendarsList: (selectedForDeletion.map((c) => c.calendar_id).join(', '))
+                  calendarsList: selectedForDeletion.map(c => c.calendar_id).join(', '),
                 }}
               />
             </p>
@@ -149,29 +150,33 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
       <Fragment>
         <NavigationMenu tabId="settings" />
         <EuiPage className="mlCalendarList">
-          <EuiPageContent
-            className="mlCalendarList__content"
-            verticalPosition="center"
-            horizontalPosition="center"
-          >
-            <CalendarsListHeader
-              totalCount={calendars.length}
-              refreshCalendars={this.loadCalendars}
-            />
-            <CalendarsListTable
-              loading={loading}
-              calendarsList={this.addRequiredFieldsToList(calendars)}
-              onDeleteClick={this.showDestroyModal}
-              canCreateCalendar={canCreateCalendar}
-              canDeleteCalendar={canDeleteCalendar}
-              mlNodesAvailable={nodesAvailable}
-              setSelectedCalendarList={this.setSelectedCalendarList}
-              itemsSelected={selectedForDeletion.length > 0}
-            />
-          </EuiPageContent>
-          {destroyModal}
+          <EuiPageBody>
+            <EuiPageContent
+              className="mlCalendarList__content"
+              verticalPosition="center"
+              horizontalPosition="center"
+            >
+              <CalendarsListHeader
+                totalCount={calendars.length}
+                refreshCalendars={this.loadCalendars}
+              />
+              <CalendarsListTable
+                loading={loading}
+                calendarsList={this.addRequiredFieldsToList(calendars)}
+                onDeleteClick={this.showDestroyModal}
+                canCreateCalendar={canCreateCalendar}
+                canDeleteCalendar={canDeleteCalendar}
+                mlNodesAvailable={nodesAvailable}
+                setSelectedCalendarList={this.setSelectedCalendarList}
+                itemsSelected={selectedForDeletion.length > 0}
+              />
+            </EuiPageContent>
+            {destroyModal}
+          </EuiPageBody>
         </EuiPage>
       </Fragment>
     );
   }
-});
+}
+
+export const CalendarsList = withKibana(CalendarsListUI);

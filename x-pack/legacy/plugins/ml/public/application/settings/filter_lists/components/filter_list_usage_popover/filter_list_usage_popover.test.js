@@ -4,40 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import { FilterListUsagePopover } from './filter_list_usage_popover';
 
-
 function prepareDetectorsTest() {
   const props = {
     entityType: 'detector',
-    entityValues: ['mean responsetime', 'max responsetime', 'count']
+    entityValues: ['mean responsetime', 'max responsetime', 'count'],
   };
 
-  const wrapper = shallow(
-    <FilterListUsagePopover {...props} />
-  );
+  const wrapper = shallow(<FilterListUsagePopover {...props} />);
 
   return { wrapper };
 }
 
 describe('FilterListUsagePopover', () => {
-
   test('renders the popover for 1 job', () => {
     const props = {
       entityType: 'job',
-      entityValues: ['farequote']
+      entityValues: ['farequote'],
     };
 
-    const component = shallow(
-      <FilterListUsagePopover {...props} />
-    );
+    const component = shallow(<FilterListUsagePopover {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the popover for 2 detectors', () => {
@@ -52,5 +44,4 @@ describe('FilterListUsagePopover', () => {
     test.wrapper.update();
     expect(test.wrapper).toMatchSnapshot();
   });
-
 });

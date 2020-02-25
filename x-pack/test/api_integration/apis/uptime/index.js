@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const es = getService('legacyEs');
 
   describe('uptime', () => {
@@ -12,7 +12,8 @@ export default function ({ getService, loadTestFile }) {
       es.indices.delete({
         index: 'heartbeat*',
         ignore: [404],
-      }));
+      })
+    );
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));

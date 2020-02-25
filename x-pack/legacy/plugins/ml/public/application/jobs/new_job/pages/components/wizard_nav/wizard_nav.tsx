@@ -8,7 +8,13 @@ import React, { FC, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
 interface StepsNavProps {
   previousActive?: boolean;
@@ -44,20 +50,23 @@ export const WizardNav: FC<StepsNavProps> = ({
 );
 
 export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = true }) => (
-  <EuiButton
+  <EuiButtonEmpty
     disabled={!previousActive}
     onClick={previous}
     iconType="arrowLeft"
+    iconSide="left"
     data-test-subj="mlJobWizardNavButtonPrevious"
   >
     <FormattedMessage id="xpack.ml.newJob.wizard.previousStepButton" defaultMessage="Previous" />
-  </EuiButton>
+  </EuiButtonEmpty>
 );
 
 export const NextButton: FC<StepsNavProps> = ({ next, nextActive = true }) => (
   <EuiButton
+    fill
     disabled={!nextActive}
     onClick={next}
+    iconSide="right"
     iconType="arrowRight"
     data-test-subj="mlJobWizardNavButtonNext"
   >

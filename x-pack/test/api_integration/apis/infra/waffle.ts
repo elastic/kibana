@@ -12,9 +12,9 @@ import {
   InfraNodeType,
   InfraTimerangeInput,
   InfraSnapshotGroupbyInput,
-} from '../../../../legacy/plugins/infra/server/graphql/types';
+} from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SnapshotNodeResponse } from '../../../../legacy/plugins/infra/common/http_api/snapshot_api';
+import { SnapshotNodeResponse } from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
 
 interface SnapshotRequest {
@@ -189,9 +189,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.003666666666666667,
-              avg: 0.00809090909090909,
-              max: 0.057833333333333334,
+              value: 0.009285714285714286,
+              max: 0.009285714285714286,
+              avg: 0.0015476190476190477,
             });
           }
         });
@@ -279,9 +279,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.003666666666666667,
-              avg: 0.00809090909090909,
-              max: 0.057833333333333334,
+              value: 0.009285714285714286,
+              max: 0.009285714285714286,
+              avg: 0.0015476190476190477,
             });
             const secondNode = nodes[1];
             expect(secondNode).to.have.property('path');
@@ -291,9 +291,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(secondNode).to.have.property('metric');
             expect(secondNode.metric).to.eql({
               name: 'cpu',
-              value: 0.003666666666666667,
-              avg: 0.00809090909090909,
-              max: 0.057833333333333334,
+              value: 0.009285714285714286,
+              max: 0.009285714285714286,
+              avg: 0.0015476190476190477,
             });
           }
         });

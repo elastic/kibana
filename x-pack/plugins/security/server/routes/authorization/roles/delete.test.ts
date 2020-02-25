@@ -73,16 +73,18 @@ describe('DELETE role', () => {
   };
 
   describe('failure', () => {
-    deleteRoleTest(`returns result of license checker`, {
+    deleteRoleTest('returns result of license checker', {
       name: 'foo-role',
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notFound('test not found message');
-    deleteRoleTest(`returns error from cluster client`, {
+    deleteRoleTest('returns error from cluster client', {
       name: 'foo-role',
-      apiResponse: () => Promise.reject(error),
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: { statusCode: 404, result: error },
     });
   });

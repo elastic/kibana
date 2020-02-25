@@ -19,7 +19,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useUiChromeContext } from '../contexts/ui/use_ui_chrome_context';
 import { NavigationMenu } from '../components/navigation_menu';
 
 interface Props {
@@ -28,8 +27,6 @@ interface Props {
 }
 
 export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
-  const basePath = useUiChromeContext().getBasePath();
-
   return (
     <Fragment>
       <NavigationMenu tabId="settings" />
@@ -38,12 +35,12 @@ export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
           <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
             <EuiPageContentHeader>
               <EuiTitle>
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.ml.settings.jobManagementTitle"
                     defaultMessage="Job Management"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiPageContentHeader>
 
@@ -53,7 +50,7 @@ export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
                   data-test-subj="ml_calendar_mng_button"
                   size="l"
                   color="primary"
-                  href={`${basePath}/app/ml#/settings/calendars_list`}
+                  href="#/settings/calendars_list"
                   isDisabled={canGetCalendars === false}
                 >
                   <FormattedMessage
@@ -68,7 +65,7 @@ export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
                   data-test-subj="ml_filter_lists_button"
                   size="l"
                   color="primary"
-                  href={`${basePath}/app/ml#/settings/filter_lists`}
+                  href="#/settings/filter_lists"
                   isDisabled={canGetFilters === false}
                 >
                   <FormattedMessage

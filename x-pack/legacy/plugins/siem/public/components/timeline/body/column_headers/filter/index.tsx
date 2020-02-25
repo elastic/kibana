@@ -5,14 +5,14 @@
  */
 
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { OnFilterChange } from '../../../events';
-import { ColumnHeader } from '../column_header';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { TextFilter } from '../text_filter';
 
 interface Props {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   onFilterChange?: OnFilterChange;
 }
 

@@ -29,13 +29,6 @@ describe('hash unhash url', () => {
 
   describe('hash url', () => {
     describe('does nothing', () => {
-      it('if missing input', () => {
-        expect(() => {
-          // @ts-ignore
-          hashUrl();
-        }).not.toThrowError();
-      });
-
       it('if url is empty', () => {
         const url = '';
         expect(hashUrl(url)).toBe(url);

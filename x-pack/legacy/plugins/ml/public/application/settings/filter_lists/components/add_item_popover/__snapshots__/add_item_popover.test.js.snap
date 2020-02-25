@@ -46,9 +46,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         labelType="label"
       >
         <EuiTextArea
-          fullWidth={false}
           onChange={[Function]}
-          resize="vertical"
           value=""
         />
       </EuiFormRow>
@@ -133,9 +131,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         labelType="label"
       >
         <EuiTextArea
-          fullWidth={false}
           onChange={[Function]}
-          resize="vertical"
           value=""
         />
       </EuiFormRow>
@@ -220,9 +216,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         labelType="label"
       >
         <EuiTextArea
-          fullWidth={false}
           onChange={[Function]}
-          resize="vertical"
           value=""
         />
       </EuiFormRow>

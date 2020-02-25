@@ -5,20 +5,16 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
-import '../../mock/ui_settings';
 import { TestProviders } from '../../mock';
 import { EmbeddableHeader } from './embeddable_header';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EmbeddableHeader', () => {
   test('it renders', () => {
     const wrapper = shallow(<EmbeddableHeader title="Test title" />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the title', () => {

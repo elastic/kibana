@@ -4,6 +4,8 @@
 
 ## AppBase.id property
 
+The unique identifier of the application
+
 <b>Signature:</b>
 
 ```typescript

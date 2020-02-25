@@ -47,6 +47,13 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       disabled: false,
       urlKey: 'network',
     },
+    [NetworkRouteType.alerts]: {
+      id: NetworkRouteType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.alerts),
+      disabled: false,
+      urlKey: 'network',
+    },
   };
 
   return hasMlUserPermissions ? networkNavTabs : omit([NetworkRouteType.anomalies], networkNavTabs);

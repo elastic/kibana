@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   condition: boolean[];
 }
 
-export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
+export function all(): ExpressionFunctionDefinition<'all', null, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().all;
 
   return {
     name: 'all',
     type: 'boolean',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       condition: {
         aliases: ['_'],
@@ -30,7 +28,7 @@ export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
         multi: true,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const conditions = args.condition || [];
       return conditions.every(Boolean);
     },

@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { initTelemetryCollection } from './server/maps_telemetry';
 import { getAppTitle } from './common/i18n_getters';
-import _ from 'lodash';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
-
   return new kibana.Plugin({
-    // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
+    require: ['kibana', 'elasticsearch'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
@@ -26,11 +24,12 @@ export function maps(kibana) {
       app: {
         title: getAppTitle(),
         description: i18n.translate('xpack.maps.appDescription', {
-          defaultMessage: 'Map application'
+          defaultMessage: 'Map application',
         }),
-        main: 'plugins/maps/index',
+        main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
@@ -44,25 +43,22 @@ export function maps(kibana) {
           emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
           emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
-          emsManifestServiceUrl: mapConfig.manifestServiceUrl,
+          emsFileApiUrl: mapConfig.emsFileApiUrl,
+          emsTileApiUrl: mapConfig.emsTileApiUrl,
           emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
           regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', [])
+          tilemap: _.get(mapConfig, 'tilemap', []),
         };
       },
-      embeddableFactories: [
-        'plugins/maps/embeddable/map_embeddable_factory'
-      ],
-      inspectorViews: [
-        'plugins/maps/inspector/views/register_views',
-      ],
-      home: ['plugins/maps/register_feature'],
+      embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
+      inspectorViews: ['plugins/maps/inspector/views/register_views'],
+      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
       savedObjectsManagement: {
         [MAP_SAVED_OBJECT_TYPE]: {
@@ -95,42 +91,45 @@ export function maps(kibana) {
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-      const { usageCollection } = server.newPlatform.setup.plugins;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      initTelemetryCollection(usageCollection, server);
+
+      // Init saved objects client deps
+      const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+      const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+      const internalRepository = getSavedObjectsRepository(callCluster);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
       const pluginsSetup = {
         featuresPlugin: newPlatformPlugins.features,
         licensing: newPlatformPlugins.licensing,
+        home: newPlatformPlugins.home,
+        usageCollection: newPlatformPlugins.usageCollection,
       };
 
       // legacy dependencies
       const __LEGACY = {
-        pluginRef: this,
         config: server.config,
-        mapConfig() { return server.config().get('map'); },
+        mapConfig() {
+          return server.config().get('map');
+        },
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          xpackMainPlugin: server.plugins.xpack_main
         },
         savedObjects: {
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
+          savedObjectsClient: new SavedObjectsClient(internalRepository),
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
-        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        replacePanelInSampleDatasetDashboard: server.replacePanelInSampleDatasetDashboard,
         injectUiAppVars: server.injectUiAppVars,
-        getInjectedUiAppVars: server.getInjectedUiAppVars
+        getInjectedUiAppVars: server.getInjectedUiAppVars,
       };
 
       const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
       server.expose('getMapConfig', mapPluginSetup.getMapConfig);
-    }
+    },
   });
 }

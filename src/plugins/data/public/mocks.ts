@@ -17,11 +17,11 @@
  * under the License.
  */
 import {
-  FieldFormatRegisty,
   Plugin,
-  FieldFormatsStart,
-  FieldFormatsSetup,
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
   IndexPatternsContract,
+  IFieldFormatsRegistry,
 } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -30,14 +30,13 @@ export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
-  addProvider: jest.fn(),
-  getProvider: jest.fn(),
-  clearProviders: jest.fn(),
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
+const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
-  getConfig: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,
   getDefaultInstanceCacheResolver: jest.fn(),
@@ -50,6 +49,8 @@ const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
+  deserialize: jest.fn(),
+  getTypeWithoutMetaParams: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
@@ -57,8 +58,14 @@ const createSetupContract = (): Setup => {
   const setupContract = {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
   };
 
   return setupContract;
@@ -69,16 +76,41 @@ const createStartContract = (): Start => {
   const startContract = {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
-    search: { search: jest.fn() },
-    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    search: {
+      search: jest.fn(),
+
+      __LEGACY: {
+        esClient: {
+          search: jest.fn(),
+          msearch: jest.fn(),
+        },
+      },
+    },
+    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
     },
-    indexPatterns: {} as IndexPatternsContract,
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+    } as unknown) as IndexPatternsContract,
   };
   return startContract;
 };
+
+export { searchSourceMock } from './search/mocks';
 
 export const dataPluginMock = {
   createSetupContract,

@@ -19,11 +19,11 @@
 import { assign } from 'lodash';
 
 export function TableVisController($scope) {
-  const uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
+  const uiStateSort = $scope.uiState ? $scope.uiState.get('vis.params.sort') : {};
   assign($scope.visParams.sort, uiStateSort);
 
   $scope.sort = $scope.visParams.sort;
-  $scope.$watchCollection('sort', function (newSort) {
+  $scope.$watchCollection('sort', function(newSort) {
     $scope.uiState.set('vis.params.sort', newSort);
   });
 
@@ -32,10 +32,9 @@ export function TableVisController($scope) {
    * - the underlying data changes (esResponse)
    * - one of the view options changes (vis.params)
    */
-  $scope.$watch('renderComplete', function () {
-
-    let tableGroups = $scope.tableGroups = null;
-    let hasSomeRows = $scope.hasSomeRows = null;
+  $scope.$watch('renderComplete', function() {
+    let tableGroups = ($scope.tableGroups = null);
+    let hasSomeRows = ($scope.hasSomeRows = null);
 
     if ($scope.esResponse) {
       tableGroups = $scope.esResponse;
@@ -54,5 +53,3 @@ export function TableVisController($scope) {
     $scope.renderComplete();
   });
 }
-
-

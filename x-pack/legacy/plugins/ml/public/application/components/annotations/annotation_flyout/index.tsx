@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ComponentType, Fragment, ReactNode } from 'react';
+import React, { Component, Fragment, FC, ReactNode } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 
 import {
@@ -23,20 +24,20 @@ import {
 } from '@elastic/eui';
 
 import { CommonProps } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { InjectedIntlProps } from 'react-intl';
-import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
 import {
   annotation$,
-  annotationsRefresh$,
+  annotationsRefreshed,
   AnnotationState,
 } from '../../../services/annotations_service';
-import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
 import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
 
 interface Props {
   annotation: AnnotationState;
@@ -46,7 +47,7 @@ interface State {
   isDeleteModalVisible: boolean;
 }
 
-class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlProps> {
+class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
   };
@@ -73,7 +74,8 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public deleteHandler = async () => {
-    const { annotation, intl } = this.props;
+    const { annotation } = this.props;
+    const toastNotifications = getToastNotifications();
 
     if (annotation === null) {
       return;
@@ -82,31 +84,30 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     try {
       await ml.annotations.deleteAnnotation(annotation._id);
       toastNotifications.addSuccess(
-        intl.formatMessage(
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
           {
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
             defaultMessage: 'Deleted annotation for job with ID {jobId}.',
-          },
-          { jobId: annotation.job_id }
+            values: { jobId: annotation.job_id },
+          }
         )
       );
     } catch (err) {
       toastNotifications.addDanger(
-        intl.formatMessage(
+        i18n.translate(
+          'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
           {
-            id:
-              'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
             defaultMessage:
               'An error occurred deleting the annotation for job with ID {jobId}: {error}',
-          },
-          { jobId: annotation.job_id, error: JSON.stringify(err) }
+            values: { jobId: annotation.job_id, error: JSON.stringify(err) },
+          }
         )
       );
     }
 
     this.closeDeleteModal();
     annotation$.next(null);
-    annotationsRefresh$.next(true);
+    annotationsRefreshed();
   };
 
   public closeDeleteModal = () => {
@@ -116,7 +117,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   public validateAnnotationText = () => {
     // Validates the entered text, returning an array of error messages
     // for display in the form. An empty array is returned if the text is valid.
-    const { annotation, intl } = this.props;
+    const { annotation } = this.props;
     const errors: string[] = [];
     if (annotation === null) {
       return errors;
@@ -124,8 +125,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
 
     if (annotation.annotation.trim().length === 0) {
       errors.push(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.noAnnotationTextError',
+        i18n.translate('xpack.ml.timeSeriesExplorer.annotationFlyout.noAnnotationTextError', {
           defaultMessage: 'Enter annotation text',
         })
       );
@@ -135,17 +135,14 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     if (textLength > ANNOTATION_MAX_LENGTH_CHARS) {
       const charsOver = textLength - ANNOTATION_MAX_LENGTH_CHARS;
       errors.push(
-        intl.formatMessage(
-          {
-            id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.maxLengthError',
-            defaultMessage:
-              '{charsOver, number} {charsOver, plural, one {character} other {characters}} above maximum length of {maxChars}',
-          },
-          {
+        i18n.translate('xpack.ml.timeSeriesExplorer.annotationFlyout.maxLengthError', {
+          defaultMessage:
+            '{charsOver, number} {charsOver, plural, one {character} other {characters}} above maximum length of {maxChars}',
+          values: {
             maxChars: ANNOTATION_MAX_LENGTH_CHARS,
             charsOver,
-          }
-        )
+          },
+        })
       );
     }
 
@@ -153,7 +150,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public saveOrUpdateAnnotation = () => {
-    const { annotation, intl } = this.props;
+    const { annotation } = this.props;
 
     if (annotation === null) {
       return;
@@ -164,54 +161,52 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     ml.annotations
       .indexAnnotation(annotation)
       .then(() => {
-        annotationsRefresh$.next(true);
+        annotationsRefreshed();
+        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addSuccess(
-            intl.formatMessage(
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
               {
-                id:
-                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
                 defaultMessage: 'Added an annotation for job with ID {jobId}.',
-              },
-              { jobId: annotation.job_id }
+                values: { jobId: annotation.job_id },
+              }
             )
           );
         } else {
           toastNotifications.addSuccess(
-            intl.formatMessage(
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
               {
-                id:
-                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
                 defaultMessage: 'Updated annotation for job with ID {jobId}.',
-              },
-              { jobId: annotation.job_id }
+                values: { jobId: annotation.job_id },
+              }
             )
           );
         }
       })
       .catch(resp => {
+        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addDanger(
-            intl.formatMessage(
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
               {
-                id:
-                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
                 defaultMessage:
                   'An error occurred creating the annotation for job with ID {jobId}: {error}',
-              },
-              { jobId: annotation.job_id, error: JSON.stringify(resp) }
+                values: { jobId: annotation.job_id, error: JSON.stringify(resp) },
+              }
             )
           );
         } else {
           toastNotifications.addDanger(
-            intl.formatMessage(
+            i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
               {
-                id:
-                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
                 defaultMessage:
                   'An error occurred updating the annotation for job with ID {jobId}: {error}',
-              },
-              { jobId: annotation.job_id, error: JSON.stringify(resp) }
+                values: { jobId: annotation.job_id, error: JSON.stringify(resp) },
+              }
             )
           );
         }
@@ -219,7 +214,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public render(): ReactNode {
-    const { annotation, intl } = this.props;
+    const { annotation } = this.props;
     const { isDeleteModalVisible } = this.state;
 
     if (annotation === null) {
@@ -238,13 +233,13 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
       isInvalid === false &&
       annotation.annotation.length > ANNOTATION_MAX_LENGTH_CHARS * lengthRatioToShowWarning
     ) {
-      helpText = intl.formatMessage(
+      helpText = i18n.translate(
+        'xpack.ml.timeSeriesExplorer.annotationFlyout.approachingMaxLengthWarning',
         {
-          id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.approachingMaxLengthWarning',
           defaultMessage:
             '{charsRemaining, number} {charsRemaining, plural, one {character} other {characters}} remaining',
-        },
-        { charsRemaining: ANNOTATION_MAX_LENGTH_CHARS - annotation.annotation.length }
+          values: { charsRemaining: ANNOTATION_MAX_LENGTH_CHARS - annotation.annotation.length },
+        }
       );
     }
 
@@ -344,7 +339,12 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   }
 }
 
-export const AnnotationFlyout = injectObservablesAsProps(
-  { annotation: annotation$ },
-  (injectI18n(AnnotationFlyoutIntl) as any) as ComponentType
-);
+export const AnnotationFlyout: FC<any> = props => {
+  const annotationProp = useObservable(annotation$);
+
+  if (annotationProp === undefined) {
+    return null;
+  }
+
+  return <AnnotationFlyoutUI annotation={annotationProp} {...props} />;
+};

@@ -28,7 +28,7 @@ export default function({ getService }: FtrProviderContext) {
       supertest
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-system-api', 'true')
+        .set('kbn-system-request', 'true')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(200);
@@ -43,7 +43,7 @@ export default function({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
         .expect(204)

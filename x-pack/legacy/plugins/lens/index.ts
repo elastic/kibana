@@ -7,10 +7,12 @@
 import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
-import { PLUGIN_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from './common';
-import { lensServerPlugin } from './server';
+import {
+  PLUGIN_ID,
+  getEditPath,
+  NOT_INTERNATIONALIZED_PRODUCT_NAME,
+} from '../../../plugins/lens/common';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -49,26 +51,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
       }).default();
-    },
-
-    init(server: Server) {
-      const kbnServer = (server as unknown) as KbnServer;
-
-      // Set up with the new platform plugin lifecycle API.
-      const plugin = lensServerPlugin();
-      const { usageCollection } = server.newPlatform.setup.plugins;
-
-      plugin.setup(kbnServer.newPlatform.setup.core, {
-        usageCollection,
-        // Legacy APIs
-        savedObjects: server.savedObjects,
-        config: server.config(),
-        server,
-      });
-
-      server.events.on('stop', () => {
-        plugin.stop();
-      });
     },
   });
 };

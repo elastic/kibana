@@ -26,11 +26,11 @@ export function buildNodeParams(child) {
 }
 
 export function toElasticsearchQuery(node, indexPattern, config, context) {
-  const [ argument ] = node.arguments;
+  const [argument] = node.arguments;
 
   return {
     bool: {
-      must_not: ast.toElasticsearchQuery(argument, indexPattern, config, context)
-    }
+      must_not: ast.toElasticsearchQuery(argument, indexPattern, config, context),
+    },
   };
 }

@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
 import {
@@ -34,10 +34,11 @@ const REACT_ROOT_ID = 'embeddableExplorerRoot';
 import {
   SayHelloAction,
   createSendMessageAction,
-  HelloWorldEmbeddableFactory,
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
+import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
 import {
   IEmbeddableStart,
   IEmbeddableSetup,
@@ -47,17 +48,15 @@ export interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
   };
 }
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
     onRenderComplete: (onRenderComplete: () => void) => void;
   };
@@ -107,7 +106,7 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
-          SavedObjectFinder={plugins.__LEGACY.SavedObjectFinder}
+          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           I18nContext={core.i18n.Context}
         />,
         root

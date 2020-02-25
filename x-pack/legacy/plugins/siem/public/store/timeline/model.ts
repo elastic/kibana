@@ -4,34 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
-import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../components/timeline/body/sort';
-import { Direction, PinnedEvent } from '../../graphql/types';
+import { PinnedEvent, TimelineNonEcsData } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
+export type EventType = 'all' | 'raw' | 'signal';
+
+export type ColumnHeaderType = 'not-filtered' | 'text-filter';
+
+/** Uniquely identifies a column */
+export type ColumnId = string;
+
+/** The specification of a column header */
+export interface ColumnHeaderOptions {
+  aggregatable?: boolean;
+  category?: string;
+  columnHeaderType: ColumnHeaderType;
+  description?: string;
+  example?: string;
+  format?: string;
+  id: ColumnId;
+  label?: string;
+  linkField?: string;
+  placeholder?: string;
+  type?: string;
+  width: number;
+}
 
 export interface TimelineModel {
   /** The columns displayed in the timeline */
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
+  /** Events to not be rendered **/
+  deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
+  /** Typoe of event you want to see in this timeline */
+  eventType?: EventType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** If selectAll checkbox in header is checked **/
+  isSelectAllChecked: boolean;
+  /** Events to be rendered as loading **/
+  loadingEventIds: string[];
   savedObjectId: string | null;
   /** When true, this timeline was marked as "favorite" by the user */
   isFavorite: boolean;
@@ -61,8 +88,14 @@ export interface TimelineModel {
     end: number;
   };
   savedQueryId?: string | null;
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** When true, show the timeline flyover */
   show: boolean;
+  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
+  showCheckboxes: boolean;
+  /** When true, shows additional rowRenderers below the PlainRowRenderer **/
+  showRowRenderers: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** Persists the UI state (width) of the timeline flyover */
@@ -78,22 +111,29 @@ export type SubsetTimelineModel = Readonly<
     TimelineModel,
     | 'columns'
     | 'dataProviders'
+    | 'deletedEventIds'
     | 'description'
+    | 'eventType'
     | 'eventIdToNoteIds'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'
     | 'isLive'
+    | 'isSelectAllChecked'
     | 'itemsPerPage'
     | 'itemsPerPageOptions'
     | 'kqlMode'
     | 'kqlQuery'
     | 'title'
+    | 'loadingEventIds'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectedEventIds'
     | 'show'
+    | 'showCheckboxes'
+    | 'showRowRenderers'
     | 'sort'
     | 'width'
     | 'isSaving'
@@ -103,39 +143,7 @@ export type SubsetTimelineModel = Readonly<
   >
 >;
 
-export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
-  columns: defaultHeaders,
-  dataProviders: [],
-  description: '',
-  eventIdToNoteIds: {},
-  highlightedDropAndProviderId: '',
-  historyIds: [],
-  filters: [],
-  isFavorite: false,
-  isLive: false,
-  isLoading: false,
-  isSaving: false,
-  itemsPerPage: 25,
-  itemsPerPageOptions: [10, 25, 50, 100],
-  kqlMode: 'filter',
-  kqlQuery: {
-    filterQuery: null,
-    filterQueryDraft: null,
-  },
-  title: '',
-  noteIds: [],
-  pinnedEventIds: {},
-  pinnedEventsSaveObject: {},
-  dateRange: {
-    start: 0,
-    end: 0,
-  },
-  savedObjectId: null,
-  show: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
-  width: DEFAULT_TIMELINE_WIDTH,
-  version: null,
-};
+export interface TimelineUrl {
+  id: string;
+  isOpen: boolean;
+}

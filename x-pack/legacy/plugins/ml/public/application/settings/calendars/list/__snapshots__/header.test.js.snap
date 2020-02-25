@@ -89,7 +89,7 @@ exports[`CalendarListsHeader renders header 1`] = `
             Object {
               "br": <br />,
               "learnMoreLink": <ForwardRef
-                href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/ml-calendars.html"
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-calendars.html"
                 target="_blank"
               >
                 <FormattedMessage

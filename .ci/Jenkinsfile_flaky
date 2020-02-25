@@ -99,7 +99,7 @@ def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWor
   def numberOfWorkers = Math.min(numberOfExecutions, maxWorkerProcesses)
 
   for(def i = 1; i <= numberOfWorkers; i++) {
-    def workerExecutions = numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
+    def workerExecutions = floor(numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0))
 
     workerMap["agent-${agentNumber}-worker-${i}"] = { workerNumber ->
       for(def j = 0; j < workerExecutions; j++) {

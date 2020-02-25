@@ -17,29 +17,46 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+
 import {
+  EnvironmentService,
+  EnvironmentServiceSetup,
+  EnvironmentServiceStart,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistryStart,
+  TutorialService,
+  TutorialServiceSetup,
+  TutorialServiceStart,
 } from './services';
+import { ConfigSchema } from '../config';
 
 export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
+  private readonly environmentService = new EnvironmentService();
+  private readonly tutorialService = new TutorialService();
 
-  public async setup() {
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
+
+  public setup(): HomePublicPluginSetup {
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
+      environment: { ...this.environmentService.setup() },
+      tutorials: { ...this.tutorialService.setup() },
+      config: this.initializerContext.config.get(),
     };
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart): HomePublicPluginStart {
     return {
       featureCatalogue: {
         ...this.featuresCatalogueRegistry.start({
           capabilities: core.application.capabilities,
         }),
       },
+      tutorials: { ...this.tutorialService.start() },
+      environment: { ...this.environmentService.start() },
     };
   }
 }
@@ -51,11 +68,33 @@ export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
 export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
 
 /** @public */
+export type EnvironmentSetup = EnvironmentServiceSetup;
+
+/** @public */
+export type EnvironmentStart = EnvironmentServiceStart;
+
+/** @public */
+export type TutorialSetup = TutorialServiceSetup;
+
+/** @public */
+export type TutorialStart = TutorialServiceStart;
+
+/** @public */
 export interface HomePublicPluginSetup {
+  tutorials: TutorialServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
+  /**
+   * The environment service is only available for a transition period and will
+   * be replaced by display specific extension points.
+   * @deprecated
+   */
+  environment: EnvironmentSetup;
+  config: ConfigSchema;
 }
 
 /** @public */
 export interface HomePublicPluginStart {
+  tutorials: TutorialServiceStart;
   featureCatalogue: FeatureCatalogueStart;
+  environment: EnvironmentStart;
 }

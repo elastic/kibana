@@ -9,10 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiConfirmModal,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 import { pauseFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
@@ -21,20 +18,20 @@ import { areAllSettingsDefault } from '../services/follower_index_default_settin
 class FollowerIndexPauseProviderUi extends PureComponent {
   static propTypes = {
     onConfirm: PropTypes.func,
-  }
+  };
 
   state = {
     isModalOpen: false,
-    indices: []
-  }
+    indices: [],
+  };
 
-  onMouseOverModal = (event) => {
+  onMouseOverModal = event => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  pauseFollowerIndex = (index) => {
+  pauseFollowerIndex = index => {
     this.setState({ isModalOpen: true, indices: arrify(index) });
   };
 
@@ -42,7 +39,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
     this.props.pauseFollowerIndex(this.state.indices.map(index => index.name));
     this.setState({ isModalOpen: false, indices: [] });
     this.props.onConfirm && this.props.onConfirm();
-  }
+  };
 
   closeConfirmModal = () => {
     this.setState({
@@ -54,32 +51,42 @@ class FollowerIndexPauseProviderUi extends PureComponent {
     const { indices } = this.state;
     const isSingle = indices.length === 1;
     const title = isSingle
-      ? i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle', {
-        defaultMessage: `Pause replication to follower index '{name}'?`,
-        values: { name: indices[0].name },
-      })
-      : i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle', {
-        defaultMessage: 'Pause replication to {count} follower indices?',
-        values: { count: indices.length },
-      });
+      ? i18n.translate(
+          'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
+          {
+            defaultMessage: `Pause replication to follower index '{name}'?`,
+            values: { name: indices[0].name },
+          }
+        )
+      : i18n.translate(
+          'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
+          {
+            defaultMessage: 'Pause replication to {count} follower indices?',
+            values: { count: indices.length },
+          }
+        );
     const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
 
     return (
       <EuiOverlayMask>
-        { /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */ }
+        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
           onCancel={this.closeConfirmModal}
           onConfirm={this.onConfirm}
-          cancelButtonText={
-            i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText', {
+          cancelButtonText={i18n.translate(
+            'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText',
+            {
               defaultMessage: 'Cancel',
-            })
-          }
+            }
+          )}
           buttonColor={hasCustomSettings ? 'danger' : 'primary'}
-          confirmButtonText={i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText', {
-            defaultMessage: 'Pause replication',
-          })}
+          confirmButtonText={i18n.translate(
+            'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
+            {
+              defaultMessage: 'Pause replication',
+            }
+          )}
           onMouseOver={this.onMouseOverModal}
           data-test-subj="pauseReplicationConfirmation"
         >
@@ -111,14 +118,16 @@ class FollowerIndexPauseProviderUi extends PureComponent {
               </p>
 
               <ul>
-                {indices.map(index => <li key={index.name}>{index.name}</li>)}
+                {indices.map(index => (
+                  <li key={index.name}>{index.name}</li>
+                ))}
               </ul>
             </Fragment>
           )}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
-  }
+  };
 
   render() {
     const { children } = this.props;
@@ -133,12 +142,11 @@ class FollowerIndexPauseProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  pauseFollowerIndex: (id) => dispatch(pauseFollowerIndex(id)),
+const mapDispatchToProps = dispatch => ({
+  pauseFollowerIndex: id => dispatch(pauseFollowerIndex(id)),
 });
 
 export const FollowerIndexPauseProvider = connect(
   undefined,
   mapDispatchToProps
 )(FollowerIndexPauseProviderUi);
-

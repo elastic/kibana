@@ -9,22 +9,15 @@ import React from 'react';
 
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { mockBrowserFields } from '../../../containers/source/mock';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../mock';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { QueryBar } from '../../query_bar';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
 import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-  savedObjects: {},
-}));
+jest.mock('../../../lib/kibana');
 
 describe('Timeline QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux

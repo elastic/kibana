@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { StartDatafeedModal } from './start_datafeed_modal';

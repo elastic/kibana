@@ -37,7 +37,7 @@ export interface Flags {
 }
 
 export function getFlags(argv: string[], options: Options): Flags {
-  const unexpected: string[] = [];
+  const unexpectedNames = new Set<string>();
   const flagOpts = options.flags || {};
 
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
@@ -49,15 +49,64 @@ export function getFlags(argv: string[], options: Options): Flags {
     },
     default: flagOpts.default,
     unknown: (name: string) => {
-      unexpected.push(name);
-
-      if (options.flags && options.flags.allowUnexpected) {
-        return true;
-      }
-
-      return false;
+      unexpectedNames.add(name);
+      return flagOpts.guessTypesForUnexpectedFlags;
     },
   } as any);
+
+  const unexpected: string[] = [];
+  for (const unexpectedName of unexpectedNames) {
+    const matchingArgv: string[] = [];
+
+    iterArgv: for (const [i, v] of argv.entries()) {
+      for (const prefix of ['--', '-']) {
+        if (v.startsWith(prefix)) {
+          // -/--name=value
+          if (v.startsWith(`${prefix}${unexpectedName}=`)) {
+            matchingArgv.push(v);
+            continue iterArgv;
+          }
+
+          // -/--name (value possibly follows)
+          if (v === `${prefix}${unexpectedName}`) {
+            matchingArgv.push(v);
+
+            // value follows -/--name
+            if (argv.length > i + 1 && !argv[i + 1].startsWith('-')) {
+              matchingArgv.push(argv[i + 1]);
+            }
+
+            continue iterArgv;
+          }
+        }
+      }
+
+      // special case for `--no-{flag}` disabling of boolean flags
+      if (v === `--no-${unexpectedName}`) {
+        matchingArgv.push(v);
+        continue iterArgv;
+      }
+
+      // special case for shortcut flags formatted as `-abc` where `a`, `b`,
+      // and `c` will be three separate unexpected flags
+      if (
+        unexpectedName.length === 1 &&
+        v[0] === '-' &&
+        v[1] !== '-' &&
+        !v.includes('=') &&
+        v.includes(unexpectedName)
+      ) {
+        matchingArgv.push(`-${unexpectedName}`);
+        continue iterArgv;
+      }
+    }
+
+    if (matchingArgv.length) {
+      unexpected.push(...matchingArgv);
+    } else {
+      throw new Error(`unable to find unexpected flag named "${unexpectedName}"`);
+    }
+  }
 
   return {
     verbose,
@@ -75,7 +124,7 @@ export function getHelp(options: Options) {
   const usage = options.usage || `node ${relative(process.cwd(), process.argv[1])}`;
 
   const optionHelp = (
-    dedent((options.flags && options.flags.help) || '') +
+    dedent(options?.flags?.help || '') +
     '\n' +
     dedent`
       --verbose, -v      Log verbosely

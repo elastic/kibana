@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
@@ -42,7 +42,7 @@ export default function({ getService }: FtrProviderContext) {
     expect(sessionCookie.httpOnly).to.be(true);
 
     const apiResponse = await supertest
-      .get('/api/security/v1/me')
+      .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
@@ -56,6 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       'enabled',
       'authentication_realm',
       'lookup_realm',
+      'authentication_provider',
     ]);
 
     expect(apiResponse.body.username).to.be('a@b.c');
@@ -64,7 +65,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('SAML authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
     });
@@ -72,7 +73,7 @@ export default function({ getService }: FtrProviderContext) {
     it('does not prevent basic login', async () => {
       const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username, password })
         .expect(204);
@@ -81,13 +82,14 @@ export default function({ getService }: FtrProviderContext) {
       expect(cookies).to.have.length(1);
 
       const { body: user } = await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', request.cookie(cookies[0])!.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('capture URL fragment', () => {
@@ -192,7 +194,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
@@ -300,7 +302,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should extend cookie on every successful non-system API call', async () => {
         const apiResponseOne = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -312,7 +314,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
 
         const apiResponseTwo = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -326,9 +328,9 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should not extend cookie for system API calls', async () => {
         const systemAPIResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -337,7 +339,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail and preserve session cookie if unsupported authentication schema is used', async () => {
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
@@ -383,7 +385,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should redirect to IdP with SAML request to complete logout', async () => {
         const logoutResponse = await supertest
-          .get('/api/security/v1/logout')
+          .get('/api/security/logout')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -404,7 +406,7 @@ export default function({ getService }: FtrProviderContext) {
         // Tokens that were stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -417,7 +419,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
-        const logoutResponse = await supertest.get('/api/security/v1/logout').expect(302);
+        const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/');
@@ -425,7 +427,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should reject AJAX requests', async () => {
         const ajaxResponse = await supertest
-          .get('/api/security/v1/logout')
+          .get('/api/security/logout')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -441,7 +443,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/v1/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -462,7 +464,7 @@ export default function({ getService }: FtrProviderContext) {
         // Tokens that were stored in the previous cookie should be invalidated as well and old session
         // cookie should not allow API access.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -477,7 +479,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/v1/logout?${querystring.stringify(logoutRequest)}`)
+          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
@@ -490,7 +492,7 @@ export default function({ getService }: FtrProviderContext) {
         // IdP session id (encoded in SAML LogoutRequest) even if Kibana doesn't provide them and session
         // cookie with these tokens should not allow API access.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -548,7 +550,7 @@ export default function({ getService }: FtrProviderContext) {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -562,7 +564,7 @@ export default function({ getService }: FtrProviderContext) {
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
         // Returned cookie will contain the same new access and refresh token pairs as the first request
         const secondResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -577,14 +579,14 @@ export default function({ getService }: FtrProviderContext) {
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', firstNewCookie.cookieString())
           .expect(200);
 
         // The second new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
@@ -701,7 +703,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Tokens from old cookie are invalidated.
         const rejectedResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .expect(400);
@@ -712,7 +714,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Only tokens from new session are valid.
         const acceptedResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', newSessionCookie.cookieString())
           .expect(200);
@@ -737,7 +739,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Tokens from old cookie are invalidated.
         const rejectedResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .expect(400);
@@ -748,7 +750,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Only tokens from new session are valid.
         const acceptedResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', newSessionCookie.cookieString())
           .expect(200);

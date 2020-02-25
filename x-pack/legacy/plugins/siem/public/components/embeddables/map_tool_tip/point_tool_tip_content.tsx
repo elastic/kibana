@@ -15,6 +15,7 @@ import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
+import { FlowTarget } from '../../../graphql/types';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -66,7 +67,8 @@ export const getRenderedFieldValue = (field: string, value: string) => {
   } else if (['host.name'].includes(field)) {
     return <HostDetailsLink hostName={value} />;
   } else if (['source.ip', 'destination.ip'].includes(field)) {
-    return <IPDetailsLink ip={value} />;
+    const flowTarget = field.split('.')[0] as FlowTarget;
+    return <IPDetailsLink ip={value} flowTarget={flowTarget} />;
   }
   return <>{value}</>;
 };

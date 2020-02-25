@@ -18,10 +18,9 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/server';
-import { Plugin } from './plugin';
-import { ConfigSchema } from './config';
+import { UsageCollectionPlugin } from './plugin';
 
 export { UsageCollectionSetup } from './plugin';
-export const config = { schema: ConfigSchema };
+export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+  new UsageCollectionPlugin(initializerContext);

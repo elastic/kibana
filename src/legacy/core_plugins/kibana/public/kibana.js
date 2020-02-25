@@ -20,7 +20,6 @@
 // autoloading
 
 // preloading (for faster webpack builds)
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { npSetup } from 'ui/new_platform';
@@ -29,7 +28,6 @@ import { npSetup } from 'ui/new_platform';
 import 'uiExports/home';
 import 'uiExports/visTypes';
 
-import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormatEditors';
@@ -48,28 +46,28 @@ import 'uiExports/interpreter';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
 import './home';
-import './discover';
-import './visualize';
-import './dashboard';
+import './discover/legacy';
+import './visualize/legacy';
+import './dashboard/legacy';
 import './management';
 import './dev_tools';
-import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import { showAppRedirectNotification } from 'ui/notify';
+import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-
-npSetup.plugins.kibana_legacy.forwardApp('doc', 'discover', { keepPrefix: true });
-npSetup.plugins.kibana_legacy.forwardApp('context', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('context', 'discover', { keepPrefix: true });
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
-routes
-  .otherwise({
-    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-  });
+const { config } = npSetup.plugins.kibanaLegacy;
+routes.otherwise({
+  redirectTo: `/${config.defaultAppId || 'discover'}`,
+});
 
-uiModules.get('kibana').run(showAppRedirectNotification);
+uiModules
+  .get('kibana')
+  .run($location => showAppRedirectNotification($location, npSetup.core.notifications.toasts));

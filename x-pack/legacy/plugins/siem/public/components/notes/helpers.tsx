@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
@@ -35,11 +35,9 @@ export const search = {
     incremental: true,
     placeholder: i18n.SEARCH_PLACEHOLDER,
     schema: {
-      user: {
-        type: 'string',
-      },
-      note: {
-        type: 'string',
+      fields: {
+        user: 'string',
+        note: 'string',
       },
     },
   },

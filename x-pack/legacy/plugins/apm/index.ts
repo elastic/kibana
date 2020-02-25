@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import mappings from './mappings.json';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -18,7 +18,6 @@ export const apm: LegacyPluginInitializer = kibana => {
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
-
     uiExports: {
       app: {
         title: 'APM',
@@ -28,7 +27,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
-        order: 8100
+        order: 8100,
+        category: DEFAULT_APP_CATEGORIES.observability
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/legacy_register_feature'],
@@ -107,11 +107,9 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      makeApmUsageCollector(usageCollection, server);
+
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
-
       apmPlugin.registerLegacyAPI({ server });
     }
   });

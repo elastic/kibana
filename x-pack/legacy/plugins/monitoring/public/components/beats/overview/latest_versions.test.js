@@ -12,14 +12,10 @@ describe('Latest Versions', () => {
   test('that latest active component renders normally', () => {
     const latestVersions = [
       { version: '6.3.1', count: 8 },
-      { version: '6.3.0', count: 2 }
+      { version: '6.3.0', count: 2 },
     ];
 
-    const component = shallow(
-      <LatestVersions
-        latestVersions={latestVersions}
-      />
-    );
+    const component = shallow(<LatestVersions latestVersions={latestVersions} />);
 
     expect(component).toMatchSnapshot();
   });

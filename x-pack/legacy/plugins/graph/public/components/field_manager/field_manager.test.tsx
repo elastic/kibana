@@ -33,6 +33,7 @@ describe('field_manager', () => {
           selected: true,
           type: 'string',
           hopSize: 5,
+          aggregatable: true,
         },
         {
           name: 'field2',
@@ -42,6 +43,7 @@ describe('field_manager', () => {
           type: 'string',
           hopSize: 0,
           lastValidHopSize: 5,
+          aggregatable: false,
         },
         {
           name: 'field3',
@@ -50,6 +52,16 @@ describe('field_manager', () => {
           selected: false,
           type: 'string',
           hopSize: 5,
+          aggregatable: true,
+        },
+        {
+          name: 'field4',
+          color: 'orange',
+          icon: getSuitableIcon('field4'),
+          selected: false,
+          type: 'string',
+          hopSize: 5,
+          aggregatable: false,
         },
       ])
     );
@@ -58,14 +70,16 @@ describe('field_manager', () => {
     store.dispatch = dispatchSpy;
 
     instance = shallow(
+      // https://github.com/airbnb/enzyme/issues/2176#issuecomment-532361526
       <Provider store={store}>
-        <FieldManager pickerOpen={true} setPickerOpen={() => {}} />
+        <FieldManager pickerOpen={true} setPickerOpen={() => {}} store={store} />
       </Provider>
     );
 
     getInstance = () =>
       instance
         .find(FieldManager)
+        .dive()
         .dive()
         .dive();
   });
@@ -84,6 +98,17 @@ describe('field_manager', () => {
         .at(1)
         .prop('field').name
     ).toEqual('field2');
+  });
+
+  it('should show selected non-aggregatable fields in picker, but hide unselected ones', () => {
+    expect(
+      getInstance()
+        .find(FieldPicker)
+        .dive()
+        .find(EuiSelectable)
+        .prop('options')
+        .map((option: { label: string }) => option.label)
+    ).toEqual(['field1', 'field2', 'field3']);
   });
 
   it('should select fields from picker', () => {
@@ -128,6 +153,25 @@ describe('field_manager', () => {
     });
 
     expect(getInstance().find(FieldEditor).length).toEqual(1);
+  });
+
+  it('should show remove non-aggregatable fields from picker after deselection', () => {
+    act(() => {
+      getInstance()
+        .find(FieldEditor)
+        .at(1)
+        .dive()
+        .find(EuiContextMenu)
+        .prop('panels')![0].items![2].onClick!({} as any);
+    });
+    expect(
+      getInstance()
+        .find(FieldPicker)
+        .dive()
+        .find(EuiSelectable)
+        .prop('options')
+        .map((option: { label: string }) => option.label)
+    ).toEqual(['field1', 'field3']);
   });
 
   it('should disable field', () => {

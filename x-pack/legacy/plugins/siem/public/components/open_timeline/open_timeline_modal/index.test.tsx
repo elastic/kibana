@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
@@ -16,7 +16,7 @@ import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 
 import { OpenTimelineModal } from '.';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/kibana');
 jest.mock('../../../utils/apollo_context', () => ({
   useApolloClient: () => ({}),
 }));

@@ -24,7 +24,6 @@ import {
   saveObject,
 } from '../resolve_saved_objects';
 
-
 jest.mock('../../../../../../../../../plugins/kibana_utils/public', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -120,12 +119,7 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      const result = await resolveSavedObjects(
-        savedObjects,
-        overwriteAll,
-        services,
-        indexPatterns
-      );
+      const result = await resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns);
 
       expect(result.conflictedIndexPatterns.length).toBe(3);
       expect(result.conflictedSavedObjectsLinkedToSavedSearches.length).toBe(0);
@@ -212,12 +206,7 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      const result = await resolveSavedObjects(
-        savedObjects,
-        overwriteAll,
-        services,
-        indexPatterns
-      );
+      const result = await resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns);
 
       expect(result.conflictedIndexPatterns.length).toBe(1);
       expect(result.conflictedSavedObjectsLinkedToSavedSearches.length).toBe(1);
@@ -234,7 +223,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: (field) => {
+              getOwnField: field => {
                 return field === 'index' ? '1' : undefined;
               },
             },
@@ -245,7 +234,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: (field) => {
+              getOwnField: field => {
                 return field === 'index' ? '3' : undefined;
               },
             },
@@ -272,11 +261,7 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(
-        resolutions,
-        conflictedIndexPatterns,
-        overwriteAll
-      );
+      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll);
       expect(hydrateIndexPattern.mock.calls.length).toBe(2);
       expect(save.mock.calls.length).toBe(2);
       expect(save).toHaveBeenCalledWith({ confirmOverwrite: !overwriteAll });
@@ -292,7 +277,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: (field) => {
+              getOwnField: field => {
                 return field === 'index' ? '1' : [{ meta: { index: 'filterIndex' } }];
               },
               setField: jest.fn(),
@@ -304,7 +289,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: (field) => {
+              getOwnField: field => {
                 return field === 'index' ? '3' : undefined;
               },
             },
@@ -331,13 +316,11 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(
-        resolutions,
-        conflictedIndexPatterns,
-        overwriteAll
-      );
+      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll);
 
-      expect(conflictedIndexPatterns[0].obj.searchSource.setField).toHaveBeenCalledWith('filter', [{ meta: { index: 'newFilterIndex' } }]);
+      expect(conflictedIndexPatterns[0].obj.searchSource.setField).toHaveBeenCalledWith('filter', [
+        { meta: { index: 'newFilterIndex' } },
+      ]);
       expect(save.mock.calls.length).toBe(2);
     });
   });

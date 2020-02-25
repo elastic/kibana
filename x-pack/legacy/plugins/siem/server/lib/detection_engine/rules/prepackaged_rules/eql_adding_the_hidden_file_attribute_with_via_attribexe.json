@@ -1,0 +1,51 @@
+{
+  "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Adding Hidden File Attribute via Attrib",
+  "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
+  "risk_score": 21,
+  "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1158",
+          "name": "Hidden Files and Directories",
+          "reference": "https://attack.mitre.org/techniques/T1158/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1158",
+          "name": "Hidden Files and Directories",
+          "reference": "https://attack.mitre.org/techniques/T1158/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

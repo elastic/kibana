@@ -20,10 +20,8 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
+      min={1}
       onChange={[Function]}
     />
   </EuiFormRow>

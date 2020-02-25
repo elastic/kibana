@@ -22,14 +22,14 @@ export class WmsClient {
     const serviceUrl = parse(this._serviceUrl, true);
     const queryParams = {
       ...serviceUrl.query,
-      ...defaultQueryParams
+      ...defaultQueryParams,
     };
     return format({
       protocol: serviceUrl.protocol,
       hostname: serviceUrl.hostname,
       port: serviceUrl.port,
       pathname: serviceUrl.pathname,
-      query: queryParams
+      query: queryParams,
     });
   }
 
@@ -44,7 +44,7 @@ export class WmsClient {
       width: '256',
       height: '256',
       layers,
-      styles
+      styles,
     });
     //TODO Find a better way to avoid URL encoding the template braces
     return `${urlTemplate}&bbox={bbox-epsg-3857}`;
@@ -61,16 +61,18 @@ export class WmsClient {
       ...{
         version: '1.1.1',
         request: 'GetCapabilities',
-        service: 'WMS'
-      }
+        service: 'WMS',
+      },
     };
-    const resp = await this._fetch(format({
-      protocol: getCapabilitiesUrl.protocol,
-      hostname: getCapabilitiesUrl.hostname,
-      port: getCapabilitiesUrl.port,
-      pathname: getCapabilitiesUrl.pathname,
-      query: queryParams
-    }));
+    const resp = await this._fetch(
+      format({
+        protocol: getCapabilitiesUrl.protocol,
+        hostname: getCapabilitiesUrl.hostname,
+        port: getCapabilitiesUrl.port,
+        pathname: getCapabilitiesUrl.pathname,
+        query: queryParams,
+      })
+    );
     if (resp.status >= 400) {
       throw new Error(`Unable to access ${this.state.serviceUrl}`);
     }
@@ -82,11 +84,14 @@ export class WmsClient {
   async getCapabilities() {
     const rawCapabilities = await this._fetchCapabilities();
 
-    const { layers, styles } = reduceLayers([], _.get(rawCapabilities, 'WMT_MS_Capabilities.Capability[0].Layer', []));
+    const { layers, styles } = reduceLayers(
+      [],
+      _.get(rawCapabilities, 'WMT_MS_Capabilities.Capability[0].Layer', [])
+    );
 
     return {
       layers: groupCapabilities(layers),
-      styles: groupCapabilities(styles)
+      styles: groupCapabilities(styles),
     };
   }
 }
@@ -99,34 +104,32 @@ function reduceLayers(path, layers) {
   function createOption(optionPath, optionTitle, optionName) {
     return {
       path: [...optionPath, optionTitle],
-      value: optionName
+      value: optionName,
     };
   }
 
   return layers.reduce((accumulatedCapabilities, layer) => {
     // Layer is hierarchical, continue traversing
     if (layer.Layer) {
-      const hierarchicalCapabilities  = reduceLayers([...path, layer.Title[0]], layer.Layer);
+      const hierarchicalCapabilities = reduceLayers([...path, layer.Title[0]], layer.Layer);
       return {
         layers: [...accumulatedCapabilities.layers, ...hierarchicalCapabilities.layers],
-        styles: [...accumulatedCapabilities.styles, ...hierarchicalCapabilities.styles]
+        styles: [...accumulatedCapabilities.styles, ...hierarchicalCapabilities.styles],
       };
     }
 
     const updatedStyles = [...accumulatedCapabilities.styles];
     if (_.has(layer, 'Style[0]')) {
-      updatedStyles.push(createOption(
-        path,
-        _.get(layer, 'Style[0].Title[0]'),
-        _.get(layer, 'Style[0].Name[0]')
-      ));
+      updatedStyles.push(
+        createOption(path, _.get(layer, 'Style[0].Title[0]'), _.get(layer, 'Style[0].Name[0]'))
+      );
     }
     return {
       layers: [
         ...accumulatedCapabilities.layers,
-        createOption(path, layer.Title[0], layer.Name[0])
+        createOption(path, layer.Title[0], layer.Name[0]),
       ],
-      styles: updatedStyles
+      styles: updatedStyles,
     };
   }, emptyCapabilities);
 }
@@ -146,14 +149,18 @@ function groupCapabilities(list) {
   });
 
   let rootCommonPath = list[0].path;
-  for(let listIndex = 1; listIndex < list.length; listIndex++) {
+  for (let listIndex = 1; listIndex < list.length; listIndex++) {
     if (rootCommonPath.length === 0) {
       // No commonality in root path, nothing left to verify
       break;
     }
 
     const path = list[listIndex].path;
-    for(let pathIndex = 0; pathIndex < path.length && pathIndex < rootCommonPath.length; pathIndex++) {
+    for (
+      let pathIndex = 0;
+      pathIndex < path.length && pathIndex < rootCommonPath.length;
+      pathIndex++
+    ) {
       if (rootCommonPath[pathIndex] !== path[pathIndex]) {
         // truncate root common path at location of divergence
         rootCommonPath = rootCommonPath.slice(0, pathIndex);
@@ -165,12 +172,11 @@ function groupCapabilities(list) {
   const labelMap = new Map();
   const options = list.map(({ path, value }) => {
     const title = path[path.length - 1];
-    const hierachyWithTitle = rootCommonPath.length === path.length
-      ? title // entire path is common, only use title
-      : path.splice(rootCommonPath.length).join(' - ');
-    const label = title === value
-      ? hierachyWithTitle
-      : `${hierachyWithTitle} (${value})`;
+    const hierachyWithTitle =
+      rootCommonPath.length === path.length
+        ? title // entire path is common, only use title
+        : path.splice(rootCommonPath.length).join(' - ');
+    const label = title === value ? hierachyWithTitle : `${hierachyWithTitle} (${value})`;
 
     // labels are used as keys in react elements so uniqueness must be guaranteed
     let uniqueLabel;
@@ -191,8 +197,10 @@ function groupCapabilities(list) {
     return options;
   }
 
-  return [{
-    label: rootCommonPath.join(' - '),
-    options
-  }];
+  return [
+    {
+      label: rootCommonPath.join(' - '),
+      options,
+    },
+  ];
 }

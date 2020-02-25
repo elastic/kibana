@@ -19,11 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getDefaultFormat = (Format) => {
+export const getDefaultFormat = Format => {
   class DefaultFormat extends Format {
     static id = '';
     static resolvedTitle = Format.title;
-    static title = i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', { defaultMessage: '- Default -' });
+    static title = i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', {
+      defaultMessage: '- Default -',
+    });
   }
 
   return DefaultFormat;

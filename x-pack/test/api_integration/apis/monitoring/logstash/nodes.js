@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import nodesFixture from './fixtures/nodes';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/logstash-pipelines';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
-      max: '2018-01-22T09:41:04.000Z'
+      max: '2018-01-22T09:41:04.000Z',
     };
 
     before('load archive', () => {

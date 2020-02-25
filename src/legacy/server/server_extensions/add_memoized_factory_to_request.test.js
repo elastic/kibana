@@ -31,9 +31,12 @@ describe('server.addMemoizedFactoryToRequest()', () => {
       }
       decorate(type, name, value) {
         switch (type) {
-          case 'request': return Request.prototype[name] = value;
-          case 'server': return Server.prototype[name] = value;
-          default: throw new Error(`Unexpected decorate type ${type}`);
+          case 'request':
+            return (Request.prototype[name] = value);
+          case 'server':
+            return (Server.prototype[name] = value);
+          default:
+            throw new Error(`Unexpected decorate type ${type}`);
         }
       }
     }
@@ -46,36 +49,76 @@ describe('server.addMemoizedFactoryToRequest()', () => {
   it('throws when propertyName is not a string', () => {
     const { server } = setup();
     expect(() => server.addMemoizedFactoryToRequest()).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest(null)).toThrowError('methodName must be a string');
+    expect(() => server.addMemoizedFactoryToRequest(null)).toThrowError(
+      'methodName must be a string'
+    );
     expect(() => server.addMemoizedFactoryToRequest(1)).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest(true)).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest(/abc/)).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest(['foo'])).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest([1])).toThrowError('methodName must be a string');
-    expect(() => server.addMemoizedFactoryToRequest({})).toThrowError('methodName must be a string');
+    expect(() => server.addMemoizedFactoryToRequest(true)).toThrowError(
+      'methodName must be a string'
+    );
+    expect(() => server.addMemoizedFactoryToRequest(/abc/)).toThrowError(
+      'methodName must be a string'
+    );
+    expect(() => server.addMemoizedFactoryToRequest(['foo'])).toThrowError(
+      'methodName must be a string'
+    );
+    expect(() => server.addMemoizedFactoryToRequest([1])).toThrowError(
+      'methodName must be a string'
+    );
+    expect(() => server.addMemoizedFactoryToRequest({})).toThrowError(
+      'methodName must be a string'
+    );
   });
 
   it('throws when factory is not a function', () => {
     const { server } = setup();
-    expect(() => server.addMemoizedFactoryToRequest('name')).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', null)).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', 1)).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', true)).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', /abc/)).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', ['foo'])).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', [1])).toThrowError('factory must be a function');
-    expect(() => server.addMemoizedFactoryToRequest('name', {})).toThrowError('factory must be a function');
+    expect(() => server.addMemoizedFactoryToRequest('name')).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', null)).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', 1)).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', true)).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', /abc/)).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', ['foo'])).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', [1])).toThrowError(
+      'factory must be a function'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', {})).toThrowError(
+      'factory must be a function'
+    );
   });
 
   it('throws when factory takes more than one arg', () => {
     const { server } = setup();
     /* eslint-disable no-unused-vars */
-    expect(() => server.addMemoizedFactoryToRequest('name', () => {})).not.toThrowError('more than one argument');
-    expect(() => server.addMemoizedFactoryToRequest('name', (a) => {})).not.toThrowError('more than one argument');
-    expect(() => server.addMemoizedFactoryToRequest('name', (a, b) => {})).toThrowError('more than one argument');
-    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c) => {})).toThrowError('more than one argument');
-    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c, d) => {})).toThrowError('more than one argument');
-    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c, d, e) => {})).toThrowError('more than one argument');
+    expect(() => server.addMemoizedFactoryToRequest('name', () => {})).not.toThrowError(
+      'more than one argument'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', a => {})).not.toThrowError(
+      'more than one argument'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', (a, b) => {})).toThrowError(
+      'more than one argument'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c) => {})).toThrowError(
+      'more than one argument'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c, d) => {})).toThrowError(
+      'more than one argument'
+    );
+    expect(() => server.addMemoizedFactoryToRequest('name', (a, b, c, d, e) => {})).toThrowError(
+      'more than one argument'
+    );
     /* eslint-enable no-unused-vars */
   });
 

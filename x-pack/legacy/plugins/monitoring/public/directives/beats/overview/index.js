@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { BeatsOverview } from 'plugins/monitoring/components/beats/overview';
 import { I18nContext } from 'ui/i18n';
 
@@ -17,23 +17,19 @@ uiModule.directive('monitoringBeatsOverview', () => {
     scope: {
       data: '=',
       onBrush: '<',
-      zoomInfo: '<'
+      zoomInfo: '<',
     },
     link(scope, $el) {
       scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
 
       scope.$watch('data', (data = {}) => {
-        render((
+        render(
           <I18nContext>
-            <BeatsOverview
-              {...data}
-              onBrush={scope.onBrush}
-              zoomInfo={scope.zoomInfo}
-            />
-          </I18nContext>
-        ), $el[0]);
+            <BeatsOverview {...data} onBrush={scope.onBrush} zoomInfo={scope.zoomInfo} />
+          </I18nContext>,
+          $el[0]
+        );
       });
-
-    }
+    },
   };
 });

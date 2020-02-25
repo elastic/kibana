@@ -8,31 +8,40 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { FieldType } from 'ui/index_patterns';
-import { timefilter } from 'ui/timefilter';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES, esQuery, esKuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  IFieldType,
+  KBN_FIELD_TYPES,
+  esQuery,
+  esKuery,
+} from '../../../../../../../../src/plugins/data/public';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license/check_license';
+import { checkPermission } from '../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
+import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { timeBasedIndexCheck } from '../../util/index_utils';
+import { useTimefilter } from '../../contexts/kibana';
+import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
+import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
@@ -88,26 +97,39 @@ function getDefaultPageState(): DataVisualizerPageState {
 }
 
 export const Page: FC = () => {
-  const kibanaContext = useKibanaContext();
+  const mlContext = useMlContext();
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = kibanaContext;
+  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const timefilter = useTimefilter({
+    timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
+    autoRefreshSelector: true,
+  });
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
+  const [globalState, setGlobalState] = useUrlState('_g');
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+  }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
+
+  const [lastRefresh, setLastRefresh] = useState(0);
 
   useEffect(() => {
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      timefilter.enableTimeRangeSelector();
-    } else {
-      timefilter.disableTimeRangeSelector();
-    }
-
-    timefilter.enableAutoRefreshSelector();
     timeBasedIndexCheck(currentIndexPattern, true);
   }, []);
 
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  const indexPatternFields: FieldType[] = currentIndexPattern.fields;
+  const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach(field => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
@@ -124,13 +146,21 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const [showActionsPanel] = useState(
-    isFullLicense() && currentIndexPattern.timeFieldName !== undefined
-  );
+  const showActionsPanel =
+    isFullLicense() &&
+    checkPermission('canCreateJob') &&
+    mlNodesAvailable() &&
+    currentIndexPattern.timeFieldName !== undefined;
 
-  const [searchString, setSearchString] = useState(defaults.searchString);
-  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState(defaults.searchQueryLanguage);
+  const {
+    searchQuery: initSearchQuery,
+    searchString: initSearchString,
+    queryLanguage: initQueryLanguage,
+  } = extractSearchData(currentSavedSearch);
+
+  const [searchString, setSearchString] = useState(initSearchString);
+  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
+  const [searchQueryLanguage] = useState(initQueryLanguage);
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -165,37 +195,21 @@ export const Page: FC = () => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(loadOverallStats);
+    ).subscribe(() => {
+      setGlobalState({
+        time: timefilter.getTime(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      });
+      setLastRefresh(Date.now());
+    });
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
   });
 
   useEffect(() => {
-    // Check for a saved search being passed in.
-    const searchSource = currentSavedSearch.searchSource;
-    const query = searchSource.getField('query');
-    if (query !== undefined) {
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
-      const qryString = query.query;
-      let qry;
-      if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
-      }
-
-      setSearchQuery(qry);
-      setSearchString(qryString);
-      setSearchQueryLanguage(queryLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
     loadOverallStats();
-  }, [searchQuery, samplerShardSize]);
+  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
@@ -218,13 +232,51 @@ export const Page: FC = () => {
     createNonMetricCards();
   }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
 
+  /**
+   * Extract query data from the saved search object.
+   */
+  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
+    if (!savedSearch) {
+      return {
+        searchQuery: defaults.searchQuery,
+        searchString: defaults.searchString,
+        queryLanguage: defaults.searchQueryLanguage,
+      };
+    }
+
+    const { query } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+    const qryString = query.query;
+    let qry;
+    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(qryString);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    } else {
+      qry = esQuery.luceneStringToDsl(qryString);
+      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+    }
+
+    return {
+      searchQuery: qry,
+      searchString: qryString,
+      queryLanguage,
+    };
+  }
+
   async function loadOverallStats() {
     const tf = timefilter as any;
     let earliest;
     let latest;
+
+    const activeBounds = tf.getActiveBounds();
+
+    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
+      return;
+    }
+
     if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
+      earliest = activeBounds.min.valueOf();
+      latest = activeBounds.max.valueOf();
     }
 
     try {
@@ -582,84 +634,98 @@ export const Page: FC = () => {
     setNonMetricConfigs(configs);
   }
 
+  const wizardPanelWidth = '280px';
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <EuiPage data-test-subj="mlPageIndexDataVisualizer">
         <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="l">
-                <h1>{currentIndexPattern.title}</h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            {currentIndexPattern.timeFieldName !== undefined && (
-              <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
-                <FullTimeRangeSelector
-                  indexPattern={currentIndexPattern}
-                  query={combinedQuery}
-                  disabled={false}
-                />
-              </EuiPageContentHeaderSection>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiPageContentHeader>
+                <EuiPageContentHeaderSection>
+                  <EuiTitle size="l">
+                    <h1>{currentIndexPattern.title}</h1>
+                  </EuiTitle>
+                </EuiPageContentHeaderSection>
+                {currentIndexPattern.timeFieldName !== undefined && (
+                  <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
+                    <FullTimeRangeSelector
+                      indexPattern={currentIndexPattern}
+                      query={combinedQuery}
+                      disabled={false}
+                    />
+                  </EuiPageContentHeaderSection>
+                )}
+              </EuiPageContentHeader>
+            </EuiFlexItem>
+            {showActionsPanel === true && (
+              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
             )}
-          </EuiPageContentHeader>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiPageContentBody>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <SearchPanel
-                  indexPattern={currentIndexPattern}
-                  searchString={searchString}
-                  setSearchString={setSearchString}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  searchQueryLanguage={searchQueryLanguage}
-                  samplerShardSize={samplerShardSize}
-                  setSamplerShardSize={setSamplerShardSize}
-                  totalCount={overallStats.totalCount}
-                />
-                <EuiSpacer size="m" />
-                <EuiFlexGroup gutterSize="m">
-                  <EuiFlexItem>
-                    {totalMetricFieldCount > 0 && (
-                      <Fragment>
-                        <FieldsPanel
-                          title={i18n.translate('xpack.ml.datavisualizer.page.metricsPanelTitle', {
-                            defaultMessage: 'Metrics',
-                          })}
-                          totalFieldCount={totalMetricFieldCount}
-                          populatedFieldCount={populatedMetricFieldCount}
-                          fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
-                          showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
-                          showAllFields={showAllMetrics}
-                          setShowAllFields={setShowAllMetrics}
-                          fieldSearchBarQuery={metricFieldQuery}
-                          setFieldSearchBarQuery={setMetricFieldQuery}
-                          fieldVisConfigs={metricConfigs}
-                        />
-                        <EuiSpacer size="m" />
-                      </Fragment>
-                    )}
-                    <FieldsPanel
-                      title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
-                        defaultMessage: 'Fields',
-                      })}
-                      totalFieldCount={totalNonMetricFieldCount}
-                      populatedFieldCount={populatedNonMetricFieldCount}
-                      showAllFields={showAllNonMetrics}
-                      setShowAllFields={setShowAllNonMetrics}
-                      fieldTypes={indexedFieldTypes}
-                      showFieldType={nonMetricShowFieldType}
-                      setShowFieldType={setNonMetricShowFieldType}
-                      fieldSearchBarQuery={nonMetricFieldQuery}
-                      setFieldSearchBarQuery={setNonMetricFieldQuery}
-                      fieldVisConfigs={nonMetricConfigs}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiPanel>
+                  <SearchPanel
+                    indexPattern={currentIndexPattern}
+                    searchString={searchString}
+                    setSearchString={setSearchString}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    searchQueryLanguage={searchQueryLanguage}
+                    samplerShardSize={samplerShardSize}
+                    setSamplerShardSize={setSamplerShardSize}
+                    totalCount={overallStats.totalCount}
+                  />
+                  <EuiHorizontalRule />
+                  <EuiFlexGroup gutterSize="m">
+                    <EuiFlexItem>
+                      {totalMetricFieldCount > 0 && (
+                        <Fragment>
+                          <FieldsPanel
+                            title={i18n.translate(
+                              'xpack.ml.datavisualizer.page.metricsPanelTitle',
+                              {
+                                defaultMessage: 'Metrics',
+                              }
+                            )}
+                            totalFieldCount={totalMetricFieldCount}
+                            populatedFieldCount={populatedMetricFieldCount}
+                            fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
+                            showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
+                            showAllFields={showAllMetrics}
+                            setShowAllFields={setShowAllMetrics}
+                            fieldSearchBarQuery={metricFieldQuery}
+                            setFieldSearchBarQuery={setMetricFieldQuery}
+                            fieldVisConfigs={metricConfigs}
+                          />
+                          <EuiSpacer size="xl" />
+                        </Fragment>
+                      )}
+                      <FieldsPanel
+                        title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
+                          defaultMessage: 'Fields',
+                        })}
+                        totalFieldCount={totalNonMetricFieldCount}
+                        populatedFieldCount={populatedNonMetricFieldCount}
+                        showAllFields={showAllNonMetrics}
+                        setShowAllFields={setShowAllNonMetrics}
+                        fieldTypes={indexedFieldTypes}
+                        showFieldType={nonMetricShowFieldType}
+                        setShowFieldType={setNonMetricShowFieldType}
+                        fieldSearchBarQuery={nonMetricFieldQuery}
+                        setFieldSearchBarQuery={setNonMetricFieldQuery}
+                        fieldVisConfigs={nonMetricConfigs}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
               </EuiFlexItem>
               {showActionsPanel === true && (
-                <EuiFlexItem grow={false} style={{ width: '280px' }}>
+                <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
                   <ActionsPanel indexPattern={currentIndexPattern} />
                 </EuiFlexItem>
               )}

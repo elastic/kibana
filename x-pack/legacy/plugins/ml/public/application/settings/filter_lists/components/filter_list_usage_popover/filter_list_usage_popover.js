@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React popover listing the jobs or detectors using a particular filter list in a custom rule.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-} from '@elastic/eui';
-
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 
 export class FilterListUsagePopover extends Component {
   constructor(props) {
@@ -33,29 +26,23 @@ export class FilterListUsagePopover extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   render() {
-    const {
-      entityType,
-      entityValues } = this.props;
+    const { entityType, entityValues } = this.props;
 
-    const linkText = `${entityValues.length} ${entityType}${(entityValues.length !== 1) ? 's' : ''}`;
+    const linkText = `${entityValues.length} ${entityType}${entityValues.length !== 1 ? 's' : ''}`;
 
-    const listItems = entityValues.map(value => (<li key={value}>{value}</li>));
+    const listItems = entityValues.map(value => <li key={value}>{value}</li>);
 
     const button = (
-      <EuiButtonEmpty
-        size="s"
-        color="primary"
-        onClick={this.onButtonClick}
-      >
+      <EuiButtonEmpty size="s" color="primary" onClick={this.onButtonClick}>
         {linkText}
       </EuiButtonEmpty>
     );
@@ -70,9 +57,7 @@ export class FilterListUsagePopover extends Component {
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
         >
-          <ul>
-            {listItems}
-          </ul>
+          <ul>{listItems}</ul>
         </EuiPopover>
       </div>
     );
@@ -80,6 +65,5 @@ export class FilterListUsagePopover extends Component {
 }
 FilterListUsagePopover.propTypes = {
   entityType: PropTypes.oneOf(['job', 'detector']),
-  entityValues: PropTypes.array.isRequired
+  entityValues: PropTypes.array.isRequired,
 };
-

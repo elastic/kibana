@@ -23,9 +23,9 @@ export function createTimeFilter(options) {
   const timeRangeFilter = {
     range: {
       [timestampField]: {
-        format: 'epoch_millis'
-      }
-    }
+        format: 'epoch_millis',
+      },
+    },
   };
   if (start) {
     timeRangeFilter.range[timestampField].gte = moment.utc(start).valueOf();
@@ -62,7 +62,7 @@ export function createQuery(options) {
 
   let clusterUuidFilter;
   if (clusterUuid && !isFromStandaloneCluster) {
-    clusterUuidFilter = { term: { 'cluster_uuid': clusterUuid } };
+    clusterUuidFilter = { term: { cluster_uuid: clusterUuid } };
   }
 
   let uuidFilter;
@@ -92,8 +92,8 @@ export function createQuery(options) {
 
   const query = {
     bool: {
-      filter: combinedFilters.filter(Boolean)
-    }
+      filter: combinedFilters.filter(Boolean),
+    },
   };
 
   return query;

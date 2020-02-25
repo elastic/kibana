@@ -45,19 +45,19 @@ export function EventsProvider(Promise) {
    * @param {function} handler - The function to call when the event is triggered
    * @return {Events} - this, for chaining
    */
-  Events.prototype.on = function (name, handler) {
+  Events.prototype.on = function(name, handler) {
     if (!Array.isArray(this._listeners[name])) {
       this._listeners[name] = [];
     }
 
     const listener = {
-      handler: handler
+      handler: handler,
     };
     this._listeners[name].push(listener);
 
     (function rebuildDefer() {
       listener.defer = createDefer(Promise);
-      listener.resolved = listener.defer.promise.then(function (args) {
+      listener.resolved = listener.defer.promise.then(function(args) {
         rebuildDefer();
 
         // we ignore the completion of handlers, just watch for unhandled errors
@@ -66,7 +66,7 @@ export function EventsProvider(Promise) {
         // indicate to bluebird not to worry about this promise being a "runaway"
         return null;
       });
-    }());
+    })();
 
     return this;
   };
@@ -77,7 +77,7 @@ export function EventsProvider(Promise) {
    * @param {function} [handler] - The handler to remove
    * @return {Events} - this, for chaining
    */
-  Events.prototype.off = function (name, handler) {
+  Events.prototype.off = function(name, handler) {
     if (!name && !handler) {
       return this.removeAllListeners();
     }
@@ -89,7 +89,7 @@ export function EventsProvider(Promise) {
     if (!handler) {
       delete this._listeners[name];
     } else {
-      this._listeners[name] = _.filter(this._listeners[name], function (listener) {
+      this._listeners[name] = _.filter(this._listeners[name], function(listener) {
         return handler !== listener.handler;
       });
     }
@@ -104,7 +104,7 @@ export function EventsProvider(Promise) {
    * @param {any} [value] - The value that will be passed to all event handlers.
    * @returns {Promise}
    */
-  Events.prototype.emit = function (name) {
+  Events.prototype.emit = function(name) {
     const self = this;
     const args = _.rest(arguments);
 
@@ -112,14 +112,14 @@ export function EventsProvider(Promise) {
       return self._emitChain;
     }
 
-    return Promise.map(self._listeners[name], function (listener) {
-      return self._emitChain = self._emitChain.then(function () {
+    return Promise.map(self._listeners[name], function(listener) {
+      return (self._emitChain = self._emitChain.then(function() {
         // Double check that off wasn't called after an emit, but before this is fired.
         if (!self._listeners[name] || self._listeners[name].indexOf(listener) < 0) return;
 
         listener.defer.resolve(args);
         return listener.resolved;
-      });
+      }));
     });
   };
 
@@ -129,7 +129,7 @@ export function EventsProvider(Promise) {
    * @param  {string} name
    * @return {array[function]}
    */
-  Events.prototype.listeners = function (name) {
+  Events.prototype.listeners = function(name) {
     return _.pluck(this._listeners[name], 'handler');
   };
 

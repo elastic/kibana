@@ -7,10 +7,6 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
-jest.mock('ui/i18n', () => ({
-  I18nContext: jest.fn()
-}));
-
 import { FieldTitleBar } from './field_title_bar';
 
 // helper to let PropTypes throw errors instead of just doing console.error()
@@ -23,7 +19,6 @@ console.error = (warning, ...args) => {
 };
 
 describe('FieldTitleBar', () => {
-
   test(`throws an error because card is a required prop`, () => {
     expect(() => <FieldTitleBar />).toThrow();
   });
@@ -80,5 +75,4 @@ describe('FieldTitleBar', () => {
     container.simulate('mouseout');
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
   });
-
 });

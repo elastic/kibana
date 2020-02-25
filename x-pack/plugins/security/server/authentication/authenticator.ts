@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Duration } from 'moment';
 import {
   SessionStorageFactory,
   SessionStorage,
@@ -31,7 +32,7 @@ import {
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { SessionInfo } from '../../public/types';
+import { SessionInfo } from '../../public';
 
 /**
  * The shape of the session that is actually stored in the cookie.
@@ -79,13 +80,6 @@ export interface ProviderLoginAttempt {
    * Login attempt can have any form and defined by the specific provider.
    */
   value: unknown;
-
-  /**
-   * Indicates whether login attempt should be performed in a "stateless" manner. If `true` provider
-   * performing login will neither be able to retrieve or update existing state if any nor persist
-   * any new state it may produce as a result of the login attempt. It's `false` by default.
-   */
-  stateless?: boolean;
 }
 
 export interface AuthenticatorOptions {
@@ -94,7 +88,6 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -106,12 +99,12 @@ const providerMap = new Map<
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
   ) => BaseAuthenticationProvider
 >([
-  ['basic', BasicAuthenticationProvider],
-  ['kerberos', KerberosAuthenticationProvider],
-  ['saml', SAMLAuthenticationProvider],
-  ['token', TokenAuthenticationProvider],
-  ['oidc', OIDCAuthenticationProvider],
-  ['pki', PKIAuthenticationProvider],
+  [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
+  [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
+  [SAMLAuthenticationProvider.type, SAMLAuthenticationProvider],
+  [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
+  [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
+  [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {
@@ -172,12 +165,12 @@ export class Authenticator {
   /**
    * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
-  private readonly idleTimeout: number | null = null;
+  private readonly idleTimeout: Duration | null = null;
 
   /**
    * Session max lifespan in ms. If `null` session may live indefinitely.
    */
-  private readonly lifespan: number | null = null;
+  private readonly lifespan: Duration | null = null;
 
   /**
    * Internal authenticator logger.
@@ -225,7 +218,6 @@ export class Authenticator {
     );
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
-    // only set these vars if they are defined in options (otherwise coalesce to existing/default)
     this.idleTimeout = this.options.config.session.idleTimeout;
     this.lifespan = this.options.config.session.lifespan;
   }
@@ -254,7 +246,7 @@ export class Authenticator {
 
     // If we detect an existing session that belongs to a different provider than the one requested
     // to perform a login we should clear such session.
-    let existingSession = attempt.stateless ? null : await this.getSessionValue(sessionStorage);
+    let existingSession = await this.getSessionValue(sessionStorage);
     if (existingSession && existingSession.provider !== attempt.provider) {
       this.logger.debug(
         `Clearing existing session of another ("${existingSession.provider}") provider.`
@@ -281,7 +273,7 @@ export class Authenticator {
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
-    } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
+    } else if (authenticationResult.shouldUpdateState()) {
       const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.state,
@@ -317,7 +309,7 @@ export class Authenticator {
 
       this.updateSessionValue(sessionStorage, {
         providerType,
-        isSystemAPIRequest: this.options.isSystemAPIRequest(request),
+        isSystemRequest: request.isSystemRequest,
         authenticationResult,
         existingSession: ownsSession ? existingSession : null,
       });
@@ -441,12 +433,12 @@ export class Authenticator {
       providerType,
       authenticationResult,
       existingSession,
-      isSystemAPIRequest,
+      isSystemRequest,
     }: {
       providerType: string;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
-      isSystemAPIRequest: boolean;
+      isSystemRequest: boolean;
     }
   ) {
     if (!existingSession && !authenticationResult.shouldUpdateState()) {
@@ -458,7 +450,7 @@ export class Authenticator {
     // state we should store it in the session regardless of whether it's a system API request or not.
     const sessionCanBeUpdated =
       (authenticationResult.succeeded() || authenticationResult.redirected()) &&
-      (authenticationResult.shouldUpdateState() || !isSystemAPIRequest);
+      (authenticationResult.shouldUpdateState() || !isSystemRequest);
 
     // If provider owned the session, but failed to authenticate anyway, that likely means that
     // session is not valid and we should clear it. Also provider can specifically ask to clear
@@ -492,11 +484,16 @@ export class Authenticator {
   private calculateExpiry(
     existingSession: ProviderSession | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
-    let lifespanExpiration = this.lifespan && Date.now() + this.lifespan;
-    if (existingSession && existingSession.lifespanExpiration && this.lifespan) {
-      lifespanExpiration = existingSession.lifespanExpiration;
-    }
-    const idleTimeoutExpiration = this.idleTimeout && Date.now() + this.idleTimeout;
+    const now = Date.now();
+    // if we are renewing an existing session, use its `lifespanExpiration` -- otherwise, set this value
+    // based on the configured server `lifespan`.
+    // note, if the server had a `lifespan` set and then removes it, remove `lifespanExpiration` on renewed sessions
+    // also, if the server did not have a `lifespan` set and then adds it, add `lifespanExpiration` on renewed sessions
+    const lifespanExpiration =
+      existingSession?.lifespanExpiration && this.lifespan
+        ? existingSession.lifespanExpiration
+        : this.lifespan && now + this.lifespan.asMilliseconds();
+    const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
   }

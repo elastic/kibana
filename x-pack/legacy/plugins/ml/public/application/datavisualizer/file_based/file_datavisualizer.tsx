@@ -5,27 +5,22 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { timefilter } from 'ui/timefilter';
-import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from 'src/core/public';
 
-import { KibanaConfigTypeFix } from '../../contexts/kibana';
+import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
+import { getIndexPatternsContract } from '../../util/index_utils';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
 export interface FileDataVisualizerPageProps {
-  indexPatterns: IndexPatternsContract;
-  kibanaConfig: KibanaConfigTypeFix;
+  kibanaConfig: IUiSettingsClient;
 }
 
-export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({
-  indexPatterns,
-  kibanaConfig,
-}) => {
-  timefilter.disableTimeRangeSelector();
-  timefilter.disableAutoRefreshSelector();
-
+export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const indexPatterns = getIndexPatternsContract();
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />

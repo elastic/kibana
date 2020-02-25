@@ -10,13 +10,8 @@ import {
   CANVAS_TYPE,
   API_ROUTE_WORKPAD,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { WorkpadAttributes } from './workpad_attributes';
 import { catchErrorHandler } from '../catch_error_handler';
-
-export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
-  '@timestamp': string;
-  '@created': string;
-};
 
 export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

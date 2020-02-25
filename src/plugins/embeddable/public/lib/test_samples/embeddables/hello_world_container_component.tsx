@@ -21,14 +21,14 @@ import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { GetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
 
 interface Props {
   container: IContainer;
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

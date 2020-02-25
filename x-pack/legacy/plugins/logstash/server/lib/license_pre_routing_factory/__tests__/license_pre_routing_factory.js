@@ -18,11 +18,11 @@ describe('license_pre_routing_factory', () => {
           xpack_main: {
             info: {
               feature: () => ({
-                getLicenseCheckResults: () => mockLicenseCheckResults
-              })
-            }
-          }
-        }
+                getLicenseCheckResults: () => mockLicenseCheckResults,
+              }),
+            },
+          },
+        },
       };
     });
 
@@ -36,14 +36,14 @@ describe('license_pre_routing_factory', () => {
     describe('isAvailable is false', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: false
+          isAvailable: false,
         };
       });
 
-      it ('replies with 403', () => {
+      it('replies with 403', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        expect(() => licensePreRouting(stubRequest)).to.throwException((response) => {
+        expect(() => licensePreRouting(stubRequest)).to.throwException(response => {
           expect(response).to.be.an(Error);
           expect(response.isBoom).to.be(true);
           expect(response.output.statusCode).to.be(403);
@@ -54,11 +54,11 @@ describe('license_pre_routing_factory', () => {
     describe('isAvailable is true', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: true
+          isAvailable: true,
         };
       });
 
-      it ('replies with nothing', () => {
+      it('replies with nothing', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
         const response = licensePreRouting(stubRequest);
