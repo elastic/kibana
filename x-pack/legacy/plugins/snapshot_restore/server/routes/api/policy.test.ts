@@ -265,7 +265,9 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should return error if policy with the same name already exists', async () => {
       const mockEsResponse = { [name]: {} };
       router.callAsCurrentUserResponses = [mockEsResponse];
-      await expect(router.runRequest(mockRequest)).rejects.toThrow();
+
+      const response = await router.runRequest(mockRequest);
+      expect(response.status).toBe(409);
     });
 
     it('should throw if ES error', async () => {
