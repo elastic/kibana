@@ -193,7 +193,7 @@ export function createFieldChooserDirective($location, config, $route) {
 
       function isFieldVisualizable(field) {
         const mapsAppUrl = getMapsAppUrl();
-        if ((mapsAppUrl && field.type === 'geo_point') || field.type === 'geo_shape') {
+        if (mapsAppUrl && (field.type === 'geo_point' || field.type === 'geo_shape')) {
           return true;
         }
 
@@ -206,7 +206,7 @@ export function createFieldChooserDirective($location, config, $route) {
         }
 
         const mapsAppUrl = getMapsAppUrl();
-        if ((mapsAppUrl && field.type === 'geo_point') || field.type === 'geo_shape') {
+        if (mapsAppUrl && (field.type === 'geo_point' || field.type === 'geo_shape')) {
           const mapAppParams = new URLSearchParams();
 
           // Copy global state
