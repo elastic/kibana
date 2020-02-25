@@ -192,7 +192,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
                 field: this._descriptor.geoField,
               },
             },
-            ...this.getValueAggsDsl(),
+            ...this.getValueAggsDsl(indexPattern),
           },
         },
       });
