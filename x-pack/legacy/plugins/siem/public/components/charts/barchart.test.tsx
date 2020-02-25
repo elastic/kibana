@@ -277,7 +277,7 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   });
 
   it(`should render chart`, () => {
-    expect(shallowWrapper.find('WrappedByAutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(1);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
   });
 });
@@ -290,7 +290,7 @@ describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
   });
 
   it(`should render a ChartPlaceHolder`, () => {
-    expect(shallowWrapper.find('WrappedByAutoSizer')).toHaveLength(0);
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(0);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
   });
 });
