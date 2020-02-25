@@ -21,19 +21,33 @@ export interface Privileges {
   missingPrivileges: MissingPrivileges;
 }
 
+function isPrivileges(arg: any): arg is Privileges {
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    arg.hasOwnProperty('hasAllPrivileges') &&
+    typeof arg.hasAllPrivileges === 'boolean' &&
+    arg.hasOwnProperty('missingPrivileges') &&
+    typeof arg.missingPrivileges === 'object' &&
+    arg.missingPrivileges !== null
+  );
+}
+
 export interface MissingPrivileges {
   [key: string]: string[] | undefined;
 }
 export const toArray = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
 
-export const hasPrivilegeFactory = (privileges: Privileges) => (privilege: Privilege) => {
+export const hasPrivilegeFactory = (privileges: Privileges | undefined | null) => (
+  privilege: Privilege
+) => {
   const [section, requiredPrivilege] = privilege;
-  if (!privileges.missingPrivileges[section]) {
+  if (isPrivileges(privileges) && !privileges.missingPrivileges[section]) {
     // if the section does not exist in our missingPrivileges, everything is OK
     return true;
   }
-  if (privileges.missingPrivileges[section]!.length === 0) {
+  if (isPrivileges(privileges) && privileges.missingPrivileges[section]!.length === 0) {
     return true;
   }
   if (requiredPrivilege === '*') {
@@ -42,7 +56,9 @@ export const hasPrivilegeFactory = (privileges: Privileges) => (privilege: Privi
   }
   // If we require _some_ privilege, we make sure that the one
   // we require is *not* in the missingPrivilege array
-  return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
+  return (
+    isPrivileges(privileges) && !privileges.missingPrivileges[section]!.includes(requiredPrivilege)
+  );
 };
 
 // create the text for button's tooltips if the user

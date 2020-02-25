@@ -11,6 +11,8 @@ import { CreateTransformButton } from './create_transform_button';
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} />);
