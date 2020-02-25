@@ -16,27 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Observable } from 'rxjs';
-import { APMOSSConfig } from './';
 
-export interface APMOSSPluginSetup {
-  config$: Observable<APMOSSConfig>
+import { of } from 'rxjs';
+import { APMOSSConfig } from '.';
+import { APMOSSPluginSetup } from './plugin';
+
+const apmStar = 'apm-*';
+
+const defaultConfig = {
+  errorIndices: apmStar,
+  indexPattern: apmStar,
+  metricsIndices: apmStar,
+  onboardingIndices: apmStar,
+  sourcemapIndices: apmStar,
+  spanIndices: apmStar,
+  transactionIndices: apmStar,
 };
 
-export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
-  constructor(private readonly initContext: PluginInitializerContext) {
-    this.initContext = initContext;
-  }
-
-  public setup(core: CoreSetup) {
-    const config$ = this.initContext.config.create<APMOSSConfig>();
-
+export const apmOSSPluginSetupMock = {
+  create(config: Partial<APMOSSConfig> = {}): APMOSSPluginSetup {
     return {
-      config$,
+      config$: of({ ...defaultConfig, ...config }),
     };
-  }
-
-  start() {}
-  stop() {}
-}
+  },
+};

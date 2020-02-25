@@ -10,7 +10,7 @@ import {
   ReindexStatus,
   ReindexWarning,
   REINDEX_OP_TYPE,
-} from '../../../legacy/plugins/upgrade_assistant/common/types';
+} from '../../../plugins/upgrade_assistant/common/types';
 
 export default function({ getService }) {
   const supertest = getService('supertest');
