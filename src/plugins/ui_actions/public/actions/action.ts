@@ -134,7 +134,7 @@ export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any, any, 
 
 /**
  * Factory actions are actions used to create dynamic actions - their `execute`
- * method returns a dynamic
+ * method returns a dynamic action.
  */
 export interface FactoryActionDefinition<
   DAD extends AnyDynamicActionDefinition,

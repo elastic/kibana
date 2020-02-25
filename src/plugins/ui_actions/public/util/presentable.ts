@@ -24,7 +24,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/common';
  */
 export interface Presentable<Context extends object = object> {
   /**
-   * Determined the display order in relation to other items. Higher numbers are
+   * Determines the display order in relation to other items. Higher numbers are
    * displayed first.
    */
   readonly order: number;
