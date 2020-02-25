@@ -38,6 +38,13 @@ async function attemptToCreateCommand(log, server, driverApi) {
   if (process.env.TEST_BROWSER_HEADLESS) {
     browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu'] } };
   }
+  if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+    browserOptions = { chromeOptions: { args: ['ignore-certificate-errors'] } };
+    if (process.env.TEST_BROWSER_HEADLESS) {
+      browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu', 'ignore-certificate-errors'] } };
+    }
+  }
+
   const session = await server.createSession(browserOptions, driverApi.getRequiredCapabilities());
 
   if (attemptId !== attemptCounter) return; // abort
