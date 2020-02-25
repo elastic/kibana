@@ -22,8 +22,4 @@
  * time. Use this function for performance measurements.
  */
 export const now: () => number =
-  typeof performance === 'object'
-    ? performance.now.bind(performance)
-    : typeof window === 'undefined'
-    ? () => require('perf_hooks').performance.now()
-    : Date.now;
+  typeof performance === 'object' ? performance.now.bind(performance) : Date.now;
