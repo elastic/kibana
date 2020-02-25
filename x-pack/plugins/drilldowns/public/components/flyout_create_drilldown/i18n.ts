@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { join } from 'path';
+import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'drilldowns',
-  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.story.tsx')],
-});
+export const txtCreateDrilldown = i18n.translate(
+  'xpack.drilldowns.components.FlyoutCreateDrilldown.CreateDrilldown',
+  {
+    defaultMessage: 'Create drilldown',
+  }
+);
