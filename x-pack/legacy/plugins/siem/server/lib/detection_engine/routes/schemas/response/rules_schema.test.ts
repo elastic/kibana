@@ -21,7 +21,7 @@ describe('create_rules_schema_output', () => {
     const decoded = rulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    const expected: RulesSchema = getBaseResponsePayload();
+    const expected = getBaseResponsePayload();
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(expected);
