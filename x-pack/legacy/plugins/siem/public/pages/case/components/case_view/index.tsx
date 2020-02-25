@@ -60,13 +60,13 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
-interface CasesProps {
+export interface CaseProps {
   caseId: string;
   initialData: Case;
   isLoading: boolean;
 }
 
-export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
+export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
   const [isEditTags, setIsEditTags] = useState(false);
@@ -162,14 +162,14 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
   ];
   const userActions = [
     {
-      avatarName: data.created_by.username,
+      avatarName: data.createdBy.username,
       title: (
         <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <p>
-              <strong>{`${data.created_by.username}`}</strong>
+              <strong>{`${data.createdBy.username}`}</strong>
               {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-              <FormattedRelativePreferenceDate value={data.created_at} />
+              <FormattedRelativePreferenceDate value={data.createdAt} />
               {/* STEPH FIX come back and add label `on` */}
             </p>
           </EuiFlexItem>
@@ -206,7 +206,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
           </EuiFlexGroup>
         </>
       ) : (
-        <Markdown raw={data.description} />
+        <Markdown raw={data.description} data-test-subj="case-view-description" />
       ),
     },
   ];
@@ -229,6 +229,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
             href: getCaseUrl(),
             text: i18n.BACK_TO_ALL,
           }}
+          data-test-subj="case-view-title"
           titleNode={titleNode}
           title={title}
         >
@@ -239,13 +240,21 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
                   <EuiFlexItem grow={false}>
                     <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <EuiBadge color={isCaseOpen ? 'secondary' : 'danger'}>{data.state}</EuiBadge>
+                      <EuiBadge
+                        color={isCaseOpen ? 'secondary' : 'danger'}
+                        data-test-subj="case-view-state"
+                      >
+                        {data.state}
+                      </EuiBadge>
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate value={data.created_at} />
+                      <FormattedRelativePreferenceDate
+                        data-test-subj="case-view-createdAt"
+                        value={data.createdAt}
+                      />
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -255,6 +264,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 <EuiFlexItem>
                   <EuiButtonToggle
+                    data-test-subj="toggle-case-state"
                     label={isCaseOpen ? 'Close case' : 'Reopen case'}
                     iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
                     onChange={onSetIsCaseOpen}
@@ -276,8 +286,13 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
               <UserActionTree userActions={userActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              <UserList headline={i18n.REPORTER} users={[data.created_by]} />
+              <UserList
+                data-test-subj="case-view-user-list"
+                headline={i18n.REPORTER}
+                users={[data.createdBy]}
+              />
               <TagList
+                data-test-subj="case-view-tag-list"
                 tags={tags}
                 iconAction={{
                   'aria-label': title,
@@ -310,7 +325,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     );
   }
 
-  return <Cases caseId={caseId} initialData={data} isLoading={isLoading} />;
+  return <CaseComponent caseId={caseId} initialData={data} isLoading={isLoading} />;
 });
 
 CaseView.displayName = 'CaseView';
