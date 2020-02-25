@@ -48,8 +48,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     useActualUrl: boolean;
   }
   interface LegacyUrl {
-    pathname: string;
-    hash: string;
+    pathName: string;
+    hashName: string;
   }
 
   class CommonPage {
@@ -255,16 +255,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hashArg = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
     ) {
       const kibServerConf = config.get('servers.kibana');
       const getKibServerUrl = getUrl.noAuth.bind(null, kibServerConf);
-      const buildLegacyUrl = ({ pathname, hash }: LegacyUrl) =>
-        getKibServerUrl({ pathname: `${basePath}${pathname}`, hash });
+      const buildLegacyUrl = ({ pathName, hashName }: LegacyUrl) =>
+        getKibServerUrl({ pathname: `${basePath}${pathName}`, hashName });
       const buildUrl = () =>
         config.has(['apps', appName])
           ? buildLegacyUrl(config.get(['apps', appName]))
-          : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash: hashArg });
+          : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash });
       const appUrl: string = buildUrl();
 
       const navToAppSuccess = async () => {
