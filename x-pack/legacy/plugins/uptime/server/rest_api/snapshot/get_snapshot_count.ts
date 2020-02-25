@@ -26,7 +26,6 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
     const result = await libs.requests.getSnapshotCount({
       callES,
-      indexName: dynamicSettings.heartbeatIndexName,
       dateRangeStart,
       dateRangeEnd,
       filters,

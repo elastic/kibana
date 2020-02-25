@@ -6,8 +6,18 @@
 
 import * as t from 'io-ts';
 
+interface NonEmptyStringBrand {
+  readonly NonEmptyString: unique symbol;
+}
+
+const NonEmptyString = t.brand(
+  t.string,
+  (s): s is t.Branded<string, NonEmptyStringBrand> => !!s.match(/^\S+$/),
+  'NonEmptyString'
+);
+
 export const DynamicSettingsType = t.type({
-  heartbeatIndexName: t.string,
+  heartbeatIndices: NonEmptyString,
 });
 
 export const DynamicSettingsSaveType = t.intersection([

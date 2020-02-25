@@ -36,6 +36,10 @@ interface DispatchProps {
   saveDynamicSettings: typeof setDynamicSettings;
 }
 
+const fieldValidators: { [key: string]: (v: any) => string | null } = {
+  heartbeatIndices: v => (v && v.match(/^\S+$/) ? null : 'May not be blank'),
+};
+
 export const SettingsPageComponent = ({
   dynamicSettingsState: dss,
   loadDynamicSettings,
@@ -48,6 +52,22 @@ export const SettingsPageComponent = ({
   const [formFields, setFormFields] = useState<{ [key: string]: any }>(dss.settings || {});
   if (dss.settings && Object.entries(formFields).length === 0) {
     setFormFields({ ...dss.settings });
+  }
+
+  let isFormValid: boolean = true;
+  const fieldErrors: { [key: string]: string } = {};
+  // don't validate if no data loaded
+  if (Object.entries(formFields).length > 0) {
+    for (const field in fieldValidators) {
+      if (fieldValidators.hasOwnProperty(field)) {
+        const validator = fieldValidators[field];
+        const error = validator(formFields[field]);
+        if (error) {
+          isFormValid = false;
+          fieldErrors[field] = error;
+        }
+      }
+    }
   }
 
   const onChangeFormField = (field: string, value: any) => {
@@ -79,30 +99,29 @@ export const SettingsPageComponent = ({
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiDescribedFormGroup
-          idAria="uptimeIndices"
+          idAria="heartbeatIndices"
           title={
             <h4>
               <FormattedMessage
-                id="xpack.uptime.sourceConfiguration.uptimeIndicesTitle"
+                id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
                 defaultMessage="Uptime indices"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.uptimeIndicesDescription"
+              id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
               defaultMessage="Index pattern for matching indices that contain Heartbeat data"
             />
           }
         >
           <EuiFormRow
-            describedByIds={['uptimeIndices']}
-            // TODO handle errors in input data
-            // error={metricAliasFieldProps.error}
+            describedByIds={['heartbeatIndices']}
+            error={fieldErrors.heartbeatIndices}
             fullWidth
             helpText={
               <FormattedMessage
-                id="xpack.uptime.sourceConfiguration.uptimeIndicesRecommendedValue"
+                id="xpack.uptime.sourceConfiguration.heartbeatIndicesRecommendedValue"
                 defaultMessage="The recommended value is {defaultValue}"
                 values={{
                   // TODO: make this a constant somewhere shared
@@ -111,22 +130,22 @@ export const SettingsPageComponent = ({
               />
             }
             // TODO handle what's invalid
-            // isInvalid={metricAliasFieldProps.isInvalid}
+            isInvalid={!!fieldErrors.heartbeatIndices}
             label={
               <FormattedMessage
-                id="xpack.uptime.sourceConfiguration.uptimeIndicesLabel"
-                defaultMessage="Uptime indices"
+                id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+                defaultMessage="Heartbeat indices"
               />
             }
           >
             <EuiFieldText
-              data-test-subj="uptimeIndicesInput"
+              data-test-subj="heartbeatIndicesInput"
               fullWidth
               disabled={dss.loading}
               isLoading={dss.loading}
-              value={formFields.heartbeatIndexName || ''}
+              value={formFields.heartbeatIndices || ''}
               onChange={(event: any) =>
-                onChangeFormField('heartbeatIndexName', event.currentTarget.value)
+                onChangeFormField('heartbeatIndices', event.currentTarget.value)
               }
             />
           </EuiFormRow>
@@ -157,7 +176,7 @@ export const SettingsPageComponent = ({
             data-test-subj="applySettingsButton"
             type="submit"
             color="primary"
-            isDisabled={!isFormDirty || dss.loading}
+            isDisabled={!isFormDirty || !isFormValid || dss.loading}
             fill
             onClick={onApply}
           >

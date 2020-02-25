@@ -10,12 +10,12 @@ export const umDynamicSettings = {
   type,
   id: 'uptime-dynamic-settings-singleton',
   defaults: {
-    heartbeatIndexName: 'heartbeat-8.*',
+    heartbeatIndices: 'heartbeat-8.*',
   },
   mapping: {
     [type]: {
       properties: {
-        heartbeatIndexName: {
+        heartbeatIndices: {
           type: 'keyword',
         },
       },
