@@ -18,6 +18,10 @@ const mockResponse = {
   ok(response: any) {
     return response;
   },
+  conflict(response: any) {
+    response.status = 409;
+    return response;
+  },
   internalError(response: any) {
     response.status = 500;
     return response;

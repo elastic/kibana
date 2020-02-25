@@ -34,22 +34,38 @@ export function registerRepositoriesRoutes({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const managedRepositoryName = await getManagedRepositoryName(callAsCurrentUser);
-      const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
-        repository: '_all',
-      });
-      const repositoryNames = Object.keys(repositoriesByName);
-      const repositories: Repository[] = repositoryNames.map(name => {
-        const { type = '', settings = {} } = repositoriesByName[name];
-        return {
-          name,
-          type,
-          settings: deserializeRepositorySettings(settings),
-        };
-      });
 
-      const managedRepository = {
-        name: managedRepositoryName,
-      } as ManagedRepository;
+      let repositoryNames: string[] | undefined;
+      let repositories: Repository[];
+      let managedRepository: ManagedRepository;
+
+      try {
+        const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
+          repository: '_all',
+        });
+        repositoryNames = Object.keys(repositoriesByName);
+        repositories = repositoryNames.map(name => {
+          const { type = '', settings = {} } = repositoriesByName[name];
+          return {
+            name,
+            type,
+            settings: deserializeRepositorySettings(settings),
+          };
+        });
+
+        managedRepository = {
+          name: managedRepositoryName,
+        };
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
 
       // If a managed repository, we also need to check if a policy is associated to it
       if (managedRepositoryName) {
@@ -89,9 +105,23 @@ export function registerRepositoriesRoutes({
 
       const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
 
-      const repositoryByName = await callAsCurrentUser('snapshot.getRepository', {
-        repository: name,
-      });
+      let repositoryByName: any;
+
+      try {
+        repositoryByName = await callAsCurrentUser('snapshot.getRepository', {
+          repository: name,
+        });
+      } catch (e) {
+        if (isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+
       const {
         responses: snapshotResponses,
       }: {
@@ -365,7 +395,7 @@ export function registerRepositoriesRoutes({
               .then(() => response.itemsDeleted.push(repoName))
               .catch(e =>
                 response.errors.push({
-                  repoName,
+                  name: repoName,
                   error: wrapEsError(e),
                 })
               );

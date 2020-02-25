@@ -90,6 +90,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
           latestActivityTimeInMillis: 0,
         },
       ];
+
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
@@ -99,6 +100,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       const mockEsResponse = {};
       router.callAsCurrentUserResponses = [mockEsResponse];
       const expectedResponse: any[] = [];
+
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
       });
