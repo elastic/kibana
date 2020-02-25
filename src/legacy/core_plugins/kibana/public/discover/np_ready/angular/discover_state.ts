@@ -142,13 +142,11 @@ export function getState({
 
   const appStateContainerModified = {
     ...appStateContainer,
-    ...{
-      set: (value: AppState | null) => {
-        if (value) {
-          previousAppState = appStateContainer.getState();
-          appStateContainer.set(value);
-        }
-      },
+    set: (value: AppState | null) => {
+      if (value) {
+        previousAppState = appStateContainer.getState();
+        appStateContainer.set(value);
+      }
     },
   };
 

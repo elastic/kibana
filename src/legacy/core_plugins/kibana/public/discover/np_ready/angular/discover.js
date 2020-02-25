@@ -115,7 +115,7 @@ app.config($routeProvider => {
       savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
         const indexPatterns = getServices().indexPatterns;
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, getServices().data, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
           const { appStateContainer } = getState({});
           const { index, savedQuery } = appStateContainer.getState();
           return Promise.props({
@@ -194,9 +194,7 @@ function discoverController(
 
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  $scope.timeRangeObj = {
-    ..._.cloneDeep(timefilter.getTime()),
-  };
+  $scope.timeRangeObj = timefilter.getTime();
   $scope.refreshInterval = timefilter.getRefreshInterval();
 
   const {
@@ -211,7 +209,7 @@ function discoverController(
     getPreviousAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
-    storeInSessionStorage: false,
+    storeInSessionStorage: config.get('state:storeInSessionStorage'),
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -238,7 +236,7 @@ function discoverController(
   };
 
   const stopSyncingAppFilters = syncAppFilters(filterManager, {
-    set: filters => setAppState({ filters: filters }),
+    set: filters => setAppState({ filters }),
     get: () => getAppFilters(),
     state$: appStateContainer.state$.pipe(map(state => state.filters)),
   });
@@ -251,28 +249,33 @@ function discoverController(
   const appStateUnsubscribe = appStateContainer.subscribe(async newState => {
     const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState($scope.state);
-    let fetchData = false;
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
         $scope.state = { ...newState };
 
-        if (!_.isEqual(newStatePartial.query, getPreviousAppState().query)) {
-          fetchData = true;
-        }
+        // detect changes that should trigger fetching of new data
+        const queryChanged = !_.isEqual(newStatePartial.query, getPreviousAppState().query);
 
-        if (oldStatePartial.savedQuery !== newStatePartial.savedQuery) {
-          if (newStatePartial.savedQuery) {
+        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
+        const sortChanged = !_.isEqual(currentSort, newStatePartial.sort);
+        const savedQueryChanged = oldStatePartial.savedQuery !== newStatePartial.savedQuery;
+
+        if (savedQueryChanged) {
+          if (
+            newStatePartial.savedQuery &&
+            (!$scope.savedQuery || $scope.savedQuery.id !== newStatePartial.savedQuery)
+          ) {
+            // savedQuery was only changed in url which means it has to be fetched
             $scope.savedQuery = await data.query.savedQueries.getSavedQuery(
               newStatePartial.savedQuery
             );
             updateStateFromSavedQuery($scope.savedQuery);
-          } else {
-            delete $scope.savedQuery;
+          } else if ($scope.savedQuery && typeof newStatePartial.savedQuery === 'undefined') {
+            $scope.savedQuery = undefined;
           }
-          fetchData = true;
         }
-        if (fetchData) {
+        if (queryChanged || sortChanged || savedQueryChanged) {
           $fetchObservable.next();
         } else {
           $scope.$digest();
@@ -604,14 +607,20 @@ function discoverController(
       indexPatternId: searchSource.getField('index').id,
     };
   };
+
+  function getDefaultQuery() {
+    return {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+    };
+  }
+
   function getStateDefaults() {
     return {
-      query: ($scope.savedQuery && $scope.savedQuery.attributes.query) ||
-        $scope.searchSource.getField('query') || {
-          query: '',
-          language:
-            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
-        },
+      query:
+        ($scope.savedQuery && $scope.savedQuery.attributes.query) ||
+        $scope.searchSource.getField('query') ||
+        getDefaultQuery(),
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
@@ -691,17 +700,6 @@ function discoverController(
           },
         })
       );
-      $scope.$watchCollection('state.sort', function(sort) {
-        if (!sort) return;
-
-        // get the current sort from searchSource as array of arrays
-        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
-        // if the searchSource doesn't know, tell it so
-        if (!_.isEqual(sort, currentSort)) {
-          setAppState({ sort });
-          $fetchObservable.next();
-        }
-      });
 
       $scope.$watch('opts.timefield', function(timefield) {
         $scope.enableTimeRangeSelector = !!timefield;
@@ -931,9 +929,7 @@ function discoverController(
   }
 
   $scope.updateTime = function() {
-    $scope.timeRangeObj = {
-      ..._.cloneDeep(timefilter.getTime()),
-    };
+    $scope.timeRangeObj = timefilter.getTime();
     //this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
       from: dateMath.parse(timefilter.getTime().from),
@@ -965,12 +961,12 @@ function discoverController(
           config.get('discover:sort:defaultOrder')
         )
       )
-      .setField('query', !$scope.state.query ? null : $scope.state.query)
+      .setField('query', $scope.state.query || null)
       .setField('filter', filterManager.getFilters());
   });
 
-  $scope.setSortOrder = function setSortOrder(sortPair) {
-    $scope.state.sort = sortPair;
+  $scope.setSortOrder = function setSortOrder(sort) {
+    setAppState({ sort });
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -1015,26 +1011,20 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  $scope.onSavedQuerySaved = savedQuery => {
+  $scope.onSavedQueryUpdated = $scope.onSavedQuerySaved = savedQuery => {
     $scope.savedQuery = savedQuery;
-    $scope.state.savedQuery = savedQuery.id;
     updateStateFromSavedQuery(savedQuery);
-    $fetchObservable.next();
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = { ...savedQuery };
-    $scope.state.savedQuery = savedQuery.id;
-    updateStateFromSavedQuery(savedQuery);
-    $fetchObservable.next();
   };
 
   $scope.onSavedQueryCleared = () => {
-    $scope.savedQuery = undefined;
-    const query = { ...$scope.state.query, ...{ query: '', filters: [] } };
-    $scope.state.query = query;
-    setAppState({ query });
-    $fetchObservable.next();
+    //reset filters and query string, remove savedQuery from state
+    const state = {
+      ...appStateContainer.getState(),
+      query: getDefaultQuery(),
+      filters: [],
+    };
+    delete state.savedQuery;
+    appStateContainer.set(state);
   };
 
   async function setupVisualization() {
