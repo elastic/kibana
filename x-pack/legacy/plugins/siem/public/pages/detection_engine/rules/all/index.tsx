@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import uuid from 'uuid';
 
 import {
@@ -43,6 +44,11 @@ import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
+// EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
+// after few hours of fight with typescript !!!! I lost :(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
+
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
@@ -71,7 +77,7 @@ interface AllRulesProps {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: () => void) => void;
+  setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
 }
 
 /**
@@ -308,7 +314,7 @@ export const AllRules = React.memo<AllRulesProps>(
                     </UtilityBarGroup>
                   </UtilityBarSection>
                 </UtilityBar>
-                <EuiBasicTable
+                <MyEuiBasicTable
                   columns={columns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"

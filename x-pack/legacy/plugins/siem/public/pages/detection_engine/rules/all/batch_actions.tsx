@@ -82,7 +82,10 @@ export const getBatchItems = ({
       disabled={containsImmutable || containsLoading || selectedRuleIds.length === 0}
       onClick={() => {
         closePopover();
-        exportRulesAction(selectedRuleIds, dispatch);
+        exportRulesAction(
+          rules.filter(r => selectedRuleIds.includes(r.id)).map(r => r.rule_id),
+          dispatch
+        );
       }}
     >
       {i18n.BATCH_ACTION_EXPORT_SELECTED}

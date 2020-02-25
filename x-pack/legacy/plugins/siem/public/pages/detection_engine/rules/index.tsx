@@ -26,7 +26,7 @@ import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/u
 import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
 import * as i18n from './translations';
 
-type Func = () => void;
+type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
@@ -68,7 +68,7 @@ const RulesPageComponent: React.FC = () => {
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
-      refreshRulesData.current();
+      refreshRulesData.current(true);
     }
   }, [refreshRulesData]);
 

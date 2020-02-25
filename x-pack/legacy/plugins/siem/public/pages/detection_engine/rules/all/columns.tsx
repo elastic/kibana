@@ -60,7 +60,7 @@ const getActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rowItem: Rule) => exportRulesAction([rowItem.id], dispatch),
+    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch),
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
