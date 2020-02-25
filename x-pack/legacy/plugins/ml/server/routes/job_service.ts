@@ -20,7 +20,7 @@ import {
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
-} from '../new_platform/job_service_schema';
+} from './schemas/job_service_schema';
 // @ts-ignore no declaration module
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';

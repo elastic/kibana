@@ -13,7 +13,7 @@ import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
-} from '../new_platform/data_analytics_schema';
+} from './schemas/data_analytics_schema';
 
 /**
  * Routes for the data frame analytics

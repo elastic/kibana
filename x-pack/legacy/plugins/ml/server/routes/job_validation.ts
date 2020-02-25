@@ -15,7 +15,7 @@ import {
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
-} from '../new_platform/job_validation_schema';
+} from './schemas/job_validation_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';

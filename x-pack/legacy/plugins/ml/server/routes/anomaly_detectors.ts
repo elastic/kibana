@@ -11,7 +11,7 @@ import { RouteInitialization } from '../new_platform/plugin';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
-} from '../new_platform/anomaly_detectors_schema';
+} from './schemas/anomaly_detectors_schema';
 
 /**
  * Routes for the anomaly detectors

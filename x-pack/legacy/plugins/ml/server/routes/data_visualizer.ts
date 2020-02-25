@@ -11,7 +11,7 @@ import { Field } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
-} from '../new_platform/data_visualizer_schema';
+} from './schemas/data_visualizer_schema';
 import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 

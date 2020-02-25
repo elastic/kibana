@@ -11,7 +11,7 @@ import { RouteInitialization } from '../new_platform/plugin';
 import {
   getCardinalityOfFieldsSchema,
   getTimeFieldRangeSchema,
-} from '../new_platform/fields_service_schema';
+} from './schemas/fields_service_schema';
 import { fieldsServiceProvider } from '../models/fields_service';
 
 function getCardinalityOfFields(context: RequestHandlerContext, payload: any) {

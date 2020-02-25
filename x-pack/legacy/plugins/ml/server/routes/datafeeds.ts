@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-import { startDatafeedSchema, datafeedConfigSchema } from '../new_platform/datafeeds_schema';
+import { startDatafeedSchema, datafeedConfigSchema } from './schemas/datafeeds_schema';
 
 /**
  * Routes for datafeed service
