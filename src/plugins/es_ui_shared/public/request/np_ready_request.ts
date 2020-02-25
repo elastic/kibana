@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
@@ -28,8 +28,8 @@ export interface SendRequestConfig {
   body?: any;
 }
 
-export interface SendRequestResponse {
-  data: any;
+export interface SendRequestResponse<D = any> {
+  data: D | null;
   error: Error | null;
 }
 
@@ -39,18 +39,18 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
-export interface UseRequestResponse {
+export interface UseRequestResponse<D = any> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: null | unknown;
-  data: any;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
+  error: Error | null;
+  data: D | null;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D>>;
 }
 
-export const sendRequest = async (
+export const sendRequest = async <D = any>(
   httpClient: HttpSetup,
   { path, method, body, query }: SendRequestConfig
-): Promise<SendRequestResponse> => {
+): Promise<SendRequestResponse<D>> => {
   try {
     const response = await httpClient[method](path, { body, query });
 
@@ -66,7 +66,7 @@ export const sendRequest = async (
   }
 };
 
-export const useRequest = (
+export const useRequest = <D = any>(
   httpClient: HttpSetup,
   {
     path,
@@ -77,7 +77,8 @@ export const useRequest = (
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-): UseRequestResponse => {
+): UseRequestResponse<D> => {
+  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D>>>();
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -102,7 +103,10 @@ export const useRequest = (
 
     // Set new interval
     if (pollInterval.current) {
-      pollIntervalId.current = setTimeout(_sendRequest, pollInterval.current);
+      pollIntervalId.current = setTimeout(
+        () => (sendRequestRef.current ?? _sendRequest)(),
+        pollInterval.current
+      );
     }
   };
 
@@ -120,7 +124,6 @@ export const useRequest = (
 
     const response = await sendRequest(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
-    const responseData = deserializer(serializedResponseData);
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
     // to execute side effects like update telemetry.
@@ -129,7 +132,12 @@ export const useRequest = (
     }
 
     setError(responseError);
-    setData(responseData);
+
+    if (!responseError) {
+      const responseData = deserializer(serializedResponseData);
+      setData(responseData);
+    }
+
     setIsLoading(false);
     setIsInitialRequest(false);
 
@@ -141,11 +149,17 @@ export const useRequest = (
   };
 
   useEffect(() => {
-    _sendRequest();
-    // To be functionally correct we'd send a new request if the method, path, or body changes.
+    sendRequestRef.current = _sendRequest;
+  }, [_sendRequest]);
+
+  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+
+  useEffect(() => {
+    (sendRequestRef.current ?? _sendRequest)();
+    // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
-    // object even if its shape hasn't changed, so for now we're just watching the path.
-  }, [path]);
+    // object even if its shape hasn't changed, so for now we're just watching the path and the query.
+  }, [path, stringifiedQuery]);
 
   useEffect(() => {
     scheduleRequest();
@@ -164,6 +178,6 @@ export const useRequest = (
     isLoading,
     error,
     data,
-    sendRequest: _sendRequest, // Gives the user the ability to manually request data
+    sendRequest: sendRequestRef.current ?? _sendRequest, // Gives the user the ability to manually request data
   };
 };

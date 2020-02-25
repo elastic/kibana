@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectReference } from '../../../../legacy/server/saved_objects/routes/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectReference } from '../../../../core/server';
 
 export interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

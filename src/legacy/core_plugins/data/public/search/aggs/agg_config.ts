@@ -35,7 +35,7 @@ import { Schema } from './schemas';
 import {
   ISearchSource,
   FetchOptions,
-  fieldFormats,
+  FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/public';
 
@@ -383,7 +383,7 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+  fieldFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
 
     if (format) {
@@ -393,7 +393,7 @@ export class AggConfig {
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+  fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
     const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;

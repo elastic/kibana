@@ -6,7 +6,6 @@
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
-import chrome from 'ui/chrome';
 import rison from 'rison-node';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
@@ -16,6 +15,7 @@ import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
+import { getSavedObjectsClient } from '../../../util/dependency_cache';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -133,7 +133,7 @@ function buildDashboardUrlFromSettings(settings) {
   return new Promise((resolve, reject) => {
     const { dashboardId, queryFieldNames } = settings.kibanaSettings;
 
-    const savedObjectsClient = chrome.getSavedObjectsClient();
+    const savedObjectsClient = getSavedObjectsClient();
     savedObjectsClient
       .get('dashboard', dashboardId)
       .then(response => {

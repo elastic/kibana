@@ -6,8 +6,8 @@
 
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
-import { Query, esFilters } from 'src/plugins/data/public';
 
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -16,7 +16,7 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-
+import { TimelineUrl } from '../../store/timeline/model';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
@@ -38,80 +38,11 @@ export const dispatchSetInitialStateFromUrl = (
 }: SetInitialStateFromUrl<unknown>): (() => void) => () => {
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
-      const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
-
-      const globalId: InputsModelId = 'global';
-      const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
-      const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
-
-      const timelineId: InputsModelId = 'timeline';
-      const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
-      const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
-
-      if (isEmpty(globalLinkTo.linkTo)) {
-        dispatch(inputsActions.removeGlobalLinkTo());
-      } else {
-        dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
-      }
-
-      if (isEmpty(timelineLinkTo.linkTo)) {
-        dispatch(inputsActions.removeTimelineLinkTo());
-      } else {
-        dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
-      }
-
-      if (timelineType) {
-        if (timelineType === 'absolute') {
-          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            inputsActions.setAbsoluteRangeDatePicker({
-              ...absoluteRange,
-              id: timelineId,
-            })
-          );
-        }
-        if (timelineType === 'relative') {
-          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            inputsActions.setRelativeRangeDatePicker({
-              ...relativeRange,
-              id: timelineId,
-            })
-          );
-        }
-      }
-
-      if (globalType) {
-        if (globalType === 'absolute') {
-          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-            get('global.timerange', timerangeStateData)
-          );
-          dispatch(
-            inputsActions.setAbsoluteRangeDatePicker({
-              ...absoluteRange,
-              id: globalId,
-            })
-          );
-        }
-        if (globalType === 'relative') {
-          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-            get('global.timerange', timerangeStateData)
-          );
-          dispatch(
-            inputsActions.setRelativeRangeDatePicker({
-              ...relativeRange,
-              id: globalId,
-            })
-          );
-        }
-      }
+      updateTimerange(newUrlStateString, dispatch);
     }
+
     if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
-      const appQuery: Query = decodeRisonUrlState(newUrlStateString);
+      const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
       if (appQuery != null) {
         dispatch(
           inputsActions.setFilterQuery({
@@ -124,13 +55,13 @@ export const dispatchSetInitialStateFromUrl = (
     }
 
     if (urlKey === CONSTANTS.filters) {
-      const filters: esFilters.Filter[] = decodeRisonUrlState(newUrlStateString);
+      const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
       filterManager.setFilters(filters || []);
     }
 
     if (urlKey === CONSTANTS.savedQuery) {
-      const savedQueryId: string = decodeRisonUrlState(newUrlStateString);
-      if (savedQueryId !== '') {
+      const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
+      if (savedQueryId != null && savedQueryId !== '') {
         savedQueries.getSavedQuery(savedQueryId).then(savedQueryData => {
           filterManager.setFilters(savedQueryData.attributes.filters || []);
           dispatch(
@@ -145,7 +76,7 @@ export const dispatchSetInitialStateFromUrl = (
     }
 
     if (urlKey === CONSTANTS.timeline) {
-      const timeline = decodeRisonUrlState(newUrlStateString);
+      const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
       if (timeline != null && timeline.id !== '') {
         queryTimelineById({
           apolloClient,
@@ -158,4 +89,78 @@ export const dispatchSetInitialStateFromUrl = (
       }
     }
   });
+};
+
+const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
+  const timerangeStateData = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
+
+  const globalId: InputsModelId = 'global';
+  const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
+  const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
+
+  const timelineId: InputsModelId = 'timeline';
+  const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
+  const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
+
+  if (isEmpty(globalLinkTo.linkTo)) {
+    dispatch(inputsActions.removeGlobalLinkTo());
+  } else {
+    dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
+  }
+
+  if (isEmpty(timelineLinkTo.linkTo)) {
+    dispatch(inputsActions.removeTimelineLinkTo());
+  } else {
+    dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+  }
+
+  if (timelineType) {
+    if (timelineType === 'absolute') {
+      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+        get('timeline.timerange', timerangeStateData)
+      );
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          ...absoluteRange,
+          id: timelineId,
+        })
+      );
+    }
+    if (timelineType === 'relative') {
+      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+        get('timeline.timerange', timerangeStateData)
+      );
+      dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          ...relativeRange,
+          id: timelineId,
+        })
+      );
+    }
+  }
+
+  if (globalType) {
+    if (globalType === 'absolute') {
+      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+        get('global.timerange', timerangeStateData)
+      );
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          ...absoluteRange,
+          id: globalId,
+        })
+      );
+    }
+    if (globalType === 'relative') {
+      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+        get('global.timerange', timerangeStateData)
+      );
+      dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          ...relativeRange,
+          id: globalId,
+        })
+      );
+    }
+  }
 };

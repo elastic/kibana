@@ -23,7 +23,8 @@ import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
@@ -35,7 +36,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
-class ForecastsTableUI extends Component {
+export class ForecastsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -65,10 +66,12 @@ class ForecastsTableUI extends Component {
           console.log('Error loading list of forecasts for jobs list:', resp);
           this.setState({
             isLoading: false,
-            errorMessage: this.props.intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobDetails.forecastsTable.loadingErrorMessage',
-              defaultMessage: 'Error loading the list of forecasts run on this job',
-            }),
+            errorMessage: i18n.translate(
+              'xpack.ml.jobsList.jobDetails.forecastsTable.loadingErrorMessage',
+              {
+                defaultMessage: 'Error loading the list of forecasts run on this job',
+              }
+            ),
             forecasts: [],
           });
         });
@@ -191,13 +194,10 @@ class ForecastsTableUI extends Component {
       );
     }
 
-    const { intl } = this.props;
-
     const columns = [
       {
         field: 'forecast_create_timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.createdLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.createdLabel', {
           defaultMessage: 'Created',
         }),
         dataType: 'date',
@@ -208,8 +208,7 @@ class ForecastsTableUI extends Component {
       },
       {
         field: 'forecast_start_timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.fromLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.fromLabel', {
           defaultMessage: 'From',
         }),
         dataType: 'date',
@@ -219,8 +218,7 @@ class ForecastsTableUI extends Component {
       },
       {
         field: 'forecast_end_timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.toLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.toLabel', {
           defaultMessage: 'To',
         }),
         dataType: 'date',
@@ -230,16 +228,14 @@ class ForecastsTableUI extends Component {
       },
       {
         field: 'forecast_status',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel', {
           defaultMessage: 'Status',
         }),
         sortable: true,
       },
       {
         field: 'forecast_memory_bytes',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.memorySizeLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.memorySizeLabel', {
           defaultMessage: 'Memory size',
         }),
         render: bytes => formatNumber(bytes, '0b'),
@@ -247,26 +243,21 @@ class ForecastsTableUI extends Component {
       },
       {
         field: 'processing_time_ms',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel', {
           defaultMessage: 'Processing time',
         }),
         render: ms =>
-          intl.formatMessage(
-            {
-              id: 'xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel',
-              defaultMessage: '{ms} ms',
-            },
-            {
+          i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel', {
+            defaultMessage: '{ms} ms',
+            values: {
               ms,
-            }
-          ),
+            },
+          }),
         sortable: true,
       },
       {
         field: 'forecast_expiry_timestamp',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel', {
           defaultMessage: 'Expires',
         }),
         render: date => formatDate(date, TIME_FORMAT),
@@ -275,8 +266,7 @@ class ForecastsTableUI extends Component {
       },
       {
         field: 'forecast_messages',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.messagesLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.messagesLabel', {
           defaultMessage: 'Messages',
         }),
         sortable: false,
@@ -292,19 +282,18 @@ class ForecastsTableUI extends Component {
         textOnly: true,
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel', {
           defaultMessage: 'View',
         }),
         width: '60px',
         render: forecast => {
-          const viewForecastAriaLabel = intl.formatMessage(
+          const viewForecastAriaLabel = i18n.translate(
+            'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
             {
-              id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
               defaultMessage: 'View forecast created at {createdDate}',
-            },
-            {
-              createdDate: formatDate(forecast.forecast_create_timestamp, TIME_FORMAT),
+              values: {
+                createdDate: formatDate(forecast.forecast_create_timestamp, TIME_FORMAT),
+              },
             }
           );
 
@@ -333,10 +322,6 @@ class ForecastsTableUI extends Component {
     );
   }
 }
-ForecastsTableUI.propTypes = {
+ForecastsTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
-
-const ForecastsTable = injectI18n(ForecastsTableUI);
-
-export { ForecastsTable };

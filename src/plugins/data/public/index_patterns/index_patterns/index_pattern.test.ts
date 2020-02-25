@@ -31,7 +31,7 @@ import { setNotifications, setFieldFormats } from '../../services';
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
-import { fieldFormats } from '../../../common/field_formats';
+import { FieldFormatsStart } from '../../field_formats';
 
 jest.mock('../../../../kibana_utils/public', () => {
   const originalModule = jest.requireActual('../../../../kibana_utils/public');
@@ -125,7 +125,8 @@ describe('IndexPattern', () => {
     setNotifications(notifications);
     setFieldFormats(({
       getDefaultInstance: jest.fn(),
-    } as unknown) as fieldFormats.FieldFormatsRegistry);
+      deserialize: jest.fn() as any,
+    } as unknown) as FieldFormatsStart);
 
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;

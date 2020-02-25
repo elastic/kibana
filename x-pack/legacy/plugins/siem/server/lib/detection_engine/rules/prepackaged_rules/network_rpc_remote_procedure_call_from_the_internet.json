@@ -1,10 +1,7 @@
 {
   "description": "This rule detects network events that may indicate the use of RPC traffic\nfrom the Internet. RPC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -35,5 +32,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

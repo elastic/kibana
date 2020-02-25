@@ -7,7 +7,7 @@
 import { UserInputError } from 'apollo-server-errors';
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
-import { JsonObject } from '../../common/typed_json';
+import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 
 export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {

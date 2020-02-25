@@ -7,11 +7,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { get, contains } from 'lodash';
-import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
+import chrome from '../np_imports/ui/chrome';
 import { CloudSetup } from '../../../../../plugins/cloud/public';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
@@ -207,12 +207,12 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
   }
 };
 
-export const isInSetupMode = async () => {
+export const isInSetupMode = () => {
   if (setupModeState.enabled) {
     return true;
   }
 
-  const $injector = angularState.injector || (await chrome.dangerouslyGetActiveInjector());
+  const $injector = angularState.injector || chrome.dangerouslyGetActiveInjector();
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
 };

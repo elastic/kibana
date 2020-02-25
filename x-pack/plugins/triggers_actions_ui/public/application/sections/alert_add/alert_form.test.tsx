@@ -12,10 +12,10 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
-import { AppContextProvider } from '../../app_context';
 import { AppDeps } from '../../app';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { AlertsContextProvider } from '../../context/alerts_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 describe('alert_form', () => {
@@ -100,16 +100,31 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       await act(async () => {
-        wrapper = mountWithIntl(
-          <AppContextProvider appDeps={deps}>
-            <AlertForm
-              alert={initialAlert}
-              dispatch={() => {}}
-              errors={{ name: [] }}
-              serverError={null}
-            />
-          </AppContextProvider>
-        );
+        if (deps) {
+          wrapper = mountWithIntl(
+            <AlertsContextProvider
+              value={{
+                addFlyoutVisible: true,
+                setAddFlyoutVisibility: state => {},
+                reloadAlerts: () => {
+                  return new Promise<void>(() => {});
+                },
+                http: deps.http,
+                actionTypeRegistry: deps.actionTypeRegistry,
+                alertTypeRegistry: deps.alertTypeRegistry,
+                toastNotifications: deps.toastNotifications,
+                uiSettings: deps.uiSettings,
+              }}
+            >
+              <AlertForm
+                alert={initialAlert}
+                dispatch={() => {}}
+                errors={{ name: [] }}
+                serverError={null}
+              />
+            </AlertsContextProvider>
+          );
+        }
       });
 
       await waitForRender(wrapper);
@@ -143,6 +158,7 @@ describe('alert_form', () => {
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
 
       const initialAlert = ({
         name: 'test',
@@ -160,16 +176,31 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       await act(async () => {
-        wrapper = mountWithIntl(
-          <AppContextProvider appDeps={deps}>
-            <AlertForm
-              alert={initialAlert}
-              dispatch={() => {}}
-              errors={{ name: [] }}
-              serverError={null}
-            />
-          </AppContextProvider>
-        );
+        if (deps) {
+          wrapper = mountWithIntl(
+            <AlertsContextProvider
+              value={{
+                addFlyoutVisible: true,
+                setAddFlyoutVisibility: state => {},
+                reloadAlerts: () => {
+                  return new Promise<void>(() => {});
+                },
+                http: deps.http,
+                actionTypeRegistry: deps.actionTypeRegistry,
+                alertTypeRegistry: deps.alertTypeRegistry,
+                toastNotifications: deps.toastNotifications,
+                uiSettings: deps.uiSettings,
+              }}
+            >
+              <AlertForm
+                alert={initialAlert}
+                dispatch={() => {}}
+                errors={{ name: [] }}
+                serverError={null}
+              />
+            </AlertsContextProvider>
+          );
+        }
       });
 
       await waitForRender(wrapper);

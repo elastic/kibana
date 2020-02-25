@@ -150,7 +150,7 @@ describe('params validation', () => {
     expect(() => {
       validateParams(actionType, { documents: ['should be an object'] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [documents.0]: expected value of type [object] but got [string]"`
+      `"error validating action params: [documents.0]: could not parse record value from [should be an object]"`
     );
   });
 });

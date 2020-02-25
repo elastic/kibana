@@ -23,8 +23,8 @@ import { fieldCalculator } from './lib/field_calculator';
 import './discover_field';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
-import { FieldList } from '../../../../../../../../plugins/data/public';
 import fieldChooserTemplate from './field_chooser.html';
+import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
 
 export function createFieldChooserDirective($location, config, $route) {
   return {
@@ -281,7 +281,7 @@ export function createFieldChooserDirective($location, config, $route) {
           });
         });
 
-        const fields = new FieldList(indexPattern, fieldSpecs);
+        const fields = new IndexPatternFieldList(indexPattern, fieldSpecs);
 
         if (prevFields) {
           fields.forEach(function(field) {

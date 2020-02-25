@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -24,11 +20,12 @@ import {
 } from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
+import { SiemNavigation } from '../../components/navigation';
+import { NavTab } from '../../components/navigation/types';
 import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { InputsModelId } from '../../store/inputs/constants';
 import { InputsRange } from '../../store/inputs/model';
 import { AlertsByCategory } from '../overview/alerts_by_category';
 import { useSignalInfo } from './components/signals_info';
@@ -45,35 +42,24 @@ import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unau
 import * as i18n from './translations';
 import { DetectionEngineTab } from './types';
 
-interface ReduxProps {
-  filters: esFilters.Filter[];
-  query: Query;
-}
-
-export interface DispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
-
-const detectionsTabs = [
-  {
+const detectionsTabs: Record<string, NavTab> = {
+  [DetectionEngineTab.signals]: {
     id: DetectionEngineTab.signals,
     name: i18n.SIGNAL,
+    href: getDetectionEngineTabUrl(DetectionEngineTab.signals),
     disabled: false,
+    urlKey: 'detections',
   },
-  {
+  [DetectionEngineTab.alerts]: {
     id: DetectionEngineTab.alerts,
     name: i18n.ALERT,
+    href: getDetectionEngineTabUrl(DetectionEngineTab.alerts),
     disabled: false,
+    urlKey: 'detections',
   },
-];
+};
 
-const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> = ({
+const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -96,24 +82,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
-  );
-
-  const tabs = useMemo(
-    () => (
-      <EuiTabs>
-        {detectionsTabs.map(tab => (
-          <EuiTab
-            isSelected={tab.id === tabName}
-            disabled={tab.disabled}
-            key={tab.id}
-            href={getDetectionEngineTabUrl(tab.id)}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    ),
-    [detectionsTabs, tabName]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -169,7 +137,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                 <GlobalTime>
                   {({ to, from, deleteQuery, setQuery }) => (
                     <>
-                      {tabs}
+                      <SiemNavigation navTabs={detectionsTabs} />
                       <EuiSpacer />
                       {tabName === DetectionEngineTab.signals && (
                         <>
@@ -205,7 +173,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             hideHeaderChildren={true}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -247,7 +214,8 @@ const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
 };
 
-export const DetectionEnginePage = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(React.memo(DetectionEnginePageComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const DetectionEnginePage = connector(React.memo(DetectionEnginePageComponent));

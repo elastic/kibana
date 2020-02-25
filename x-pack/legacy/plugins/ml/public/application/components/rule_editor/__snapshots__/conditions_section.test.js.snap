@@ -40,7 +40,7 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
 
 exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
 <Fragment>
-  <InjectIntl(ConditionExpression)
+  <ConditionExpression
     appliesTo="actual"
     deleteCondition={[MockFunction]}
     index={0}
@@ -66,7 +66,7 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
 
 exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
 <Fragment>
-  <InjectIntl(ConditionExpression)
+  <ConditionExpression
     appliesTo="actual"
     deleteCondition={[MockFunction]}
     index={0}
@@ -75,7 +75,7 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     updateCondition={[MockFunction]}
     value={1}
   />
-  <InjectIntl(ConditionExpression)
+  <ConditionExpression
     appliesTo="typical"
     deleteCondition={[MockFunction]}
     index={1}

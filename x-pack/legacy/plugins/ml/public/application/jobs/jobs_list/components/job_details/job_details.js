@@ -17,12 +17,9 @@ import { AnnotationFlyout } from '../../../../components/annotations/annotation_
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
-
-class JobDetailsUI extends Component {
+export class JobDetails extends Component {
   constructor(props) {
     super(props);
 
@@ -66,14 +63,13 @@ class JobDetailsUI extends Component {
         datafeedTimingStats,
       } = extractJobDetails(job);
 
-      const { intl, showFullDetails } = this.props;
+      const { showFullDetails } = this.props;
 
       const tabs = [
         {
           id: 'job-settings',
           'data-test-subj': 'mlJobListTab-job-settings',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel', {
             defaultMessage: 'Job settings',
           }),
           content: (
@@ -87,8 +83,7 @@ class JobDetailsUI extends Component {
         {
           id: 'job-config',
           'data-test-subj': 'mlJobListTab-job-config',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel', {
             defaultMessage: 'Job config',
           }),
           content: (
@@ -101,8 +96,7 @@ class JobDetailsUI extends Component {
         {
           id: 'counts',
           'data-test-subj': 'mlJobListTab-counts',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.countsLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.countsLabel', {
             defaultMessage: 'Counts',
           }),
           content: (
@@ -115,8 +109,7 @@ class JobDetailsUI extends Component {
         {
           id: 'json',
           'data-test-subj': 'mlJobListTab-json',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.jsonLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jsonLabel', {
             defaultMessage: 'JSON',
           }),
           content: <JsonPane job={job} />,
@@ -124,8 +117,7 @@ class JobDetailsUI extends Component {
         {
           id: 'job-messages',
           'data-test-subj': 'mlJobListTab-job-messages',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel', {
             defaultMessage: 'Job messages',
           }),
           content: <JobMessagesPane jobId={job.job_id} />,
@@ -137,8 +129,7 @@ class JobDetailsUI extends Component {
         tabs.splice(2, 0, {
           id: 'datafeed',
           'data-test-subj': 'mlJobListTab-datafeed',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedLabel', {
             defaultMessage: 'Datafeed',
           }),
           content: (
@@ -153,8 +144,7 @@ class JobDetailsUI extends Component {
           {
             id: 'datafeed-preview',
             'data-test-subj': 'mlJobListTab-datafeed-preview',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel', {
               defaultMessage: 'Datafeed preview',
             }),
             content: <DatafeedPreviewPane job={job} />,
@@ -162,8 +152,7 @@ class JobDetailsUI extends Component {
           {
             id: 'forecasts',
             'data-test-subj': 'mlJobListTab-forecasts',
-            name: intl.formatMessage({
-              id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
+            name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.forecastsLabel', {
               defaultMessage: 'Forecasts',
             }),
             content: <ForecastsTable job={job} />,
@@ -171,12 +160,11 @@ class JobDetailsUI extends Component {
         );
       }
 
-      if (mlAnnotationsEnabled && showFullDetails) {
+      if (showFullDetails) {
         tabs.push({
           id: 'annotations',
           'data-test-subj': 'mlJobListTab-annotations',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.annotationsLabel',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
             defaultMessage: 'Annotations',
           }),
           content: (
@@ -196,12 +184,10 @@ class JobDetailsUI extends Component {
     }
   }
 }
-JobDetailsUI.propTypes = {
+JobDetails.propTypes = {
   jobId: PropTypes.string.isRequired,
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
   showFullDetails: PropTypes.bool,
 };
-
-export const JobDetails = injectI18n(JobDetailsUI);

@@ -25,8 +25,6 @@ exports[`Should render icon select 1`] = `
           <SymbolIcon
             className="mapIconSelectSymbol__inputButton"
             fill="rgb(52, 55, 65)"
-            stroke="rgb(0, 0, 0)"
-            strokeWidth="1px"
             symbolId="symbol1"
           />
         }
@@ -53,8 +51,6 @@ exports[`Should render icon select 1`] = `
             "label": "symbol1",
             "prepend": <SymbolIcon
               fill="rgb(52, 55, 65)"
-              stroke="rgb(0, 0, 0)"
-              strokeWidth="1px"
               symbolId="symbol1"
             />,
             "value": "symbol1",
@@ -63,8 +59,6 @@ exports[`Should render icon select 1`] = `
             "label": "symbol2",
             "prepend": <SymbolIcon
               fill="rgb(52, 55, 65)"
-              stroke="rgb(0, 0, 0)"
-              strokeWidth="1px"
               symbolId="symbol2"
             />,
             "value": "symbol2",

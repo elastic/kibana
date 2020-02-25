@@ -3,21 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
-interface Return extends ContainerStyle {
+interface Output extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): ExpressionFunction<
+export function containerStyle(): ExpressionFunctionDefinition<
   'containerStyle',
   null,
   ContainerStyle,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
   const errors = getFunctionErrors().containerStyle;
@@ -26,10 +26,8 @@ export function containerStyle(): ExpressionFunction<
     name: 'containerStyle',
     aliases: [],
     type: 'containerStyle',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       backgroundColor: {
         types: ['string'],
@@ -74,12 +72,12 @@ export function containerStyle(): ExpressionFunction<
         help: argHelp.padding,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { backgroundImage, backgroundSize, backgroundRepeat, ...remainingArgs } = args;
       const style = {
         type: 'containerStyle',
         ...remainingArgs,
-      } as Return;
+      } as Output;
 
       if (backgroundImage) {
         if (!isValidUrl(backgroundImage)) {

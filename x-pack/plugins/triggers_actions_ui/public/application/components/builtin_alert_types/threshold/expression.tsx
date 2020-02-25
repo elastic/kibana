@@ -10,30 +10,35 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormLabel,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
-  EuiFieldNumber,
   EuiComboBoxOptionProps,
-  EuiText,
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { Alert } from '../../../../types';
-import { Comparator, AggregationType, GroupByType } from './types';
-import { AGGREGATION_TYPES, COMPARATORS } from './constants';
+import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
   loadIndexPatterns,
 } from './lib/api';
-import { useAppDependencies } from '../../../app_context';
-import { getTimeOptions, getTimeFieldOptions } from '../../../lib/get_time_options';
-import { getTimeUnitLabel } from '../../../lib/get_time_unit_label';
+import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { ThresholdVisualization } from './visualization';
+import { WhenExpression } from '../../../../common';
+import {
+  OfExpression,
+  ThresholdExpression,
+  ForLastExpression,
+  GroupByExpression,
+} from '../../../../common';
+import { builtInAggregationTypes } from '../../../../common/constants';
+import { IndexThresholdAlertParams } from './types';
+import { AlertsContextValue } from '../../../context/alerts_context';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -58,133 +63,21 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-export const aggregationTypes: { [key: string]: AggregationType } = {
-  count: {
-    text: 'count()',
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
-    validNormalizedTypes: [],
-  },
-  avg: {
-    text: 'average()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.AVERAGE,
-  },
-  sum: {
-    text: 'sum()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.SUM,
-  },
-  min: {
-    text: 'min()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MIN,
-  },
-  max: {
-    text: 'max()',
-    fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MAX,
-  },
-};
-
-export const comparators: { [key: string]: Comparator } = {
-  [COMPARATORS.GREATER_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveLabel',
-      {
-        defaultMessage: 'Is above',
-      }
-    ),
-    value: COMPARATORS.GREATER_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.GREATER_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveOrEqualsLabel',
-      {
-        defaultMessage: 'Is above or equals',
-      }
-    ),
-    value: COMPARATORS.GREATER_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowLabel',
-      {
-        defaultMessage: 'Is below',
-      }
-    ),
-    value: COMPARATORS.LESS_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowOrEqualsLabel',
-      {
-        defaultMessage: 'Is below or equals',
-      }
-    ),
-    value: COMPARATORS.LESS_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.BETWEEN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBetweenLabel',
-      {
-        defaultMessage: 'Is between',
-      }
-    ),
-    value: COMPARATORS.BETWEEN,
-    requiredValues: 2,
-  },
-};
-
-export const groupByTypes: { [key: string]: GroupByType } = {
-  all: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',
-      {
-        defaultMessage: 'all documents',
-      }
-    ),
-    sizeRequired: false,
-    value: 'all',
-    validNormalizedTypes: [],
-  },
-  top: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.topLabel',
-      {
-        defaultMessage: 'top',
-      }
-    ),
-    sizeRequired: true,
-    value: 'top',
-    validNormalizedTypes: ['number', 'date', 'keyword'],
-  },
-};
-
-interface Props {
-  alert: Alert;
+interface IndexThresholdProps {
+  alertParams: IndexThresholdAlertParams;
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
-  hasErrors?: boolean;
+  alertsContext: AlertsContextValue;
 }
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
-  alert,
+export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
+  alertParams,
   setAlertParams,
   setAlertProperty,
   errors,
+  alertsContext,
 }) => {
-  const { http } = useAppDependencies();
-
   const {
     index,
     timeField,
@@ -197,7 +90,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     threshold,
     timeWindowSize,
     timeWindowUnit,
-  } = alert.params;
+  } = alertParams;
 
   const firstFieldOption = {
     text: i18n.translate(
@@ -208,31 +101,20 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     ),
     value: '',
   };
+  const { http } = alertsContext;
 
-  const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState<Record<string, any>>([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionProps[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
-  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
-  const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
-  const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
-  const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
-
-  const andThresholdText = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertAdd.threshold.andLabel',
-    {
-      defaultMessage: 'AND',
-    }
-  );
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     errorKey =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alert.params[errorKey] !== undefined
+      (alertParams as { [key: string]: any })[errorKey] !== undefined
   );
 
   const canShowVizualization = !!Object.keys(errors).find(
@@ -446,7 +328,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiSpacer size="l" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Select Index to query:"
+          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="indexPopover"
@@ -459,7 +349,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                     defaultMessage: 'index',
                   }
                 )}
-                value={index || firstFieldOption.text}
+                value={index ? index.join(' ') : firstFieldOption.text}
                 isActive={indexPopoverOpen}
                 onClick={() => {
                   setIndexPopoverOpen(true);
@@ -489,427 +379,92 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             </div>
           </EuiPopover>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="aggTypePopover"
-            button={
-              <EuiExpression
-                description={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.whenLabel',
-                  {
-                    defaultMessage: 'when',
-                  }
-                )}
-                value={
-                  aggregationTypes[aggType]
-                    ? aggregationTypes[aggType].text
-                    : aggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text
-                }
-                isActive={aggTypePopoverOpen}
-                onClick={() => {
-                  setAggTypePopoverOpen(true);
-                }}
-              />
+          <WhenExpression
+            aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+            onChangeSelectedAggType={(selectedAggType: string) =>
+              setAlertParams('aggType', selectedAggType)
             }
-            isOpen={aggTypePopoverOpen}
-            closePopover={() => {
-              setAggTypePopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.whenButtonLabel',
-                  {
-                    defaultMessage: 'when',
-                  }
-                )}
-              </EuiPopoverTitle>
-              <EuiSelect
-                value={aggType || ''}
-                fullWidth
-                onChange={e => {
-                  setAlertParams('aggType', e.target.value);
-                  setAggTypePopoverOpen(false);
-                }}
-                options={Object.values(aggregationTypes).map(({ text, value }) => {
-                  return {
-                    text,
-                    value,
-                  };
-                })}
-              />
-            </div>
-          </EuiPopover>
+          />
         </EuiFlexItem>
-        {aggType && aggregationTypes[aggType].fieldRequired ? (
+        {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="aggFieldPopover"
-              button={
-                <EuiExpression
-                  description={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertAdd.threshold.ofLabel',
-                    {
-                      defaultMessage: 'of',
-                    }
-                  )}
-                  value={aggField || firstFieldOption.text}
-                  isActive={aggFieldPopoverOpen || !aggField}
-                  onClick={() => {
-                    setAggFieldPopoverOpen(true);
-                  }}
-                  color={aggField ? 'secondary' : 'danger'}
-                />
+            <OfExpression
+              aggField={aggField}
+              fields={esFields}
+              aggType={aggType}
+              errors={errors}
+              onChangeSelectedAggField={(selectedAggField?: string) =>
+                setAlertParams('aggField', selectedAggField)
               }
-              isOpen={aggFieldPopoverOpen}
-              closePopover={() => {
-                setAggFieldPopoverOpen(false);
-              }}
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>
-                  {i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertAdd.threshold.ofButtonLabel',
-                    {
-                      defaultMessage: 'of',
-                    }
-                  )}
-                </EuiPopoverTitle>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
-                    <EuiFormRow
-                      isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-                      error={errors.aggField}
-                    >
-                      <EuiComboBox
-                        singleSelection={{ asPlainText: true }}
-                        isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-                        placeholder={firstFieldOption.text}
-                        options={esFields.reduce((esFieldOptions: any[], field: any) => {
-                          if (
-                            aggregationTypes[aggType].validNormalizedTypes.includes(
-                              field.normalizedType
-                            )
-                          ) {
-                            esFieldOptions.push({
-                              label: field.name,
-                            });
-                          }
-                          return esFieldOptions;
-                        }, [])}
-                        selectedOptions={aggField ? [{ label: aggField }] : []}
-                        onChange={selectedOptions => {
-                          setAlertParams(
-                            'aggField',
-                            selectedOptions.length === 1 ? selectedOptions[0].label : undefined
-                          );
-                          setAggFieldPopoverOpen(false);
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiPopover>
+            />
           </EuiFlexItem>
         ) : null}
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="groupByPopover"
-            button={
-              <EuiExpression
-                description={`${
-                  groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
-                    ? i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertAdd.threshold.groupedOverLabel',
-                        {
-                          defaultMessage: 'grouped over',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertAdd.threshold.overLabel',
-                        {
-                          defaultMessage: 'over',
-                        }
-                      )
-                }`}
-                value={`${groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].text} ${
-                  groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
-                    ? `${termSize} ${termField ? `'${termField}'` : ''}`
-                    : ''
-                }`}
-                isActive={groupByPopoverOpen || (groupBy === 'top' && !(termSize && termField))}
-                onClick={() => {
-                  setGroupByPopoverOpen(true);
-                }}
-                color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
-              />
+          <GroupByExpression
+            groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+            termField={termField}
+            termSize={termSize}
+            errors={errors}
+            fields={esFields}
+            onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
+            onChangeSelectedTermField={selectedTermField =>
+              setAlertParams('termField', selectedTermField)
             }
-            isOpen={groupByPopoverOpen}
-            closePopover={() => {
-              setGroupByPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.overButtonLabel',
-                  {
-                    defaultMessage: 'over',
-                  }
-                )}
-              </EuiPopoverTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    value={groupBy}
-                    onChange={e => {
-                      setAlertParams('termSize', null);
-                      setAlertParams('termField', null);
-                      setAlertParams('groupBy', e.target.value);
-                    }}
-                    options={Object.values(groupByTypes).map(({ text, value }) => {
-                      return {
-                        text,
-                        value,
-                      };
-                    })}
-                  />
-                </EuiFlexItem>
-
-                {groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired ? (
-                  <Fragment>
-                    <EuiFlexItem grow={false}>
-                      <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
-                        <EuiFieldNumber
-                          isInvalid={errors.termSize.length > 0}
-                          value={termSize || 0}
-                          onChange={e => {
-                            const { value } = e.target;
-                            const termSizeVal = value !== '' ? parseFloat(value) : value;
-                            setAlertParams('termSize', termSizeVal);
-                          }}
-                          min={1}
-                        />
-                      </EuiFormRow>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFormRow
-                        isInvalid={errors.timeField.length > 0 && termField !== undefined}
-                        error={errors.termField}
-                      >
-                        <EuiSelect
-                          value={termField || ''}
-                          isInvalid={errors.timeField.length > 0 && termField !== undefined}
-                          onChange={e => {
-                            setAlertParams('termField', e.target.value);
-                          }}
-                          options={esFields.reduce(
-                            (options: any, field: any) => {
-                              if (
-                                groupByTypes[
-                                  groupBy || DEFAULT_VALUES.GROUP_BY
-                                ].validNormalizedTypes.includes(field.normalizedType)
-                              ) {
-                                options.push({
-                                  text: field.name,
-                                  value: field.name,
-                                });
-                              }
-                              return options;
-                            },
-                            [firstFieldOption]
-                          )}
-                        />
-                      </EuiFormRow>
-                    </EuiFlexItem>
-                  </Fragment>
-                ) : null}
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
+            onChangeSelectedTermSize={selectedTermSize =>
+              setAlertParams('termSize', selectedTermSize)
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Define the alert condition:"
+          id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <ThresholdExpression
+            thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+            threshold={threshold}
+            errors={errors}
+            onChangeSelectedThreshold={selectedThresholds =>
+              setAlertParams('threshold', selectedThresholds)
+            }
+            onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+              setAlertParams('thresholdComparator', selectedThresholdComparator)
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="alertThresholdPopover"
-            button={
-              <EuiExpression
-                data-test-subj="alertThresholdPopover"
-                description={
-                  comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR].text
-                }
-                value={(threshold || [])
-                  .slice(
-                    0,
-                    comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR]
-                      .requiredValues
-                  )
-                  .join(` ${andThresholdText} `)}
-                isActive={Boolean(
-                  alertThresholdPopoverOpen ||
-                    (errors.threshold0 && errors.threshold0.length) ||
-                    (errors.threshold1 && errors.threshold1.length)
-                )}
-                onClick={() => {
-                  setAlertThresholdPopoverOpen(true);
-                }}
-                color={
-                  (errors.threshold0 && errors.threshold0.length) ||
-                  (errors.threshold1 && errors.threshold1.length)
-                    ? 'danger'
-                    : 'secondary'
-                }
-              />
+          <ForLastExpression
+            timeWindowSize={timeWindowSize || 1}
+            timeWindowUnit={timeWindowUnit || ''}
+            errors={errors}
+            onChangeWindowSize={(selectedWindowSize: any) =>
+              setAlertParams('timeWindowSize', selectedWindowSize)
             }
-            isOpen={alertThresholdPopoverOpen}
-            closePopover={() => {
-              setAlertThresholdPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                {comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR].text}
-              </EuiPopoverTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    value={thresholdComparator}
-                    onChange={e => {
-                      setAlertParams('thresholdComparator', e.target.value);
-                    }}
-                    options={Object.values(comparators).map(({ text, value }) => {
-                      return { text, value };
-                    })}
-                  />
-                </EuiFlexItem>
-                {Array.from(
-                  Array(
-                    comparators[thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR]
-                      .requiredValues
-                  )
-                ).map((_notUsed, i) => {
-                  return (
-                    <Fragment key={`threshold${i}`}>
-                      {i > 0 ? (
-                        <EuiFlexItem
-                          grow={false}
-                          className="alertThresholdWatchInBetweenComparatorText"
-                        >
-                          <EuiText>{andThresholdText}</EuiText>
-                          {errors[`threshold${i}`].length > 0 && <EuiSpacer />}
-                        </EuiFlexItem>
-                      ) : null}
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow
-                          isInvalid={errors[`threshold${i}`].length > 0}
-                          error={errors[`threshold${i}`]}
-                        >
-                          <EuiFieldNumber
-                            data-test-subj="alertThresholdInput"
-                            isInvalid={errors[`threshold${i}`].length > 0}
-                            value={!threshold || threshold[i] === null ? 0 : threshold[i]}
-                            min={0}
-                            step={0.1}
-                            onChange={e => {
-                              const { value } = e.target;
-                              const thresholdVal = value !== '' ? parseFloat(value) : value;
-                              const newThreshold = [...threshold];
-                              newThreshold[i] = thresholdVal;
-                              setAlertParams('threshold', newThreshold);
-                            }}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                    </Fragment>
-                  );
-                })}
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="watchDurationPopover"
-            button={
-              <EuiExpression
-                description={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.forTheLastLabel',
-                  {
-                    defaultMessage: 'for the last',
-                  }
-                )}
-                value={`${timeWindowSize} ${getTimeUnitLabel(
-                  timeWindowUnit,
-                  parseInt(timeWindowSize, 10).toString()
-                )}`}
-                isActive={alertDurationPopoverOpen || !timeWindowSize}
-                onClick={() => {
-                  setAlertDurationPopoverOpen(true);
-                }}
-                color={timeWindowSize ? 'secondary' : 'danger'}
-              />
+            onChangeWindowUnit={(selectedWindowUnit: any) =>
+              setAlertParams('timeWindowUnit', selectedWindowUnit)
             }
-            isOpen={alertDurationPopoverOpen}
-            closePopover={() => {
-              setAlertDurationPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-          >
-            <div>
-              <EuiPopoverTitle>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.threshold.forTheLastButtonLabel"
-                  defaultMessage="For the last"
-                />
-              </EuiPopoverTitle>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
-                    isInvalid={errors.timeWindowSize.length > 0}
-                    error={errors.timeWindowSize}
-                  >
-                    <EuiFieldNumber
-                      isInvalid={errors.timeWindowSize.length > 0}
-                      min={1}
-                      value={timeWindowSize ? parseInt(timeWindowSize, 10) : 1}
-                      onChange={e => {
-                        const { value } = e.target;
-                        const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
-                        setAlertParams('timeWindowSize', timeWindowSizeVal);
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    value={timeWindowUnit}
-                    onChange={e => {
-                      setAlertParams('timeWindowUnit', e.target.value);
-                    }}
-                    options={getTimeOptions(timeWindowSize)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {canShowVizualization ? null : (
         <Fragment>
-          <ThresholdVisualization alert={alert} />
+          <ThresholdVisualization
+            alertParams={alertParams}
+            aggregationTypes={builtInAggregationTypes}
+            comparators={builtInComparators}
+            alertsContext={alertsContext}
+          />
         </Fragment>
       )}
     </Fragment>

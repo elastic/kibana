@@ -5,13 +5,14 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { transformError } from '../utils';
 import { readTags } from '../../tags/read_tags';
+import { GetScopedClients } from '../../../../services';
 
-export const createReadTagsRoute: Hapi.ServerRoute = {
+export const createReadTagsRoute = (getClients: GetScopedClients): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_TAGS_URL,
   options: {
@@ -22,8 +23,9 @@ export const createReadTagsRoute: Hapi.ServerRoute = {
       },
     },
   },
-  async handler(request: RequestFacade, headers) {
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+  async handler(request: LegacyRequest, headers) {
+    const { alertsClient } = await getClients(request);
+
     if (!alertsClient) {
       return headers.response().code(404);
     }
@@ -34,11 +36,17 @@ export const createReadTagsRoute: Hapi.ServerRoute = {
       });
       return tags;
     } catch (err) {
-      return transformError(err);
+      const error = transformError(err);
+      return headers
+        .response({
+          message: error.message,
+          status_code: error.statusCode,
+        })
+        .code(error.statusCode);
     }
   },
-};
+});
 
-export const readTagsRoute = (server: ServerFacade) => {
-  server.route(createReadTagsRoute);
+export const readTagsRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
+  route(createReadTagsRoute(getClients));
 };

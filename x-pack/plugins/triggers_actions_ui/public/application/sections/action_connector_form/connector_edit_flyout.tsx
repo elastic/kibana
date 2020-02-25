@@ -108,6 +108,7 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
           errors={errors}
           actionTypeName={connector.actionType}
           dispatch={dispatch}
+          actionTypeRegistry={actionTypeRegistry}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

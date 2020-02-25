@@ -302,6 +302,8 @@ module.exports = {
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
                   'test/plugin_functional/plugins/**/server/np_ready/**/*',
                   'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/vis_type_*/public/**/*',
+                  '!src/legacy/core_plugins/vis_type_*/public/legacy*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
                   'x-pack/legacy/plugins/**/public/np_ready/**/*',
                   'x-pack/legacy/plugins/**/server/np_ready/**/*',
@@ -353,13 +355,7 @@ module.exports = {
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': [
-          'plugins',
-          'legacy/ui',
-          'uiExports',
-          // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
-          'querystring',
-        ],
+        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {

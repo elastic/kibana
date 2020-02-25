@@ -36,10 +36,23 @@ export default function({ getService, getPageObjects }) {
       }
 
       await browser.setWindowSize(1600, 1000);
-      // TODO: Remove the retry.try wrapper once https://github.com/elastic/kibana/issues/55985 is resolved
-      retry.try(async () => {
-        await PageObjects.common.navigateToApp('watcher');
-        await testSubjects.find('createWatchButton');
+
+      // License values are emitted ES -> Kibana Server -> Kibana Public. The current implementation
+      // creates a situation where the Watcher plugin may not have received a minimum required license at setup time
+      // so the public app may not have registered in the UI.
+      //
+      // For functional testing this is a problem. The temporary solution is we wait for watcher
+      // to be visible.
+      //
+      // See this issue https://github.com/elastic/kibana/issues/55985.
+      await retry.waitFor('watcher to display in management UI', async () => {
+        try {
+          await PageObjects.common.navigateToApp('watcher');
+          await testSubjects.find('createWatchButton');
+        } catch (e) {
+          return false;
+        }
+        return true;
       });
     });
 
