@@ -73,7 +73,7 @@ export class KbnClientSavedObjects {
 
     return await this.requester.request<MigrateResponse>({
       description: 'migrate saved objects',
-      path: uriencode`/api/saved_objects/_migrate`,
+      path: uriencode`/internal/saved_objects/_migrate`,
       method: 'POST',
       body: {},
     });

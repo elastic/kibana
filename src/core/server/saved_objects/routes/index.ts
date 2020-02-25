@@ -62,5 +62,8 @@ export function registerRoutes({
   registerExportRoute(router, config, importableExportableTypes);
   registerImportRoute(router, config, importableExportableTypes);
   registerResolveImportErrorsRoute(router, config, importableExportableTypes);
-  registerMigrateRoute(router, migratorPromise);
+
+  const internalRouter = http.createRouter('/internal/saved_objects/');
+
+  registerMigrateRoute(internalRouter, migratorPromise);
 }

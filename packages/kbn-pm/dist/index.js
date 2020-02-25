@@ -43791,7 +43791,7 @@ class KbnClientSavedObjects {
         this.log.debug('Migrating saved objects');
         return await this.requester.request({
             description: 'migrate saved objects',
-            path: kbn_client_requester_1.uriencode `/api/saved_objects/_migrate`,
+            path: kbn_client_requester_1.uriencode `/internal/saved_objects/_migrate`,
             method: 'POST',
             body: {},
         });
