@@ -43,11 +43,7 @@ function importData(
 /**
  * Routes for the file data visualizer.
  */
-export function fileDataVisualizerRoutes({
-  router,
-  savedObjects,
-  getLicenseCheckResults,
-}: RouteInitialization) {
+export function fileDataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
    *
@@ -137,7 +133,7 @@ export function fileDataVisualizerRoutes({
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          await incrementFileDataVisualizerIndexCreationCount(savedObjects!);
+          await incrementFileDataVisualizerIndexCreationCount(context.savedObjects);
         }
 
         const result = await importData(

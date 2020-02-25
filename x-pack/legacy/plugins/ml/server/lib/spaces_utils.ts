@@ -6,19 +6,19 @@
 
 import { Request } from 'hapi';
 import { Space } from '../../../../../plugins/spaces/server';
-import { LegacySpacesPlugin } from '../../../spaces';
+import { SpacesPluginSetup } from '../../../../../plugins/spaces/server';
 
 interface GetActiveSpaceResponse {
   valid: boolean;
   space?: Space;
 }
 
-export function spacesUtilsProvider(spacesPlugin: LegacySpacesPlugin, request: Request) {
+export function spacesUtilsProvider(spacesPlugin: SpacesPluginSetup, request: Request) {
   async function activeSpace(): Promise<GetActiveSpaceResponse> {
     try {
       return {
         valid: true,
-        space: await spacesPlugin.getActiveSpace(request),
+        space: await spacesPlugin.spacesService.getActiveSpace(request),
       };
     } catch (e) {
       return {

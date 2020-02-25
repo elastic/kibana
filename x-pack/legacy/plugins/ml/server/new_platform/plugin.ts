@@ -10,7 +10,7 @@ import {
   Logger,
   PluginInitializerContext,
   CoreSetup,
-  IRouter,
+  // IRouter,
   IScopedClusterClient,
   SavedObjectsServiceStart,
 } from 'src/core/server';
@@ -85,20 +85,22 @@ export interface LicenseCheckResult {
   type?: string;
 }
 
-export interface RouteInitialization {
-  config?: any;
-  elasticsearchService: ElasticsearchServiceSetup;
-  router: IRouter;
-  xpackMainPlugin: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsServiceStart;
-  spacesPlugin: any;
-  securityPlugin: any;
-  cloud?: CloudSetup;
-  getLicenseCheckResults: () => LicenseCheckResult;
-}
+export type RouteInitialization = any; // TODO: do this properly in NP dir
+// export interface RouteInitialization {
+//   config?: any;
+//   elasticsearchService: ElasticsearchServiceSetup;
+//   router: IRouter;
+//   xpackMainPlugin: MlXpackMainPlugin;
+//   savedObjects?: SavedObjectsServiceStart;
+//   spacesPlugin: any;
+//   securityPlugin: any;
+//   cloud?: CloudSetup;
+//   getLicenseCheckResults: () => LicenseCheckResult;
+// }
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
+    savedObjects: any;
     ml?: {
       mlClient: IScopedClusterClient;
     };
