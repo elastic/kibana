@@ -134,7 +134,7 @@ export const CalendarForm = ({
         </Fragment>
       )}
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xl" />
 
       <EuiSwitch
         name="switch"
