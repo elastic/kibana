@@ -60,6 +60,7 @@ describe('EmbeddableActionStorage', () => {
     test('can create multiple events', async () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
+
       const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
         triggerId: 'TRIGGER-ID',
@@ -106,6 +107,133 @@ describe('EmbeddableActionStorage', () => {
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toMatchInlineSnapshot(
         `"[EEXIST]: Event with [eventId = EVENT_ID] already exists on [embeddable.id = test, embeddable.title = undefined]."`
+      );
+    });
+  });
+
+  describe('.update()', () => {
+    test('method exists', () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+      expect(typeof storage.update).toBe('function');
+    });
+
+    test('can update an existing event', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event1: SerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'foo',
+        } as any,
+      };
+      const event2: SerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'bar',
+        } as any,
+      };
+
+      await storage.create(event1);
+      await storage.update(event2);
+
+      const events = embeddable.getInput().events || [];
+      expect(events).toEqual([event2]);
+    });
+
+    test('updates event in place of the old event', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event1: SerializedEvent = {
+        eventId: 'EVENT_ID1',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'foo',
+        } as any,
+      };
+      const event2: SerializedEvent = {
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'bar',
+        } as any,
+      };
+      const event22: SerializedEvent = {
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'baz',
+        } as any,
+      };
+      const event3: SerializedEvent = {
+        eventId: 'EVENT_ID3',
+        triggerId: 'TRIGGER-ID',
+        action: {
+          name: 'qux',
+        } as any,
+      };
+
+      await storage.create(event1);
+      await storage.create(event2);
+      await storage.create(event3);
+
+      const events1 = embeddable.getInput().events || [];
+      expect(events1).toEqual([event1, event2, event3]);
+
+      await storage.update(event22);
+
+      const events2 = embeddable.getInput().events || [];
+      expect(events2).toEqual([event1, event22, event3]);
+
+      await storage.update(event2);
+
+      const events3 = embeddable.getInput().events || [];
+      expect(events3).toEqual([event1, event2, event3]);
+    });
+
+    test('throws when updating event, but storage is empty', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event: SerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+
+      const [, error] = await of(storage.update(event));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatchInlineSnapshot(
+        `"[ENOENT]: Event with [eventId = EVENT_ID] could not be updated as it does not exist in [embeddable.id = test, embeddable.title = undefined]."`
+      );
+    });
+
+    test('throws when updating event with ID that is not stored', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const event1: SerializedEvent = {
+        eventId: 'EVENT_ID1',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+      const event2: SerializedEvent = {
+        eventId: 'EVENT_ID2',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+
+      await storage.create(event1);
+      const [, error] = await of(storage.update(event2));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatchInlineSnapshot(
+        `"[ENOENT]: Event with [eventId = EVENT_ID2] could not be updated as it does not exist in [embeddable.id = test, embeddable.title = undefined]."`
       );
     });
   });

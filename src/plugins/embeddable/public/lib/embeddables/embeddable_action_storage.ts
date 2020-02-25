@@ -65,14 +65,15 @@ export class EmbeddableActionStorage implements ActionStorage {
 
     if (index === -1) {
       throw new Error(
-        `[ENOENT]: Event with [eventId = ${event.eventId}] could not be updated as it does not exist in ` +
+        `[ENOENT]: Event with [eventId = ${event.eventId}] could not be ` +
+          `updated as it does not exist in ` +
           `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
       );
     }
 
     this.embbeddable.updateInput({
       ...input,
-      // events: [...events.filter, event],
+      events: [...events.slice(0, index), event, ...events.slice(index + 1)],
     });
   }
 
