@@ -20,5 +20,19 @@ import { wrapInI18nContext } from '../../../kibana_services';
 import { DiscoverGrid } from './discover_grid';
 
 export function createDiscoverGridDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverGrid));
+  return reactDirective(wrapInI18nContext(DiscoverGrid), [
+    ['columns', { watchDepth: 'collection' }],
+    ['rows', { watchDepth: 'collection' }],
+    ['indexPattern', { watchDepth: 'reference' }],
+    ['sort', { watchDepth: 'value' }],
+    ['sampleSize', { watchDepth: 'reference' }],
+    ['searchDescription', { watchDepth: 'reference' }],
+    ['searchTitle', { watchDepth: 'reference' }],
+    ['useShortDots', { watchDepth: 'value' }],
+    ['onFilter', { watchDepth: 'reference', wrapApply: false }],
+    ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
+    ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
+    ['getContextAppHref', { watchDepth: 'reference', wrapApply: false }],
+    ['onSort', { watchDepth: 'reference', wrapApply: false }],
+  ]);
 }

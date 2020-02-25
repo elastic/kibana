@@ -1163,5 +1163,16 @@ export function getUiSettingDefaults() {
       category: ['accessibility'],
       requiresPageReload: true,
     },
+    'doc_table:legacyTable': {
+      name: i18n.translate('kbn.advancedSettings.docTableVersionName', {
+        defaultMessage: 'Use legacy table',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.docTableVersionDescription', {
+        defaultMessage:
+          'Prefer the legacy version of the documents table in Discover while available',
+      }),
+      category: ['discover'],
+    },
   };
 }
