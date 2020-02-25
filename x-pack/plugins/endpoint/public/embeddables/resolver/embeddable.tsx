@@ -7,30 +7,22 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { CoreStart } from 'kibana/public';
 import { Resolver } from './view';
 import { storeFactory } from './store';
-import {
-  Embeddable,
-  EmbeddableInput,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+import { Embeddable } from '../../../../../../src/plugins/embeddable/public';
+import { getCore } from '../../index';
 
 export class ResolverEmbeddable extends Embeddable {
   public readonly type = 'resolver';
   private lastRenderTarget?: Element;
-  public coreStart: CoreStart;
-  constructor(initialInput: EmbeddableInput, {}, parent: IContainer, coreStart: any) {
-    super(initialInput, {}, parent);
-    this.coreStart = coreStart;
-  }
 
   public render(node: HTMLElement) {
     if (this.lastRenderTarget !== undefined) {
       ReactDOM.unmountComponentAtNode(this.lastRenderTarget);
     }
     this.lastRenderTarget = node;
-    const { store } = storeFactory(this.coreStart);
+    const coreStart = getCore();
+    const { store } = storeFactory(coreStart);
     ReactDOM.render(
       <Provider store={store}>
         <Resolver />

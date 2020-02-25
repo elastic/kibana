@@ -42,12 +42,12 @@ export function eventType(passedEvent: EndpointEvent) {
  * Returns the process event's pid
  */
 export function uniquePidForProcess(passedEvent: EndpointEvent) {
-  return passedEvent.endgame.pid;
+  return passedEvent.endgame.unique_pid;
 }
 
 /**
  * Returns the process event's parent pid
  */
 export function uniqueParentPidForProcess(passedEvent: EndpointEvent) {
-  return passedEvent.endgame.ppid;
+  return passedEvent.endgame.unique_ppid;
 }

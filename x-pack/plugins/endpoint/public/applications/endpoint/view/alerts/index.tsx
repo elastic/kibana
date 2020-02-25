@@ -28,7 +28,11 @@ import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailResolver } from './resolver';
 
-export const AlertIndex = memo((coreStart: CoreStart) => {
+interface AlertIndexProps {
+  coreStart: CoreStart;
+}
+
+export const AlertIndex: React.FunctionComponent<AlertIndexProps> = memo(({ coreStart }) => {
   const history = useHistory();
 
   const columns = useMemo((): EuiDataGridColumn[] => {

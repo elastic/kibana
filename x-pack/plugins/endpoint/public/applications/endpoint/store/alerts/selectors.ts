@@ -15,7 +15,7 @@ import {
   AlertsAPIQueryParams,
   CreateStructuredSelector,
 } from '../../types';
-import { Immutable, ImmutableObject, AlertData } from '../../../../../common/types';
+import { Immutable, ImmutableObject, AlertData, EndpointEvent } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 /**
@@ -94,12 +94,10 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
 
-export const selectedEvent: (
-  state: AlertListState
-) => ImmutableObject<AlertData> | undefined = createSelector(
+export const selectedEvent: (state: AlertListState) => EndpointEvent | undefined = createSelector(
   uiQueryParams,
   alertListData,
   ({ selected_alert: selectedAlert }, alertList) => {
-    return alertList.find(alert => alert.event.id === selectedAlert);
+    return alertList.find(alert => alert.event.id === selectedAlert) as EndpointEvent;
   }
 );

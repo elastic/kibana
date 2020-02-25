@@ -6,7 +6,7 @@
 
 import { animatePanning } from './camera/methods';
 import { processNodePositionsAndEdgeLineSegments } from './selectors';
-import { ResolverState, ProcessEvent } from '../types';
+import { ResolverState } from '../types';
 import { EndpointEvent } from '../../../../common/types';
 
 const animationDuration = 1000;

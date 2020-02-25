@@ -33,6 +33,7 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 interface RouterProps {
   basename: string;
   store: Store;
+  coreStart: CoreStart;
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(

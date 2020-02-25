@@ -34,6 +34,7 @@ export class EndpointPlugin
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
+        require('./index').initCore(coreStart);
         return renderApp(coreStart, params);
       },
     });

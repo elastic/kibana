@@ -85,7 +85,7 @@ export interface AlertData {
       score: number;
     };
   };
-  process: {
+  process?: {
     unique_pid: number;
   };
   host: {
@@ -96,6 +96,8 @@ export interface AlertData {
     };
   };
   thread: {};
+  endpoint?: {};
+  endgame?: {};
 }
 
 export interface EndpointMetadata {
@@ -127,7 +129,7 @@ export interface EndpointMetadata {
 }
 
 export interface LegacyEndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': string;
   endgame: {
     event_type_full: string;
     event_subtype_full: string;
@@ -160,17 +162,17 @@ export interface EndpointEvent {
     type: string;
   };
   endgame: {
-    pid: number;
-    ppid: number;
-    node_id: number;
+    pid?: number;
+    ppid?: number;
     event_type_full: string;
     event_subtype_full: string;
     event_timestamp: number;
-    event_type: number;
+    event_type?: number;
     unique_pid: number;
+    unique_ppid: number;
     machine_id: string;
     process_name: string;
-    process_path: string;
+    process_path?: string;
     timestamp_utc: string;
   };
 }

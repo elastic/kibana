@@ -13,7 +13,7 @@ describe('process event', () => {
     beforeEach(() => {
       event = mockProcessEvent({
         endgame: {
-          node_id: 1,
+          unique_pid: 1,
           event_type_full: 'process_event',
         },
       });

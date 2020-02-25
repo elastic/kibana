@@ -33,6 +33,7 @@ export const mockAlertResultList: (options?: {
       },
       event: {
         action: 'open',
+        id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',
       },
       file_classification: {
         malware_classification: {
@@ -47,6 +48,9 @@ export const mockAlertResultList: (options?: {
         },
       },
       thread: {},
+      process: {
+        unique_pid: 1,
+      },
     });
   }
   const mock: AlertResultList = {

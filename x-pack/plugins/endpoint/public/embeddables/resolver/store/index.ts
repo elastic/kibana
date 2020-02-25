@@ -12,14 +12,13 @@ import { resolverReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
 
 export const storeFactory = (
-  coreStart: CoreStart
+  coreStart?: CoreStart
 ): { store: Store<ResolverState, ResolverAction> } => {
   const actionsBlacklist: Array<ResolverAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',
     actionsBlacklist,
   });
-
   const middlewareEnhancer = applyMiddleware(resolverMiddlewareFactory(coreStart));
 
   const store = createStore(resolverReducer, composeEnhancers(middlewareEnhancer));

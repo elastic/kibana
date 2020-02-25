@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { Provider } from 'react-redux';
 import { CoreStart } from 'kibana/public';
 import { Resolver } from '../../../../embeddables/resolver/view';
+import { ResolverEvent } from '../../../../../common/types';
 import { storeFactory } from '../../../../embeddables/resolver/store';
 
 export const AlertDetailResolver = styled(
@@ -19,14 +20,14 @@ export const AlertDetailResolver = styled(
       coreStart,
     }: {
       className?: string;
-      selectedEvent: object;
+      selectedEvent?: ResolverEvent;
       coreStart: CoreStart;
     }) => {
       const { store } = storeFactory(coreStart);
       return (
         <div className={className}>
           <Provider store={store}>
-            <Resolver />
+            <Resolver selectedEvent={selectedEvent} />
           </Provider>
         </div>
       );
