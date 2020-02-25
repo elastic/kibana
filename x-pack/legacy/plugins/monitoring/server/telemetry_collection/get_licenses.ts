@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import {
+  StatsCollectionConfig,
+  LicenseGetter,
+} from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
+import { ESLicense } from 'src/legacy/core_plugins/telemetry/server/telemetry_collection/get_local_license';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
- *
- * @param {Object} server The server instance
- * @param {function} callCluster The callWithRequest or callWithInternalUser handler
- * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
-export async function getElasticsearchStats(
-  server: StatsCollectionConfig['server'],
-  callCluster: StatsCollectionConfig['callCluster'],
-  clusterUuids: string[]
-) {
-  const response = await fetchElasticsearchStats(server, callCluster, clusterUuids);
-  return handleElasticsearchStats(response);
-}
+export const getLicenses: LicenseGetter = async (clustersDetails, { server, callCluster }) => {
+  const clusterUuids = clustersDetails.map(({ clusterUuid }) => clusterUuid);
+  const response = await fetchLicenses(server, callCluster, clusterUuids);
+  return handleLicenses(response);
+};
 
 /**
  * Fetch the Elasticsearch stats.
@@ -33,7 +30,7 @@ export async function getElasticsearchStats(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchElasticsearchStats(
+export function fetchLicenses(
   server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[]
@@ -43,14 +40,7 @@ export function fetchElasticsearchStats(
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
-    filterPath: [
-      'hits.hits._source.cluster_uuid',
-      'hits.hits._source.timestamp',
-      'hits.hits._source.cluster_name',
-      'hits.hits._source.version',
-      'hits.hits._source.cluster_stats',
-      'hits.hits._source.stack_stats',
-    ],
+    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
     body: {
       query: {
         bool: {
@@ -72,20 +62,23 @@ export function fetchElasticsearchStats(
   return callCluster('search', params);
 }
 
-export interface ESClusterStats {
+export interface ESClusterStatsWithLicense {
   cluster_uuid: string;
-  cluster_name: string;
-  timestamp: string;
-  version: string;
-  cluster_stats: object;
-  stack_stats?: object;
+  type: 'cluster_stats';
+  license?: ESLicense;
 }
 
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
+export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map(cluster => cluster._source);
+  return clusters.reduce(
+    (acc, { _source }) => ({
+      ...acc,
+      [_source.cluster_uuid]: _source.license,
+    }),
+    {}
+  );
 }
