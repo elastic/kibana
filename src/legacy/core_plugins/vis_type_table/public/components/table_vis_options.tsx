@@ -47,14 +47,14 @@ function TableOptions({
         .filter(col => get(col.aggConfig.type.getFormat(col.aggConfig), 'type.id') === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
-    [aggs]
+    [aggs, stateParams.percentageCol, stateParams.dimensions]
   );
 
   const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;
 
   useEffect(() => {
     setValidity(isPerPageValid);
-  }, [isPerPageValid, setValidity]);
+  }, [isPerPageValid]);
 
   useEffect(() => {
     if (
@@ -64,7 +64,7 @@ function TableOptions({
     ) {
       setValue('percentageCol', percentageColumns[0].value);
     }
-  }, [percentageColumns, stateParams.percentageCol, setValue]);
+  }, [percentageColumns, stateParams.percentageCol]);
 
   return (
     <EuiPanel paddingSize="s">
