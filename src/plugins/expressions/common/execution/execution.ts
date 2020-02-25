@@ -230,8 +230,8 @@ export class Execution<
         input = output;
       } catch (rawError) {
         const timeEnd: number = this.params.debug ? now() : 0;
-        rawError.message = `[${fnName}] > ${rawError.message}`;
         const error = createError(rawError) as ExpressionValueError;
+        error.error.message = `[${fnName}] > ${error.error.message}`;
 
         if (this.params.debug) {
           (link as ExpressionAstFunction).debug = {

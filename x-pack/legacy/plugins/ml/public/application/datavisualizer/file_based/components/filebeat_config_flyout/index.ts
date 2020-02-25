@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SourceConfigurationSettings } from './source_configuration_settings';
-export { ViewSourceConfigurationButton } from './view_source_configuration_button';
+export { FilebeatConfigFlyout } from './filebeat_config_flyout';
