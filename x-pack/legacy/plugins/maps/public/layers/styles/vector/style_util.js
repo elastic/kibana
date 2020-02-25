@@ -34,22 +34,6 @@ export function isOnlySingleFeatureType(featureType, supportedFeatures, hasFeatu
   }, true);
 }
 
-export function scaleValue(value, range) {
-  if (isNaN(value) || !range) {
-    return -1; //Nothing to scale, put outside scaled range
-  }
-
-  if (range.delta === 0 || value >= range.max) {
-    return 1; //snap to end of scaled range
-  }
-
-  if (value <= range.min) {
-    return 0; //snap to beginning of scaled range
-  }
-
-  return (value - range.min) / range.delta;
-}
-
 export function assignCategoriesToPalette({ categories, paletteValues }) {
   const stops = [];
   let fallback = null;

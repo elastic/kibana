@@ -121,25 +121,28 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   getMbSizeExpression() {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
-      return this._getMbDataDrivenSize({
-        targetName: this.getComputedFieldName(),
-        minSize: this._options.minSize,
-        maxSize: this._options.maxSize,
-      });
+    if (!this._isSizeDynamicConfigComplete(this._options)) {
+      return null;
     }
-    return null;
+
+    return this._getMbDataDrivenSize({
+      targetName: this.getComputedFieldName(),
+      minSize: this._options.minSize,
+      maxSize: this._options.maxSize,
+    });
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+    const rangeFieldMeta = this.getFieldMeta();
+
     const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],
       ['coalesce', [lookup, targetName], 0],
-      0,
+      rangeFieldMeta.min,
       minSize,
-      1,
+      rangeFieldMeta.max,
       maxSize,
     ];
   }
@@ -149,7 +152,8 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       this._field &&
       this._field.isValid() &&
       _.has(this._options, 'minSize') &&
-      _.has(this._options, 'maxSize')
+      _.has(this._options, 'maxSize') &&
+      this.getFieldMeta()
     );
   }
 

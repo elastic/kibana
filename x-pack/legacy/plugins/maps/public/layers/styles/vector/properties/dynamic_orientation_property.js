@@ -25,8 +25,4 @@ export class DynamicOrientationProperty extends DynamicStyleProperty {
   supportsFeatureState() {
     return false;
   }
-
-  isOrdinalScaled() {
-    return false;
-  }
 }

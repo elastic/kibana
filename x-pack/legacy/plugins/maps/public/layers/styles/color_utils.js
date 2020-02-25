@@ -64,13 +64,17 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getOrdinalColorRampStops(colorRampName, min, max) {
   if (!colorRampName) {
     return null;
   }
+
+  const numberColors = GRADIENT_INTERVALS;
+  const delta = max - min;
   return getHexColorRangeStrings(colorRampName, numberColors).reduce(
     (accu, stopColor, idx, srcArr) => {
-      const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
+      // const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
+      const stopNumber = delta > 0 ? min + (delta * idx) / srcArr.length : 1;
       return [...accu, stopNumber, stopColor];
     },
     []

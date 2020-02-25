@@ -88,10 +88,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return true;
   }
 
-  isOrdinalScaled() {
-    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
-  }
-
   isOrdinalRanged() {
     return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
   }
@@ -232,7 +228,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
     } else {
-      return getOrdinalColorRampStops(this._options.color);
+      const rangeFieldMeta = this.getFieldMeta();
+      if (!rangeFieldMeta) {
+        return null;
+      }
+      return getOrdinalColorRampStops(this._options.color, rangeFieldMeta.min, rangeFieldMeta.max);
     }
   }
 

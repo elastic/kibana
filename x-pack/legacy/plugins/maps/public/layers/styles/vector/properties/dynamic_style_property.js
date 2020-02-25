@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { COLOR_PALETTE_MAX_SIZE, STYLE_TYPE } from '../../../../../common/constants';
-import { scaleValue, getComputedFieldName } from '../style_util';
+import { getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -84,7 +84,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   supportsFieldMeta() {
     if (this.isOrdinal()) {
-      return this.isComplete() && this.isOrdinalScaled() && this._field.supportsFieldMeta();
+      return this.isComplete() && this._field.supportsFieldMeta();
     } else if (this.isCategorical()) {
       return this.isComplete() && this._field.supportsFieldMeta();
     } else {
@@ -106,10 +106,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsFeatureState() {
-    return true;
-  }
-
-  isOrdinalScaled() {
     return true;
   }
 
@@ -245,9 +241,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     const valueAsFloat = parseFloat(value);
-    if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getFieldMeta());
-    }
     if (isNaN(valueAsFloat)) {
       return 0;
     }
