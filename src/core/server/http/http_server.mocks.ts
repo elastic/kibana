@@ -21,7 +21,7 @@ import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 
 import {
   KibanaRequest,
@@ -42,6 +42,11 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  validation?: {
+    params?: Type<any>;
+    body?: Type<any>;
+    query?: Type<any>;
+  };
 }
 
 function createKibanaRequestMock({
@@ -53,6 +58,7 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
+  validation = {},
 }: RequestFixtureOptions = {}) {
   const queryString = stringify(query, { sort: false });
 
@@ -76,9 +82,9 @@ function createKibanaRequestMock({
       },
     }),
     {
-      params: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
-      query: schema.object({}, { allowUnknowns: true }),
+      params: validation.params || schema.any(),
+      body: validation.body || schema.any(),
+      query: validation.query || schema.any(),
     }
   );
 }
