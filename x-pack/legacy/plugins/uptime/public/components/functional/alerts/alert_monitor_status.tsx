@@ -86,11 +86,15 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     setAlertParams('timerange', { from: `now-${numMins}m`, to: 'now' });
   }, [numMins, setAlertParams]);
   useEffect(() => {
-    setAlertParams(
-      'locations',
-      locations.filter(l => l.checked === 'on').map(l => l.label)
-    );
-  }, [locations, setAlertParams]);
+    if (allLabels) {
+      setAlertParams('locations', []);
+    } else {
+      setAlertParams(
+        'locations',
+        locations.filter(l => l.checked === 'on').map(l => l.label)
+      );
+    }
+  }, [locations, setAlertParams, allLabels]);
   useEffect(() => {
     setAlertParams('filters', props.filters);
   }, [props.filters, setAlertParams]);
@@ -132,8 +136,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       {locations.length === 0 && (
         <EuiExpression color="secondary" description="in" isActive={false} value="all locations" />
       )}
-
-      <EuiSpacer size="xs" />
 
       {locations.length > 0 && (
         <AlertExpressionPopover
