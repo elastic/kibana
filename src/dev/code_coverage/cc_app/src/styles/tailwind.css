@@ -13279,6 +13279,36 @@ video {
   color: #b20ab7;
 }
 
+.App-footer {
+  background-color: #06d9d6;
+  /*min-height: 100vh;*/
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+          flex-direction: column;
+  -webkit-box-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+          justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+.App-header {
+  background-color: #06d9d6;
+  /*min-height: 100vh;*/
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+          flex-direction: column;
+  -webkit-box-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+          justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
 @-webkit-keyframes App-logo-spin {
   from {
     -webkit-transform: rotate(0deg);
@@ -13312,6 +13342,30 @@ video {
 
 .App-current {
   /*border: 4mm ridge rgba(9, 77, 255, 0.6)*/
+}
+
+.App-TestRunner-List {
+  border-style: solid;
+  /*background-color: #282c34;*/
+  /*min-height: 100vh;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  /*justify-content: center;*/
+  /*font-size: calc(10px + 2vmin);*/
+  /*color: white;*/
+}
+
+.App-Historical-List {
+  border-style: solid;
+  /*background-color: #282c34;*/
+  /*min-height: 100vh;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  /*justify-content: center;*/
+  /*font-size: calc(10px + 2vmin);*/
+  /*color: white;*/
 }
 
 @media (min-width: 640px) {
