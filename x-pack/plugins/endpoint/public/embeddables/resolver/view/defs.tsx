@@ -107,32 +107,14 @@ const SymbolsAndShapes = memo(() => (
       viewBox="-10 0 128.6889 29.31389"
       preserveAspectRatio="xMidYMid meet"
     >
-      <path
-        d="M 1.5453386,0.77661425 H 107.34961 c 0.37098,0 0.66964,0.20676641 0.66964,0.46360185 V 28.180641 c 0,0.256835 -0.29866,0.463601 -0.66964,0.463601 H 1.5453386 c -0.3709839,0 -0.66964599,-0.206766 -0.66964599,-0.463601 V 1.2402161 c 0,-0.25683544 0.29866209,-0.46360185 0.66964599,-0.46360185 z"
-        fill={`url(#${PaintServerIds.darkLinearReflect})`}
-        fillOpacity="1"
-        stroke={NamedColors.ok}
-        strokeWidth="0.889"
-        strokeMiterlimit="4"
-        strokeOpacity="1"
-        paintOrder="normal"
-      />
+      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.darkLinearReflect})`} stroke={NamedColors.ok} stroke-width=".88" paintOrder="normal"/>
     </symbol>
     <symbol
       id={SymbolIds.processNodeWithHorizontalRule}
       viewBox="-10 0 128.6889 29.31389"
       preserveAspectRatio="xMidYMid meet"
     >
-      <path
-        d="M 1.5453386,0.77661425 H 107.34961 c 0.37098,0 0.66964,0.20676641 0.66964,0.46360185 V 28.180641 c 0,0.256835 -0.29866,0.463601 -0.66964,0.463601 H 1.5453386 c -0.3709839,0 -0.66964599,-0.206766 -0.66964599,-0.463601 V 1.2402161 c 0,-0.25683544 0.29866209,-0.46360185 0.66964599,-0.46360185 z"
-        fill={`url(#${PaintServerIds.darkLinearReflect})`}
-        fillOpacity="1"
-        stroke={NamedColors.ok}
-        strokeWidth="0.889"
-        strokeMiterlimit="4"
-        strokeOpacity="1"
-        paintOrder="normal"
-      />
+      <rect x=".97904" y=".89113" width="106.96" height="27.627" rx="1.3357" ry="1.1398" fill={`url(#${PaintServerIds.darkLinearReflect})`} stroke={NamedColors.ok} stroke-width=".88" paintOrder="normal"/>
       <line x1="1.425" x2="108.5" y1="10" y2="10" stroke={NamedColors.ok} strokeWidth="0.449" />
     </symbol>
 
