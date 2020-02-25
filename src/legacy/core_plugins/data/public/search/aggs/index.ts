@@ -57,4 +57,4 @@ export { METRIC_TYPES } from './metrics/metric_agg_types';
 export { ISchemas, Schema, Schemas } from './schemas';
 
 // types
-export { IAggConfig, IAggConfigs } from './types';
+export { CreateAggConfigParams, IAggConfig, IAggConfigs } from './types';
