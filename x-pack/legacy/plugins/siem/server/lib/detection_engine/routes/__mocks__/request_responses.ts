@@ -249,15 +249,19 @@ export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInje
   payload,
 });
 
-export const getDeleteRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getDeleteRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
-export const getDeleteRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
-});
+export const getDeleteRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
+  });
 
 export const getCreateRequest = () =>
   requestMock.create({
