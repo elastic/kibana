@@ -6,7 +6,7 @@
 
 import { APICaller } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateJobSchema } from '../../new_platform/job_validation_schema';
+import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 
 type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 

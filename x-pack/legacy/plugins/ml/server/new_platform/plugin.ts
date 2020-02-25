@@ -16,7 +16,7 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
-// import { LicensingPluginSetup } from '../../../../../plugins/licensing/server'; // LicenseFeature
+import { LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/common/types';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
@@ -46,6 +46,7 @@ import { initMlServerLog, LogInitialization } from '../client/log';
 import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server';
 // @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from '../client/elasticsearch_ml';
+import { LICENSE_TYPE_PLATINUM, LICENSE_TYPE_TRIAL } from '../../../../../legacy/common/constants';
 
 export const PLUGIN_ID = 'ml';
 
@@ -66,7 +67,7 @@ export interface MlInitializerContext extends PluginInitializerContext {
   log: Logger;
 }
 export interface PluginsSetup {
-  licensing: any; // LicensingPluginSetup;
+  licensing: any;
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
@@ -77,9 +78,10 @@ export interface PluginsSetup {
   ml: any;
 }
 
-interface LicenseCheckResult {
+export interface LicenseCheckResult {
   isAvailable: boolean;
   isSecurityDisabled: boolean;
+  message?: string;
 }
 
 export interface RouteInitialization {
@@ -110,6 +112,7 @@ export class Plugin {
   private licenseCheckResults: LicenseCheckResult = {
     isAvailable: false,
     isSecurityDisabled: false,
+    message: undefined,
   };
 
   constructor(initializerContext: MlInitializerContext) {
@@ -218,19 +221,45 @@ export class Plugin {
     makeMlUsageCollector(plugins.usageCollection, coreSavedObjects);
 
     plugins.licensing.license$.subscribe(async (license: any) => {
-      const { isAvailable } = license.getFeature(pluginId);
-      const { isEnabled } = license.getFeature('security');
+      let hasValidLicense = false;
+      let message;
 
-      if (isAvailable) {
+      const { isEnabled } = license.getFeature('security');
+      // Checks isAvailable, isActive, and minimum license
+      const { state, message: platinumMessage } = license.check(pluginId, LICENSE_TYPE_PLATINUM);
+
+      if (state === LICENSE_CHECK_STATE.Valid) {
+        hasValidLicense = true;
+      } else if (state !== LICENSE_CHECK_STATE.Valid) {
+        message = platinumMessage;
+
+        const { state: trialState, message: trialMessage } = license.check(
+          pluginId,
+          LICENSE_TYPE_TRIAL
+        );
+
+        if (trialState === LICENSE_CHECK_STATE.Valid) {
+          hasValidLicense = true;
+          message = undefined;
+        } else {
+          message = trialMessage;
+        }
+      }
+
+      if (hasValidLicense && license.getFeature(pluginId)) {
         this.log.info('Enabling Ml plugin.');
         this.licenseCheckResults = {
           isAvailable: true,
           isSecurityDisabled: isEnabled === false,
         };
       } else {
+        if (message) {
+          this.log.info(message);
+        }
         this.licenseCheckResults = {
           isAvailable: false,
           isSecurityDisabled: isEnabled === false,
+          message,
         };
       }
     });
