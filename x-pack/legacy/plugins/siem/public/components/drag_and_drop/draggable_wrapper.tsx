@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable jsx-a11y/mouse-events-have-key-events */
-
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   Draggable,
@@ -165,7 +163,7 @@ interface ConditionalPortalProps {
   registerProvider: () => void;
 }
 
-const ConditionalPortal = React.memo<ConditionalPortalProps>(
+export const ConditionalPortal = React.memo<ConditionalPortalProps>(
   ({ children, usePortal, registerProvider, isDragging }) => {
     useEffect(() => {
       if (isDragging) {
