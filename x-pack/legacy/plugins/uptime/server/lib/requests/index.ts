@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getDocCount } from './get_doc_count';
 export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
 export { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
@@ -17,4 +16,4 @@ export { getPings, GetPingsParams } from './get_pings';
 export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
 export { UptimeRequests } from './uptime_requests';
 export { getSnapshotCount, GetSnapshotCountParams } from './get_snapshot_counts';
-export { getStatesIndexStatus } from './get_states_index_status';
+export { getIndexStatus } from './get_index_status';
