@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import { ILocationService } from 'angular';
 import { modifyUrl } from '../../../../../core/utils';
-import { toastNotifications } from '../toasts';
+import { ToastsStart } from '../../../../../core/public';
 
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';
 
-export function addAppRedirectMessageToUrl(url, message) {
+export function addAppRedirectMessageToUrl(url: string, message: string) {
   return modifyUrl(url, urlParts => {
     urlParts.hash = modifyUrl(urlParts.hash || '', hashParts => {
       hashParts.query[APP_REDIRECT_MESSAGE_PARAM] = message;
@@ -32,7 +33,7 @@ export function addAppRedirectMessageToUrl(url, message) {
 
 // If an app needs to redirect, e.g. due to an expired license, it can surface a message via
 // the URL query params.
-export function showAppRedirectNotification($location) {
+export function showAppRedirectNotification($location: ILocationService, toasts: ToastsStart) {
   const queryString = $location.search();
 
   if (!queryString[APP_REDIRECT_MESSAGE_PARAM]) {
@@ -42,5 +43,5 @@ export function showAppRedirectNotification($location) {
   const message = queryString[APP_REDIRECT_MESSAGE_PARAM];
   $location.search(APP_REDIRECT_MESSAGE_PARAM, null);
 
-  toastNotifications.addDanger(message);
+  toasts.addDanger(message);
 }

@@ -17,14 +17,32 @@
  * under the License.
  */
 
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+// This can be removed when the ES client improves the types
+export interface ESClusterInfo {
+  cluster_uuid: string;
+  cluster_name: string;
+  version: {
+    number: string;
+    build_flavor: string;
+    build_type: string;
+    build_hash: string;
+    build_date: string;
+    build_snapshot?: boolean;
+    lucene_version: string;
+    minimum_wire_compatibility_version: string;
+    minimum_index_compatibility_version: string;
+  };
+}
+
 /**
  * Get the cluster info from the connected cluster.
  *
  * This is the equivalent to GET /
  *
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- * @return {Promise} The response from Elasticsearch.
  */
-export function getClusterInfo(callCluster) {
-  return callCluster('info');
+export function getClusterInfo(callCluster: CallCluster) {
+  return callCluster<ESClusterInfo>('info');
 }
