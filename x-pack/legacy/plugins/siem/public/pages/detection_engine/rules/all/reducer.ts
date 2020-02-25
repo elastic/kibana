@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBasicTable } from '@elastic/eui';
 import {
   FilterOptions,
   PaginationOptions,
@@ -35,7 +36,9 @@ export type Action =
     }
   | { type: 'failure' };
 
-export const allRulesReducer = (state: State, action: Action): State => {
+export const allRulesReducer = (
+  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
+) => (state: State, action: Action): State => {
   switch (action.type) {
     case 'exportRuleIds': {
       return {
@@ -61,6 +64,14 @@ export const allRulesReducer = (state: State, action: Action): State => {
       };
     }
     case 'setRules': {
+      if (
+        tableRef != null &&
+        tableRef.current != null &&
+        tableRef.current.changeSelection != null
+      ) {
+        tableRef.current.changeSelection([]);
+      }
+
       return {
         ...state,
         rules: action.rules,

@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 
@@ -96,6 +96,7 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const [initLoading, setInitLoading] = useState(true);
+    const tableRef = useRef<EuiBasicTable>();
     const [
       {
         exportRuleIds,
@@ -107,7 +108,7 @@ export const AllRules = React.memo<AllRulesProps>(
         selectedRuleIds,
       },
       dispatch,
-    ] = useReducer(allRulesReducer, initialState);
+    ] = useReducer(allRulesReducer(tableRef), initialState);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
@@ -298,7 +299,7 @@ export const AllRules = React.memo<AllRulesProps>(
                         </UtilityBarAction>
                       )}
                       <UtilityBarAction
-                        iconSide="right"
+                        iconSide="left"
                         iconType="refresh"
                         onClick={() => reFetchRulesData(true)}
                       >
@@ -320,6 +321,7 @@ export const AllRules = React.memo<AllRulesProps>(
                     totalItemCount: pagination.total,
                     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
                   }}
+                  ref={tableRef}
                   sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
                   selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
                 />
