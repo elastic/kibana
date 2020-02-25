@@ -18,7 +18,7 @@ import {
   Mappings,
 } from '../models/file_data_visualizer';
 
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
 
@@ -45,8 +45,8 @@ function importData(
  */
 export function fileDataVisualizerRoutes({
   router,
-  xpackMainPlugin,
   savedObjects,
+  getLicenseCheckResults,
 }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
@@ -86,7 +86,7 @@ export function fileDataVisualizerRoutes({
         },
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const result = await analyzeFiles(context, request.body, request.query);
         return response.ok({ body: result });
@@ -128,7 +128,7 @@ export function fileDataVisualizerRoutes({
         },
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;

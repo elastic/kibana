@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
@@ -74,7 +74,7 @@ function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) 
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function resultsServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup ResultsService
    *
@@ -89,7 +89,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
         body: schema.object(anomaliesTableDataSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getAnomaliesTableData(context, request.body);
 
@@ -116,7 +116,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
         body: schema.object(categoryDefinitionSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getCategoryDefinition(context, request.body);
 
@@ -143,7 +143,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
         body: schema.object(maxAnomalyScoreSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getMaxAnomalyScore(context, request.body);
 
@@ -170,7 +170,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
         body: schema.object(categoryExamplesSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getCategoryExamples(context, request.body);
 
@@ -197,7 +197,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
         body: schema.object(partitionFieldValuesSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getPartitionFieldsValues(context, request.body);
 

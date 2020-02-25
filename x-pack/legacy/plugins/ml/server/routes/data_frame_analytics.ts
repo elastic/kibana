@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
   dataAnalyticsJobConfigSchema,
@@ -18,7 +18,7 @@ import {
 /**
  * Routes for the data frame analytics
  */
-export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function dataFrameAnalyticsRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -36,7 +36,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({ analyticsId: schema.maybe(schema.string()) }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
         return response.ok({
@@ -64,7 +64,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
@@ -91,7 +91,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
       path: '/api/ml/data_frame/analytics/_stats',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.getDataFrameAnalyticsStats'
@@ -121,7 +121,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -159,7 +159,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         body: schema.object(dataAnalyticsJobConfigSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -192,7 +192,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         body: schema.object({ ...dataAnalyticsEvaluateSchema }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.evaluateDataFrameAnalytics',
@@ -232,7 +232,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         body: schema.object({ ...dataAnalyticsExplainSchema }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.explainDataFrameAnalytics',
@@ -267,7 +267,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser(
@@ -303,7 +303,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
@@ -337,7 +337,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const options: { analyticsId: string; force?: boolean | undefined } = {
           analyticsId: request.params.analyticsId,
@@ -377,7 +377,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({ analyticsId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
         const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function notificationRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *
@@ -24,7 +24,7 @@ export function notificationRoutes({ xpackMainPlugin, router }: RouteInitializat
       path: '/api/ml/notification_settings',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const params = {
           includeDefaults: true,

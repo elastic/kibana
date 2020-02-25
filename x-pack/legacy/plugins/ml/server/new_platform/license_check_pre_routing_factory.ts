@@ -10,10 +10,9 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { PLUGIN_ID, MlXpackMainPlugin } from './plugin';
 
 export const licensePreRoutingFactory = (
-  xpackMainPlugin: MlXpackMainPlugin,
+  getLicenseCheckResults: any,
   handler: RequestHandler<any, any, any>
 ): RequestHandler<any, any, any> => {
   // License checking and enable/disable logic
@@ -22,7 +21,7 @@ export const licensePreRoutingFactory = (
     request: KibanaRequest,
     response: KibanaResponseFactory
   ) {
-    const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN_ID).getLicenseCheckResults();
+    const licenseCheckResults = getLicenseCheckResults();
 
     if (!licenseCheckResults.isAvailable) {
       return response.forbidden({

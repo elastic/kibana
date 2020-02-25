@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
   deleteAnnotationSchema,
@@ -34,7 +34,11 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
 /**
  * Routes for annotations
  */
-export function annotationRoutes({ xpackMainPlugin, router, securityPlugin }: RouteInitialization) {
+export function annotationRoutes({
+  router,
+  securityPlugin,
+  getLicenseCheckResults,
+}: RouteInitialization) {
   /**
    * @apiGroup Annotations
    *
@@ -57,7 +61,7 @@ export function annotationRoutes({ xpackMainPlugin, router, securityPlugin }: Ro
         body: schema.object(getAnnotationsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getAnnotations } = annotationServiceProvider(context);
         const resp = await getAnnotations(request.body);
@@ -88,7 +92,7 @@ export function annotationRoutes({ xpackMainPlugin, router, securityPlugin }: Ro
         body: schema.object(indexAnnotationSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
           context.ml!.mlClient.callAsCurrentUser
@@ -126,7 +130,7 @@ export function annotationRoutes({ xpackMainPlugin, router, securityPlugin }: Ro
         params: schema.object(deleteAnnotationSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
           context.ml!.mlClient.callAsCurrentUser

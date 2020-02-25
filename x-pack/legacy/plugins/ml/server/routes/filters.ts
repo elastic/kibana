@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import { createFilterSchema, updateFilterSchema } from '../new_platform/filters_schema';
@@ -44,7 +44,7 @@ function deleteFilter(context: RequestHandlerContext, filterId: string) {
   return mgr.deleteFilter(filterId);
 }
 
-export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function filtersRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
@@ -60,7 +60,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
       path: '/api/ml/filters',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getAllFilters(context);
 
@@ -90,7 +90,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
         params: schema.object({ filterId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getFilter(context, request.params.filterId);
         return response.ok({
@@ -119,7 +119,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
         body: schema.object(createFilterSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const body = request.body;
         const resp = await newFilter(context, body);
@@ -151,7 +151,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
         body: schema.object(updateFilterSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { filterId } = request.params;
         const body = request.body;
@@ -182,7 +182,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
         params: schema.object({ filterId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { filterId } = request.params;
         const resp = await deleteFilter(context, filterId);
@@ -212,7 +212,7 @@ export function filtersRoutes({ xpackMainPlugin, router }: RouteInitialization) 
       path: '/api/ml/filters/_stats',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getAllFilterStats(context);
 

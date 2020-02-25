@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import { startDatafeedSchema, datafeedConfigSchema } from '../new_platform/datafeeds_schema';
@@ -13,7 +13,7 @@ import { startDatafeedSchema, datafeedConfigSchema } from '../new_platform/dataf
 /**
  * Routes for datafeed service
  */
-export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function dataFeedRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DatafeedService
    *
@@ -26,7 +26,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
       path: '/api/ml/datafeeds',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds');
 
@@ -53,7 +53,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         params: schema.object({ datafeedId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds', { datafeedId });
@@ -79,7 +79,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
       path: '/api/ml/datafeeds/_stats',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats');
 
@@ -106,7 +106,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         params: schema.object({ datafeedId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats', {
@@ -137,7 +137,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         body: datafeedConfigSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.addDatafeed', {
@@ -169,7 +169,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         body: datafeedConfigSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.updateDatafeed', {
@@ -201,7 +201,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         query: schema.maybe(schema.object({ force: schema.maybe(schema.any()) })),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const options: { datafeedId: string; force?: boolean } = {
           datafeedId: request.params.jobId,
@@ -237,7 +237,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         body: startDatafeedSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const { start, end } = request.body;
@@ -271,7 +271,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         params: schema.object({ datafeedId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
 
@@ -302,7 +302,7 @@ export function dataFeedRoutes({ xpackMainPlugin, router }: RouteInitialization)
         params: schema.object({ datafeedId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
         const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedPreview', {
