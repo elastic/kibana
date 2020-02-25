@@ -178,7 +178,7 @@ To run tests on Firefox locally, use `config.firefox.js`:
 node scripts/functional_test_runner --config test/functional/config.firefox.js
 -----------
 
-
+[float]
 ===== Using the test_user service
 
 Tests should run at the positive security boundry condition, meaning that they should be run with the mimimum privileges required (and documented) and not as the superuser.
