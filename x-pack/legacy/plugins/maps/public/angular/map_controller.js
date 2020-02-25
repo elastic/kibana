@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
+import rison from 'rison-node';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
 import React from 'react';
@@ -63,6 +64,31 @@ const savedQueryService = npStart.plugins.data.query.savedQueries;
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
+
+function getInitialLayersFromUrlParam() {
+  const locationSplit = window.location.href.split('?');
+  if (locationSplit.length <= 1) {
+    return [];
+  }
+  const mapAppParams = new URLSearchParams(locationSplit[1]);
+  if (!mapAppParams.has('initialLayers')) {
+    return [];
+  }
+
+  try {
+    return rison.decode(mapAppParams.get('initialLayers'));
+  } catch (e) {
+    toastNotifications.addWarning({
+      title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
+        defaultMessage: `Inital layers not added to map`,
+      }),
+      text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
+        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: ${e.message}`,
+      }),
+    });
+    return [];
+  }
+}
 
 app.controller(
   'GisMapController',
@@ -331,7 +357,7 @@ app.controller(
         store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
 
-      const layerList = getInitialLayers(savedMap.layerListJSON);
+      const layerList = getInitialLayers(savedMap.layerListJSON, getInitialLayersFromUrlParam());
       initialLayerListConfig = copyPersistentState(layerList);
       store.dispatch(replaceLayerList(layerList));
       store.dispatch(setRefreshConfig($scope.refreshConfig));

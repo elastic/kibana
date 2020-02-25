@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import uuid from 'uuid/v4';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
@@ -25,7 +26,6 @@ import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import fieldChooserTemplate from './field_chooser.html';
 import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
-import chrome from 'ui/chrome';
 import { getServices } from '../../../kibana_services';
 
 export function createFieldChooserDirective($location, config, $route) {
@@ -192,7 +192,12 @@ export function createFieldChooserDirective($location, config, $route) {
       }
 
       function isFieldVisualizable(field) {
+        const mapsAppUrl = getMapsAppUrl();
+        if ((mapsAppUrl && field.type === 'geo_point') || field.type === 'geo_shape') {
+          return true;
+        }
 
+        return field.visualizable;
       }
 
       function getVisualizeUrl(field) {
@@ -201,8 +206,48 @@ export function createFieldChooserDirective($location, config, $route) {
         }
 
         const mapsAppUrl = getMapsAppUrl();
-        if (mapsAppUrl && field.type === 'geo_point' || field.type === 'geo_shape') {
-          return chrome.addBasePath(mapsAppUrl);
+        if ((mapsAppUrl && field.type === 'geo_point') || field.type === 'geo_shape') {
+          const mapAppParams = new URLSearchParams();
+
+          // Copy global state
+          const locationSplit = window.location.href.split('?');
+          if (locationSplit.length > 1) {
+            const discoverParams = new URLSearchParams(locationSplit[1]);
+            mapAppParams.set('_g', discoverParams.get('_g'));
+          }
+
+          // Copy filters and query in app state
+          const mapsAppState = {
+            filters: $scope.state.filters || [],
+          };
+          if ($scope.state.query) {
+            mapsAppState.query = $scope.state.query;
+          }
+          mapAppParams.set('_a', rison.encode(mapsAppState));
+
+          // create initial layer descriptor
+          const hasColumns =
+            $scope.columns && $scope.columns.length && $scope.columns[0] !== '_source';
+          mapAppParams.set(
+            'initialLayers',
+            rison.encode([
+              {
+                id: uuid(),
+                label: $scope.indexPattern.title,
+                sourceDescriptor: {
+                  id: uuid(),
+                  type: 'ES_SEARCH',
+                  geoField: field.name,
+                  tooltipProperties: hasColumns ? $scope.columns : [],
+                  indexPatternId: $scope.indexPattern.id,
+                },
+                visible: true,
+                type: 'VECTOR',
+              },
+            ])
+          );
+
+          return getServices().addBasePath(`${mapsAppUrl}?${mapAppParams.toString()}`);
         }
 
         let agg = {};
@@ -262,7 +307,7 @@ export function createFieldChooserDirective($location, config, $route) {
       $scope.computeDetails = function(field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           field.details = {
-            visualizeUrl: field.visualizable ? getVisualizeUrl(field) : null,
+            visualizeUrl: isFieldVisualizable(field) ? getVisualizeUrl(field) : null,
             ...fieldCalculator.getFieldValueCounts({
               hits: $scope.hits,
               field: field,
