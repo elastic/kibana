@@ -1625,6 +1625,8 @@ export interface SavedObjectsClientWrapperOptions {
     client: SavedObjectsClientContract;
     // (undocumented)
     request: KibanaRequest;
+    // (undocumented)
+    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public

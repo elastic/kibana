@@ -400,6 +400,7 @@ export class SavedObjectsService
         const repository = repositoryFactory.createScopedRepository(request);
         return new SavedObjectsClient(repository);
       },
+      typeRegistry: this.typeRegistry,
     });
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
