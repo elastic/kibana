@@ -14,7 +14,7 @@ export async function createOrUpdateCustomAction({
   setup
 }: {
   customActionId?: string;
-  customAction: Omit<CustomAction, '@timestamp' | 'actionId'>;
+  customAction: Omit<CustomAction, '@timestamp'>;
   setup: Setup;
 }) {
   const { internalClient, indices } = setup;
@@ -27,7 +27,7 @@ export async function createOrUpdateCustomAction({
       label: customAction.label,
       url: customAction.url,
       filters: customAction.filters,
-      actionId: 'trace'
+      actionId: customAction.actionId
     }
   };
 

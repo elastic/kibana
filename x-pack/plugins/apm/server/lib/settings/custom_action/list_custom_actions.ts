@@ -11,7 +11,7 @@ export async function listCustomActions({ setup }: { setup: Setup }) {
   const { internalClient, indices } = setup;
   const params = {
     index: indices.apmCustomActionIndex,
-    size: 200
+    size: 500
   };
   const resp = await internalClient.search<CustomAction>(params);
   return resp.hits.hits.map(item => ({

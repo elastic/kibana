@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`List Custom Actions fetches custom actions 1`] = `
+Object {
+  "index": "myIndex",
+  "size": 500,
+}
+`;
