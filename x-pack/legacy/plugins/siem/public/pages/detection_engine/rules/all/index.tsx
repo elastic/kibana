@@ -263,54 +263,55 @@ export const AllRules = React.memo<AllRulesProps>(
                   userHasNoPermissions={hasNoPermissions}
                 />
               )}
-
-            <UtilityBar border>
-              <UtilityBarSection>
-                <UtilityBarGroup>
-                  <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
-                </UtilityBarGroup>
-
-                <UtilityBarGroup>
-                  <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
-                  {!hasNoPermissions && (
-                    <UtilityBarAction
-                      iconSide="right"
-                      iconType="arrowDown"
-                      popoverContent={getBatchItemsPopoverContent}
-                    >
-                      {i18n.BATCH_ACTIONS}
-                    </UtilityBarAction>
-                  )}
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="refresh"
-                    onClick={() => reFetchRulesData(true)}
-                  >
-                    {i18n.REFRESH}
-                  </UtilityBarAction>
-                </UtilityBarGroup>
-              </UtilityBarSection>
-            </UtilityBar>
             {initLoading && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
             {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading && (
-              <EuiBasicTable
-                columns={columns}
-                isSelectable={!hasNoPermissions ?? false}
-                itemId="id"
-                items={rules ?? []}
-                noItemsMessage={emptyPrompt}
-                onChange={tableOnChangeCallback}
-                pagination={{
-                  pageIndex: pagination.page - 1,
-                  pageSize: pagination.perPage,
-                  totalItemCount: pagination.total,
-                  pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-                }}
-                sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
-                selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
-              />
+              <>
+                <UtilityBar border>
+                  <UtilityBarSection>
+                    <UtilityBarGroup>
+                      <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                    </UtilityBarGroup>
+
+                    <UtilityBarGroup>
+                      <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
+                      {!hasNoPermissions && (
+                        <UtilityBarAction
+                          iconSide="right"
+                          iconType="arrowDown"
+                          popoverContent={getBatchItemsPopoverContent}
+                        >
+                          {i18n.BATCH_ACTIONS}
+                        </UtilityBarAction>
+                      )}
+                      <UtilityBarAction
+                        iconSide="right"
+                        iconType="refresh"
+                        onClick={() => reFetchRulesData(true)}
+                      >
+                        {i18n.REFRESH}
+                      </UtilityBarAction>
+                    </UtilityBarGroup>
+                  </UtilityBarSection>
+                </UtilityBar>
+                <EuiBasicTable
+                  columns={columns}
+                  isSelectable={!hasNoPermissions ?? false}
+                  itemId="id"
+                  items={rules ?? []}
+                  noItemsMessage={emptyPrompt}
+                  onChange={tableOnChangeCallback}
+                  pagination={{
+                    pageIndex: pagination.page - 1,
+                    pageSize: pagination.perPage,
+                    totalItemCount: pagination.total,
+                    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                  }}
+                  sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                  selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                />
+              </>
             )}
           </>
         </Panel>
