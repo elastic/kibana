@@ -73,7 +73,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
     });
@@ -86,7 +86,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
     });
