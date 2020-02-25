@@ -6,7 +6,6 @@
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 
 import {
   EuiButton,
@@ -30,13 +29,15 @@ import {
 } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { ToastNotificationText } from '../../../../components';
-import { useApi } from '../../../../hooks/use_api';
-import { useKibanaContext } from '../../../../lib/kibana';
-import { RedirectToTransformManagement } from '../../../../common/navigation';
+
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
+import { useApi } from '../../../../hooks/use_api';
+import { useKibanaContext } from '../../../../lib/kibana';
+import { useToastNotifications } from '../../../../app_dependencies';
+import { RedirectToTransformManagement } from '../../../../common/navigation';
+import { ToastNotificationText } from '../../../../components';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -74,6 +75,7 @@ export const StepCreateForm: FC<Props> = React.memo(
     );
 
     const kibanaContext = useKibanaContext();
+    const toastNotifications = useToastNotifications();
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });

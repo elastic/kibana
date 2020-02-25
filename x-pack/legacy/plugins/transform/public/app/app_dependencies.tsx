@@ -48,6 +48,15 @@ export const useAppDependencies = () => {
   return useContext<AppDependencies>(DependenciesContext);
 };
 
+export const useToastNotifications = () => {
+  const {
+    core: {
+      notifications: { toasts: toastNotifications },
+    },
+  } = useAppDependencies();
+  return toastNotifications;
+};
+
 export const getAppProviders = (deps: AppDependencies) => {
   const I18nContext = deps.core.i18n.Context;
 

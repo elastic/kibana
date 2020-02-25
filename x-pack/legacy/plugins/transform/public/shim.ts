@@ -22,7 +22,7 @@ export type npCore = typeof npStart.core;
 // we pass on via context/hooks to the app and its components.
 export type AppCore = Pick<
   CoreStart,
-  'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings' | 'overlays'
+  'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings' | 'overlays' | 'notifications'
 >;
 
 export interface AppPlugins {

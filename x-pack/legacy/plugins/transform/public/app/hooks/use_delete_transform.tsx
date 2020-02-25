@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
+import { useToastNotifications } from '../app_dependencies';
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 import { ToastNotificationText } from '../components';
 
@@ -17,6 +17,7 @@ import { useApi } from './use_api';
 import { TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
 
 export const useDeleteTransforms = () => {
+  const toastNotifications = useToastNotifications();
   const api = useApi();
 
   return async (transforms: TransformListRow[]) => {

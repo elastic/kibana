@@ -10,7 +10,6 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { metadata } from 'ui/metadata';
-import { toastNotifications } from 'ui/notify';
 
 import {
   EuiButton,
@@ -29,6 +28,7 @@ import {
 } from '@elastic/eui';
 
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import { DropDown } from '../aggregation_dropdown';
@@ -147,32 +147,30 @@ export function applyTransformConfigToDefineState(
   return state;
 }
 
-export function isAggNameConflict(
+export function getAggNameConflictToastMessages(
   aggName: AggName,
   aggList: PivotAggsConfigDict,
   groupByList: PivotGroupByConfigDict
-) {
+): string[] {
   if (aggList[aggName] !== undefined) {
-    toastNotifications.addDanger(
+    return [
       i18n.translate('xpack.transform.stepDefineForm.aggExistsErrorMessage', {
         defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
         values: { aggName },
-      })
-    );
-    return true;
+      }),
+    ];
   }
 
   if (groupByList[aggName] !== undefined) {
-    toastNotifications.addDanger(
+    return [
       i18n.translate('xpack.transform.stepDefineForm.groupByExistsErrorMessage', {
         defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
         values: { aggName },
-      })
-    );
-    return true;
+      }),
+    ];
   }
 
-  let conflict = false;
+  const conflicts: string[] = [];
 
   // check the new aggName against existing aggs and groupbys
   const aggNameSplit = aggName.split('.');
@@ -180,29 +178,28 @@ export function isAggNameConflict(
   aggNameSplit.forEach(aggNamePart => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
-      toastNotifications.addDanger(
+      conflicts.push(
         i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
           defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
           values: { aggName, aggNameCheck },
         })
       );
-      conflict = true;
     }
   });
 
-  if (conflict) {
-    return true;
+  if (conflicts.length > 0) {
+    return conflicts;
   }
 
   // check all aggs against new aggName
-  conflict = Object.keys(aggList).some(aggListName => {
+  Object.keys(aggList).some(aggListName => {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string;
     return aggListNameSplit.some(aggListNamePart => {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
-        toastNotifications.addDanger(
+        conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedAggListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
             values: { aggName, aggListName },
@@ -214,12 +211,12 @@ export function isAggNameConflict(
     });
   });
 
-  if (conflict) {
-    return true;
+  if (conflicts.length > 0) {
+    return conflicts;
   }
 
   // check all group-bys against new aggName
-  conflict = Object.keys(groupByList).some(groupByListName => {
+  Object.keys(groupByList).some(groupByListName => {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string;
     return groupByListNameSplit.some(groupByListNamePart => {
@@ -228,7 +225,7 @@ export function isAggNameConflict(
           ? groupByListNamePart
           : `${groupByListNameCheck}.${groupByListNamePart}`;
       if (groupByListNameCheck === aggName) {
-        toastNotifications.addDanger(
+        conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
             values: { aggName, groupByListName },
@@ -240,7 +237,7 @@ export function isAggNameConflict(
     });
   });
 
-  return conflict;
+  return conflicts;
 }
 
 interface Props {
@@ -250,6 +247,7 @@ interface Props {
 
 export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const kibanaContext = useKibanaContext();
+  const toastNotifications = useToastNotifications();
 
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
@@ -288,7 +286,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const config: PivotGroupByConfig = groupByOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isAggNameConflict(aggName, aggList, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -300,7 +300,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const groupByListWithoutPrevious = { ...groupByList };
     delete groupByListWithoutPrevious[previousAggName];
 
-    if (isAggNameConflict(item.aggName, aggList, groupByListWithoutPrevious)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(
+      item.aggName,
+      aggList,
+      groupByListWithoutPrevious
+    );
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -321,7 +327,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const config: PivotAggsConfig = aggOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isAggNameConflict(aggName, aggList, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
@@ -333,7 +341,13 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
     const aggListWithoutPrevious = { ...aggList };
     delete aggListWithoutPrevious[previousAggName];
 
-    if (isAggNameConflict(item.aggName, aggListWithoutPrevious, groupByList)) {
+    const aggNameConflictMessages = getAggNameConflictToastMessages(
+      item.aggName,
+      aggListWithoutPrevious,
+      groupByList
+    );
+    if (aggNameConflictMessages.length > 0) {
+      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
       return;
     }
 
