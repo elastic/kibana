@@ -47,6 +47,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },
         openConfirm: npStart.core.overlays.openConfirm,
+        uiSettings: npStart.core.uiSettings,
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;

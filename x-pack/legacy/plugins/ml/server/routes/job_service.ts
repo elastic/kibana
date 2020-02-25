@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'src/core/server';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
+import { isSecurityDisabled } from '../lib/security_utils';
 import {
   categorizationFieldExamplesSchema,
   chartSchema,
@@ -21,11 +24,31 @@ import {
 } from '../new_platform/job_service_schema';
 // @ts-ignore no declaration module
 import { jobServiceProvider } from '../models/job_service';
+import { categorizationExamplesProvider } from '../models/job_service/new_job';
 
 /**
  * Routes for job service
  */
 export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  async function hasPermissionToCreateJobs(
+    callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
+  ) {
+    if (isSecurityDisabled(xpackMainPlugin) === true) {
+      return true;
+    }
+
+    const resp = await callAsCurrentUser('ml.privilegeCheck', {
+      body: {
+        cluster: [
+          'cluster:admin/xpack/ml/job/put',
+          'cluster:admin/xpack/ml/job/open',
+          'cluster:admin/xpack/ml/datafeeds/put',
+        ],
+      },
+    });
+    return resp.has_all_requested;
+  }
+
   /**
    * @apiGroup JobService
    *
@@ -545,8 +568,17 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        const { validateCategoryExamples } = jobServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser
+        // due to the use of the _analyze endpoint which is called by the kibana user,
+        // basic job creation privileges are required to use this endpoint
+        if ((await hasPermissionToCreateJobs(context.ml!.mlClient.callAsCurrentUser)) === false) {
+          throw Boom.forbidden(
+            'Insufficient privileges, the machine_learning_admin role is required.'
+          );
+        }
+
+        const { validateCategoryExamples } = categorizationExamplesProvider(
+          context.ml!.mlClient.callAsCurrentUser,
+          context.ml!.mlClient.callAsInternalUser
         );
         const {
           indexPatternTitle,

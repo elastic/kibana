@@ -26,18 +26,17 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useServicesContext, useEditorReadContext } from '../../../../contexts';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
-import { ConsoleMenu } from '../../../../components';
 
-import { autoIndent, getDocumentation } from '../console_menu_actions';
-import { registerCommands } from './keyboard_shortcuts';
-import { applyCurrentSettings } from './apply_editor_settings';
+// @ts-ignore
+import mappings from '../../../../../lib/mappings/mappings';
+import { ConsoleMenu } from '../../../../components';
+import { useEditorReadContext, useServicesContext } from '../../../../contexts';
+import * as senseEditor from '../../../../models/sense_editor';
+import { TextObjectWithId } from '../../../../../../common/text_object';
 
 import {
   useSendCurrentRequestToES,
@@ -45,12 +44,12 @@ import {
   useSequencedSaveTextObject,
 } from '../../../../hooks';
 
-import * as senseEditor from '../../../../models/sense_editor';
-// @ts-ignore
-import mappings from '../../../../../lib/mappings/mappings';
-
+import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { TextObjectWithId } from '../../../../../../common/text_object';
+import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
+
+import { applyCurrentSettings } from './apply_editor_settings';
+import { registerCommands } from './keyboard_shortcuts';
 
 export interface EditorProps {
   textObject: TextObjectWithId;
@@ -98,6 +97,8 @@ const createEditorElement = () => {
   return el;
 };
 
+const inputId = 'ConAppInputTextarea';
+
 export const Editor: FunctionComponent<EditorProps> = memo(
   ({ textObject }) => {
     const {
@@ -135,8 +136,11 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       const element = editorRef.current;
       const mountPoint = document.querySelector('#conAppEditorMount')!;
       mountPoint.appendChild(element);
+
       const editor = senseEditor.create(element);
-      setEditorInstance(editor);
+
+      const textareaElement = editorRef.current.querySelector('textarea')!;
+      textareaElement.setAttribute('id', inputId);
 
       const readQueryParams = () => {
         const [, queryString] = (window.location.hash || '').split('?');
@@ -209,9 +213,12 @@ export const Editor: FunctionComponent<EditorProps> = memo(
         }
       }
 
+      // Update component state
+      setEditorInstance(editor);
       setInputEditor(editor);
-      setTextArea(editorRef.current!.querySelector('textarea'));
+      setTextArea(textareaElement);
 
+      // Start autocomplete polling
       mappings.retrieveAutoCompleteInfo();
 
       const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
@@ -300,12 +307,14 @@ export const Editor: FunctionComponent<EditorProps> = memo(
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          {/* Axe complains about Ace's textarea element missing a label, which interferes with our
-        automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
-        satisfy Axe. */}
-
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label id="conAppEditorMount" className="conApp__textAreaLabelHack" />
+          <EuiScreenReaderOnly>
+            <label htmlFor={inputId}>
+              {i18n.translate('console.inputTextarea', {
+                defaultMessage: 'Dev Tools Console',
+              })}
+            </label>
+          </EuiScreenReaderOnly>
+          <div id="conAppEditorMount" />
         </div>
       </div>
     );
