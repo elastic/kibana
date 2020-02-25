@@ -19,7 +19,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { AlertData, AlertResultList } from '../../../common/types';
+import { AlertEvent, AlertResultList } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { alertListReqSchema } from './list/schemas';
 import { registerAlertRoutes } from './index';

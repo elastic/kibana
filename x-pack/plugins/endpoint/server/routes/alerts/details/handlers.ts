@@ -5,7 +5,7 @@
  */
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import { AlertData, EndpointAppConstants } from '../../../../common/types';
+import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
@@ -23,7 +23,7 @@ export const alertDetailsHandlerWrapper = function(
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
-      })) as GetResponse<AlertData>;
+      })) as GetResponse<AlertEvent>;
 
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(

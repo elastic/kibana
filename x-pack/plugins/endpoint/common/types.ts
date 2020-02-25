@@ -84,8 +84,7 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
-export interface AlertData {
-  id: string;
+export type AlertEvent = Immutable<{
   '@timestamp': number;
   agent: {
     id: string;
@@ -111,11 +110,17 @@ export interface AlertData {
     pid: number;
   };
   thread: {};
+}>;
+
+interface AlertMetadata {
+  id: string;
 
   // Alert Details Pagination
   next: string | null;
   prev: string | null;
 }
+
+export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
   event: {
@@ -150,7 +155,7 @@ export interface ESTotal {
   relation: string;
 }
 
-export type AlertHits = SearchResponse<AlertData>['hits']['hits'];
+export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
 export enum Direction {
   asc = 'asc',
