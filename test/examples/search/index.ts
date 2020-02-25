@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   describe('search services', function() {
     before(async () => {
@@ -35,6 +36,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
         defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1300, 900);
+      await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Search Explorer');
     });
 
