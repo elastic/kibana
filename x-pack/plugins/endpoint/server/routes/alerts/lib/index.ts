@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -155,18 +156,26 @@ export const searchESForAlerts = async (
     AlertEvent
   >;
 
-  // ES has some limitations in sorting undefined values, so we do some hackery here...
-  // hopefully there's a better way to do this.
   if (query.searchBefore !== undefined) {
+    // ES has some limitations in sorting undefined values, so we do some hackery here...
+    // hopefully there's a better way to do this.
+    // TODO: what are the other cases?
+    let valBeforeUndefined: bool = false;
+
     for (const idx in response.hits.hits) {
       if (response.hits.hits.hasOwnProperty(idx)) {
         const hit = response.hits.hits[idx];
-        if (hit._source.thread?.id === undefined) {
+        if (get(hit._source, query.sort) !== undefined) {
+          valBeforeUndefined = true;
+        }
+        if (valBeforeUndefined && get(hit._source, query.sort) === undefined) {
           response.hits.hits = response.hits.hits.slice(0, idx);
           break;
         }
       }
     }
+
+    // Reverse the hits when using `search_before`.
     response.hits.hits.reverse();
   }
 

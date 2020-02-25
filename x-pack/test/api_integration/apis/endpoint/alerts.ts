@@ -157,14 +157,12 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should filter results of alert data', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?filters=${encode({
-              term: { 'process.uptime': { value: 1063 } },
-            })}`
+            `/api/endpoint/alerts?filters=!((%27%24state%27%3A(store%3AappState)%2Cmeta%3A(alias%3A!n%2Cdisabled%3A!f%2Ckey%3Ahost.hostname%2Cnegate%3A!f%2Cparams%3A(query%3AHD-m3z-4c803698)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(host.hostname%3AHD-m3z-4c803698))))`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.total).to.eql(132);
-        expect(body.alerts.length).to.eql(3);
+        expect(body.total).to.eql(72);
+        expect(body.alerts.length).to.eql(10);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
         expect(body.result_from_index).to.eql(0);
