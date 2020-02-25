@@ -18,30 +18,34 @@
  */
 
 import { Observable } from 'rxjs';
-import { ISearchContext, SYNC_SEARCH_STRATEGY } from '../../../src/plugins/data/public';
-import { TSearchStrategyProvider, ISearchStrategy } from '../../../src/plugins/data/public';
+import {
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+} from '../../../src/plugins/data/public';
 
-import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
+import { ASYNC_DEMO_SEARCH_STRATEGY, IAsyncDemoResponse } from '../common';
+import { ASYNC_SEARCH_STRATEGY } from '../../../x-pack/plugins/data_enhanced/public';
 
 /**
- * This demo search strategy provider simply provides a shortcut for calling the DEMO_SEARCH_STRATEGY
+ * This demo search strategy provider simply provides a shortcut for calling the DEMO_ASYNC_SEARCH_STRATEGY
  * on the server side, without users having to pass it in explicitly, and it takes advantage of the
- * already registered SYNC_SEARCH_STRATEGY that exists on the client.
+ * already registered ASYNC_SEARCH_STRATEGY that exists on the client.
  *
  * so instead of callers having to do:
  *
  * ```
- * context.search(
- *   { ...request, serverStrategy: DEMO_SEARCH_STRATEGY },
+ * search(
+ *   { ...request, serverStrategy: DEMO_ASYNC_SEARCH_STRATEGY },
  *   options,
- *   SYNC_SEARCH_STRATEGY
+ *   ASYNC_SEARCH_STRATEGY
  *  ) as Observable<IDemoResponse>,
  *```
 
  * They can instead just do
  *
  * ```
- * context.search(request, options, DEMO_SEARCH_STRATEGY);
+ * search(request, options, DEMO_ASYNC_SEARCH_STRATEGY);
  * ```
  *
  * and are ensured type safety in regard to the request and response objects.
@@ -49,16 +53,17 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * @param context - context supplied by other plugins.
  * @param search - a search function to access other strategies that have already been registered.
  */
-export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = (
+export const asyncDemoClientSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_DEMO_SEARCH_STRATEGY> = (
   context: ISearchContext
-): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
-  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
-  const { search } = syncStrategyProvider(context);
+): ISearchStrategy<typeof ASYNC_DEMO_SEARCH_STRATEGY> => {
+  const asyncStrategyProvider = context.getSearchStrategy(ASYNC_SEARCH_STRATEGY);
+  const { search } = asyncStrategyProvider(context);
   return {
     search: (request, options) => {
-      return search({ ...request, serverStrategy: DEMO_SEARCH_STRATEGY }, options) as Observable<
-        IDemoResponse
-      >;
+      return search(
+        { ...request, serverStrategy: ASYNC_DEMO_SEARCH_STRATEGY },
+        options
+      ) as Observable<IAsyncDemoResponse>;
     },
   };
 };
