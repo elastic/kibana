@@ -89,7 +89,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   """,
                   "### Upload Code Coverage Static Site"
                 )
-                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
+//                kibanaPipeline.uploadCoverageStaticSite(TIME_STAMP)
                 kibanaPipeline.uploadCoverageStaticSite_PROD(TIME_STAMP)
               }
 
