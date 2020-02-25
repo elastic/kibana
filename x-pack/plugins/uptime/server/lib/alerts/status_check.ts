@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ACTION_GROUP_IDS } from '../../../common/constants';
 import { UptimeAlertTypeFactory } from './types';
 
 export interface StatusCheckExecutorParams {
@@ -21,6 +22,8 @@ const getResponse = () => ({
   lastChecked: new Date(),
 });
 
+const { DOWN_MONITOR } = ACTION_GROUP_IDS;
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
   id: 'xpack.uptime.alerts.downMonitor',
   name: 'X-Pack Alerting',
@@ -35,10 +38,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       locations: schema.arrayOf(schema.string()),
     }),
   },
-  defaultActionGroupId: 'down-monitor',
+  defaultActionGroupId: DOWN_MONITOR,
   actionGroups: [
     {
-      id: 'down-monitor',
+      id: DOWN_MONITOR,
       name: 'Alert',
     },
   ],
@@ -55,7 +58,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       alertInstance.replaceState({
         monitors,
       });
-      alertInstance.scheduleActions('down-monitor', {
+      alertInstance.scheduleActions(DOWN_MONITOR, {
         server,
         monitors,
       });
