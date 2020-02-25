@@ -8,7 +8,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -229,8 +229,4 @@ export const TimelineComponent: React.FC<Props> = ({
   );
 };
 
-TimelineComponent.displayName = 'TimelineComponent';
-
 export const Timeline = React.memo(TimelineComponent);
-
-Timeline.displayName = 'Timeline';

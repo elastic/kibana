@@ -7,7 +7,10 @@
 import { EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import {
+  isJavaAgentName,
+  isRumAgentName
+} from '../../../../../../../plugins/apm/common/agent_name';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';

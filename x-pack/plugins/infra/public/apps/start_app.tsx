@@ -29,6 +29,7 @@ import {
 import { AppRouter } from '../routers';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import '../index.scss';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -80,11 +81,8 @@ export async function startApp(
     </KibanaContextProvider>
   );
 
-  // Ensure the element we're handed from application mounting takes up
-  // the full size it can, so that our inner application styles work as
-  // expected.
-  element.style.height = '100%';
-  element.style.display = 'flex';
+  // Ensure the element we're handed from application mounting is assigned a class
+  // for our index.scss styles to apply to.
   element.className += ` ${CONTAINER_CLASSNAME}`;
 
   ReactDOM.render(<App />, element);

@@ -22,20 +22,8 @@ import { set } from 'lodash';
 import { FormattedData } from '../../../../../../plugins/inspector/public';
 // @ts-ignore
 import { createFilter } from './create_filter';
-interface Column {
-  id: string;
-  name: string;
-  aggConfig: any;
-}
 
-interface Row {
-  [key: string]: any;
-}
-
-interface Table {
-  columns: Column[];
-  rows: Row[];
-}
+import { TabbedTable } from '../tabify';
 
 /**
  * @deprecated
@@ -52,7 +40,7 @@ interface Table {
  * inspector. It will only be called when the data view in the inspector is opened.
  */
 export async function buildTabularInspectorData(
-  table: Table,
+  table: TabbedTable,
   queryFilter: { addFilters: (filter: any) => void }
 ) {
   const aggConfigs = table.columns.map(column => column.aggConfig);

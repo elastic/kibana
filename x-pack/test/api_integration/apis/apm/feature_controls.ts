@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -14,8 +12,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
-  const log = getService('log');
   const es = getService('legacyEs');
+  const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
   const end = encodeURIComponent(new Date().toISOString());
@@ -33,7 +31,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   interface Endpoint {
     req: {
       url: string;
-      method?: 'get' | 'post' | 'delete';
+      method?: 'get' | 'post' | 'delete' | 'put';
       body?: any;
     };
     expectForbidden: (result: any) => void;
@@ -148,7 +146,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           index: '.apm-agent-configuration',
         });
 
-        console.warn(JSON.stringify(res, null, 2));
+        log.error(JSON.stringify(res, null, 2));
       },
     },
   ];
@@ -196,7 +194,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     const { statusCode, req } = response;
     if (statusCode !== 200) {
-      log.debug(`Endpoint: ${req.method} ${req.path}
+      throw new Error(`Endpoint: ${req.method} ${req.path}
       Status code: ${statusCode}
       Response: ${response.body.message}`);
     }
@@ -216,9 +214,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      console.log(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
+      log.info(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
-      console.log(`Responded: ${endpoint.req.url}`);
+      log.info(`Responded: ${endpoint.req.url}`);
 
       try {
         if (expectation === 'forbidden') {
@@ -244,26 +242,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   describe('apm feature controls', () => {
-    let res: any;
+    const config = {
+      service: { name: 'test-service' },
+      settings: { transaction_sample_rate: 0.5 },
+    };
     before(async () => {
-      console.log(`Creating agent configuration`);
-      res = await executeAsAdmin({
-        method: 'post',
-        url: '/api/apm/settings/agent-configuration/new',
-        body: {
-          service: { name: 'test-service' },
-          settings: { transaction_sample_rate: 0.5 },
-        },
+      log.info(`Creating agent configuration`);
+      await executeAsAdmin({
+        method: 'put',
+        url: '/api/apm/settings/agent-configuration',
+        body: config,
       });
-      console.log(`Agent configuration created`);
+      log.info(`Agent configuration created`);
     });
 
     after(async () => {
-      console.log('deleting agent configuration');
-      const configurationId = res.body._id;
+      log.info('deleting agent configuration');
       await executeAsAdmin({
         method: 'delete',
-        url: `/api/apm/settings/agent-configuration/${configurationId}`,
+        url: `/api/apm/settings/agent-configuration`,
+        body: {
+          service: config.service,
+        },
       });
     });
 
