@@ -65,7 +65,7 @@ export function decorateMochaUi(lifecycle, context, config) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
-          const filePath = this.file.match(/\/(test\/.*?)$/)[1];
+          const filePath = this.file.match(/\/((x-pack\/)?test\/.*?)$/)[1];
           const tag = filePath
             .slice(5)
             .replace('/index.js', '')
