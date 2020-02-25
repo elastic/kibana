@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
@@ -13,7 +13,7 @@ import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function jobAuditMessagesRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup JobAuditMessages
    *
@@ -29,7 +29,7 @@ export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitial
         query: schema.maybe(schema.object({ from: schema.maybe(schema.any()) })),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getJobAuditMessages } = jobAuditMessagesProvider(
           context.ml!.mlClient.callAsCurrentUser
@@ -62,7 +62,7 @@ export function jobAuditMessagesRoutes({ xpackMainPlugin, router }: RouteInitial
         query: schema.maybe(schema.object({ from: schema.maybe(schema.any()) })),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getJobAuditMessages } = jobAuditMessagesProvider(
           context.ml!.mlClient.callAsCurrentUser

@@ -74,8 +74,15 @@ export const ml = (kibana: any) => {
         coreSavedObjects: kbnServer.newPlatform.start.core.savedObjects,
         elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
       };
-      const { usageCollection, cloud, home, security } = kbnServer.newPlatform.setup.plugins;
+      const {
+        usageCollection,
+        cloud,
+        home,
+        security,
+        licensing,
+      } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
+        licensing,
         security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,

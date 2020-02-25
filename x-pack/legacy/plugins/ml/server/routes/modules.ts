@@ -9,7 +9,7 @@ import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { getModuleIdParamSchema, setupModuleBodySchema } from '../new_platform/modules';
 import { RouteInitialization } from '../new_platform/plugin';
 
@@ -65,7 +65,7 @@ function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: strin
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization) {
+export function dataRecognizer({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataRecognizer
    *
@@ -84,7 +84,7 @@ export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization)
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { indexPatternTitle } = request.params;
         const results = await recognize(context, indexPatternTitle);
@@ -114,7 +114,7 @@ export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization)
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         let { moduleId } = request.params;
         if (moduleId === '') {
@@ -150,7 +150,7 @@ export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization)
         body: setupModuleBodySchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { moduleId } = request.params;
 
@@ -207,7 +207,7 @@ export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization)
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { moduleId } = request.params;
         const result = await dataRecognizerJobsExist(context, moduleId);

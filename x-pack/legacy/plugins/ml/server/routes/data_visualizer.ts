@@ -12,7 +12,7 @@ import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
 } from '../new_platform/data_visualizer_schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 
 function getOverallStats(
@@ -68,7 +68,7 @@ function getStatsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup DataVisualizer
    *
@@ -83,7 +83,7 @@ export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitializ
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
       validate: dataVisualizerFieldStatsSchema,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -135,7 +135,7 @@ export function dataVisualizerRoutes({ xpackMainPlugin, router }: RouteInitializ
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
       validate: dataVisualizerOverallStatsSchema,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },

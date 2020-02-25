@@ -11,20 +11,22 @@ import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { privilegesProvider } from '../lib/check_privileges';
-import { isSecurityDisabled } from '../lib/security_utils';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 
 /**
  * System routes
  */
 export function systemRoutes({
+  getLicenseCheckResults,
   router,
-  xpackMainPlugin,
+  xpackMainPlugin, // TODO: this needs to be replaced with NP
   spacesPlugin,
   cloud,
 }: RouteInitialization) {
+  const { isSecurityDisabled } = getLicenseCheckResults();
+
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
     const resp = await context.ml!.mlClient.callAsInternalUser('nodes.info', {
@@ -59,7 +61,7 @@ export function systemRoutes({
         body: schema.maybe(schema.any()),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         let upgradeInProgress = false;
         try {
@@ -80,7 +82,7 @@ export function systemRoutes({
           }
         }
 
-        if (isSecurityDisabled(xpackMainPlugin)) {
+        if (isSecurityDisabled) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return response.ok({
@@ -119,7 +121,7 @@ export function systemRoutes({
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
@@ -155,11 +157,11 @@ export function systemRoutes({
       path: '/api/ml/ml_node_count',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (isSecurityDisabled(xpackMainPlugin)) {
+        if (isSecurityDisabled) {
           return response.ok({
             body: await getNodeCount(context),
           });
@@ -206,7 +208,7 @@ export function systemRoutes({
       path: '/api/ml/info',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
         const cloudId = cloud && cloud.cloudId;
@@ -234,7 +236,7 @@ export function systemRoutes({
         body: schema.maybe(schema.any()),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         return response.ok({
           body: await context.ml!.mlClient.callAsCurrentUser('search', request.body),

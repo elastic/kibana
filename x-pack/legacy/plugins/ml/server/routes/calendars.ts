@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import { calendarSchema } from '../new_platform/calendars_schema';
@@ -42,13 +42,13 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
   return cal.getCalendarsByIds(calendarIds);
 }
 
-export function calendars({ xpackMainPlugin, router }: RouteInitialization) {
+export function calendars({ router, getLicenseCheckResults }: RouteInitialization) {
   router.get(
     {
       path: '/api/ml/calendars',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getAllCalendars(context);
 
@@ -68,7 +68,7 @@ export function calendars({ xpackMainPlugin, router }: RouteInitialization) {
         params: schema.object({ calendarIds: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       let returnValue;
       try {
         const calendarIds = request.params.calendarIds.split(',');
@@ -95,7 +95,7 @@ export function calendars({ xpackMainPlugin, router }: RouteInitialization) {
         body: schema.object({ ...calendarSchema }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const body = request.body;
         const resp = await newCalendar(context, body);
@@ -117,7 +117,7 @@ export function calendars({ xpackMainPlugin, router }: RouteInitialization) {
         body: schema.object({ ...calendarSchema }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { calendarId } = request.params;
         const body = request.body;
@@ -139,7 +139,7 @@ export function calendars({ xpackMainPlugin, router }: RouteInitialization) {
         params: schema.object({ calendarId: schema.string() }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { calendarId } = request.params;
         const resp = await deleteCalendar(context, calendarId);

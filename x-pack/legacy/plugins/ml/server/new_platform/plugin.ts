@@ -16,6 +16,7 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
+// import { LicensingPluginSetup } from '../../../../../plugins/licensing/server'; // LicenseFeature
 import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
@@ -65,6 +66,7 @@ export interface MlInitializerContext extends PluginInitializerContext {
   log: Logger;
 }
 export interface PluginsSetup {
+  licensing: any; // LicensingPluginSetup;
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
@@ -73,6 +75,11 @@ export interface PluginsSetup {
   home?: HomeServerPluginSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
+}
+
+interface LicenseCheckResult {
+  isAvailable: boolean;
+  isSecurityDisabled: boolean;
 }
 
 export interface RouteInitialization {
@@ -84,6 +91,7 @@ export interface RouteInitialization {
   spacesPlugin: any;
   securityPlugin: any;
   cloud?: CloudSetup;
+  getLicenseCheckResults: () => LicenseCheckResult;
 }
 
 declare module 'kibana/server' {
@@ -98,6 +106,11 @@ export class Plugin {
   private readonly pluginId: string = PLUGIN_ID;
   private config: any;
   private log: Logger;
+
+  private licenseCheckResults: LicenseCheckResult = {
+    isAvailable: false,
+    isSecurityDisabled: false,
+  };
 
   constructor(initializerContext: MlInitializerContext) {
     this.config = initializerContext.legacyConfig;
@@ -168,6 +181,7 @@ export class Plugin {
       xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
       securityPlugin: plugins.security,
+      getLicenseCheckResults: () => this.licenseCheckResults,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
@@ -202,6 +216,24 @@ export class Plugin {
 
     initMlServerLog(logInitializationDeps);
     makeMlUsageCollector(plugins.usageCollection, coreSavedObjects);
+
+    plugins.licensing.license$.subscribe(async (license: any) => {
+      const { isAvailable } = license.getFeature(pluginId);
+      const { isEnabled } = license.getFeature('security');
+
+      if (isAvailable) {
+        this.log.info('Enabling Ml plugin.');
+        this.licenseCheckResults = {
+          isAvailable: true,
+          isSecurityDisabled: isEnabled === false,
+        };
+      } else {
+        this.licenseCheckResults = {
+          isAvailable: false,
+          isSecurityDisabled: isEnabled === false,
+        };
+      }
+    });
   }
 
   public stop() {}

@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
@@ -29,7 +29,7 @@ function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ xpackMainPlugin, router }: RouteInitialization) {
+export function fieldsService({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
@@ -44,7 +44,7 @@ export function fieldsService({ xpackMainPlugin, router }: RouteInitialization) 
         body: getCardinalityOfFieldsSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getCardinalityOfFields(context, request.body);
 
@@ -71,7 +71,7 @@ export function fieldsService({ xpackMainPlugin, router }: RouteInitialization) 
         body: getTimeFieldRangeSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await getTimeFieldRange(context, request.body);
 

@@ -7,10 +7,9 @@
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'src/core/server';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
-import { isSecurityDisabled } from '../lib/security_utils';
 import {
   categorizationFieldExamplesSchema,
   chartSchema,
@@ -29,11 +28,12 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function jobServiceRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   async function hasPermissionToCreateJobs(
     callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
   ) {
-    if (isSecurityDisabled(xpackMainPlugin) === true) {
+    const { isSecurityDisabled } = getLicenseCheckResults();
+    if (isSecurityDisabled === true) {
       return true;
     }
 
@@ -63,7 +63,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(forceStartDatafeedSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { forceStartDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { datafeedIds, start, end } = request.body;
@@ -92,7 +92,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(datafeedIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { stopDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { datafeedIds } = request.body;
@@ -121,7 +121,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { deleteJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -150,7 +150,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { closeJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -179,7 +179,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { jobsSummary } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -208,7 +208,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobsWithTimerangeSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { jobsWithTimerange } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { dateFormatTz } = request.body;
@@ -237,7 +237,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { createFullJobsList } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -264,7 +264,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
       path: '/api/ml/jobs/groups',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getAllGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await getAllGroups();
@@ -292,7 +292,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(updateGroupsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { updateGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobs } = request.body;
@@ -319,7 +319,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
       path: '/api/ml/jobs/deleting_jobs_tasks',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { deletingJobTasks } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await deletingJobTasks();
@@ -347,7 +347,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(jobIdsSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { jobsExist } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
@@ -377,7 +377,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { indexPattern } = request.params;
         const isRollup = request.query.rollup === 'true';
@@ -408,7 +408,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(chartSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           indexPatternTitle,
@@ -461,7 +461,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(chartSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           indexPatternTitle,
@@ -509,7 +509,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
       path: '/api/ml/jobs/all_jobs_and_group_ids',
       validate: false,
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getAllJobAndGroupIds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await getAllJobAndGroupIds();
@@ -537,7 +537,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(lookBackProgressSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { getLookBackProgress } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, start, end } = request.body;
@@ -566,7 +566,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(categorizationFieldExamplesSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         // due to the use of the _analyze endpoint which is called by the kibana user,
         // basic job creation privileges are required to use this endpoint
@@ -625,7 +625,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         body: schema.object(topCategoriesSchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const { topCategories } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, count } = request.body;

@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { RequestHandlerContext } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
@@ -25,7 +25,12 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteInitialization) {
+export function jobValidationRoutes({
+  config,
+  xpackMainPlugin, // TODO: this needs to be replaced
+  router,
+  getLicenseCheckResults,
+}: RouteInitialization) {
   function calculateModelMemoryLimit(
     context: RequestHandlerContext,
     payload: CalculateModelMemoryLimitPayload
@@ -67,7 +72,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
         body: estimateBucketSpanSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(
@@ -114,7 +119,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
         body: modelMemoryLimitSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await calculateModelMemoryLimit(context, request.body);
 
@@ -141,7 +146,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
         body: schema.object(validateCardinalitySchema),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const resp = await validateCardinality(
           context.ml!.mlClient.callAsCurrentUser,
@@ -171,7 +176,7 @@ export function jobValidationRoutes({ config, xpackMainPlugin, router }: RouteIn
         body: validateJobSchema,
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         // pkg.branch corresponds to the version used in documentation links.
         const version = config.get('pkg.branch');

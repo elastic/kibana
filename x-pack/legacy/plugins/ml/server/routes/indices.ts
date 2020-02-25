@@ -6,13 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
-import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { licensePreRoutingFactory } from '../new_platform/license_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
 
 /**
  * Indices routes.
  */
-export function indicesRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function indicesRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
   /**
    * @apiGroup Indices
    *
@@ -30,7 +30,7 @@ export function indicesRoutes({ xpackMainPlugin, router }: RouteInitialization) 
         }),
       },
     },
-    licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
+    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
       try {
         const {
           body: { index, fields: requestFields },
