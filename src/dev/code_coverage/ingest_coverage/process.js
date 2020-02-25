@@ -30,6 +30,7 @@ import {
   addTimeStamp,
   distro,
   buildId,
+  coveredFilePath,
 } from './transforms';
 import { resolve } from "path";
 
@@ -59,6 +60,7 @@ export default ({ coverageSummaryPath }, log) => {
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
       map(prokStatsTimeStampBuildId),
+      map(coveredFilePath),
       map(addCoverageSummaryPathAndDistro),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
