@@ -14,9 +14,13 @@ import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
+  private readonly serverBasePath: string;
+
   public readonly onActiveSpaceChange$: Observable<Space>;
 
-  constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
+  constructor(private readonly http: HttpSetup) {
+    this.serverBasePath = http.basePath.serverBasePath;
+
     this.onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
