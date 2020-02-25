@@ -15,11 +15,9 @@ export default function({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
       it('alerts api should return one entry for each alert with default paging', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/alerts')
+          .get('/api/endpoint/alerts')
           .set('kbn-xsrf', 'xxx')
-          .send({})
           .expect(200);
-        expect(body).to.eql({});
         expect(body.total).to.eql(132);
         expect(body.alerts.length).to.eql(10);
         expect(body.request_page_size).to.eql(10);
@@ -29,12 +27,8 @@ export default function({ getService }: FtrProviderContext) {
 
       it('alerts api should return page based on paging properties passed.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/alerts')
+          .get('/api/endpoint/alerts?page_size=1&page_index=1')
           .set('kbn-xsrf', 'xxx')
-          .send({
-            page_size: 1,
-            page_index: 1,
-          })
           .expect(200);
         expect(body.total).to.eql(132);
         expect(body.alerts.length).to.eql(1);
@@ -64,7 +58,8 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return `prev` and `next` using `after` and `before`.', async () => {
-        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const prefix =
+          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
         const { body } = await supertest
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
@@ -78,7 +73,8 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return data using `next`', async () => {
-        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const prefix =
+          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${prefix}&after=1542789412000&after=c710bf2d-8686-4038-a2a1-43bdecc06b2a`
@@ -94,7 +90,8 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return data using `prev`', async () => {
-        const prefix = 'date_range=(from:now-2y,to:now)&sort=@timestamp&order=desc&page_size=10';
+        const prefix =
+          "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)&sort=@timestamp&order=desc&page_size=10";
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${prefix}&before=1542789412000&before=823d814d-fa0c-4e53-a94c-f6b296bb965b`
