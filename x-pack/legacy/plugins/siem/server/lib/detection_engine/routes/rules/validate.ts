@@ -40,7 +40,7 @@ export const transformValidateFindAlerts = (
     return [null, 'Internal error transforming'];
   } else {
     const decoded = findRulesSchema.decode(transformed);
-    const checked = exactCheck(findResults, decoded);
+    const checked = exactCheck(transformed, decoded);
     const left = (errors: t.Errors): string[] => formatErrors(errors);
     const right = (): string[] => [];
     const piped = pipe(checked, fold(left, right));
