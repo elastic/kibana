@@ -25,7 +25,13 @@ import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
+import {
+  BasePathProxyServer,
+  HttpConfig,
+  HttpConfigType,
+  config as httpConfig,
+  RequestHandlerContextProvider,
+} from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
@@ -277,10 +283,13 @@ export class LegacyService implements CoreService {
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
-        registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(
-          null,
-          this.legacyId
-        ),
+        registerRouteHandlerContext: <
+          TContextType extends RequestHandlerContext = RequestHandlerContext,
+          TContextName extends keyof TContextType = 'core'
+        >(
+          contextName: TContextName,
+          provider: RequestHandlerContextProvider<TContextName, TContextType>
+        ) => setupDeps.core.http.registerRouteHandlerContext(this.legacyId, contextName, provider),
         createRouter: <T extends RequestHandlerContext>() =>
           setupDeps.core.http.createRouter<T>('', this.legacyId),
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,

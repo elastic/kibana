@@ -53,7 +53,7 @@ describe('Actions Plugin', () => {
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
+        const actionsContextHandler = (await (handler[1] as Function)(
           {
             core: {
               savedObjects: {
@@ -74,7 +74,7 @@ describe('Actions Plugin', () => {
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
+        const actionsContextHandler = (await (handler[1] as Function)(
           {
             core: {
               savedObjects: {

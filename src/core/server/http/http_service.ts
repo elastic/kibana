@@ -110,11 +110,15 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         return router;
       },
 
-      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      registerRouteHandlerContext: <
+        TContextType extends RequestHandlerContext = RequestHandlerContext,
+        TContextName extends keyof TContextType = 'core'
+      >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: T,
-        provider: RequestHandlerContextProvider<T>
-      ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+        contextName: TContextName,
+        provider: RequestHandlerContextProvider<TContextName, TContextType>
+      ) =>
+        this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName as any, provider),
     };
 
     return contract;

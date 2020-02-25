@@ -101,7 +101,7 @@ function createCoreSetupMock() {
     csp: CspConfig.DEFAULT,
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),
-    registerRouteHandlerContext: jest.fn(),
+    registerRouteHandlerContext: jest.fn() as any,
     auth: {
       get: httpService.auth.get,
       isAuthenticated: httpService.auth.isAuthenticated,

@@ -44,8 +44,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  * @public
  */
 export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+  TContextName extends keyof TContextType,
+  TContextType extends RequestHandlerContext = RequestHandlerContext
+> = IContextProvider<RequestHandler<any, any, any, any, TContextType>, TContextName>;
 
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -250,9 +251,12 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+  registerRouteHandlerContext: <
+    TContextType extends RequestHandlerContext = RequestHandlerContext,
+    TContextName extends keyof TContextType = 'core'
+  >(
+    contextName: TContextName,
+    provider: RequestHandlerContextProvider<TContextName, TContextType>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -271,10 +275,13 @@ export interface InternalHttpServiceSetup
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
   getAuthHeaders: GetAuthHeaders;
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+  registerRouteHandlerContext: <
+    TContextType extends RequestHandlerContext = RequestHandlerContext,
+    TContextName extends keyof TContextType = 'core'
+  >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+    contextName: TContextName,
+    provider: RequestHandlerContextProvider<TContextName, TContextType>
   ) => RequestHandlerContextContainer;
 }
 

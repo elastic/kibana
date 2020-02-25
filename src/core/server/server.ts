@@ -217,7 +217,7 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
-    coreSetup.http.registerRouteHandlerContext(
+    coreSetup.http.registerRouteHandlerContext<RequestHandlerContext>(
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {

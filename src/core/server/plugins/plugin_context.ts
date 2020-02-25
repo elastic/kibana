@@ -35,7 +35,7 @@ import {
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
 import { pick, deepFreeze } from '../../utils';
-import { CoreSetup, CoreStart, RequestHandlerContext } from '..';
+import { CoreSetup, CoreStart, RequestHandlerContext, RequestHandlerContextProvider } from '..';
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -151,10 +151,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
-      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
-        null,
-        plugin.opaqueId
-      ),
+      registerRouteHandlerContext: <
+        TContextType extends RequestHandlerContext = RequestHandlerContext,
+        TContextName extends keyof TContextType = 'core'
+      >(
+        contextName: TContextName,
+        provider: RequestHandlerContextProvider<TContextName, TContextType>
+      ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
       createRouter: <T extends RequestHandlerContext>() =>
         deps.http.createRouter<T>('', plugin.opaqueId),
       registerOnPreAuth: deps.http.registerOnPreAuth,
