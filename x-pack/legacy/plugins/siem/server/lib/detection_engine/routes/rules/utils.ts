@@ -180,9 +180,7 @@ export const transform = (
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
   }
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
-  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
+  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
     return null;
@@ -195,7 +193,7 @@ export const transformOrBulkError = (
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus)) {
+    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
       return transformAlertToRule(alert);
