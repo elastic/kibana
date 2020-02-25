@@ -61,7 +61,7 @@ describe('getColorRampCenterColor', () => {
 
 describe('getColorRampStops', () => {
   it('Should create color stops for color ramp', () => {
-    expect(getOrdinalColorRampStops('Blues'), 0, 1).toEqual([
+    expect(getOrdinalColorRampStops('Blues', 0, 1)).toEqual([
       0,
       '#f7faff',
       0.125,
