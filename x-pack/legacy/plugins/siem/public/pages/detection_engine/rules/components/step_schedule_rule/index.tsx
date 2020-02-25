@@ -5,8 +5,8 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
@@ -62,7 +62,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
       const myDefaultValues = {
         ...defaultValues,
         isNew: false,
