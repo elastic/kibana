@@ -18,7 +18,7 @@
  */
 
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry, TriggerId } from '../types';
-import { ActionDefinition, ActionInternal } from '../actions';
+import { ActionDefinition, ActionInternal, AnyActionInternal } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -118,7 +118,8 @@ export class UiActionsService {
     const actionIds = this.triggerToActions.get(triggerId);
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId))
-      .filter(Boolean) as AnyActionContract[];
+      .filter<AnyActionInternal>(Boolean as any)
+      .map<AnyActionContract>(({ contract }) => contract);
 
     return actions;
   };
@@ -127,11 +128,11 @@ export class UiActionsService {
     triggerId: string,
     context: C
   ): Promise<AnyActionContract[]> => {
-    const actions = this.getTriggerActions!(triggerId);
+    const contracts = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
-      actions.map(action => action.isCompatible(context as any))
+      contracts.map(action => action.isCompatible(context as any))
     );
-    return actions.reduce<AnyActionContract[]>(
+    return contracts.reduce<AnyActionContract[]>(
       (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
       []
     );

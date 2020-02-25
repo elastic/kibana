@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { Action, ActionContext, AnyActionDefinition } from './action';
+import { Action, ActionExecutionContext, AnyActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { createActionStateContainer, ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
+import { ActionContract } from './action_contract';
 
 export class ActionInternal<A extends AnyActionDefinition>
-  implements Action<ActionContext<A>>, Presentable<ActionContext<A>> {
+  implements Action<ActionExecutionContext<A>>, Presentable<ActionExecutionContext<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
@@ -36,6 +37,10 @@ export class ActionInternal<A extends AnyActionDefinition>
     ? uiToReactComponent(this.CollectConfig)
     : undefined;
 
+  public get contract(): ActionContract<A> {
+    return this;
+  }
+
   public get order() {
     return this.state.get().order;
   }
@@ -46,26 +51,26 @@ export class ActionInternal<A extends AnyActionDefinition>
     config: this.definition.defaultConfig || {},
   });
 
-  public execute(context: ActionContext<A>) {
-    return this.definition.execute(context, this.state.get().config);
+  public execute(context: ActionExecutionContext<A>) {
+    return this.definition.execute(context, this.contract);
   }
 
-  public getIconType(context: ActionContext<A>): string | undefined {
+  public getIconType(context: ActionExecutionContext<A>): string | undefined {
     if (!this.definition.getIconType) return undefined;
     return this.definition.getIconType(context);
   }
 
-  public getDisplayName(context: ActionContext<A>): string {
+  public getDisplayName(context: ActionExecutionContext<A>): string {
     if (!this.definition.getDisplayName) return '';
     return this.definition.getDisplayName(context);
   }
 
-  public async isCompatible(context: ActionContext<A>): Promise<boolean> {
+  public async isCompatible(context: ActionExecutionContext<A>): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
   }
 
-  public getHref(context: ActionContext<A>): string | undefined {
+  public getHref(context: ActionExecutionContext<A>): string | undefined {
     if (!this.definition.getHref) return undefined;
     return this.definition.getHref(context);
   }

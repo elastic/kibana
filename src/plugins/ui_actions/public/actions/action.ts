@@ -19,6 +19,7 @@
 
 import { Presentable } from '../util/presentable';
 import { Configurable } from '../util/configurable';
+import { ActionContract } from './action_contract';
 
 /**
  * Legacy action interface, do not use. Use @type {ActionDefinition} and
@@ -63,10 +64,13 @@ export interface Action<Context extends {} = {}> extends Partial<Presentable<Con
  * A convenience interface used to register an action.
  */
 export interface ActionDefinition<
-  Context extends object = object,
+  PresentationContext extends object = object,
+  ExecutionContext extends object = PresentationContext,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> extends Partial<Presentable<Context>>, Partial<Configurable<Config, Context>> {
+>
+  extends Partial<Presentable<PresentationContext>>,
+    Partial<Configurable<Config, PresentationContext>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -81,18 +85,26 @@ export interface ActionDefinition<
   readonly factoryId?: string;
 
   /**
-   * If this returns something truthy, this is used in addition to the `execute` method when clicked.
+   * @deprecated
+   *
+   * Do not use this, use `execute` method instead.
    */
-  getHref?(context: Context): string | undefined;
+  getHref?(context: ExecutionContext): string | undefined;
 
   /**
    * Executes the action.
    */
-  execute(context: Context, config: Config): Return;
+  execute(
+    context: ExecutionContext,
+    action: ActionContract<ActionDefinition<PresentationContext, ExecutionContext, Return, Config>>
+  ): Return;
 }
 
-export type AnyActionDefinition = ActionDefinition<any, any, any>;
-export type ActionContext<A> = A extends ActionDefinition<infer Context, any, any>
+export type AnyActionDefinition = ActionDefinition<any, any, any, any>;
+export type ActionPresentationContext<A> = A extends ActionDefinition<infer Context, any, any, any>
+  ? Context
+  : never;
+export type ActionExecutionContext<A> = A extends ActionDefinition<any, infer Context, any, any>
   ? Context
   : never;
 export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config> ? Config : never;
@@ -106,24 +118,31 @@ export type ActionConfig<A> = A extends ActionDefinition<any, any, infer Config>
  * back.
  */
 export type DynamicActionDefinition<
-  Context extends object = object,
+  PresentationContext extends object = object,
+  ExecutionContext extends object = PresentationContext,
   Return = Promise<void>,
   Config extends object | undefined = undefined
-> = ActionDefinition<Context, Return, Config> &
+> = ActionDefinition<PresentationContext, ExecutionContext, Return, Config> &
   Required<
-    Pick<ActionDefinition<Context, Return, Config>, 'CollectConfig' | 'defaultConfig' | 'factoryId'>
+    Pick<
+      ActionDefinition<PresentationContext, ExecutionContext, Return, Config>,
+      'CollectConfig' | 'defaultConfig' | 'factoryId'
+    >
   >;
+
+export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any, any, any>;
 
 /**
  * Factory actions are actions used to create dynamic actions - their `execute`
  * method returns a dynamic
  */
 export interface FactoryActionDefinition<
-  Context extends object,
-  DAD extends DynamicActionDefinition<any, any, any>
-> extends ActionDefinition<Context, DAD> {
+  DAD extends AnyDynamicActionDefinition,
+  PresentationContext extends object = object,
+  ExecutionContext extends object = PresentationContext
+> extends ActionDefinition<PresentationContext, ExecutionContext, DAD> {
   /**
    * Returns an instance of a dynamic action definition.
    */
-  execute(context: Context): DAD;
+  execute(context: ExecutionContext): DAD;
 }
