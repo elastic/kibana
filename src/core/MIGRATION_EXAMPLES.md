@@ -741,8 +741,8 @@ router.get(
 
 ## Saved Objects types
 
-In the legacy platform, saved object types were registered using static definitions in `uiExports` part 
-the plugin manifest
+In the legacy platform, saved object types were registered using static definitions in the `uiExports` part of
+the plugin manifest.
 
 In the new platform, all these registration are to be performed programmatically during your plugin's `setup` phase,
 using the core `savedObjects`'s `registerType` setup API.
@@ -756,7 +756,7 @@ and `mappings`.
 Let say we have the following in a legacy plugin:
 
 ```js
-// src/legacy/core_plugins/my-plugin/index.js
+// src/legacy/core_plugins/my_plugin/index.js
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 
@@ -780,7 +780,7 @@ new kibana.Plugin({
 ```
 
 ```json
-// src/legacy/core_plugins/my-plugin/mappings.json
+// src/legacy/core_plugins/my_plugin/mappings.json
 {
   "first-type": {
     "properties": {
@@ -806,7 +806,7 @@ new kibana.Plugin({
 ```
 
 ```js
-// src/legacy/core_plugins/my-plugin/migrations.js
+// src/legacy/core_plugins/my_plugin/migrations.js
 export const migrations = {
   'first-type': {
     '1.0.0': migrateFirstTypeToV1,
@@ -823,7 +823,7 @@ To migrate this, we will have to regroup the declaration per-type. That would be
 First type:
  
 ```typescript
-// src/plugins/my-plugin/server/saved_objects/first_type.ts
+// src/plugins/my_plugin/server/saved_objects/first_type.ts
 import { SavedObjectsType } from 'src/core/server';
 
 export const firstType: SavedObjectsType = {
@@ -850,7 +850,7 @@ export const firstType: SavedObjectsType = {
 Second type:
 
 ```typescript
-// src/plugins/my-plugin/server/saved_objects/second_type.ts
+// src/plugins/my_plugin/server/saved_objects/second_type.ts
 import { SavedObjectsType } from 'src/core/server';
 
 export const secondType: SavedObjectsType = {
@@ -876,7 +876,7 @@ export const secondType: SavedObjectsType = {
 Registration in the plugin's setup phase:
 
 ```typescript
-// src/plugins/my-plugin/server/plugin.ts
+// src/plugins/my_plugin/server/plugin.ts
 import { firstType, secondType } from './saved_objects';
 
 export class MyPlugin implements Plugin {
@@ -896,7 +896,7 @@ The NP `registerType` expected input is very close to the legacy format. However
 - The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
 
 - The migration function signature has changed:
-In legacy, is was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
+In legacy, it was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 In new platform, it is now `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
 
 With context being:

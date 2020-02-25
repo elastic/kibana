@@ -1498,7 +1498,6 @@ export interface SavedObjectMigrationContext {
 }
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectUnsanitizedDoc"
 //
 // @public
 export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;

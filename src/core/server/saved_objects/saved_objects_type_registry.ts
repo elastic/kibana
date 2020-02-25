@@ -31,7 +31,7 @@ export type ISavedObjectTypeRegistry = Pick<
 >;
 
 /**
- * Registry holding information about all the registered {@link SavedObjectsType | savedObject types}.
+ * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  *
  * @public
  */

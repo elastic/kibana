@@ -22,7 +22,7 @@ The type definition is an aggregation of the legacy savedObjects `schema`<!-- --
 
 
 ```ts
-// src/plugins/my_plugin/server/saved_objects/types.ts
+// src/plugins/my_plugin/server/saved_objects/my_type.ts
 import { SavedObjectsType } from 'src/core/server';
 import * as migrations from './migrations';
 

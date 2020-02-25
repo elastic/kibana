@@ -4,7 +4,7 @@
 
 ## SavedObjectTypeRegistry class
 
-Registry holding information about all the registered [savedObject types](./kibana-plugin-server.savedobjectstype.md)<!-- -->.
+Registry holding information about all the registered [saved object types](./kibana-plugin-server.savedobjectstype.md)<!-- -->.
 
 <b>Signature:</b>
 

@@ -21,17 +21,18 @@ import { SavedObjectUnsanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 /**
- * A migration function defined for a {@link SavedObjectsType | saved objects type}
- * used to migrate it's {@link SavedObjectUnsanitizedDoc | documents} to a given version
+ * A migration function for a {@link SavedObjectsType | saved object type}
+ * used to migrate it to a given version
  *
  * @example
  * ```typescript
  * const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
- *   try {
+ *   if(doc.attributes.someProp === null) {
+ *     log.warn('Skipping migration');
+ *   } else {
  *     doc.attributes.someProp = migrateProperty(doc.attributes.someProp);
- *   } catch(e) {
- *     log.warn('Error migrating `someProp`');
  *   }
+ *
  *   return doc;
  * }
  * ```

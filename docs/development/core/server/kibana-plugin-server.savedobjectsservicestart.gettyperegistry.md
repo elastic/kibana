@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceStart.getTypeRegistry property
 
-Returns the [registry](./kibana-plugin-server.isavedobjecttyperegistry.md) containing all registered [savedObject types](./kibana-plugin-server.savedobjectstype.md)
+Returns the [registry](./kibana-plugin-server.isavedobjecttyperegistry.md) containing all registered [saved object types](./kibana-plugin-server.savedobjectstype.md)
 
 <b>Signature:</b>
 

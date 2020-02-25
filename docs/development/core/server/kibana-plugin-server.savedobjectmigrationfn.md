@@ -4,7 +4,7 @@
 
 ## SavedObjectMigrationFn type
 
-A migration function defined for a [saved objects type](./kibana-plugin-server.savedobjectstype.md) used to migrate it's  to a given version
+A migration function for a [saved object type](./kibana-plugin-server.savedobjectstype.md) used to migrate it to a given version
 
 <b>Signature:</b>
 
@@ -17,11 +17,12 @@ export declare type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, co
 
 ```typescript
 const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
-  try {
+  if(doc.attributes.someProp === null) {
+    log.warn('Skipping migration');
+  } else {
     doc.attributes.someProp = migrateProperty(doc.attributes.someProp);
-  } catch(e) {
-    log.warn('Error migrating `someProp`');
   }
+
   return doc;
 }
 

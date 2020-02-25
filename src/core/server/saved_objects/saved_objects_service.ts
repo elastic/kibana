@@ -111,7 +111,7 @@ export interface SavedObjectsServiceSetup {
    *
    * @example
    * ```ts
-   * // src/plugins/my_plugin/server/saved_objects/types.ts
+   * // src/plugins/my_plugin/server/saved_objects/my_type.ts
    * import { SavedObjectsType } from 'src/core/server';
    * import * as migrations from './migrations';
    *
@@ -205,7 +205,7 @@ export interface SavedObjectsServiceStart {
   createSerializer: () => SavedObjectsSerializer;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
-   * {@link SavedObjectsType | savedObject types}
+   * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
