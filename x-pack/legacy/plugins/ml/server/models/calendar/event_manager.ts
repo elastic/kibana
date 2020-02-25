@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+
 export interface CalendarEvent {
   calendar_id?: string;
   event_id?: string;
@@ -32,7 +34,7 @@ export class EventManager {
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
-    const calendarId = '_all';
+    const calendarId = GLOBAL_CALENDAR;
     try {
       const resp = await this._client('ml.events', {
         calendarId,
