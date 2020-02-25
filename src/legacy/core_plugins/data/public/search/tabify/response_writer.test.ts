@@ -18,7 +18,7 @@
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { AggConfigs, AggGroupNames, Schemas, BUCKET_TYPES } from '../aggs';
+import { AggConfigs, BUCKET_TYPES } from '../aggs';
 import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 import { TabbedResponseWriterOptions } from './types';
@@ -73,14 +73,6 @@ describe('TabbedAggResponseWriter class', () => {
     return new TabbedAggResponseWriter(
       new AggConfigs(indexPattern, aggs, {
         typesRegistry,
-        schemas: new Schemas([
-          {
-            group: AggGroupNames.Metrics,
-            name: 'metric',
-            min: 1,
-            defaults: [{ schema: 'metric', type: 'count' }],
-          },
-        ]).all,
       }),
       {
         metricsAtAllLevels: false,

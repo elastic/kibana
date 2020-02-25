@@ -19,7 +19,7 @@
 
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
-import { AggConfigs, AggGroupNames, Schemas } from '../aggs';
+import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
 
 describe('get columns', () => {
@@ -45,14 +45,6 @@ describe('get columns', () => {
 
     return new AggConfigs(indexPattern, aggs, {
       typesRegistry,
-      schemas: new Schemas([
-        {
-          group: AggGroupNames.Metrics,
-          name: 'metric',
-          min: 1,
-          defaults: [{ schema: 'metric', type: 'count' }],
-        },
-      ]).all,
     });
   };
 
