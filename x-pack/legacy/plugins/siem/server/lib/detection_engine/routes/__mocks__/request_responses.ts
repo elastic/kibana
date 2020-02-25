@@ -179,10 +179,11 @@ export const getPrivilegeRequest = (): ServerInjectOptions => ({
   url: DETECTION_ENGINE_PRIVILEGES_URL,
 });
 
-export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_PREPACKAGED_URL,
-});
+export const addPrepackagedRulesRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_PREPACKAGED_URL,
+  });
 
 export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
   method: 'GET',

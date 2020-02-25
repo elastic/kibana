@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
-import { createRulesRoute } from './create_rules_route';
 import {
   getFindResult,
-  getResult,
-  createActionResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
   getEmptyIndex,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
-import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
+import { requestContextMock, serverMock } from '../__mocks__';
+import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
+import { PrepackagedRules } from '../../types';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -43,87 +40,79 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
-import { PrepackagedRules } from '../../types';
-
 describe('add_prepackaged_rules_route', () => {
-  let server = createMockServer();
-  let config = createMockConfig();
-  let getClients = clientsServiceMock.createGetScoped();
-  let clients = clientsServiceMock.createClients();
+  let { getRoute, router, response } = serverMock.create();
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    ({ getRoute, router, response } = serverMock.create());
+    ({ clients, context } = requestContextMock.createTools());
 
-    server = createMockServer();
-    config = createMockConfig();
-    getClients = clientsServiceMock.createGetScoped();
-    clients = clientsServiceMock.createClients();
-
-    getClients.mockResolvedValue(clients);
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
+    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    addPrepackedRulesRoute(server.route, config, getClients);
+    addPrepackedRulesRoute(router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when creating a with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.create.mockResolvedValue(createActionResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(addPrepackagedRulesRequest());
-      expect(statusCode).toBe(200);
+    test('returns 200 when creating with a valid actionClient and alertClient', async () => {
+      const { handler } = getRoute();
+      const request = addPrepackagedRulesRequest();
+
+      await handler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      getClients.mockResolvedValue(omit('alertsClient', clients));
-      const { inject, route } = createMockServer();
-      createRulesRoute(route, config, getClients);
-      const { statusCode } = await inject(addPrepackagedRulesRequest());
-      expect(statusCode).toBe(404);
-    });
-  });
+      context.alerting.getAlertsClient = jest.fn();
+      const { handler } = getRoute();
+      const request = addPrepackagedRulesRequest();
 
-  describe('validation', () => {
+      await handler(context, request, response);
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
     test('it returns a 400 if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.create.mockResolvedValue(createActionResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
-      expect(JSON.parse(payload)).toEqual({
-        message: expect.stringContaining(
-          'Pre-packaged rules cannot be installed until the space index is created'
+      const { handler } = getRoute();
+      const request = addPrepackagedRulesRequest();
+
+      await handler(context, request, response);
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: expect.stringContaining(
+          'Pre-packaged rules cannot be installed until the signals index is created'
         ),
-        status_code: 400,
       });
     });
   });
 
-  describe('payload', () => {
+  describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.create.mockResolvedValue(createActionResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
-      expect(JSON.parse(payload)).toEqual({
-        rules_installed: 1,
-        rules_updated: 0,
+      const request = addPrepackagedRulesRequest();
+      await getRoute().handler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          rules_installed: 1,
+          rules_updated: 0,
+        },
       });
     });
 
     test('1 rule is updated and 0 are installed when we return a single find and the versions are different', async () => {
       clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.alertsClient.get.mockResolvedValue(getResult());
-      clients.actionsClient.create.mockResolvedValue(createActionResult());
-      clients.alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
-      expect(JSON.parse(payload)).toEqual({
-        rules_installed: 0,
-        rules_updated: 1,
+      const request = addPrepackagedRulesRequest();
+      await getRoute().handler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          rules_installed: 0,
+          rules_updated: 1,
+        },
       });
     });
   });
