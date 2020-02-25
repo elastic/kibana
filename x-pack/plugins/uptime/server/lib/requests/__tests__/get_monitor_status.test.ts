@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
 
 interface BucketItemCriteria {

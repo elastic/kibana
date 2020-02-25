@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ACTION_GROUP_IDS } from '../../../common/constants';
+import { ACTION_GROUP_IDS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 
 export interface StatusCheckExecutorParams {

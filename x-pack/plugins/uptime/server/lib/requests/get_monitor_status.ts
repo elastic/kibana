@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES } from '../../../common/constants';
+import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetMonitorStatusParams {
   filters?: string;
