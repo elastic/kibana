@@ -35,12 +35,9 @@ describe('Sync search strategy', () => {
       core: mockCoreStart,
       getSearchStrategy: jest.fn(),
     });
-    syncSearch.search(
-      {
-        serverStrategy: SYNC_SEARCH_STRATEGY,
-      },
-      {}
-    );
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+    syncSearch.search(request, {});
+
     expect(mockCoreStart.http.fetch.mock.calls[0][0]).toEqual({
       path: `/internal/search/${SYNC_SEARCH_STRATEGY}`,
       body: JSON.stringify({
@@ -55,24 +52,18 @@ describe('Sync search strategy', () => {
     const expectedLoadingCountValues = [0, 1, 0];
     const receivedLoadingCountValues: number[] = [];
 
-    mockCoreStart.http.fetch.mockImplementationOnce(() => Promise.resolve());
+    mockCoreStart.http.fetch.mockResolvedValueOnce('response');
 
     const syncSearch = syncSearchStrategyProvider({
       core: mockCoreStart,
       getSearchStrategy: jest.fn(),
     });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
     loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
 
-    await syncSearch
-      .search(
-        {
-          serverStrategy: SYNC_SEARCH_STRATEGY,
-        },
-        {}
-      )
-      .toPromise();
+    await syncSearch.search(request, {}).toPromise();
 
     expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
   });
@@ -82,25 +73,19 @@ describe('Sync search strategy', () => {
     const expectedLoadingCountValues = [0, 1, 0];
     const receivedLoadingCountValues: number[] = [];
 
-    mockCoreStart.http.fetch.mockImplementationOnce(() => Promise.reject());
+    mockCoreStart.http.fetch.mockRejectedValueOnce('error');
 
     const syncSearch = syncSearchStrategyProvider({
       core: mockCoreStart,
       getSearchStrategy: jest.fn(),
     });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
     loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
 
     try {
-      await syncSearch
-        .search(
-          {
-            serverStrategy: SYNC_SEARCH_STRATEGY,
-          },
-          {}
-        )
-        .toPromise();
+      await syncSearch.search(request, {}).toPromise();
     } catch (e) {
       expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
     }
