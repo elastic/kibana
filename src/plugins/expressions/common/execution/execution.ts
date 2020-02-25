@@ -216,8 +216,8 @@ export class Execution<
         if (isAborted()) return createAbortErrorValue();
         args = resolvedArgs;
         timeStart = this.params.debug ? performance.now() : 0;
-        const output = await this.invokeFunction(fn, input, resolvedArgs);
-        if (isAborted()) return createAbortErrorValue();
+        let output = await this.invokeFunction(fn, input, resolvedArgs);
+        if (isAborted()) output = createAbortErrorValue();
 
         if (this.params.debug) {
           const timeEnd: number = performance.now();
@@ -225,15 +225,31 @@ export class Execution<
             success: true,
             fn,
             input,
-            args: resolvedArgs,
+            args,
             output,
             duration: timeEnd - timeStart,
           };
         }
 
+        if (isAborted()) return output;
+
         if (getType(output) === 'error') return output;
         input = output;
       } catch (rawError) {
+        if (isAborted()) {
+          const output = createAbortErrorValue();
+          const timeEnd: number = performance.now();
+          (link as ExpressionAstFunction).debug = {
+            success: true,
+            fn,
+            input,
+            args,
+            output,
+            duration: timeStart ? timeEnd - timeStart : undefined,
+          };
+          return output;
+        }
+
         const timeEnd: number = this.params.debug ? performance.now() : 0;
         rawError.message = `[${fnName}] > ${rawError.message}`;
         const error = createError(rawError) as ExpressionValueError;
