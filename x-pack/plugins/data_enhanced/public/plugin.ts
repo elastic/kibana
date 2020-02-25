@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -26,20 +26,15 @@ export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin implements Plugin {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup, { data }: DataEnhancedSetupDependencies) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
+    data.search.registerSearchStrategyProvider(ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider);
     data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      ASYNC_SEARCH_STRATEGY,
-      asyncSearchStrategyProvider
-    );
-    data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
       ES_SEARCH_STRATEGY,
       enhancedEsSearchStrategyProvider
     );

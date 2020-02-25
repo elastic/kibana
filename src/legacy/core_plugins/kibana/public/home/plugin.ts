@@ -57,20 +57,22 @@ export class HomePlugin implements Plugin {
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  setup(core: CoreSetup, { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies) {
+  setup(
+    core: CoreSetup<HomePluginStartDependencies>,
+    { home, kibanaLegacy, usageCollection }: HomePluginSetupDependencies
+  ) {
     kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { home: homeStart }] = await core.getStartServices();
         setServices({
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
           toastNotifications: core.notifications.toasts,
           banners: coreStart.overlays.banners,
-          getInjected: core.injectedMetadata.getInjectedVar,
           docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
           chrome: coreStart.chrome,
@@ -82,6 +84,7 @@ export class HomePlugin implements Plugin {
           environment: this.environment!,
           config: kibanaLegacy.config,
           homeConfig: home.config,
+          tutorialVariables: homeStart.tutorials.get,
           featureCatalogue: this.featureCatalogue!,
         });
         const { renderApp } = await import('./np_ready/application');

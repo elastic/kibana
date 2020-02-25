@@ -177,7 +177,7 @@ export class ExpressionsPublicPlugin
       },
     };
 
-    return setup;
+    return Object.freeze(setup);
   }
 
   public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
@@ -186,17 +186,19 @@ export class ExpressionsPublicPlugin
     setNotifications(core.notifications);
 
     const { expressions } = this;
-    const expressionsStart = expressions.start();
-
-    return {
-      ...expressionsStart,
+    const start = {
+      ...expressions.start(),
       ExpressionLoader,
       ExpressionRenderHandler,
       loader,
       ReactExpressionRenderer,
       render,
     };
+
+    return Object.freeze(start);
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }
