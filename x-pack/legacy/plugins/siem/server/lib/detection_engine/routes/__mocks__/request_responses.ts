@@ -79,6 +79,7 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  tags: [],
 });
 
 export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
@@ -256,13 +257,14 @@ export const getDeleteRequestById = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
 });
 
-export const getCreateRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getCreateRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...typicalPayload(),
+    },
+  });
 
 export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
   method: 'POST',
