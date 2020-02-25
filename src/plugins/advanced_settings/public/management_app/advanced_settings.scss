@@ -50,12 +50,12 @@
 }
 
 .mgtAdvancedSettingsForm__unsavedCount {
-  @include euiBreakpoint('xs', 's') {
+  @include euiBreakpoint('xs') {
     display: none;
   }
 }
 
-.mgtAdvancedSettingsForm__unsavedCountMessage{
+.mgtAdvancedSettingsForm__unsavedCountMessage {
   // Simulates a left side border without shifting content
   box-shadow: -$euiSizeXS 0px $euiColorWarning;
   padding-left: $euiSizeS;
