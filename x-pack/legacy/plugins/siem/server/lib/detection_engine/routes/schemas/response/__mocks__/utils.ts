@@ -9,6 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { RulesSchema } from '../rules_schema';
 import { RulesBulkSchema } from '../rules_bulk_schema';
 import { ErrorSchema } from '../error_schema';
+import { FindRulesSchema } from '../find_rules_schema';
 
 interface Message<T> {
   errors: t.Errors;
@@ -72,4 +73,11 @@ export const getErrorPayload = (
     status_code: 404,
     message: 'id: "819eded6-e9c8-445b-a647-519aea39e063" not found',
   },
+});
+
+export const getFindResponseSingle = (): FindRulesSchema => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [getBaseResponsePayload()],
 });

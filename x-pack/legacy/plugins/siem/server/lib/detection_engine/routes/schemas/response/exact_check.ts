@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { left, Either, fold, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { isObject, get } from 'lodash/fp';
 
 /**
  * Given an original object and a decoded object this will return an error
@@ -30,10 +31,7 @@ export const exactCheck = <T>(
 ): Either<t.Errors, T> => {
   const onLeft = (errors: t.Errors): Either<t.Errors, T> => left(errors);
   const onRight = (decodedValue: T): Either<t.Errors, T> => {
-    const decodedKeys = Object.keys(decodedValue);
-    const differences = Object.keys(original).filter(
-      originalKeys => !decodedKeys.includes(originalKeys)
-    );
+    const differences = findDifferencesRecursive(original, decodedValue);
     if (differences.length !== 0) {
       const validationError: t.ValidationError = {
         value: differences,
@@ -47,4 +45,40 @@ export const exactCheck = <T>(
     }
   };
   return pipe(decoded, fold(onLeft, onRight));
+};
+
+export const findDifferencesRecursive = <T>(original: object, decodedValue: T): string[] => {
+  if (decodedValue == null) {
+    try {
+      // It is null and painful when the original contains an object or an array
+      // the the decoded value does not have.
+      return [JSON.stringify(original)];
+    } catch (err) {
+      return ['circular reference'];
+    }
+  }
+  const decodedKeys = Object.keys(decodedValue);
+  const differences = Object.keys(original).flatMap(originalKey => {
+    const foundKey = decodedKeys.some(key => key === originalKey);
+    const topLevelKey = foundKey ? [] : [originalKey];
+    // I use lodash to cheat and get an any (not going to lie ;-))
+    const valueObjectOrArrayOriginal = get(originalKey, original);
+    const valueObjectOrArrayDecoded = get(originalKey, decodedValue);
+    if (isObject(valueObjectOrArrayOriginal)) {
+      return [
+        ...topLevelKey,
+        ...findDifferencesRecursive(valueObjectOrArrayOriginal, valueObjectOrArrayDecoded),
+      ];
+    } else if (Array.isArray(valueObjectOrArrayOriginal)) {
+      return [
+        ...topLevelKey,
+        ...valueObjectOrArrayOriginal.flatMap((arrayElement, index) =>
+          findDifferencesRecursive(arrayElement, get(index, valueObjectOrArrayDecoded))
+        ),
+      ];
+    } else {
+      return topLevelKey;
+    }
+  });
+  return differences;
 };

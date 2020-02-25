@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { getPaths } from './utils';
 import { foldLeftRight } from './__mocks__/utils';
-import { exactCheck } from './exact_check';
+import { exactCheck, findDifferencesRecursive } from './exact_check';
 
 describe('exact_check', () => {
   test('it returns an error if given extra object properties', () => {
@@ -77,5 +77,71 @@ describe('exact_check', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual({ a: 'test' });
+  });
+
+  test('it should find no differences recursively with two empty objects', () => {
+    const difference = findDifferencesRecursive({}, {});
+    expect(difference).toEqual([]);
+  });
+
+  test('it should find a single difference with two objects with different keys', () => {
+    const difference = findDifferencesRecursive({ a: 1 }, { b: 1 });
+    expect(difference).toEqual(['a']);
+  });
+
+  test('it should find a two differences with two objects with multiple different keys', () => {
+    const difference = findDifferencesRecursive({ a: 1, c: 1 }, { b: 1 });
+    expect(difference).toEqual(['a', 'c']);
+  });
+
+  test('it should find no differences with two objects with the same keys', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: 1 }, { a: 1, b: 1 });
+    expect(difference).toEqual([]);
+  });
+
+  test('it should find a difference with two deep objects with different same keys', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: { c: 1 } }, { a: 1, b: { d: 1 } });
+    expect(difference).toEqual(['c']);
+  });
+
+  test('it should find a difference within an array', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: [{ c: 1 }] }, { a: 1, b: [{ a: 1 }] });
+    expect(difference).toEqual(['c']);
+  });
+
+  test('it should find a no difference when using arrays that are identical', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: [{ c: 1 }] }, { a: 1, b: [{ c: 1 }] });
+    expect(difference).toEqual([]);
+  });
+
+  test('it should find differences when one has an array and the other does not', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: [{ c: 1 }] }, { a: 1 });
+    expect(difference).toEqual(['b', '[{"c":1}]']);
+  });
+
+  test('it should find differences when one has an deep object and the other does not', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: { c: 1 } }, { a: 1 });
+    expect(difference).toEqual(['b', '{"c":1}']);
+  });
+
+  test('it should find differences when one has a deep object with multiple levels and the other does not', () => {
+    const difference = findDifferencesRecursive({ a: 1, b: { c: { d: 1 } } }, { a: 1 });
+    expect(difference).toEqual(['b', '{"c":{"d":1}}']);
+  });
+
+  test('it tests two deep objects as the same with no key differences', () => {
+    const difference = findDifferencesRecursive(
+      { a: 1, b: { c: { d: 1 } } },
+      { a: 1, b: { c: { d: 1 } } }
+    );
+    expect(difference).toEqual([]);
+  });
+
+  test('it tests two deep objects with just one deep key difference', () => {
+    const difference = findDifferencesRecursive(
+      { a: 1, b: { c: { d: 1 } } },
+      { a: 1, b: { c: { e: 1 } } }
+    );
+    expect(difference).toEqual(['d']);
   });
 });
