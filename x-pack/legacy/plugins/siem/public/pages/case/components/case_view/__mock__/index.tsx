@@ -33,7 +33,6 @@ export const caseProps: CaseProps = {
     updatedAt: '2020-02-19T15:02:57.995Z',
     version: 'WzQ3LDFd',
   },
-  isLoading: false,
 };
 
 export const data: Case = {
