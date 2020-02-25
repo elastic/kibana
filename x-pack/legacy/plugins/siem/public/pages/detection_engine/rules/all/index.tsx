@@ -221,6 +221,18 @@ export const AllRules = React.memo<AllRulesProps>(
       );
     }, []);
 
+    const isLoadingAnActionOnRule = useMemo(() => {
+      if (
+        loadingRuleIds.length > 0 &&
+        (loadingRulesAction === 'disable' || loadingRulesAction === 'enable')
+      ) {
+        return false;
+      } else if (loadingRuleIds.length > 0) {
+        return true;
+      }
+      return false;
+    }, [loadingRuleIds, loadingRulesAction]);
+
     return (
       <>
         <RuleDownloader
@@ -251,7 +263,7 @@ export const AllRules = React.memo<AllRulesProps>(
               />
             </HeaderSection>
 
-            {(loading || isLoadingRules || loadingRuleIds.length > 0) && !initLoading && (
+            {(loading || isLoadingRules || isLoadingAnActionOnRule) && !initLoading && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
             {rulesCustomInstalled != null &&

@@ -81,12 +81,13 @@ export const allRulesReducer = (state: State, action: Action): State => {
           }
           return newRules;
         }, state.rules);
-
+        const updatedRuleIds = action.rules.map(r => r.id);
+        const newLoadingRuleIds = state.loadingRuleIds.filter(id => !updatedRuleIds.includes(id));
         return {
           ...state,
           rules: updatedRules,
-          loadingRuleIds: [],
-          loadingRulesAction: null,
+          loadingRuleIds: newLoadingRuleIds,
+          loadingRulesAction: newLoadingRuleIds.length === 0 ? null : state.loadingRulesAction,
         };
       }
       return state;
