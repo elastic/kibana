@@ -6,7 +6,9 @@
 
 jest.mock('../../../kibana_services', () => {});
 
+// @ts-ignore
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
+// @ts-ignore
 import { RENDER_AS } from './render_as';
 
 describe('convertCompositeRespToGeoJson', () => {

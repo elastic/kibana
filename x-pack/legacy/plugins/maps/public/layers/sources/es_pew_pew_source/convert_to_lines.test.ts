@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { convertToLines } from './convert_to_lines';
 
 const esResponse = {
