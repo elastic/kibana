@@ -49,7 +49,6 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
     body: JSON.stringify(rule),
     signal,
   });
-
   await throwIfNotOk(response);
   return response.json();
 };
