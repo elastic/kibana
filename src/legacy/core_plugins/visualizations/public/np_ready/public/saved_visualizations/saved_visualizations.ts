@@ -19,18 +19,15 @@
 import {
   SavedObjectLoader,
   SavedObjectKibanaServices,
-} from '../../../../../plugins/saved_objects/public';
-
-// @ts-ignore
+} from '../../../../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
-import { createVisualizeEditUrl } from '../../../kibana/public/visualize';
-import { TypesStart } from '../np_ready/public/types';
+import { TypesStart } from '../vis_types';
 
 export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
   visualizationTypes: TypesStart;
 }
-
+export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
 export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 
@@ -59,7 +56,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
       source.icon = source.type.icon;
       source.image = source.type.image;
       source.typeTitle = source.type.title;
-      source.editUrl = `#${createVisualizeEditUrl(id)}`;
+      source.editUrl = `#/visualize/edit/${id}`;
 
       return source;
     };

@@ -18,6 +18,13 @@
  */
 
 import _ from 'lodash';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../../../../core/public';
+import { SavedObjectLoader } from '../../../../../../../plugins/saved_objects/public';
+import { VisTypeAlias } from '../vis_types';
+import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 
 /**
  * Search for visualizations and convert them into a list display-friendly format.
@@ -28,34 +35,42 @@ export async function findListItems({
   size,
   savedObjectsClient,
   mapSavedObjectApiHits,
+}: {
+  search: string;
+  size: number;
+  visTypes: VisTypeAlias[];
+  savedObjectsClient: SavedObjectsClientContract;
+  mapSavedObjectApiHits: SavedObjectLoader['mapSavedObjectApiHits'];
 }) {
-  const extensions = _.compact(
-    visTypes.map(v => v.appExtensions && v.appExtensions.visualizations)
-  );
+  const extensions = visTypes
+    .map(v => v.appExtensions?.visualizations)
+    .filter(Boolean) as VisualizationsAppExtension[];
   const extensionByType = extensions.reduce((acc, m) => {
-    return m.docTypes.reduce((_acc, type) => {
+    return m!.docTypes.reduce((_acc, type) => {
       acc[type] = m;
       return acc;
     }, acc);
-  }, {});
-  const searchOption = (field, ...defaults) =>
+  }, {} as { [visType: string]: VisualizationsAppExtension });
+  const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions)
       .pluck(field)
       .concat(defaults)
       .compact()
       .flatten()
       .uniq()
-      .value();
+      .value() as string[];
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),
     search: search ? `${search}*` : undefined,
     perPage: size,
     page: 1,
-    defaultSearchOperator: 'AND',
+    defaultSearchOperator: 'AND' as 'AND',
   };
 
-  const { total, savedObjects } = await savedObjectsClient.find(searchOptions);
+  const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
+    searchOptions
+  );
 
   return {
     total,
