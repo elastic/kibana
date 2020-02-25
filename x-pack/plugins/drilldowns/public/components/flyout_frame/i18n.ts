@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { DrilldownHelloBar } from '..';
+import { i18n } from '@kbn/i18n';
 
-storiesOf('components/DrilldownHelloBar', module).add('default', () => {
-  return <DrilldownHelloBar />;
+export const txtClose = i18n.translate('xpack.drilldowns.components.FlyoutFrame.Close', {
+  defaultMessage: 'Close',
 });

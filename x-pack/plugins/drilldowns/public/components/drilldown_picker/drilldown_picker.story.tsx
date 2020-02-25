@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DrilldownPicker } from '..';
+import { DrilldownPicker } from '.';
 
 storiesOf('components/DrilldownPicker', module).add('default', () => {
   return <DrilldownPicker />;
