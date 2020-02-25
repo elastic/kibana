@@ -77,7 +77,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
 
-                  . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER}
+                  . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
                 """,
                   "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"

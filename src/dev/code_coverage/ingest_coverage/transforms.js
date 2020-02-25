@@ -103,6 +103,16 @@ export const coveredFilePath = obj => {
     .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
 };
 
+export const ciRunUrl = log => obj => {
+  const ciRunUrl = process.env.CI_RUN_URL || 'CI RUN URL NOT PROVIDED';
+  log.verbose(`\n### ciRunUrl: \n\t${ciRunUrl}`)
+
+  return {
+    ...obj,
+    ciRunUrl,
+  }
+};
+
 export const testRunner = obj => {
   const { coverageSummaryPath } = obj;
 

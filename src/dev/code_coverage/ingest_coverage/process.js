@@ -31,6 +31,7 @@ import {
   distro,
   buildId,
   coveredFilePath,
+  ciRunUrl,
 } from './transforms';
 import { resolve } from "path";
 
@@ -61,6 +62,7 @@ export default ({ coverageSummaryPath }, log) => {
     .pipe(
       map(prokStatsTimeStampBuildId),
       map(coveredFilePath),
+      map(ciRunUrl(log)),
       map(addCoverageSummaryPathAndDistro),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
