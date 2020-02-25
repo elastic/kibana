@@ -347,7 +347,7 @@ export function QueryBarTopRow(props: Props) {
       className={classes}
       responsive={!!props.showDatePicker}
       gutterSize="s"
-      justifyContent="flexEnd"
+      justifyContent="flexStart"
     >
       {renderQueryInput()}
       {renderSharingMetaFields()}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 
 import {
   EuiButton,
@@ -60,10 +60,19 @@ export enum ExportUrlAsType {
 interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
+  showTopNavMenu: boolean;
+  showQueryInput: boolean;
+  showDatePicker: boolean;
+  showFilterBar: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
 }
+
+type UrlParams = Pick<
+  State,
+  'showTopNavMenu' | 'showQueryInput' | 'showDatePicker' | 'showFilterBar'
+>;
 
 export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
@@ -77,6 +86,10 @@ export class UrlPanelContent extends Component<Props, State> {
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
+      showTopNavMenu: false,
+      showQueryInput: false,
+      showDatePicker: false,
+      showFilterBar: true,
       isCreatingShortUrl: false,
       url: '',
     };
@@ -102,6 +115,10 @@ export class UrlPanelContent extends Component<Props, State> {
           {this.renderExportAsRadioGroup()}
 
           {this.renderShortUrlSwitch()}
+          {this.renderTopNavMenuSwitch()}
+          {this.renderQueryInputSwitch()}
+          {this.renderDatePickerSwitch()}
+          {this.renderFilterBarSwitch()}
 
           <EuiSpacer size="m" />
 
@@ -195,13 +212,25 @@ export class UrlPanelContent extends Component<Props, State> {
     return url;
   };
 
-  private makeUrlEmbeddable = (url: string) => {
-    const embedQueryParam = '?embed=true';
+  private getEmbedQueryParams = (): string => {
+    return [
+      ['&show-top-nav-menu=true', this.state.showTopNavMenu],
+      ['&show-query-input=true', this.state.showQueryInput],
+      ['&show-date-picker=true', this.state.showDatePicker],
+      ['&hide-filter-bar=true', !this.state.showFilterBar], // Inverted to keep default behaviour for old links
+    ].reduce(
+      (accumulator, [queryParam, include]) => (include ? accumulator + queryParam : accumulator),
+      '?embed=true'
+    );
+  };
+
+  private makeUrlEmbeddable = (url: string): string => {
     const urlHasQueryString = url.indexOf('?') !== -1;
+    const embedQueryParams = this.getEmbedQueryParams();
     if (urlHasQueryString) {
-      return url.replace('?', `${embedQueryParam}&`);
+      return url.replace('?', `${embedQueryParams}&`);
     }
-    return `${url}${embedQueryParam}`;
+    return `${url}${embedQueryParams}`;
   };
 
   private makeIframeTag = (url?: string) => {
@@ -285,6 +314,11 @@ export class UrlPanelContent extends Component<Props, State> {
         );
       }
     }
+  };
+
+  private handleUrlParamChange = (param: keyof UrlParams) => (evt: EuiSwitchEvent): void => {
+    const stateUpdate: Partial<UrlParams> = { [param]: evt.target.checked };
+    this.setState(stateUpdate as State, this.setUrl);
   };
 
   private renderExportUrlAsOptions = () => {
@@ -393,6 +427,122 @@ export class UrlPanelContent extends Component<Props, State> {
 
     return (
       <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderTopNavMenuSwitch = (): ReactElement | void => {
+    if (!this.props.isEmbedded) {
+      return;
+    }
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.topNavMenuLabel" defaultMessage="Show top nav menu" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.showTopNavMenu}
+        onChange={this.handleUrlParamChange('showTopNavMenu')}
+        data-test-subj="topNavMenuSwitch"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.topNavMenuHelpText"
+        defaultMessage="Display the top nav menu UI"
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="showTopNavMenu">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderQueryInputSwitch = (): ReactElement | void => {
+    if (!this.props.isEmbedded) {
+      return;
+    }
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.queryInputLabel" defaultMessage="Show query input" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.showQueryInput}
+        onChange={this.handleUrlParamChange('showQueryInput')}
+        data-test-subj="queryInputSwitch"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.queryInputHelpText"
+        defaultMessage="Display the query input UI"
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="showQueryInput">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderDatePickerSwitch = (): ReactElement | void => {
+    if (!this.props.isEmbedded) {
+      return;
+    }
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.datePickerLabel" defaultMessage="Show date picker" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.showDatePicker}
+        onChange={this.handleUrlParamChange('showDatePicker')}
+        data-test-subj="datePickerSwitch"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.datePickerHelpText"
+        defaultMessage="Display the date picker UI"
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="showDatePicker">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderFilterBarSwitch = (): ReactElement | void => {
+    if (!this.props.isEmbedded) {
+      return;
+    }
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.filterBarLabel" defaultMessage="Show filter bar" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.showFilterBar}
+        onChange={this.handleUrlParamChange('showFilterBar')}
+        data-test-subj="filterBarSwitch"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.filterBarHelpText"
+        defaultMessage="Display the filter bar UI"
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="showFilterBar">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );

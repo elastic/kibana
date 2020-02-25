@@ -27,6 +27,8 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
+import { parse } from 'url';
+
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -133,8 +135,20 @@ export class DashboardAppController {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    let showTopNavMenu = true;
     let showSearchBar = true;
     let showQueryBar = true;
+    let showQueryInput = true;
+    let showDatePicker = true;
+
+    // url param rules should only apply when embedded (e.g. url?embed=true)
+    const shouldForceDisplay = (param: string): boolean =>
+      chrome.isEmbedded && param in parse(location.hash.slice(1), true).query;
+
+    const forceShowTopNavMenu = shouldForceDisplay('show-top-nav-menu');
+    const forceShowQueryInput = shouldForceDisplay('show-query-input');
+    const forceShowDatePicker = shouldForceDisplay('show-date-picker');
+    const forceHideFilterBar = shouldForceDisplay('hide-filter-bar');
 
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -252,7 +266,8 @@ export class DashboardAppController {
     };
 
     const showFilterBar = () =>
-      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
+      !forceHideFilterBar &&
+      ($scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode());
 
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
@@ -595,11 +610,14 @@ export class DashboardAppController {
       const screenTitle = dashboardStateManager.getTitle();
       return {
         appName: 'dashboard',
-        config: $scope.isVisible ? $scope.topNavMenu : undefined,
+        config: showTopNavMenu ? $scope.topNavMenu : undefined,
         className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
         screenTitle,
+        showTopNavMenu,
         showSearchBar,
         showQueryBar,
+        showQueryInput,
+        showDatePicker,
         showFilterBar: showFilterBar(),
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
@@ -798,7 +816,6 @@ export class DashboardAppController {
     } = {};
     navActions[TopNavIds.FULL_SCREEN] = () => {
       dashboardStateManager.setFullScreenMode(true);
-      showQueryBar = false;
       updateNavBar();
     };
     navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
@@ -954,9 +971,15 @@ export class DashboardAppController {
 
     const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
+        const shouldShow = (forceShow: boolean) => (forceShow || isVisible) && !dashboardStateManager.getFullScreenMode();
+
         $scope.isVisible = isVisible;
-        showSearchBar = isVisible || showFilterBar();
-        showQueryBar = !dashboardStateManager.getFullScreenMode() && isVisible;
+        showTopNavMenu = shouldShow(forceShowTopNavMenu);
+        showQueryInput = shouldShow(forceShowQueryInput);
+        showDatePicker = shouldShow(forceShowDatePicker);
+        showQueryBar = showQueryInput || showDatePicker;
+        showSearchBar = showQueryBar || showFilterBar();
+
         updateNavBar();
       });
     });

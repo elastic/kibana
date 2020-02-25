@@ -28,6 +28,10 @@ import { ExportUrlAsType, UrlPanelContent } from './url_panel_content';
 import { act } from 'react-dom/test-utils';
 import { shortenUrl } from '../lib/url_shortener';
 
+const TOP_NAV_MENU_SWITCH_SELECTOR = '[data-test-subj="topNavMenuSwitch"]';
+const QUERY_INPUT_SWITCH_SELECTOR = '[data-test-subj="queryInputSwitch"]';
+const DATE_PICKER_SWITCH_SELECTOR = '[data-test-subj="datePickerSwitch"]';
+const FILTER_BAR_SWITCH_SELECTOR = '[data-test-subj="filterBarSwitch"]';
 const defaultProps = {
   allowShortUrl: true,
   objectType: 'dashboard',
@@ -201,4 +205,22 @@ describe('share url panel content', () => {
       expect(component.exists(EuiSwitch)).toEqual(false);
     });
   });
+});
+
+test('should show embedded option switches when embedded link', () => {
+  const component = shallow(<UrlPanelContent {...defaultProps} isEmbedded={true} objectId="id1" />);
+  expect(component.find(TOP_NAV_MENU_SWITCH_SELECTOR).length).toBe(1);
+  expect(component.find(QUERY_INPUT_SWITCH_SELECTOR).length).toBe(1);
+  expect(component.find(DATE_PICKER_SWITCH_SELECTOR).length).toBe(1);
+  expect(component.find(FILTER_BAR_SWITCH_SELECTOR).length).toBe(1);
+  expect(component).toMatchSnapshot();
+});
+
+test('should not show embedded option switches when permalink', () => {
+  const component = shallow(<UrlPanelContent {...defaultProps} objectId="id1" />);
+  expect(component.find(TOP_NAV_MENU_SWITCH_SELECTOR).length).toBe(0);
+  expect(component.find(QUERY_INPUT_SWITCH_SELECTOR).length).toBe(0);
+  expect(component.find(DATE_PICKER_SWITCH_SELECTOR).length).toBe(0);
+  expect(component.find(FILTER_BAR_SWITCH_SELECTOR).length).toBe(0);
+  expect(component).toMatchSnapshot();
 });
