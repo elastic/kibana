@@ -20,8 +20,7 @@
 import { cloneDeep } from 'lodash';
 
 import { Vis, VisState } from 'src/legacy/core_plugins/visualizations/public';
-
-import { createAggConfigs, IAggConfig, AggGroupNames } from '../../../legacy_imports';
+import { createAggConfigs, AggGroupNames } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
@@ -33,8 +32,9 @@ function initEditorState(vis: Vis) {
 function editorStateReducer(state: VisState, action: EditorAction): VisState {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
-      const payloadAggConfig = action.payload as IAggConfig;
-      const aggConfig = state.aggs.createAggConfig(payloadAggConfig, {
+      const { schema } = action.payload;
+      const defaultConfig = (schema as any).defaults.slice(0, schema.max);
+      const aggConfig = state.aggs.createAggConfig(defaultConfig, {
         addToAggConfigs: false,
       });
       aggConfig.brandNew = true;
@@ -42,7 +42,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
@@ -65,7 +65,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
@@ -90,7 +90,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
@@ -131,7 +131,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
@@ -143,7 +143,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
@@ -165,7 +165,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
       };
     }
 
