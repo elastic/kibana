@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import { Dispatch } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal';
 
 import { KueryFilterQuery } from '../../store';
 import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../store/timeline/actions';
@@ -29,7 +29,7 @@ export const useUpdateKql = ({
   timelineId,
 }: UseUpdateKqlProps): RefetchKql => {
   const updateKql: RefetchKql = (dispatch: Dispatch) => {
-    if (kueryFilterQueryDraft != null && !isEqual(kueryFilterQuery, kueryFilterQueryDraft)) {
+    if (kueryFilterQueryDraft != null && !deepEqual(kueryFilterQuery, kueryFilterQueryDraft)) {
       if (storeType === 'timelineType' && timelineId != null) {
         dispatch(
           dispatchApplyTimelineFilterQuery({
