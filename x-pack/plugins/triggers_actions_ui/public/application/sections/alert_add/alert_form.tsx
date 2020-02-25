@@ -179,18 +179,6 @@ export const AlertForm = ({
     );
   });
 
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  );
-
   const alertTypeDetails = (
     <Fragment>
       <EuiHorizontalRule />
@@ -253,7 +241,6 @@ export const AlertForm = ({
           }
           http={http}
           actionTypeRegistry={actionTypeRegistry}
-          actionsErrors={actionsErrors}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
           toastNotifications={toastNotifications}
         />

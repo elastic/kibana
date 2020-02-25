@@ -44,12 +44,6 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  actionsErrors: Record<
-    string,
-    {
-      errors: IErrorObject;
-    }
-  >;
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
@@ -72,7 +66,6 @@ export const ActionForm = ({
   setActionParamsProperty,
   http,
   actionTypeRegistry,
-  actionsErrors,
   actionTypes,
   messageVariables,
   defaultActionMessage,
@@ -136,6 +129,18 @@ export const ActionForm = ({
       }
     }
   }
+
+  const actionsErrors = actions.reduce(
+    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
+      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
+      if (!actionType) {
+        return { ...acc };
+      }
+      const actionValidationErrors = actionType.validateParams(alertAction.params);
+      return { ...acc, [alertAction.id]: actionValidationErrors };
+    },
+    {}
+  ) as Record<string, { errors: IErrorObject }>;
 
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiKeyPadMenuItem, EuiIcon } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionForm } from '../../../../../../../plugins/triggers_actions_ui/public';
 import {
-  ActionTypeIndex,
   AlertAction,
+  Alert,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import * as i18nCommon from '../../common/translations';
@@ -32,9 +32,16 @@ const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks, triggers_actions_ui } = useKibana().services;
   const basePath = http.basePath.get();
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-  // this is for example, but in real code it should be a property of Alert object
-  const [actions, setActions] = useState<AlertAction[]>([]);
+  const [alert, setAlert] = useState<Alert>(({
+    params: {},
+    consumer: 'siem',
+    alertTypeId: '.siem',
+    schedule: {
+      interval: '1m',
+    },
+    actions: [],
+    tags: [],
+  } as unknown) as Alert);
 
   return (
     <>
@@ -52,21 +59,22 @@ const OverviewEmptyComponent: React.FC = () => {
       />
       <EuiSpacer size="xl" />
       <ActionForm
-        actions={actions}
+        actions={alert.actions}
         messageVariables={['test var1', 'test var2']}
         defaultActionGroupId={'default'}
         setActionIdByIndex={(id: string, index: number) => {
-          actions[index].id = id;
+          alert.actions[index].id = id;
         }}
-        setAlertProperty={(updatedActions: AlertAction[]) => setActions(updatedActions)}
+        setAlertProperty={(updatedActions: AlertAction[]) => {
+          setAlert({ ...alert, actions: updatedActions });
+        }}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setActionParamsProperty={(key: string, value: any, index: number) =>
-          (actions[index] = { ...actions[index], [key]: value })
+          (alert.actions[index] = { ...alert.actions[index], [key]: value })
         }
         http={http}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={actionTypes}
-        actionsErrors={{}}
         defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
       />
     </>
