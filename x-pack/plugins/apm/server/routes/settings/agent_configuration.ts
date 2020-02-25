@@ -9,15 +9,19 @@ import Boom from 'boom';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
-import { searchConfigurations } from '../../lib/settings/agent_configuration/search';
+import { searchConfigurations } from '../../lib/settings/agent_configuration/search_configurations';
+import { findExactConfiguration } from '../../lib/settings/agent_configuration/find_exact_configuration';
 import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
 import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
 import { createRoute } from '../create_route';
-import { transactionSampleRateRt } from '../../../common/runtime_types/transaction_sample_rate_rt';
-import { transactionMaxSpansRt } from '../../../common/runtime_types/transaction_max_spans_rt';
 import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
 import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
+import {
+  serviceRt,
+  agentConfigurationIntakeRt
+} from '../../../common/runtime_types/agent_configuration_intake_rt';
+import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
@@ -31,20 +35,34 @@ export const agentConfigurationRoute = createRoute(core => ({
 // delete configuration
 export const deleteAgentConfigurationRoute = createRoute(() => ({
   method: 'DELETE',
-  path: '/api/apm/settings/agent-configuration/{configurationId}',
+  path: '/api/apm/settings/agent-configuration',
   options: {
     tags: ['access:apm', 'access:apm_write']
   },
   params: {
-    path: t.type({
-      configurationId: t.string
+    body: t.type({
+      service: serviceRt
     })
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { configurationId } = context.params.path;
+    const { service } = context.params.body;
+
+    const config = await findExactConfiguration({ service, setup });
+    if (!config) {
+      context.logger.info(
+        `Config was not found for ${service.name}/${service.environment}`
+      );
+
+      throw Boom.notFound();
+    }
+
+    context.logger.info(
+      `Deleting config ${service.name}/${service.environment} (${config._id})`
+    );
+
     return await deleteConfiguration({
-      configurationId,
+      configurationId: config._id,
       setup
     });
   }
@@ -61,23 +79,6 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
     });
   }
 }));
-
-const agentPayloadRt = t.intersection([
-  t.partial({ agent_name: t.string }),
-  t.type({
-    service: t.intersection([
-      t.partial({ name: t.string }),
-      t.partial({ environment: t.string })
-    ])
-  }),
-  t.type({
-    settings: t.intersection([
-      t.partial({ transaction_sample_rate: transactionSampleRateRt }),
-      t.partial({ capture_body: t.string }),
-      t.partial({ transaction_max_spans: transactionMaxSpansRt })
-    ])
-  })
-]);
 
 // get environments for service
 export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
@@ -102,55 +103,47 @@ export const agentConfigurationAgentNameRoute = createRoute(() => ({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
     const agentName = await getAgentNameByService({ serviceName, setup });
-    return agentName;
+    return { agentName };
   }
 }));
 
-export const createAgentConfigurationRoute = createRoute(() => ({
-  method: 'POST',
-  path: '/api/apm/settings/agent-configuration/new',
-  params: {
-    body: agentPayloadRt
-  },
+export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
+  method: 'PUT',
+  path: '/api/apm/settings/agent-configuration',
   options: {
     tags: ['access:apm', 'access:apm_write']
   },
+  params: {
+    query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }),
+    body: agentConfigurationIntakeRt
+  },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const configuration = context.params.body;
+    const { body, query } = context.params;
 
-    // TODO: Remove logger. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-    context.logger.info(
-      `Hitting: /api/apm/settings/agent-configuration/new with ${configuration.service.name}/${configuration.service.environment}`
-    );
-    const res = await createOrUpdateConfiguration({
-      configuration,
+    // if the config already exists, it is fetched and updated
+    // this is to avoid creating two configs with identical service params
+    const config = await findExactConfiguration({
+      service: body.service,
       setup
     });
-    context.logger.info(`Created agent configuration`);
 
-    return res;
-  }
-}));
+    // if the config exists ?overwrite=true is required
+    if (config && !query.overwrite) {
+      throw Boom.badRequest(
+        `A configuration already exists for "${body.service.name}/${body.service.environment}. Use ?overwrite=true to overwrite the existing configuration.`
+      );
+    }
 
-export const updateAgentConfigurationRoute = createRoute(() => ({
-  method: 'PUT',
-  path: '/api/apm/settings/agent-configuration/{configurationId}',
-  options: {
-    tags: ['access:apm', 'access:apm_write']
-  },
-  params: {
-    path: t.type({
-      configurationId: t.string
-    }),
-    body: agentPayloadRt
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { configurationId } = context.params.path;
+    context.logger.info(
+      `${config ? 'Updating' : 'Creating'} config ${body.service.name}/${
+        body.service.environment
+      }`
+    );
+
     return await createOrUpdateConfiguration({
-      configurationId,
-      configuration: context.params.body,
+      configurationId: config?._id,
+      configurationIntake: body,
       setup
     });
   }
@@ -162,41 +155,33 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration/search',
   params: {
     body: t.type({
-      service: t.intersection([
-        t.type({ name: t.string }),
-        t.partial({ environment: t.string })
-      ]),
+      service: serviceRt,
       etag: t.string
     })
   },
   handler: async ({ context, request }) => {
-    const { body } = context.params;
-
-    // TODO: Remove logger. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-    context.logger.info(
-      `Hitting: /api/apm/settings/agent-configuration/search for ${body.service.name}/${body.service.environment}`
-    );
+    const { service, etag } = context.params.body;
 
     const setup = await setupRequest(context, request);
     const config = await searchConfigurations({
-      serviceName: body.service.name,
-      environment: body.service.environment,
+      service,
       setup
     });
 
     if (!config) {
       context.logger.info(
-        `Config was not found for ${body.service.name}/${body.service.environment}`
+        `Config was not found for ${service.name}/${service.environment}`
       );
-      throw new Boom('Not found', { statusCode: 404 });
+      throw Boom.notFound();
     }
 
     context.logger.info(
-      `Config was found for ${body.service.name}/${body.service.environment}`
+      `Config was found for ${service.name}/${service.environment}`
     );
 
     // update `applied_by_agent` field if etags match
-    if (body.etag === config._source.etag && !config._source.applied_by_agent) {
+    // this happens in the background and doesn't block the response
+    if (etag === config._source.etag && !config._source.applied_by_agent) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
