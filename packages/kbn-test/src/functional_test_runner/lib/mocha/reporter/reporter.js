@@ -29,13 +29,13 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 
-// import Testrail from 'testrail-api';
-//
-// const testrail = new Testrail({
-//   host: 'https://elastic.testrail.io',
-//   user: '',
-//   password: '',
-// });
+import Testrail from 'testrail-api';
+
+const testrail = new Testrail({
+  host: 'https://elastic.testrail.io',
+  user: '',
+  password: '',
+});
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -217,12 +217,24 @@ export function MochaReporterProvider({ getService }) {
       writeEpilogue(log, this.stats);
 
       if (config.get('testrailOpts.testrail')) {
-        // const projectId = 2;
-        // const suiteId = 23;
+        const projectId = 2;
+        const suiteId = 23;
+        const testRunName = 'Test run A1';
+        const testRunDescription = 'A test';
         console.log(results);
-        // create a testrun in testrail
-
-        // write results to testrail
+        testrail
+          .addRun(projectId, {
+            suite_id: suiteId,
+            name: testRunName,
+            description: testRunDescription,
+            include_all: true,
+            milestone_id: 0,
+            assignedto_id: 16,
+            case_ids: [471],
+          })
+          .then(function(response) {
+            console.log(response.id);
+          });
       }
     };
   };
