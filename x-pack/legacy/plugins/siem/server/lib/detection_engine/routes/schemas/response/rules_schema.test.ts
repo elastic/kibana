@@ -14,7 +14,7 @@ import { getPaths } from './utils';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-describe('create_rules_schema_output', () => {
+describe('rules_schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getBaseResponsePayload();
 

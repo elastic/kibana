@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck } from './exact_check';
 import { foldLeftRight, getErrorPayload } from './__mocks__/utils';
 import { getPaths } from './utils';
-import { errorSchema } from './error_schema';
+import { errorSchema, ErrorSchema } from './error_schema';
 
 describe('error_schema', () => {
   test('it should validate an error with a UUID given for id', () => {
@@ -18,6 +18,7 @@ describe('error_schema', () => {
     const decoded = errorSchema.decode(getErrorPayload());
     const checked = exactCheck(error, decoded);
     const message = pipe(checked, foldLeftRight);
+
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(error);
   });
@@ -27,7 +28,33 @@ describe('error_schema', () => {
     const decoded = errorSchema.decode(error);
     const checked = exactCheck(error, decoded);
     const message = pipe(checked, foldLeftRight);
+
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(error);
+  });
+
+  test('it should NOT validate an error when it has extra data next to a valid payload element', () => {
+    type InvalidError = ErrorSchema & { invalid_extra_data?: string };
+    const error: InvalidError = getErrorPayload();
+    error.invalid_extra_data = 'invalid_extra_data';
+    const decoded = errorSchema.decode(error);
+    const checked = exactCheck(error, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_extra_data"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate an error when it has required elements deleted from it', () => {
+    const error = getErrorPayload();
+    delete error.error;
+    const decoded = errorSchema.decode(error);
+    const checked = exactCheck(error, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "error"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 });
