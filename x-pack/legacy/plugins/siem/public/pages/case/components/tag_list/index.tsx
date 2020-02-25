@@ -109,14 +109,22 @@ export const TagList = React.memo(({ tags, isEditTags, iconAction, isLoading }: 
               </Form>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton fill onClick={onSubmit}>
-                {i18n.SUBMIT}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => onActionClick(iconAction.onClick, false)}>
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="secondary" fill iconType="save" onClick={onSubmit} size="s">
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    onClick={() => onActionClick(iconAction.onClick, false)}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
