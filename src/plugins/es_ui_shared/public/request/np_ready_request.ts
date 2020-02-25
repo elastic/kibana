@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
@@ -78,6 +78,8 @@ export const useRequest = (
     deserializer = (data: any): any => data,
   }: UseRequestConfig
 ): UseRequestResponse => {
+  const sendRequestRef = useRef<() => Promise<SendRequestResponse>>();
+
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -102,7 +104,10 @@ export const useRequest = (
 
     // Set new interval
     if (pollInterval.current) {
-      pollIntervalId.current = setTimeout(_sendRequest, pollInterval.current);
+      pollIntervalId.current = setTimeout(
+        () => (sendRequestRef.current ?? _sendRequest)(),
+        pollInterval.current
+      );
     }
   };
 
@@ -145,11 +150,17 @@ export const useRequest = (
   };
 
   useEffect(() => {
-    _sendRequest();
-    // To be functionally correct we'd send a new request if the method, path, or body changes.
+    sendRequestRef.current = _sendRequest;
+  }, [_sendRequest]);
+
+  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+
+  useEffect(() => {
+    (sendRequestRef.current ?? _sendRequest)();
+    // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
-    // object even if its shape hasn't changed, so for now we're just watching the path.
-  }, [path]);
+    // object even if its shape hasn't changed, so for now we're just watching the path and the query.
+  }, [path, stringifiedQuery]);
 
   useEffect(() => {
     scheduleRequest();
@@ -168,6 +179,6 @@ export const useRequest = (
     isLoading,
     error,
     data,
-    sendRequest: _sendRequest, // Gives the user the ability to manually request data
+    sendRequest: sendRequestRef.current ?? _sendRequest, // Gives the user the ability to manually request data
   };
 };

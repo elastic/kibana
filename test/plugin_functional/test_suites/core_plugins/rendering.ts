@@ -69,7 +69,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Talked to @dover, he aggreed we can skip these tests that are unexpectedly flaky
+  describe.skip('rendering service', () => {
     it('renders "core" application', async () => {
       await navigateTo('/render/core');
 

@@ -25,7 +25,14 @@ import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
+import {
+  Field,
+  Form,
+  FormDataProvider,
+  getUseField,
+  UseField,
+  useForm,
+} from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
 

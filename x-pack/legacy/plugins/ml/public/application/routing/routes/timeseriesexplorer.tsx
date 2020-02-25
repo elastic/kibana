@@ -35,7 +35,7 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
-import { useMlKibana } from '../../contexts/kibana';
+import { useTimefilter } from '../../contexts/kibana';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
@@ -88,8 +88,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
-  const { services } = useMlKibana();
-  const { timefilter } = services.data.query.timefilter;
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -105,11 +104,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       }
     }
   }, [refresh?.lastRefresh]);
-
-  useEffect(() => {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-  }, []);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.

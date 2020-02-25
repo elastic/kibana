@@ -44,6 +44,8 @@ const validConfigOptions: string[] = [
   'monitoring.ui.container.logstash.enabled',
   'monitoring.tests.cloud_detector.enabled',
   'monitoring.kibana.collection.interval',
+  'monitoring.elasticsearch.hosts',
+  'monitoring.elasticsearch',
   'monitoring.ui.elasticsearch.hosts',
   'monitoring.ui.elasticsearch',
   'monitoring.xpack_api_polling_frequency_millis',
@@ -78,7 +80,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
     uiExports: getUiExports(),
     deprecations,
 
-    init(server: Server) {
+    async init(server: Server) {
       const serverConfig = server.config();
       const { getOSInfo, plugins, injectUiAppVars } = server as typeof server & { getOSInfo?: any };
       const log = (...args: Parameters<typeof server.log>) => server.log(...args);
@@ -107,15 +109,16 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
       };
 
       const legacyPlugins = plugins as Partial<typeof plugins> & { infra?: InfraPlugin };
-      const { xpack_main, elasticsearch, infra, alerting } = legacyPlugins;
+      const { xpack_main, elasticsearch, infra } = legacyPlugins;
       const {
         core: coreSetup,
-        plugins: { usageCollection, licensing },
+        plugins: { usageCollection, licensing, alerting },
       } = server.newPlatform.setup;
 
       const pluginsSetup: PluginsSetup = {
         usageCollection,
         licensing,
+        alerting,
       };
 
       const __LEGACY: LegacySetup = {
@@ -124,11 +127,11 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
           xpack_main,
           elasticsearch,
           infra,
-          alerting,
         },
       };
 
-      new Plugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      const plugin = new Plugin();
+      await plugin.setup(coreSetup, pluginsSetup, __LEGACY);
     },
 
     postInit(server: Server) {

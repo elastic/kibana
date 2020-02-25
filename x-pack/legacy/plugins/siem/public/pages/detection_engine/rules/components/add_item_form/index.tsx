@@ -18,7 +18,7 @@ import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 're
 import styled from 'styled-components';
 
 import * as RuleI18n from '../../translations';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 interface AddItemProps {
   addText: string;

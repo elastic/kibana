@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
@@ -35,7 +37,6 @@ export {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionDataHandler } from './execute';
 export { ExpressionRenderHandler } from './render';
 export {
   AnyExpressionFunctionDefinition,
@@ -46,6 +47,7 @@ export {
   DatatableColumnType,
   DatatableRow,
   Execution,
+  ExecutionContract,
   ExecutionContainer,
   ExecutionContext,
   ExecutionParams,

@@ -40,7 +40,6 @@ import {
   ActionTypeIndex,
   ActionConnector,
   AlertTypeIndex,
-  ActionGroup,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
@@ -119,7 +118,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<ActionGroup | undefined>(undefined);
+  const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
@@ -166,13 +165,14 @@ export const AlertForm = ({
           ],
           name: 'threshold',
           actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
+          defaultActionGroupId: 'alert',
         });
         const index: AlertTypeIndex = {};
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
         }
-        if (alert.alertTypeId) {
-          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
+        if (alert.alertTypeId && index[alert.alertTypeId]) {
+          setDefaultActionGroupId(index[alert.alertTypeId].defaultActionGroupId);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -251,6 +251,14 @@ export const AlertForm = ({
     : null;
 
   function addActionType(actionTypeModel: ActionTypeModel) {
+    if (!defaultActionGroupId) {
+      toastNotifications!.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+          defaultMessage: 'Unable to add action, because default action group is not defined',
+        }),
+      });
+      return;
+    }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id
@@ -266,7 +274,7 @@ export const AlertForm = ({
         alert.actions.push({
           id: '',
           actionTypeId: actionTypeModel.id,
-          group: defaultActionGroup?.id ?? 'Alert',
+          group: defaultActionGroupId,
           params: {},
         });
         setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
@@ -278,7 +286,7 @@ export const AlertForm = ({
       alert.actions.push({
         id: '',
         actionTypeId: actionTypeModel.id,
-        group: defaultActionGroup?.id ?? 'Alert',
+        group: defaultActionGroupId,
         params: {},
       });
       setActionProperty('id', alert.actions.length, alert.actions.length - 1);
@@ -294,12 +302,8 @@ export const AlertForm = ({
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
-          if (
-            alertTypesIndex &&
-            alertTypesIndex[item.id] &&
-            alertTypesIndex[item.id].actionGroups.length > 0
-          ) {
-            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0]);
+          if (alertTypesIndex && alertTypesIndex[item.id]) {
+            setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
           }
         }}
       >
@@ -356,7 +360,7 @@ export const AlertForm = ({
         id,
       }));
     const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
+    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     const actionParamsErrors: { errors: IErrorObject } =
       Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
@@ -368,7 +372,7 @@ export const AlertForm = ({
         id={index.toString()}
         className="euiAccordionForm"
         buttonContentClassName="euiAccordionForm__button"
-        data-test-subj="alertActionAccordion"
+        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -465,7 +469,9 @@ export const AlertForm = ({
             errors={actionParamsErrors.errors}
             editAction={setActionParamsProperty}
             messageVariables={
-              alertTypesIndex ? alertTypesIndex[alert.alertTypeId].actionVariables : undefined
+              alertTypesIndex && alertTypesIndex[alert.alertTypeId]
+                ? alertTypesIndex[alert.alertTypeId].actionVariables
+                : undefined
             }
             defaultMessage={alertTypeModel?.defaultActionMessage ?? undefined}
           />
@@ -479,7 +485,7 @@ export const AlertForm = ({
       ? actionTypesIndex[actionItem.actionTypeId].name
       : actionItem.actionTypeId;
     const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
+    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
     return (
       <EuiAccordion
         initialIsOpen={true}
@@ -487,7 +493,7 @@ export const AlertForm = ({
         id={index.toString()}
         className="euiAccordionForm"
         buttonContentClassName="euiAccordionForm__button"
-        data-test-subj="alertActionAccordion"
+        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
