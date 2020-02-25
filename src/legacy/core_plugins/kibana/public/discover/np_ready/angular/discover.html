@@ -9,14 +9,11 @@
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
     index-patterns="[indexPattern]"
-
     query="state.query"
     on-query-submit="updateQuery"
-	
     show-save-query="showSaveQuery"
     saved-query-id="state.savedQuery"
     on-saved-query-id-change="updateSavedQueryId"
-
     use-default-behaviors="true"
   >
   </kbn-top-nav>
@@ -211,6 +208,7 @@
                   on-change-sort-order="setSortOrder"
                   on-move-column="moveColumn"
                   on-remove-column="removeColumn"
+                  data-test-subj="discoverDocTable"
                 ></doc-table>
 
                 <a tabindex="0" id="discoverBottomMarker"></a>

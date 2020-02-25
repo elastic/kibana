@@ -22,15 +22,19 @@ import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
-import { useAppDependencies } from '../../app_context';
 import { createAlert } from '../../lib/alert_api';
 
-export const AlertAdd = () => {
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
+interface AlertAddProps {
+  consumer: string;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
+}
+
+export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddProps) => {
   const initialAlert = ({
     params: {},
-    consumer: 'alerting',
-    alertTypeId: null,
+    consumer,
+    alertTypeId,
     schedule: {
       interval: '1m',
     },
@@ -45,7 +49,15 @@ export const AlertAdd = () => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const { addFlyoutVisible, setAddFlyoutVisibility, reloadAlerts } = useAlertsContext();
+  const {
+    addFlyoutVisible,
+    setAddFlyoutVisibility,
+    reloadAlerts,
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+  } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
@@ -63,7 +75,7 @@ export const AlertAdd = () => {
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
   const errors = {
-    ...(alertType ? alertType.validate(alert).errors : []),
+    ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
@@ -91,14 +103,16 @@ export const AlertAdd = () => {
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await createAlert({ http, alert });
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
-          defaultMessage: "Saved '{alertName}'",
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
+      if (toastNotifications) {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
+            defaultMessage: "Saved '{alertName}'",
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+      }
       return newAlert;
     } catch (errorRes) {
       setServerError(errorRes);
@@ -126,7 +140,13 @@ export const AlertAdd = () => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AlertForm alert={alert} dispatch={dispatch} errors={errors} serverError={serverError} />
+          <AlertForm
+            alert={alert}
+            dispatch={dispatch}
+            errors={errors}
+            serverError={serverError}
+            canChangeTrigger={canChangeTrigger}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -152,7 +172,9 @@ export const AlertAdd = () => {
                   setIsSaving(false);
                   if (savedAlert) {
                     closeFlyout();
-                    reloadAlerts();
+                    if (reloadAlerts) {
+                      reloadAlerts();
+                    }
                   }
                 }}
               >

@@ -5,16 +5,16 @@
  */
 import React from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid } from '@elastic/eui';
-import { ActionType } from '../../../types';
+import { ActionType, ActionTypeModel } from '../../../types';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { useAppDependencies } from '../../app_context';
+import { TypeRegistry } from '../../type_registry';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 }
 
-export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
-  const { actionTypeRegistry } = useAppDependencies();
+export const ActionTypeMenu = ({ onActionTypeChange, actionTypeRegistry }: Props) => {
   const { actionTypesIndex } = useActionsConnectorsContext();
   if (!actionTypesIndex) {
     return null;

@@ -10,6 +10,7 @@ import React, { memo, useState } from 'react';
 
 import {
   IIndexPattern,
+  Filter,
   esFilters,
   FilterManager,
   Query,
@@ -18,7 +19,7 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/searc
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
 import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../shared_imports';
+import { FormSchema } from '../../../../shared_imports';
 import { ListItems } from './types';
 import {
   buildQueryBarDescription,
@@ -97,7 +98,7 @@ const buildListItems = (
     []
   );
 
-export const addFilterStateIfNotThere = (filters: esFilters.Filter[]): esFilters.Filter[] => {
+export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   return filters.map(filter => {
     if (filter.$state == null) {
       return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };

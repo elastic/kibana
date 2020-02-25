@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
@@ -13,6 +13,7 @@ import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../..
 import { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const startAnalytics = async (d: DataFrameAnalyticsListRow) => {
+  const toastNotifications = getToastNotifications();
   try {
     await ml.dataFrameAnalytics.startDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(

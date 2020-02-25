@@ -7,9 +7,9 @@
 import { difference } from 'lodash';
 import { useEffect } from 'react';
 
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
+import { getToastNotifications } from '../../util/dependency_cache';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { useUrlState } from '../../util/url_state';
@@ -27,6 +27,7 @@ function getInvalidJobIds(jobs: MlJobWithTimeRange[], ids: string[]) {
 
 function warnAboutInvalidJobIds(invalidIds: string[]) {
   if (invalidIds.length > 0) {
+    const toastNotifications = getToastNotifications();
     toastNotifications.addWarning(
       i18n.translate('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
         defaultMessage: `Requested
@@ -66,6 +67,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
   useEffect(() => {
     // if there are no valid ids, warn and then select the first job
     if (validIds.length === 0 && jobs.length > 0) {
+      const toastNotifications = getToastNotifications();
       toastNotifications.addWarning(
         i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
           defaultMessage: 'No jobs selected, auto selecting first job',

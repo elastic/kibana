@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { CallAPIOptions } from '../../../../../../../src/core/server';
+import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 
-export type PartialFilter = Partial<esFilters.Filter>;
+export type PartialFilter = Partial<Filter>;
 
 export interface IMitreAttack {
   id: string;
@@ -117,4 +118,9 @@ export type PrepackagedRules = Omit<
   | 'created_at'
 > & { rule_id: string; immutable: boolean };
 
-export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CallWithRequest<T extends Record<string, any>, V> = (
+  endpoint: string,
+  params: T,
+  options?: CallAPIOptions
+) => Promise<V>;

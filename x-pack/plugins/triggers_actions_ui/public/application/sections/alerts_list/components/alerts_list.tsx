@@ -32,7 +32,7 @@ import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
-import { routeToAlertDetails } from '../../../constants';
+import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 const ENTER_KEY = 13;
 
@@ -49,7 +49,17 @@ interface AlertState {
 
 export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
-  const { http, injectedMetadata, toastNotifications, capabilities } = useAppDependencies();
+  const {
+    http,
+    injectedMetadata,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    uiSettings,
+    charts,
+    dataPlugin,
+  } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
@@ -57,7 +67,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
-  const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
+  const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
@@ -385,9 +395,16 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible: alertFlyoutVisible,
           setAddFlyoutVisibility: setAlertFlyoutVisibility,
           reloadAlerts: loadAlertsData,
+          http,
+          actionTypeRegistry,
+          alertTypeRegistry,
+          toastNotifications,
+          uiSettings,
+          charts,
+          dataFieldsFormats: dataPlugin.fieldFormats,
         }}
       >
-        <AlertAdd />
+        <AlertAdd consumer={'alerting'} />
       </AlertsContextProvider>
     </section>
   );

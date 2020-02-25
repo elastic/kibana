@@ -27,6 +27,8 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../shared_imports');
+
 describe('Transform: <PivotPreview />', () => {
   test('Minimal initialization', () => {
     const groupBy: PivotGroupByConfig = {

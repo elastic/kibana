@@ -145,8 +145,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       params = this.props.addBasePath(visType.aliasUrl);
       if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
         params = `${params}?addToDashboard`;
-        this.props.onClose();
       }
+      this.props.onClose();
       window.location.assign(params);
       return;
     }

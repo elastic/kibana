@@ -10,7 +10,6 @@ import React from 'react';
 import { HookWrapper } from '../../mock';
 import { SiemPageName } from '../../pages/home/types';
 import { RouteSpyState } from '../../utils/route/types';
-
 import { CONSTANTS } from './constants';
 import {
   getMockPropsObj,
@@ -22,6 +21,7 @@ import {
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
+import { wait } from '../../lib/helpers';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -34,6 +34,12 @@ const mockRouteSpy: RouteSpyState = {
 };
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
+}));
+
+jest.mock('../super_date_picker', () => ({
+  formatDate: (date: string) => {
+    return 11223344556677;
+  },
 }));
 
 jest.mock('../../lib/kibana', () => ({
@@ -69,19 +75,19 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
-              from: 1558591200000,
+              from: 11223344556677,
               fromStr: 'now-1d/d',
               kind: 'relative',
-              to: 1558677599999,
+              to: 11223344556677,
               toStr: 'now-1d/d',
               id: 'global',
             });
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
-              from: 1558732849370,
+              from: 11223344556677,
               fromStr: 'now-15m',
               kind: 'relative',
-              to: 1558733749370,
+              to: 11223344556677,
               toStr: 'now',
               id: 'timeline',
             });
@@ -160,5 +166,58 @@ describe('UrlStateContainer', () => {
         );
       });
     });
+  });
+
+  describe('After Initialization, keep Relative Date up to date for global only on detections page', () => {
+    test.each(testCases)(
+      '%o',
+      async (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+        mockProps = getMockPropsObj({
+          page,
+          examplePath,
+          namespaceLower,
+          pageName,
+          detailName,
+        }).relativeTimeSearch.undefinedQuery;
+        const wrapper = mount(
+          <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        );
+
+        wrapper.setProps({
+          hookProps: getMockPropsObj({
+            page: CONSTANTS.hostsPage,
+            examplePath: '/hosts',
+            namespaceLower: 'hosts',
+            pageName: SiemPageName.hosts,
+            detailName: undefined,
+          }).relativeTimeSearch.undefinedQuery,
+        });
+        wrapper.update();
+        await wait();
+
+        if (CONSTANTS.detectionsPage === page) {
+          expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
+            from: 11223344556677,
+            fromStr: 'now-1d/d',
+            kind: 'relative',
+            to: 11223344556677,
+            toStr: 'now-1d/d',
+            id: 'global',
+          });
+
+          expect(mockSetRelativeRangeDatePicker.mock.calls[2][0]).toEqual({
+            from: 1558732849370,
+            fromStr: 'now-15m',
+            kind: 'relative',
+            to: 1558733749370,
+            toStr: 'now',
+            id: 'timeline',
+          });
+        } else {
+          // There is no change in url state, so that's expected we only have two actions
+          expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
+        }
+      }
+    );
   });
 });

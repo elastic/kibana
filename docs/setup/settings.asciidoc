@@ -447,7 +447,7 @@ us improve your user experience. Your data is never shared with anyone. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through the *Advanced Settings* in {kib}.
 
-`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+`vis_type_vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.
@@ -457,16 +457,7 @@ Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
-`xpack.actions.enabledActionTypes:`:: *Default: +[ {asterisk} ]+* Set this value
-to an array of action types that are enabled.  An element of `*` indicates all
-action types registered are enabled.  The action types provided by Kibana are:
-`.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`.
-
-`xpack.actions.whitelistedHosts:`:: *Default: +[ {asterisk} ]+* Set this value
-to an array of host names which actions such as email, slack, pagerduty, and
-webhook can connect to.  An element of `*` indicates any host can be connected
-to.  An empty array indicates no hosts can be connected to.
-
+include::{docdir}/settings/alert-action-settings.asciidoc[]
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]

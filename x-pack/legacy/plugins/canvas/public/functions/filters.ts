@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { interpretAst } from 'plugins/interpreter/interpreter';
 // @ts-ignore untyped Elastic lib
 import { registries } from 'plugins/interpreter/registries';
-import { ExpressionFunction } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 // @ts-ignore untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
@@ -43,16 +43,14 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
   });
 }
 
-export function filters(): ExpressionFunction<'filters', null, Arguments, Filter> {
+export function filters(): ExpressionFunctionDefinition<'filters', null, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().filters;
 
   return {
     name: 'filters',
     type: 'filter',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       group: {
         aliases: ['_'],
@@ -67,7 +65,7 @@ export function filters(): ExpressionFunction<'filters', null, Arguments, Filter
         default: false,
       },
     },
-    fn: (_context, { group, ungrouped }) => {
+    fn: (input, { group, ungrouped }) => {
       const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
 
       if (filterList && filterList.length) {

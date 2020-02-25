@@ -4,10 +4,7 @@
     "RDP connections may be made directly to Internet destinations in order to access\n    Windows cloud server instances but such connections are usually made only by engineers.\n    In such cases, only RDP gateways, bastions or jump servers may be expected Internet\n    destinations and can be exempted from this rule. RDP may be required by some work-flows\n    such as remote access and support for specialized software products and servers. Such\n    work-flows are usually known and not unexpected. Usage that is unfamiliar to server or\n    network owners can be unexpected and suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

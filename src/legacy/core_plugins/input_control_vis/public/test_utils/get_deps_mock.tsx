@@ -18,13 +18,12 @@
  */
 
 import React from 'react';
-import { FieldList } from 'src/plugins/data/public';
 import { InputControlVisDependencies } from '../plugin';
 
-const fields: FieldList = [] as any;
+const fields = [] as any;
 fields.push({ name: 'myField' } as any);
 fields.getByName = (name: any) => {
-  return fields.find(({ name: n }) => n === name);
+  return fields.find(({ name: n }: { name: string }) => n === name);
 };
 
 export const getDepsMock = (): InputControlVisDependencies =>

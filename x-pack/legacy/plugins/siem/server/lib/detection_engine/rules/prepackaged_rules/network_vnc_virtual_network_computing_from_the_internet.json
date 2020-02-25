@@ -4,10 +4,7 @@
     "VNC connections may be received directly to Linux cloud server instances but\n    such connections are usually made only by engineers. VNC is less common than SSH\n    or RDP but may be required by some work-flows such as remote access and support\n    for specialized software products or servers. Such work-flows are usually known\n    and not unexpected. Usage that is unfamiliar to server or network owners can be\n    unexpected and suspicious."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -53,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

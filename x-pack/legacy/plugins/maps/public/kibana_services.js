@@ -14,6 +14,7 @@ import { npStart } from 'ui/new_platform';
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/plugins/data/public';
 export const indexPatternService = npStart.plugins.data.indexPatterns;
+export const autocompleteService = npStart.plugins.data.autocomplete;
 
 let licenseId;
 export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
