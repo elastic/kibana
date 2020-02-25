@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,

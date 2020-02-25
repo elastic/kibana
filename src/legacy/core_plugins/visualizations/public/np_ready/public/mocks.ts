@@ -23,7 +23,7 @@ jest.mock('ui/vis/vis_factory');
 jest.mock('ui/registry/vis_types');
 jest.mock('./types/vis_type_alias_registry');
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';

@@ -30,7 +30,7 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 
 /** @public */

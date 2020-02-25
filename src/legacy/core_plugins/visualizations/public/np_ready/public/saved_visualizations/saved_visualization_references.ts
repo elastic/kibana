@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../../../../core/public';
 import { VisSavedObject } from '../types';
 
 export function extractReferences({

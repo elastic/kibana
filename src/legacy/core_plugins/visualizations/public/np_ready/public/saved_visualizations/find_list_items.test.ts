@@ -19,7 +19,7 @@
 
 import { findListItems } from './find_list_items';
 import { coreMock } from '../../../../../../../core/public/mocks';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '../../../../../../../core/public';
 import { VisTypeAlias } from '../vis_types';
 
 describe('saved_visualizations', () => {

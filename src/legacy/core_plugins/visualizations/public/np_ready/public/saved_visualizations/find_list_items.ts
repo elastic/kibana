@@ -18,7 +18,10 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../../../../core/public';
 import { SavedObjectLoader } from '../../../../../../../plugins/saved_objects/public';
 import { VisTypeAlias } from '../vis_types';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';

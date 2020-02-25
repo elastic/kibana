@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '../../../../../../../core/public';
 import {
   Container,
   EmbeddableFactory,

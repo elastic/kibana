@@ -23,7 +23,7 @@ import {
   I18nStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from 'src/core/public';
+} from '../../../../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import {
