@@ -7,9 +7,9 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
-import { getMonitorDurationAction } from '../../../state/actions';
+import { anomalyRecordsAction, getMonitorDurationAction } from '../../../state/actions';
 import { DurationChartComponent } from '../../functional/charts';
-import { selectDurationLines } from '../../../state/selectors';
+import { anomaliesSelector, selectDurationLines } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 
 interface Props {
@@ -22,20 +22,23 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
 
   const { monitor_duration, loading } = useSelector(selectDurationLines);
 
+  const anomalies = useSelector(anomaliesSelector);
+
   const dispatch = useDispatch();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   useEffect(() => {
-    dispatch(
-      getMonitorDurationAction({ monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd })
-    );
+    const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
+    dispatch(getMonitorDurationAction(params));
+    dispatch(anomalyRecordsAction.get());
   }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
 
   return (
     <DurationChartComponent
-      locationDurationLines={monitor_duration?.locationDurationLines ?? []}
+      anomalies={anomalies}
       loading={loading}
+      locationDurationLines={monitor_duration?.locationDurationLines ?? []}
     />
   );
 };

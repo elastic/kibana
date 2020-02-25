@@ -41,6 +41,8 @@ export const hasMLJobSelector = createSelector(mlSelector, ml => ml.mlJob?.count
 
 export const isMLJobCreating = createSelector(mlSelector, ml => ml.loading);
 
+export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies);
+
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };

@@ -10,9 +10,6 @@ import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
   try {
-    fetchPost(`/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`, {
-      expand: true,
-    });
     return await fetchGet(url);
   } catch (error) {
     if (error.response.status === 404) {
@@ -29,11 +26,11 @@ export const createMLJob = async () => {
 
   const data = {
     prefix: '',
-    indexPatternName: INDEX_NAMES.HEARTBEAT,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: dateRange?.[0],
     end: dateRange?.[1],
+    indexPatternName: INDEX_NAMES.HEARTBEAT,
   };
 
   return fetchPost(url, data);
@@ -54,7 +51,9 @@ export const getIndexDateRange = async () => {
 
 export const fetchAnomalyRecords = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}/results/buckets`;
-  return await fetchPost(url, {
+
+  return fetchPost(url, {
     expand: true,
+    anomaly_score: 10,
   });
 };

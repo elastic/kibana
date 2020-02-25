@@ -5,7 +5,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { getMLJobAction, createMLJobAction, getAnomalyRecordsAction } from '../actions';
+import { getMLJobAction, createMLJobAction, anomalyRecordsAction } from '../actions';
 import { IReducerState } from './types';
 import { handleAsyncAction } from './utils';
 
@@ -25,7 +25,7 @@ export const mlJobsReducer = handleActions<MLJobState>(
   {
     ...handleAsyncAction('mlJob', createMLJobAction),
     ...handleAsyncAction('mlJob', getMLJobAction),
-    ...handleAsyncAction('anomalies', getAnomalyRecordsAction),
+    ...handleAsyncAction('anomalies', anomalyRecordsAction),
   },
   initialState
 );

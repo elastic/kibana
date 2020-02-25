@@ -10,4 +10,4 @@ export const getMLJobAction = createAsyncAction<{ jobId: string }, any, any>('GE
 
 export const createMLJobAction = createAsyncAction<any, any, any>('CREATE_ML_JOB');
 
-export const getAnomalyRecordsAction = createAsyncAction<any, any, any>('GET_ANOMALY_RECORDS');
+export const anomalyRecordsAction = createAsyncAction<any, any, any>('GET_ANOMALY_RECORDS');

@@ -29,6 +29,8 @@ interface DurationChartProps {
    * To represent the loading spinner on chart
    */
   loading: boolean;
+
+  anomalies: any;
 }
 
 /**
@@ -37,7 +39,11 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChartComponent = ({ locationDurationLines, loading }: DurationChartProps) => {
+export const DurationChartComponent = ({
+  locationDurationLines,
+  anomalies,
+  loading,
+}: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
