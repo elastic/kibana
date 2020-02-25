@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { snakeCase } from 'lodash/fp';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacyServices } from '../../../types';
 
@@ -210,4 +211,12 @@ export const getIndex = (getSpaceId: () => string, config: LegacyServices['confi
   const spaceId = getSpaceId();
 
   return `${signalsIndex}-${spaceId}`;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  return Object.keys(obj).reduce((acc, item) => {
+    const newKey = snakeCase(item);
+    return { ...acc, [newKey]: obj[item] };
+  }, {});
 };

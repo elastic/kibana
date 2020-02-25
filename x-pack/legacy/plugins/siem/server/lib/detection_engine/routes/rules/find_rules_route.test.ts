@@ -6,13 +6,22 @@
 
 import { omit } from 'lodash/fp';
 
+import {
+  getFindResult,
+  getResult,
+  getFindResultWithSingleHit,
+  getFindResultStatus,
+  getFindRequest,
+} from '../__mocks__/request_responses';
 import { createMockServer } from '../__mocks__';
 import { clientsServiceMock } from '../__mocks__/clients_service_mock';
+
+import * as utils from './utils';
+import * as findRules from '../../rules/find_rules';
 
 import { findRulesRoute } from './find_rules_route';
 import { ServerInjectOptions } from 'hapi';
 
-import { getFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('find_rules', () => {
@@ -21,7 +30,12 @@ describe('find_rules', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
 
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
@@ -33,15 +47,10 @@ describe('find_rules', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResult());
-      clients.actionsClient.find.mockResolvedValue({
-        page: 1,
-        perPage: 1,
-        total: 0,
-        data: [],
-      });
+    test('returns 200 when finding a single rule with a valid alertsClient', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getFindRequest());
       expect(statusCode).toBe(200);
     });
@@ -52,6 +61,28 @@ describe('find_rules', () => {
       findRulesRoute(route, getClients);
       const { statusCode } = await inject(getFindRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('catches error when transformation fails', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(utils, 'transformFindAlerts').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getFindRequest());
+      expect(statusCode).toBe(500);
+      expect(JSON.parse(payload).message).toBe('unknown data type, error transforming alert');
+    });
+
+    test('catch error when findRules function throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(findRules, 'findRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getFindRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 

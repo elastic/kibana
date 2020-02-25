@@ -7,6 +7,9 @@
 import { ServerInjectOptions } from 'hapi';
 import { omit } from 'lodash/fp';
 
+import * as utils from './utils';
+import * as updateRules from '../../rules/update_rules';
+
 import { updateRulesRoute } from './update_rules_route';
 import {
   getFindResult,
@@ -27,7 +30,12 @@ describe('update_rules', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    // jest carries state between mocked implementations when using
+    // spyOn. So now we're doing all three of these.
+    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
 
     server = createMockServer();
     config = createMockConfig();
@@ -65,6 +73,28 @@ describe('update_rules', () => {
       updateRulesRoute(route, config, getClients);
       const { statusCode } = await inject(getUpdateRequest());
       expect(statusCode).toBe(404);
+    });
+
+    test('returns 500 when transform fails', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(utils, 'transform').mockReturnValue(null);
+      const { payload, statusCode } = await server.inject(getUpdateRequest());
+      expect(JSON.parse(payload).message).toBe('Internal error transforming rules');
+      expect(statusCode).toBe(500);
+    });
+
+    test('catches error if readRules throws error', async () => {
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      jest.spyOn(updateRules, 'updateRules').mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const { payload, statusCode } = await server.inject(getUpdateRequest());
+      expect(JSON.parse(payload).message).toBe('Test error');
+      expect(statusCode).toBe(500);
     });
   });
 
