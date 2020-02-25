@@ -33,6 +33,7 @@ export function buildNode(functionName: FunctionName, ...args: any[]) {
   return {
     type: 'function',
     function: functionName,
+    // @ts-ignore
     ...kueryFunction.buildNodeParams(...args),
   };
 }
