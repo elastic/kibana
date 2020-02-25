@@ -231,9 +231,15 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
-  return (
+  return ipReputationLinks?.length > 0 ? (
     <section>
-      <EuiFlexGroup gutterSize="none" justifyContent="center" direction="row" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="none"
+        justifyContent="center"
+        direction="row"
+        alignItems="center"
+        data-test-subj="reputationLinkGroup"
+      >
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="none" justifyContent="center" direction="row">
             {ipReputationLinks
@@ -253,32 +259,31 @@ const ReputationLinkComponent: React.FC<{
               ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {ipReputationLinks?.length && (
-          <EuiFlexItem grow={false}>
-            <DefaultFieldRendererOverflow
-              rowItems={ipReputationLinks}
-              idPrefix="moreReputationLink"
-              render={rowItem => {
-                return (
-                  isReputationLink(rowItem) && (
-                    <ExternalLink
-                      url={rowItem.url_template}
-                      overflowIndexStart={overflowIndexStart}
-                      allItemsLimit={allItemsLimit}
-                    >
-                      <>{rowItem.name ?? domain}</>
-                    </ExternalLink>
-                  )
-                );
-              }}
-              moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-              overflowIndexStart={overflowIndexStart}
-            />
-          </EuiFlexItem>
-        )}
+
+        <EuiFlexItem grow={false}>
+          <DefaultFieldRendererOverflow
+            rowItems={ipReputationLinks}
+            idPrefix="moreReputationLink"
+            render={rowItem => {
+              return (
+                isReputationLink(rowItem) && (
+                  <ExternalLink
+                    url={rowItem.url_template}
+                    overflowIndexStart={overflowIndexStart}
+                    allItemsLimit={allItemsLimit}
+                  >
+                    <>{rowItem.name ?? domain}</>
+                  </ExternalLink>
+                )
+              );
+            }}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={overflowIndexStart}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </section>
-  );
+  ) : null;
 };
 
 ReputationLinkComponent.displayName = 'ReputationLinkComponent';

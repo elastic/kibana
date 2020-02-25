@@ -3363,38 +3363,7 @@ tr:hover .c3:focus::before {
                                                   domain="fa5195a5dfacc9d1c68d43600f0e0262cad14dde"
                                                   overflowIndexStart={1}
                                                   showDomain={true}
-                                                >
-                                                  <section>
-                                                    <EuiFlexGroup
-                                                      alignItems="center"
-                                                      direction="row"
-                                                      gutterSize="none"
-                                                      justifyContent="center"
-                                                    >
-                                                      <div
-                                                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                                      >
-                                                        <EuiFlexItem
-                                                          grow={true}
-                                                        >
-                                                          <div
-                                                            className="euiFlexItem"
-                                                          >
-                                                            <EuiFlexGroup
-                                                              direction="row"
-                                                              gutterSize="none"
-                                                              justifyContent="center"
-                                                            >
-                                                              <div
-                                                                className="euiFlexGroup euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                                              />
-                                                            </EuiFlexGroup>
-                                                          </div>
-                                                        </EuiFlexItem>
-                                                      </div>
-                                                    </EuiFlexGroup>
-                                                  </section>
-                                                </Memo(ReputationLinkComponent)>
+                                                />
                                               </div>
                                             </div>
                                           </EuiFlexItem>
