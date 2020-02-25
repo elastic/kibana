@@ -78,8 +78,7 @@ export class DirectAccessLinksPlugin
           values: { id },
         })
       );
-    } else {
-      return generator.getPublicContract();
     }
+    return generator.getPublicContract();
   };
 }
