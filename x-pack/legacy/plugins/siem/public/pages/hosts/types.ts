@@ -19,12 +19,6 @@ export type HostsTabsProps = HostsComponentProps & {
   filterQuery: string;
   type: hostsModel.HostsType;
   indexPattern: IIndexPattern;
-export interface HostsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
-
-interface HostsComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
