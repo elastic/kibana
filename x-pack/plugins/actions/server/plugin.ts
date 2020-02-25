@@ -173,9 +173,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
         registerActionsUsageCollector(usageCollection, savedObjectsRepository, actionTypeRegistry);
       });
-      /* getInternalSavedObjectsClient(core).then(savedObjectsRepository =>
-        registerActionsUsageCollector(usageCollection, savedObjectsRepository, actionTypeRegistry)
-      ); */
     }
 
     core.http.registerRouteHandlerContext(

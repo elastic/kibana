@@ -5,32 +5,21 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsLegacyService } from 'kibana/server';
+import { ISavedObjectsRepository } from 'kibana/server';
 import { AlertsUsage, AlertsTelemetrySavedObject } from './types';
 import { AlertTypeRegistry } from '../alert_type_registry';
 import { ALERTS_TELEMETRY_DOC_ID, createAlertsTelemetry } from './alerts_telemetry';
 
-interface Config {
-  isAlertsEnabled: boolean;
-}
-
-function getSavedObjectsClient(callCluster: CallCluster, savedObjects: SavedObjectsLegacyService) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-  const internalRepository = getSavedObjectsRepository(callCluster);
-  return new SavedObjectsClient(internalRepository);
-}
-
-async function getTotalCount(savedObjectsClient: any) {
-  const findResult = await savedObjectsClient.find({
+async function getTotalCount(savedObjectsRepository: ISavedObjectsRepository) {
+  const findResult = await savedObjectsRepository.find({
     type: 'alert',
   });
 
   return findResult.total;
 }
 
-async function getInUseTotalCount(savedObjectsClient: any) {
-  const findResult = await savedObjectsClient.find({
+async function getInUseTotalCount(savedObjectsRepository: ISavedObjectsRepository) {
+  const findResult = await savedObjectsRepository.find({
     type: 'alert',
     fields: ['enabled'],
   });
@@ -44,20 +33,23 @@ async function getInUseTotalCount(savedObjectsClient: any) {
 }
 
 async function getTotalCountByAlertTypes(
-  savedObjectsClient: any,
+  savedObjectsRepository: ISavedObjectsRepository,
   alertTypeRegistry: AlertTypeRegistry
 ) {
   const totalByAlertType = alertTypeRegistry.list().reduce(async (accPromise: any, alertType) => {
     const acc = await accPromise;
-    const total = await getTotalCountByAlertType(savedObjectsClient, alertType.id);
+    const total = await getTotalCountByAlertType(savedObjectsRepository, alertType.id);
     return { ...acc, [alertType.name]: total };
   }, Promise.resolve({}));
 
   return totalByAlertType;
 }
 
-async function getTotalCountByAlertType(savedObjectsClient: any, alertTypeId: string) {
-  const findResult = await savedObjectsClient.find({
+async function getTotalCountByAlertType(
+  savedObjectsRepository: ISavedObjectsRepository,
+  alertTypeId: string
+) {
+  const findResult = await savedObjectsRepository.find({
     type: 'alert',
     searchFields: ['alertTypeId'],
     search: alertTypeId,
@@ -67,20 +59,23 @@ async function getTotalCountByAlertType(savedObjectsClient: any, alertTypeId: st
 }
 
 async function getTotalInUseCountByAlertTypes(
-  savedObjectsClient: any,
+  savedObjectsRepository: ISavedObjectsRepository,
   alertTypeRegistry: AlertTypeRegistry
 ) {
   const totalByAlertType = alertTypeRegistry.list().reduce(async (accPromise: any, alertType) => {
     const acc = await accPromise;
-    const total = await getTotalInUseCountByAlertType(savedObjectsClient, alertType.id);
+    const total = await getTotalInUseCountByAlertType(savedObjectsRepository, alertType.id);
     return { ...acc, [alertType.name]: total };
   }, Promise.resolve({}));
 
   return totalByAlertType;
 }
 
-async function getTotalInUseCountByAlertType(savedObjectsClient: any, alertTypeId: string) {
-  const findResult = await savedObjectsClient.find({
+async function getTotalInUseCountByAlertType(
+  savedObjectsRepository: ISavedObjectsRepository,
+  alertTypeId: string
+) {
+  const findResult = await savedObjectsRepository.find({
     type: 'alert',
     searchFields: ['alertTypeId'],
     search: alertTypeId,
@@ -94,9 +89,9 @@ async function getTotalInUseCountByAlertType(savedObjectsClient: any, alertTypeI
     .length;
 }
 
-async function getExecutions(savedObjectsClient: any) {
+async function getExecutions(savedObjectsRepository: ISavedObjectsRepository) {
   try {
-    const alertsTelemetrySavedObject = (await savedObjectsClient.get(
+    const alertsTelemetrySavedObject = (await savedObjectsRepository.get(
       'alerts-telemetry',
       ALERTS_TELEMETRY_DOC_ID
     )) as AlertsTelemetrySavedObject;
@@ -106,8 +101,8 @@ async function getExecutions(savedObjectsClient: any) {
   }
 }
 
-async function getExecutionsCount(savedObjectsClient: any) {
-  const alertExecutions = await getExecutions(savedObjectsClient);
+async function getExecutionsCount(savedObjectsRepository: ISavedObjectsRepository) {
+  const alertExecutions = await getExecutions(savedObjectsRepository);
   return Object.entries(alertExecutions.excutions_count_by_type).reduce(
     (sum, [key, value]) => sum + value,
     0
@@ -115,10 +110,10 @@ async function getExecutionsCount(savedObjectsClient: any) {
 }
 
 async function getExecutionsCountByAlertTypes(
-  savedObjectsClient: any,
+  savedObjectsRepository: ISavedObjectsRepository,
   alertTypeRegistry: AlertTypeRegistry
 ) {
-  const alertExecutions = await getExecutions(savedObjectsClient);
+  const alertExecutions = await getExecutions(savedObjectsRepository);
   const totalByAlertType = alertTypeRegistry.list().reduce(
     (res: any, alertType) => ({
       ...res,
@@ -131,28 +126,24 @@ async function getExecutionsCountByAlertTypes(
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  savedObjects: any,
-  alertTypeRegistry: AlertTypeRegistry,
-  config: Config
+  savedObjectsRepository: ISavedObjectsRepository,
+  alertTypeRegistry: AlertTypeRegistry
 ) {
-  const { isAlertsEnabled } = config;
   return usageCollection.makeUsageCollector({
     type: 'alerts',
     isReady: () => true,
-    fetch: async (callCluster: CallCluster): Promise<AlertsUsage> => {
-      const savedObjectsClient = getSavedObjectsClient(callCluster, savedObjects);
+    fetch: async (): Promise<AlertsUsage> => {
       return {
-        enabled: isAlertsEnabled,
-        count_total: await getTotalCount(savedObjectsClient),
-        count_active_total: await getInUseTotalCount(savedObjectsClient),
-        executions_total: await getExecutionsCount(savedObjectsClient),
+        count_total: await getTotalCount(savedObjectsRepository),
+        count_active_total: await getInUseTotalCount(savedObjectsRepository),
+        executions_total: await getExecutionsCount(savedObjectsRepository),
         count_active_by_type: await getTotalInUseCountByAlertTypes(
-          savedObjectsClient,
+          savedObjectsRepository,
           alertTypeRegistry
         ),
-        count_by_type: await getTotalCountByAlertTypes(savedObjectsClient, alertTypeRegistry),
+        count_by_type: await getTotalCountByAlertTypes(savedObjectsRepository, alertTypeRegistry),
         executions_by_type: await getExecutionsCountByAlertTypes(
-          savedObjectsClient,
+          savedObjectsRepository,
           alertTypeRegistry
         ),
       };
@@ -161,20 +152,10 @@ export function createAlertsUsageCollector(
 }
 
 export function registerAlertsUsageCollector(
-  usageCollection: UsageCollectionSetup | undefined,
-  savedObjects: SavedObjectsLegacyService,
-  alertTypeRegistry: AlertTypeRegistry,
-  config: Config
+  usageCollection: UsageCollectionSetup,
+  savedObjects: ISavedObjectsRepository,
+  alertTypeRegistry: AlertTypeRegistry
 ) {
-  if (!usageCollection) {
-    return;
-  }
-
-  const collector = createAlertsUsageCollector(
-    usageCollection,
-    savedObjects,
-    alertTypeRegistry,
-    config
-  );
+  const collector = createAlertsUsageCollector(usageCollection, savedObjects, alertTypeRegistry);
   usageCollection.registerCollector(collector);
 }

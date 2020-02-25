@@ -5,7 +5,6 @@
  */
 
 export interface AlertsUsage {
-  enabled: boolean;
   count_total: number;
   count_active_total: number;
   executions_total: number;

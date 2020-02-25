@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -50,6 +51,7 @@ import {
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../plugins/actions/server';
 import { Services } from './types';
+import { registerAlertsUsageCollector } from './usage';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -66,6 +68,7 @@ export interface AlertingPluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -123,6 +126,14 @@ export class AlertingPlugin {
     });
     this.alertTypeRegistry = alertTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
+
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      core.getStartServices().then(async ([coreStart]: [CoreStart, object]) => {
+        const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
+        registerAlertsUsageCollector(usageCollection, savedObjectsRepository, alertTypeRegistry);
+      });
+    }
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext());
 

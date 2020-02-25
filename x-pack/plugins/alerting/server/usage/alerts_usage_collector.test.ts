@@ -39,16 +39,12 @@ describe('registerAlertsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerAlertsUsageCollector(usageCollectionMock, savedObjects, alertTypeRegistry, {
-      isAlertsEnabled: true,
-    });
+    registerAlertsUsageCollector(usageCollectionMock, savedObjects, alertTypeRegistry);
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = alerts', () => {
-    registerAlertsUsageCollector(usageCollectionMock, savedObjects, alertTypeRegistry, {
-      isAlertsEnabled: true,
-    });
+    registerAlertsUsageCollector(usageCollectionMock, savedObjects, alertTypeRegistry);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('alerts');
   });
