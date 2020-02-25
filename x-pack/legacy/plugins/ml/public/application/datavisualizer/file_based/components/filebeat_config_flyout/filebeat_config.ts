@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 export function createFilebeatConfig(
@@ -15,8 +16,7 @@ export function createFilebeatConfig(
   return [
     'filebeat.inputs:',
     '- type: log',
-    '  paths:',
-    "  - '<add path to your files here>'",
+    ...getPaths(),
     ...getEncoding(results),
     ...getExcludeLines(results),
     ...getMultiline(results),
@@ -32,6 +32,13 @@ export function createFilebeatConfig(
     '  template.enabled: false',
     '  ilm.enabled: false',
   ].join('\n');
+}
+
+function getPaths() {
+  const txt = i18n.translate('xpack.ml.fileDatavisualizer.fileBeatConfig.paths', {
+    defaultMessage: 'add path to your files here',
+  });
+  return ['  paths:', `  - '<${txt}>'`];
 }
 
 function getEncoding(results: any) {
