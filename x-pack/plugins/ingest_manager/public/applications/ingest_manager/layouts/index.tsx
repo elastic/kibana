@@ -4,3 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { DefaultLayout } from './default';
+export { WithHeaderLayout } from './with_header';
