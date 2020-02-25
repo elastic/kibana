@@ -18,13 +18,8 @@
  */
 
 import _, { get } from 'lodash';
-import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { npStart } from 'ui/new_platform';
-import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { EmbeddableVisTriggerContext } from 'src/plugins/embeddable/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -32,9 +27,8 @@ import {
   Query,
   esFilters,
   Filter,
-  ISearchSource,
   TimefilterContract,
-} from '../../../../../plugins/data/public';
+} from '../../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -42,26 +36,20 @@ import {
   Container,
   selectRangeTrigger,
   valueClickTrigger,
-} from '../../../../../plugins/embeddable/public';
-import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
-import { SavedObject } from '../../../../../plugins/saved_objects/public';
-import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
-import { Vis } from '../np_ready/public';
+  EmbeddableVisTriggerContext,
+} from '../../../../../../../plugins/embeddable/public';
+import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
+import {
+  IExpressionLoaderParams,
+  ExpressionsStart,
+} from '../../../../../../../plugins/expressions/public';
+import { buildPipeline } from '../legacy/build_pipeline';
+import { Vis } from '../vis';
+import { getExpressions, getUiActions } from '../services';
+import { PersistedState } from '../../../legacy_imports';
+import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
-
-export interface VisSavedObject extends SavedObject {
-  vis: Vis;
-  description?: string;
-  searchSource: ISearchSource;
-  title: string;
-  uiStateJSON?: string;
-  destroy: () => void;
-  savedSearchRefName?: string;
-  savedSearchId?: string;
-  savedSearch?: SavedSearch;
-  visState: any;
-}
 
 export interface VisualizeEmbeddableConfiguration {
   savedVisualization: VisSavedObject;
@@ -90,7 +78,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
-type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
+type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -281,7 +269,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
     this.domNode = div;
 
-    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
+    const expressions = getExpressions();
+    this.handler = new expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
@@ -309,7 +298,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
           };
-          npStart.plugins.uiActions.getTrigger(triggerId).exec(context);
+          getUiActions()
+            .getTrigger(triggerId)
+            .exec(context);
         }
       })
     );

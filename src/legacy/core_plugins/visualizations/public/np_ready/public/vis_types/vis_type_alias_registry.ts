@@ -27,7 +27,7 @@ interface VisualizationListItem {
   typeTitle: string;
 }
 
-interface VisualizationsAppExtension {
+export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
   toListItem: (savedObject: {

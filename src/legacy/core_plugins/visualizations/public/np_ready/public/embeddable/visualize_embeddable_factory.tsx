@@ -18,27 +18,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '../../../../../../../core/public';
 import {
   Container,
   EmbeddableFactory,
   EmbeddableOutput,
   ErrorEmbeddable,
-} from '../../../../../plugins/embeddable/public';
-import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
+} from '../../../../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
-import {
-  VisSavedObject,
-  VisualizeEmbeddable,
-  VisualizeInput,
-  VisualizeOutput,
-} from './visualize_embeddable';
+import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import { VisSavedObject } from '../types';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-
-import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
-import { showNewVisModal } from '../np_ready/public/wizard';
-import { TimefilterContract } from '../../../../../plugins/data/public';
+import {
+  getCapabilities,
+  getHttp,
+  getTypes,
+  getUISettings,
+  getSavedVisualizationsLoader,
+  getTimeFilter,
+} from '../services';
+import { showNewVisModal } from '../wizard';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -52,10 +52,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor(
-    private timefilter: TimefilterContract,
-    private getSavedVisualizationsLoader: () => SavedVisualizations
-  ) {
+  constructor() {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -101,7 +98,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = this.getSavedVisualizationsLoader();
+    const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
       const visId = savedObject.id as string;
@@ -118,7 +115,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
       return new VisualizeEmbeddable(
-        this.timefilter,
+        getTimeFilter(),
         {
           savedVisualization: savedObject,
           indexPatterns,
@@ -141,7 +138,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = this.getSavedVisualizationsLoader();
+    const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
