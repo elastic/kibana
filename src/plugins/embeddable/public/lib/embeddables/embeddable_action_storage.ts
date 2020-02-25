@@ -43,7 +43,7 @@ export class EmbeddableActionStorage implements ActionStorage {
   async create(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
     const events = (input.events || []) as SerializedEvent[];
-    const exists = events.find(({ eventId }) => eventId === event.eventId);
+    const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
       throw new Error(
@@ -59,7 +59,21 @@ export class EmbeddableActionStorage implements ActionStorage {
   }
 
   async update(event: SerializedEvent) {
-    throw new Error('not implemented');
+    const input = this.embbeddable.getInput();
+    const events = (input.events || []) as SerializedEvent[];
+    const index = events.findIndex(({ eventId }) => eventId === event.eventId);
+
+    if (index === -1) {
+      throw new Error(
+        `[ENOENT]: Event with [eventId = ${event.eventId}] could not be updated as it does not exist in ` +
+          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+      );
+    }
+
+    this.embbeddable.updateInput({
+      ...input,
+      // events: [...events.filter, event],
+    });
   }
 
   async remove(eventId: string) {
